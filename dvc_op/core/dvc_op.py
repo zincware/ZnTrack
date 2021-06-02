@@ -382,7 +382,7 @@ class DVCOp:
                       f'{self.name}().run_dvc(id_={self.id})"')
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
-        process = subprocess.run(script, shell=True, capture_output=True)
+        process = subprocess.run(script, shell=False, capture_output=True)
         if len(process.stdout) > 0:
             log.info(process.stdout.decode())
         if len(process.stderr) > 0:
