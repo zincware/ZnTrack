@@ -291,6 +291,8 @@ class DVCOp:
 
         script += self.files.get_dvc_arguments()
 
+        script += ["--params", f"{self.dvc.params_file_path / self.dvc.params_file}:{self.name}.{self.id}"]
+
         if force:
             script.append("--force")
             log.warning("Overwriting existing configuration!")
