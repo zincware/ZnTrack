@@ -62,6 +62,9 @@ class TestBasic(TestCase):
         base = BasicTest()
         base(name='MyTest')
 
+        print(os.listdir())
+        print(os.getcwd())
+
         subprocess.check_call(['dvc', 'repro'])
 
         with open(base.files.json_file) as f:
