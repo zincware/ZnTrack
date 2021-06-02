@@ -55,12 +55,14 @@ class DVCOp:
             return str(self._id)
 
         if self.dvc.multi_use:
-            if self.all_parameters.get(self.name) is None:
+            if self.all_parameters.get(self.name) is None:  # no stage with this classes name found.
+                log.debug(f"No Parameters for {self.name} found -> id=0")
                 self._id = 0
             else:
                 id_ = len(self.all_parameters[self.name])  # assume that the configuration is new and create a new id_
                 for stage_id in self.all_parameters[self.name]:
                     if self.all_parameters[self.name][stage_id] == self.parameters:
+                        log.debug(f"Found stage with the given parameters for id = {stage_id}!")
                         id_ = stage_id  # entry already exists, load existing id_
                 self._id = id_
         else:
@@ -80,6 +82,10 @@ class DVCOp:
 
     @property
     def module(self) -> str:
+        """Module from which to import <name>
+
+        Used for from <module> import <name>
+        """
         return self.__class__.__module__
 
     @property
@@ -182,9 +188,8 @@ class DVCOp:
         Notes
         -----
         Most of the information will be in
-            - self.id_
             - self.parameters
-            - self.post_run_params
+            - self.results
         """
 
         if isinstance(filter_, int):
@@ -229,20 +234,12 @@ class DVCOp:
             Tell DVC to always rerun this stage, e.g. for non-deterministic stages or for testing
         slurm: bool, default = False
             Use SLURM to run DVC stages on a Cluster.
-            TODO add the important attributes
-                add appropiate names
-                make sure, that everything uses slurm, because otherwise
-                you run stuff on the head node!
 
         Notes
         -----
         If the dependencies for a stage change this function won't necessarily tell you.
         Use 'dvc status' to check, if the stage needs to be rerun.
         """
-        # TODO for multi use have some method that updates an existing stage rather than creating a new one
-        #   maybe have an argument id_ and if that is given, that specific id will be overwritten
-        # Also consider having multi_use as an argument in the __call__ method, so ideally you never need to bother
-        # with id_, because if multi use is disabled, you can always assume id_ = 0
 
         script = ['dvc', 'run', '-n', self.stage_name]
 
@@ -284,32 +281,17 @@ class DVCOp:
 
     @property
     def files(self):
-
-        if self._json_file is not None:
-            json_file = self.dvc.outs_path / f"{self.id}_{self._json_file}"
-        else:
-            json_file = None
-
-        files = Files(
-            deps=[self.dvc.deps_path / f"{self.id}_{dep}" for dep in self.dvc.deps],
-            outs=[self.dvc.outs_path / f"{self.id}_{out}" for out in self.dvc.outs],
-            outs_no_cache=[self.dvc.outs_no_cache_path / f"{self.id}_{out}" for out in self.dvc.outs_no_cache],
-            outs_persistent=[self.dvc.outs_persistent_path / f"{self.id}_{out}" for out in self.dvc.outs_persistent],
-            params=[self.dvc.params_path / f"{self.id}_{param}" for param in self.dvc.params],
-            metrics=[self.dvc.metrics_path / f"{self.id}_{metric}" for metric in self.dvc.metrics],
-            metrics_no_cache=[self.dvc.metrics_no_cache_path / f"{self.id}_{metric}" for metric in
-                              self.dvc.metrics_no_cache],
-            plots=[self.dvc.plots_path / f"{self.id}_{plot}" for plot in self.dvc.plots],
-            plots_no_cache=[self.dvc.plots_no_cache_path / f"{self.id}_{plot}" for plot in self.dvc.plots_no_cache],
-            json_file=json_file
-        )
-        return files
+        return Files(id_=self.id, dvc_params=self.dvc, json_file=self._json_file)
 
     @property
     def results(self) -> dict:
-        with open(self.files.json_file) as f:
-            file = json.load(f)
-        return file
+        try:
+            with open(self.files.json_file) as f:
+                file = json.load(f)
+            return file
+        except FileNotFoundError:
+            log.warning("No results found!")
+            return {}
 
     @results.setter
     def results(self, value):
