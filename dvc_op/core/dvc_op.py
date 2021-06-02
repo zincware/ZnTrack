@@ -145,7 +145,6 @@ class DVCOp:
                 self._id = 0
             else:
                 id_ = len(self.all_parameters)  # assume that the configuration is new and create a new id_
-                # TODO how is this different from self._filter_parameters()
                 for stage_id in self.all_parameters:
                     if self.all_parameters[stage_id] == self.parameters:
                         log.debug(f"Found stage with the given parameters for id = {stage_id}!")
@@ -359,7 +358,6 @@ class DVCOp:
         if force:
             script.append("--force")
             log.warning("Overwriting existing configuration!")
-            # TODO check these logs!
         #
         if not exec_:
             script.append("--no-exec")
