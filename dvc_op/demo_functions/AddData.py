@@ -30,11 +30,11 @@ def numbers_to_keys(atomic_numbers) -> dict:
 class AddData(DVCOp):
     """Demo function that could represent data loading"""
 
-    def __init__(self):
+    def __init__(self, id_=None):
         """
         The Init function does not take any arguments!
         """
-        super().__init__()
+        super().__init__(id_)
         self.dvc = DVCParams(
             multi_use=True,
             outs=['database.db']

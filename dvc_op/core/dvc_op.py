@@ -14,7 +14,7 @@ log = logging.getLogger(__file__)
 
 
 class DVCOp:
-    def __init__(self):
+    def __init__(self, id_=None):
         self._parameters: dict = {}
         self._id: int = 0
         self._running = False  # is set to true, when run_dvc
@@ -22,6 +22,12 @@ class DVCOp:
         self.slurm_config: SlurmConfig = SlurmConfig()
 
         self._json_file = f"{self.name}.json"
+
+        try:
+            if id_ is not None:
+                self.parameters = self.all_parameters[self.name][str(id_)]
+        except KeyError:
+            raise KeyError(f'Could not find a stage with id {id_}!')
 
     def __repr__(self):
         return self.dvc.__repr__()
