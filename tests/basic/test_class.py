@@ -35,7 +35,6 @@ class TestBasic(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-
         tmp_dir.mkdir(parents=True, exist_ok=True)
 
         shutil.copy(__file__, tmp_dir)
@@ -59,22 +58,15 @@ class TestBasic(TestCase):
         shutil.rmtree(tmp_dir)
 
     def test_basic(self):
-        base = BasicTest()
-        base(name='MyTest')
+        basic_test = BasicTest()
+        basic_test(name='MyTest')
 
         print(os.listdir())
         print(os.getcwd())
 
         subprocess.check_call(['dvc', 'repro'])
 
-        with open(base.files.json_file) as f:
+        with open(basic_test.files.json_file) as f:
             file_read = json.load(f)
 
         self.assertTrue(file_read == dict(name="MyTest"))
-
-
-if __name__ == '__main__':
-    base = BasicTest()
-    base(name='MyTest')
-
-    base.run_dvc()
