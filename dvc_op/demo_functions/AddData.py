@@ -7,6 +7,7 @@ from dvc_op.core.dataclasses import DVCParams
 import numpy as np
 import ase.io
 import ase.db
+from ase import Atoms
 from tqdm import tqdm
 
 from pathlib import Path
@@ -100,51 +101,38 @@ class AddData(DVCOp):
 
         self.results = database_groups
 
-    def load_full_database(self, property_: str = None) -> list:
-        """Query the full ASE database
-
-        Parameters
-        ---------
-        property_: str
-            A name, e.g. "energy" that can directly be accessed from the database object and be returned instead
-            of a list of Atoms.
-
-        Useful e.g. for Clustering methods
-        """
-        atoms = []
-        log.debug("Start querying database")
-        with ase.db.connect(self.files.outs[0]) as db:
-            for row in db.select():
-                if property_ is None:
-                    atoms.append(row.toatoms())
-                elif property_ == "energy":
-                    atoms.append(row.toatoms().get_potential_energy())
-        log.debug("Finished querying database")
-
-        if property_ == "energy":
-            atoms = np.array(atoms)
-
-        return atoms
-
-    def load_database_generator(self, configuration_ids: list, database_id: int):
+    def load_database_generator(self, configuration_ids: list = None, property_: str = None) -> list:
         """Generator to load data from the database
 
         Parameters
         ----------
-        configuration_ids: list
-            List of integer atoms ids that shall be queried from the database
-        database_id: int
-            ID of the database
+        configuration_ids: list, default = None
+            List of integer atoms ids that shall be queried from the database. If None query the entire database
+        property_: str, default = None
+            Property, e.g. energy to select instead of atoms objects
 
         Returns
         -------
 
-        Atoms: generates the ASE Atoms objects
+        Atoms: generates the ASE Atoms objects o
 
         """
-        with ase.db.connect(self.data_path['outputs'] / self.convert_outs(self.outputs[0], id_=database_id)) as db:
-            for configuration_id in configuration_ids:
-                yield db.get_atoms(int(configuration_id))
+
+        def get_property(atoms: Atoms):
+            if property_ is None:
+                return atoms
+            elif property_ == "energy":
+                return atoms.get_potential_energy()
+            else:
+                raise ValueError(f'property {property_} not found!')
+
+        with ase.db.connect(self.files.outs[0]) as db:
+            if configuration_ids is None:
+                for row in db.select():
+                    yield get_property(row.toatoms())
+            else:
+                for configuration_id in configuration_ids:
+                    yield get_property(db.get_atoms(int(configuration_id)))
 
     def load_database(self, configuration_ids: dict) -> dict:
         """
@@ -162,8 +150,6 @@ class AddData(DVCOp):
 
         atoms_list = {}
         for database_id, configuration_id in configuration_ids.items():
-            atoms_list[database_id] = list(self.load_database_generator(
-                configuration_ids=configuration_id, database_id=database_id)
-            )
+            atoms_list[database_id] = list(self.load_database_generator(configuration_ids=configuration_id))
 
         return atoms_list
