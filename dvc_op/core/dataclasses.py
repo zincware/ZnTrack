@@ -1,3 +1,4 @@
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union
@@ -13,8 +14,8 @@ class DVCParams:
     dvc_file: str = "dvc.yaml"
 
     # DVC Parameter
-    deps: list[str] = field(default_factory=list)
-    deps_path: Path = Path("deps")
+    deps: list[Path] = field(default_factory=list)
+    # deps_path: Path = Path("deps")
 
     outs: list[str] = field(default_factory=list)
     outs_path: Path = Path("outs")
@@ -75,7 +76,8 @@ class Files:
         #
         #     self.__dict__[key] = [dvc_params.__dict__[f"{key}_path"] / f"{id_}_{x}" for x in dvc_params.__dict__[key]]
 
-        self.deps = [dvc_params.deps_path / f"{id_}_{dep}" for dep in dvc_params.deps]
+        # self.deps = [dvc_params.deps_path / f"{id_}_{dep}" for dep in dvc_params.deps]
+        self.deps = dvc_params.deps
         self.outs = [dvc_params.outs_path / f"{id_}_{out}" for out in dvc_params.outs]
         self.outs_no_cache = [dvc_params.outs_no_cache_path / f"{id_}_{out}" for out in dvc_params.outs_no_cache]
         self.outs_persistent = [dvc_params.outs_persistent_path / f"{id_}_{out}" for out in dvc_params.outs_persistent]
