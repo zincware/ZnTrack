@@ -308,6 +308,17 @@ class DVCOp:
 
     @property
     def files(self):
+        """Return the files where to find.
+
+        This is based on self.dvc and the self.id. This is only a property and can not be changed directly.
+        Change the values in self.dvc for that! We use this function, because it combines the path, id and filenames
+        from self.dvc
+
+        Notes
+        -----
+        The user never has to handle the internal naming with the id attached. Ideally only the file names and not the
+        paths are changed, that is why we provide self.dvc for configuration.
+        """
         return Files(id_=self.id, dvc_params=self.dvc, json_file=self._json_file)
 
     @property
