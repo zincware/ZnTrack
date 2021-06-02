@@ -16,6 +16,17 @@ log = logging.getLogger(__file__)
 
 class DVCOp:
     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
+        """Constructor for the DVCOp parent class
+
+        Parameters
+        ----------
+        id_: int, str, optional
+            Optional primary key to query a previously created stage
+        filter_: dict, optional
+            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
+            This will always return the first instance. If multiple instances are possible use query_obj()!
+
+        """
         self._parameters: dict = {}
         self._id: int = 0
         self._running = False  # is set to true, when run_dvc
@@ -46,24 +57,68 @@ class DVCOp:
             raise KeyError(f'Could not find a stage with id {id_}!')
 
     def config(self):
-        """Set all arguments like DVCParams or SlurmConfig in here!"""
-        pass
-        # raise NotImplementedError("Implemented in child class")
+        """Set all arguments like DVCParams or SlurmConfig in here!
 
-    def __repr__(self):
-        return self.dvc.__repr__()
+        Child class version of __init__ without superclass - to be depreciated!
+        """
+        pass
+
 
     def run_dvc(self, id_=0):
-        # TODO run_dvc should not take the id_ anymore, but the init should
+        """Function to be executed by DVC
+
+        This is the main and only function that dvc will run!
+        It has access to all class attributes such as parameters, files, ...
+        This function has to be able to run without any additional user input! All configurations should
+        take place in the config / __init__ or in the call method!
+
+        Parameters
+        ----------
+        id_: int
+            Primary key to identify the stage - to be depreciated in favor of __init__(id_=)
+        """
         raise NotImplementedError('Implemented in child class')
 
     def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
+        """Method after call
+
+        This function should always be the last one in the __call__ method, it handles file IO and DVC execution
+
+        Parameters
+        ----------
+        force: bool, default=False
+            Use dvc run with `--force` to overwrite previous stages!
+        exec_: bool, default=False
+            Run the stage directly and don't use dvc with '--no-exec'.
+            This will not output stdout/stderr in real time and should only be used for fast functions!
+        always_changed: bool, default=False
+            Set the always changed dvc argument. See the offical DVC docs. Can be useful for debugging / development.
+        slurm: bool, default=False
+            Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't mean that every stage uses slurm
+            and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
+
+        """
         self.dvc.make_paths()
         self._write_parameters()
         self._write_dvc(force, exec_, always_changed, slurm)
 
     def pre_run(self, id_):
-        # Note I am not using super run_dvc because run_dvc ALWAYS has to implemented in the child class!
+        """Command to be run before run_dvc
+
+        Handles the id and potentially updates internals.
+
+        Parameters
+        ----------
+        id_: int
+            Primary key!
+
+        Notes
+        -----
+         Not using super run_dvc because run_dvc ALWAYS has to implemented in the child class and should otherwise
+         raise and error!
+
+        """
+
         self._running = True
         self.id = id_
         self._update(self, id_)
@@ -90,6 +145,7 @@ class DVCOp:
                 self._id = 0
             else:
                 id_ = len(self.all_parameters)  # assume that the configuration is new and create a new id_
+                # TODO how is this different from self._filter_parameters()
                 for stage_id in self.all_parameters:
                     if self.all_parameters[stage_id] == self.parameters:
                         log.debug(f"Found stage with the given parameters for id = {stage_id}!")
@@ -102,12 +158,27 @@ class DVCOp:
 
     @id.setter
     def id(self, value):
+        """Change id if self._running
+
+        Parameters
+        ----------
+        value: int
+            New id
+
+        """
         if not self._running:
             raise ValueError('Can only set the value of id during dvc_run!')
         self._id = value
 
     @property
     def name(self) -> str:
+        """Used for naming the stage and dvc run
+
+        Returns
+        -------
+        str: Name of this class
+
+        """
         return self.__class__.__name__
 
     @property
@@ -120,25 +191,17 @@ class DVCOp:
 
     @property
     def stage_name(self) -> str:
+        """Get the stage name"""
         return f"{self.name}_{self.id}"
 
     @property
     def parameters(self) -> dict:
-        if len(self._parameters) > 0:
-            # Assume that the value is set, e.g. during the call method
-            return self._parameters
-        else:
-            raise ValueError(
-                'Something went wrong! Maybe you tried to change the parameters before creating them!'
-                ' Always start with "self.parameters = [...]"')
-            # # Try to read the value from a file, it it hasn't been set
-            # try:
-            #     return self.all_parameters[self.id]
-            # except KeyError:
-            #     return self._parameters  # == return {}
+        """Return the parameters"""
+        return self._parameters
 
     @parameters.setter
     def parameters(self, value):
+        """Set the parameters"""
         self._parameters = value
 
     @property
@@ -344,6 +407,7 @@ class DVCOp:
 
     @property
     def results(self) -> dict:
+        """Return the results from the json_file if available."""
         try:
             with open(self.files.json_file) as f:
                 file = json.load(f)
@@ -354,11 +418,21 @@ class DVCOp:
 
     @results.setter
     def results(self, value):
-        # TODO maybe make if self.files.json_file?!
+        """Write the results to json_file
+
+        Parameters
+        ----------
+        value: dict
+            Any json-serializable data
+        """
         with open(self.files.json_file, "w") as f:
             json.dump(value, f)
 
     def _filter_parameters(self, filter_, id_) -> int:
+        """Get the id based in filter_
+
+        Usually inside `for id in self.all_parameters`
+        """
         obj_id = -1
         for key, value in filter_.items():
             try:
