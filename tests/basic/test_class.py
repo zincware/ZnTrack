@@ -66,10 +66,16 @@ class TestBasic(TestCase):
         base = BasicTest(filter_={'name': 'PyTest'})
         self.assertTrue(base.id, "0")
 
-    def test_query_obj(self):
+    def test_query_obj_id(self):
         base = BasicTest()
         out = base.query_obj(0)
         self.assertTrue(out.id, "0")
+    
+    def test_query_obj_name(self):
+        base = BasicTest()
+        out = base.query_obj(dict(name="PyTest"))
+        self.assertTrue(len(out), 1)
+        self.assertTrue(out[0].id, "0")
 
     def test_parameters(self):
         base = BasicTest(id_=0)
