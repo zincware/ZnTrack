@@ -35,7 +35,6 @@ class TestBasic(TestCase):
         subprocess.check_call(['git', 'init'])
         subprocess.check_call(['dvc', 'init'])
 
-
     @classmethod
     def tearDownClass(cls) -> None:
         """Remove all test files"""
@@ -48,4 +47,3 @@ class TestBasic(TestCase):
         # Have to run dvc repro here, because otherwise I can not test the values inside it
         base()
         subprocess.check_call(['dvc', 'repro'])
-
