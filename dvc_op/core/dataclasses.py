@@ -15,7 +15,7 @@ class DVCParams:
 
     # DVC Parameter
     deps: list[Path] = field(default_factory=list)
-    # deps_path: Path = Path("deps")
+    # Has no path, because it always comes as a path object already
 
     outs: list[str] = field(default_factory=list)
     outs_path: Path = Path("outs")
@@ -69,14 +69,6 @@ class Files:
         if json_file is not None:
             json_file = dvc_params.outs_path / f"{id_}_{json_file}"
 
-        # NOTE: Can not use this, because it is a dataclass! Have to use property setter
-        # for key in self.__dict__:
-        #     if key == "json_file":
-        #         continue
-        #
-        #     self.__dict__[key] = [dvc_params.__dict__[f"{key}_path"] / f"{id_}_{x}" for x in dvc_params.__dict__[key]]
-
-        # self.deps = [dvc_params.deps_path / f"{id_}_{dep}" for dep in dvc_params.deps]
         self.deps = dvc_params.deps
         self.outs = [dvc_params.outs_path / f"{id_}_{out}" for out in dvc_params.outs]
         self.outs_no_cache = [dvc_params.outs_no_cache_path / f"{id_}_{out}" for out in dvc_params.outs_no_cache]
