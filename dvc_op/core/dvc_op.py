@@ -5,6 +5,7 @@ import logging
 import json
 import subprocess
 import yaml
+from pathlib import Path
 
 from typing import List
 
@@ -14,7 +15,7 @@ log = logging.getLogger(__file__)
 
 
 class DVCOp:
-    def __init__(self, id_=None):
+    def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         self._parameters: dict = {}
         self._id: int = 0
         self._running = False  # is set to true, when run_dvc
@@ -23,16 +24,23 @@ class DVCOp:
 
         self._json_file = f"{self.name}.json"
 
+        self.config()
+
         try:
             if id_ is not None:
-                self.parameters = self.all_parameters[self.name][str(id_)]
+                self._update(self, id_)
         except KeyError:
             raise KeyError(f'Could not find a stage with id {id_}!')
+
+    def config(self, *args, **kwargs):
+        """Set all arguments like DVCParams or SlurmConfig in here!"""
+        raise NotImplementedError("Implemented in child class")
 
     def __repr__(self):
         return self.dvc.__repr__()
 
     def run_dvc(self, id_=0):
+        # TODO run_dvc should not take the id_ anymore, but the init should
         raise NotImplementedError('Implemented in child class')
 
     def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
@@ -43,6 +51,7 @@ class DVCOp:
     def pre_run(self, id_):
         self._running = True
         self.id = id_
+        self._update(self, id_)
 
     def _write_parameters(self):
         """Update parameters file
@@ -163,6 +172,15 @@ class DVCOp:
         except KeyError:
             return {}
 
+    def _update(self, cls: DVCOp, id_: Union[int, str]):
+        """Update all parameters of cls connected to the given id"""
+        cls.parameters = self.all_parameters[self.name][str(id_)]
+        try:
+            cls.dvc.deps = [Path(x) for x in cls._dvc_stage['deps']]
+        except KeyError:
+            # No dependencies available
+            pass
+
     def _get_obj_by_id(self, id_: int):
         """
 
@@ -179,7 +197,10 @@ class DVCOp:
 
         """
         obj = self.__class__()
-        obj.parameters = self.all_parameters[self.name][str(id_)]  # need to convert int to str
+
+        self._update(obj, id_)
+
+        # obj.parameters = self.all_parameters[self.name][str(id_)]  # need to convert int to str
 
         return obj
 
