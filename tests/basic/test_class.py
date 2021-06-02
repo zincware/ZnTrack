@@ -1,4 +1,3 @@
-import time
 from unittest import TestCase
 from dvc_op.core.dvc_op import DVCOp
 from dvc_op.core.dataclasses import DVCParams
@@ -60,9 +59,6 @@ class TestBasic(TestCase):
     def test_basic(self):
         basic_test = BasicTest()
         basic_test(name='MyTest')
-
-        print(os.listdir())
-        print(os.getcwd())
 
         subprocess.check_call(['dvc', 'repro'])
 
