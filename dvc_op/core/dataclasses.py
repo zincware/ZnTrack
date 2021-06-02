@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import Union
 
 
-@dataclass(frozen=True, order=True)
+@dataclass(frozen=False, order=True)
 class DVCParams:
     # DVCOp Parameter
     multi_use: bool = False
