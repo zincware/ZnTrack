@@ -30,11 +30,10 @@ def numbers_to_keys(atomic_numbers) -> dict:
 class AddData(DVCOp):
     """Demo function that could represent data loading"""
 
-    def __init__(self, id_=None):
+    def config(self):
         """
         The Init function does not take any arguments!
         """
-        super().__init__(id_)
         self.dvc = DVCParams(
             multi_use=True,
             outs=['database.db']
@@ -61,6 +60,8 @@ class AddData(DVCOp):
 
         if name is None:
             name = Path(path).stem
+
+        # self.dvc.deps = [AddData(id_=0).files.outs[0], AddData(id_=0).files.json_file]
 
         self.parameters = dict(name=name, path=path, comment=comment)
         self.post_call(exec_=exec_, slurm=slurm, force=force)
