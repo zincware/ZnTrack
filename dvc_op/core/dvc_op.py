@@ -22,19 +22,33 @@ class DVCOp:
         self.dvc: DVCParams = DVCParams()
         self.slurm_config: SlurmConfig = SlurmConfig()
 
-        self._json_file = f"{self.name}.json"
+        self.json_file: bool = True
 
         self.config()
 
+        if self.json_file:
+            self._json_file = f"{self.name}.json"
+        else:
+            self._json_file = None
+
         try:
             if id_ is not None:
-                self._update(self, id_)
+                self._update(self, str(id_))
+            elif filter_ is not None:
+                log.debug("Assuming that the filter only finds a single DVCOp!")
+                for id_ in self.all_parameters:
+                    stage_id = self._filter_parameters(filter_, id_)
+                    if stage_id != -1:
+                        self._update(self, stage_id)
+                        break
+
         except KeyError:
             raise KeyError(f'Could not find a stage with id {id_}!')
 
-    def config(self, *args, **kwargs):
+    def config(self):
         """Set all arguments like DVCParams or SlurmConfig in here!"""
-        raise NotImplementedError("Implemented in child class")
+        pass
+        # raise NotImplementedError("Implemented in child class")
 
     def __repr__(self):
         return self.dvc.__repr__()
@@ -49,6 +63,7 @@ class DVCOp:
         self._write_dvc(force, exec_, always_changed, slurm)
 
     def pre_run(self, id_):
+        # Note I am not using super run_dvc because run_dvc ALWAYS has to implemented in the child class!
         self._running = True
         self.id = id_
         self._update(self, id_)
@@ -70,13 +85,13 @@ class DVCOp:
             return str(self._id)
 
         if self.dvc.multi_use:
-            if self.all_parameters.get(self.name) is None:  # no stage with this classes name found.
+            if len(self.all_parameters) == 0:  # no stage with this classes name found.
                 log.debug(f"No Parameters for {self.name} found -> id=0")
                 self._id = 0
             else:
-                id_ = len(self.all_parameters[self.name])  # assume that the configuration is new and create a new id_
-                for stage_id in self.all_parameters[self.name]:
-                    if self.all_parameters[self.name][stage_id] == self.parameters:
+                id_ = len(self.all_parameters)  # assume that the configuration is new and create a new id_
+                for stage_id in self.all_parameters:
+                    if self.all_parameters[stage_id] == self.parameters:
                         log.debug(f"Found stage with the given parameters for id = {stage_id}!")
                         id_ = stage_id  # entry already exists, load existing id_
                 self._id = id_
@@ -113,11 +128,14 @@ class DVCOp:
             # Assume that the value is set, e.g. during the call method
             return self._parameters
         else:
-            # Try to read the value from a file, it it hasn't been set
-            try:
-                return self.all_parameters[self.name][self.id]
-            except KeyError:
-                return self._parameters  # == return {}
+            raise ValueError(
+                'Something went wrong! Maybe you tried to change the parameters before creating them!'
+                ' Always start with "self.parameters = [...]"')
+            # # Try to read the value from a file, it it hasn't been set
+            # try:
+            #     return self.all_parameters[self.id]
+            # except KeyError:
+            #     return self._parameters  # == return {}
 
     @parameters.setter
     def parameters(self, value):
@@ -128,16 +146,24 @@ class DVCOp:
         """Load ALL parameters from params_file"""
         try:
             with open(self.dvc.params_file_path / self.dvc.params_file) as json_file:
-                return json.load(json_file)
+                return json.load(json_file)[self.name]
         except FileNotFoundError:
             log.debug(f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!")
+        except KeyError:
+            log.debug(f"Stage with name {self.name} does not exist")
         return {}
 
     @all_parameters.setter
     def all_parameters(self, value):
         """Update parameters in params_file"""
         if isinstance(value, dict):
-            parameters = self.all_parameters
+            try:
+                with open(self.dvc.params_file_path / self.dvc.params_file) as json_file:
+                    parameters = json.load(json_file)
+            except FileNotFoundError:
+                log.debug(f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!")
+                parameters = {}
+
             try:
                 parameters[self.name].update({self.id: value})
                 log.debug("Updating existing stage")
@@ -174,9 +200,11 @@ class DVCOp:
 
     def _update(self, cls: DVCOp, id_: Union[int, str]):
         """Update all parameters of cls connected to the given id"""
-        cls.parameters = self.all_parameters[self.name][str(id_)]
+        cls.parameters = self.all_parameters[str(id_)]
+        log.debug("Updating Parameters!")
         try:
             cls.dvc.deps = [Path(x) for x in cls._dvc_stage['deps']]
+            log.debug("Updating dependencies!")
         except KeyError:
             # No dependencies available
             pass
@@ -224,18 +252,9 @@ class DVCOp:
         else:
             objs = []
 
-            def filter_parameters() -> int:
-                obj_id = -1
-                for key, value in filter_.items():
-                    if self.all_parameters[self.name][id_][key] == value:
-                        obj_id = id_
-                    else:
-                        return -1
-                return obj_id
-
             ids = []
-            for id_ in self.all_parameters[self.name]:
-                ids.append(filter_parameters())
+            for id_ in self.all_parameters:
+                ids.append(self._filter_parameters(filter_, id_))
 
             for id_ in ids:
                 if id_ == -1:
@@ -336,3 +355,15 @@ class DVCOp:
         # TODO maybe make if self.files.json_file?!
         with open(self.files.json_file, "w") as f:
             json.dump(value, f)
+
+    def _filter_parameters(self, filter_, id_) -> int:
+        obj_id = -1
+        for key, value in filter_.items():
+            try:
+                if self.all_parameters[id_][key] == value:
+                    obj_id = id_
+                else:
+                    return -1
+            except KeyError:
+                log.debug(f"Can not find key '{key}' in 'all_parameters' - skipping!")
+        return obj_id
