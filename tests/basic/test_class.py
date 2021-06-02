@@ -1,3 +1,4 @@
+import time
 from unittest import TestCase
 from dvc_op.core.dvc_op import DVCOp
 from dvc_op.core.dataclasses import DVCParams
@@ -6,6 +7,10 @@ import json
 
 import subprocess
 import shutil
+
+import os
+
+tmp_dir = Path('tmp_dir')
 
 
 class BasicTest(DVCOp):
@@ -30,8 +35,12 @@ class TestBasic(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        # TODO maybe make a directory, cd into it and when done remove the whole directory instead of trying to remove
-        #   the individual files
+
+        tmp_dir.mkdir(parents=True, exist_ok=True)
+
+        shutil.copy(__file__, tmp_dir)
+        os.chdir(tmp_dir)
+
         subprocess.check_call(['git', 'init'])
         subprocess.check_call(['dvc', 'init'])
 
@@ -46,11 +55,8 @@ class TestBasic(TestCase):
     def tearDownClass(cls) -> None:
         """Remove all test files"""
         subprocess.check_call(['dvc', 'destroy', "-f"])
-        shutil.rmtree(Path(".git"))
-        shutil.rmtree(Path("config"))
-        # shutil.rmtree(Path("config"))
-        shutil.rmtree(Path("outs"))
-        Path('.dvcignore').unlink()
+        os.chdir('..')
+        shutil.rmtree(tmp_dir)
 
     def test_basic(self):
         base = BasicTest()
@@ -61,7 +67,7 @@ class TestBasic(TestCase):
         with open(base.files.json_file) as f:
             file_read = json.load(f)
 
-        self.assert_(file_read == dict(name="MyTest"))
+        self.assertTrue(file_read == dict(name="MyTest"))
 
 
 if __name__ == '__main__':
