@@ -1,6 +1,5 @@
 from unittest import TestCase
-from dvc_op.core.dvc_op import DVCOp
-from dvc_op.core.dataclasses import DVCParams
+from dvc_op import DVCOp, DVCParams
 from pathlib import Path
 import json
 
@@ -70,7 +69,7 @@ class TestBasic(TestCase):
         base = BasicTest()
         out = base.query_obj(0)
         self.assertTrue(out.id, "0")
-    
+
     def test_query_obj_name(self):
         base = BasicTest()
         out = base.query_obj(dict(name="PyTest"))

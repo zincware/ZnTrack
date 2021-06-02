@@ -1,8 +1,6 @@
 from unittest import TestCase
-from dvc_op.core.dvc_op import DVCOp
-from dvc_op.core.dataclasses import DVCParams
+from dvc_op import DVCOp
 from pathlib import Path
-import json
 
 import subprocess
 import shutil
