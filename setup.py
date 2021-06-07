@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="DVC_Op",
+    name="PyTrack",
     version="0.0.1",
     author="Fabian Zills",
     author_email="fabian.zills@web.de",

@@ -14,7 +14,7 @@ from .dataclasses import DVCParams, SlurmConfig, Files
 log = logging.getLogger(__file__)
 
 
-class DVCOp:
+class PyTrack:
     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         """Constructor for the DVCOp parent class
 
@@ -300,7 +300,7 @@ class DVCOp:
 
         Returns
         --------
-        List[DVC_Op] : The instantiated class having self.parameters, self.id_ and potentially all post run parameters
+        List[PyTrack] : The instantiated class having self.parameters, self.id_ and potentially all post run parameters
                     set, so that it can be used
 
         Notes
