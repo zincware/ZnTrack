@@ -16,14 +16,6 @@ class PyTrack:
     def __init__(self):
         """Constructor for the DVCOp parent class
 
-        Parameters
-        ----------
-        id_: int, str, optional
-            Optional primary key to query a previously created stage
-        filter_: dict, optional
-            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
-            This will always return the first instance. If multiple instances are possible use query_obj()!
-
         Notes
         -----
         A PyTrack child should implement
@@ -104,7 +96,7 @@ class PyTrack:
             Run the stage directly and don't use dvc with '--no-exec'.
             This will not output stdout/stderr in real time and should only be used for fast functions!
         always_changed: bool, default=False
-            Set the always changed dvc argument. See the offical DVC docs. Can be useful for debugging / development.
+            Set the always changed dvc argument. See the official DVC docs. Can be useful for debugging / development.
         slurm: bool, default=False
             Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't mean that every stage uses slurm
             and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
@@ -119,12 +111,7 @@ class PyTrack:
     def pre_run(self):
         """Command to be run before run_dvc
 
-        Handles the id and potentially updates internals.
-
-        Parameters
-        ----------
-        id_: int
-            Primary key!
+        Updates internals.
 
         Notes
         -----

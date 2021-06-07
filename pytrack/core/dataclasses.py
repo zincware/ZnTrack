@@ -5,6 +5,23 @@ from typing import Union, List
 
 @dataclass(frozen=False, order=True)
 class DVCParams:
+    """All available DVC outputs should be specified in this dataclass.
+
+    Attributes
+    ----------
+    multi_use: bool
+        Set to to true, if the function can appear multiple times in the same data pipeline
+    params_file: str
+        Name of the parameter file to store DVC tracked parameters in
+    params_file_path: Path
+        Path to the params_file
+
+    Notes
+    -----
+    For help on the other parameters see https://dvc.org/doc/command-reference/run#options .
+    The corresponding *._path specifies the path where the files should be saved.
+
+    """
     # pytrack Parameter
     multi_use: bool = False
     params_file: str = 'params.json'
@@ -52,6 +69,7 @@ class DVCParams:
 
 @dataclass(frozen=False, order=True, init=False)
 class Files:
+    """Dataclass to combine the DVCParams with the correct id and path for easy access"""
     deps: List[Path]
     outs: List[Path]
     outs_no_cache: List[Path]
@@ -81,6 +99,14 @@ class Files:
         self.json_file = json_file
 
     def get_dvc_arguments(self) -> list:
+        """Combine the attributes with the corresponding DVC option
+
+        Returns
+        -------
+        str: E.g. for outs it will return a list of ["--outs", "outs_path/{id}_outs[0]", ...]
+
+        """
+
         def flatten(x):
             """
             Convert [[str, Path], [str, Path]] to [str, Path, str, Path]
@@ -105,4 +131,5 @@ class Files:
 
 @dataclass(frozen=True, order=True)
 class SlurmConfig:
+    """Available SLURM Parameters for SRUN"""
     n: int = 1
