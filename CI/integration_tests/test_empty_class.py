@@ -37,7 +37,7 @@ class TestBasic(TestCase):
     def tearDownClass(cls) -> None:
         """Remove all test files"""
         subprocess.check_call(['dvc', 'destroy', "-f"])
-        os.chdir('..')
+        os.chdir('../../tests')
         shutil.rmtree(tmp_dir)
 
     def test_building_class(self):
