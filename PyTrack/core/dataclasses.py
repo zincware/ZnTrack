@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 
 @dataclass(frozen=False, order=True)
@@ -13,31 +13,31 @@ class DVCParams:
     dvc_file: str = "dvc.yaml"
 
     # DVC Parameter
-    deps: list[Path] = field(default_factory=list)
+    deps: List[Path] = field(default_factory=list)
     # Has no path, because it always comes as a path object already
 
-    outs: list[str] = field(default_factory=list)
+    outs: List[str] = field(default_factory=list)
     outs_path: Path = Path("outs")
 
-    outs_no_cache: list[str] = field(default_factory=list)
+    outs_no_cache: List[str] = field(default_factory=list)
     outs_no_cache_path: Path = Path("outs")
 
-    outs_persistent: list[str] = field(default_factory=list)
+    outs_persistent: List[str] = field(default_factory=list)
     outs_persistent_path: Path = Path("outs")
 
-    params: list[str] = field(default_factory=list)
+    params: List[str] = field(default_factory=list)
     params_path: Path = Path("params")
 
-    metrics: list[str] = field(default_factory=list)
+    metrics: List[str] = field(default_factory=list)
     metrics_path: Path = Path("metrics")
 
-    metrics_no_cache: list[str] = field(default_factory=list)
+    metrics_no_cache: List[str] = field(default_factory=list)
     metrics_no_cache_path: Path = Path("metrics")
 
-    plots: list[str] = field(default_factory=list)
+    plots: List[str] = field(default_factory=list)
     plots_path: Path = Path("plots")
 
-    plots_no_cache: list[str] = field(default_factory=list)
+    plots_no_cache: List[str] = field(default_factory=list)
     plots_no_cache_path: Path = Path("plots")
 
     def make_paths(self):
@@ -52,15 +52,15 @@ class DVCParams:
 
 @dataclass(frozen=False, order=True, init=False)
 class Files:
-    deps: list[Path]
-    outs: list[Path]
-    outs_no_cache: list[Path]
-    outs_persistent: list[Path]
-    params: list[Path]
-    metrics: list[Path]
-    metrics_no_cache: list[Path]
-    plots: list[Path]
-    plots_no_cache: list[Path]
+    deps: List[Path]
+    outs: List[Path]
+    outs_no_cache: List[Path]
+    outs_persistent: List[Path]
+    params: List[Path]
+    metrics: List[Path]
+    metrics_no_cache: List[Path]
+    plots: List[Path]
+    plots_no_cache: List[Path]
 
     json_file: Union[Path, None] = None
 
