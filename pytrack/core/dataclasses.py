@@ -1,11 +1,28 @@
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union
+from typing import Union, List
 
 
 @dataclass(frozen=False, order=True)
 class DVCParams:
-    # DVCOp Parameter
+    """All available DVC outputs should be specified in this dataclass.
+
+    Attributes
+    ----------
+    multi_use: bool
+        Set to to true, if the function can appear multiple times in the same data pipeline
+    params_file: str
+        Name of the parameter file to store DVC tracked parameters in
+    params_file_path: Path
+        Path to the params_file
+
+    Notes
+    -----
+    For help on the other parameters see https://dvc.org/doc/command-reference/run#options .
+    The corresponding *._path specifies the path where the files should be saved.
+
+    """
+    # pytrack Parameter
     multi_use: bool = False
     params_file: str = 'params.json'
     params_file_path: Path = Path("config")
@@ -13,31 +30,31 @@ class DVCParams:
     dvc_file: str = "dvc.yaml"
 
     # DVC Parameter
-    deps: list[Path] = field(default_factory=list)
+    deps: List[Path] = field(default_factory=list)
     # Has no path, because it always comes as a path object already
 
-    outs: list[str] = field(default_factory=list)
+    outs: List[str] = field(default_factory=list)
     outs_path: Path = Path("outs")
 
-    outs_no_cache: list[str] = field(default_factory=list)
+    outs_no_cache: List[str] = field(default_factory=list)
     outs_no_cache_path: Path = Path("outs")
 
-    outs_persistent: list[str] = field(default_factory=list)
+    outs_persistent: List[str] = field(default_factory=list)
     outs_persistent_path: Path = Path("outs")
 
-    params: list[str] = field(default_factory=list)
+    params: List[str] = field(default_factory=list)
     params_path: Path = Path("params")
 
-    metrics: list[str] = field(default_factory=list)
+    metrics: List[str] = field(default_factory=list)
     metrics_path: Path = Path("metrics")
 
-    metrics_no_cache: list[str] = field(default_factory=list)
+    metrics_no_cache: List[str] = field(default_factory=list)
     metrics_no_cache_path: Path = Path("metrics")
 
-    plots: list[str] = field(default_factory=list)
+    plots: List[str] = field(default_factory=list)
     plots_path: Path = Path("plots")
 
-    plots_no_cache: list[str] = field(default_factory=list)
+    plots_no_cache: List[str] = field(default_factory=list)
     plots_no_cache_path: Path = Path("plots")
 
     def make_paths(self):
@@ -52,15 +69,16 @@ class DVCParams:
 
 @dataclass(frozen=False, order=True, init=False)
 class Files:
-    deps: list[Path]
-    outs: list[Path]
-    outs_no_cache: list[Path]
-    outs_persistent: list[Path]
-    params: list[Path]
-    metrics: list[Path]
-    metrics_no_cache: list[Path]
-    plots: list[Path]
-    plots_no_cache: list[Path]
+    """Dataclass to combine the DVCParams with the correct id and path for easy access"""
+    deps: List[Path]
+    outs: List[Path]
+    outs_no_cache: List[Path]
+    outs_persistent: List[Path]
+    params: List[Path]
+    metrics: List[Path]
+    metrics_no_cache: List[Path]
+    plots: List[Path]
+    plots_no_cache: List[Path]
 
     json_file: Union[Path, None] = None
 
@@ -81,6 +99,14 @@ class Files:
         self.json_file = json_file
 
     def get_dvc_arguments(self) -> list:
+        """Combine the attributes with the corresponding DVC option
+
+        Returns
+        -------
+        str: E.g. for outs it will return a list of ["--outs", "outs_path/{id}_outs[0]", ...]
+
+        """
+
         def flatten(x):
             """
             Convert [[str, Path], [str, Path]] to [str, Path, str, Path]
@@ -105,4 +131,5 @@ class Files:
 
 @dataclass(frozen=True, order=True)
 class SlurmConfig:
+    """Available SLURM Parameters for SRUN"""
     n: int = 1

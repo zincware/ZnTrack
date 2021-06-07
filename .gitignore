@@ -1,2 +1,5 @@
 /tmp/
 /tests/basic/.git
+/docs/build
+.idea
+PyTrack.egg-info

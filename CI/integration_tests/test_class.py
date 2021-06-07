@@ -1,7 +1,8 @@
 from unittest import TestCase
-from dvc_op import DVCOp, DVCParams
+from pytrack import PyTrack, DVCParams
 from pathlib import Path
 import json
+from typing import Union
 
 import subprocess
 import shutil
@@ -11,20 +12,22 @@ import os
 tmp_dir = Path('tmp_dir')
 
 
-class BasicTest(DVCOp):
+class BasicTest(PyTrack):
 
-    def config(self):
+    def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
+        super().__init__()
         self.dvc = DVCParams(
             params_file="params.json",
             deps=[Path('deps1', 'input.json'), Path('deps2', 'input.json')]
         )
+        self.post_init(id_, filter_)
 
     def __call__(self, **kwargs):
         self.parameters = kwargs
         self.post_call()
 
-    def run_dvc(self, id_=0):
-        self.pre_run(id_)
+    def run_dvc(self):
+        self.pre_run()
         self.results = {'name': self.parameters['name']}
 
 

@@ -1,8 +1,8 @@
 import sys
 import logging
 
-from dvc_op import DVCOp
-from dvc_op.core.dataclasses import DVCParams
+from pytrack import DVCOp
+from pytrack.core.dataclasses import DVCParams
 
 import numpy as np
 import ase.io
