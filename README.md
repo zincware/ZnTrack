@@ -1,2 +1,2 @@
-# DVC_Op
+# pyTrack
 A Python package to use DVC for parameter and data control
