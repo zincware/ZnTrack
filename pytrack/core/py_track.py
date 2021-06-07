@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Union
+from typing import Union, List
 
 import logging
 import json
@@ -7,15 +7,13 @@ import subprocess
 import yaml
 from pathlib import Path
 
-from typing import List
-
 from .dataclasses import DVCParams, SlurmConfig, Files
 
 log = logging.getLogger(__file__)
 
 
 class PyTrack:
-    def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
+    def __init__(self):
         """Constructor for the DVCOp parent class
 
         Parameters
@@ -26,7 +24,21 @@ class PyTrack:
             Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
             This will always return the first instance. If multiple instances are possible use query_obj()!
 
+        Notes
+        -----
+        A PyTrack child should implement
+        >>> class Child(PyTrack):
+        >>>     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
+        >>>         super(PyTrack, self).__init__()
+        >>>         self.dvc = DVCParams()
+        >>>         self.post_init(id_, filter_)
+        >>>     def __call__(self,exec_=False, force=False, always_changed=False, slurm=False, **kwargs):
+        >>>         self.parameters = kwargs
+        >>>         self.post_call(force, exec_, always_changed, slurm)
+        >>>     def run_dvc(self):
+        >>>         self.pre_run()
         """
+
         self._parameters: dict = {}
         self._id: int = 0
         self._running = False  # is set to true, when run_dvc
@@ -35,8 +47,20 @@ class PyTrack:
 
         self.json_file: bool = True
 
-        self.config()
+        self._json_file = None
 
+    def post_init(self, id_: Union[int, str] = None, filter_: dict = None):
+        """Post init method
+
+        Parameters
+        ----------
+        id_: int, str, optional
+            Optional primary key to query a previously created stage
+        filter_: dict, optional
+            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
+            This will always return the first instance. If multiple instances are possible use query_obj()!
+
+        """
         if self.json_file:
             self._json_file = f"{self.name}.json"
         else:
@@ -56,14 +80,7 @@ class PyTrack:
         except KeyError:
             raise KeyError(f'Could not find a stage with id {id_}!')
 
-    def config(self):
-        """Set all arguments like DVCParams or SlurmConfig in here!
-
-        Child class version of __init__ without superclass - to be depreciated!
-        """
-        pass
-
-    def run_dvc(self, id_=0):
+    def run_dvc(self):
         """Function to be executed by DVC
 
         This is the main and only function that dvc will run!
@@ -71,10 +88,6 @@ class PyTrack:
         This function has to be able to run without any additional user input! All configurations should
         take place in the config / __init__ or in the call method!
 
-        Parameters
-        ----------
-        id_: int
-            Primary key to identify the stage - to be depreciated in favor of __init__(id_=)
         """
         raise NotImplementedError('Implemented in child class')
 
@@ -103,7 +116,7 @@ class PyTrack:
         self._write_parameters()
         self._write_dvc(force, exec_, always_changed, slurm)
 
-    def pre_run(self, id_):
+    def pre_run(self):
         """Command to be run before run_dvc
 
         Handles the id and potentially updates internals.
@@ -121,8 +134,6 @@ class PyTrack:
         """
 
         self._running = True
-        self.id = id_
-        self._update(self, id_)
 
     def _write_parameters(self):
         """Update parameters file
@@ -261,7 +272,7 @@ class PyTrack:
         except KeyError:
             return {}
 
-    def _update(self, cls: DVCOp, id_: Union[int, str]):
+    def _update(self, cls: PyTrack, id_: Union[int, str]):
         """Update all parameters of cls connected to the given id"""
         cls.parameters = self.all_parameters[str(id_)]
         log.debug("Updating Parameters!")
@@ -295,7 +306,7 @@ class PyTrack:
 
         return obj
 
-    def query_obj(self, filter_: Union[int, dict]) -> Union[DVCOp, List[DVCOp]]:
+    def query_obj(self, filter_: Union[int, dict]) -> Union[PyTrack, List[PyTrack]]:
         """Get a class instance with all the available information attached
 
         Returns
@@ -348,6 +359,7 @@ class PyTrack:
         -----
         If the dependencies for a stage change this function won't necessarily tell you.
         Use 'dvc status' to check, if the stage needs to be rerun.
+
         """
 
         script = ['dvc', 'run', '-n', self.stage_name]
@@ -380,7 +392,7 @@ class PyTrack:
             script.append(f"{self.slurm_config.n}")
         #
         script.append(f'python -c "from {self.module} import {self.name}; '
-                      f'{self.name}().run_dvc(id_={self.id})"')
+                      f'{self.name}(id_={self.id}).run_dvc()"')
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
         process = subprocess.run(script, capture_output=True)
