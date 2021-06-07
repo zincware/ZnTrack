@@ -5,7 +5,7 @@ from typing import Union, List
 
 @dataclass(frozen=False, order=True)
 class DVCParams:
-    # PyTrack Parameter
+    # pytrack Parameter
     multi_use: bool = False
     params_file: str = 'params.json'
     params_file_path: Path = Path("config")

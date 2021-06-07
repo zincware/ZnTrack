@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="PyTrack",
+    name="pytrack",
     version="0.0.1",
     author="Fabian Zills",
     author_email="fabian.zills@web.de",

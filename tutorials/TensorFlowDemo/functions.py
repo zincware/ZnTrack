@@ -1,4 +1,4 @@
-from PyTrack import DVCOp, DVCParams
+from pytrack import DVCOp, DVCParams
 import tensorflow as tf
 import numpy as np
 import json

@@ -300,7 +300,7 @@ class PyTrack:
 
         Returns
         --------
-        List[PyTrack] : The instantiated class having self.parameters, self.id_ and potentially all post run parameters
+        List[pytrack] : The instantiated class having self.parameters, self.id_ and potentially all post run parameters
                     set, so that it can be used
 
         Notes
