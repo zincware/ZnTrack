@@ -13,7 +13,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 project = 'PyTrack'
 copyright = '2021, Zincware'
-author = 'Samuel Tovey'
+author = 'Fabian Zills, Samuel Tovey'
 
 # The full version, including alpha/beta/rc tags
 release = '2021'
