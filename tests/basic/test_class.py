@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pyTrack import DVCOp, DVCParams
+from PyTrack import DVCOp, DVCParams
 from pathlib import Path
 import json
 

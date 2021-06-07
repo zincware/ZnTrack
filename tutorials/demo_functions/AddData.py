@@ -1,8 +1,8 @@
 import sys
 import logging
 
-from pyTrack import DVCOp
-from pyTrack.core.dataclasses import DVCParams
+from PyTrack import DVCOp
+from PyTrack.core.dataclasses import DVCParams
 
 import numpy as np
 import ase.io
