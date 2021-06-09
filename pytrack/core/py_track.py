@@ -13,11 +13,19 @@ log = logging.getLogger(__file__)
 
 
 class PyTrack:
-    def __init__(self):
+    def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         """Constructor for the DVCOp parent class
 
-        Notes
-        -----
+        Parameters
+        ----------
+        id_: int, str, optional
+            Optional primary key to query a previously created stage
+        filter_: dict, optional
+            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
+            This will always return the first instance. If multiple instances are possible use query_obj()!
+
+        Examples
+        --------
         A PyTrack child should implement
         >>> class Child(PyTrack):
         >>>     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
@@ -27,7 +35,7 @@ class PyTrack:
         >>>     def __call__(self,exec_=False, force=False, always_changed=False, slurm=False, **kwargs):
         >>>         self.parameters = kwargs
         >>>         self.post_call(force, exec_, always_changed, slurm)
-        >>>     def run_dvc(self):
+        >>>     def run(self):
         >>>         self.pre_run()
         """
 
@@ -72,7 +80,7 @@ class PyTrack:
         except KeyError:
             raise KeyError(f'Could not find a stage with id {id_}!')
 
-    def run_dvc(self):
+    def run(self):
         """Function to be executed by DVC
 
         This is the main and only function that dvc will run!
@@ -109,13 +117,13 @@ class PyTrack:
         self._write_dvc(force, exec_, always_changed, slurm)
 
     def pre_run(self):
-        """Command to be run before run_dvc
+        """Command to be run before run
 
         Updates internals.
 
         Notes
         -----
-         Not using super run_dvc because run_dvc ALWAYS has to implemented in the child class and should otherwise
+         Not using super run_ because run ALWAYS has to implemented in the child class and should otherwise
          raise and error!
 
         """
@@ -379,7 +387,7 @@ class PyTrack:
             script.append(f"{self.slurm_config.n}")
         #
         script.append(f'python -c "from {self.module} import {self.name}; '
-                      f'{self.name}(id_={self.id}).run_dvc()"')
+                      f'{self.name}(id_={self.id}).run()"')
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
         process = subprocess.run(script, capture_output=True)

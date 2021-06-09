@@ -1,22 +1,61 @@
-from pytrack import DVCOp, DVCParams
+from pytrack import PyTrack, DVCParams
 import tensorflow as tf
 import numpy as np
 import json
 
 
-class LoadData(DVCOp):
-    def config(self):
+class LoadData(PyTrack):
+    def __init__(self, id_=None, filter_=None):
+        """Constructor oft the LoadData PyTrack Instance
+
+        Parameters
+        ----------
+        id_: int, str, optional
+            Optional primary key to query a previously created stage
+        filter_: dict, optional
+            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
+            This will always return the first instance. If multiple instances are possible use query_obj()!
+        """
+        super().__init__()
         self.dvc = DVCParams(
             outs=['x_train.npy', 'y_train.npy', 'x_test.npy', 'y_test.npy']
         )
+        self.post_init(id_, filter_)
 
     def __call__(self, dataset: str, exec_: bool = False, slurm: bool = False, force: bool = False,
                  always_changed: bool = False):
+        """Call method of the LoadData class
+
+        Parameters
+        ----------
+        dataset: str
+            Name of the dataset
+        force: bool, default=False
+            Use dvc run with `--force` to overwrite previous stages!
+        exec_: bool, default=False
+            Run the stage directly and don't use dvc with '--no-exec'.
+            This will not output stdout/stderr in real time and should only be used for fast functions!
+        always_changed: bool, default=False
+            Set the always changed dvc argument. See the official DVC docs. Can be useful for debugging / development.
+        slurm: bool, default=False
+            Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't mean that every stage uses slurm
+            and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
+
+        Returns
+        -------
+
+        """
         self.parameters = {"dataset": dataset}
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run_dvc(self, id_=0):
-        self.pre_run(id_)
+    def run(self):
+        """Run method that loads the data
+
+        Notes
+        -----
+            only mnist dataset is supported
+        """
+        self.pre_run()
 
         if self.parameters['dataset'] == "mnist":
             mnist = tf.keras.datasets.mnist
@@ -35,22 +74,54 @@ class LoadData(DVCOp):
             self.results = {"shape": x_train.shape, "targets": len(np.unique(y_train))}
 
 
-class FitModel(DVCOp):
-    def config(self):
+class FitModel(PyTrack):
+    def __init__(self, id_=None, filter_=None):
+        """Constructor oft the FitModel PyTrack Instance
+
+        Parameters
+        ----------
+        id_: int, str, optional
+            Optional primary key to query a previously created stage
+        filter_: dict, optional
+            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
+            This will always return the first instance. If multiple instances are possible use query_obj()!
+        """
+        super().__init__()
         self.dvc = DVCParams(
             outs=['model']
         )
         self.json_file = False
+        self.post_init(id_, filter_)
 
     def __call__(self, exec_: bool = False, slurm: bool = False, force: bool = False,
                  always_changed: bool = False):
+        """Call method of the LoadData class
+
+        Parameters
+        ----------
+        force: bool, default=False
+            Use dvc run with `--force` to overwrite previous stages!
+        exec_: bool, default=False
+            Run the stage directly and don't use dvc with '--no-exec'.
+            This will not output stdout/stderr in real time and should only be used for fast functions!
+        always_changed: bool, default=False
+            Set the always changed dvc argument. See the official DVC docs. Can be useful for debugging / development.
+        slurm: bool, default=False
+            Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't mean that every stage uses slurm
+            and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
+
+        Returns
+        -------
+
+                """
         self.dvc.deps = LoadData(id_=0).files.outs[:2]
 
         self.parameters = {"layer": 128}
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run_dvc(self, id_=0):
-        self.pre_run(id_)
+    def run(self):
+        """Fit the model"""
+        self.pre_run()
 
         load_data = LoadData(id_=0)
 
@@ -78,22 +149,55 @@ class FitModel(DVCOp):
         model.save(str(self.files.outs[0]))
 
 
-class EvaluateModel(DVCOp):
-    def config(self):
+class EvaluateModel(PyTrack):
+
+    def __init__(self, id_=None, filter_=None):
+        """Constructor oft the EvaluateModel PyTrack Instance
+
+        Parameters
+        ----------
+        id_: int, str, optional
+            Optional primary key to query a previously created stage
+        filter_: dict, optional
+            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
+            This will always return the first instance. If multiple instances are possible use query_obj()!
+        """
+        super().__init__()
         self.dvc = DVCParams(
             metrics_no_cache=['metrics.json']
         )
         self.json_file = False
+        self.post_init(id_, filter_)
 
     def __call__(self, exec_: bool = False, slurm: bool = False, force: bool = False,
                  always_changed: bool = False):
+        """Call method of the LoadData class
+
+        Parameters
+        ----------
+        force: bool, default=False
+            Use dvc run with `--force` to overwrite previous stages!
+        exec_: bool, default=False
+            Run the stage directly and don't use dvc with '--no-exec'.
+            This will not output stdout/stderr in real time and should only be used for fast functions!
+        always_changed: bool, default=False
+            Set the always changed dvc argument. See the official DVC docs. Can be useful for debugging / development.
+        slurm: bool, default=False
+            Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't mean that every stage uses slurm
+            and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
+
+        Returns
+        -------
+
+        """
         self.parameters = {'verbose': 2}
         self.dvc.deps = FitModel(id_=0).files.outs
         self.dvc.deps += LoadData(id_=0).files.outs[2:]
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run_dvc(self, id_=0):
-        self.pre_run(id_)
+    def run(self):
+        """Evaluate the model"""
+        self.pre_run()
 
         fit_model = FitModel(id_=0)
 
