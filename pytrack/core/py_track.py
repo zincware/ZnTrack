@@ -13,7 +13,7 @@ log = logging.getLogger(__file__)
 
 
 class PyTrack:
-    def __init__(self):
+    def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         """Constructor for the DVCOp parent class
 
         Notes
