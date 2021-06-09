@@ -16,7 +16,7 @@ class PyTrack:
     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         """Constructor for the DVCOp parent class
 
-        Notes
+        Examples
         -----
         A PyTrack child should implement
         >>> class Child(PyTrack):
