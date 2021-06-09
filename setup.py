@@ -21,6 +21,7 @@ setuptools.setup(
     python_requires='>=3.7',
     install_requires=[
         'dvc',
-        'pytest'
+        'pytest',
+        'PyYAML'
     ],
 )

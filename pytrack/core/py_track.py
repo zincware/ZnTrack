@@ -240,8 +240,8 @@ class PyTrack:
     def _dvc_file(self) -> dict:
         """Load ALL parameters from dvc.dvc_file"""
         try:
-            with open(self.dvc.dvc_file) as json_file:
-                return yaml.safe_load(json_file)
+            with open(self.dvc.dvc_file) as dvc_file:
+                return yaml.safe_load(dvc_file)
         except FileNotFoundError:
             log.debug(f"Could not load dvc config from {self.dvc.dvc_file}!")
         return {}
