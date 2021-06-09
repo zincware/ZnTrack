@@ -12,6 +12,7 @@ temp_dir = TemporaryDirectory()
 
 
 class BasicTest(PyTrack):
+    """BasicTest class"""
 
     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         """Constructor of the PyTrack test instance
@@ -43,6 +44,7 @@ class BasicTest(PyTrack):
 
 
 class TestBasic(TestCase):
+    """This is a unittest TestCase for testing PyTrack"""
 
     @classmethod
     def setUpClass(cls) -> None:
