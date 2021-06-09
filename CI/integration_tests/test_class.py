@@ -3,13 +3,12 @@ from pytrack import PyTrack, DVCParams
 from pathlib import Path
 import json
 from typing import Union
-
 import subprocess
-import shutil
-
 import os
+import shutil
+from tempfile import TemporaryDirectory
 
-tmp_dir = Path('tmp_dir')
+temp_dir = TemporaryDirectory()
 
 
 class BasicTest(PyTrack):
@@ -35,10 +34,8 @@ class TestBasic(TestCase):
 
     @classmethod
     def setUpClass(cls) -> None:
-        tmp_dir.mkdir(parents=True, exist_ok=True)
-
-        shutil.copy(__file__, tmp_dir)
-        os.chdir(tmp_dir)
+        shutil.copy(__file__, temp_dir.name)
+        os.chdir(temp_dir.name)
 
         subprocess.check_call(['git', 'init'])
         subprocess.check_call(['dvc', 'init'])
@@ -58,7 +55,7 @@ class TestBasic(TestCase):
         """Remove all test files"""
         subprocess.check_call(['dvc', 'destroy', "-f"])
         os.chdir('..')
-        shutil.rmtree(tmp_dir)
+        temp_dir.cleanup()
 
     def test_query_by_id(self):
         base = BasicTest(id_=0)
