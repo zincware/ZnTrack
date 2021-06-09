@@ -15,7 +15,7 @@ class LoadData(DVCOp):
         self.parameters = {"dataset": dataset}
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run_dvc(self, id_=0):
+    def run(self, id_=0):
         self.pre_run(id_)
 
         if self.parameters['dataset'] == "mnist":
@@ -49,7 +49,7 @@ class FitModel(DVCOp):
         self.parameters = {"layer": 128}
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run_dvc(self, id_=0):
+    def run(self, id_=0):
         self.pre_run(id_)
 
         load_data = LoadData(id_=0)
@@ -92,7 +92,7 @@ class EvaluateModel(DVCOp):
         self.dvc.deps += LoadData(id_=0).files.outs[2:]
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run_dvc(self, id_=0):
+    def run(self, id_=0):
         self.pre_run(id_)
 
         fit_model = FitModel(id_=0)

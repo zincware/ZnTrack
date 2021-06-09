@@ -19,7 +19,7 @@ class BasicTest(PyTrack):
     def __call__(self):
         self.post_call()
 
-    def run_dvc(self):
+    def run(self):
         self.pre_run()
 
 

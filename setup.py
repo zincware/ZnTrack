@@ -22,6 +22,7 @@ setuptools.setup(
     install_requires=[
         'dvc',
         'pytest',
-        'PyYAML'
+        'PyYAML',
+        'mlflow'
     ],
 )

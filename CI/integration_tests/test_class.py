@@ -25,7 +25,7 @@ class BasicTest(PyTrack):
         self.parameters = kwargs
         self.post_call()
 
-    def run_dvc(self):
+    def run(self):
         self.pre_run()
         self.results = {'name': self.parameters['name']}
 

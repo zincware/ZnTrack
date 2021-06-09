@@ -27,7 +27,7 @@ class PyTrack:
         >>>     def __call__(self,exec_=False, force=False, always_changed=False, slurm=False, **kwargs):
         >>>         self.parameters = kwargs
         >>>         self.post_call(force, exec_, always_changed, slurm)
-        >>>     def run_dvc(self):
+        >>>     def run(self):
         >>>         self.pre_run()
         """
 
@@ -72,7 +72,7 @@ class PyTrack:
         except KeyError:
             raise KeyError(f'Could not find a stage with id {id_}!')
 
-    def run_dvc(self):
+    def run(self):
         """Function to be executed by DVC
 
         This is the main and only function that dvc will run!
@@ -109,13 +109,13 @@ class PyTrack:
         self._write_dvc(force, exec_, always_changed, slurm)
 
     def pre_run(self):
-        """Command to be run before run_dvc
+        """Command to be run before run
 
         Updates internals.
 
         Notes
         -----
-         Not using super run_dvc because run_dvc ALWAYS has to implemented in the child class and should otherwise
+         Not using super run_ because run ALWAYS has to implemented in the child class and should otherwise
          raise and error!
 
         """
@@ -379,7 +379,7 @@ class PyTrack:
             script.append(f"{self.slurm_config.n}")
         #
         script.append(f'python -c "from {self.module} import {self.name}; '
-                      f'{self.name}(id_={self.id}).run_dvc()"')
+                      f'{self.name}(id_={self.id}).run()"')
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
         process = subprocess.run(script, capture_output=True)
