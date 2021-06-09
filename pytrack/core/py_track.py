@@ -16,6 +16,14 @@ class PyTrack:
     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         """Constructor for the DVCOp parent class
 
+        Parameters
+        ----------
+        id_: int, str, optional
+            Optional primary key to query a previously created stage
+        filter_: dict, optional
+            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
+            This will always return the first instance. If multiple instances are possible use query_obj()!
+
         Examples
         -----
         A PyTrack child should implement
