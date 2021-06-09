@@ -25,7 +25,7 @@ class PyTrack:
             This will always return the first instance. If multiple instances are possible use query_obj()!
 
         Examples
-        -----
+        --------
         A PyTrack child should implement
         >>> class Child(PyTrack):
         >>>     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
