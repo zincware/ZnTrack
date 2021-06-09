@@ -1,22 +1,24 @@
-from pytrack import DVCOp, DVCParams
+from pytrack import PyTrack, DVCParams
 import tensorflow as tf
 import numpy as np
 import json
 
 
-class LoadData(DVCOp):
-    def config(self):
+class LoadData(PyTrack):
+    def __init__(self, id_=None, filter_=None):
+        super().__init__()
         self.dvc = DVCParams(
             outs=['x_train.npy', 'y_train.npy', 'x_test.npy', 'y_test.npy']
         )
+        self.post_init(id_, filter_)
 
     def __call__(self, dataset: str, exec_: bool = False, slurm: bool = False, force: bool = False,
                  always_changed: bool = False):
         self.parameters = {"dataset": dataset}
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run(self, id_=0):
-        self.pre_run(id_)
+    def run(self):
+        self.pre_run()
 
         if self.parameters['dataset'] == "mnist":
             mnist = tf.keras.datasets.mnist
@@ -35,12 +37,14 @@ class LoadData(DVCOp):
             self.results = {"shape": x_train.shape, "targets": len(np.unique(y_train))}
 
 
-class FitModel(DVCOp):
-    def config(self):
+class FitModel(PyTrack):
+    def __init__(self, id_=None, filter_=None):
+        super().__init__()
         self.dvc = DVCParams(
             outs=['model']
         )
         self.json_file = False
+        self.post_init(id_, filter_)
 
     def __call__(self, exec_: bool = False, slurm: bool = False, force: bool = False,
                  always_changed: bool = False):
@@ -49,8 +53,8 @@ class FitModel(DVCOp):
         self.parameters = {"layer": 128}
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run(self, id_=0):
-        self.pre_run(id_)
+    def run(self):
+        self.pre_run()
 
         load_data = LoadData(id_=0)
 
@@ -78,12 +82,15 @@ class FitModel(DVCOp):
         model.save(str(self.files.outs[0]))
 
 
-class EvaluateModel(DVCOp):
-    def config(self):
+class EvaluateModel(PyTrack):
+
+    def __init__(self, id_=None, filter_=None):
+        super().__init__()
         self.dvc = DVCParams(
             metrics_no_cache=['metrics.json']
         )
         self.json_file = False
+        self.post_init(id_, filter_)
 
     def __call__(self, exec_: bool = False, slurm: bool = False, force: bool = False,
                  always_changed: bool = False):
@@ -92,8 +99,8 @@ class EvaluateModel(DVCOp):
         self.dvc.deps += LoadData(id_=0).files.outs[2:]
         self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
 
-    def run(self, id_=0):
-        self.pre_run(id_)
+    def run(self):
+        self.pre_run()
 
         fit_model = FitModel(id_=0)
 
