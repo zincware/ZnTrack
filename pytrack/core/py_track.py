@@ -6,13 +6,14 @@ import json
 import subprocess
 import yaml
 from pathlib import Path
+import abc
 
 from .dataclasses import DVCParams, SlurmConfig, Files
 
 log = logging.getLogger(__file__)
 
 
-class PyTrack:
+class PyTrack(abc.ABC):
     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
         """Constructor for the DVCOp parent class
 
@@ -80,6 +81,7 @@ class PyTrack:
         except KeyError:
             raise KeyError(f'Could not find a stage with id {id_}!')
 
+    @abc.abstractmethod
     def run(self):
         """Function to be executed by DVC
 
