@@ -7,6 +7,7 @@ import subprocess
 import yaml
 from pathlib import Path
 import abc
+import sys
 
 from .dataclasses import DVCParams, SlurmConfig, Files
 
@@ -308,7 +309,7 @@ class PyTrack(abc.ABC):
 
         Returns
         --------
-        List[pytrack] : The instantiated class having self.parameters, self.id_ and potentially all post run parameters
+        List[PyTrack] : The instantiated class having self.parameters, self.id_ and potentially all post run parameters
                     set, so that it can be used
 
         Notes
@@ -388,15 +389,12 @@ class PyTrack(abc.ABC):
             script.append('-n')
             script.append(f"{self.slurm_config.n}")
         #
-        script.append(f'python -c "from {self.module} import {self.name}; '
+        script.append(f'{self.python_interpreter} -c "from {self.module} import {self.name}; '
                       f'{self.name}(id_={self.id}).run()"')
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
-        process = subprocess.run(script, capture_output=True)
-        if len(process.stdout) > 0:
-            log.info(process.stdout.decode())
-        if len(process.stderr) > 0:
-            log.warning(process.stderr.decode())
+        log.debug("If you are using a jupyter notebook, you may not be able to see the output in real time!")
+        subprocess.run(script)
 
     @property
     def files(self):
@@ -451,3 +449,25 @@ class PyTrack(abc.ABC):
             except KeyError:
                 log.debug(f"Can not find key '{key}' in 'all_parameters' - skipping!")
         return obj_id
+
+    @property
+    def python_interpreter(self):
+        """Find the most suitable python interpreter
+
+        Try to run subprocess check calls to see, which python interpreter should be selected
+
+        Returns
+        -------
+        interpreter: str
+            Name of the python interpreter that works with subprocess calls
+
+        """
+
+        for interpreter in ["python3", "python"]:
+            try:
+                subprocess.check_call([interpreter, "--version"])
+                log.debug(f"Using command {interpreter} for dvc!")
+                return interpreter
+            except subprocess.CalledProcessError:
+                log.debug(f"{interpreter} is not working!")
+        raise subprocess.CalledProcessError("Could not find a working python interpreter to work with subprocesses!")
