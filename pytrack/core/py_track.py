@@ -394,7 +394,11 @@ class PyTrack(abc.ABC):
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
         log.debug("If you are using a jupyter notebook, you may not be able to see the output in real time!")
-        subprocess.run(script)
+        process = subprocess.run(script, capture_output=True)
+        if len(process.stdout) > 0:
+            log.info(process.stdout.decode())
+        if len(process.stderr) > 0:
+            log.warning(process.stderr.decode())
 
     @property
     def files(self):
