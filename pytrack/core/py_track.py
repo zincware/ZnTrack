@@ -389,7 +389,7 @@ class PyTrack(abc.ABC):
             script.append('-n')
             script.append(f"{self.slurm_config.n}")
         #
-        script.append(f'{self.python_interpreter} -c "from {self.module} import {self.name}; '
+        script.append(f'{self._python_interpreter} -c "from {self.module} import {self.name}; '
                       f'{self.name}(id_={self.id}).run()"')
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
@@ -451,7 +451,7 @@ class PyTrack(abc.ABC):
         return obj_id
 
     @property
-    def python_interpreter(self):
+    def _python_interpreter(self):
         """Find the most suitable python interpreter
 
         Try to run subprocess check calls to see, which python interpreter should be selected
