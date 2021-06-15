@@ -1,6 +1,11 @@
-from dataclasses import dataclass, field
+from __future__ import annotations
+
+import logging
+from dataclasses import dataclass, field, fields
 from pathlib import Path
 from typing import Union, List
+
+log = logging.getLogger(__file__)
 
 
 @dataclass(frozen=False, order=True)
@@ -65,6 +70,29 @@ class DVCParams:
                 if len(self.__dict__[key[:-5]]) > 0:
                     # Check if the corresponding list has an entry - if not, you don't need to create the folder
                     self.__dict__[key].mkdir(exist_ok=True, parents=True)
+
+    def merge(self, other: DVCParams, force: False):
+        """Merge two dataclasses
+
+        Parameters
+        -----------
+        other: DVCParams
+                second instance of DVCParams to merge with this one
+        force: bool, default = False
+                Overwrite all changed values that aren't lists
+        """
+        for field_ in fields(other):
+            if getattr(self, field_.name) != getattr(other, field_.name):
+                # check if the attributes are different
+                log.debug(f"Update type {field_.name}")
+                if(field_.type.startswith("List")):
+                    # if there are of type string, we want to append them
+                    setattr(self, field_.name, getattr(other, field_.name) + getattr(self, field_.name))
+                else:
+                    if force:
+                        setattr(self, field_.name, getattr(other, field_.name))
+                    else:
+                        log.error("Can not overwrite given parameter with new parameter - use force=True for that!")
 
 
 @dataclass(frozen=False, order=True, init=False)
