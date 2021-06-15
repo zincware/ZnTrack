@@ -71,7 +71,7 @@ class DVCParams:
                     # Check if the corresponding list has an entry - if not, you don't need to create the folder
                     self.__dict__[key].mkdir(exist_ok=True, parents=True)
 
-    def merge(self, other: DVCParams, force: False):
+    def merge(self, other: DVCParams, force: bool = False):
         """Merge two dataclasses
 
         Parameters
