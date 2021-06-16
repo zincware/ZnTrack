@@ -7,7 +7,6 @@ import subprocess
 import yaml
 from pathlib import Path
 import abc
-import sys
 
 from .dataclasses import DVCParams, SlurmConfig, Files
 
