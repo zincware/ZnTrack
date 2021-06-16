@@ -38,7 +38,7 @@ class DVCInterface:
         if self._experiment is None:
             # Only load it once! This speeds things up. If experiments change during the lifetime
             # of this instance they won't be registered except _reset is called!
-            cmd = ["dvc", "exp", "show", "--show-json"]
+            cmd = ["dvc", "exp", "show", "--show-json", "-A"]
             log.debug(f"DVC command: {cmd}")
             out = subprocess.run(cmd, capture_output=True, cwd=self.dvc_path)
             self._experiment = json.loads(out.stdout)
@@ -59,9 +59,15 @@ class DVCInterface:
                     continue
                 for exp in workspace:
                     if exp == "baseline":
-                        exp_dict["master"] = "master"
+                        try:
+                            exp_dict[workspace[exp]["name"]] = key
+                        except KeyError:
+                            exp_dict[key] = key
                     else:
-                        exp_dict[workspace[exp]["name"]] = exp
+                        try:
+                            exp_dict[workspace[exp]["name"]] = exp
+                        except KeyError:
+                            exp_dict[key] = exp
             self._exp_dict = exp_dict
         return self._exp_dict
 
@@ -104,5 +110,5 @@ class DVCInterface:
                 out_path = path / experiment
                 out_path.mkdir(parents=True, exist_ok=True)
                 cmd = ["dvc", "get", ".", file, "--rev", exp_dict[experiment], "--out", out_path]
-                log.debug(f"DVC command: {cmd}")
+                log.warning(f"DVC command: {cmd}")
                 subprocess.run(cmd, cwd=self.dvc_path)
