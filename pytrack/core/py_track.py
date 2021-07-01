@@ -242,7 +242,7 @@ class PyTrack(abc.ABC):
                 log.debug(f"Creating a new stage for {self.name}")
                 parameters.update({self.name: {self.id: value}})
             with open(self.dvc.params_file_path / self.dvc.params_file, "w") as json_file:
-                json.dump(parameters, json_file)
+                json.dump(parameters, json_file, indent=4)
         else:
             raise ValueError(f"Value has to be a dictionary but found {type(value)} instead!")
 
@@ -435,7 +435,7 @@ class PyTrack(abc.ABC):
             Any json-serializable data
         """
         with open(self.files.json_file, "w") as f:
-            json.dump(value, f)
+            json.dump(value, f, indent=4)
 
     def _filter_parameters(self, filter_, id_) -> int:
         """Get the id based in filter_
