@@ -6,9 +6,8 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: Some basic interface functionality
+Description: Providing a project class that can run experiments
 """
+from .py_track_project import PyTrackProject
 
-from .base import DVCInterface
-
-__all__ = ["DVCInterface"]
+__all__ = ["PyTrackProject"]

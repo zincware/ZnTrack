@@ -29,20 +29,20 @@ class DVCInterface:
                 Path to the DVC repository to use
         """
         self.dvc_path = dvc_path
-        self._experiment = None
+        self._experiments = None
         self._exp_dict = None
 
     @property
-    def exp_show(self):
+    def experiments(self) -> dict:
         """Get all experiments in json format"""
-        if self._experiment is None:
+        if self._experiments is None:
             # Only load it once! This speeds things up. If experiments change during the lifetime
             # of this instance they won't be registered except _reset is called!
             cmd = ["dvc", "exp", "show", "--show-json", "-A"]
             log.debug(f"DVC command: {cmd}")
             out = subprocess.run(cmd, capture_output=True, cwd=self.dvc_path)
-            self._experiment = json.loads(out.stdout)
-        return self._experiment
+            self._experiments = json.loads(out.stdout)
+        return self._experiments
 
     @property
     def exp_dict(self) -> dict:
@@ -54,7 +54,7 @@ class DVCInterface:
         """
         if self._exp_dict is None:
             exp_dict = {}
-            for key, workspace in self.exp_show.items():
+            for key, workspace in self.experiments.items():
                 if key == "workspace":
                     continue
                 for exp in workspace:
@@ -73,7 +73,7 @@ class DVCInterface:
 
     def _reset(self):
         """Reset properties to be loaded again"""
-        self._experiment = None
+        self._experiments = None
         self._exp_dict = None
 
     def load_files_into_directory(self, files: List[str], path: str = "experiments", experiments: List[str] = None):
