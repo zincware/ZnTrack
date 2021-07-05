@@ -74,6 +74,8 @@ class DVCParams:
     def merge(self, other: DVCParams, force: bool = False):
         """Merge two dataclasses
 
+        In case of lists other will be appended to the current dataclass, thus shifting the indices!
+
         Parameters
         -----------
         other: DVCParams
@@ -85,9 +87,9 @@ class DVCParams:
             if getattr(self, field_.name) != getattr(other, field_.name):
                 # check if the attributes are different
                 log.debug(f"Update type {field_.name}")
-                if(field_.type.startswith("List")):
+                if field_.type.startswith("List"):
                     # if there are of type string, we want to append them
-                    setattr(self, field_.name, getattr(other, field_.name) + getattr(self, field_.name))
+                    setattr(self, field_.name, getattr(self, field_.name) + getattr(other, field_.name))
                 else:
                     if force:
                         setattr(self, field_.name, getattr(other, field_.name))
