@@ -1,7 +1,11 @@
 import setuptools
+from pathlib import Path
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
+
+requirements = Path(__file__).read_text().split("\n")
 
 setuptools.setup(
     name="py-track",
@@ -22,9 +26,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires='>=3.7',
-    install_requires=[
-        'dvc',
-        'pytest',
-        'PyYAML'
-    ],
+    install_requires=requirements
 )
