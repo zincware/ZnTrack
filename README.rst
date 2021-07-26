@@ -24,6 +24,13 @@ Or you can install from source with:
    git clone https://github.com/zincware/py-track.git
    cd py-track
    pip install . --user
+   
+For an introduction on how to use PyTrack follow the documentation. To verfiy that the installation was succesfull, you can try:
+
+.. code-block:: python
+   
+   from pytrack import DVCParams
+   DVCParams()
 
 .. badges
 
