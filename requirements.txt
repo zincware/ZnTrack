@@ -2,3 +2,8 @@ dvc
 pytest
 PyYAML
 sphinx_rtd_theme
+IPython
+sphinxcontrib.bibtex
+nbsphinx
+numpydoc
+sphinx-copybutton
