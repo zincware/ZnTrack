@@ -18,12 +18,18 @@ class LoadData(PyTrack):
         """
         super().__init__()
         self.dvc = DVCParams(
-            outs=['x_train.npy', 'y_train.npy', 'x_test.npy', 'y_test.npy']
+            outs=["x_train.npy", "y_train.npy", "x_test.npy", "y_test.npy"]
         )
         self.post_init(id_, filter_)
 
-    def __call__(self, dataset: str, exec_: bool = False, slurm: bool = False, force: bool = False,
-                 always_changed: bool = False):
+    def __call__(
+        self,
+        dataset: str,
+        exec_: bool = False,
+        slurm: bool = False,
+        force: bool = False,
+        always_changed: bool = False,
+    ):
         """Call method of the LoadData class
 
         Parameters
@@ -46,7 +52,9 @@ class LoadData(PyTrack):
 
         """
         self.parameters = {"dataset": dataset}
-        self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
+        self.post_call(
+            exec_=exec_, slurm=slurm, force=force, always_changed=always_changed
+        )
 
     def run(self):
         """Run method that loads the data
@@ -57,7 +65,7 @@ class LoadData(PyTrack):
         """
         self.pre_run()
 
-        if self.parameters['dataset'] == "mnist":
+        if self.parameters["dataset"] == "mnist":
             mnist = tf.keras.datasets.mnist
             (x_train, y_train), (x_test, y_test) = mnist.load_data()
             x_train, x_test = x_train / 255.0, x_test / 255.0
@@ -87,14 +95,17 @@ class FitModel(PyTrack):
             This will always return the first instance. If multiple instances are possible use query_obj()!
         """
         super().__init__()
-        self.dvc = DVCParams(
-            outs=['model']
-        )
+        self.dvc = DVCParams(outs=["model"])
         self.json_file = False
         self.post_init(id_, filter_)
 
-    def __call__(self, exec_: bool = False, slurm: bool = False, force: bool = False,
-                 always_changed: bool = False):
+    def __call__(
+        self,
+        exec_: bool = False,
+        slurm: bool = False,
+        force: bool = False,
+        always_changed: bool = False,
+    ):
         """Call method of the LoadData class
 
         Parameters
@@ -113,11 +124,13 @@ class FitModel(PyTrack):
         Returns
         -------
 
-                """
+        """
         self.dvc.deps = LoadData(id_=0).files.outs[:2]
 
         self.parameters = {"layer": 128}
-        self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
+        self.post_call(
+            exec_=exec_, slurm=slurm, force=force, always_changed=always_changed
+        )
 
     def run(self):
         """Fit the model"""
@@ -125,24 +138,24 @@ class FitModel(PyTrack):
 
         load_data = LoadData(id_=0)
 
-        input_shape = load_data.results['shape'][1:]
-        target_size = load_data.results['targets']
+        input_shape = load_data.results["shape"][1:]
+        target_size = load_data.results["targets"]
 
-        model = tf.keras.models.Sequential([
-            tf.keras.layers.Flatten(input_shape=input_shape),
-            tf.keras.layers.Dense(self.parameters['layer'], activation='relu'),
-            tf.keras.layers.Dropout(0.2),
-            tf.keras.layers.Dense(target_size)
-        ])
+        model = tf.keras.models.Sequential(
+            [
+                tf.keras.layers.Flatten(input_shape=input_shape),
+                tf.keras.layers.Dense(self.parameters["layer"], activation="relu"),
+                tf.keras.layers.Dropout(0.2),
+                tf.keras.layers.Dense(target_size),
+            ]
+        )
 
         loss_fn = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
-        model.compile(optimizer='adam',
-                      loss=loss_fn,
-                      metrics=['accuracy'])
+        model.compile(optimizer="adam", loss=loss_fn, metrics=["accuracy"])
 
-        with open(load_data.files.outs[0], 'rb') as f:
+        with open(load_data.files.outs[0], "rb") as f:
             x_train = np.load(f)
-        with open(load_data.files.outs[1], 'rb') as f:
+        with open(load_data.files.outs[1], "rb") as f:
             y_train = np.load(f)
 
         model.fit(x_train, y_train, epochs=5)
@@ -150,7 +163,6 @@ class FitModel(PyTrack):
 
 
 class EvaluateModel(PyTrack):
-
     def __init__(self, id_=None, filter_=None):
         """Constructor oft the EvaluateModel PyTrack Instance
 
@@ -163,14 +175,17 @@ class EvaluateModel(PyTrack):
             This will always return the first instance. If multiple instances are possible use query_obj()!
         """
         super().__init__()
-        self.dvc = DVCParams(
-            metrics_no_cache=['metrics.json']
-        )
+        self.dvc = DVCParams(metrics_no_cache=["metrics.json"])
         self.json_file = False
         self.post_init(id_, filter_)
 
-    def __call__(self, exec_: bool = False, slurm: bool = False, force: bool = False,
-                 always_changed: bool = False):
+    def __call__(
+        self,
+        exec_: bool = False,
+        slurm: bool = False,
+        force: bool = False,
+        always_changed: bool = False,
+    ):
         """Call method of the LoadData class
 
         Parameters
@@ -190,10 +205,12 @@ class EvaluateModel(PyTrack):
         -------
 
         """
-        self.parameters = {'verbose': 2}
+        self.parameters = {"verbose": 2}
         self.dvc.deps = FitModel(id_=0).files.outs
         self.dvc.deps += LoadData(id_=0).files.outs[2:]
-        self.post_call(exec_=exec_, slurm=slurm, force=force, always_changed=always_changed)
+        self.post_call(
+            exec_=exec_, slurm=slurm, force=force, always_changed=always_changed
+        )
 
     def run(self):
         """Evaluate the model"""
@@ -205,12 +222,12 @@ class EvaluateModel(PyTrack):
 
         load_data = LoadData(id_=0)
 
-        with open(load_data.files.outs[2], 'rb') as f:
+        with open(load_data.files.outs[2], "rb") as f:
             x_test = np.load(f)
-        with open(load_data.files.outs[3], 'rb') as f:
+        with open(load_data.files.outs[3], "rb") as f:
             y_test = np.load(f)
 
-        out = model.evaluate(x_test, y_test, verbose=self.parameters['verbose'])
+        out = model.evaluate(x_test, y_test, verbose=self.parameters["verbose"])
 
         with open(self.files.metrics_no_cache[0], "w") as f:
             json.dump(out, f)

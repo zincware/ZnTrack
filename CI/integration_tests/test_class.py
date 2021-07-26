@@ -28,7 +28,7 @@ class BasicTest(PyTrack):
         super().__init__()
         self.dvc = DVCParams(
             params_file="params.json",
-            deps=[Path('deps1', 'input.json'), Path('deps2', 'input.json')]
+            deps=[Path("deps1", "input.json"), Path("deps2", "input.json")],
         )
         self.post_init(id_, filter_)
 
@@ -40,7 +40,7 @@ class BasicTest(PyTrack):
     def run(self):
         """Run method of the PyTrack test instance"""
         self.pre_run()
-        self.results = {'name': self.parameters['name']}
+        self.results = {"name": self.parameters["name"]}
 
 
 class TestBasic(TestCase):
@@ -59,24 +59,24 @@ class TestBasic(TestCase):
         shutil.copy(__file__, temp_dir.name)
         os.chdir(temp_dir.name)
 
-        subprocess.check_call(['git', 'init'])
-        subprocess.check_call(['dvc', 'init'])
+        subprocess.check_call(["git", "init"])
+        subprocess.check_call(["dvc", "init"])
 
         base = BasicTest()
         for idx, dep in enumerate(base.dvc.deps):
             dep.parent.mkdir(exist_ok=True, parents=True)
             with open(dep, "w") as f:
-                json.dump({'id': idx}, f)
+                json.dump({"id": idx}, f)
 
         # Have to run dvc repro here, because otherwise I can not test the values inside it
         base(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
-        subprocess.check_call(['dvc', 'repro'])
+        subprocess.check_call(["dvc", "repro"])
 
     @classmethod
     def tearDownClass(cls) -> None:
         """Remove all test files"""
-        subprocess.check_call(['dvc', 'destroy', "-f"])
-        os.chdir('..')
+        subprocess.check_call(["dvc", "destroy", "-f"])
+        os.chdir("..")
         temp_dir.cleanup()
 
     def test_query_by_id(self):
@@ -86,7 +86,7 @@ class TestBasic(TestCase):
 
     def test_query_by_name(self):
         """Test that query by name works"""
-        base = BasicTest(filter_={'name': 'PyTest'})
+        base = BasicTest(filter_={"name": "PyTest"})
         self.assertTrue(base.id, "0")
 
     def test_query_obj_id(self):
@@ -105,17 +105,21 @@ class TestBasic(TestCase):
     def test_parameters(self):
         """Test that the parameters are read correctly"""
         base = BasicTest(id_=0)
-        self.assertTrue(base.parameters, dict(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256]))
+        self.assertTrue(
+            base.parameters, dict(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
+        )
 
     def test_results(self):
         """Test that the results are read correctly"""
         base = BasicTest(id_=0)
-        self.assertTrue(base.results, {'name': 'PyTest'})
+        self.assertTrue(base.results, {"name": "PyTest"})
 
     def test_deps(self):
         """Test that the dependencies are stored correctly"""
         base = BasicTest(id_=0)
-        self.assertTrue(base.files.deps, [Path('deps1', 'input.json'), Path('deps2', 'input.json')])
+        self.assertTrue(
+            base.files.deps, [Path("deps1", "input.json"), Path("deps2", "input.json")]
+        )
 
     def test_params_file(self):
         """Test that the params file has to correct name"""

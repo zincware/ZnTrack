@@ -24,17 +24,17 @@ class PyTrackProject(DVCInterface):
     def queue(self):
         """Add this project to the DVC queue"""
         log.info("Running git add")
-        subprocess.check_call(['git', 'add', '.'])
+        subprocess.check_call(["git", "add", "."])
         log.info("Queue DVC stage")
-        subprocess.check_call(['dvc', 'exp', 'run', '--name', self.name, '--queue'])
+        subprocess.check_call(["dvc", "exp", "run", "--name", self.name, "--queue"])
 
     @staticmethod
     def run_all():
         """Run all queried experiments"""
         log.info("RUN DVC stage")
-        subprocess.check_call(['dvc', 'exp', 'run', '--run-all'])
+        subprocess.check_call(["dvc", "exp", "run", "--run-all"])
         log.info("Running git add")
-        subprocess.check_call(['git', 'add', '.'])
+        subprocess.check_call(["git", "add", "."])
 
     def run(self):
         """Add this experiment to the queue and run the full queue"""
@@ -43,8 +43,8 @@ class PyTrackProject(DVCInterface):
 
     def load(self):
         """Load this project"""
-        subprocess.check_call(['dvc', 'exp', 'apply', self.name])
+        subprocess.check_call(["dvc", "exp", "apply", self.name])
 
     def save(self):
         """Save this project to a branch"""
-        subprocess.check_call(['dvc', 'exp', 'branch', self.name, self.name])
+        subprocess.check_call(["dvc", "exp", "branch", self.name, self.name])

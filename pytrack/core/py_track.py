@@ -90,7 +90,7 @@ class PyTrack(abc.ABC):
                         break
 
         except KeyError:
-            raise KeyError(f'Could not find a stage with id {id_}!')
+            raise KeyError(f"Could not find a stage with id {id_}!")
 
     @abc.abstractmethod
     def run(self):
@@ -102,7 +102,7 @@ class PyTrack(abc.ABC):
         take place in the config / __init__ or in the call method!
 
         """
-        raise NotImplementedError('Implemented in child class')
+        raise NotImplementedError("Implemented in child class")
 
     def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
         """Method after call
@@ -164,10 +164,14 @@ class PyTrack(abc.ABC):
                 log.debug(f"No Parameters for {self.name} found -> id=0")
                 self._id = 0
             else:
-                id_ = len(self.all_parameters)  # assume that the configuration is new and create a new id_
+                id_ = len(
+                    self.all_parameters
+                )  # assume that the configuration is new and create a new id_
                 for stage_id in self.all_parameters:
                     if self.all_parameters[stage_id] == self.parameters:
-                        log.debug(f"Found stage with the given parameters for id = {stage_id}!")
+                        log.debug(
+                            f"Found stage with the given parameters for id = {stage_id}!"
+                        )
                         id_ = stage_id  # entry already exists, load existing id_
                 self._id = id_
         else:
@@ -186,7 +190,7 @@ class PyTrack(abc.ABC):
 
         """
         if not self._running:
-            raise ValueError('Can only set the value of id during dvc_run!')
+            raise ValueError("Can only set the value of id during dvc_run!")
         self._id = value
 
     @property
@@ -230,7 +234,9 @@ class PyTrack(abc.ABC):
             with open(self.dvc.params_file_path / self.dvc.params_file) as json_file:
                 return json.load(json_file)[self.name]
         except FileNotFoundError:
-            log.debug(f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!")
+            log.debug(
+                f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!"
+            )
         except KeyError:
             log.debug(f"Stage with name {self.name} does not exist")
         return {}
@@ -240,10 +246,14 @@ class PyTrack(abc.ABC):
         """Update parameters in params_file"""
         if isinstance(value, dict):
             try:
-                with open(self.dvc.params_file_path / self.dvc.params_file) as json_file:
+                with open(
+                    self.dvc.params_file_path / self.dvc.params_file
+                ) as json_file:
                     parameters = json.load(json_file)
             except FileNotFoundError:
-                log.debug(f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!")
+                log.debug(
+                    f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!"
+                )
                 parameters = {}
 
             try:
@@ -252,10 +262,14 @@ class PyTrack(abc.ABC):
             except KeyError:
                 log.debug(f"Creating a new stage for {self.name}")
                 parameters.update({self.name: {self.id: value}})
-            with open(self.dvc.params_file_path / self.dvc.params_file, "w") as json_file:
+            with open(
+                self.dvc.params_file_path / self.dvc.params_file, "w"
+            ) as json_file:
                 json.dump(parameters, json_file, indent=4)
         else:
-            raise ValueError(f"Value has to be a dictionary but found {type(value)} instead!")
+            raise ValueError(
+                f"Value has to be a dictionary but found {type(value)} instead!"
+            )
 
     @property
     def _dvc_file(self) -> dict:
@@ -270,7 +284,7 @@ class PyTrack(abc.ABC):
     @property
     def _dvc_stages(self) -> dict:
         """Load all stages from dvc.dvc_file"""
-        return self._dvc_file['stages']
+        return self._dvc_file["stages"]
 
     @property
     def _dvc_stage(self) -> dict:
@@ -285,7 +299,7 @@ class PyTrack(abc.ABC):
         cls.parameters = self.all_parameters[str(id_)]
         log.debug("Updating Parameters!")
         try:
-            cls.dvc.deps = [Path(x) for x in cls._dvc_stage['deps']]
+            cls.dvc.deps = [Path(x) for x in cls._dvc_stage["deps"]]
             log.debug("Updating dependencies!")
         except KeyError:
             # No dependencies available
@@ -345,7 +359,13 @@ class PyTrack(abc.ABC):
 
             return objs
 
-    def _write_dvc(self, force=False, exec_: bool = False, always_changed: bool = False, slurm: bool = False):
+    def _write_dvc(
+        self,
+        force=False,
+        exec_: bool = False,
+        always_changed: bool = False,
+        slurm: bool = False,
+    ):
         """Write the DVC file using run.
 
         If it already exists it'll tell you that the stage is already persistent and has been run before.
@@ -370,11 +390,14 @@ class PyTrack(abc.ABC):
 
         """
 
-        script = ['dvc', 'run', '-n', self.stage_name]
+        script = ["dvc", "run", "-n", self.stage_name]
 
         script += self.files.get_dvc_arguments()
 
-        script += ["--params", f"{self.dvc.params_file_path / self.dvc.params_file}:{self.name}.{self.id}"]
+        script += [
+            "--params",
+            f"{self.dvc.params_file_path / self.dvc.params_file}:{self.name}.{self.id}",
+        ]
 
         if force:
             script.append("--force")
@@ -383,27 +406,35 @@ class PyTrack(abc.ABC):
         if not exec_:
             script.append("--no-exec")
         else:
-            log.warning("You will not be able to see the stdout/stderr of the process in real time!")
+            log.warning(
+                "You will not be able to see the stdout/stderr of the process in real time!"
+            )
         #
         if always_changed:
             script.append("--always-changed")
         #
         if slurm:
             log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            log.warning("Make sure, that every stage uses SLURM! If a stage does not have SLURM enabled, the command "
-                        "will be run on the HEAD NODE! Check the dvc.yaml file before running! There are no checks"
-                        "implemented to test, that only SRUN is in use!")
+            log.warning(
+                "Make sure, that every stage uses SLURM! If a stage does not have SLURM enabled, the command "
+                "will be run on the HEAD NODE! Check the dvc.yaml file before running! There are no checks"
+                "implemented to test, that only SRUN is in use!"
+            )
             log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
-            script.append('srun')
-            script.append('-n')
+            script.append("srun")
+            script.append("-n")
             script.append(f"{self.slurm_config.n}")
         #
-        script.append(f'{self._python_interpreter} -c "from {self.module} import {self.name}; '
-                      f'{self.name}(id_={self.id}).run()"')
+        script.append(
+            f'{self._python_interpreter} -c "from {self.module} import {self.name}; '
+            f'{self.name}(id_={self.id}).run()"'
+        )
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
-        log.debug("If you are using a jupyter notebook, you may not be able to see the output in real time!")
+        log.debug(
+            "If you are using a jupyter notebook, you may not be able to see the output in real time!"
+        )
         process = subprocess.run(script, capture_output=True)
         if len(process.stdout) > 0:
             log.info(process.stdout.decode())
@@ -484,4 +515,6 @@ class PyTrack(abc.ABC):
                 return interpreter
             except subprocess.CalledProcessError:
                 log.debug(f"{interpreter} is not working!")
-        raise subprocess.CalledProcessError("Could not find a working python interpreter to work with subprocesses!")
+        raise subprocess.CalledProcessError(
+            "Could not find a working python interpreter to work with subprocesses!"
+        )
