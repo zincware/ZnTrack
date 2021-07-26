@@ -1,5 +1,5 @@
 from pytrack import PyTrack
-from Example01 import TextToFile
+from .Example01 import TextToFile
 
 
 class ProcessData(PyTrack):
