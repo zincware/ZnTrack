@@ -33,7 +33,7 @@ Or you can install from source with:
 
 .. |docs| image:: https://readthedocs.org/projects/py-track/badge/?version=latest&style=flat
     :alt: Build tests passing
-    :target:https://py-track.readthedocs.io/en/latest/
+    :target: https://py-track.readthedocs.io/en/latest/
 
 .. |license| image:: https://img.shields.io/badge/License-EPL-purple.svg?style=flat
     :alt: Project license
