@@ -24,6 +24,9 @@ Or you can install from source with:
    git clone https://github.com/zincware/py-track.git
    cd py-track
    pip install . --user
+
+Quickstart
+==========
    
 For an introduction on how to use PyTrack follow the documentation. To verify that the installation was successful, you can try:
 
