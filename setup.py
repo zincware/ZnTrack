@@ -4,9 +4,7 @@ from pathlib import Path
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-
-file_path = Path(__file__).absolute().parent / "requirements.txt"
-requirements = file_path.read_text().split("\n")
+requirements = Path("requirements.txt").read_text().split("\n")
 
 setuptools.setup(
     name="py-track",
