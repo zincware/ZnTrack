@@ -19,7 +19,6 @@ Please have a look at the Tutorials and Documentation for detailed information o
 
    installation
    tutorials
-   modules_and_classes
 
 
 
