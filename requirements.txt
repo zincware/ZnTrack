@@ -8,3 +8,4 @@ nbsphinx
 numpydoc
 sphinx-copybutton
 sphinx
+pandoc
