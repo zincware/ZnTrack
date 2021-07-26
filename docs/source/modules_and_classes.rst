@@ -1,8 +1,6 @@
 Modules and Classes
 ===================
 
-<Placeholder>
-
 .. toctree::
    :maxdepth: 1
    :caption: Core:
