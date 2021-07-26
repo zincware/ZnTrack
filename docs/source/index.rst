@@ -6,7 +6,7 @@
 Welcome to PyTrack's documentation!
 ===================================
 PyTrack is build to help you write code that can easily be shared and reproduced.
-It uses `Data Version Control <https://dvc.org/>` to track generated files and parameters.
+It uses `Data Version Control <https://dvc.org/>`_ to track generated files and parameters.
 PyTrack is designed as a developer package aiming to be used in other software packages.
 If you are not planning on writing such packages we highly recommend looking up DVC first.
 
