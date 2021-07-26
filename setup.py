@@ -6,8 +6,8 @@ with open("README.md", "r") as fh:
 setuptools.setup(
     name="pytrack",
     version="0.0.1",
-    author="Fabian Zills",
-    author_email="fabian.zills@web.de",
+    author="Zincware",
+    author_email="zincwarecode@gmail.com",
     description="A python package for parameter and data version control with DVC",
     long_description=long_description,
     long_description_content_type="text/markdown",
