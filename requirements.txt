@@ -7,7 +7,7 @@ sphinxcontrib.bibtex
 nbsphinx
 numpydoc
 sphinx-copybutton
-sphinx
+sphinx==4.1.0
 pandoc
 matplotlib
 pybtex
