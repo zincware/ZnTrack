@@ -25,7 +25,7 @@ Or you can install from source with:
    cd py-track
    pip install . --user
    
-For an introduction on how to use PyTrack follow the documentation. To verfiy that the installation was succesfull, you can try:
+For an introduction on how to use PyTrack follow the documentation. To verfiy that the installation was succesful, you can try:
 
 .. code-block:: python
    
