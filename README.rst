@@ -4,7 +4,7 @@ PyTrack
 -------
 A Python package to use DVC for parameter and data control
 
-For more information on DVC visit their `homepage <https://dvc.org/doc>`
+For more information on DVC visit their `homepage <https://dvc.org/doc>`_
 and especially for staging options on `DVCParams` have a look
 `here <https://dvc.org/doc/command-reference/run#options>`_.
 
