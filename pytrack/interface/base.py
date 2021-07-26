@@ -76,7 +76,9 @@ class DVCInterface:
         self._experiments = None
         self._exp_dict = None
 
-    def load_files_into_directory(self, files: List[str], path: str = "experiments", experiments: List[str] = None):
+    def load_files_into_directory(
+        self, files: List[str], path: str = "experiments", experiments: List[str] = None
+    ):
         """Save files from multiple experiments in a single directory
 
         Create a parent directory "path" that contains subdirectories for each experiment where the requested
@@ -103,12 +105,23 @@ class DVCInterface:
                 try:
                     exp_dict[key] = self.exp_dict[key]
                 except KeyError:
-                    raise KeyError(f" '{key}' could not be found in the list of experiments")
+                    raise KeyError(
+                        f" '{key}' could not be found in the list of experiments"
+                    )
 
         for experiment in exp_dict:
             for file in files:
                 out_path = path / experiment
                 out_path.mkdir(parents=True, exist_ok=True)
-                cmd = ["dvc", "get", ".", file, "--rev", exp_dict[experiment], "--out", out_path]
+                cmd = [
+                    "dvc",
+                    "get",
+                    ".",
+                    file,
+                    "--rev",
+                    exp_dict[experiment],
+                    "--out",
+                    out_path,
+                ]
                 log.warning(f"DVC command: {cmd}")
                 subprocess.run(cmd, cwd=self.dvc_path)

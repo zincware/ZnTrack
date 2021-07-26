@@ -38,9 +38,10 @@ class DVCParams:
     The corresponding *._path specifies the path where the files should be saved.
 
     """
+
     # pytrack Parameter
     multi_use: bool = False
-    params_file: str = 'params.json'
+    params_file: str = "params.json"
     params_file_path: Path = Path("config")
 
     dvc_file: str = "dvc.yaml"
@@ -76,7 +77,7 @@ class DVCParams:
     def make_paths(self):
         """Create all paths that can possibly be used"""
         for key in self.__dict__:
-            if key.endswith('path'):
+            if key.endswith("path"):
                 # self.__dict__[key]: Path
                 if len(self.__dict__[key[:-5]]) > 0:
                     # Check if the corresponding list has an entry - if not, you don't need to create the folder
@@ -100,17 +101,24 @@ class DVCParams:
                 log.debug(f"Update type {field_.name}")
                 if field_.type.startswith("List"):
                     # if there are of type string, we want to append them
-                    setattr(self, field_.name, getattr(self, field_.name) + getattr(other, field_.name))
+                    setattr(
+                        self,
+                        field_.name,
+                        getattr(self, field_.name) + getattr(other, field_.name),
+                    )
                 else:
                     if force:
                         setattr(self, field_.name, getattr(other, field_.name))
                     else:
-                        log.error("Can not overwrite given parameter with new parameter - use force=True for that!")
+                        log.error(
+                            "Can not overwrite given parameter with new parameter - use force=True for that!"
+                        )
 
 
 @dataclass(frozen=False, order=True, init=False)
 class Files:
     """Dataclass to combine the DVCParams with the correct id and path for easy access"""
+
     deps: List[Path]
     outs: List[Path]
     outs_no_cache: List[Path]
@@ -129,14 +137,31 @@ class Files:
 
         self.deps = dvc_params.deps
         self.outs = [dvc_params.outs_path / f"{id_}_{out}" for out in dvc_params.outs]
-        self.outs_no_cache = [dvc_params.outs_no_cache_path / f"{id_}_{out}" for out in dvc_params.outs_no_cache]
-        self.outs_persistent = [dvc_params.outs_persistent_path / f"{id_}_{out}" for out in dvc_params.outs_persistent]
-        self.params = [dvc_params.params_path / f"{id_}_{param}" for param in dvc_params.params]
-        self.metrics = [dvc_params.metrics_path / f"{id_}_{metric}" for metric in dvc_params.metrics]
-        self.metrics_no_cache = [dvc_params.metrics_no_cache_path / f"{id_}_{metric}" for metric in
-                                 dvc_params.metrics_no_cache]
-        self.plots = [dvc_params.plots_path / f"{id_}_{plot}" for plot in dvc_params.plots]
-        self.plots_no_cache = [dvc_params.plots_no_cache_path / f"{id_}_{plot}" for plot in dvc_params.plots_no_cache]
+        self.outs_no_cache = [
+            dvc_params.outs_no_cache_path / f"{id_}_{out}"
+            for out in dvc_params.outs_no_cache
+        ]
+        self.outs_persistent = [
+            dvc_params.outs_persistent_path / f"{id_}_{out}"
+            for out in dvc_params.outs_persistent
+        ]
+        self.params = [
+            dvc_params.params_path / f"{id_}_{param}" for param in dvc_params.params
+        ]
+        self.metrics = [
+            dvc_params.metrics_path / f"{id_}_{metric}" for metric in dvc_params.metrics
+        ]
+        self.metrics_no_cache = [
+            dvc_params.metrics_no_cache_path / f"{id_}_{metric}"
+            for metric in dvc_params.metrics_no_cache
+        ]
+        self.plots = [
+            dvc_params.plots_path / f"{id_}_{plot}" for plot in dvc_params.plots
+        ]
+        self.plots_no_cache = [
+            dvc_params.plots_no_cache_path / f"{id_}_{plot}"
+            for plot in dvc_params.plots_no_cache
+        ]
         self.json_file = json_file
 
     def get_dvc_arguments(self) -> list:
@@ -159,13 +184,18 @@ class Files:
         for option in self.__dict__:
             try:
                 out.append(
-                    flatten([[f"--{option.replace('_', '-')}", x] for x in self.__dict__[option]])
+                    flatten(
+                        [
+                            [f"--{option.replace('_', '-')}", x]
+                            for x in self.__dict__[option]
+                        ]
+                    )
                 )
             except TypeError:
                 # reached json_file which is not iterable!
                 pass
         if self.json_file is not None:
-            out += [['--outs', self.json_file]]
+            out += [["--outs", self.json_file]]
 
         return flatten(out)
 
@@ -173,4 +203,5 @@ class Files:
 @dataclass(frozen=True, order=True)
 class SlurmConfig:
     """Available SLURM Parameters for SRUN"""
+
     n: int = 1
