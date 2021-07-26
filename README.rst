@@ -5,7 +5,7 @@ PyTrack
 A Python package to use DVC for parameter and data control
 
 For more information on DVC visit https://dvc.org/doc and especially for
-staging options on `DVCParams` have a look at See
+staging options on `DVCParams` have a look at
 https://dvc.org/doc/command-reference/run#options
 
 Installation
@@ -13,13 +13,13 @@ Installation
 
 Simply run:
 
-.. code-block::bash
+.. code-block:: bash
 
    pip install py-track
 
 Or you can install from source with:
 
-.. code-block::bash
+.. code-block:: bash
 
    git clone https://github.com/zincware/py-track.git
    cd py-track
