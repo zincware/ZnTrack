@@ -1,13 +1,9 @@
 dvc
-pytest
 PyYAML
 sphinx_rtd_theme
 IPython
-sphinxcontrib.bibtex
 nbsphinx
 numpydoc
 sphinx-copybutton
 sphinx==4.0.2
 pandoc
-matplotlib
-pybtex
