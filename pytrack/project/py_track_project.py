@@ -48,3 +48,14 @@ class PyTrackProject(DVCInterface):
     def save(self):
         """Save this project to a branch"""
         subprocess.check_call(["dvc", "exp", "branch", self.name, self.name])
+
+    def create_dvc_repository(self):
+        """Perform git and dvc init"""
+        try:
+            subprocess.check_call(['dvc', 'status'])
+            log.info("DVC Repository already exists.")
+        except subprocess.CalledProcessError:
+            subprocess.check_call(['git', 'init'])
+            subprocess.check_call(['dvc', 'init'])
+            subprocess.check_call(['git', 'add', "."])
+            subprocess.check_call(['git', 'commit', '-m', f'Initialize {self.name}'])
