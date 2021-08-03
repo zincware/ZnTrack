@@ -20,6 +20,7 @@ from pathlib import Path
 import abc
 
 from .dataclasses import DVCParams, SlurmConfig, Files
+from pytrack.utils import is_jsonable
 
 log = logging.getLogger(__file__)
 
@@ -225,6 +226,11 @@ class PyTrack(abc.ABC):
     @parameters.setter
     def parameters(self, value):
         """Set the parameters"""
+        if not is_jsonable(value):
+            raise TypeError(
+                "The passed dictionary to self.parameters "
+                "contains values that can not be written to a .json file!"
+            )
         self._parameters = value
 
     @property
@@ -510,7 +516,7 @@ class PyTrack(abc.ABC):
 
         for interpreter in ["python3", "python"]:
             try:
-                subprocess.check_call([interpreter, "--version"])
+                subprocess.check_call([interpreter, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
                 log.debug(f"Using command {interpreter} for dvc!")
                 return interpreter
             except subprocess.CalledProcessError:
