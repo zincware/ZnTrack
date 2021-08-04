@@ -14,7 +14,13 @@ class Parameter:
     def __init__(self):
         pass
 
+    def __repr__(self):
+        return "Empty PyTrack Parameter"
+
 
 class Result:
     def __init__(self):
         pass
+
+    def __repr__(self):
+        return "Empty PyTrack Result"

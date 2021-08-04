@@ -17,9 +17,9 @@ log = logging.getLogger(__file__)
 
 
 class PyTrackProject(DVCInterface):
-    def __init__(self):
+    def __init__(self, name: str = None):
         super().__init__()
-        self.name = None
+        self.name = name
 
     def queue(self):
         """Add this project to the DVC queue"""
@@ -40,6 +40,7 @@ class PyTrackProject(DVCInterface):
         """Add this experiment to the queue and run the full queue"""
         self.queue()
         self.run_all()
+        log.info("Finished")
 
     def load(self):
         """Load this project"""
