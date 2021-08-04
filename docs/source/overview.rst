@@ -155,3 +155,75 @@ DVCParams
 Usually one does like to interact with different files and might also generate different outputs.
 PyTrack has a :code:`from pytrack import DVCParams` prepared for this.
 It supports all arguments from https://dvc.org/doc/command-reference/run#options
+
+For a better understanding we will look at a quick example.
+We read the text of a dependency file and write it to another file specified as an output.
+The PyTrack stage could look like the following:
+
+.. code-block:: python
+
+    from pytrack import pytrack, DVCParams
+
+    @pytrack
+    class StageIO:
+        def __init__(self):
+            """Class constructor
+
+            Definition of parameters and results
+            """
+            self.dvc = DVCParams(outs=['calculation.txt'])
+
+        def __call__(self, file):
+            """User input
+
+            Parameters
+            ----------
+            file: str,
+                Path to the file we want to read
+            """
+
+            self.dvc.deps.append(file)
+
+        def run(self):
+            """Actual computation
+            """
+
+            with open(self.dvc.deps[0], "r") as f:
+                file_content = f.readlines()
+
+            self.dvc.outs[0].write_text("".join(file_content))
+
+We define an output in the init with :code:`self.dvc = DVCParams(outs=['calculation.txt'])`.
+In principle we could also do that in the :code:`__call__` but it must be set to :code:`self.dvc`!
+Then we ask the user to add a path to the file we want to read and add that as a dependency :code:`self.dvc.deps.append(file)`.
+Now we are able to access those values in the :code:`run` method to read and write to them.
+We can also access the outs later via
+
+.. code-block:: python
+
+    from dvc_stages import StageIO
+
+    stage_io = StageIO(id_=0)
+    print(stage_io.dvc.outs[0].read_text())
+
+It is worth mentioning that PyTrack associates a folder with the out files and usually stores them in :code:`/outs`
+which is also represented in the :code:`dvc.yaml`
+
+.. code-block:: yaml
+
+    stages:
+      StageIO_0:
+        cmd: python -c "from dvc_stages import StageIO; StageIO(id_=0).run()"
+        deps:
+        - dvc_stages.py
+        params:
+        - config/params.json:
+          - StageIO.0
+        outs:
+        - outs\0_calculation.txt
+
+Building a Pipeline
+-------------------
+
+Now that we know how to define parameters, results, dependencies and outputs we can join them together to build a DAG.
+Therefore we need to use the output of one stage as the dependency of the next stage.
