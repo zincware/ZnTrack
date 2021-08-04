@@ -50,28 +50,28 @@ class DVCParams:
     deps: List[Path] = field(default_factory=list)
     # Has no path, because it always comes as a path object already
 
-    outs: List[str] = field(default_factory=list)
+    outs: Union[List[Path], List[str]] = field(default_factory=list)
     outs_path: Path = Path("outs")
 
-    outs_no_cache: List[str] = field(default_factory=list)
+    outs_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
     outs_no_cache_path: Path = Path("outs")
 
-    outs_persistent: List[str] = field(default_factory=list)
+    outs_persistent: Union[List[Path], List[str]] = field(default_factory=list)
     outs_persistent_path: Path = Path("outs")
 
-    params: List[str] = field(default_factory=list)
+    params: Union[List[Path], List[str]] = field(default_factory=list)
     params_path: Path = Path("params")
 
-    metrics: List[str] = field(default_factory=list)
+    metrics: Union[List[Path], List[str]] = field(default_factory=list)
     metrics_path: Path = Path("metrics")
 
-    metrics_no_cache: List[str] = field(default_factory=list)
+    metrics_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
     metrics_no_cache_path: Path = Path("metrics")
 
-    plots: List[str] = field(default_factory=list)
+    plots: Union[List[Path], List[str]] = field(default_factory=list)
     plots_path: Path = Path("plots")
 
-    plots_no_cache: List[str] = field(default_factory=list)
+    plots_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
     plots_no_cache_path: Path = Path("plots")
 
     def make_paths(self):
@@ -96,19 +96,19 @@ class DVCParams:
                 Overwrite all changed values that aren't lists
         """
         for field_ in fields(other):
-            if getattr(self, field_.name) != getattr(other, field_.name):
+            if getattr(self, field_._pytrack_name) != getattr(other, field_._pytrack_name):
                 # check if the attributes are different
-                log.debug(f"Update type {field_.name}")
+                log.debug(f"Update type {field_._pytrack_name}")
                 if field_.type.startswith("List"):
                     # if there are of type string, we want to append them
                     setattr(
                         self,
-                        field_.name,
-                        getattr(self, field_.name) + getattr(other, field_.name),
+                        field_._pytrack_name,
+                        getattr(self, field_._pytrack_name) + getattr(other, field_._pytrack_name),
                     )
                 else:
                     if force:
-                        setattr(self, field_.name, getattr(other, field_.name))
+                        setattr(self, field_._pytrack_name, getattr(other, field_._pytrack_name))
                     else:
                         log.error(
                             "Can not overwrite given parameter with new parameter - use force=True for that!"
@@ -163,6 +163,58 @@ class Files:
             for plot in dvc_params.plots_no_cache
         ]
         self.json_file = json_file
+
+    def get_dvc_arguments(self) -> list:
+        """Combine the attributes with the corresponding DVC option
+
+        Returns
+        -------
+        str: E.g. for outs it will return a list of ["--outs", "outs_path/{id}_outs[0]", ...]
+
+        """
+
+        def flatten(x):
+            """
+            Convert [[str, Path], [str, Path]] to [str, Path, str, Path]
+            """
+            return sum(x, [])
+
+        out = []
+
+        for option in self.__dict__:
+            try:
+                out.append(
+                    flatten(
+                        [
+                            [f"--{option.replace('_', '-')}", x]
+                            for x in self.__dict__[option]
+                        ]
+                    )
+                )
+            except TypeError:
+                # reached json_file which is not iterable!
+                pass
+        if self.json_file is not None:
+            out += [["--outs", self.json_file]]
+
+        return flatten(out)
+
+
+@dataclass(frozen=True, order=True)
+class FilesLoaded:
+    """Dataclass to combine the DVCParams with the correct id and path for easy access"""
+
+    deps: List[Path] = field(default_factory=list)
+    outs: List[Path] = field(default_factory=list)
+    outs_no_cache: List[Path] = field(default_factory=list)
+    outs_persistent: List[Path] = field(default_factory=list)
+    params: List[Path] = field(default_factory=list)
+    metrics: List[Path] = field(default_factory=list)
+    metrics_no_cache: List[Path] = field(default_factory=list)
+    plots: List[Path] = field(default_factory=list)
+    plots_no_cache: List[Path] = field(default_factory=list)
+
+    json_file: Union[Path, None] = None
 
     def get_dvc_arguments(self) -> list:
         """Combine the attributes with the corresponding DVC option

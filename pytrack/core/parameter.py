@@ -20,6 +20,7 @@ class Parameter:
 
 class Result:
     def __init__(self):
+        # TODO allow the definition of outs that are stored in GIT or DVC as an attribute
         pass
 
     def __repr__(self):

@@ -24,7 +24,7 @@ def init_decorator(func):
 
 def call_decorator(f):
     def wrapper(self: PyTrackParent, *args, force=False, exec_=False, always_changed=False, slurm=False, **kwargs):
-        # self._pytrack_pre_call()
+        self._pytrack_pre_call()
         function = f(self, *args, **kwargs)
         self._pytrack_post_call(force, exec_, always_changed, slurm)
         return function
