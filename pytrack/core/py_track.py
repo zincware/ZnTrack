@@ -67,18 +67,9 @@ class PyTrackParent:
         self._pytrack__parameters = {}
         self._pytrack__results = {}
 
-    def _pytrack_post_init(self, id_=None):
-        # TODO results should also be updated!
-        try:
-            if id_ is not None:
-                self._pytrack__id = id_
-                # TODO setting a hidden variable should be done via the property setter
-                for name, value in self._pytrack_parameters.items():
-                    log.debug(f"Updating {name} with {value}")
-                    self.__dict__.update({name: value})
-        except KeyError:
-            raise KeyError(f"Could not find a stage with id {id_}!")
+        self._pytrack_json_file = None
 
+    def _pytrack_post_init(self, id_=None):
         # Updating internals and checking for parameters and results
         for attr, value in vars(self).items():
             if isinstance(value, Parameter):
@@ -87,6 +78,25 @@ class PyTrackParent:
         for attr, value in vars(self).items():
             if isinstance(value, Result):
                 self._pytrack__results.update({attr: value})
+
+        if len(self._pytrack__results) > 0:
+            self._pytrack_json_file = f"{self._pytrack_name}.json"
+
+        try:
+            if id_ is not None:
+                self._pytrack__id = id_
+                # TODO setting a hidden variable should be done via the property setter
+                for name, value in self._pytrack_parameters.items():
+                    log.debug(f"Updating {name} with {value}")
+                    self.__dict__.update({name: value})
+
+                for name, value in self._pytrack_results.items():
+                    log.debug(f"Updating {name} with {value}")
+                    self.__dict__.update({name: value})
+
+
+        except KeyError:
+            raise KeyError(f"Could not find a stage with id {id_}!")
 
     def _pytrack_post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
         """Method after call
@@ -115,6 +125,9 @@ class PyTrackParent:
         for parameter in self._pytrack__parameters:
             parameters.update({parameter: vars(self)[parameter]})
 
+        if self._pytrack_json_file is not None:
+            self.files.json_file.parent.mkdir(exist_ok=True, parents=True)
+
         self._pytrack_parameters = parameters
         self._write_dvc(force, exec_, always_changed, slurm)
 
@@ -133,11 +146,30 @@ class PyTrackParent:
         self._pytrack__running = True
 
     def _pytrack_post_run(self):
-        results = {}
-        for result in self._pytrack__results:
-            results.update({result: vars(self)[result]})
+        if self._pytrack_json_file:
+            results = {}
+            for result in self._pytrack__results:
+                results.update({result: vars(self)[result]})
 
-        # TODO write them to a file
+            self._pytrack_results = results
+
+    @property
+    def _pytrack_results(self):
+        if self._pytrack_json_file is not None:
+            try:
+                with open(self.files.json_file) as f:
+                    file = json.load(f)
+                return file
+            except FileNotFoundError:
+                log.warning("No results found!")
+                return {}
+        else:
+            return {}
+
+    @_pytrack_results.setter
+    def _pytrack_results(self, value):
+        with open(self.files.json_file, "w") as f:
+            json.dump(value, f, indent=4)
 
     @property
     def _pytrack_parameters(self):
@@ -239,7 +271,7 @@ class PyTrackParent:
         The user never has to handle the internal naming with the id attached. Ideally only the file names and not the
         paths are changed, that is why we provide self.dvc for configuration.
         """
-        return Files(id_=self._pytrack_id, dvc_params=self.dvc, json_file=None)
+        return Files(id_=self._pytrack_id, dvc_params=self.dvc, json_file=self._pytrack_json_file)
 
     # def _update(self, cls: PyTrackParent, id_: Union[int, str]):
     #     """Update all parameters of cls connected to the given id"""
