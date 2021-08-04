@@ -1,8 +1,7 @@
 from unittest import TestCase
-from pytrack import PyTrack, DVCParams
+from pytrack import pytrack, DVCParams, Parameter, Result
 from pathlib import Path
 import json
-from typing import Union
 import subprocess
 import os
 import shutil
@@ -11,35 +10,25 @@ from tempfile import TemporaryDirectory
 temp_dir = TemporaryDirectory()
 
 
-class BasicTest(PyTrack):
+@pytrack
+class BasicTest():
     """BasicTest class"""
 
-    def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
-        """Constructor of the PyTrack test instance
-
-        Parameters
-        ----------
-        id_: int, str, optional
-            Optional primary key to query a previously created stage
-        filter_: dict, optional
-            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
-            This will always return the first instance. If multiple instances are possible use query_obj()!
-        """
-        super().__init__()
+    def __init__(self):
+        """Constructor of the PyTrack test instance"""
         self.dvc = DVCParams(
             params_file="params.json",
             deps=[Path("deps1", "input.json"), Path("deps2", "input.json")],
         )
-        self.post_init(id_, filter_)
+        self.parameters = Parameter()
+        self.results = Result()
 
     def __call__(self, **kwargs):
         """Call Method of the PyTrack test instance"""
         self.parameters = kwargs
-        self.post_call()
 
     def run(self):
         """Run method of the PyTrack test instance"""
-        self.pre_run()
         self.results = {"name": self.parameters["name"]}
 
 
@@ -82,25 +71,7 @@ class TestBasic(TestCase):
     def test_query_by_id(self):
         """Test that the id is set correctly"""
         base = BasicTest(id_=0)
-        self.assertTrue(base.id, "0")
-
-    def test_query_by_name(self):
-        """Test that query by name works"""
-        base = BasicTest(filter_={"name": "PyTest"})
-        self.assertTrue(base.id, "0")
-
-    def test_query_obj_id(self):
-        """Test that query by id works"""
-        base = BasicTest()
-        out = base.query_obj(0)
-        self.assertTrue(out.id, "0")
-
-    def test_query_obj_name(self):
-        """Test that query_obj works and returns te correct new instance"""
-        base = BasicTest()
-        out = base.query_obj(dict(name="PyTest"))
-        self.assertTrue(len(out), 1)
-        self.assertTrue(out[0].id, "0")
+        self.assertTrue(base._pytrack_id, "0")
 
     def test_parameters(self):
         """Test that the parameters are read correctly"""
@@ -118,10 +89,5 @@ class TestBasic(TestCase):
         """Test that the dependencies are stored correctly"""
         base = BasicTest(id_=0)
         self.assertTrue(
-            base.files.deps, [Path("deps1", "input.json"), Path("deps2", "input.json")]
+            base.dvc.deps, [Path("deps1", "input.json"), Path("deps2", "input.json")]
         )
-
-    def test_params_file(self):
-        """Test that the params file has to correct name"""
-        base = BasicTest(id_=0)
-        self.assertTrue(base.dvc.params_file, "params.json")
