@@ -13,28 +13,45 @@ Whilst DVC provides all this functionality it is designed to be programming lang
 Stages
 ------
 DVC organizes its pipeline in multiple stages (see https://dvc.org/doc/start for more information).
-In the case of PyTrack every stage inherits from :code:`pytrack.PyTrack` as follows
+In the case of PyTrack every stage is decorated with :code:`pytrack.pytrack` as follows
 
 .. code-block:: python
 
-    from pytrack import PyTrack
+    from pytrack import pytrack, Parameter, Result
 
-    class Stage(PyTrack):
 
-        def __init__(self, id_=None, filter_=None):
-            super().__init__(id_, filter_)
-            self.post_init(id_, filter_)
+    @pytrack
+    class Stage:
+        def __init__(self):
+            """Class constructor
 
-        def __call__(self):
-            self.parameters = {}
-            self.post_call()
+            Definition of parameters and results
+            """
+            self.n_1 = Parameter()
+            self.n_2 = Parameter()
+            self.sum = Result()
+            self.dif = Result()
+
+        def __call__(self, n_1, n_2):
+            """User input
+
+            Parameters
+            ----------
+            n_1: First number
+            n_2: Second number
+            """
+            self.n_1 = n_1
+            self.n_2 = n_2
 
         def run(self):
-            self.results = self.parameters
+            """Actual computation
+            """
+            self.sum = self.n_1 + self.n_2
+            self.dif = self.n_1 - self.n_2
 
-This example defines a DVC stage that has no dependencies and no parameters.
+This example defines a DVC stage that performs an addition and subtraction on two numbers :code:`n_1, n_2`.
 To use the stage we have to move it inside a directory and initialize :code:`git init` and :code:`dvc init`
-If we now instantiate a stage and call it :code:`Stage()()` three important files will be generated for us:
+If we now instantiate a stage and call it :code:`Stage()(5, 10)` three important files will be generated for us:
 
 dvc.yaml
 ^^^^^^^^
@@ -45,43 +62,91 @@ The first file we are interested in defines all DVC stage :code:`dvc.yaml`
 
     stages:
       Stage_0:
-        cmd: python3 -c "from dvc_stages import Stage; Stage(id_=0).run()"
+        cmd: python -c "from dvc_stages import Stage; Stage(id_=0).run()"
         params:
         - config/params.json:
           - Stage.0
         outs:
-        - outs/0_Stage.json
+        - outs\0_Stage.json
 
+In this scenario we put the definition in a file :code:`dvc_stages.py`.
 We can see here that DVC will run :code:`python3 -c "from dvc_stages import Stage; Stage(id_=0).run()"`.
 This requires that all information for running this command must be given through files.
 It is crucial that this command can run without requiring anything being passed to the :code:`__init__` of the class!
+Furthermore, we see here that we pass the argument :code:`id_=0` which is not defined in our :code:`__init__` because PyTrack handles this for us automatically.
 This file also specifies the dependencies and outputs from our stage. This information can then be used to generate e.g., the DAG.
 
 params.json
 ^^^^^^^^^^^
 
-Most of the configurations (everything passed to :code:`self.parameters`) is stored in `params.json`.
-Because no parameters are passed this file currently looks like
+All :code:`Parameter()` are stored in `params.json`.
+Our file contains two numbers an looks as follows
 
 .. code-block:: json
 
     {
         "Stage": {
-            "0": {}
+            "0": {
+                "n_1": 50,
+                "n_2": 100
+            }
         }
     }
 
 Here :code:`Stage` gives the name of Stage, which is usually the name of the class.
 Therefore it is important that :code:`PyTrack` stages don't share a name within one pipeline.
-The :code:`id = 0` allows for having multiple parameters to a single stage. This is usually not a good idea and therefore 0 is handled as the default.
+The :code:`id = 0` allows for having multiple parameters to a single stage.
+This is usually not a good idea and therefore 0 is handled as the default.
 
 0_Stages.json
 ^^^^^^^^^^^^^
 
 The file :code:`outs/0_Stage.json` is the output from the stage.
-Its content is equivalent to :code:`Stage(id_=0).results` after running the stage.
+It contains the values for :code:`Stage(id_=0).sum` and :code:`Stage(id_=0).dif` after running the stage.
+PyTrack needs to know which attributes are considered results and therefore has the definition of :code:`Result()` in the init.
 This allows accessing and sharing the result of a stage without manually opening the generated files.
 In general all paths should be handled through PyTrack in a way described later.
+
+We can use :code:`dvc repro` or the following code snippet to run our stage
+
+.. code-block:: python
+
+    from dvc_stages import Stage
+    from pytrack import PyTrackProject
+
+    project = PyTrackProject()
+    project.create_dvc_repository()
+
+    stage = Stage()
+    stage(5, 10)
+    project.name = "Test1"
+    project.run()
+
+This will create the :code:`outs/0_Stage.json` as
+
+.. code-block:: json
+
+    {
+        "sum": 150,
+        "dif": -50
+    }
+
+which we can also access now via
+
+.. code-block:: python
+
+    from dvc_stages import Stage
+    from pytrack import PyTrackProject
+
+    project = PyTrackProject()
+    project.name = "Test1"
+    project.load()
+
+    stage = Stage(id_=0)
+    print(stage.sum)
+    print(stage.dif)
+
+Storing and managing the data is handled by PyTrack allowing the usage as an almost normal python class.
 
 
 DVCParams
