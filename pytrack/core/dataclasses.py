@@ -19,32 +19,14 @@ from typing import Union, List
 log = logging.getLogger(__file__)
 
 
-@dataclass(frozen=False, order=True)
+@dataclass(frozen=False, order=True, init=True)
 class DVCParams:
-    """All available DVC outputs should be specified in this dataclass.
-
-    Attributes
-    ----------
-    multi_use: bool
-        Set to to true, if the function can appear multiple times in the same data pipeline
-    params_file: str
-        Name of the parameter file to store DVC tracked parameters in
-    params_file_path: Path
-        Path to the params_file
-
-    Notes
-    -----
-    For help on the other parameters see https://dvc.org/doc/command-reference/run#options .
-    The corresponding *._path specifies the path where the files should be saved.
-
-    """
-
     # pytrack Parameter
     multi_use: bool = False
     params_file: str = "params.json"
     params_file_path: Path = Path("config")
 
-    dvc_file: str = "dvc.yaml"
+    json_file: Union[Path, str, None] = None
 
     # DVC Parameter
     deps: List[Path] = field(default_factory=list)
@@ -59,9 +41,6 @@ class DVCParams:
     outs_persistent: Union[List[Path], List[str]] = field(default_factory=list)
     outs_persistent_path: Path = Path("outs")
 
-    params: Union[List[Path], List[str]] = field(default_factory=list)
-    params_path: Path = Path("params")
-
     metrics: Union[List[Path], List[str]] = field(default_factory=list)
     metrics_path: Path = Path("metrics")
 
@@ -74,6 +53,44 @@ class DVCParams:
     plots_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
     plots_no_cache_path: Path = Path("plots")
 
+    _dvc_params: List[str] = field(
+        default_factory=lambda: [
+            'deps', 'outs', 'outs_no_cache', 'outs_persistent', 'metrics', 'metrics_no_cache', 'plots',
+            'plots_no_cache'
+        ],
+        init=False,
+        repr=False)
+
+    def __post_init__(self):
+        self.outs = [self.outs_path / out for out in self.outs]
+        if self.json_file is not None:
+            self.json_file = self.outs_path / self.json_file
+
+    def get_dvc_arguments(self) -> list:
+        """Combine the attributes with the corresponding DVC option
+
+        Returns
+        -------
+        str: E.g. for outs it will return a list of ["--outs", "outs_path/{id}_outs[0]", ...]
+
+        """
+
+        def flatten(x):
+            """
+            Convert [[str, Path], [str, Path]] to [str, Path, str, Path]
+            """
+            return sum(x, [])
+
+        out = []
+
+        for dvc_param in self._dvc_params:
+            out.append(flatten([[f"--{dvc_param.replace('_', '-')}", x] for x in self.__dict__[dvc_param]]))
+
+        if self.json_file is not None:
+            out += [["--outs", self.json_file]]
+
+        return flatten(out)
+
     def make_paths(self):
         """Create all paths that can possibly be used"""
         for key in self.__dict__:
@@ -83,173 +100,24 @@ class DVCParams:
                     # Check if the corresponding list has an entry - if not, you don't need to create the folder
                     self.__dict__[key].mkdir(exist_ok=True, parents=True)
 
-    def merge(self, other: DVCParams, force: bool = False):
-        """Merge two dataclasses
+        if self.json_file is not None:
+            self.outs_path.mkdir(exist_ok=True, parents=True)
 
-        In case of lists other will be appended to the current dataclass, thus shifting the indices!
-
-        Parameters
-        -----------
-        other: DVCParams
-                second instance of DVCParams to merge with this one
-        force: bool, default = False
-                Overwrite all changed values that aren't lists
-        """
-        for field_ in fields(other):
-            if getattr(self, field_._pytrack_name) != getattr(other, field_._pytrack_name):
-                # check if the attributes are different
-                log.debug(f"Update type {field_._pytrack_name}")
-                if field_.type.startswith("List"):
-                    # if there are of type string, we want to append them
-                    setattr(
-                        self,
-                        field_._pytrack_name,
-                        getattr(self, field_._pytrack_name) + getattr(other, field_._pytrack_name),
-                    )
+    def load_from_file(self, json_file, dvc_stage: dict):
+        for dvc_param in self._dvc_params:
+            try:
+                if json_file is not None and dvc_param == "outs":
+                    outs = []
+                    for stage_param in dvc_stage[dvc_param]:
+                        if stage_param.endswith(json_file):
+                            self.json_file = Path(stage_param)
+                        else:
+                            outs.append(Path(stage_param))
+                    self.outs = outs
                 else:
-                    if force:
-                        setattr(self, field_._pytrack_name, getattr(other, field_._pytrack_name))
-                    else:
-                        log.error(
-                            "Can not overwrite given parameter with new parameter - use force=True for that!"
-                        )
-
-
-@dataclass(frozen=False, order=True, init=False)
-class Files:
-    """Dataclass to combine the DVCParams with the correct id and path for easy access"""
-
-    deps: List[Path]
-    outs: List[Path]
-    outs_no_cache: List[Path]
-    outs_persistent: List[Path]
-    params: List[Path]
-    metrics: List[Path]
-    metrics_no_cache: List[Path]
-    plots: List[Path]
-    plots_no_cache: List[Path]
-
-    json_file: Union[Path, None] = None
-
-    def __init__(self, id_: str, dvc_params: DVCParams, json_file):
-        if json_file is not None:
-            json_file = dvc_params.outs_path / f"{id_}_{json_file}"
-
-        self.deps = dvc_params.deps
-        self.outs = [dvc_params.outs_path / f"{id_}_{out}" for out in dvc_params.outs]
-        self.outs_no_cache = [
-            dvc_params.outs_no_cache_path / f"{id_}_{out}"
-            for out in dvc_params.outs_no_cache
-        ]
-        self.outs_persistent = [
-            dvc_params.outs_persistent_path / f"{id_}_{out}"
-            for out in dvc_params.outs_persistent
-        ]
-        self.params = [
-            dvc_params.params_path / f"{id_}_{param}" for param in dvc_params.params
-        ]
-        self.metrics = [
-            dvc_params.metrics_path / f"{id_}_{metric}" for metric in dvc_params.metrics
-        ]
-        self.metrics_no_cache = [
-            dvc_params.metrics_no_cache_path / f"{id_}_{metric}"
-            for metric in dvc_params.metrics_no_cache
-        ]
-        self.plots = [
-            dvc_params.plots_path / f"{id_}_{plot}" for plot in dvc_params.plots
-        ]
-        self.plots_no_cache = [
-            dvc_params.plots_no_cache_path / f"{id_}_{plot}"
-            for plot in dvc_params.plots_no_cache
-        ]
-        self.json_file = json_file
-
-    def get_dvc_arguments(self) -> list:
-        """Combine the attributes with the corresponding DVC option
-
-        Returns
-        -------
-        str: E.g. for outs it will return a list of ["--outs", "outs_path/{id}_outs[0]", ...]
-
-        """
-
-        def flatten(x):
-            """
-            Convert [[str, Path], [str, Path]] to [str, Path, str, Path]
-            """
-            return sum(x, [])
-
-        out = []
-
-        for option in self.__dict__:
-            try:
-                out.append(
-                    flatten(
-                        [
-                            [f"--{option.replace('_', '-')}", x]
-                            for x in self.__dict__[option]
-                        ]
-                    )
-                )
-            except TypeError:
-                # reached json_file which is not iterable!
+                    self.__dict__[dvc_param] = [Path(x) for x in dvc_stage[dvc_param]]
+            except KeyError:
                 pass
-        if self.json_file is not None:
-            out += [["--outs", self.json_file]]
-
-        return flatten(out)
-
-
-@dataclass(frozen=True, order=True)
-class FilesLoaded:
-    """Dataclass to combine the DVCParams with the correct id and path for easy access"""
-
-    deps: List[Path] = field(default_factory=list)
-    outs: List[Path] = field(default_factory=list)
-    outs_no_cache: List[Path] = field(default_factory=list)
-    outs_persistent: List[Path] = field(default_factory=list)
-    params: List[Path] = field(default_factory=list)
-    metrics: List[Path] = field(default_factory=list)
-    metrics_no_cache: List[Path] = field(default_factory=list)
-    plots: List[Path] = field(default_factory=list)
-    plots_no_cache: List[Path] = field(default_factory=list)
-
-    json_file: Union[Path, None] = None
-
-    def get_dvc_arguments(self) -> list:
-        """Combine the attributes with the corresponding DVC option
-
-        Returns
-        -------
-        str: E.g. for outs it will return a list of ["--outs", "outs_path/{id}_outs[0]", ...]
-
-        """
-
-        def flatten(x):
-            """
-            Convert [[str, Path], [str, Path]] to [str, Path, str, Path]
-            """
-            return sum(x, [])
-
-        out = []
-
-        for option in self.__dict__:
-            try:
-                out.append(
-                    flatten(
-                        [
-                            [f"--{option.replace('_', '-')}", x]
-                            for x in self.__dict__[option]
-                        ]
-                    )
-                )
-            except TypeError:
-                # reached json_file which is not iterable!
-                pass
-        if self.json_file is not None:
-            out += [["--outs", self.json_file]]
-
-        return flatten(out)
 
 
 @dataclass(frozen=True, order=True)
