@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pytrack import pytrack, DVCParams, parameter, result
+from pytrack import PyTrack, DVCParams, parameter, result
 from pathlib import Path
 import json
 import subprocess
@@ -10,8 +10,8 @@ from tempfile import TemporaryDirectory
 temp_dir = TemporaryDirectory()
 
 
-@pytrack
-class BasicTest():
+@PyTrack
+class BasicTest:
     """BasicTest class"""
 
     def __init__(self):

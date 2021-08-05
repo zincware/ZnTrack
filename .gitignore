@@ -3,3 +3,5 @@
 /docs/build
 .idea
 PyTrack.egg-info
+htmlcov
+.coverage

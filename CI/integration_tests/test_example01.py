@@ -14,15 +14,14 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import pytrack, parameter, result, DVCParams, PyTrackProject
+from pytrack import PyTrack, parameter, result, DVCParams, PyTrackProject
 
 temp_dir = TemporaryDirectory()
 
 cwd = os.getcwd()
 
 
-
-@pytrack
+@PyTrack()
 class StageIO:
     def __init__(self):
         """Class constructor
@@ -47,8 +46,42 @@ class StageIO:
         self.dvc.outs[0].write_text("".join(file_content))
 
 
-@pytrack
+@PyTrack
 class StageAddition:
+    def __init__(self):
+        """Class constructor
+
+        Definition of parameters and results
+        """
+        self.dvc = DVCParams(outs=['calculation.txt'])
+
+        self.n_1 = parameter(int)  # seems optional now
+        self.n_2 = parameter()
+
+        self.sum = result()
+        self.dif = result()
+
+    def __call__(self, n_1, n_2):
+        """User input
+
+        Parameters
+        ----------
+        n_1: First number
+        n_2: Second number
+        """
+        self.n_1 = n_1
+        self.n_2 = n_2
+
+    def run(self):
+        """Actual computation"""
+        self.sum = self.n_1 + self.n_2
+        self.dif = self.n_1 - self.n_2
+
+        self.dvc.outs[0].write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
+
+
+@PyTrack()
+class StageAddition2:
     def __init__(self):
         """Class constructor
 
@@ -117,6 +150,30 @@ def test_stage_addition():
     assert finished_stage.sum == 150
 
 
+def test_stage_addition2():
+    """Check that the dvc repro works"""
+    project = PyTrackProject()
+    project.create_dvc_repository()
+
+    stage = StageAddition2()
+    stage(5, 10)
+    project.name = "Test1"
+    project.queue()
+
+    stage = StageAddition2()
+    stage(50, 100)
+    project.name = "Test2"
+    project.run()
+
+    project.load("Test1")
+    finished_stage = StageAddition2(id_=0)
+    assert finished_stage.sum == 15
+
+    project.load("Test2")
+    finished_stage = StageAddition2(id_=0)
+    assert finished_stage.sum == 150
+
+
 def test_stage_io():
     project = PyTrackProject()
     project.create_dvc_repository()
@@ -128,4 +185,3 @@ def test_stage_io():
     project.load()
 
     assert stage.dvc.outs[0].read_text().startswith('\"\"\"')
-

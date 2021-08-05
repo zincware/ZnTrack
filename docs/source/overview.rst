@@ -13,14 +13,14 @@ Whilst DVC provides all this functionality it is designed to be programming lang
 Stages
 ------
 DVC organizes its pipeline in multiple stages (see https://dvc.org/doc/start for more information).
-In the case of PyTrack every stage is decorated with :code:`pytrack.pytrack` as follows
+In the case of PyTrack every stage is decorated with :code:`pytrack.PyTrack` as follows
 
 .. code-block:: python
 
-    from pytrack import pytrack, parameter, result
+    from pytrack import PyTrack, parameter, result
 
 
-    @pytrack
+    @PyTrack
     class Stage:
         def __init__(self):
             """Class constructor
@@ -87,8 +87,8 @@ Our file contains two numbers an looks as follows
     {
         "Stage": {
             "0": {
-                "n_1": 50,
-                "n_2": 100
+                "n_1": 5,
+                "n_2": 10
             }
         }
     }
@@ -127,8 +127,8 @@ This will create the :code:`outs/0_Stage.json` as
 .. code-block:: json
 
     {
-        "sum": 150,
-        "dif": -50
+        "sum": 15,
+        "dif": -5
     }
 
 which we can also access now via
@@ -152,7 +152,7 @@ Storing and managing the data is handled by PyTrack allowing the usage as an alm
 DVCParams
 ---------
 
-Usually one does like to interact with different files and might also generate different outputs.
+Usually one would like to interact with different files and might also generate different outputs.
 PyTrack has a :code:`from pytrack import DVCParams` prepared for this.
 It supports all arguments from https://dvc.org/doc/command-reference/run#options
 
@@ -162,9 +162,9 @@ The PyTrack stage could look like the following:
 
 .. code-block:: python
 
-    from pytrack import pytrack, DVCParams
+    from pytrack import PyTrack, DVCParams
 
-    @pytrack
+    @PyTrack
     class StageIO:
         def __init__(self):
             """Class constructor

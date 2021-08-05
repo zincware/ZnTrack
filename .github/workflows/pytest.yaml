@@ -37,6 +37,10 @@ jobs:
       - name: Install package
         run: |
           pip3 install .
+      - name: Setup git user
+        run: |
+          git config --global user.name "John Doe"
+          git config --global user.email johndoe@example.com
       - name: Pytest
         run: |
           pytest
