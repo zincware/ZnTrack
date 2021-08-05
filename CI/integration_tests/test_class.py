@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pytrack import pytrack, DVCParams, Parameter, Result
+from pytrack import pytrack, DVCParams, parameter, result
 from pathlib import Path
 import json
 import subprocess
@@ -20,8 +20,8 @@ class BasicTest():
             params_file="params.json",
             deps=[Path("deps1", "input.json"), Path("deps2", "input.json")],
         )
-        self.parameters = Parameter()
-        self.results = Result()
+        self.parameters = parameter()
+        self.results = result()
 
     def __call__(self, **kwargs):
         """Call Method of the PyTrack test instance"""
