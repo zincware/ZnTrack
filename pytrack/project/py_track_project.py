@@ -42,8 +42,10 @@ class PyTrackProject(DVCInterface):
         self.run_all()
         log.info("Finished")
 
-    def load(self):
+    def load(self, name=None):
         """Load this project"""
+        if name is not None:
+            self.name = name
         subprocess.check_call(["dvc", "exp", "apply", self.name])
 
     def save(self):
@@ -60,3 +62,8 @@ class PyTrackProject(DVCInterface):
             subprocess.check_call(['dvc', 'init'])
             subprocess.check_call(['git', 'add', "."])
             subprocess.check_call(['git', 'commit', '-m', f'Initialize {self.name}'])
+
+    @staticmethod
+    def _destroy():
+        subprocess.check_call(['dvc', 'destroy', '-f'])
+
