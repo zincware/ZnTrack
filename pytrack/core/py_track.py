@@ -61,6 +61,22 @@ class PyTrackParent:
         self._pytrack_dvc_file = 'dvc.yaml'
 
     def _pytrack_post_init(self, id_=None):
+        """Post init command
+
+        This command is executed after the init of the "child" class.
+        It handles:
+        - updating which attributes are parameters and results
+        - loads values if id_!=None
+
+        Parameters
+        ----------
+        id_:int
+            Either None if new stage or usually 0 if a stage should be loaded
+
+        Returns
+        -------
+
+        """
         # Updating internals and checking for parameters and results
 
         for attr, value in vars(self).items():
@@ -104,6 +120,7 @@ class PyTrackParent:
             raise KeyError(f"Could not find a stage with id {id_}!")
 
     def _pytrack_pre_call(self):
+        """Method to be run before the call"""
         # set user dvc to internal dvc (at this point internal is equivalent to the one defined in the __init__)
         self.dvc = self._pytrack_dvc
 
@@ -162,6 +179,10 @@ class PyTrackParent:
         self._pytrack__running = True
 
     def _pytrack_post_run(self):
+        """Method to be executed after run
+
+        This method saves the results
+        """
         if self._pytrack_json_file:
             results = {}
             for result in self._pytrack__results:
@@ -174,6 +195,8 @@ class PyTrackParent:
 
     @property
     def _pytrack_results(self):
+        """Result property to load the results as a dictionary
+        """
         if self._pytrack_json_file is not None:
             try:
                 with open(self._pytrack_dvc.json_file) as f:
@@ -187,6 +210,17 @@ class PyTrackParent:
 
     @_pytrack_results.setter
     def _pytrack_results(self, value):
+        """Write the results to a file
+
+        Parameters
+        ----------
+        value: json
+            values to be written to the json file
+
+        Returns
+        -------
+
+        """
         with open(self._pytrack_dvc.json_file, "w") as f:
             json.dump(value, f, indent=4)
 
@@ -290,6 +324,7 @@ class PyTrackParent:
 
     @_pytrack_dvc.setter
     def _pytrack_dvc(self, value: DVCParams):
+        """Update the internal pytrack_dvc property"""
         self._pytrack__dvc = value
 
     def _write_dvc(

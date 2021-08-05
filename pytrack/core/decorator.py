@@ -20,6 +20,16 @@ log = logging.getLogger(__file__)
 
 class PyTrack:
     def __init__(self, cls=None, nb_name: str = None, **kwargs):
+        """
+
+        Parameters
+        ----------
+        cls: object
+            Required for use as decorator with @PyTrack
+        nb_name: str
+            Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables juypter support
+        kwargs: No kwars are implemented
+        """
         self.cls = cls
         self.kwargs = kwargs
         self.return_with_args = True
@@ -35,6 +45,21 @@ class PyTrack:
         self.nb_class_path = Path('src')
 
     def __call__(self, *args, **kwargs):
+        """
+
+        Parameters
+        ----------
+        args: tuple
+            The first arg might be the class, if @PyTrack() is used, otherwise args that are passed to the cls
+        kwargs: dict
+            kwargs that are passed to the cls
+
+        Returns
+        -------
+
+        decorated cls
+
+        """
         log.debug(f"call_args: {args}")
         log.debug(f"call kwargs: {kwargs}")
 
@@ -42,7 +67,7 @@ class PyTrack:
             self.cls = args[0]
             self.return_with_args = False
 
-        self.cls = self.apply_decorator(self.cls)
+        self.apply_decorator()
 
         if self.nb_name is not None:
             self.jupyter_class_to_file()
@@ -81,22 +106,25 @@ class PyTrack:
         self.nb_class_path.mkdir(exist_ok=True, parents=True)
         src_file.write_text(src)
 
-    def apply_decorator(self, cls):
-        if "run" not in vars(cls):
+    def apply_decorator(self):
+        """Apply the decorators to the class methods
+        """
+        if "run" not in vars(self.cls):
             raise NotImplementedError("PyTrack class must implement a run method!")
-        for name, obj in vars(cls).items():
+        for name, obj in vars(self.cls).items():
             if name == "__init__":
-                setattr(cls, name, self.init_decorator(obj))
+                setattr(self.cls, name, self.init_decorator(obj))
             if name == "__call__":
-                setattr(cls, name, self.call_decorator(obj))
+                setattr(self.cls, name, self.call_decorator(obj))
             if name == "run":
-                setattr(cls, name, self.run_decorator(obj))
+                setattr(self.cls, name, self.run_decorator(obj))
         for name, obj in vars(PyTrackParent).items():
             if not name.endswith("__") and name != "run":
-                setattr(cls, name, obj)
-        return cls
+                setattr(self.cls, name, obj)
 
     def init_decorator(self, func):
+        """Decorator to handle the init of the decorated class"""
+
         def wrapper(cls: PyTrackParent, *args, id_=None, **kwargs):
             PyTrackParent.__init__(cls)
             result = func(cls, *args, **kwargs)
@@ -111,6 +139,8 @@ class PyTrack:
 
     @staticmethod
     def call_decorator(f):
+        """Decorator to handle the call of the decorated class"""
+
         def wrapper(cls: PyTrackParent, *args, force=False, exec_=False, always_changed=False, slurm=False, **kwargs):
             cls._pytrack_pre_call()
             function = f(cls, *args, **kwargs)
@@ -121,6 +151,8 @@ class PyTrack:
 
     @staticmethod
     def run_decorator(f):
+        """Decorator to handle the run of the decorated class"""
+
         def wrapper(cls: PyTrackParent):
             cls._pytrack_pre_run()
             function = f(cls)
@@ -128,6 +160,3 @@ class PyTrack:
             return function
 
         return wrapper
-
-    def _pytrack_module_decorator(self, f):
-        return self.cls.__name__

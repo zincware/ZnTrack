@@ -62,7 +62,12 @@ class DVCParams:
         repr=False)
 
     def __post_init__(self):
-        self.outs = [self.outs_path / out for out in self.outs]
+        """Combine the DVC Parameter with their associated path.
+        """
+        for dvc_param in self._dvc_params:
+            if dvc_param == "deps":  # deps have no associated path but can be anywhere
+                continue
+            self.__dict__[dvc_param] = [self.__dict__[f"{dvc_param}_path"] / x for x in self.__dict__[dvc_param]]
         if self.json_file is not None:
             self.json_file = self.outs_path / self.json_file
 
@@ -95,7 +100,6 @@ class DVCParams:
         """Create all paths that can possibly be used"""
         for key in self.__dict__:
             if key.endswith("path"):
-                # self.__dict__[key]: Path
                 if len(self.__dict__[key[:-5]]) > 0:
                     # Check if the corresponding list has an entry - if not, you don't need to create the folder
                     self.__dict__[key].mkdir(exist_ok=True, parents=True)
@@ -104,6 +108,16 @@ class DVCParams:
             self.outs_path.mkdir(exist_ok=True, parents=True)
 
     def load_from_file(self, json_file, dvc_stage: dict):
+        """Create a DVCParams fromm reading dvc.yaml
+
+        Parameters
+        ----------
+        json_file: str
+            Name of the json file e.g. O_Stage.json
+        dvc_stage: dict
+            A dictionary containing the content from dvc.yaml for this stage
+
+        """
         for dvc_param in self._dvc_params:
             try:
                 if json_file is not None and dvc_param == "outs":
