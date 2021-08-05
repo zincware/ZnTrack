@@ -9,3 +9,4 @@ Tutorials
    _tutorials/Example02.ipynb
    _tutorials/ExampleTensorflow01.ipynb
    _tutorials/ExampleInterface_FilesFromMultipleRev.ipynb
+   _tutorials/JupyterPyTrack.ipynb

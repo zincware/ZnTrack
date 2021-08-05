@@ -19,6 +19,7 @@ Please have a look at the Tutorials and Documentation for detailed information o
 
    installation
    overview
+   jupyter
    tutorials
    modules_and_classes
 

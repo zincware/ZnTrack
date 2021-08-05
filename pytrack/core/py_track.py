@@ -52,6 +52,7 @@ class PyTrackParent:
         self._pytrack__id: int = 0
         self._pytrack__running = False  # is set to true, when run_dvc
         self._pytrack__dvc = None
+        self._pytrack__module = None
 
         self._pytrack__parameters = {}
         self._pytrack__results = {}
@@ -429,7 +430,9 @@ class PyTrackParent:
 
         Used for from <module> import <name>
         """
-        return self.__class__.__module__
+        if self._pytrack__module is None:
+            self._pytrack__module = self.__class__.__module__
+        return self._pytrack__module
 
     @property
     def _pytrack_stage_name(self) -> str:
