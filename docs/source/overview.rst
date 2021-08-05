@@ -17,7 +17,7 @@ In the case of PyTrack every stage is decorated with :code:`pytrack.pytrack` as 
 
 .. code-block:: python
 
-    from pytrack import pytrack, Parameter, Result
+    from pytrack import pytrack, parameter, result
 
 
     @pytrack
@@ -27,10 +27,10 @@ In the case of PyTrack every stage is decorated with :code:`pytrack.pytrack` as 
 
             Definition of parameters and results
             """
-            self.n_1 = Parameter()
-            self.n_2 = Parameter()
-            self.sum = Result()
-            self.dif = Result()
+            self.n_1 = parameter()
+            self.n_2 = parameter()
+            self.sum = result()
+            self.dif = result()
 
         def __call__(self, n_1, n_2):
             """User input
@@ -79,7 +79,7 @@ This file also specifies the dependencies and outputs from our stage. This infor
 params.json
 ^^^^^^^^^^^
 
-All :code:`Parameter()` are stored in `params.json`.
+All :code:`parameter()` are stored in `params.json`.
 Our file contains two numbers an looks as follows
 
 .. code-block:: json
@@ -103,7 +103,7 @@ This is usually not a good idea and therefore 0 is handled as the default.
 
 The file :code:`outs/0_Stage.json` is the output from the stage.
 It contains the values for :code:`Stage(id_=0).sum` and :code:`Stage(id_=0).dif` after running the stage.
-PyTrack needs to know which attributes are considered results and therefore has the definition of :code:`Result()` in the init.
+PyTrack needs to know which attributes are considered results and therefore has the definition of :code:`result()` in the init.
 This allows accessing and sharing the result of a stage without manually opening the generated files.
 In general all paths should be handled through PyTrack in a way described later.
 

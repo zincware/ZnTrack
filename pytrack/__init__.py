@@ -10,9 +10,9 @@ Description: Standard python init file for the main directory
 """
 
 from .core.dataclasses import DVCParams, SlurmConfig
-from .core.parameter import Parameter, Result
+from .core.parameter import parameter, result
 from .core.decorator import pytrack
 from .project import PyTrackProject
 from .interface import DVCInterface
 
-__all__ = ["DVCParams", "SlurmConfig", "pytrack", "PyTrackProject", "DVCInterface", "Parameter", "Result"]
+__all__ = ["DVCParams", "SlurmConfig", "pytrack", "PyTrackProject", "DVCInterface", "parameter", "result"]

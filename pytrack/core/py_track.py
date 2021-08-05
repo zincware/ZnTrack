@@ -20,7 +20,7 @@ from pathlib import Path
 import abc
 
 from .dataclasses import DVCParams, SlurmConfig, Files, FilesLoaded
-from .parameter import Parameter, Result
+from .parameter import parameter, result
 from pytrack.utils import is_jsonable
 
 log = logging.getLogger(__file__)
@@ -65,12 +65,18 @@ class PyTrackParent:
         self._pytrack_dvc = self.dvc
 
         for attr, value in vars(self).items():
-            if isinstance(value, Parameter):
-                self._pytrack__parameters.update({attr: value})
+            try:
+                if value.__name__ == parameter().__name__:
+                    self._pytrack__parameters.update({attr: value})
+            except AttributeError:  # not all attributes have __name__
+                pass
 
         for attr, value in vars(self).items():
-            if isinstance(value, Result):
-                self._pytrack__results.update({attr: value})
+            try:
+                if value.__name__ == result().__name__:
+                    self._pytrack__results.update({attr: value})
+            except AttributeError:  # not all attributes have __name__
+                pass
 
         if len(self._pytrack__results) > 0:
             self._pytrack_json_file = f"{self._pytrack_name}.json"
