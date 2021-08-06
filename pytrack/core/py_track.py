@@ -103,8 +103,7 @@ class PyTrackParent:
 
                 # If we load a stage we read the dependcies from a file, so we reset them first
                 # TODO check this here too
-                self._pytrack__dvc = None
-                self.dvc = self._pytrack_dvc
+                self._pytrack_load_dvc()
 
         except KeyError:
             raise KeyError(f"Could not find a stage with id {id_}!")
@@ -161,6 +160,13 @@ class PyTrackParent:
         """
 
         self._pytrack__running = True
+
+    def _pytrack_load_dvc(self):
+        for out_name, out_value in zip(
+                self._pytrack_ph.dvc_options.get('out', []),
+                self._pytrack_dvc_stage['outs']
+        ):
+            self.__dict__[out_name] = Path(out_value)
 
     def _pytrack_post_run(self):
         """Method to be executed after run
