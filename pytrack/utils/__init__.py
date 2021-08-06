@@ -9,25 +9,6 @@ Copyright Contributors to the Zincware Project.
 Description: Standard python init file for the utils directory
 """
 
-import json
+from .utils import is_jsonable
 
-
-# https://stackoverflow.com/questions/42033142/is-there-an-easy-way-to-check-if-an-object-is-json-serializable-in-python
-def is_jsonable(x: dict) -> bool:
-    """
-
-    Parameters
-    ----------
-    x: dict
-        Dictionary to check, if it is json serializable.
-
-    Returns
-    -------
-    bool: Whether the dict was serializable or not.
-
-    """
-    try:
-        json.dumps(x)
-        return True
-    except (TypeError, OverflowError):
-        return False
+__all__ = ['is_jsonable']

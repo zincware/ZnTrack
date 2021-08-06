@@ -141,7 +141,7 @@ class PyTrack:
     def call_decorator(f):
         """Decorator to handle the call of the decorated class"""
 
-        def wrapper(cls: PyTrackParent, *args, force=False, exec_=False, always_changed=False, slurm=False, **kwargs):
+        def wrapper(cls: PyTrackParent, *args, force=True, exec_=False, always_changed=False, slurm=False, **kwargs):
             cls._pytrack_pre_call()
             function = f(cls, *args, **kwargs)
             cls._pytrack_post_call(force, exec_, always_changed, slurm)
