@@ -79,32 +79,16 @@ class PyTrackOption:
         return f"Empty {self.pytrack_dvc_option}!"
 
 
-def parameter(obj=object):
-    """Parameter for PyTrack
-
-    Parameters
-    ----------
-    obj: any class object that the parameter will take on, so that type hinting does not raise issues
-
-    Returns
-    -------
-    cls: Class that inherits from obj
-
-    """
-
-    class PyTrackParameter(PyTrackOption, obj):
-        pass
-
-    return PyTrackParameter("parameter")
+class DVC:
 
 
-def result(obj=object):
-    """Parameter for PyTrack
+    @staticmethod
+    def parameter(obj=object):
+        """Parameter for PyTrack
 
         Parameters
         ----------
         obj: any class object that the parameter will take on, so that type hinting does not raise issues
-        outs: Future Version, allows for defining the type ot output
 
         Returns
         -------
@@ -112,38 +96,54 @@ def result(obj=object):
 
         """
 
-    class PyTrackParameter(PyTrackOption, obj):
-        pass
+        class PyTrackParameter(PyTrackOption, obj):
+            pass
 
-    return PyTrackParameter("result")
+        return PyTrackParameter("parameter")
+
+    @staticmethod
+    def result(obj=object):
+        """Parameter for PyTrack
+
+            Parameters
+            ----------
+            obj: any class object that the parameter will take on, so that type hinting does not raise issues
+            outs: Future Version, allows for defining the type ot output
+
+            Returns
+            -------
+            cls: Class that inherits from obj
+
+            """
+
+        class PyTrackParameter(PyTrackOption, obj):
+            pass
+
+        return PyTrackParameter("result")
+
+    @staticmethod
+    def dependency(obj=object):
+        class PyTrackParameter(PyTrackOption, obj):
+            pass
+
+        return PyTrackParameter("dependency")
+
+    @staticmethod
+    def out(value=None, obj=object):
+        class PyTrackParameter(PyTrackOption, obj):
+            pass
+
+        return PyTrackParameter("out", value=value)
 
 
-def dependency(obj=object):
-    class PyTrackParameter(PyTrackOption, obj):
-        pass
-
-    return PyTrackParameter("dependency")
-
-
-def out(value=None, obj=object):
-    class PyTrackParameter(PyTrackOption, obj):
-        pass
-
-    return PyTrackParameter("out", value=value)
-
-
-DVC_PARAMS = {
-    "deps": dependency,
-    "outs": out
-}
 
 if __name__ == '__main__':
     class TEST:
         def __init__(self):
-            self.param1 = parameter()
-            self.param2 = parameter()
-            self.out1 = out()
-            self.result1 = result()
+            self.param1 = DVC.parameter()
+            self.param2 = DVC.parameter()
+            self.out1 = DVC.out()
+            self.result1 = DVC.result()
 
         def run(self):
             self.param1 = 10
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     param_handler.update_dvc_options(test)
 
     test.run()
-    param_handler.update_dvc_parameters(test)
+    param_handler.update_dvc(test)
 
     print(param_handler.dvc_options)
 
