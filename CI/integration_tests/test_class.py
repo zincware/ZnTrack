@@ -1,5 +1,5 @@
 from unittest import TestCase
-from pytrack import PyTrack, DVCParams, parameter, result
+from pytrack import PyTrack, DVC
 from pathlib import Path
 import json
 import subprocess
@@ -16,12 +16,10 @@ class BasicTest:
 
     def __init__(self):
         """Constructor of the PyTrack test instance"""
-        self.dvc = DVCParams(
-            params_file="params.json",
-            deps=[Path("deps1", "input.json"), Path("deps2", "input.json")],
-        )
-        self.parameters = parameter()
-        self.results = result()
+        self.deps1 = DVC.deps(Path("deps1", "input.json"))
+        self.deps2 = DVC.deps(Path("deps2", "input.json"))
+        self.parameters = DVC.parameter()
+        self.results = DVC.result()
 
     def __call__(self, **kwargs):
         """Call Method of the PyTrack test instance"""
@@ -52,7 +50,8 @@ class TestBasic(TestCase):
         subprocess.check_call(["dvc", "init"])
 
         base = BasicTest()
-        for idx, dep in enumerate(base.dvc.deps):
+
+        for idx, dep in enumerate([base.deps1.value, base.deps2.value]):
             dep.parent.mkdir(exist_ok=True, parents=True)
             with open(dep, "w") as f:
                 json.dump({"id": idx}, f)
@@ -89,5 +88,8 @@ class TestBasic(TestCase):
         """Test that the dependencies are stored correctly"""
         base = BasicTest(id_=0)
         self.assertTrue(
-            base.dvc.deps, [Path("deps1", "input.json"), Path("deps2", "input.json")]
+            base.deps1, Path("deps1", "input.json")
+        )
+        self.assertTrue(
+            base.deps2, Path("deps2", "input.json")
         )

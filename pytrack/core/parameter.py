@@ -12,6 +12,7 @@ Description: PyTrack parameter
 from pytrack.utils import is_jsonable
 from pytrack.core.data_classes import DVCParams
 from pathlib import Path
+from typing import Union
 
 
 class ParameterHandler:
@@ -35,31 +36,56 @@ class ParameterHandler:
         for item in self.dvc_options:
             if item == "parameter":
                 for option in self.dvc_options.get("parameter", []):
-                    if is_jsonable(cls.__dict__[option]):
+                    if isinstance(getattr(cls, option), Path):
+                        # Convert Path -> string
+                        setattr(cls, option, getattr(cls, option).as_posix())
+                    if is_jsonable(getattr(cls, option)):
                         parameter_dict = self.dvc_values.get("parameter", {})
-                        parameter_dict[option] = cls.__dict__[option]
+                        parameter_dict[option] = getattr(cls, option)
                         self.dvc_values.update({"parameter": parameter_dict})
                     else:
-                        raise ValueError(f'Parameter {parameter} is not json serializable!')
+                        raise ValueError(f'Parameter {option} is not json serializable!')
             if item == "result":
                 # self.dvc is currently handled elsewhere!
                 continue
-            if item == "dependency":
-                for option in self.dvc_options.get("dependency", []):
-                    if isinstance(cls.__dict__[option], list):
-                        raise NotImplementedError('Lists for dependencies are currently not implemented')
-                    else:
-                        self.dvc.deps.append(Path(cls.__dict__[option]))
-            if item == "out":
-                for option in self.dvc_options.get("out", []):
-                    if isinstance(cls.__dict__[option], list):
-                        raise NotImplementedError('Lists for dependencies are currently not implemented')
-                    elif isinstance(cls.__dict__[option], PyTrackOption):
-                        for abc in cls.__dict__[option].value:
-                            print(abc)
-                            self.dvc.outs.append(self.dvc.outs_path / abc)
-                    else:
-                        self.dvc.outs.append(self.dvc.outs_path / cls.__dict__[option])
+            if item == "deps":
+                self.update_cls_attributes(item, cls, self.dvc.deps)
+            if item == "outs":
+                self.dvc.outs_path.mkdir(parents=True, exist_ok=True)
+                self.update_cls_attributes(item, cls, self.dvc.outs, self.dvc.outs_path)
+
+    def update_cls_attributes(self, item, cls, target, path=Path()):
+        """
+
+        Parameters
+        ----------
+        item: the dvc option item to update
+        cls: the class to get the attributes from
+        target: the target, e.g. DVCParams.deps
+        path: (optional) the standard path, e.g. DVCParams.outs_path
+
+        Returns
+        -------
+
+        """
+        for option in self.dvc_options.get(item, []):
+            if isinstance(getattr(cls, option), list):
+                raise NotImplementedError('Lists are not yet supported!')
+                # if self.param = ["a", "b"]
+                # for abc in getattr(cls, option):
+                #     target.append(path / abc)
+            elif isinstance(getattr(cls, option), PyTrackOption):
+                if isinstance(getattr(cls, option).value, list):
+                    raise NotImplementedError('Lists are not yet supported!')
+                    # if self.param = DVC.outs(["a", "b"])
+                    # for abc in getattr(cls, option).value:
+                    #     target.append(path / abc)
+                else:
+                    # if self.param = DVC.outs("a")
+                    target.append(path / getattr(cls, option).value)
+            else:
+                # if self.param = "a"
+                target.append(path / getattr(cls, option))
 
     def update_dvc_internal(self, option, value):
         try:
@@ -69,7 +95,7 @@ class ParameterHandler:
 
 
 class PyTrackOption:
-    def __init__(self, option: str, value=None):
+    def __init__(self, option: str, value: Union[list, str] = None):
         if value is None:
             value = []
         self.pytrack_dvc_option = option
@@ -80,7 +106,6 @@ class PyTrackOption:
 
 
 class DVC:
-
 
     @staticmethod
     def parameter(obj=object):
@@ -122,19 +147,18 @@ class DVC:
         return PyTrackParameter("result")
 
     @staticmethod
-    def dependency(obj=object):
+    def deps(value=None, obj=object):
         class PyTrackParameter(PyTrackOption, obj):
             pass
 
-        return PyTrackParameter("dependency")
+        return PyTrackParameter("deps", value=value)
 
     @staticmethod
-    def out(value=None, obj=object):
+    def outs(value=None, obj=object):
         class PyTrackParameter(PyTrackOption, obj):
             pass
 
-        return PyTrackParameter("out", value=value)
-
+        return PyTrackParameter("outs", value=value)
 
 
 if __name__ == '__main__':
@@ -142,7 +166,7 @@ if __name__ == '__main__':
         def __init__(self):
             self.param1 = DVC.parameter()
             self.param2 = DVC.parameter()
-            self.out1 = DVC.out()
+            self.out1 = DVC.outs()
             self.result1 = DVC.result()
 
         def run(self):

@@ -14,7 +14,8 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, parameter, result, DVCParams, PyTrackProject
+from pytrack import PyTrack, DVC, PyTrackProject
+from pathlib import Path
 
 temp_dir = TemporaryDirectory()
 
@@ -28,22 +29,24 @@ class StageIO:
 
         Definition of parameters and results
         """
-        self.dvc = DVCParams(outs=['calculation.txt'])
+        self.outs = DVC.outs('calculation.txt')
+        self.deps = DVC.deps()
+        self.param = DVC.parameter()
 
     def __call__(self, file):
         """User input
         """
-
-        self.dvc.deps.append(file)
+        self.param = file
+        self.deps = file
 
     def run(self):
         """Actual computation
         """
 
-        with open(self.dvc.deps[0], "r") as f:
+        with open(self.deps, "r") as f:
             file_content = f.readlines()
 
-        self.dvc.outs[0].write_text("".join(file_content))
+        self.outs.write_text("".join(file_content))
 
 
 @PyTrack
@@ -53,13 +56,13 @@ class StageAddition:
 
         Definition of parameters and results
         """
-        self.dvc = DVCParams(outs=['calculation.txt'])
+        self.outs = DVC.outs('calculation.txt')
 
-        self.n_1 = parameter(int)  # seems optional now
-        self.n_2 = parameter()
+        self.n_1 = DVC.parameter()  # seems optional now
+        self.n_2 = DVC.parameter()
 
-        self.sum = result()
-        self.dif = result()
+        self.sum = DVC.result()
+        self.dif = DVC.result()
 
     def __call__(self, n_1, n_2):
         """User input
@@ -77,7 +80,7 @@ class StageAddition:
         self.sum = self.n_1 + self.n_2
         self.dif = self.n_1 - self.n_2
 
-        self.dvc.outs[0].write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
+        self.outs.write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
 
 
 @PyTrack()
@@ -87,13 +90,13 @@ class StageAddition2:
 
         Definition of parameters and results
         """
-        self.dvc = DVCParams(outs=['calculation.txt'])
+        self.outs = DVC.outs('calculation.txt')
 
-        self.n_1 = parameter(int)  # seems optional now
-        self.n_2 = parameter()
+        self.n_1 = DVC.parameter()  # seems optional now
+        self.n_2 = DVC.parameter()
 
-        self.sum = result()
-        self.dif = result()
+        self.sum = DVC.result()
+        self.dif = DVC.result()
 
     def __call__(self, n_1, n_2):
         """User input
@@ -111,7 +114,7 @@ class StageAddition2:
         self.sum = self.n_1 + self.n_2
         self.dif = self.n_1 - self.n_2
 
-        self.dvc.outs[0].write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
+        self.outs.write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
 
 
 @pytest.fixture(autouse=True)
@@ -176,12 +179,16 @@ def test_stage_addition2():
 
 def test_stage_io():
     project = PyTrackProject()
+    # project.name = "Test1"
     project.create_dvc_repository()
 
+    deps = Path("test_example01.py")
+
     stage = StageIO()
-    stage("test_example01.py")
-    project.name = "Test1"
+    stage(deps.resolve())
     project.run()
     project.load()
 
-    assert stage.dvc.outs[0].read_text().startswith('\"\"\"')
+    stage = StageIO(id_=0)
+
+    assert stage.outs.read_text().startswith('\"\"\"')

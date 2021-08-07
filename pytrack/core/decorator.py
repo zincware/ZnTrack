@@ -41,6 +41,7 @@ class PyTrack:
                 "Jupyter support is an experimental feature! \n"
                 "Please submit issues to https://github.com/zincware/py-track."
             )
+            nb_name = Path(nb_name)
         self.nb_name = nb_name
         self.nb_class_path = Path('src')
 
@@ -93,7 +94,7 @@ class PyTrack:
                 if line.startswith("import") or line.startswith("from"):
                     imports += line
                 if reading_class:
-                    if re.match(r'\S', line):
+                    if re.match(r'\S', line) and not line.startswith("#"):
                         reading_class = False
                 if line.startswith(f"class {self.cls.__name__}"):
                     reading_class = True
@@ -105,6 +106,9 @@ class PyTrack:
         src_file = Path(self.nb_class_path, self.cls.__name__).with_suffix(".py")
         self.nb_class_path.mkdir(exist_ok=True, parents=True)
         src_file.write_text(src)
+
+        # Remove converted ipynb file
+        self.nb_name.with_suffix(".py").unlink()
 
     def apply_decorator(self):
         """Apply the decorators to the class methods

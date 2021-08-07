@@ -12,6 +12,7 @@ import logging
 
 from pytrack.interface import DVCInterface
 import subprocess
+from datetime import datetime
 
 log = logging.getLogger(__file__)
 
@@ -19,6 +20,8 @@ log = logging.getLogger(__file__)
 class PyTrackProject(DVCInterface):
     def __init__(self, name: str = None):
         super().__init__()
+        if name is None:
+            name = f'PyTrackProject_{datetime.now().strftime("%Y_%m_%d-%H_%M_%S")}'
         self.name = name
 
     def queue(self):
