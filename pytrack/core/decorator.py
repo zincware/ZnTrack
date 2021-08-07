@@ -38,8 +38,8 @@ class PyTrack:
         # jupyter
         if nb_name is not None:
             log.warning(
-                "Jupyter support is an experimental feature! \n"
-                "Please submit issues to https://github.com/zincware/py-track."
+                "Jupyter support is an experimental feature! Please save your notebook before running this command!\n"
+                "Submit issues to https://github.com/zincware/py-track."
             )
             nb_name = Path(nb_name)
         self.nb_name = nb_name
@@ -87,19 +87,20 @@ class PyTrack:
 
         imports = ""
 
-        class_definition = "@PyTrack\n"
+        class_definition = ""
 
         with open(Path(self.nb_name).with_suffix(".py"), "r") as f:
             for line in f:
                 if line.startswith("import") or line.startswith("from"):
                     imports += line
                 if reading_class:
-                    if re.match(r'\S', line) and not line.startswith("#"):
+                    if re.match(r'\S', line) and not line.startswith("#") and not line.startswith("class"):
                         reading_class = False
-                if line.startswith(f"class {self.cls.__name__}"):
-                    reading_class = True
                 if reading_class:
                     class_definition += line
+                if line.startswith("@PyTrack"):
+                    reading_class = True
+                    class_definition += "@PyTrack\n"
 
         src = imports + "\n\n" + class_definition
 

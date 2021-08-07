@@ -69,6 +69,7 @@ class PyTrackParent:
         try:
             if len(self._pytrack_ph.dvc_options['result']) > 0:
                 self._pytrack_ph.dvc.set_json_file(f"{self._pytrack_id}_{self._pytrack_name}.json")
+                setattr(self, "results", self._pytrack_ph.dvc.json_file)
         except KeyError:
             log.debug("Stage has no assigned json file")
 

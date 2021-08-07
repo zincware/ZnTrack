@@ -32,6 +32,12 @@ class PyTrackProject(DVCInterface):
         subprocess.check_call(["dvc", "exp", "run", "--name", self.name, "--queue"])
 
     @staticmethod
+    def remove_queue():
+        """Empty the queue"""
+        log.warning("Removing all queried experiments!")
+        subprocess.check_call(["dvc", "exp", "remove", "--queue"])
+
+    @staticmethod
     def run_all():
         """Run all queried experiments"""
         log.info("RUN DVC stage")
@@ -69,4 +75,3 @@ class PyTrackProject(DVCInterface):
     @staticmethod
     def _destroy():
         subprocess.check_call(['dvc', 'destroy', '-f'])
-
