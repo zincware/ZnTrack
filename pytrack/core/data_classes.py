@@ -24,6 +24,9 @@ class DVCParams:
     # pytrack Parameter
     multi_use: bool = False
     params_file: Path = Path("config", "params.json")
+    # internals_file: Path = Path("config", ".pytrack.json") # TODO should be a hidden file
+    internals_file: Path = Path("config", "pytrack.json")
+
 
     json_file: Union[Path, str, None] = None
 

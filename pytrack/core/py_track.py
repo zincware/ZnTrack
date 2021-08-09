@@ -20,6 +20,7 @@ from pathlib import Path
 from .data_classes import SlurmConfig
 from .parameter import ParameterHandler
 from pytrack.utils import is_jsonable
+from dataclasses import asdict
 
 log = logging.getLogger(__file__)
 
@@ -66,19 +67,13 @@ class PyTrackParent:
         # Updating internals and checking for parameters and results
 
         self._pytrack_ph.update_dvc_options(self)
-        try:
-            if len(self._pytrack_ph.dvc_options['result']) > 0:
-                self._pytrack_ph.dvc.set_json_file(f"{self._pytrack_id}_{self._pytrack_name}.json")
-                setattr(self, "results", self._pytrack_ph.dvc.json_file)
-        except KeyError:
-            log.debug("Stage has no assigned json file")
-
-        # We update the internal dvc to the one the user defined
+        self._pytrack_ph.dvc.set_json_file(f"{self._pytrack_id}_{self._pytrack_name}.json")
 
         try:
             if id_ is not None:
                 self._pytrack__id = id_
                 # TODO setting a hidden variable should be done via the property setter
+                # TODO set them all here!
                 for name, value in self._pytrack_parameters.items():
                     log.debug(f"Updating {name} with {value}")
                     setattr(self, name, value)
@@ -128,11 +123,15 @@ class PyTrackParent:
         # Parameters are only set in/after the call method!
         self._pytrack_ph.update_dvc(self)
         try:
-            self._pytrack_parameters = self._pytrack_ph.dvc_values['parameter']
+            self._pytrack_parameters = self._pytrack_ph.dvc_values.parameter
         except KeyError:
             log.debug("No parameters assigned with the stage.")
 
         self._write_dvc(force, exec_, always_changed, slurm)
+
+        # # TODO save everything here and then have assertion statements to compare it to dvc.yaml?!
+        # #  should make things easier
+        self._pytrack_internals = asdict(self._pytrack_ph.dvc_values)
 
         self._pytrack_was_called = True
 
@@ -154,29 +153,24 @@ class PyTrackParent:
         """Load dvc options from the stage
         # TODO support more than just outs
         """
-        if self._pytrack_ph.dvc.json_file is not None:
-            log.debug("LoadDVC: skipping json file")
-            out_iterator = zip(
-                self._pytrack_ph.dvc_options.get('outs', []),
-                self._pytrack_dvc_stage['outs'][1:]
-                # if we have a json file, we need to skip the first entry of the stage
-            )
-        else:
-            out_iterator = zip(
-                self._pytrack_ph.dvc_options.get('outs', []),
-                self._pytrack_dvc_stage['outs']
-            )
-        try:
-            log.debug("LoadDVC: loading outs")
-            for out_name, out_value in out_iterator:
-                log.debug(f"Updateing {out_name} with {out_value}")
-                setattr(self, out_name, Path(out_value))
-        except KeyError:
-            log.debug("No outs defined!")
+        log.debug("LoadDVC: skipping json file")
+        out_iterator = zip(
+            self._pytrack_ph.dvc_options.outs,
+            self._pytrack_dvc_stage['outs'][1:]
+            # if we have a json file, we need to skip the first entry of the stage
+        )
+
+        # TODO use descriptor!
+        # TODO update this whole part
+        log.debug("LoadDVC: loading outs")
+        for out_name, out_value in out_iterator:
+            log.debug(f"Updating {out_name} with {out_value}")
+            setattr(self, out_name, Path(out_value))
+
         try:
             log.debug("LoadDVC: loading deps")
             for deps_name, deps_val in zip(
-                    self._pytrack_ph.dvc_options.get('deps', []),
+                    self._pytrack_ph.dvc_options.deps,
                     self._pytrack_dvc_stage['deps']
             ):
                 log.debug(f"Updateing {deps_name} with {deps_val}")
@@ -189,29 +183,25 @@ class PyTrackParent:
 
         This method saves the results
         """
-        if self._pytrack_ph.dvc.json_file is not None:
-            results = {}
-            for result in self._pytrack_ph.dvc_options['result']:
-                if is_jsonable(vars(self)[result]):
-                    results.update({result: vars(self)[result]})
-                else:
-                    raise ValueError(f'Result {result} is not json serializable!')
+        results = self._pytrack_results
+        for result in self._pytrack_ph.dvc_options.result:
+            if is_jsonable(vars(self)[result]):
+                results.update({result: vars(self)[result]})
+            else:
+                raise ValueError(f'Result {result} is not json serializable!')
 
-            self._pytrack_results = results
+        self._pytrack_results = results
 
     @property
     def _pytrack_results(self):
         """Result property to load the results as a dictionary
         """
-        if self._pytrack_ph.dvc.json_file is not None:
-            try:
-                with open(self._pytrack_ph.dvc.json_file) as f:
-                    file = json.load(f)
-                return file
-            except FileNotFoundError:
-                log.warning("No results found!")
-                return {}
-        else:
+        try:
+            with open(self._pytrack_ph.dvc.json_file) as f:
+                file = json.load(f)
+            return file
+        except FileNotFoundError:
+            log.warning("No results found!")
             return {}
 
     @_pytrack_results.setter
@@ -227,8 +217,10 @@ class PyTrackParent:
         -------
 
         """
+        # TODO expand this by the lists of DVC options as .options or .internals or such
         with open(self._pytrack_ph.dvc.json_file, "w") as f:
             json.dump(value, f, indent=4)
+
 
     @property
     def _pytrack_parameters(self):
@@ -279,8 +271,6 @@ class PyTrackParent:
             log.debug(
                 f"Could not load params from {self._pytrack_ph.dvc.params_file}!"
             )
-        except KeyError:
-            log.debug(f"Stage with name {self._pytrack_name} does not exist")
         return {}
 
     @_pytrack_all_parameters.setter
@@ -342,6 +332,11 @@ class PyTrackParent:
         script += [
             "--params",
             f"{self._pytrack_ph.dvc.params_file}:{self._pytrack_name}.{self._pytrack_id}",
+        ]
+
+        script += [
+            "--params",
+            f"{self._pytrack_ph.dvc.internals_file}:default",
         ]
 
         if force:
