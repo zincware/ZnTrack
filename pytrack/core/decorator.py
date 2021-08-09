@@ -132,8 +132,9 @@ class PyTrack:
 
         def wrapper(cls: PyTrackParent, *args, id_=None, **kwargs):
             PyTrackParent.__init__(cls)
+            cls._pytrack_pre_init(id_)
             result = func(cls, *args, **kwargs)
-            cls._pytrack_post_init(id_)
+            cls._pytrack_post_init()
 
             if self.nb_name is not None:
                 cls._pytrack__module = f"{self.nb_class_path}.{self.cls.__name__}"

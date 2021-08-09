@@ -16,18 +16,20 @@ class BasicTest:
 
     def __init__(self):
         """Constructor of the PyTrack test instance"""
-        self.deps1 = DVC.deps(Path("deps1", "input.json"))
-        self.deps2 = DVC.deps(Path("deps2", "input.json"))
-        self.parameters = DVC.parameter()
+        self.deps1 = DVC.deps(Path("deps1", "input.json").as_posix())
+        self.deps2 = DVC.deps(Path("deps2", "input.json").as_posix())
+        self.name = DVC.params()
+        self.values = DVC.params()
         self.results = DVC.result()
 
-    def __call__(self, **kwargs):
+    def __call__(self, name, values):
         """Call Method of the PyTrack test instance"""
-        self.parameters = kwargs
+        self.name = name
+        self.values = values
 
     def run(self):
         """Run method of the PyTrack test instance"""
-        self.results = {"name": self.parameters["name"]}
+        self.results = f"My Name is {self.name}."
 
 
 class TestBasic(TestCase):
@@ -51,13 +53,13 @@ class TestBasic(TestCase):
 
         base = BasicTest()
 
-        for idx, dep in enumerate([base.deps1.value, base.deps2.value]):
-            dep.parent.mkdir(exist_ok=True, parents=True)
+        for idx, dep in enumerate([base.deps1, base.deps2]):
+            Path(dep).parent.mkdir(exist_ok=True, parents=True)
             with open(dep, "w") as f:
                 json.dump({"id": idx}, f)
 
         # Have to run dvc repro here, because otherwise I can not test the values inside it
-        base(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
+        base(name="PyTest", values=(2, 4, 8, 16, 32, 64, 128, 256))
         subprocess.check_call(["dvc", "repro"])
 
     @classmethod
