@@ -5,14 +5,8 @@ name: pytest
 
 on:
   push:
-    branches:
-      - main
-      - pyTrack
   pull_request:
-    branches:
-      - main
-      - pyTrack
-
+  
 jobs:
   build:
 
