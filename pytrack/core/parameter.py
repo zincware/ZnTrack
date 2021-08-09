@@ -18,7 +18,6 @@ from pytrack.core.data_classes import DVCParams
 from pathlib import Path
 from typing import Union, Dict, Any
 from dataclasses import dataclass, field, asdict
-from weakref import WeakKeyDictionary
 
 log = logging.getLogger(__file__)
 
@@ -233,6 +232,9 @@ class PyTrackOption:
         """Update internals in .pytrack.json"""
         log.debug(f"Writing updates to .pytrack.json as {value}")
         value.update({"default": None})
+
+        Path(file).parent.mkdir(exist_ok=True, parents=True)
+
         with open(file, "w") as json_file:
             json.dump(value, json_file, indent=4)
 
