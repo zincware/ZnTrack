@@ -16,8 +16,9 @@ import subprocess
 import yaml
 
 from .data_classes import SlurmConfig
-from .parameter import ParameterHandler
-
+from .parameter import PyTrackOption
+from pytrack.core.data_classes import DVCParams
+from pathlib import Path
 
 log = logging.getLogger(__file__)
 
@@ -44,7 +45,8 @@ class PyTrackParent:
         self._pytrack_allow_param_change = False
         self._pytrack_allow_result_change = False
 
-        self._pytrack_ph = ParameterHandler()
+        self._pytrack_dvc = DVCParams()
+        self._pytrack_nb_mode = False
 
     def _pytrack_pre_init(self, id_):
         self._pytrack_allow_param_change = id_ is None
@@ -67,8 +69,8 @@ class PyTrackParent:
 
         """
         # Updating internals and checking for parameters and results
-        self._pytrack_ph.update_dvc_options(self)
-        self._pytrack_ph.dvc.set_json_file(f"{self._pytrack_id}_{self._pytrack_name}.json")
+        self._pytrack_update_dvc_options()
+        self._pytrack_dvc.set_json_file(f"{self._pytrack_id}_{self._pytrack_name}.json")
 
     def _pytrack_pre_call(self):
         """Method to be run before the call"""
@@ -95,10 +97,7 @@ class PyTrackParent:
             and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
 
         """
-        self._pytrack_ph.dvc.make_paths()
-
-        # Parameters are only set in/after the call method!
-        # self._pytrack_ph.update_dvc(self)
+        self._pytrack_dvc.make_paths()
 
         self._write_dvc(force, exec_, always_changed, slurm)
 
@@ -125,6 +124,22 @@ class PyTrackParent:
         """
         self._pytrack_allow_result_change = False
 
+    def _pytrack_update_dvc_options(self):
+        """Update the dvc_options with None values
+
+        This is run after the __init__ to save all DVCParams and they can later be overwritten
+        """
+        for attr, value in vars(self).items():
+            try:
+                option = value.pytrack_dvc_option
+                try:
+                    log.warning(f"Updating {attr} with PyTrackOption and value {value.value}!")
+                    setattr(type(self), attr, PyTrackOption(option=option, value=value.value, attr=attr, cls=self))
+                except AttributeError:
+                    raise AttributeError('setattr went wrong!')
+            except AttributeError:
+                pass
+
     @property
     def _pytrack_id(self) -> str:
         """Get multi_use id"""
@@ -134,6 +149,14 @@ class PyTrackParent:
         self._pytrack__id = 0
 
         return str(self._pytrack__id)
+
+    def _pytrack_update_dvc(self):
+        for attr, val in vars(type(self)).items():
+            if isinstance(val, PyTrackOption):
+                if val.pytrack_dvc_option == "outs":
+                    self._pytrack_dvc.outs.append(getattr(self, attr))
+                if val.pytrack_dvc_option == "deps":
+                    self._pytrack_dvc.deps.append(getattr(self, attr))
 
     def _write_dvc(
             self,
@@ -166,19 +189,20 @@ class PyTrackParent:
 
         """
 
+        self._pytrack_update_dvc()
+
         script = ["dvc", "run", "-n", self._pytrack_stage_name]
 
-        script += self._pytrack_ph.dvc.get_dvc_arguments()
-
-        # script += [
-        #     "--params",
-        #     f"{self._pytrack_ph.dvc.params_file}:{self._pytrack_name}.{self._pytrack_id}",
-        # ]
+        script += self._pytrack_dvc.get_dvc_arguments()
+        # TODO if no DVC.result are assigned, no json file will be written!
 
         script += [
             "--params",
-            f"{self._pytrack_ph.dvc.internals_file}:{self._pytrack_name}.{self._pytrack_id}.params",
+            f"{self._pytrack_dvc.internals_file}:{self._pytrack_name}.{self._pytrack_id}.params",
         ]
+
+        if self._pytrack_nb_mode:
+            script += ["--deps", Path(*self._pytrack_module.split(".")).with_suffix(".py")]
 
         if force:
             script.append("--force")

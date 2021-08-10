@@ -9,6 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: Simple test for graph execution
 """
 import shutil
+import subprocess
 
 import pytest
 import os
@@ -21,11 +22,12 @@ temp_dir = TemporaryDirectory()
 
 cwd = os.getcwd()
 
+# TODO tests should also test .run() and not just dvc repro for better coverage!
 
 @PyTrack()
 class ComputeA:
     def __init__(self):
-        self.inp = DVC.parameter()
+        self.inp = DVC.params()
         self.out = DVC.result()
 
     def __call__(self, inp):
@@ -38,7 +40,7 @@ class ComputeA:
 @PyTrack()
 class ComputeB:
     def __init__(self):
-        self.inp = DVC.parameter()
+        self.inp = DVC.params()
         self.out = DVC.result()
 
     def __call__(self, inp):
@@ -51,11 +53,11 @@ class ComputeB:
 @PyTrack()
 class ComputeAB:
     def __init__(self):
-        self.a = DVC.deps(ComputeA(id_=0).results)
-        self.b = DVC.deps(ComputeB(id_=0).results)
+        self.a = DVC.deps(ComputeA(id_=0)._pytrack_dvc.json_file.as_posix())
+        self.b = DVC.deps(ComputeB(id_=0)._pytrack_dvc.json_file.as_posix())
         self.out = DVC.result()
 
-        self.param = DVC.parameter()
+        self.param = DVC.params()
 
     def __call__(self):
         self.param = "default"
@@ -81,6 +83,7 @@ def prepare_env():
 def test_stage_addition():
     """Check that the dvc repro works"""
     project = PyTrackProject()
+    project.name = "test01"
     project.create_dvc_repository()
 
     a = ComputeA()
@@ -91,6 +94,7 @@ def test_stage_addition():
     ab()
 
     project.run()
-    project.load()
+    subprocess.check_call(['dvc', "repro"])
+    # project.load()
     finished_stage = ComputeAB(id_=0)
     assert finished_stage.out == 31

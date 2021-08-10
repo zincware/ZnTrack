@@ -102,12 +102,13 @@ class PyTrack:
                     class_definition += line
                 if line.startswith("@PyTrack"):
                     reading_class = True
-                    class_definition += "@PyTrack\n"
+                    class_definition += "@PyTrack()\n"
 
         src = imports + "\n\n" + class_definition
 
         src_file = Path(self.nb_class_path, self.cls.__name__).with_suffix(".py")
         self.nb_class_path.mkdir(exist_ok=True, parents=True)
+
         src_file.write_text(src)
 
         # Remove converted ipynb file
@@ -140,6 +141,7 @@ class PyTrack:
 
             if self.nb_name is not None:
                 cls._pytrack__module = f"{self.nb_class_path}.{self.cls.__name__}"
+                cls._pytrack_nb_mode = True
 
             return result
 

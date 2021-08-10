@@ -31,7 +31,8 @@ class StageIO:
         """
         self.outs = DVC.outs('calculation.txt')
         self.deps = DVC.deps()
-        self.param = DVC.parameter()
+        self.param = DVC.params()
+        self.result = DVC.result()  # TODO right now, this is mandatory, make it optional
 
     def __call__(self, file):
         """User input
@@ -46,10 +47,12 @@ class StageIO:
         with open(self.deps, "r") as f:
             file_content = f.readlines()
 
-        self.outs.write_text("".join(file_content))
+        Path(self.outs).write_text("".join(file_content))
+
+        self.result = "Mandatory result placeholder"
 
 
-@PyTrack
+@PyTrack()
 class StageAddition:
     def __init__(self):
         """Class constructor
@@ -58,8 +61,8 @@ class StageAddition:
         """
         self.outs = DVC.outs('calculation.txt')
 
-        self.n_1 = DVC.parameter()  # seems optional now
-        self.n_2 = DVC.parameter()
+        self.n_1 = DVC.params()  # seems optional now
+        self.n_2 = DVC.params()
 
         self.sum = DVC.result()
         self.dif = DVC.result()
@@ -80,41 +83,7 @@ class StageAddition:
         self.sum = self.n_1 + self.n_2
         self.dif = self.n_1 - self.n_2
 
-        self.outs.write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
-
-
-@PyTrack()
-class StageAddition2:
-    def __init__(self):
-        """Class constructor
-
-        Definition of parameters and results
-        """
-        self.outs = DVC.outs('calculation.txt')
-
-        self.n_1 = DVC.parameter()  # seems optional now
-        self.n_2 = DVC.parameter()
-
-        self.sum = DVC.result()
-        self.dif = DVC.result()
-
-    def __call__(self, n_1, n_2):
-        """User input
-
-        Parameters
-        ----------
-        n_1: First number
-        n_2: Second number
-        """
-        self.n_1 = n_1
-        self.n_2 = n_2
-
-    def run(self):
-        """Actual computation"""
-        self.sum = self.n_1 + self.n_2
-        self.dif = self.n_1 - self.n_2
-
-        self.outs.write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
+        Path(self.outs).write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
 
 
 @pytest.fixture(autouse=True)
@@ -153,33 +122,9 @@ def test_stage_addition():
     assert finished_stage.sum == 150
 
 
-def test_stage_addition2():
-    """Check that the dvc repro works"""
-    project = PyTrackProject()
-    project.create_dvc_repository()
-
-    stage = StageAddition2()
-    stage(5, 10)
-    project.name = "Test1"
-    project.queue()
-
-    stage = StageAddition2()
-    stage(50, 100)
-    project.name = "Test2"
-    project.run()
-
-    project.load("Test1")
-    finished_stage = StageAddition2(id_=0)
-    assert finished_stage.sum == 15
-
-    project.load("Test2")
-    finished_stage = StageAddition2(id_=0)
-    assert finished_stage.sum == 150
-
-
 def test_stage_io():
     project = PyTrackProject()
-    # project.name = "Test1"
+    project.name = "Test1"
     project.create_dvc_repository()
 
     deps = Path("test_example01.py")
