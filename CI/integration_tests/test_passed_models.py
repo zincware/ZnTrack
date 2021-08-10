@@ -32,8 +32,8 @@ class Model:
         self.model_class = DVC.params()
 
         self.model_dict = {
-            TestModel1.__name__: TestModel1,
-            TestModel2.__name__: TestModel2
+            Model1.__name__: Model1,
+            Model2.__name__: Model2
         }
 
         self.result = DVC.result()
@@ -47,7 +47,7 @@ class Model:
         model.run()
 
 
-class TestModel1:
+class Model1:
     def __init__(self, param1, parent=None):
         self.params = {"param1": param1}
         self.parent: Model = parent
@@ -56,7 +56,7 @@ class TestModel1:
         self.parent.result = f"TestModel1 received params: {self.params}!"
 
 
-class TestModel2:
+class Model2:
     def __init__(self, param1, param2, parent=None):
         self.params = {"param1": param1, "param2": param2}
         self.parent: Model = parent
@@ -82,8 +82,8 @@ def test_stage_addition():
     project = PyTrackProject()
     project.create_dvc_repository()
 
-    test_model_1 = TestModel1(15)
-    test_model_2 = TestModel2(10, 5)
+    test_model_1 = Model1(15)
+    test_model_2 = Model2(10, 5)
 
     model = Model()
     model(model=test_model_1)
