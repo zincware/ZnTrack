@@ -16,8 +16,7 @@ class BasicTest:
 
     def __init__(self):
         """Constructor of the PyTrack test instance"""
-        self.deps1 = DVC.deps(Path("deps1", "input.json").as_posix())
-        self.deps2 = DVC.deps(Path("deps2", "input.json").as_posix())
+        self.deps = DVC.deps([Path("deps1", "input.json"), Path("deps2", "input.json")])
         self.parameters = DVC.params()
         self.results = DVC.result()
 
@@ -51,7 +50,7 @@ class TestBasic(TestCase):
 
         base = BasicTest()
 
-        for idx, dep in enumerate([base.deps1, base.deps2]):
+        for idx, dep in enumerate(base.deps):
             Path(dep).parent.mkdir(exist_ok=True, parents=True)
             with open(dep, "w") as f:
                 json.dump({"id": idx}, f)
@@ -88,8 +87,5 @@ class TestBasic(TestCase):
         """Test that the dependencies are stored correctly"""
         base = BasicTest(id_=0)
         self.assertTrue(
-            base.deps1, Path("deps1", "input.json")
-        )
-        self.assertTrue(
-            base.deps2, Path("deps2", "input.json")
+            base.deps, [Path("deps1", "input.json"), Path("deps2", "input.json")]
         )
