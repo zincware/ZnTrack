@@ -95,11 +95,14 @@ class PyTrackOption:
 
     def check_input(self, value):
         if isinstance(value, dict):
-            raise ValueError(f'Value {value} must be immutable. Please use tuple,'
-                             f' or non-iterable types instead of dict!')
+            log.warning(f"Used mutable type dict for {self.pytrack_dvc_option}! "
+                        f"Always overwrite the {self.pytrack_dvc_option} and don't alter it otherwise!"
+                        f" It won't work.")
 
         if isinstance(value, list):
-            raise ValueError(f"Value {value} must be immutable. Please convert list to tuple!")
+            log.warning(f"Used mutable type list for {self.pytrack_dvc_option}! "
+                        f"Always overwrite the {self.pytrack_dvc_option} and don't append to it!"
+                        f" It won't work.")
 
     def set_internals(self, instance: PyTrackParent, value: dict):
         """Set the Internals for this instance (Stage & Id)
@@ -116,7 +119,7 @@ class PyTrackOption:
                 log.warning(f"Processing value {value}")
                 results = self.get_results(instance)
                 results.update(value)
-                self.set_results(instance, value)
+                self.set_results(instance, results)
 
             else:
                 if not instance._pytrack_allow_param_change:
@@ -178,8 +181,9 @@ class PyTrackOption:
         file = instance._pytrack_ph.dvc.json_file
         try:
             with open(file) as f:
-                file = json.load(f)
-            return file
+                result = json.load(f)
+            log.warning(f"Loading results {result}")
+            return result
         except FileNotFoundError:
             log.warning("No results found!")
             return {}
