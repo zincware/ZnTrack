@@ -30,6 +30,8 @@ class PyTrack:
             Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables juypter support
         kwargs: No kwars are implemented
         """
+        if cls is not None:
+            raise ValueError('Please use `@Pytrack()` instead of `@Pytrack`.')
         self.cls = cls
         self.kwargs = kwargs
         self.return_with_args = True

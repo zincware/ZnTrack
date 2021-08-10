@@ -16,30 +16,15 @@ import json
 from pytrack.utils import is_jsonable
 from pytrack.core.data_classes import DVCParams
 from pathlib import Path
-from typing import Union, Dict, Any
-from dataclasses import dataclass, field, asdict
+from typing import Union
 
 log = logging.getLogger(__file__)
 
 if typing.TYPE_CHECKING:
     from pytrack.core.py_track import PyTrackParent
 
-
-@dataclass
-class DVCValues:
-    params: Dict[str, Any] = field(default_factory=dict)
-    deps: Dict[str, Any] = field(default_factory=dict)
-    outs: Dict[str, Any] = field(default_factory=dict)
-    result: Dict[str, Any] = field(default_factory=dict)  # check what this is?!
-
-
 class ParameterHandler:
     def __init__(self):
-        # TODO remove dvc_options and only use dvc_values
-        self.dvc_options = DVCValues()
-        # save the attributes, e.g. {params: [param1, param2], results: [result1]}
-        self.dvc_values = DVCValues()  # see dataclass definition
-
         self.dvc = DVCParams()
 
     def update_dvc_options(self, cls):
@@ -57,77 +42,6 @@ class ParameterHandler:
                     raise AttributeError('setattr went wrong!')
             except AttributeError:
                 pass
-
-        # assumes all DVC.<placeholder> are converted to descriptors
-        for attr, value in vars(type(cls)).items():
-            try:
-                option = value.pytrack_dvc_option
-                try:
-                    getattr(self.dvc_options, option).update({attr: None})
-                except AttributeError:
-                    log.warning(f"Could not set attr {option}!")
-            except AttributeError:  # not all attributes have an pytrack_dvc_option
-                pass
-
-    def update_dvc(self, cls):
-        """Save the user input"""
-        for option in self.dvc_options.params:
-            if is_jsonable(getattr(cls, option)):
-                parameter_dict = self.dvc_values.params
-                parameter_dict[option] = getattr(cls, option)
-                self.dvc_values.params.update(parameter_dict)
-            else:
-                raise ValueError(f'Parameter {option} is not json serializable! ({getattr(cls, option)})')
-
-        for option in asdict(self.dvc_options):
-            if option == "params":
-                continue
-            if option == "result":
-                continue
-            for value in getattr(self.dvc_options, option):
-                getattr(self.dvc_values, option).update({value: getattr(cls, value)})
-
-            self.update_cls_attributes(option, cls)
-
-    def update_cls_attributes(self, item, cls):
-        """
-
-        Parameters
-        ----------
-        item: the dvc option item to update
-        cls: the class to get the attributes from
-        target: the target, e.g. DVCParams.deps
-        path: (optional) the standard path, e.g. DVCParams.outs_path
-
-        Returns
-        -------
-
-        """
-
-        target = getattr(self.dvc, item)
-        try:
-            path = getattr(self.dvc, f'{item}_path')
-        except AttributeError:
-            path = Path()
-
-        for option in getattr(self.dvc_options, item):
-            if isinstance(getattr(cls, option), tuple):
-                # raise NotImplementedError('Lists are not yet supported!')
-                # if self.param = ["a", "b"]
-                for abc in getattr(cls, option):
-                    target.append(path / abc)
-            elif isinstance(getattr(cls, option), PyTrackOption):
-                if isinstance(getattr(cls, option), tuple):
-                    # raise NotImplementedError('Lists are not yet supported!')
-                    # if self.param = DVC.outs(["a", "b"])
-                    for abc in getattr(cls, option):
-                        target.append(path / abc)
-                else:
-                    # if self.param = DVC.outs("a")
-                    target.append(path / getattr(cls, option))
-            else:
-                # if self.param = "a"
-                target.append(path / getattr(cls, option))
 
 
 class PyTrackOption:
@@ -157,7 +71,7 @@ class PyTrackOption:
         """Update the value"""
         if self.pytrack_dvc_option is not "result":
             self.check_input(value)
-        log.debug(f"Updating {self.get_name(instance)} with {value}")
+        log.warning(f"Updating {self.get_name(instance)} with {value}")
         self.set_internals(instance, {self.get_name(instance): value})
 
     def get_name(self, instance):
@@ -194,8 +108,8 @@ class PyTrackOption:
         """
         if isinstance(value, dict):
             if self.pytrack_dvc_option == "result":
-                if not instance._pytrack__running:
-                    log.debug("Result can only be changed within `run` call!")
+                if not instance._pytrack_allow_result_change:
+                    log.warning("Result can only be changed within `run` call!")
                     return
                 if not is_jsonable(value):
                     raise ValueError('Results must be JSON serializable')
@@ -205,8 +119,8 @@ class PyTrackOption:
                 self.set_results(instance, value)
 
             else:
-                if instance._pytrack_was_loaded:
-                    log.debug("This stage is being loaded. No internals will be changed!")
+                if not instance._pytrack_allow_param_change:
+                    log.warning("This stage is being loaded. No internals will be changed!")
                     return
                 name = instance._pytrack_name
                 id_ = instance._pytrack_id

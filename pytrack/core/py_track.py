@@ -41,12 +41,13 @@ class PyTrackParent:
 
         self._pytrack_dvc_file = 'dvc.yaml'
         self._pytrack_was_called = False
-        self._pytrack_was_loaded = False
+        self._pytrack_allow_param_change = False
+        self._pytrack_allow_result_change = False
 
         self._pytrack_ph = ParameterHandler()
 
     def _pytrack_pre_init(self, id_):
-        self._pytrack_was_loaded = id_ is not None
+        self._pytrack_allow_param_change = id_ is None
 
     def _pytrack_post_init(self):
         """Post init command
@@ -97,7 +98,7 @@ class PyTrackParent:
         self._pytrack_ph.dvc.make_paths()
 
         # Parameters are only set in/after the call method!
-        self._pytrack_ph.update_dvc(self)
+        # self._pytrack_ph.update_dvc(self)
 
         self._write_dvc(force, exec_, always_changed, slurm)
 
@@ -114,7 +115,7 @@ class PyTrackParent:
          raise and error!
 
         """
-
+        self._pytrack_allow_result_change = True
         self._pytrack__running = True
 
     def _pytrack_post_run(self):
@@ -122,7 +123,7 @@ class PyTrackParent:
 
         This method saves the results
         """
-        pass
+        self._pytrack_allow_result_change = False
 
     @property
     def _pytrack_id(self) -> str:

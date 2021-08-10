@@ -10,7 +10,7 @@ from tempfile import TemporaryDirectory
 temp_dir = TemporaryDirectory()
 
 
-@PyTrack
+@PyTrack()
 class BasicTest:
     """BasicTest class"""
 
