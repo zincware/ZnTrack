@@ -47,11 +47,9 @@ class ParameterHandler:
 
 class PyTrackOption:
     def __init__(self, option: str, value: Union[str, tuple] = None, attr: str = None, cls: PyTrackParent = None):
-        self.check_input(value)
-
         self.pytrack_dvc_option = option
-
         self.value = value
+        self.check_input(value)
         if value is not None and cls is not None:
             self.set_internals(cls, {attr: value})
 
@@ -79,7 +77,7 @@ class PyTrackOption:
         # TODO support Path objects and lists of Path objects!
         # TODO support dicts for parameters and write them to a different file?!
         """Update the value"""
-        if self.pytrack_dvc_option is not "result":
+        if self.pytrack_dvc_option != "result":
             self.check_input(value)
         log.warning(f"Updating {self.get_name(instance)} with {value}")
 
@@ -94,24 +92,30 @@ class PyTrackOption:
         if isinstance(value, Path):
             value = value.as_posix()
 
-        if isinstance(value, list):
-            new_value = []
-            for entry in value:
-                if isinstance(entry, Path):
-                    new_value.append(entry.as_posix())
-                else:
-                    new_value.append(entry)
-            value = new_value
+        def conv_path_lists(path_list):
+            if isinstance(path_list, list):
+                str_list = []
+                for entry in path_list:
+                    if isinstance(entry, Path):
+                        str_list.append(entry.as_posix())
+                    else:
+                        str_list.append(entry)
+                return str_list
+            return path_list
 
-        if isinstance(value, dict):
-            new_value = {}
-            for key, val in value.items():
-                if isinstance(val, Path):
-                    new_value[key] = val.as_posix()
-                else:
-                    new_value[key] = val
+        def conv_path_dict(path_dict):
+            if isinstance(path_dict, dict):
+                str_dict = {}
+                for key, val in path_dict.items():
+                    if isinstance(val, Path):
+                        str_dict[key] = val.as_posix()
+                    else:
+                        str_dict[key] = conv_path_lists(val)
+                return str_dict
+            return path_dict
 
-            value = new_value
+        value = conv_path_lists(value)
+        value = conv_path_dict(value)
 
         return value
 
@@ -166,6 +170,7 @@ class PyTrackOption:
                 if not instance._pytrack_allow_param_change:
                     log.warning("This stage is being loaded. No internals will be changed!")
                     return
+                value = self.make_serializable(value)
                 name = instance._pytrack_name
                 id_ = instance._pytrack_id
                 file = instance._pytrack_dvc.internals_file

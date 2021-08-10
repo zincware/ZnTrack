@@ -154,8 +154,10 @@ class PyTrackParent:
         for attr, val in vars(type(self)).items():
             if isinstance(val, PyTrackOption):
                 if val.pytrack_dvc_option == "outs":
+                    # TODO check that this works with lists!
                     self._pytrack_dvc.outs.append(getattr(self, attr))
                 if val.pytrack_dvc_option == "deps":
+                    # TODO check that this works with lists!
                     self._pytrack_dvc.deps.append(getattr(self, attr))
 
     def _write_dvc(
