@@ -51,6 +51,7 @@ class PyTrackOption:
         self.value = value
         self.check_input(value)
         if value is not None and cls is not None:
+            value = self.make_serializable(value)
             self.set_internals(cls, {attr: value})
 
     def __get__(self, instance: PyTrackParent, owner):
@@ -91,6 +92,15 @@ class PyTrackOption:
     def make_serializable(self, value):
         if isinstance(value, self.__class__):
             value = value.value
+
+        if hasattr(value, "_pytrack_dvc"):
+            # Allow self.deps = DVC.deps(Stage(id_=0))
+            if self.pytrack_dvc_option == "deps":
+                new_value = getattr(value, "_pytrack_dvc").json_file
+                if new_value is None:
+                    raise ValueError(f"Stage {value} has no results assigned to it!")
+                else:
+                    value = new_value
 
         if isinstance(value, Path):
             value = value.as_posix()

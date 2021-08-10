@@ -54,8 +54,8 @@ class ComputeB:
 @PyTrack()
 class ComputeAB:
     def __init__(self):
-        self.a = DVC.deps(ComputeA(id_=0)._pytrack_dvc.json_file.as_posix())
-        self.b = DVC.deps(ComputeB(id_=0)._pytrack_dvc.json_file.as_posix())
+        self.a = DVC.deps(ComputeA(id_=0))
+        self.b = DVC.deps(ComputeB(id_=0))
         self.out = DVC.result()
 
         self.param = DVC.params()
@@ -95,7 +95,6 @@ def test_stage_addition():
     ab()
 
     project.run()
-    subprocess.check_call(['dvc', "repro"])
-    # project.load()
+    project.load()
     finished_stage = ComputeAB(id_=0)
     assert finished_stage.out == 31
