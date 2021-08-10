@@ -58,11 +58,14 @@ class PyTrackOption:
         if self.pytrack_dvc_option == "result":
             return self.get_results(instance).get(self.get_name(instance))
         else:
-            output = self.get_internals(instance).get(self.get_name(instance))
+            output = self.get_internals(instance).get(self.get_name(instance), "")
             if self.pytrack_dvc_option == "params":
                 return output
             elif self.pytrack_dvc_option == "deps":
-                return Path(output)
+                if isinstance(output, list):
+                    return [Path(x) for x in output]
+                else:
+                    return Path(output)
             else:
                 # convert to path
                 file_path: Path = getattr(instance._pytrack_dvc, f"{self.pytrack_dvc_option}_path")

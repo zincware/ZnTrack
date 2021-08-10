@@ -153,12 +153,15 @@ class PyTrackParent:
     def _pytrack_update_dvc(self):
         for attr, val in vars(type(self)).items():
             if isinstance(val, PyTrackOption):
-                if val.pytrack_dvc_option == "outs":
-                    # TODO check that this works with lists!
-                    self._pytrack_dvc.outs.append(getattr(self, attr))
-                if val.pytrack_dvc_option == "deps":
-                    # TODO check that this works with lists!
-                    self._pytrack_dvc.deps.append(getattr(self, attr))
+                option = val.pytrack_dvc_option
+                new_vals = getattr(self, attr)
+                try:
+                    if isinstance(new_vals, list):
+                        [getattr(self._pytrack_dvc, option).append(x) for x in new_vals]
+                    else:
+                        getattr(self._pytrack_dvc, option).append(new_vals)
+                except AttributeError:
+                    log.warning(f"'DVCParams' object has no attribute '{option}'")
 
     def _write_dvc(
             self,
