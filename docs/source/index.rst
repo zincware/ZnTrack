@@ -11,6 +11,7 @@ PyTrack is designed as a developer package aiming to be used in other software p
 If you are not planning on writing such packages we highly recommend looking up DVC first.
 
 PyTrack might still be helpful for you, because it provides an Object Oriented Mapper for DVC.
+It contains an experimental feature, that enables the usage of Python classes from within a Jupyter Notebook while utilizing DVC tracking.
 Please have a look at the Tutorials and Documentation for detailed information or write an issue on Github for https://github.com/zincware/py-track
 
 .. toctree::
@@ -18,7 +19,7 @@ Please have a look at the Tutorials and Documentation for detailed information o
    :caption: Contents:
 
    installation
-   overview
+   Overview/Introduction.ipynb
    jupyter
    tutorials
    modules_and_classes
