@@ -1,13 +1,15 @@
 from unittest import TestCase
-from pytrack import PyTrack, DVC
+from pytrack import PyTrack, DVC, PyTrackProject
 from pathlib import Path
 import json
 import subprocess
 import os
 import shutil
 from tempfile import TemporaryDirectory
+import pytest
 
 temp_dir = TemporaryDirectory()
+cwd = os.getcwd()
 
 
 @PyTrack()
@@ -29,63 +31,51 @@ class BasicTest:
         self.results = {"name": self.parameters["name"]}
 
 
-class TestBasic(TestCase):
-    """This is a unittest TestCase for testing PyTrack"""
+@pytest.fixture(autouse=True)
+def prepare_env():
+    temp_dir = TemporaryDirectory()
+    shutil.copy(__file__, temp_dir.name)
+    os.chdir(temp_dir.name)
 
-    @classmethod
-    def setUpClass(cls) -> None:
-        """Prepare for tests
+    project = PyTrackProject()
+    project.create_dvc_repository()
 
-        1. copy file to temp_dir
-        2. chdir into temp_dir
-        3. Initalize DVC
-        4. run dvc repro
+    base = BasicTest()
+    base(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
 
-        """
-        shutil.copy(__file__, temp_dir.name)
-        os.chdir(temp_dir.name)
+    for idx, dep in enumerate(base.deps):
+        Path(dep).parent.mkdir(exist_ok=True, parents=True)
+        with open(dep, "w") as f:
+            json.dump({"id": idx}, f)
 
-        subprocess.check_call(["git", "init"])
-        subprocess.check_call(["dvc", "init"])
+    project.name = "Test1"
+    project.run()
+    project.load()
 
-        base = BasicTest()
+    yield
 
-        for idx, dep in enumerate(base.deps):
-            Path(dep).parent.mkdir(exist_ok=True, parents=True)
-            with open(dep, "w") as f:
-                json.dump({"id": idx}, f)
+    os.chdir(cwd)
+    temp_dir.cleanup()
 
-        # Have to run dvc repro here, because otherwise I can not test the values inside it
-        base(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
-        subprocess.check_call(["dvc", "repro"])
 
-    @classmethod
-    def tearDownClass(cls) -> None:
-        """Remove all test files"""
-        subprocess.check_call(["dvc", "destroy", "-f"])
-        os.chdir("..")
-        temp_dir.cleanup()
+def test_query_by_id():
+    base = BasicTest(id_=0)
+    assert base.pytrack.id == "0"
 
-    def test_query_by_id(self):
-        """Test that the id is set correctly"""
-        base = BasicTest(id_=0)
-        self.assertTrue(base._pytrack_id, "0")
 
-    def test_parameters(self):
-        """Test that the parameters are read correctly"""
-        base = BasicTest(id_=0)
-        self.assertTrue(
-            base.parameters, dict(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
-        )
+def test_parameters():
+    """Test that the parameters are read correctly"""
+    base = BasicTest(id_=0)
+    assert base.parameters == dict(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
 
-    def test_results(self):
-        """Test that the results are read correctly"""
-        base = BasicTest(id_=0)
-        self.assertTrue(base.results, {"name": "PyTest"})
 
-    def test_deps(self):
-        """Test that the dependencies are stored correctly"""
-        base = BasicTest(id_=0)
-        self.assertTrue(
-            base.deps, [Path("deps1", "input.json"), Path("deps2", "input.json")]
-        )
+def test_results():
+    """Test that the results are read correctly"""
+    base = BasicTest(id_=0)
+    assert base.results == {"name": "PyTest"}
+
+
+def test_deps():
+    """Test that the dependencies are stored correctly"""
+    base = BasicTest(id_=0)
+    assert base.deps == [Path("deps1", "input.json"), Path("deps2", "input.json")]

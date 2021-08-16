@@ -21,10 +21,11 @@ log = logging.getLogger(__file__)
 
 if typing.TYPE_CHECKING:
     from pytrack.core.py_track import PyTrackParent
+    from pytrack.utils.type_hints import TypeHintParent
 
 
 class PyTrackOption:
-    def __init__(self, option: str, value: Union[str, tuple] = None, attr: str = None, cls: PyTrackParent = None):
+    def __init__(self, option: str, value: Union[str, tuple] = None, attr: str = None, cls: TypeHintParent = None):
         """PyTrack Descriptor to handle the loading and writing of files
 
         Parameters
@@ -41,7 +42,7 @@ class PyTrackOption:
             value = self.make_serializable(value)
             self.set_internals(cls, {attr: value})
 
-    def __get__(self, instance: PyTrackParent, owner):
+    def __get__(self, instance: TypeHintParent, owner):
         """Get the value of this instance from pytrack_internals and return it"""
         if self.pytrack_dvc_option == "result":
             return self.get_results(instance).get(self.get_name(instance))
@@ -56,7 +57,7 @@ class PyTrackOption:
                     return Path(output)
             else:
                 # convert to path
-                file_path: Path = getattr(instance._pytrack_dvc, f"{self.pytrack_dvc_option}_path")
+                file_path: Path = getattr(instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path")
                 if isinstance(output, list):
                     return [file_path / x for x in output]
                 elif isinstance(output, str):
@@ -64,7 +65,7 @@ class PyTrackOption:
                 else:
                     return output
 
-    def __set__(self, instance: PyTrackParent, value):
+    def __set__(self, instance: TypeHintParent, value):
         # TODO support Path objects and lists of Path objects!
         # TODO support dicts for parameters and write them to a different file?!
         """Update the value"""
@@ -81,10 +82,10 @@ class PyTrackOption:
         if isinstance(value, self.__class__):
             value = value.value
 
-        if hasattr(value, "_pytrack_dvc"):
+        if hasattr(value, "pytrack"):
             # Allow self.deps = DVC.deps(Stage(id_=0))
             if self.pytrack_dvc_option == "deps":
-                new_value = getattr(value, "_pytrack_dvc").json_file
+                new_value = value.pytrack.dvc.json_file
                 if new_value is None:
                     raise ValueError(f"Stage {value} has no results assigned to it!")
                 else:
@@ -125,7 +126,7 @@ class PyTrackOption:
 
         Parameters
         ----------
-        instance: PyTrackParent
+        instance: TypeHintParent
             A instance of the Parent that contains
 
         Returns
@@ -150,14 +151,14 @@ class PyTrackOption:
                         f"Always overwrite the {self.pytrack_dvc_option} and don't append to it!"
                         f" It won't work.")
 
-    def set_internals(self, instance: PyTrackParent, value: dict):
+    def set_internals(self, instance: TypeHintParent, value: dict):
         """Set the Internals for this instance (Stage & Id)
 
         This writes them to self._pytrack_all_parameters, i.e., to the config file.
         """
         if isinstance(value, dict):
             if self.pytrack_dvc_option == "result":
-                if not instance._pytrack_allow_result_change:
+                if not instance.pytrack.allow_result_change:
                     log.warning("Result can only be changed within `run` call!")
                     return
                 if not is_jsonable(value):
@@ -168,13 +169,14 @@ class PyTrackOption:
                 self.set_results(instance, results)
 
             else:
-                if not instance._pytrack_allow_param_change:
+                log.warning(f"Param_Change: {instance.pytrack.allow_param_change} on {instance.pytrack}")
+                if not instance.pytrack.allow_param_change:
                     log.warning("This stage is being loaded. No internals will be changed!")
                     return
                 value = self.make_serializable(value)
-                name = instance._pytrack_name
-                id_ = instance._pytrack_id
-                file = instance._pytrack_dvc.internals_file
+                name = instance.pytrack.name
+                id_ = instance.pytrack.id
+                file = instance.pytrack.dvc.internals_file
 
                 full_internals = self.get_full_internals(file)
                 stage = full_internals.get(name, {})
@@ -194,11 +196,11 @@ class PyTrackOption:
                 f"Value has to be a dictionary but found {type(value)} instead!"
             )
 
-    def get_internals(self, instance: PyTrackParent):
+    def get_internals(self, instance: TypeHintParent):
         """Get the parameters for this instance (Stage & Id)"""
-        name = instance._pytrack_name
-        id_ = instance._pytrack_id
-        file = instance._pytrack_dvc.internals_file
+        name = instance.pytrack.name
+        id_ = instance.pytrack.id
+        file = instance.pytrack.dvc.internals_file
 
         full_internals = self.get_full_internals(file)
 
@@ -219,7 +221,7 @@ class PyTrackOption:
     @staticmethod
     def set_full_internals(file, value: dict):
         """Update internals in .pytrack.json"""
-        log.debug(f"Writing updates to .pytrack.json as {value}")
+        log.warning(f"Writing updates to .pytrack.json as {value}")
         value.update({"default": None})
 
         if not is_jsonable(value):
@@ -231,8 +233,8 @@ class PyTrackOption:
             json.dump(value, json_file, indent=4)
 
     @staticmethod
-    def get_results(instance):
-        file = instance._pytrack_dvc.json_file
+    def get_results(instance: TypeHintParent):
+        file = instance.pytrack.dvc.json_file
         try:
             with open(file) as f:
                 result = json.load(f)
@@ -243,8 +245,8 @@ class PyTrackOption:
             return {}
 
     @staticmethod
-    def set_results(instance, value):
-        file = instance._pytrack_dvc.json_file
+    def set_results(instance: TypeHintParent, value):
+        file = instance.pytrack.dvc.json_file
         if not is_jsonable(value):
             raise ValueError(f'{value} is not JSON serializable')
         log.warning(f"Writing {value} to {file}")
