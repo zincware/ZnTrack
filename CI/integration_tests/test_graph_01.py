@@ -9,7 +9,6 @@ Copyright Contributors to the Zincware Project.
 Description: Simple test for graph execution
 """
 import shutil
-import subprocess
 
 import pytest
 import os
@@ -23,10 +22,10 @@ temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
 
 
-# TODO tests should also test .run() and not just dvc repro for better coverage!
-
 @PyTrack()
 class ComputeA:
+    """PyTrack stage A"""
+
     def __init__(self):
         self.inp = DVC.params()
         self.out = DVC.result()
@@ -40,6 +39,8 @@ class ComputeA:
 
 @PyTrack()
 class ComputeB:
+    """PyTrack stage B"""
+
     def __init__(self):
         self.inp = DVC.params()
         self.out = DVC.result()
@@ -53,6 +54,8 @@ class ComputeB:
 
 @PyTrack()
 class ComputeAB:
+    """PyTrack stage AB, depending on A&B"""
+
     def __init__(self):
         self.a = DVC.deps(ComputeA(id_=0))
         self.b = DVC.deps(ComputeB(id_=0))
@@ -71,6 +74,7 @@ class ComputeAB:
 
 @pytest.fixture(autouse=True)
 def prepare_env():
+    """Create temporary directory"""
     temp_dir = TemporaryDirectory()
     shutil.copy(__file__, temp_dir.name)
     os.chdir(temp_dir.name)
@@ -96,5 +100,26 @@ def test_stage_addition():
 
     project.run()
     project.load()
+    finished_stage = ComputeAB(id_=0)
+    assert finished_stage.out == 31
+
+
+def test_stage__addition_run():
+    """Check that the PyTracks run method works"""
+    project = PyTrackProject()
+    project.name = "test01"
+    project.create_dvc_repository()
+
+    a = ComputeA()
+    a(2)
+    b = ComputeB()
+    b(3)
+    ab = ComputeAB()
+    ab()
+
+    a.run()
+    b.run()
+    ab.run()
+
     finished_stage = ComputeAB(id_=0)
     assert finished_stage.out == 31

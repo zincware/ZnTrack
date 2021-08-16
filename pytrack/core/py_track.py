@@ -24,6 +24,7 @@ log = logging.getLogger(__file__)
 
 
 class PyTrackParent:
+    """Parent class to be applied within the decorator"""
     def __init__(self):
         """Constructor for the DVCOp parent class
         """

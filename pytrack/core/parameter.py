@@ -14,7 +14,6 @@ import typing
 
 import json
 from pytrack.utils import is_jsonable
-from pytrack.core.data_classes import DVCParams
 from pathlib import Path
 from typing import Union
 
@@ -24,29 +23,17 @@ if typing.TYPE_CHECKING:
     from pytrack.core.py_track import PyTrackParent
 
 
-class ParameterHandler:
-    def __init__(self):
-        self.dvc = DVCParams()
-
-    def update_dvc_options(self, cls):
-        """Update the dvc_options with None values
-
-        This is run after the __init__ to save all DVCParams and they can later be overwritten
-        """
-        for attr, value in vars(cls).items():
-            try:
-                option = value.pytrack_dvc_option
-                try:
-                    log.warning(f"Updating {attr} with PyTrackOption and value {value.value}!")
-                    setattr(type(cls), attr, PyTrackOption(option=option, value=value.value, attr=attr, cls=cls))
-                except AttributeError:
-                    raise AttributeError('setattr went wrong!')
-            except AttributeError:
-                pass
-
-
 class PyTrackOption:
     def __init__(self, option: str, value: Union[str, tuple] = None, attr: str = None, cls: PyTrackParent = None):
+        """PyTrack Descriptor to handle the loading and writing of files
+
+        Parameters
+        ----------
+        option
+        value
+        attr
+        cls
+        """
         self.pytrack_dvc_option = option
         self.value = value
         self.check_input(value)
@@ -90,6 +77,7 @@ class PyTrackOption:
         self.set_internals(instance, {self.get_name(instance): value})
 
     def make_serializable(self, value):
+        """Make value serializable to save as json"""
         if isinstance(value, self.__class__):
             value = value.value
 
@@ -330,30 +318,3 @@ class DVC:
             pass
 
         return PyTrackParameter("outs", value=value)
-
-
-if __name__ == '__main__':
-    class TEST:
-        def __init__(self):
-            self.param1 = DVC.parameter()
-            self.param2 = DVC.parameter()
-            self.out1 = DVC.outs()
-            self.result1 = DVC.result()
-
-        def run(self):
-            self.param1 = 10
-            self.param2 = 20
-
-
-    test = TEST()
-
-    param_handler = ParameterHandler()
-
-    param_handler.update_dvc_options(test)
-
-    test.run()
-    param_handler.update_dvc(test)
-
-    print(param_handler.dvc_options)
-
-    print(param_handler.dvc_values)

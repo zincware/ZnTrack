@@ -18,14 +18,24 @@ log = logging.getLogger(__file__)
 
 
 class PyTrackProject(DVCInterface):
+    """PyTrack Project to handle experiments via subprocess calls to DVC"""
     def __init__(self, name: str = None):
+        """
+
+        Parameters
+        ----------
+        name: str (optional)
+            Name of the project
+        """
         super().__init__()
         if name is None:
             name = f'PyTrackProject_{datetime.now().strftime("%Y_%m_%d-%H_%M_%S")}'
         self.name = name
 
-    def queue(self):
+    def queue(self, name: str = None):
         """Add this project to the DVC queue"""
+        if name is not None:
+            self.name = name
         log.info("Running git add")
         subprocess.check_call(["git", "add", "."])
         log.info("Queue DVC stage")
@@ -45,9 +55,9 @@ class PyTrackProject(DVCInterface):
         log.info("Running git add")
         subprocess.check_call(["git", "add", "."])
 
-    def run(self):
+    def run(self, name: str = None):
         """Add this experiment to the queue and run the full queue"""
-        self.queue()
+        self.queue(name=name)
         self.run_all()
         log.info("Finished")
 

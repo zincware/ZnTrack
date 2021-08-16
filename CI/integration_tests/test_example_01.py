@@ -32,7 +32,6 @@ class StageIO:
         self.outs = DVC.outs('calculation.txt')
         self.deps = DVC.deps()
         self.param = DVC.params()
-        self.result = DVC.result()  # TODO right now, this is mandatory, make it optional
 
     def __call__(self, file):
         """User input
@@ -48,8 +47,6 @@ class StageIO:
             file_content = f.readlines()
 
         Path(self.outs).write_text("".join(file_content))
-
-        self.result = "Mandatory result placeholder"
 
 
 @PyTrack()
@@ -127,7 +124,7 @@ def test_stage_io():
     project.name = "Test1"
     project.create_dvc_repository()
 
-    deps = Path("test_example01.py")
+    deps = Path("test_example_01.py")
 
     stage = StageIO()
     stage(deps.resolve())
