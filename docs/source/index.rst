@@ -19,6 +19,7 @@ Please have a look at the Tutorials and Documentation for detailed information o
    :caption: Contents:
 
    installation
+   Overview/Functionality.ipynb
    Overview/Introduction.ipynb
    jupyter
    tutorials

@@ -71,7 +71,7 @@ class PyTrackOption:
         """Update the value"""
         if self.pytrack_dvc_option != "result":
             self.check_input(value)
-        log.warning(f"Updating {self.get_name(instance)} with {value}")
+        log.debug(f"Updating {self.get_name(instance)} with {value}")
 
         value = self.make_serializable(value)
 
@@ -163,13 +163,13 @@ class PyTrackOption:
                     return
                 if not is_jsonable(value):
                     raise ValueError('Results must be JSON serializable')
-                log.warning(f"Processing value {value}")
+                log.debug(f"Processing value {value}")
                 results = self.get_results(instance)
                 results.update(value)
                 self.set_results(instance, results)
 
             else:
-                log.warning(f"Param_Change: {instance.pytrack.allow_param_change} on {instance.pytrack}")
+                log.debug(f"Param_Change: {instance.pytrack.allow_param_change} on {instance.pytrack}")
                 if not instance.pytrack.allow_param_change:
                     log.warning("This stage is being loaded. No internals will be changed!")
                     return
@@ -221,7 +221,7 @@ class PyTrackOption:
     @staticmethod
     def set_full_internals(file, value: dict):
         """Update internals in .pytrack.json"""
-        log.warning(f"Writing updates to .pytrack.json as {value}")
+        log.debug(f"Writing updates to .pytrack.json as {value}")
         value.update({"default": None})
 
         if not is_jsonable(value):
@@ -238,7 +238,7 @@ class PyTrackOption:
         try:
             with open(file) as f:
                 result = json.load(f)
-            log.warning(f"Loading results {result}")
+            log.debug(f"Loading results {result}")
             return result
         except FileNotFoundError:
             log.warning("No results found!")
@@ -249,10 +249,10 @@ class PyTrackOption:
         file = instance.pytrack.dvc.json_file
         if not is_jsonable(value):
             raise ValueError(f'{value} is not JSON serializable')
-        log.warning(f"Writing {value} to {file}")
+        log.debug(f"Writing {value} to {file}")
         with open(file, "w") as f:
             json.dump(value, f, indent=4)
-        log.warning("successful!")
+        log.debug("successful!")
 
     def __repr__(self):
         return f"Descriptor for {self.pytrack_dvc_option}"

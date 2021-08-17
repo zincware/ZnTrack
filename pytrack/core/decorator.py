@@ -140,7 +140,7 @@ class PyTrack:
         """Decorator to handle the init of the decorated class"""
 
         def wrapper(cls: TypeHintParent, *args, id_=None, **kwargs):
-            log.warning(f"Got id_: {id_}")
+            log.debug(f"Got id_: {id_}")
             pytrack_parent = PyTrackParent(child=cls)
             pytrack_parent.pre_init(id_=id_)
 
