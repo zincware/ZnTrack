@@ -25,16 +25,14 @@ cwd = os.getcwd()
 
 # TODO tests should also test .run() and not just dvc repro for better coverage!
 
+
 @PyTrack()
 class Model:
     def __init__(self):
         self.model_params = DVC.params()
         self.model_class = DVC.params()
 
-        self.model_dict = {
-            Model1.__name__: Model1,
-            Model2.__name__: Model2
-        }
+        self.model_dict = {Model1.__name__: Model1, Model2.__name__: Model2}
 
         self.result = DVC.result()
 

@@ -37,7 +37,7 @@ class PyTrack:
         kwargs: No kwars are implemented
         """
         if cls is not None:
-            raise ValueError('Please use `@Pytrack()` instead of `@Pytrack`.')
+            raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
         self.cls = cls
         self.kwargs = kwargs
         self.return_with_args = True
@@ -51,7 +51,7 @@ class PyTrack:
             )
             nb_name = Path(nb_name)
         self.nb_name = nb_name
-        self.nb_class_path = Path('src')
+        self.nb_class_path = Path("src")
 
     def __call__(self, *args, **kwargs):
         """
@@ -102,7 +102,11 @@ class PyTrack:
                 if line.startswith("import") or line.startswith("from"):
                     imports += line
                 if reading_class:
-                    if re.match(r'\S', line) and not line.startswith("#") and not line.startswith("class"):
+                    if (
+                        re.match(r"\S", line)
+                        and not line.startswith("#")
+                        and not line.startswith("class")
+                    ):
                         reading_class = False
                 if reading_class:
                     class_definition += line
@@ -121,8 +125,7 @@ class PyTrack:
         self.nb_name.with_suffix(".py").unlink()
 
     def apply_decorator(self):
-        """Apply the decorators to the class methods
-        """
+        """Apply the decorators to the class methods"""
         if "run" not in vars(self.cls):
             raise NotImplementedError("PyTrack class must implement a run method!")
         for name, obj in vars(self.cls).items():
@@ -162,7 +165,15 @@ class PyTrack:
     def call_decorator(f):
         """Decorator to handle the call of the decorated class"""
 
-        def wrapper(cls: TypeHintParent, *args, force=True, exec_=False, always_changed=False, slurm=False, **kwargs):
+        def wrapper(
+            cls: TypeHintParent,
+            *args,
+            force=True,
+            exec_=False,
+            always_changed=False,
+            slurm=False,
+            **kwargs,
+        ):
             cls.pytrack.pre_call()
             function = f(cls, *args, **kwargs)
             cls.pytrack.post_call(force, exec_, always_changed, slurm)

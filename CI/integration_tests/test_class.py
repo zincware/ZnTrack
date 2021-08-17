@@ -66,7 +66,9 @@ def test_query_by_id():
 def test_parameters():
     """Test that the parameters are read correctly"""
     base = BasicTest(id_=0)
-    assert base.parameters == dict(name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256])
+    assert base.parameters == dict(
+        name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256]
+    )
 
 
 def test_results():

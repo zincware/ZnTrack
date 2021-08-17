@@ -27,8 +27,7 @@ class PyTrackParent:
     """Parent class to be applied within the decorator"""
 
     def __init__(self, child):
-        """Constructor for the DVCOp parent class
-        """
+        """Constructor for the DVCOp parent class"""
 
         self.child = child
 
@@ -44,7 +43,7 @@ class PyTrackParent:
         self._running = False  # is set to true, when run_dvc
         self._module = None
 
-        self.dvc_file = 'dvc.yaml'
+        self.dvc_file = "dvc.yaml"
         self.was_called = False
         self.allow_param_change = False
         self.allow_result_change = False
@@ -81,7 +80,9 @@ class PyTrackParent:
     def pre_call(self):
         """Method to be run before the call"""
         if self.was_called:
-            raise AttributeError('This method was already called. Please create a new instance!')
+            raise AttributeError(
+                "This method was already called. Please create a new instance!"
+            )
 
     def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
         """Method after call
@@ -141,11 +142,18 @@ class PyTrackParent:
             try:
                 option = value.pytrack_dvc_option
                 try:
-                    log.debug(f"Updating {attr} with PyTrackOption and value {value.value}!")
-                    setattr(type(self.child), attr,
-                            PyTrackOption(option=option, value=value.value, attr=attr, cls=self.child))
+                    log.debug(
+                        f"Updating {attr} with PyTrackOption and value {value.value}!"
+                    )
+                    setattr(
+                        type(self.child),
+                        attr,
+                        PyTrackOption(
+                            option=option, value=value.value, attr=attr, cls=self.child
+                        ),
+                    )
                 except AttributeError:
-                    raise AttributeError('setattr went wrong!')
+                    raise AttributeError("setattr went wrong!")
             except AttributeError:
                 pass
 
@@ -189,11 +197,11 @@ class PyTrackParent:
         return False
 
     def _write_dvc(
-            self,
-            force=True,
-            exec_: bool = False,
-            always_changed: bool = False,
-            slurm: bool = False,
+        self,
+        force=True,
+        exec_: bool = False,
+        always_changed: bool = False,
+        slurm: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -291,7 +299,11 @@ class PyTrackParent:
 
         for interpreter in ["python3", "python"]:
             try:
-                subprocess.check_call([interpreter, "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.check_call(
+                    [interpreter, "--version"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
                 log.debug(f"Using command {interpreter} for dvc!")
                 return interpreter
 

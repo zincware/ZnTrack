@@ -77,7 +77,7 @@ class DVCInterface:
         self._exp_dict = None
 
     def load_files_into_directory(
-            self, files: List[str], path: str = "experiments", experiments: List[str] = None
+        self, files: List[str], path: str = "experiments", experiments: List[str] = None
     ):
         """Save files from multiple experiments in a single directory
 

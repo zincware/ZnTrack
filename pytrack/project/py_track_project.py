@@ -19,6 +19,7 @@ log = logging.getLogger(__file__)
 
 class PyTrackProject(DVCInterface):
     """PyTrack Project to handle experiments via subprocess calls to DVC"""
+
     def __init__(self, name: str = None):
         """
 
@@ -74,14 +75,14 @@ class PyTrackProject(DVCInterface):
     def create_dvc_repository(self):
         """Perform git and dvc init"""
         try:
-            subprocess.check_call(['dvc', 'status'])
+            subprocess.check_call(["dvc", "status"])
             log.info("DVC Repository already exists.")
         except subprocess.CalledProcessError:
-            subprocess.check_call(['git', 'init'])
-            subprocess.check_call(['dvc', 'init'])
-            subprocess.check_call(['git', 'add', "."])
-            subprocess.check_call(['git', 'commit', '-m', f'Initialize {self.name}'])
+            subprocess.check_call(["git", "init"])
+            subprocess.check_call(["dvc", "init"])
+            subprocess.check_call(["git", "add", "."])
+            subprocess.check_call(["git", "commit", "-m", f"Initialize {self.name}"])
 
     @staticmethod
     def _destroy():
-        subprocess.check_call(['dvc', 'destroy', '-f'])
+        subprocess.check_call(["dvc", "destroy", "-f"])

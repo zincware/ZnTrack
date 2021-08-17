@@ -25,7 +25,13 @@ if typing.TYPE_CHECKING:
 
 
 class PyTrackOption:
-    def __init__(self, option: str, value: Union[str, tuple] = None, attr: str = None, cls: TypeHintParent = None):
+    def __init__(
+        self,
+        option: str,
+        value: Union[str, tuple] = None,
+        attr: str = None,
+        cls: TypeHintParent = None,
+    ):
         """PyTrack Descriptor to handle the loading and writing of files
 
         Parameters
@@ -57,7 +63,9 @@ class PyTrackOption:
                     return Path(output)
             else:
                 # convert to path
-                file_path: Path = getattr(instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path")
+                file_path: Path = getattr(
+                    instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path"
+                )
                 if isinstance(output, list):
                     return [file_path / x for x in output]
                 elif isinstance(output, str):
@@ -138,18 +146,22 @@ class PyTrackOption:
             if val == self:
                 return attr
 
-        raise ValueError(f'Could not find {self} in instance {instance}')
+        raise ValueError(f"Could not find {self} in instance {instance}")
 
     def check_input(self, value):
         if isinstance(value, dict):
-            log.warning(f"Used mutable type dict for {self.pytrack_dvc_option}! "
-                        f"Always overwrite the {self.pytrack_dvc_option} and don't alter it otherwise!"
-                        f" It won't work.")
+            log.warning(
+                f"Used mutable type dict for {self.pytrack_dvc_option}! "
+                f"Always overwrite the {self.pytrack_dvc_option} and don't alter it otherwise!"
+                f" It won't work."
+            )
 
         if isinstance(value, list):
-            log.warning(f"Used mutable type list for {self.pytrack_dvc_option}! "
-                        f"Always overwrite the {self.pytrack_dvc_option} and don't append to it!"
-                        f" It won't work.")
+            log.warning(
+                f"Used mutable type list for {self.pytrack_dvc_option}! "
+                f"Always overwrite the {self.pytrack_dvc_option} and don't append to it!"
+                f" It won't work."
+            )
 
     def set_internals(self, instance: TypeHintParent, value: dict):
         """Set the Internals for this instance (Stage & Id)
@@ -162,16 +174,20 @@ class PyTrackOption:
                     log.warning("Result can only be changed within `run` call!")
                     return
                 if not is_jsonable(value):
-                    raise ValueError('Results must be JSON serializable')
+                    raise ValueError("Results must be JSON serializable")
                 log.debug(f"Processing value {value}")
                 results = self.get_results(instance)
                 results.update(value)
                 self.set_results(instance, results)
 
             else:
-                log.debug(f"Param_Change: {instance.pytrack.allow_param_change} on {instance.pytrack}")
+                log.debug(
+                    f"Param_Change: {instance.pytrack.allow_param_change} on {instance.pytrack}"
+                )
                 if not instance.pytrack.allow_param_change:
-                    log.warning("This stage is being loaded. No internals will be changed!")
+                    log.warning(
+                        "This stage is being loaded. No internals will be changed!"
+                    )
                     return
                 value = self.make_serializable(value)
                 name = instance.pytrack.name
@@ -204,7 +220,9 @@ class PyTrackOption:
 
         full_internals = self.get_full_internals(file)
 
-        return full_internals.get(name, {}).get(id_, {}).get(self.pytrack_dvc_option, {})
+        return (
+            full_internals.get(name, {}).get(id_, {}).get(self.pytrack_dvc_option, {})
+        )
 
     @staticmethod
     def get_full_internals(file) -> dict:
@@ -213,9 +231,7 @@ class PyTrackOption:
             with open(file) as json_file:
                 return json.load(json_file)
         except FileNotFoundError:
-            log.debug(
-                f"Could not load params from {file}!"
-            )
+            log.debug(f"Could not load params from {file}!")
         return {}
 
     @staticmethod
@@ -225,7 +241,7 @@ class PyTrackOption:
         value.update({"default": None})
 
         if not is_jsonable(value):
-            raise ValueError(f'{value} is not JSON serializable')
+            raise ValueError(f"{value} is not JSON serializable")
 
         Path(file).parent.mkdir(exist_ok=True, parents=True)
 
@@ -248,7 +264,7 @@ class PyTrackOption:
     def set_results(instance: TypeHintParent, value):
         file = instance.pytrack.dvc.json_file
         if not is_jsonable(value):
-            raise ValueError(f'{value} is not JSON serializable')
+            raise ValueError(f"{value} is not JSON serializable")
         log.debug(f"Writing {value} to {file}")
         with open(file, "w") as f:
             json.dump(value, f, indent=4)
@@ -263,7 +279,9 @@ class DVC:
 
     def __init__(self):
         """Basically a dataclass of DVC methods"""
-        raise NotImplementedError('Can not initialize DVC - this class is purely for accessing its methods!')
+        raise NotImplementedError(
+            "Can not initialize DVC - this class is purely for accessing its methods!"
+        )
 
     @staticmethod
     def params(value=None):
@@ -288,19 +306,19 @@ class DVC:
     def result(value=None):
         """Parameter for PyTrack
 
-            Parameters
-            ----------
-            obj: any class object that the parameter will take on, so that type hinting does not raise issues
-            outs: Future Version, allows for defining the type ot output
+        Parameters
+        ----------
+        obj: any class object that the parameter will take on, so that type hinting does not raise issues
+        outs: Future Version, allows for defining the type ot output
 
-            Returns
-            -------
-            cls: Class that inherits from obj
+        Returns
+        -------
+        cls: Class that inherits from obj
 
-            """
+        """
 
         if value is not None:
-            raise ValueError('Can not pre-initialize result!')
+            raise ValueError("Can not pre-initialize result!")
 
         class PyTrackParameter(PyTrackOption):
             pass

@@ -22,6 +22,7 @@ log = logging.getLogger(__file__)
 @dataclass(frozen=False, order=True, init=True)
 class DVCParams:
     """PyTracks DVCParams"""
+
     # pytrack Parameter
     multi_use: bool = False
     params_file: Path = Path("config", "params.json")
@@ -57,19 +58,27 @@ class DVCParams:
 
     _dvc_params: List[str] = field(
         default_factory=lambda: [
-            'deps', 'outs', 'outs_no_cache', 'outs_persistent', 'metrics', 'metrics_no_cache', 'plots',
-            'plots_no_cache'
+            "deps",
+            "outs",
+            "outs_no_cache",
+            "outs_persistent",
+            "metrics",
+            "metrics_no_cache",
+            "plots",
+            "plots_no_cache",
         ],
         init=False,
-        repr=False)
+        repr=False,
+    )
 
     def __post_init__(self):
-        """Combine the DVC Parameter with their associated path.
-        """
+        """Combine the DVC Parameter with their associated path."""
         for dvc_param in self._dvc_params:
             if dvc_param == "deps":  # deps have no associated path but can be anywhere
                 continue
-            self.__dict__[dvc_param] = [self.__dict__[f"{dvc_param}_path"] / x for x in self.__dict__[dvc_param]]
+            self.__dict__[dvc_param] = [
+                self.__dict__[f"{dvc_param}_path"] / x for x in self.__dict__[dvc_param]
+            ]
         if self.json_file is not None:
             self.json_file = self.outs_path / self.json_file
 
@@ -91,7 +100,14 @@ class DVCParams:
         out = []
 
         for dvc_param in self._dvc_params:
-            out.append(flatten([[f"--{dvc_param.replace('_', '-')}", x] for x in self.__dict__[dvc_param]]))
+            out.append(
+                flatten(
+                    [
+                        [f"--{dvc_param.replace('_', '-')}", x]
+                        for x in self.__dict__[dvc_param]
+                    ]
+                )
+            )
 
         if self.json_file is not None:
             out += [["--outs", self.json_file]]

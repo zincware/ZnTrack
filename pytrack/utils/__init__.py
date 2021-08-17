@@ -11,4 +11,4 @@ Description: Standard python init file for the utils directory
 
 from .utils import is_jsonable
 
-__all__ = ['is_jsonable']
+__all__ = ["is_jsonable"]

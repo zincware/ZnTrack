@@ -29,19 +29,17 @@ class StageIO:
 
         Definition of parameters and results
         """
-        self.outs = DVC.outs('calculation.txt')
+        self.outs = DVC.outs("calculation.txt")
         self.deps = DVC.deps()
         self.param = DVC.params()
 
     def __call__(self, file):
-        """User input
-        """
+        """User input"""
         self.param = file
         self.deps = file
 
     def run(self):
-        """Actual computation
-        """
+        """Actual computation"""
 
         with open(self.deps, "r") as f:
             file_content = f.readlines()
@@ -56,7 +54,7 @@ class StageAddition:
 
         Definition of parameters and results
         """
-        self.outs = DVC.outs('calculation.txt')
+        self.outs = DVC.outs("calculation.txt")
 
         self.n_1 = DVC.params()  # seems optional now
         self.n_2 = DVC.params()
@@ -133,4 +131,4 @@ def test_stage_io():
 
     stage = StageIO(id_=0)
 
-    assert stage.outs.read_text().startswith('\"\"\"')
+    assert stage.outs.read_text().startswith('"""')
