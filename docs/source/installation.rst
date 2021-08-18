@@ -13,7 +13,7 @@ If you want to install PyTrack from source you can use
 
     git clone https://github.com/zincware/py-track.git
     cd py-track
-    pip3 install . --user
+    pip3 install .
 
 If you are a developer we suggest using
 
