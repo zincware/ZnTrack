@@ -123,5 +123,5 @@ class DVCInterface:
                     "--out",
                     out_path,
                 ]
-                log.warning(f"DVC command: {cmd}")
+                log.debug(f"DVC command: {cmd}")
                 subprocess.run(cmd, cwd=self.dvc_path)

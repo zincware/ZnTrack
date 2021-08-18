@@ -5,3 +5,4 @@
 PyTrack.egg-info
 htmlcov
 .coverage
+venv

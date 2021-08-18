@@ -16,5 +16,5 @@ def test_is_jsonable():
 
     Test is performed for a serializable dictionary and a non-serializable function.
     """
-    assert is_jsonable({'a': 1}) is True
-    assert is_jsonable({'a': is_jsonable}) is False
+    assert is_jsonable({"a": 1}) is True
+    assert is_jsonable({"a": is_jsonable}) is False

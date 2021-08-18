@@ -23,7 +23,7 @@ Or you can install from source with:
 
    git clone https://github.com/zincware/py-track.git
    cd py-track
-   pip install . --user
+   pip3 install .
 
 Quickstart
 ==========

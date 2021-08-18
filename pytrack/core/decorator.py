@@ -8,14 +8,20 @@ Copyright Contributors to the Zincware Project.
 
 Description: PyTrack decorators
 """
+from __future__ import annotations
+
 import logging
 import subprocess
 from pathlib import Path
 import re
+import typing
 
 from .py_track import PyTrackParent
 
 log = logging.getLogger(__file__)
+
+if typing.TYPE_CHECKING:
+    from pytrack.utils.type_hints import TypeHintParent
 
 
 class PyTrack:
@@ -30,6 +36,8 @@ class PyTrack:
             Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables juypter support
         kwargs: No kwars are implemented
         """
+        if cls is not None:
+            raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
         self.cls = cls
         self.kwargs = kwargs
         self.return_with_args = True
@@ -38,11 +46,12 @@ class PyTrack:
         # jupyter
         if nb_name is not None:
             log.warning(
-                "Jupyter support is an experimental feature! \n"
-                "Please submit issues to https://github.com/zincware/py-track."
+                "Jupyter support is an experimental feature! Please save your notebook before running this command!\n"
+                "Submit issues to https://github.com/zincware/py-track."
             )
+            nb_name = Path(nb_name)
         self.nb_name = nb_name
-        self.nb_class_path = Path('src')
+        self.nb_class_path = Path("src")
 
     def __call__(self, *args, **kwargs):
         """
@@ -86,29 +95,37 @@ class PyTrack:
 
         imports = ""
 
-        class_definition = "@PyTrack\n"
+        class_definition = ""
 
         with open(Path(self.nb_name).with_suffix(".py"), "r") as f:
             for line in f:
                 if line.startswith("import") or line.startswith("from"):
                     imports += line
                 if reading_class:
-                    if re.match(r'\S', line):
+                    if (
+                        re.match(r"\S", line)
+                        and not line.startswith("#")
+                        and not line.startswith("class")
+                    ):
                         reading_class = False
-                if line.startswith(f"class {self.cls.__name__}"):
-                    reading_class = True
                 if reading_class:
                     class_definition += line
+                if line.startswith("@PyTrack"):
+                    reading_class = True
+                    class_definition += "@PyTrack()\n"
 
         src = imports + "\n\n" + class_definition
 
         src_file = Path(self.nb_class_path, self.cls.__name__).with_suffix(".py")
         self.nb_class_path.mkdir(exist_ok=True, parents=True)
+
         src_file.write_text(src)
 
+        # Remove converted ipynb file
+        self.nb_name.with_suffix(".py").unlink()
+
     def apply_decorator(self):
-        """Apply the decorators to the class methods
-        """
+        """Apply the decorators to the class methods"""
         if "run" not in vars(self.cls):
             raise NotImplementedError("PyTrack class must implement a run method!")
         for name, obj in vars(self.cls).items():
@@ -118,20 +135,27 @@ class PyTrack:
                 setattr(self.cls, name, self.call_decorator(obj))
             if name == "run":
                 setattr(self.cls, name, self.run_decorator(obj))
-        for name, obj in vars(PyTrackParent).items():
-            if not name.endswith("__") and name != "run":
-                setattr(self.cls, name, obj)
+        # for name, obj in vars(PyTrackParent).items():
+        #     if not name.endswith("__") and name != "run":
+        #         setattr(self.cls, name, obj)
 
     def init_decorator(self, func):
         """Decorator to handle the init of the decorated class"""
 
-        def wrapper(cls: PyTrackParent, *args, id_=None, **kwargs):
-            PyTrackParent.__init__(cls)
+        def wrapper(cls: TypeHintParent, *args, id_=None, **kwargs):
+            log.debug(f"Got id_: {id_}")
+            pytrack_parent = PyTrackParent(child=cls)
+            pytrack_parent.pre_init(id_=id_)
+
+            setattr(type(cls), "pytrack", property(lambda self_: pytrack_parent))
+            # setattr(cls, "pytrack", pytrack_parent)
+            # cls.pytrack = pytrack_parent
             result = func(cls, *args, **kwargs)
-            cls._pytrack_post_init(id_)
+            cls.pytrack.post_init()
 
             if self.nb_name is not None:
-                cls._pytrack__module = f"{self.nb_class_path}.{self.cls.__name__}"
+                cls.pytrack._module = f"{self.nb_class_path}.{self.cls.__name__}"
+                cls.pytrack.nb_mode = True
 
             return result
 
@@ -141,10 +165,18 @@ class PyTrack:
     def call_decorator(f):
         """Decorator to handle the call of the decorated class"""
 
-        def wrapper(cls: PyTrackParent, *args, force=False, exec_=False, always_changed=False, slurm=False, **kwargs):
-            cls._pytrack_pre_call()
+        def wrapper(
+            cls: TypeHintParent,
+            *args,
+            force=True,
+            exec_=False,
+            always_changed=False,
+            slurm=False,
+            **kwargs,
+        ):
+            cls.pytrack.pre_call()
             function = f(cls, *args, **kwargs)
-            cls._pytrack_post_call(force, exec_, always_changed, slurm)
+            cls.pytrack.post_call(force, exec_, always_changed, slurm)
             return function
 
         return wrapper
@@ -153,10 +185,10 @@ class PyTrack:
     def run_decorator(f):
         """Decorator to handle the run of the decorated class"""
 
-        def wrapper(cls: PyTrackParent):
-            cls._pytrack_pre_run()
+        def wrapper(cls: TypeHintParent):
+            cls.pytrack.pre_run()
             function = f(cls)
-            cls._pytrack_post_run()
+            cls.pytrack.post_run()
             return function
 
         return wrapper
