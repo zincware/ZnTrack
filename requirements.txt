@@ -1,5 +1,3 @@
-dvc
-PyYAML
 pytest
 sphinx_rtd_theme
 IPython
@@ -9,3 +7,4 @@ sphinx-copybutton
 sphinx==4.0.2
 pandoc
 numpy
+matplotlib
