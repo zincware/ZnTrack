@@ -20,7 +20,6 @@ from typing import Union
 log = logging.getLogger(__file__)
 
 if typing.TYPE_CHECKING:
-    from pytrack.core.py_track import PyTrackParent
     from pytrack.utils.type_hints import TypeHintParent
 
 
@@ -171,8 +170,13 @@ class PyTrackOption:
         if isinstance(value, dict):
             if self.pytrack_dvc_option == "result":
                 if not instance.pytrack.allow_result_change:
-                    log.warning("Result can only be changed within `run` call!")
-                    return
+                    if instance.pytrack.is_init:
+                        log.debug("ValueError Exception during init!")
+                        return
+                    else:
+                        raise ValueError("Result can only be changed within `run` call!")
+                    # log.warning("Result can only be changed within `run` call!")
+                    # return
                 if not is_jsonable(value):
                     raise ValueError("Results must be JSON serializable")
                 log.debug(f"Processing value {value}")
@@ -185,10 +189,11 @@ class PyTrackOption:
                     f"Param_Change: {instance.pytrack.allow_param_change} on {instance.pytrack}"
                 )
                 if not instance.pytrack.allow_param_change:
-                    log.warning(
-                        "This stage is being loaded. No internals will be changed!"
-                    )
-                    return
+                    if instance.pytrack.is_init:
+                        log.debug("ValueError Exception during init!")
+                        return
+                    else:
+                        raise ValueError("This stage is being loaded. Parameters can not be set!")
                 value = self.make_serializable(value)
                 name = instance.pytrack.name
                 id_ = instance.pytrack.id
