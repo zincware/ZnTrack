@@ -47,12 +47,15 @@ class PyTrackParent:
         self.was_called = False
         self.allow_param_change = False
         self.allow_result_change = False
+        self.is_init = False
+        # This is True while inside the init to avoid ValueErrors
 
         self.dvc = DVCParams()
         self.nb_mode = False  # notebook mode
 
     def pre_init(self, id_):
         self.allow_param_change = id_ is None
+        self.is_init = True
         log.debug(f"Setting param change to {self.allow_param_change} on {self}")
 
     def post_init(self):
@@ -76,6 +79,8 @@ class PyTrackParent:
         self.update_dvc_options()
         if self.has_results():
             self.dvc.set_json_file(f"{self.id}_{self.name}.json")
+
+        self.is_init = False
 
     def pre_call(self):
         """Method to be run before the call"""
@@ -197,11 +202,11 @@ class PyTrackParent:
         return False
 
     def _write_dvc(
-        self,
-        force=True,
-        exec_: bool = False,
-        always_changed: bool = False,
-        slurm: bool = False,
+            self,
+            force=True,
+            exec_: bool = False,
+            always_changed: bool = False,
+            slurm: bool = False,
     ):
         """Write the DVC file using run.
 
