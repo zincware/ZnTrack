@@ -10,99 +10,79 @@ Description: PyTrack core
 """
 
 from __future__ import annotations
-from typing import Union, List
 
 import logging
-import json
 import subprocess
 import yaml
-from pathlib import Path
-import abc
 
-from .dataclasses import DVCParams, SlurmConfig, Files
+from .data_classes import SlurmConfig
+from .parameter import PyTrackOption
+from pytrack.core.data_classes import DVCParams
+from pathlib import Path
 
 log = logging.getLogger(__file__)
 
 
-class PyTrack(abc.ABC):
-    def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
-        """Constructor for the DVCOp parent class
+class PyTrackParent:
+    """Parent class to be applied within the decorator"""
 
-        Parameters
-        ----------
-        id_: int, str, optional
-            Optional primary key to query a previously created stage
-        filter_: dict, optional
-            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
-            This will always return the first instance. If multiple instances are possible use query_obj()!
+    def __init__(self, child):
+        """Constructor for the DVCOp parent class"""
 
-        Examples
-        --------
-        A PyTrack child should implement
-        >>> class Child(PyTrack):
-        >>>     def __init__(self, id_: Union[int, str] = None, filter_: dict = None):
-        >>>         super(PyTrack, self).__init__()
-        >>>         self.dvc = DVCParams()
-        >>>         self.post_init(id_, filter_)
-        >>>     def __call__(self,exec_=False, force=False, always_changed=False, slurm=False, **kwargs):
-        >>>         self.parameters = kwargs
-        >>>         self.post_call(force, exec_, always_changed, slurm)
-        >>>     def run(self):
-        >>>         self.pre_run()
-        """
+        self.child = child
 
-        self._parameters: dict = {}
-        self._id: int = 0
-        self._running = False  # is set to true, when run_dvc
-        self.dvc: DVCParams = DVCParams()
+        # Parameters that will be overwritten by "child" classes
         self.slurm_config: SlurmConfig = SlurmConfig()
 
-        self.json_file: bool = True
+        # Conventions
+        # self._pytrack_<placeholder> is considered a normal attribute
+        # self._pytrack__<placeholder> is considered a hidden attribute
 
-        self._json_file = None
+        # Properties
+        self._id: int = 0
+        self._running = False  # is set to true, when run_dvc
+        self._module = None
 
-    def post_init(self, id_: Union[int, str] = None, filter_: dict = None):
-        """Post init method
+        self.dvc_file = "dvc.yaml"
+        self.was_called = False
+        self.allow_param_change = False
+        self.allow_result_change = False
+
+        self.dvc = DVCParams()
+        self.nb_mode = False  # notebook mode
+
+    def pre_init(self, id_):
+        self.allow_param_change = id_ is None
+        log.debug(f"Setting param change to {self.allow_param_change} on {self}")
+
+    def post_init(self):
+        """Post init command
+
+        This command is executed after the init of the "child" class.
+        It handles:
+        - updating which attributes are parameters and results
+        - loads values if id_!=None
 
         Parameters
         ----------
-        id_: int, str, optional
-            Optional primary key to query a previously created stage
-        filter_: dict, optional
-            Optional second method to query - only executed if id_ = None - using a dictionary with parameters key pairs
-            This will always return the first instance. If multiple instances are possible use query_obj()!
+        id_:int
+            Either None if new stage or usually 0 if a stage should be loaded
+
+        Returns
+        -------
 
         """
-        if self.json_file:
-            self._json_file = f"{self.name}.json"
-        else:
-            self._json_file = None
+        # Updating internals and checking for parameters and results
+        self.update_dvc_options()
+        if self.has_results():
+            self.dvc.set_json_file(f"{self.id}_{self.name}.json")
 
-        try:
-            if id_ is not None:
-                self._update(self, str(id_))
-            elif filter_ is not None:
-                log.debug("Assuming that the filter only finds a single DVCOp!")
-                for id_ in self.all_parameters:
-                    stage_id = self._filter_parameters(filter_, id_)
-                    if stage_id != -1:
-                        self._update(self, stage_id)
-                        break
-
-        except KeyError:
-            raise KeyError(f"Could not find a stage with id {id_}!")
-
-    @abc.abstractmethod
-    def run(self):
-        """Function to be executed by DVC
-
-        This is the main and only function that dvc will run!
-        It has access to all class attributes such as parameters, files, ...
-        This function has to be able to run without any additional user input! All configurations should
-        take place in the config / __init__ or in the call method!
-
-        """
-        raise NotImplementedError("Implemented in child class")
+    def pre_call(self):
+        """Method to be run before the call"""
+        if self.was_called:
+            raise AttributeError(
+                "This method was already called. Please create a new instance!"
+            )
 
     def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
         """Method after call
@@ -123,11 +103,14 @@ class PyTrack(abc.ABC):
             and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
 
         """
+        self.update_dvc()
+
         self.dvc.make_paths()
-        if self.json_file:
-            self.files.json_file.parent.mkdir(parents=True, exist_ok=True)
-        self._write_parameters()
+
         self._write_dvc(force, exec_, always_changed, slurm)
+
+        self.was_called = True
+        self.allow_param_change = False
 
     def pre_run(self):
         """Command to be run before run
@@ -140,18 +123,39 @@ class PyTrack(abc.ABC):
          raise and error!
 
         """
-
+        self.allow_result_change = True
         self._running = True
 
-    def _write_parameters(self):
-        """Update parameters file
+    def post_run(self):
+        """Method to be executed after run
 
-        Notes
-        -----
-        We use this method, because all_parameters is getting updated, so no information is lost.
-        We can not write the parameters without caching the old / other parameters first
+        This method saves the results
         """
-        self.all_parameters = self.parameters
+        self.allow_result_change = False
+
+    def update_dvc_options(self):
+        """Update the dvc_options with None values
+
+        This is run after the __init__ to save all DVCParams and they can later be overwritten
+        """
+        for attr, value in vars(self.child).items():
+            try:
+                option = value.pytrack_dvc_option
+                try:
+                    log.debug(
+                        f"Updating {attr} with PyTrackOption and value {value.value}!"
+                    )
+                    setattr(
+                        type(self.child),
+                        attr,
+                        PyTrackOption(
+                            option=option, value=value.value, attr=attr, cls=self.child
+                        ),
+                    )
+                except AttributeError:
+                    raise AttributeError("setattr went wrong!")
+            except AttributeError:
+                pass
 
     @property
     def id(self) -> str:
@@ -159,209 +163,42 @@ class PyTrack(abc.ABC):
         if self._running:
             return str(self._id)
 
-        if self.dvc.multi_use:
-            if len(self.all_parameters) == 0:  # no stage with this classes name found.
-                log.debug(f"No Parameters for {self.name} found -> id=0")
-                self._id = 0
-            else:
-                id_ = len(
-                    self.all_parameters
-                )  # assume that the configuration is new and create a new id_
-                for stage_id in self.all_parameters:
-                    if self.all_parameters[stage_id] == self.parameters:
-                        log.debug(
-                            f"Found stage with the given parameters for id = {stage_id}!"
-                        )
-                        id_ = stage_id  # entry already exists, load existing id_
-                self._id = id_
-        else:
-            self._id = 0
+        self._id = 0
 
         return str(self._id)
 
-    @id.setter
-    def id(self, value):
-        """Change id if self._running
+    def update_dvc(self):
+        for attr, val in vars(type(self.child)).items():
+            if isinstance(val, PyTrackOption):
+                option = val.pytrack_dvc_option
+                new_vals = getattr(self.child, attr)
+                try:
+                    if isinstance(new_vals, list):
+                        [getattr(self.dvc, option).append(x) for x in new_vals]
+                    else:
+                        getattr(self.dvc, option).append(new_vals)
+                except AttributeError:
+                    log.debug(f"'DVCParams' object has no attribute '{option}'")
 
-        Parameters
-        ----------
-        value: int
-            New id
+    def has_results(self) -> bool:
+        """Check if a json file is generated by looking for defined results"""
+        for attr, val in vars(type(self.child)).items():
+            if isinstance(val, PyTrackOption):
+                if val.pytrack_dvc_option == "result":
+                    return True
+        return False
 
-        """
-        if not self._running:
-            raise ValueError("Can only set the value of id during dvc_run!")
-        self._id = value
-
-    @property
-    def name(self) -> str:
-        """Used for naming the stage and dvc run
-
-        Returns
-        -------
-        str: Name of this class
-
-        """
-        return self.__class__.__name__
-
-    @property
-    def module(self) -> str:
-        """Module from which to import <name>
-
-        Used for from <module> import <name>
-        """
-        return self.__class__.__module__
-
-    @property
-    def stage_name(self) -> str:
-        """Get the stage name"""
-        return f"{self.name}_{self.id}"
-
-    @property
-    def parameters(self) -> dict:
-        """Return the parameters"""
-        return self._parameters
-
-    @parameters.setter
-    def parameters(self, value):
-        """Set the parameters"""
-        self._parameters = value
-
-    @property
-    def all_parameters(self) -> dict:
-        """Load ALL parameters from params_file"""
-        try:
-            with open(self.dvc.params_file_path / self.dvc.params_file) as json_file:
-                return json.load(json_file)[self.name]
-        except FileNotFoundError:
-            log.debug(
-                f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!"
-            )
-        except KeyError:
-            log.debug(f"Stage with name {self.name} does not exist")
-        return {}
-
-    @all_parameters.setter
-    def all_parameters(self, value):
-        """Update parameters in params_file"""
-        if isinstance(value, dict):
-            try:
-                with open(
-                    self.dvc.params_file_path / self.dvc.params_file
-                ) as json_file:
-                    parameters = json.load(json_file)
-            except FileNotFoundError:
-                log.debug(
-                    f"Could not load params from {self.dvc.params_file_path / self.dvc.params_file}!"
-                )
-                parameters = {}
-
-            try:
-                parameters[self.name].update({self.id: value})
-                log.debug("Updating existing stage")
-            except KeyError:
-                log.debug(f"Creating a new stage for {self.name}")
-                parameters.update({self.name: {self.id: value}})
-            with open(
-                self.dvc.params_file_path / self.dvc.params_file, "w"
-            ) as json_file:
-                json.dump(parameters, json_file, indent=4)
-        else:
-            raise ValueError(
-                f"Value has to be a dictionary but found {type(value)} instead!"
-            )
-
-    @property
-    def _dvc_file(self) -> dict:
-        """Load ALL parameters from dvc.dvc_file"""
-        try:
-            with open(self.dvc.dvc_file) as dvc_file:
-                return yaml.safe_load(dvc_file)
-        except FileNotFoundError:
-            log.debug(f"Could not load dvc config from {self.dvc.dvc_file}!")
-        return {}
-
-    @property
-    def _dvc_stages(self) -> dict:
-        """Load all stages from dvc.dvc_file"""
-        return self._dvc_file["stages"]
-
-    @property
-    def _dvc_stage(self) -> dict:
-        """Load the current stage from dvc.dvc_file"""
-        try:
-            return self._dvc_stages[f"{self.name}_{self.id}"]
-        except KeyError:
-            return {}
-
-    def _update(self, cls: PyTrack, id_: Union[int, str]):
-        """Update all parameters of cls connected to the given id"""
-        cls.parameters = self.all_parameters[str(id_)]
-        log.debug("Updating Parameters!")
-        try:
-            cls.dvc.deps = [Path(x) for x in cls._dvc_stage["deps"]]
-            log.debug("Updating dependencies!")
-        except KeyError:
-            # No dependencies available
-            pass
-
-    def _get_obj_by_id(self, id_: int):
-        """
-
-        Parameters
-        ----------
-        id_: int
-            Primary key
-
-        Returns
-        -------
-
-        DVCOp:
-            Returns a new instance of a DVCOp with the correct id
-
-        """
-        obj = self.__class__()
-
-        self._update(obj, id_)
-
-        # obj.parameters = self.all_parameters[self.name][str(id_)]  # need to convert int to str
-
-        return obj
-
-    def query_obj(self, filter_: Union[int, dict]) -> Union[PyTrack, List[PyTrack]]:
-        """Get a class instance with all the available information attached
-
-        Returns
-        --------
-        List[PyTrack] : The instantiated class having self.parameters, self.id_ and potentially all post run parameters
-                    set, so that it can be used
-
-        Notes
-        -----
-        Most of the information will be in
-            - self.parameters
-            - self.results
-        """
-
-        if isinstance(filter_, int):
-            return self._get_obj_by_id(filter_)
-        else:
-            objs = []
-
-            ids = []
-            for id_ in self.all_parameters:
-                ids.append(self._filter_parameters(filter_, id_))
-
-            for id_ in ids:
-                if id_ == -1:
-                    continue
-                objs.append(self._get_obj_by_id(id_))
-
-            return objs
+    def has_params(self) -> bool:
+        """Check if any params are required by going through the defined params"""
+        for attr, val in vars(type(self.child)).items():
+            if isinstance(val, PyTrackOption):
+                if val.pytrack_dvc_option == "params":
+                    return True
+        return False
 
     def _write_dvc(
         self,
-        force=False,
+        force=True,
         exec_: bool = False,
         always_changed: bool = False,
         slurm: bool = False,
@@ -389,15 +226,21 @@ class PyTrack(abc.ABC):
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+        log.warning("--- Writing new DVC file! ---")
 
         script = ["dvc", "run", "-n", self.stage_name]
 
-        script += self.files.get_dvc_arguments()
+        script += self.dvc.get_dvc_arguments()
+        # TODO if no DVC.result are assigned, no json file will be written!
 
-        script += [
-            "--params",
-            f"{self.dvc.params_file_path / self.dvc.params_file}:{self.name}.{self.id}",
-        ]
+        if self.has_params():
+            script += [
+                "--params",
+                f"{self.dvc.internals_file}:{self.name}.{self.id}.params",
+            ]
+
+        if self.nb_mode:
+            script += ["--deps", Path(*self.module.split(".")).with_suffix(".py")]
 
         if force:
             script.append("--force")
@@ -427,7 +270,7 @@ class PyTrack(abc.ABC):
             script.append(f"{self.slurm_config.n}")
         #
         script.append(
-            f'{self._python_interpreter} -c "from {self.module} import {self.name}; '
+            f'{self.python_interpreter} -c "from {self.module} import {self.name}; '
             f'{self.name}(id_={self.id}).run()"'
         )
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
@@ -442,61 +285,7 @@ class PyTrack(abc.ABC):
             log.warning(process.stderr.decode())
 
     @property
-    def files(self):
-        """Return the files where to find.
-
-        This is based on self.dvc and the self.id. This is only a property and can not be changed directly.
-        Change the values in self.dvc for that! We use this function, because it combines the path, id and filenames
-        from self.dvc
-
-        Notes
-        -----
-        The user never has to handle the internal naming with the id attached. Ideally only the file names and not the
-        paths are changed, that is why we provide self.dvc for configuration.
-        """
-        return Files(id_=self.id, dvc_params=self.dvc, json_file=self._json_file)
-
-    @property
-    def results(self) -> dict:
-        """Return the results from the json_file if available."""
-        try:
-            with open(self.files.json_file) as f:
-                file = json.load(f)
-            return file
-        except FileNotFoundError:
-            log.warning("No results found!")
-            return {}
-
-    @results.setter
-    def results(self, value):
-        """Write the results to json_file
-
-        Parameters
-        ----------
-        value: dict
-            Any json-serializable data
-        """
-        with open(self.files.json_file, "w") as f:
-            json.dump(value, f, indent=4)
-
-    def _filter_parameters(self, filter_, id_) -> int:
-        """Get the id based in filter_
-
-        Usually inside `for id in self.all_parameters`
-        """
-        obj_id = -1
-        for key, value in filter_.items():
-            try:
-                if self.all_parameters[id_][key] == value:
-                    obj_id = id_
-                else:
-                    return -1
-            except KeyError:
-                log.debug(f"Can not find key '{key}' in 'all_parameters' - skipping!")
-        return obj_id
-
-    @property
-    def _python_interpreter(self):
+    def python_interpreter(self):
         """Find the most suitable python interpreter
 
         Try to run subprocess check calls to see, which python interpreter should be selected
@@ -510,11 +299,72 @@ class PyTrack(abc.ABC):
 
         for interpreter in ["python3", "python"]:
             try:
-                subprocess.check_call([interpreter, "--version"])
+                subprocess.check_call(
+                    [interpreter, "--version"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                )
                 log.debug(f"Using command {interpreter} for dvc!")
                 return interpreter
+
             except subprocess.CalledProcessError:
                 log.debug(f"{interpreter} is not working!")
-        raise subprocess.CalledProcessError(
+        raise ValueError(
             "Could not find a working python interpreter to work with subprocesses!"
         )
+
+    @id.setter
+    def id(self, value):
+        """Change id if self._running
+
+        Parameters
+        ----------
+        value: int
+            New id
+
+        """
+        if not self._running:
+            raise ValueError("Can only set the value of id during dvc_run!")
+        self._id = value
+
+    @property
+    def name(self) -> str:
+        """Used for naming the stage and dvc run
+
+        Returns
+        -------
+        str: Name of this class
+
+        """
+        return self.child.__class__.__name__
+
+    @property
+    def module(self) -> str:
+        """Module from which to import <name>
+
+        Used for from <module> import <name>
+        """
+        if self._module is None:
+            self._module = self.child.__class__.__module__
+        return self._module
+
+    @property
+    def stage_name(self) -> str:
+        """Get the stage name"""
+        return f"{self.name}_{self.id}"
+
+    @property
+    def dvc_stages(self) -> dict:
+        """Load all stages from dvc.dvc_file"""
+        with open(self.dvc_file, "r") as f:
+            dvc_file = yaml.safe_load(f)
+
+        return dvc_file["stages"]
+
+    @property
+    def dvc_stage(self) -> dict:
+        """Load the current stage from dvc.dvc_file"""
+        try:
+            return self.dvc_stages[f"{self.name}_{self.id}"]
+        except KeyError:
+            return {}

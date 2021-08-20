@@ -8,3 +8,4 @@ numpydoc
 sphinx-copybutton
 sphinx==4.0.2
 pandoc
+numpy

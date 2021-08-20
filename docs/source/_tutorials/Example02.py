@@ -3,7 +3,6 @@ from .Example01 import TextToFile
 
 
 class ProcessData(PyTrack):
-
     def __init__(self, id_=None, filter_=None):
         super().__init__(id_, filter_)
         self.post_init(id_, filter_)
@@ -14,4 +13,4 @@ class ProcessData(PyTrack):
         self.post_call()
 
     def run(self):
-        self.results = sum(TextToFile(id_=0).results['text'])
+        self.results = sum(TextToFile(id_=0).results["text"])
