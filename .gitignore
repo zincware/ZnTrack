@@ -6,3 +6,6 @@ PyTrack.egg-info
 htmlcov
 .coverage
 venv
+/build/
+/dist/
+/py_track.egg-info/
