@@ -32,7 +32,6 @@ information or write an issue on Github for https://github.com/zincware/py-track
    Overview/Functionality.ipynb
    Overview/Introduction.ipynb
    Overview/PassingClasses.ipynb
-   jupyter
    tutorials
 
 .. toctree::
