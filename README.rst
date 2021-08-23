@@ -52,7 +52,7 @@ This stage can be used via
     linear(3, 7, "values.csv")
 
 which builds the DVC stage an can be used e.g., through :code:`dvc repro`.
-The results can then be accessed easily via :code:`Linear(id_=0.out)`.
+The results can then be accessed easily via :code:`Linear(id_=0).out`.
 
 
 Installation
