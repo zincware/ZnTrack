@@ -74,7 +74,7 @@ Or you can install from source with:
 
 .. badges
 
-.. |build| image:: https://github.com/zincware/MDSuite/actions/workflows/python-package.yml/badge.svg
+.. |build| image:: https://github.com/zincware/py-track/actions/workflows/pytest.yaml/badge.svg
     :alt: Build tests passing
     :target: https://github.com/zincware/py-test/blob/readme_badges/
 
