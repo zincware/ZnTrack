@@ -13,7 +13,7 @@ import logging
 import typing
 
 import json
-from pytrack.utils import is_jsonable
+from pytrack.utils import is_jsonable, serializer, deserializer
 from pathlib import Path
 from typing import Union
 
@@ -25,11 +25,11 @@ if typing.TYPE_CHECKING:
 
 class PyTrackOption:
     def __init__(
-        self,
-        option: str,
-        value: Union[str, tuple] = None,
-        attr: str = None,
-        cls: TypeHintParent = None,
+            self,
+            option: str,
+            value: Union[str, tuple] = None,
+            attr: str = None,
+            cls: TypeHintParent = None,
     ):
         """PyTrack Descriptor to handle the loading and writing of files
 
@@ -50,11 +50,11 @@ class PyTrackOption:
     def __get__(self, instance: TypeHintParent, owner):
         """Get the value of this instance from pytrack_internals and return it"""
         if self.pytrack_dvc_option == "result":
-            return self.get_results(instance).get(self.get_name(instance))
+            return deserializer(self.get_results(instance).get(self.get_name(instance)))
         else:
             output = self.get_internals(instance).get(self.get_name(instance), "")
             if self.pytrack_dvc_option == "params":
-                return output
+                return deserializer(output)
             elif self.pytrack_dvc_option == "deps":
                 if isinstance(output, list):
                     return [Path(x) for x in output]
@@ -89,6 +89,8 @@ class PyTrackOption:
         if isinstance(value, self.__class__):
             value = value.value
 
+        # Check if the passed value is a PyTrack class
+        # if so, add its json file as a dependency to this stage.
         if hasattr(value, "pytrack"):
             # Allow self.deps = DVC.deps(Stage(id_=0))
             if self.pytrack_dvc_option == "deps":
@@ -98,33 +100,7 @@ class PyTrackOption:
                 else:
                     value = new_value
 
-        if isinstance(value, Path):
-            value = value.as_posix()
-
-        def conv_path_lists(path_list):
-            if isinstance(path_list, list):
-                str_list = []
-                for entry in path_list:
-                    if isinstance(entry, Path):
-                        str_list.append(entry.as_posix())
-                    else:
-                        str_list.append(entry)
-                return str_list
-            return path_list
-
-        def conv_path_dict(path_dict):
-            if isinstance(path_dict, dict):
-                str_dict = {}
-                for key, val in path_dict.items():
-                    if isinstance(val, Path):
-                        str_dict[key] = val.as_posix()
-                    else:
-                        str_dict[key] = conv_path_lists(val)
-                return str_dict
-            return path_dict
-
-        value = conv_path_lists(value)
-        value = conv_path_dict(value)
+        value = serializer(value)
 
         return value
 
