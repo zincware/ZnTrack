@@ -14,6 +14,7 @@ import logging
 import subprocess
 from pathlib import Path
 import re
+import sys
 import typing
 
 from .py_track import PyTrackParent
@@ -33,8 +34,8 @@ class PyTrack:
         cls: object
             Required for use as decorator with @PyTrack
         nb_name: str
-            Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables juypter support
-        kwargs: No kwars are implemented
+            Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables jupyter support
+        kwargs: No kwargs are implemented
         """
         if cls is not None:
             raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
@@ -129,6 +130,10 @@ class PyTrack:
         """Apply the decorators to the class methods"""
         if "run" not in vars(self.cls):
             raise NotImplementedError("PyTrack class must implement a run method!")
+
+        if "__call__" not in vars(self.cls):
+            setattr(self.cls, "__call__", lambda *args: None)
+
         for name, obj in vars(self.cls).items():
             if name == "__init__":
                 setattr(self.cls, name, self.init_decorator(obj))
