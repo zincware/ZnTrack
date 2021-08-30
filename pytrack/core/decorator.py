@@ -140,6 +140,9 @@ class PyTrack:
         if "__call__" not in vars(self.cls):
             setattr(self.cls, "__call__", lambda *args: None)
 
+        if "__init__" not in vars(self.cls):
+            setattr(self.cls, "__init__", lambda *args: None)
+
         for name, obj in vars(self.cls).items():
             if name == "__init__":
                 setattr(self.cls, name, self.init_decorator(obj))
@@ -147,9 +150,6 @@ class PyTrack:
                 setattr(self.cls, name, self.call_decorator(obj))
             if name == "run":
                 setattr(self.cls, name, self.run_decorator(obj))
-        # for name, obj in vars(PyTrackParent).items():
-        #     if not name.endswith("__") and name != "run":
-        #         setattr(self.cls, name, obj)
 
     def init_decorator(self, func):
         """Decorator to handle the init of the decorated class"""
@@ -160,8 +160,7 @@ class PyTrack:
             pytrack_parent.pre_init(id_=id_)
 
             setattr(type(cls), "pytrack", property(lambda self_: pytrack_parent))
-            # setattr(cls, "pytrack", pytrack_parent)
-            # cls.pytrack = pytrack_parent
+
             result = func(cls, *args, **kwargs)
             cls.pytrack.post_init()
 
