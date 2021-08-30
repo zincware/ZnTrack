@@ -30,15 +30,15 @@ def conv_path_to_str(value):
 def conv_numpy_to_dict(value):
     """Convert numpy to a list, marked by a dictionary"""
     if isinstance(value, np.ndarray):
-        value = {'np': value.tolist()}
+        value = {"np": value.tolist()}
     return value
 
 
 def conv_dict_to_numpy(value):
     """Convert marked dictionary to a numpy array"""
     if isinstance(value, dict):
-        if len(value) == 1 and 'np' in value:
-            value = np.array(value['np'])
+        if len(value) == 1 and "np" in value:
+            value = np.array(value["np"])
     return value
 
 

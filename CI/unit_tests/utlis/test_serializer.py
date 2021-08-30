@@ -18,12 +18,9 @@ import numpy as np
 @pytest.fixture
 def path_dict():
     return {
-        'a': {
-            'b': {
-                'c': Path('hello1.py'),
-                'd': Path('hello2.py')
-            },
-            'e': Path('hello3.py')
+        "a": {
+            "b": {"c": Path("hello1.py"), "d": Path("hello2.py")},
+            "e": Path("hello3.py"),
         }
     }
 
@@ -31,25 +28,28 @@ def path_dict():
 @pytest.fixture
 def np_dict():
     return {
-        'a': {
-            'b': {
-                'c': np.arange(1, 5),
-                'd': np.arange(5, 10)
-            },
-            'e': np.arange(10, 15)
+        "a": {
+            "b": {"c": np.arange(1, 5), "d": np.arange(5, 10)},
+            "e": np.arange(10, 15),
         }
     }
 
 
 def test_serializer_path_dict(path_dict):
     """Test that serializing Path works"""
-    assert serializer(path_dict) == {'a': {'b': {'c': 'hello1.py', 'd': 'hello2.py'}, 'e': 'hello3.py'}}
+    assert serializer(path_dict) == {
+        "a": {"b": {"c": "hello1.py", "d": "hello2.py"}, "e": "hello3.py"}
+    }
 
 
 def test_serializer_numpy_dict(np_dict):
     """Test that serializing numpy works"""
     assert serializer(np_dict) == {
-        'a': {'b': {'c': {'np': [1, 2, 3, 4]}, 'd': {'np': [5, 6, 7, 8, 9]}}, 'e': {'np': [10, 11, 12, 13, 14]}}}
+        "a": {
+            "b": {"c": {"np": [1, 2, 3, 4]}, "d": {"np": [5, 6, 7, 8, 9]}},
+            "e": {"np": [10, 11, 12, 13, 14]},
+        }
+    }
 
 
 def test_unserialize_numpy_dict(np_dict):
@@ -57,11 +57,9 @@ def test_unserialize_numpy_dict(np_dict):
     serialized_np_dict = serializer(np_dict)
     deserialized_np_dict = deserializer(serialized_np_dict)
     np.testing.assert_array_equal(
-        deserialized_np_dict['a']['b']['c'], np_dict['a']['b']['c']
+        deserialized_np_dict["a"]["b"]["c"], np_dict["a"]["b"]["c"]
     )
     np.testing.assert_array_equal(
-        deserialized_np_dict['a']['b']['d'], np_dict['a']['b']['d']
+        deserialized_np_dict["a"]["b"]["d"], np_dict["a"]["b"]["d"]
     )
-    np.testing.assert_array_equal(
-        deserialized_np_dict['a']['e'], np_dict['a']['e']
-    )
+    np.testing.assert_array_equal(deserialized_np_dict["a"]["e"], np_dict["a"]["e"])

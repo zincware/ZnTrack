@@ -177,6 +177,10 @@ class PyTrackParent:
         return str(self._id)
 
     def update_dvc(self):
+        """Update the DVCParams with the options from self.dvc
+
+        This method searches for all PyTrackOptions that are defined within the __init__
+        """
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, PyTrackOption):
                 option = val.pytrack_dvc_option
@@ -206,11 +210,11 @@ class PyTrackParent:
         return False
 
     def _write_dvc(
-            self,
-            force=True,
-            exec_: bool = False,
-            always_changed: bool = False,
-            slurm: bool = False,
+        self,
+        force=True,
+        exec_: bool = False,
+        always_changed: bool = False,
+        slurm: bool = False,
     ):
         """Write the DVC file using run.
 

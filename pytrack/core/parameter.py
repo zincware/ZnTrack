@@ -25,11 +25,11 @@ if typing.TYPE_CHECKING:
 
 class PyTrackOption:
     def __init__(
-            self,
-            option: str,
-            value: Union[str, tuple] = None,
-            attr: str = None,
-            cls: TypeHintParent = None,
+        self,
+        option: str,
+        value: Union[str, tuple] = None,
+        attr: str = None,
+        cls: TypeHintParent = None,
     ):
         """PyTrack Descriptor to handle the loading and writing of files
 
@@ -150,7 +150,9 @@ class PyTrackOption:
                         log.debug("ValueError Exception during init!")
                         return
                     else:
-                        raise ValueError("Result can only be changed within `run` call!")
+                        raise ValueError(
+                            "Result can only be changed within `run` call!"
+                        )
                     # log.warning("Result can only be changed within `run` call!")
                     # return
                 if not is_jsonable(value):
@@ -169,7 +171,9 @@ class PyTrackOption:
                         log.debug("ValueError Exception during init!")
                         return
                     else:
-                        raise ValueError("This stage is being loaded. Parameters can not be set!")
+                        raise ValueError(
+                            "This stage is being loaded. Parameters can not be set!"
+                        )
                 value = self.make_serializable(value)
                 name = instance.pytrack.name
                 id_ = instance.pytrack.id
