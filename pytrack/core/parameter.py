@@ -256,7 +256,10 @@ class PyTrackOption:
 
 
 class DVC:
-    """Basically a dataclass of DVC methods"""
+    """Basically a dataclass of DVC methods
+
+    Referring to https://dvc.org/doc/command-reference/run#options
+    """
 
     def __init__(self):
         """Basically a dataclass of DVC methods"""
@@ -319,3 +322,10 @@ class DVC:
             pass
 
         return PyTrackParameter("outs", value=value)
+
+    @staticmethod
+    def metrics_no_cache(value=None):
+        class PyTrackParameter(PyTrackOption):
+            pass
+
+        return PyTrackParameter("metrics_no_cache", value=value)

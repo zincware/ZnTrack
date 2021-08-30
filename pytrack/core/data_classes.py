@@ -76,6 +76,7 @@ class DVCParams:
         for dvc_param in self._dvc_params:
             if dvc_param == "deps":  # deps have no associated path but can be anywhere
                 continue
+            # TODO use setattr / getattr
             self.__dict__[dvc_param] = [
                 self.__dict__[f"{dvc_param}_path"] / x for x in self.__dict__[dvc_param]
             ]

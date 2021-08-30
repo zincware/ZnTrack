@@ -129,6 +129,9 @@ class PyTrackParent:
          raise and error!
 
         """
+        self.update_dvc()
+        self.dvc.make_paths()
+        # required if your are inside a temporary directory
         self.allow_result_change = True
         self._running = True
 
