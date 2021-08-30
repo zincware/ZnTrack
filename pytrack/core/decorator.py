@@ -26,7 +26,7 @@ if typing.TYPE_CHECKING:
 
 
 class PyTrack:
-    def __init__(self, cls=None, nb_name: str = None, **kwargs):
+    def __init__(self, cls=None, nb_name: str = None, name: str = None, **kwargs):
         """
 
         Parameters
@@ -35,11 +35,17 @@ class PyTrack:
             Required for use as decorator with @PyTrack
         nb_name: str
             Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables jupyter support
+        name: str
+            A custom name for the DVC stage.
+            !There is currently no check in place, that avoids overwriting an existing stage!
         kwargs: No kwargs are implemented
         """
         if cls is not None:
             raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
         self.cls = cls
+
+        self.name = name
+
         self.kwargs = kwargs
         self.return_with_args = True
         log.debug(f"decorator_kwargs: {kwargs}")
@@ -158,6 +164,8 @@ class PyTrack:
             # cls.pytrack = pytrack_parent
             result = func(cls, *args, **kwargs)
             cls.pytrack.post_init()
+
+            cls.pytrack.stage_name = self.name
 
             if self.nb_name is not None:
                 cls.pytrack._module = f"{self.nb_class_path}.{self.cls.__name__}"

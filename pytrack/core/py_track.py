@@ -42,6 +42,7 @@ class PyTrackParent:
         self._id: int = 0
         self._running = False  # is set to true, when run_dvc
         self._module = None
+        self._stage_name = None
 
         self.dvc_file = "dvc.yaml"
         self.was_called = False
@@ -356,7 +357,15 @@ class PyTrackParent:
     @property
     def stage_name(self) -> str:
         """Get the stage name"""
-        return f"{self.name}_{self.id}"
+        if self._stage_name is None:
+            self._stage_name = f"{self.name}_{self.id}"
+
+        return self._stage_name
+
+    @stage_name.setter
+    def stage_name(self, value):
+        """Set the stage name"""
+        self._stage_name = value
 
     @property
     def dvc_stages(self) -> dict:
