@@ -163,6 +163,9 @@ class PyTrack:
                 cls.pytrack._module = f"{self.nb_class_path}.{self.cls.__name__}"
                 cls.pytrack.nb_mode = True
 
+            if cls.pytrack.module == "__main__":
+                cls.pytrack._module = Path(sys.argv[0]).stem
+
             return result
 
         return wrapper
