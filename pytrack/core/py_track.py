@@ -34,10 +34,6 @@ class PyTrackParent:
         # Parameters that will be overwritten by "child" classes
         self.slurm_config: SlurmConfig = SlurmConfig()
 
-        # Conventions
-        # self._pytrack_<placeholder> is considered a normal attribute
-        # self._pytrack__<placeholder> is considered a hidden attribute
-
         # Properties
         self._id: int = 0
         self._running = False  # is set to true, when run_dvc
@@ -150,6 +146,10 @@ class PyTrackParent:
         for attr, value in vars(self.child).items():
             try:
                 option = value.pytrack_dvc_option
+                # this is not hard coded, because when overwriting PyTrackOption those custom descriptors
+                # also need to be applied!
+                value: PyTrackOption  # or child instances
+                py_track_option = value.__class__
                 try:
                     log.debug(
                         f"Updating {attr} with PyTrackOption and value {value.value}!"
@@ -157,7 +157,7 @@ class PyTrackParent:
                     setattr(
                         type(self.child),
                         attr,
-                        PyTrackOption(
+                        py_track_option(
                             option=option, value=value.value, attr=attr, cls=self.child
                         ),
                     )

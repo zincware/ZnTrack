@@ -25,21 +25,27 @@ if typing.TYPE_CHECKING:
 
 class PyTrackOption:
     def __init__(
-        self,
-        option: str,
-        value: Union[str, tuple] = None,
-        attr: str = None,
-        cls: TypeHintParent = None,
+            self,
+            value: Union[str, tuple] = None,
+            option: str = None,
+            attr: str = None,
+            cls: TypeHintParent = None,
     ):
         """PyTrack Descriptor to handle the loading and writing of files
 
         Parameters
         ----------
-        option
-        value
+        option: str
+            One of the DVC options, e.g., params, outs, ...
+        value:
+            default value
         attr
         cls
         """
+        if option is None:
+            log.warning("Using a custom PyTrackOption! No default values supported!")
+            option = "custom"
+
         self.pytrack_dvc_option = option
         self.value = value
         self.check_input(value)
@@ -49,40 +55,52 @@ class PyTrackOption:
 
     def __get__(self, instance: TypeHintParent, owner):
         """Get the value of this instance from pytrack_internals and return it"""
-        if self.pytrack_dvc_option == "result":
-            return deserializer(self.get_results(instance).get(self.get_name(instance)))
-        else:
-            output = self.get_internals(instance).get(self.get_name(instance), "")
-            if self.pytrack_dvc_option == "params":
-                return deserializer(output)
-            elif self.pytrack_dvc_option == "deps":
-                if isinstance(output, list):
-                    return [Path(x) for x in output]
-                else:
-                    return Path(output)
+        try:
+            return self._get(instance, owner)
+        except NotImplementedError:
+            if self.pytrack_dvc_option == "result":
+                return deserializer(self.get_results(instance).get(self.get_name(instance)))
             else:
-                # convert to path
-                file_path: Path = getattr(
-                    instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path"
-                )
-                if isinstance(output, list):
-                    return [file_path / x for x in output]
-                elif isinstance(output, str):
-                    return file_path / output
+                output = self.get_internals(instance).get(self.get_name(instance), "")
+                if self.pytrack_dvc_option == "params":
+                    return deserializer(output)
+                elif self.pytrack_dvc_option == "deps":
+                    if isinstance(output, list):
+                        return [Path(x) for x in output]
+                    else:
+                        return Path(output)
                 else:
-                    return output
+                    # convert to path
+                    file_path: Path = getattr(
+                        instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path"
+                    )
+                    if isinstance(output, list):
+                        return [file_path / x for x in output]
+                    elif isinstance(output, str):
+                        return file_path / output
+                    else:
+                        return output
 
     def __set__(self, instance: TypeHintParent, value):
-        # TODO support Path objects and lists of Path objects!
-        # TODO support dicts for parameters and write them to a different file?!
         """Update the value"""
-        if self.pytrack_dvc_option != "result":
-            self.check_input(value)
-        log.debug(f"Updating {self.get_name(instance)} with {value}")
+        try:
+            self._set(instance, value)
+        except NotImplementedError:
+            if self.pytrack_dvc_option != "result":
+                self.check_input(value)
+            log.debug(f"Updating {self.get_name(instance)} with {value}")
 
-        value = self.make_serializable(value)
+            value = self.make_serializable(value)
 
-        self.set_internals(instance, {self.get_name(instance): value})
+            self.set_internals(instance, {self.get_name(instance): value})
+
+    def _get(self, instance: TypeHintParent, owner):
+        """Overwrite this method for custom PyTrackOption get method"""
+        raise NotImplementedError
+
+    def _set(self, instance: TypeHintParent, value):
+        """Overwrite this method for custom PyTrackOption set method"""
+        raise NotImplementedError
 
     def make_serializable(self, value):
         """Make value serializable to save as json"""
@@ -268,7 +286,7 @@ class DVC:
     def __init__(self):
         """Basically a dataclass of DVC methods"""
         raise NotImplementedError(
-            "Can not initialize DVC - this class is purely for accessing its methods!"
+            "Cannot initialize DVC - this class is only for accessing its methods!"
         )
 
     @staticmethod
@@ -285,10 +303,7 @@ class DVC:
 
         """
 
-        class PyTrackParameter(PyTrackOption):
-            pass
-
-        return PyTrackParameter("params", value=value)
+        return PyTrackOption(value, option="params")
 
     @staticmethod
     def result(value=None):
@@ -308,28 +323,16 @@ class DVC:
         if value is not None:
             raise ValueError("Can not pre-initialize result!")
 
-        class PyTrackParameter(PyTrackOption):
-            pass
-
-        return PyTrackParameter("result", value=value)
+        return PyTrackOption(value, option="result")
 
     @staticmethod
     def deps(value=None):
-        class PyTrackParameter(PyTrackOption):
-            pass
-
-        return PyTrackParameter("deps", value=value)
+        return PyTrackOption(value, option="deps")
 
     @staticmethod
     def outs(value=None):
-        class PyTrackParameter(PyTrackOption):
-            pass
-
-        return PyTrackParameter("outs", value=value)
+        return PyTrackOption(value, option="outs")
 
     @staticmethod
     def metrics_no_cache(value=None):
-        class PyTrackParameter(PyTrackOption):
-            pass
-
-        return PyTrackParameter("metrics_no_cache", value=value)
+        return PyTrackOption(value, option="metrics_no_cache")
