@@ -46,6 +46,9 @@ class PyTrack:
 
         self.name = name
 
+        self.pytrack_cls_dict = {}
+        # TODO maybe make this a weakref dict?
+
         self.kwargs = kwargs
         self.return_with_args = True
         log.debug(f"decorator_kwargs: {kwargs}")
@@ -156,11 +159,22 @@ class PyTrack:
 
         def wrapper(cls: TypeHintParent, *args, id_=None, **kwargs):
             log.debug(f"Got id_: {id_}")
-            pytrack_parent = PyTrackParent(child=cls)
-            pytrack_parent.pre_init(id_=id_)
 
-            setattr(type(cls), "pytrack", property(lambda self_: pytrack_parent))
+            def map_pytrack_to_dict(self_):
+                """Map the correct pytrack instance to the correct cls
 
+                This is required, because we use setattr(TYPE(cls)) and not on the instance,
+                so we need to distinguish between different instances, otherwise there is only a single
+                cls.pytrack for all instances!
+                """
+                if self.pytrack_cls_dict.get(self_) is None:
+                    self.pytrack_cls_dict[self_] = PyTrackParent(self_)
+                return self.pytrack_cls_dict[self_]
+
+            setattr(type(cls), "pytrack", property(map_pytrack_to_dict))
+
+            cls.pytrack.pre_init(id_=id_)
+            log.warning(f"Processing {cls.pytrack}")
             result = func(cls, *args, **kwargs)
             cls.pytrack.post_init()
 

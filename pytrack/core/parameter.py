@@ -25,11 +25,11 @@ if typing.TYPE_CHECKING:
 
 class PyTrackOption:
     def __init__(
-            self,
-            value: Union[str, tuple] = None,
-            option: str = None,
-            attr: str = None,
-            cls: TypeHintParent = None,
+        self,
+        value: Union[str, tuple] = None,
+        option: str = None,
+        attr: str = None,
+        cls: TypeHintParent = None,
     ):
         """PyTrack Descriptor to handle the loading and writing of files
 
@@ -59,7 +59,9 @@ class PyTrackOption:
             return self._get(instance, owner)
         except NotImplementedError:
             if self.pytrack_dvc_option == "result":
-                return deserializer(self.get_results(instance).get(self.get_name(instance)))
+                return deserializer(
+                    self.get_results(instance).get(self.get_name(instance))
+                )
             else:
                 output = self.get_internals(instance).get(self.get_name(instance), "")
                 if self.pytrack_dvc_option == "params":

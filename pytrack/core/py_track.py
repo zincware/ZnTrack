@@ -28,7 +28,7 @@ class PyTrackParent:
 
     def __init__(self, child):
         """Constructor for the DVCOp parent class"""
-
+        log.debug(f"New instance of {self} with {child}")
         self.child = child
 
         # Parameters that will be overwritten by "child" classes
