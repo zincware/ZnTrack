@@ -29,7 +29,7 @@ class StageIO:
 
         Definition of parameters and results
         """
-        self.outs = DVC.outs("calculation.txt")
+        self.outs = DVC.outs(Path("calculation.txt"))
         self.deps = DVC.deps()
         self.param = DVC.params()
 
@@ -54,7 +54,7 @@ class StageAddition:
 
         Definition of parameters and results
         """
-        self.outs = DVC.outs("calculation.txt")
+        self.outs = DVC.outs(Path("calculation.txt"))
 
         self.n_1 = DVC.params()  # seems optional now
         self.n_2 = DVC.params()

@@ -64,24 +64,25 @@ class PyTrackOption:
                 )
             else:
                 output = self.get_internals(instance).get(self.get_name(instance), "")
-                if self.pytrack_dvc_option == "params":
-                    return deserializer(output)
-                elif self.pytrack_dvc_option == "deps":
-                    if isinstance(output, list):
-                        return [Path(x) for x in output]
-                    else:
-                        return Path(output)
-                else:
-                    # convert to path
-                    file_path: Path = getattr(
-                        instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path"
-                    )
-                    if isinstance(output, list):
-                        return [file_path / x for x in output]
-                    elif isinstance(output, str):
-                        return file_path / output
-                    else:
-                        return output
+                return deserializer(output)
+                # if self.pytrack_dvc_option == "params":
+                #     return deserializer(output)
+                # elif self.pytrack_dvc_option == "deps":
+                #     if isinstance(output, list):
+                #         return [Path(x) for x in output]
+                #     else:
+                #         return Path(output)
+                # else:
+                #     # convert to path
+                #     file_path: Path = getattr(
+                #         instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path"
+                #     )
+                #     if isinstance(output, list):
+                #         return [file_path / x for x in output]
+                #     elif isinstance(output, str):
+                #         return file_path / output
+                #     else:
+                #         return output
 
     def __set__(self, instance: TypeHintParent, value):
         """Update the value"""

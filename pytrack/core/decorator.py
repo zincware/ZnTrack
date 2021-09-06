@@ -174,7 +174,7 @@ class PyTrack:
             setattr(type(cls), "pytrack", property(map_pytrack_to_dict))
 
             cls.pytrack.pre_init(id_=id_)
-            log.warning(f"Processing {cls.pytrack}")
+            log.debug(f"Processing {cls.pytrack}")
             result = func(cls, *args, **kwargs)
             cls.pytrack.post_init()
 

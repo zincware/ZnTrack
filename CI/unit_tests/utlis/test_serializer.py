@@ -19,7 +19,7 @@ import numpy as np
 def path_dict():
     return {
         "a": {
-            "b": {"c": Path("hello1.py"), "d": Path("hello2.py")},
+            "b": {"c": Path("hello1.py"), "d": "hello2.py"},
             "e": Path("hello3.py"),
         }
     }
@@ -38,8 +38,19 @@ def np_dict():
 def test_serializer_path_dict(path_dict):
     """Test that serializing Path works"""
     assert serializer(path_dict) == {
-        "a": {"b": {"c": "hello1.py", "d": "hello2.py"}, "e": "hello3.py"}
+        "a": {
+            "b": {"c": {"Path": "hello1.py"}, "d": "hello2.py"},
+            "e": {"Path": "hello3.py"},
+        }
     }
+
+
+def test_unserialize_path_dict(path_dict):
+    """Test that deserializing Path works"""
+    serialized_path_dict = serializer(path_dict)
+    deserialized_path_dict = deserializer(serialized_path_dict)
+
+    assert deserialized_path_dict == path_dict
 
 
 def test_serializer_numpy_dict(np_dict):

@@ -20,10 +20,11 @@ from pathlib import Path
 import numpy as np
 
 
+# Serializer
 def conv_path_to_str(value):
     """Convert Path to str"""
     if isinstance(value, Path):
-        value = value.as_posix()
+        value = {"Path": value.as_posix()}
     return value
 
 
@@ -34,11 +35,20 @@ def conv_numpy_to_dict(value):
     return value
 
 
+# Deserializer
 def conv_dict_to_numpy(value):
     """Convert marked dictionary to a numpy array"""
     if isinstance(value, dict):
         if len(value) == 1 and "np" in value:
             value = np.array(value["np"])
+    return value
+
+
+def conv_dict_to_path(value):
+    """Convert marked dictionary to Path"""
+    if isinstance(value, dict):
+        if len(value) == 1 and "Path" in value:
+            value = Path(value["Path"])
     return value
 
 
@@ -58,6 +68,7 @@ def serializer(data):
 def deserializer(data):
     """Deserialize data from the json file back to python objects"""
     data = conv_dict_to_numpy(data)
+    data = conv_dict_to_path(data)
     if isinstance(data, list):
         return [deserializer(x) for x in data]
     elif isinstance(data, dict):
