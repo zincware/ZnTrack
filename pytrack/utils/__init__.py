@@ -10,5 +10,6 @@ Description: Standard python init file for the utils directory
 """
 
 from .utils import is_jsonable
+from .serializer import serializer, deserializer
 
-__all__ = ["is_jsonable"]
+__all__ = ["is_jsonable", "serializer", "deserializer"]

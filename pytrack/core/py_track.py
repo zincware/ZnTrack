@@ -28,20 +28,17 @@ class PyTrackParent:
 
     def __init__(self, child):
         """Constructor for the DVCOp parent class"""
-
+        log.debug(f"New instance of {self} with {child}")
         self.child = child
 
         # Parameters that will be overwritten by "child" classes
         self.slurm_config: SlurmConfig = SlurmConfig()
 
-        # Conventions
-        # self._pytrack_<placeholder> is considered a normal attribute
-        # self._pytrack__<placeholder> is considered a hidden attribute
-
         # Properties
         self._id: int = 0
         self._running = False  # is set to true, when run_dvc
         self._module = None
+        self._stage_name = None
 
         self.dvc_file = "dvc.yaml"
         self.was_called = False
@@ -128,6 +125,9 @@ class PyTrackParent:
          raise and error!
 
         """
+        self.update_dvc()
+        self.dvc.make_paths()
+        # required if your are inside a temporary directory
         self.allow_result_change = True
         self._running = True
 
@@ -146,6 +146,10 @@ class PyTrackParent:
         for attr, value in vars(self.child).items():
             try:
                 option = value.pytrack_dvc_option
+                # this is not hard coded, because when overwriting PyTrackOption those custom descriptors
+                # also need to be applied!
+                value: PyTrackOption  # or child instances
+                py_track_option = value.__class__
                 try:
                     log.debug(
                         f"Updating {attr} with PyTrackOption and value {value.value}!"
@@ -153,7 +157,7 @@ class PyTrackParent:
                     setattr(
                         type(self.child),
                         attr,
-                        PyTrackOption(
+                        py_track_option(
                             option=option, value=value.value, attr=attr, cls=self.child
                         ),
                     )
@@ -173,6 +177,10 @@ class PyTrackParent:
         return str(self._id)
 
     def update_dvc(self):
+        """Update the DVCParams with the options from self.dvc
+
+        This method searches for all PyTrackOptions that are defined within the __init__
+        """
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, PyTrackOption):
                 option = val.pytrack_dvc_option
@@ -202,11 +210,11 @@ class PyTrackParent:
         return False
 
     def _write_dvc(
-            self,
-            force=True,
-            exec_: bool = False,
-            always_changed: bool = False,
-            slurm: bool = False,
+        self,
+        force=True,
+        exec_: bool = False,
+        always_changed: bool = False,
+        slurm: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -356,7 +364,15 @@ class PyTrackParent:
     @property
     def stage_name(self) -> str:
         """Get the stage name"""
-        return f"{self.name}_{self.id}"
+        if self._stage_name is None:
+            self._stage_name = f"{self.name}_{self.id}"
+
+        return self._stage_name
+
+    @stage_name.setter
+    def stage_name(self, value):
+        """Set the stage name"""
+        self._stage_name = value
 
     @property
     def dvc_stages(self) -> dict:

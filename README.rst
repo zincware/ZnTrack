@@ -1,4 +1,4 @@
-|build| |docs| |license|
+|build| |docs| |license| |code style|
 
 PyTrack
 -------
@@ -51,7 +51,7 @@ This stage can be used via
     linear = Linear()
     linear(3, 7, "values.csv")
 
-which builds the DVC stage an can be used e.g., through :code:`dvc repro`.
+which builds the DVC stage and can be used e.g., through :code:`dvc repro`.
 The results can then be accessed easily via :code:`Linear(id_=0).out`.
 
 
@@ -85,3 +85,7 @@ Or you can install from source with:
 .. |license| image:: https://img.shields.io/badge/License-EPL-purple.svg?style=flat
     :alt: Project license
     :target: https://www.gnu.org/licenses/quick-guide-gplv3.en.html
+
+.. |code style| image:: https://img.shields.io/badge/code%20style-black-black
+    :alt: Code style: black
+    :target: https://github.com/psf/black/

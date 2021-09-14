@@ -72,6 +72,41 @@ class ComputeAB:
         self.out = a + b
 
 
+@PyTrack(name="Stage_A")
+class ComputeANamed:
+    """PyTrack stage A"""
+
+    def __init__(self):
+        self.inp = DVC.params()
+        self.out = DVC.result()
+
+    def __call__(self, inp):
+        self.inp = inp
+
+    def run(self):
+        self.out = np.power(2, self.inp).item()
+
+
+@PyTrack(name="Stage_AB")
+class ComputeABNamed:
+    """PyTrack stage AB, depending on A&B with a custom stage name"""
+
+    def __init__(self):
+        self.a = DVC.deps(ComputeANamed(id_=0))
+        self.b = DVC.deps(ComputeB(id_=0))
+        self.out = DVC.result()
+
+        self.param = DVC.params()
+
+    def __call__(self):
+        self.param = "default"
+
+    def run(self):
+        a = ComputeANamed(id_=0).out
+        b = ComputeB(id_=0).out
+        self.out = a + b
+
+
 @pytest.fixture(autouse=True)
 def prepare_env():
     """Create temporary directory"""
@@ -104,7 +139,26 @@ def test_stage_addition():
     assert finished_stage.out == 31
 
 
-def test_stage__addition_run():
+def test_stage_addition_named():
+    """Check that the dvc repro works with named stages"""
+    project = PyTrackProject()
+    project.name = "test01"
+    project.create_dvc_repository()
+
+    a = ComputeANamed()
+    a(2)
+    b = ComputeB()
+    b(3)
+    ab = ComputeABNamed()
+    ab()
+
+    project.run()
+    project.load()
+    finished_stage = ComputeABNamed(id_=0)
+    assert finished_stage.out == 31
+
+
+def test_stage_addition_run():
     """Check that the PyTracks run method works"""
     project = PyTrackProject()
     project.name = "test01"
@@ -122,4 +176,25 @@ def test_stage__addition_run():
     ab.run()
 
     finished_stage = ComputeAB(id_=0)
+    assert finished_stage.out == 31
+
+
+def test_stage_addition_named_run():
+    """Check that the PyTracks run method works with named stages"""
+    project = PyTrackProject()
+    project.name = "test01"
+    project.create_dvc_repository()
+
+    a = ComputeANamed()
+    a(2)
+    b = ComputeB()
+    b(3)
+    ab = ComputeABNamed()
+    ab()
+
+    a.run()
+    b.run()
+    ab.run()
+
+    finished_stage = ComputeABNamed(id_=0)
     assert finished_stage.out == 31
