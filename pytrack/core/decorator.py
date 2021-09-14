@@ -26,6 +26,8 @@ if typing.TYPE_CHECKING:
 
 
 class PyTrack:
+    """Decorator for converting a class into a PyTrack stage"""
+
     def __init__(self, cls=None, nb_name: str = None, name: str = None, **kwargs):
         """
 
@@ -113,9 +115,9 @@ class PyTrack:
                     imports += line
                 if reading_class:
                     if (
-                        re.match(r"\S", line)
-                        and not line.startswith("#")
-                        and not line.startswith("class")
+                            re.match(r"\S", line)
+                            and not line.startswith("#")
+                            and not line.startswith("class")
                     ):
                         reading_class = False
                 if reading_class or line.startswith("class"):
@@ -158,6 +160,7 @@ class PyTrack:
         """Decorator to handle the init of the decorated class"""
 
         def wrapper(cls: TypeHintParent, *args, id_=None, **kwargs):
+            """Wrapper around the init"""
             log.debug(f"Got id_: {id_}")
 
             def map_pytrack_to_dict(self_):
@@ -166,6 +169,12 @@ class PyTrack:
                 This is required, because we use setattr(TYPE(cls)) and not on the instance,
                 so we need to distinguish between different instances, otherwise there is only a single
                 cls.pytrack for all instances!
+
+                Attributes
+                ----------
+                self_: object
+                    The class object that is being converted into a PyTrack stage
+
                 """
                 if self.pytrack_cls_dict.get(self_) is None:
                     self.pytrack_cls_dict[self_] = PyTrackParent(self_)
@@ -196,14 +205,37 @@ class PyTrack:
         """Decorator to handle the call of the decorated class"""
 
         def wrapper(
-            cls: TypeHintParent,
-            *args,
-            force=True,
-            exec_=False,
-            always_changed=False,
-            slurm=False,
-            **kwargs,
+                cls: TypeHintParent,
+                *args,
+                force=True,
+                exec_=False,
+                always_changed=False,
+                slurm=False,
+                **kwargs,
         ):
+            """Wrapper around the call
+
+            Parameters
+            ----------
+            cls: object
+                The class/self argument
+            args:
+                Args to be passed to the class
+            force: bool
+                Whether to use dvc with the force argument
+            exec_: bool
+                Whether to use dvc with the exec argument
+            always_changed: bool
+                Whether to use dvc with the always_changed argument
+            slurm: bool
+                Using SLURM with SRUN. (Experimental feature)
+            kwargs
+
+            Returns
+            -------
+            decorated class
+
+            """
             cls.pytrack.pre_call()
             function = f(cls, *args, **kwargs)
             cls.pytrack.post_call(force, exec_, always_changed, slurm)
@@ -216,6 +248,7 @@ class PyTrack:
         """Decorator to handle the run of the decorated class"""
 
         def wrapper(cls: TypeHintParent):
+            """Wrapper around the run method"""
             cls.pytrack.pre_run()
             function = f(cls)
             cls.pytrack.post_run()
