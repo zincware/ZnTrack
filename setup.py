@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="py-track",
-    version="0.1.0",
+    version="0.1.2",
     author="Zincware",
     author_email="zincwarecode@gmail.com",
     description="A python package for parameter and data version control with DVC",
