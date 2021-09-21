@@ -47,4 +47,4 @@ For an introduction on how to use PyTrack follow the documentation. To verify th
 
 .. |license| image:: https://img.shields.io/badge/License-EPL-purple.svg?style=flat
     :alt: Project license
-    :target: https://www.gnu.org/licenses/quick-guide-gplv3.en.html
+    :target: https://www.eclipse.org/legal/eplfaq.php
