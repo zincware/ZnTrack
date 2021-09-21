@@ -6,13 +6,11 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: Standard python init file for the main directory
+Description: Type hinting class for IDE autocompletion
 """
+from pytrack.core.py_track import PyTrackParent
 
-from .core.parameter import DVC
-from .core.decorator import PyTrack
-from .project import PyTrackProject
-from .interface import DVCInterface
 
-#
-__all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC"]
+class TypeHintParent:
+    def __init__(self):
+        self.pytrack: PyTrackParent = PyTrackParent(child=self)

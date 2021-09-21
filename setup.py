@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="py-track",
-    version="0.0.2",
+    version="0.1.0",
     author="Zincware",
     author_email="zincwarecode@gmail.com",
     description="A python package for parameter and data version control with DVC",
@@ -13,7 +13,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/zincware/py-track",
     download_url="https://github.com/zincware/py-track/archive/beta.tar.gz",
-    keywords=['dvc', 'machine learning', 'parameter tracking'],
+    keywords=["dvc", "machine learning", "parameter tracking"],
     packages=setuptools.find_packages(),
     classifiers=[
         "Development Status :: 3 - Alpha",
@@ -21,6 +21,6 @@ setuptools.setup(
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
         "Operating System :: OS Independent",
     ],
-    python_requires='>=3.7',
-    install_requires=["dvc", "PyYAML"]
+    python_requires=">=3.7",
+    install_requires=["dvc", "PyYAML"],
 )
