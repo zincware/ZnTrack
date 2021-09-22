@@ -84,7 +84,7 @@ Or you can install from source with:
 
 .. |license| image:: https://img.shields.io/badge/License-EPL-purple.svg?style=flat
     :alt: Project license
-    :target: https://www.eclipse.org/legal/eplfaq.php
+    :target: https://www.eclipse.org/legal/epl-2.0/faq.php
 
 .. |code style| image:: https://img.shields.io/badge/code%20style-black-black
     :alt: Code style: black
