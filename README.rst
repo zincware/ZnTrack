@@ -8,7 +8,8 @@ For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
 
 Example
 ========
-PyTrack allows you to convert most Python classes into a DVC stage, including parameters, dependencies and all DVC output types.
+PyTrack allows you to convert most Python classes into a DVC stage, including
+parameters, dependencies and all DVC output types.
 
 .. code-block:: py
 
@@ -84,7 +85,7 @@ Or you can install from source with:
 
 .. |license| image:: https://img.shields.io/badge/License-EPL-purple.svg?style=flat
     :alt: Project license
-    :target: https://www.gnu.org/licenses/quick-guide-gplv3.en.html
+    :target: https://www.eclipse.org/legal/epl-2.0/faq.php
 
 .. |code style| image:: https://img.shields.io/badge/code%20style-black-black
     :alt: Code style: black
