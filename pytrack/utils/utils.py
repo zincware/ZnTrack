@@ -31,3 +31,25 @@ def is_jsonable(x: dict) -> bool:
         return True
     except (TypeError, OverflowError):
         return False
+
+
+def raise_not_serializable(values: dict):
+    """Raise an error with the non serializable objects selected
+
+    If values is a dictionary, all entries will be checked, collected and then raised as ValueError
+    This reduces the size of the ValueError message to only the important information.
+    """
+
+    if isinstance(values, dict):
+        non_serializable = {}
+        for key, val in values.items():
+            if not is_jsonable(val):
+                non_serializable.update({key: val})
+
+        if len(non_serializable) > 0:
+            raise ValueError(
+                f"Passed values {non_serializable} are not JSON serializable."
+            )
+
+    if not is_jsonable(values):
+        raise ValueError(f"{values} is not JSON serializable.")

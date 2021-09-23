@@ -8,7 +8,7 @@ Copyright Contributors to the Zincware Project.
 
 Description: Test class for testing utils
 """
-from pytrack.utils import is_jsonable
+from pytrack.utils.utils import is_jsonable
 
 
 def test_is_jsonable():

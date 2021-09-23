@@ -9,7 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: Standard python init file for the utils directory
 """
 
-from .utils import is_jsonable
+from .utils import is_jsonable, raise_not_serializable
 from .serializer import serializer, deserializer
 
-__all__ = ["is_jsonable", "serializer", "deserializer"]
+__all__ = ["serializer", "deserializer", "raise_not_serializable"]

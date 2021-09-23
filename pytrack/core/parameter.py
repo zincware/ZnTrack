@@ -13,7 +13,7 @@ import logging
 import typing
 
 import json
-from pytrack.utils import is_jsonable, serializer, deserializer
+from pytrack.utils import serializer, deserializer, raise_not_serializable
 from pathlib import Path
 from typing import Union
 
@@ -171,8 +171,7 @@ class PyTrackOption:
                         )
                     # log.warning("Result can only be changed within `run` call!")
                     # return
-                if not is_jsonable(value):
-                    raise ValueError("Results must be JSON serializable")
+                raise_not_serializable(value)
                 log.debug(f"Processing value {value}")
                 results = self.get_results(instance)
                 results.update(value)
@@ -241,8 +240,7 @@ class PyTrackOption:
         log.debug(f"Writing updates to .pytrack.json as {value}")
         value.update({"default": None})
 
-        if not is_jsonable(value):
-            raise ValueError(f"{value} is not JSON serializable")
+        raise_not_serializable(value)
 
         Path(file).parent.mkdir(exist_ok=True, parents=True)
 
@@ -264,8 +262,7 @@ class PyTrackOption:
     @staticmethod
     def set_results(instance: TypeHintParent, value):
         file = instance.pytrack.dvc.json_file
-        if not is_jsonable(value):
-            raise ValueError(f"{value} is not JSON serializable")
+        raise_not_serializable(value)
         log.debug(f"Writing {value} to {file}")
         with open(file, "w") as f:
             json.dump(value, f, indent=4)
