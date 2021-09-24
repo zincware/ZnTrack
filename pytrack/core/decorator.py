@@ -115,9 +115,9 @@ class PyTrack:
                     imports += line
                 if reading_class:
                     if (
-                            re.match(r"\S", line)
-                            and not line.startswith("#")
-                            and not line.startswith("class")
+                        re.match(r"\S", line)
+                        and not line.startswith("#")
+                        and not line.startswith("class")
                     ):
                         reading_class = False
                 if reading_class or line.startswith("class"):
@@ -205,13 +205,13 @@ class PyTrack:
         """Decorator to handle the call of the decorated class"""
 
         def wrapper(
-                cls: TypeHintParent,
-                *args,
-                force=True,
-                exec_=False,
-                always_changed=False,
-                slurm=False,
-                **kwargs,
+            cls: TypeHintParent,
+            *args,
+            force=True,
+            exec_=False,
+            always_changed=False,
+            slurm=False,
+            **kwargs,
         ):
             """Wrapper around the call
 

@@ -85,4 +85,10 @@ class PyTrackProject(DVCInterface):
 
     @staticmethod
     def _destroy():
+        """Remove the DVC directory"""
         subprocess.check_call(["dvc", "destroy", "-f"])
+
+    @staticmethod
+    def repro():
+        """Run dvc repro"""
+        subprocess.check_call(["dvc", "repro"])

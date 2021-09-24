@@ -13,6 +13,7 @@ from .core.parameter import DVC
 from .core.decorator import PyTrack
 from .project import PyTrackProject
 from .interface import DVCInterface
+from .utils import config
 
 #
-__all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC"]
+__all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC", "config"]
