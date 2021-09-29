@@ -9,7 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: 
 """
 import pytest
-from pytrack import PyTrack, DVC, PyTrackProject
+from pytrack import PyTrack, PyTrackProject
 import shutil
 import os
 from subprocess import CalledProcessError

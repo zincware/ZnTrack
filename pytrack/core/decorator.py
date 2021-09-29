@@ -16,6 +16,7 @@ from pathlib import Path
 import re
 import sys
 import typing
+import functools
 
 from .py_track import PyTrackParent
 
@@ -159,6 +160,7 @@ class PyTrack:
     def init_decorator(self, func):
         """Decorator to handle the init of the decorated class"""
 
+        @functools.wraps(func)
         def wrapper(cls: TypeHintParent, *args, id_=None, **kwargs):
             """Wrapper around the init"""
             log.debug(f"Got id_: {id_}")
@@ -201,9 +203,10 @@ class PyTrack:
         return wrapper
 
     @staticmethod
-    def call_decorator(f):
+    def call_decorator(func):
         """Decorator to handle the call of the decorated class"""
 
+        @functools.wraps(func)
         def wrapper(
             cls: TypeHintParent,
             *args,
@@ -237,20 +240,20 @@ class PyTrack:
 
             """
             cls.pytrack.pre_call()
-            function = f(cls, *args, **kwargs)
+            function = func(cls, *args, **kwargs)
             cls.pytrack.post_call(force, exec_, always_changed, slurm)
             return function
 
         return wrapper
 
     @staticmethod
-    def run_decorator(f):
+    def run_decorator(func):
         """Decorator to handle the run of the decorated class"""
 
         def wrapper(cls: TypeHintParent):
             """Wrapper around the run method"""
             cls.pytrack.pre_run()
-            function = f(cls)
+            function = func(cls)
             cls.pytrack.post_run()
             return function
 
