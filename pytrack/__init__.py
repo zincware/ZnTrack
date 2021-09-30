@@ -21,7 +21,7 @@ import sys
 #
 __all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC", "config"]
 
-__version__ = '0.1.3'
+__version__ = "0.1.3"
 
 
 logger = logging.getLogger("pytrack")
@@ -29,7 +29,7 @@ logger.setLevel(logging.INFO)
 
 # Formatter for advanced logging
 # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-formatter = logging.Formatter('%(asctime)s (%(levelname)s): %(message)s')
+formatter = logging.Formatter("%(asctime)s (%(levelname)s): %(message)s")
 
 channel = logging.StreamHandler(sys.stdout)
 channel.setLevel(logging.DEBUG)
