@@ -20,7 +20,7 @@ import functools
 
 from .py_track import PyTrackParent
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
     from pytrack.utils.type_hints import TypeHintParent

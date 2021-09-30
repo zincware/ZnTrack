@@ -17,7 +17,7 @@ from pytrack.utils import is_jsonable, serializer, deserializer
 from pathlib import Path
 from typing import Union
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
     from pytrack.utils.type_hints import TypeHintParent

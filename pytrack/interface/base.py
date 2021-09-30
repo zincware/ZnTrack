@@ -14,7 +14,7 @@ import json
 from typing import List
 from pathlib import Path
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 
 class DVCInterface:

@@ -20,7 +20,7 @@ from .parameter import PyTrackOption
 from pytrack.core.data_classes import DVCParams
 from pathlib import Path
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 
 class PyTrackParent:

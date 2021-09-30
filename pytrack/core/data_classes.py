@@ -16,7 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union, List
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=False, order=True, init=True)

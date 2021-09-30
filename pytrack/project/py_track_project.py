@@ -14,7 +14,7 @@ from pytrack.interface import DVCInterface
 import subprocess
 from datetime import datetime
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 
 class PyTrackProject(DVCInterface):
@@ -60,6 +60,7 @@ class PyTrackProject(DVCInterface):
         """Add this experiment to the queue and run the full queue"""
         self.queue(name=name)
         self.run_all()
+        self.load(name=name)
         log.info("Finished")
 
     def load(self, name=None):
@@ -75,13 +76,28 @@ class PyTrackProject(DVCInterface):
     def create_dvc_repository(self):
         """Perform git and dvc init"""
         try:
-            subprocess.check_call(["dvc", "status"])
-            log.info("DVC Repository already exists.")
+            subprocess.check_call(
+                ["dvc", "status"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            log.info("DVC repository already exists.")
         except subprocess.CalledProcessError:
-            subprocess.check_call(["git", "init"])
-            subprocess.check_call(["dvc", "init"])
-            subprocess.check_call(["git", "add", "."])
-            subprocess.check_call(["git", "commit", "-m", f"Initialize {self.name}"])
+            log.info("Setting up GIT/DVC repository.")
+            subprocess.check_call(
+                ["git", "init"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            subprocess.check_call(
+                ["dvc", "init"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
+            subprocess.check_call(
+                ["git", "add", "."],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            subprocess.check_call(
+                ["git", "commit", "-m", f"Initialize {self.name}"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
 
     @staticmethod
     def _destroy():
