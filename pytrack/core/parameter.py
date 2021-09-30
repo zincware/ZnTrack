@@ -15,7 +15,7 @@ import typing
 import json
 from pytrack.utils import is_jsonable, serializer, deserializer
 from pathlib import Path
-from typing import Union
+from pytrack.utils.types import NoneType
 
 log = logging.getLogger(__name__)
 
@@ -25,11 +25,11 @@ if typing.TYPE_CHECKING:
 
 class PyTrackOption:
     def __init__(
-        self,
-        value: Union[str, tuple] = None,
-        option: str = None,
-        attr: str = None,
-        cls: TypeHintParent = None,
+            self,
+            value=None,
+            option: str = None,
+            attr: str = None,
+            cls: TypeHintParent = None,
     ):
         """PyTrack Descriptor to handle the loading and writing of files
 
@@ -49,8 +49,13 @@ class PyTrackOption:
         self.pytrack_dvc_option = option
         self.value = value
         self.check_input(value)
+
         if value is not None and cls is not None:
-            value = self.make_serializable(value)
+            value = self.get_value(value)
+            if value is NoneType:
+                return
+
+            value = serializer(value)
             self.set_internals(cls, {attr: value})
 
     def __get__(self, instance: TypeHintParent, owner):
@@ -86,9 +91,14 @@ class PyTrackOption:
         except NotImplementedError:
             if self.pytrack_dvc_option != "result":
                 self.check_input(value)
+
+            value = self.get_value(value)
+            if value is NoneType:
+                return
+
             log.debug(f"Updating {self.get_name(instance)} with {value}")
 
-            value = self.make_serializable(value)
+            value = serializer(value)
 
             self.set_internals(instance, {self.get_name(instance): value})
 
@@ -100,8 +110,14 @@ class PyTrackOption:
         """Overwrite this method for custom PyTrackOption set method"""
         raise NotImplementedError
 
-    def make_serializable(self, value):
-        """Make value serializable to save as json"""
+    def get_value(self, value):
+        """Get the value
+
+        If the input is a PyTrackOption gather the value trough the .value attribute
+        Otherwise if e.g. it is a pytrack stage, look for the results json file
+        and make that the resulting value
+
+        """
         if isinstance(value, self.__class__):
             value = value.value
 
@@ -115,9 +131,6 @@ class PyTrackOption:
                     raise ValueError(f"Stage {value} has no results assigned to it!")
                 else:
                     value = new_value
-
-        value = serializer(value)
-
         return value
 
     def get_name(self, instance):
@@ -190,7 +203,8 @@ class PyTrackOption:
                         raise ValueError(
                             "This stage is being loaded. Parameters can not be set!"
                         )
-                value = self.make_serializable(value)
+                value = self.get_value(value)
+                value = serializer(value)
                 name = instance.pytrack.name
                 id_ = instance.pytrack.id
                 file = instance.pytrack.dvc.internals_file
@@ -288,7 +302,7 @@ class DVC:
         )
 
     @staticmethod
-    def params(value=None):
+    def params(value=NoneType):
         """Parameter for PyTrack
 
         Parameters
@@ -304,7 +318,7 @@ class DVC:
         return PyTrackOption(value, option="params")
 
     @staticmethod
-    def result(value=None):
+    def result(value=NoneType):
         """Parameter for PyTrack
 
         Parameters
@@ -318,19 +332,19 @@ class DVC:
 
         """
 
-        if value is not None:
+        if value is not NoneType:
             raise ValueError("Can not pre-initialize result!")
 
         return PyTrackOption(value, option="result")
 
     @staticmethod
-    def deps(value=None):
+    def deps(value=NoneType):
         return PyTrackOption(value, option="deps")
 
     @staticmethod
-    def outs(value=None):
+    def outs(value=NoneType):
         return PyTrackOption(value, option="outs")
 
     @staticmethod
-    def metrics_no_cache(value=None):
+    def metrics_no_cache(value=NoneType):
         return PyTrackOption(value, option="metrics_no_cache")
