@@ -29,7 +29,14 @@ if typing.TYPE_CHECKING:
 class PyTrack:
     """Decorator for converting a class into a PyTrack stage"""
 
-    def __init__(self, cls=None, nb_name: str = None, name: str = None, **kwargs):
+    def __init__(
+        self,
+        cls=None,
+        nb_name: str = None,
+        name: str = None,
+        exec_: bool = False,
+        **kwargs,
+    ):
         """
 
         Parameters
@@ -41,11 +48,16 @@ class PyTrack:
         name: str
             A custom name for the DVC stage.
             !There is currently no check in place, that avoids overwriting an existing stage!
+        exec_: bool
+            Set the default value for exec_.
+            If true, always run this stage immediately.
         kwargs: No kwargs are implemented
         """
         if cls is not None:
             raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
         self.cls = cls
+
+        self.exec_ = exec_
 
         self.name = name
 
@@ -86,6 +98,7 @@ class PyTrack:
         log.debug(f"call kwargs: {kwargs}")
 
         if self.cls is None:
+            # This is what gets called with PyTrack()
             self.cls = args[0]
             self.return_with_args = False
 
@@ -202,8 +215,8 @@ class PyTrack:
 
         return wrapper
 
-    @staticmethod
-    def call_decorator(func):
+    # @staticmethod
+    def call_decorator(self, func):
         """Decorator to handle the call of the decorated class"""
 
         @functools.wraps(func)
@@ -211,7 +224,7 @@ class PyTrack:
             cls: TypeHintParent,
             *args,
             force=True,
-            exec_=False,
+            exec_=self.exec_,
             always_changed=False,
             slurm=False,
             **kwargs,

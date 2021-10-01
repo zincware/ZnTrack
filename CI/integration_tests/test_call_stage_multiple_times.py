@@ -23,6 +23,7 @@ class HelloWorld:
     def run(self):
         pass
 
+
 @PyTrack()
 class HelloWorldwDefault:
     def __init__(self):
@@ -51,6 +52,7 @@ def test_init_without_overwriting(tmp_path):
 
     assert hello_world_1.argument_1 == 11235
 
+
 def test_init_with_overwriting(tmp_path):
     """Test that pre-initializing DVC.params does result in changing values"""
     os.chdir(tmp_path)
@@ -68,4 +70,3 @@ def test_init_with_overwriting(tmp_path):
     # mixing both is not recommended
 
     assert hello_world_1.argument_1 == 314159
-

@@ -24,4 +24,5 @@ class NoneType:
 
     which can not be done with any built in python type
     """
+
     pass

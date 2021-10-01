@@ -25,11 +25,11 @@ if typing.TYPE_CHECKING:
 
 class PyTrackOption:
     def __init__(
-            self,
-            value=None,
-            option: str = None,
-            attr: str = None,
-            cls: TypeHintParent = None,
+        self,
+        value=None,
+        option: str = None,
+        attr: str = None,
+        cls: TypeHintParent = None,
     ):
         """PyTrack Descriptor to handle the loading and writing of files
 
