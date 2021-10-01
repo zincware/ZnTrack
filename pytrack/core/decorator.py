@@ -215,7 +215,6 @@ class PyTrack:
 
         return wrapper
 
-    # @staticmethod
     def call_decorator(self, func):
         """Decorator to handle the call of the decorated class"""
 
