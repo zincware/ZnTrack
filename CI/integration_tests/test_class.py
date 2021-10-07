@@ -49,8 +49,7 @@ def prepare_env():
             json.dump({"id": idx}, f)
 
     project.name = "Test1"
-    project.run()
-    project.load()
+    project.repro()
 
     yield
 

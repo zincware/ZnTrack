@@ -50,9 +50,18 @@ class PyTrackParent:
         self.dvc = DVCParams()
         self.nb_mode = False  # notebook mode
 
-    def pre_init(self, id_):
-        self.allow_param_change = id_ is None
+    def pre_init(self, load: bool = False):
+        """Function to be called prior to the init
+
+        Parameters
+        ----------
+        load: bool
+            Load the stage and prohibit parameter changes
+        """
+        if not load:
+            self.allow_param_change = True
         self.is_init = True
+
         log.debug(f"Setting param change to {self.allow_param_change} on {self}")
 
     def post_init(self):
@@ -61,15 +70,6 @@ class PyTrackParent:
         This command is executed after the init of the "child" class.
         It handles:
         - updating which attributes are parameters and results
-        - loads values if id_!=None
-
-        Parameters
-        ----------
-        id_:int
-            Either None if new stage or usually 0 if a stage should be loaded
-
-        Returns
-        -------
 
         """
         # Updating internals and checking for parameters and results
@@ -89,7 +89,8 @@ class PyTrackParent:
     def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
         """Method after call
 
-        This function should always be the last one in the __call__ method, it handles file IO and DVC execution
+        This function should always be the last one in the __call__ method,
+        it handles file IO and DVC execution
 
         Parameters
         ----------
@@ -97,12 +98,15 @@ class PyTrackParent:
             Use dvc run with `--force` to overwrite previous stages!
         exec_: bool, default=False
             Run the stage directly and don't use dvc with '--no-exec'.
-            This will not output stdout/stderr in real time and should only be used for fast functions!
+            This will not output stdout/stderr in real time and should only be used
+            for fast functions!
         always_changed: bool, default=False
-            Set the always changed dvc argument. See the official DVC docs. Can be useful for debugging / development.
+            Set the always changed dvc argument. See the official DVC docs.
+            Can be useful for debugging / development.
         slurm: bool, default=False
-            Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't mean that every stage uses slurm
-            and you may accidentally run stages on your HEAD Node. You can check the commands in dvc.yaml!
+            Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't
+            mean that every stage uses slurm and you may accidentally run stages on
+            your HEAD Node. You can check the commands in dvc.yaml!
 
         """
         self.update_dvc()
@@ -121,8 +125,8 @@ class PyTrackParent:
 
         Notes
         -----
-         Not using super run_ because run ALWAYS has to implemented in the child class and should otherwise
-         raise and error!
+         Not using super run_ because run ALWAYS has to implemented in the child class
+         and should otherwise raise and error!
 
         """
         self.update_dvc()
@@ -141,13 +145,15 @@ class PyTrackParent:
     def update_dvc_options(self):
         """Update the dvc_options with None values
 
-        This is run after the __init__ to save all DVCParams and they can later be overwritten
+        This is run after the __init__ to save all DVCParams and they can later be
+        overwritten
         """
         for attr, value in vars(self.child).items():
             try:
                 option = value.pytrack_dvc_option
-                # this is not hard coded, because when overwriting PyTrackOption those custom descriptors
-                # also need to be applied!
+                # this is not hard coded, because when overwriting
+                # PyTrackOption those custom descriptors also need to be applied!
+
                 value: PyTrackOption  # or child instances
                 py_track_option = value.__class__
                 try:
@@ -218,18 +224,19 @@ class PyTrackParent:
     ):
         """Write the DVC file using run.
 
-        If it already exists it'll tell you that the stage is already persistent and has been run before.
-        Otherwise it'll run the stage for you.
+        If it already exists it'll tell you that the stage is already persistent and
+        has been run before. Otherwise it'll run the stage for you.
 
         Parameters
         ----------
         force: bool, default = False
             Force DVC to rerun this stage, even if the parameters haven't changed!
         exec_: bool, default = False
-            if False, only write the stage to the dvc.yaml and run later. Otherwise the stage and ALL dependencies
-            will be executed!
+            if False, only write the stage to the dvc.yaml and run later.
+             Otherwise the stage and ALL dependencies will be executed!
         always_changed: bool, default = False
-            Tell DVC to always rerun this stage, e.g. for non-deterministic stages or for testing
+            Tell DVC to always rerun this stage, e.g. for non-deterministic stages
+            or for testing
         slurm: bool, default = False
             Use SLURM to run DVC stages on a Cluster.
 
@@ -263,7 +270,8 @@ class PyTrackParent:
             script.append("--no-exec")
         else:
             log.warning(
-                "You will not be able to see the stdout/stderr of the process in real time!"
+                "You will not be able to see the stdout/stderr "
+                "of the process in real time!"
             )
         #
         if always_changed:
@@ -272,9 +280,10 @@ class PyTrackParent:
         if slurm:
             log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             log.warning(
-                "Make sure, that every stage uses SLURM! If a stage does not have SLURM enabled, the command "
-                "will be run on the HEAD NODE! Check the dvc.yaml file before running! There are no checks"
-                "implemented to test, that only SRUN is in use!"
+                "Make sure, that every stage uses SLURM! If a stage does not have SLURM"
+                " enabled, the command will be run on the HEAD NODE! Check the dvc.yaml"
+                " file before running! There are no checks implemented to test, "
+                "that only SRUN is in use!"
             )
             log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 
@@ -284,12 +293,13 @@ class PyTrackParent:
         #
         script.append(
             f'{self.python_interpreter} -c "from {self.module} import {self.name}; '
-            f'{self.name}(id_={self.id}).run()"'
+            f'{self.name}(load=True).run()"'
         )
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
         log.debug(
-            "If you are using a jupyter notebook, you may not be able to see the output in real time!"
+            "If you are using a jupyter notebook, you may not be able to see the "
+            "output in real time!"
         )
         process = subprocess.run(script, capture_output=True)
         if len(process.stdout) > 0:
@@ -301,7 +311,8 @@ class PyTrackParent:
     def python_interpreter(self):
         """Find the most suitable python interpreter
 
-        Try to run subprocess check calls to see, which python interpreter should be selected
+        Try to run subprocess check calls to see, which python interpreter
+        should be selected
 
         Returns
         -------
