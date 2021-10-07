@@ -217,7 +217,8 @@ class PyTrack:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.pytrack.pre_init(load=load)
+            cls.pytrack.load = load
+            cls.pytrack.pre_init()
             log.debug(f"Processing {cls.pytrack}")
             result = func(cls, *args, **kwargs)
             cls.pytrack.post_init()
