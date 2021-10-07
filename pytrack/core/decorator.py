@@ -63,9 +63,6 @@ class PyTrack:
 
         self.name = name
 
-        self.pytrack_cls_dict = {}
-        # TODO maybe make this a weakref dict?
-
         self.kwargs = kwargs
         self.return_with_args = True
         log.debug(f"decorator_kwargs: {kwargs}")
@@ -200,15 +197,19 @@ class PyTrack:
                 instance, so we need to distinguish between different instances,
                 otherwise there is only a single cls.pytrack for all instances!
 
+                We save the PyTrack instance in self.__dict__ to avoid this.
+
                 Attributes
                 ----------
                 self_: object
                     The class object that is being converted into a PyTrack stage
 
                 """
-                if self.pytrack_cls_dict.get(self_) is None:
-                    self.pytrack_cls_dict[self_] = PyTrackParent(self_)
-                return self.pytrack_cls_dict[self_]
+                try:
+                    return self_.__dict__['pytrack']
+                except KeyError:
+                    self_.__dict__['pytrack'] = PyTrackParent(self_)
+                    return self_.__dict__['pytrack']
 
             setattr(type(cls), "pytrack", property(map_pytrack_to_dict))
 
