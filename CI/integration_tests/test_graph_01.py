@@ -189,19 +189,22 @@ def test_stage_addition_named_run():
     ab = ComputeABNamed()
     ab()
 
-    a.run()
-    b.run()
-    ab.run()
+    ComputeANamed(load=True).run()
+    ComputeB(load=True).run()
+    ComputeABNamed(load=True).run()
 
-    finished_stage = ComputeABNamed(id_=0)
+    finished_stage = ComputeABNamed(load=True)
     assert finished_stage.out == 31
 
 
 def test_named_single_stage():
+    """Test a single named stage"""
     project = PyTrackProject()
     project.create_dvc_repository()
 
     a = ComputeANamed()
-    a(5)
+    a(2)
 
     project.repro()
+
+    assert ComputeANamed(load=True).out == 4
