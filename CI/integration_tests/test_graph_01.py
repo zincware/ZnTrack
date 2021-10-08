@@ -92,8 +92,8 @@ class ComputeABNamed:
     """PyTrack stage AB, depending on A&B with a custom stage name"""
 
     def __init__(self):
-        self.a = DVC.deps(ComputeANamed(id_=0))
-        self.b = DVC.deps(ComputeB(id_=0))
+        self.a: ComputeANamed = DVC.deps(ComputeANamed(id_=0))
+        self.b: ComputeB = DVC.deps(ComputeB(id_=0))
         self.out = DVC.result()
 
         self.param = DVC.params()
@@ -102,9 +102,7 @@ class ComputeABNamed:
         self.param = "default"
 
     def run(self):
-        a = ComputeANamed(id_=0).out
-        b = ComputeB(id_=0).out
-        self.out = a + b
+        self.out = self.a.out + self.b.out
 
 
 @pytest.fixture(autouse=True)
@@ -152,8 +150,7 @@ def test_stage_addition_named():
     ab = ComputeABNamed()
     ab()
 
-    project.run()
-    project.load()
+    project.repro()
     finished_stage = ComputeABNamed(id_=0)
     assert finished_stage.out == 31
 
@@ -192,9 +189,22 @@ def test_stage_addition_named_run():
     ab = ComputeABNamed()
     ab()
 
-    a.run()
-    b.run()
-    ab.run()
+    ComputeANamed(load=True).run()
+    ComputeB(load=True).run()
+    ComputeABNamed(load=True).run()
 
-    finished_stage = ComputeABNamed(id_=0)
+    finished_stage = ComputeABNamed(load=True)
     assert finished_stage.out == 31
+
+
+def test_named_single_stage():
+    """Test a single named stage"""
+    project = PyTrackProject()
+    project.create_dvc_repository()
+
+    a = ComputeANamed()
+    a(2)
+
+    project.repro()
+
+    assert ComputeANamed(load=True).out == 4

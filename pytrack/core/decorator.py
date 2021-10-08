@@ -18,7 +18,8 @@ import sys
 import typing
 import functools
 
-from .py_track import PyTrackParent
+from .py_track import PyTrackProperty
+from pytrack.utils import config
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +59,9 @@ class PyTrack:
         if cls is not None:
             raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
         self.cls = cls
+
+        if nb_name is None:
+            nb_name = config.nb_name
 
         self.exec_ = exec_
 
@@ -190,39 +194,19 @@ class PyTrack:
                 parameters to be passed to the cls
             """
 
-            def map_pytrack_to_dict(self_):
-                """Map the correct pytrack instance to the correct cls
-
-                This is required, because we use setattr(TYPE(cls)) and not on the
-                instance, so we need to distinguish between different instances,
-                otherwise there is only a single cls.pytrack for all instances!
-
-                We save the PyTrack instance in self.__dict__ to avoid this.
-
-                Attributes
-                ----------
-                self_: object
-                    The class object that is being converted into a PyTrack stage
-
-                """
-                try:
-                    return self_.__dict__['pytrack']
-                except KeyError:
-                    self_.__dict__['pytrack'] = PyTrackParent(self_)
-                    return self_.__dict__['pytrack']
-
-            setattr(type(cls), "pytrack", property(map_pytrack_to_dict))
+            setattr(type(cls), "pytrack", PyTrackProperty())
 
             if id_ is not None:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.pytrack.pre_init(load=load)
+            cls.pytrack.load = load
+            cls.pytrack.stage_name = self.name
+
+            cls.pytrack.pre_init()
             log.debug(f"Processing {cls.pytrack}")
             result = func(cls, *args, **kwargs)
             cls.pytrack.post_init()
-
-            cls.pytrack.stage_name = self.name
 
             if self.nb_name is not None:
                 cls.pytrack._module = f"{self.nb_class_path}.{self.cls.__name__}"

@@ -13,56 +13,91 @@ from __future__ import annotations
 
 import logging
 import subprocess
-import yaml
+import json
 
 from .data_classes import SlurmConfig
 from .parameter import PyTrackOption
 from pytrack.core.data_classes import DVCParams
 from pathlib import Path
+from pytrack.utils import is_jsonable, serializer, deserializer
+from pytrack.utils.types import PyTrackType
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from pytrack.utils.type_hints import TypeHintParent
 
 log = logging.getLogger(__name__)
 
 
-class PyTrackParent:
+class PyTrackProperty:
+    """Map the correct pytrack instance to the correct cls
+
+    This is required, because we use setattr(TYPE(cls)) and not on the
+    instance, so we need to distinguish between different instances,
+    otherwise there is only a single cls.pytrack for all instances!
+
+    We save the PyTrack instance in self.__dict__ to avoid this.
+    """
+
+    def __get__(self, instance, owner):
+        """
+
+        Parameters
+        ----------
+        instance: TypeHintParent
+            An instance of the decorated function
+        owner
+
+        Returns
+        -------
+        PyTrack:
+            the pytrack property to handle PyTrack
+        """
+        try:
+            return instance.__dict__['pytrack']
+        except KeyError:
+            instance.__dict__['pytrack'] = PyTrackParent(instance)
+            return instance.__dict__['pytrack']
+
+    def __set__(self, instance, value):
+        raise NotImplementedError('Can not change pytrack property!')
+
+
+class PyTrackParent(PyTrackType):
     """Parent class to be applied within the decorator"""
 
     def __init__(self, child):
         """Constructor for the DVCOp parent class"""
         log.debug(f"New instance of {self} with {child}")
-        self.child = child
+        self.child: TypeHintParent = child
 
         # Parameters that will be overwritten by "child" classes
         self.slurm_config: SlurmConfig = SlurmConfig()
 
         # Properties
-        self._id: int = 0
-        self._running = False  # is set to true, when run_dvc
+
         self._module = None
         self._stage_name = None
 
+        self.running = False  # is set to true, when run_dvc
+        self.load = False
+
         self.dvc_file = "dvc.yaml"
-        self.was_called = False
-        self.allow_param_change = False
-        self.allow_result_change = False
-        self.is_init = False
         # This is True while inside the init to avoid ValueErrors
 
         self.dvc = DVCParams()
         self.nb_mode = False  # notebook mode
 
-    def pre_init(self, load: bool = False):
+    def pre_init(self):
         """Function to be called prior to the init
-
-        Parameters
-        ----------
-        load: bool
-            Load the stage and prohibit parameter changes
         """
-        if not load:
-            self.allow_param_change = True
-        self.is_init = True
 
-        log.debug(f"Setting param change to {self.allow_param_change} on {self}")
+        # self.child._executed = DVC.result()
+        self.dvc.set_json_file(self.name)
+        # if self.load:
+        #     self.load_internals()
+        #     self.load_results()
 
     def post_init(self):
         """Post init command
@@ -72,19 +107,15 @@ class PyTrackParent:
         - updating which attributes are parameters and results
 
         """
-        # Updating internals and checking for parameters and results
-        self.update_dvc_options()
-        if self.has_results():
-            self.dvc.set_json_file(f"{self.id}_{self.name}.json")
-
-        self.is_init = False
+        self.fix_pytrackoptions()
+        if self.load:
+            self.load_internals()
+            self.load_results()
 
     def pre_call(self):
         """Method to be run before the call"""
-        if self.was_called:
-            raise AttributeError(
-                "This method was already called. Please create a new instance!"
-            )
+        if self.load:
+            raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
         """Method after call
@@ -110,13 +141,11 @@ class PyTrackParent:
 
         """
         self.update_dvc()
-
         self.dvc.make_paths()
 
-        self._write_dvc(force, exec_, always_changed, slurm)
+        self.write_dvc(force, exec_, always_changed, slurm)
 
-        self.was_called = True
-        self.allow_param_change = False
+        self.save_internals()
 
     def pre_run(self):
         """Command to be run before run
@@ -129,98 +158,109 @@ class PyTrackParent:
          and should otherwise raise and error!
 
         """
-        self.update_dvc()
         self.dvc.make_paths()
         # required if your are inside a temporary directory
-        self.allow_result_change = True
-        self._running = True
+        self.running = True
 
     def post_run(self):
         """Method to be executed after run
 
         This method saves the results
         """
-        self.allow_result_change = False
+        self.save_results()
 
-    def update_dvc_options(self):
-        """Update the dvc_options with None values
+    def fix_pytrackoptions(self):
+        """Fix PyTrackOption as attribute of the parent class
 
-        This is run after the __init__ to save all DVCParams and they can later be
-        overwritten
+        This is required, if the PyTrackOption is defined inside the __init__
+        because that means :code:`PyTrackOption in vars(hello_world)` but we require
+        :code:`PyTrackOption in vars(hello_world.__class__)` so with this code we update
+        the parent class
+
+        Notes
+        -----
+        It should be preferred to set them not in the __init__ but under the class
+        definition to make them parts of the parent class
+            >>> class HelloWorld:
+            >>>     option=PyTrackOption()
+
+
         """
+
+        remove_from__dict__ = []
+
         for attr, value in vars(self.child).items():
-            try:
-                option = value.pytrack_dvc_option
+            if isinstance(value, PyTrackOption):
                 # this is not hard coded, because when overwriting
                 # PyTrackOption those custom descriptors also need to be applied!
+                log.warning(f"DeprecationWarning: please move the definition "
+                            f"of {attr} from __init__ to class level!")
+
+                log.warning(f'Updating {attr} with {value.option} / {attr} '
+                            f'and default {value.default_value}')
 
                 value: PyTrackOption  # or child instances
-                py_track_option = value.__class__
+                ParsedPyTrackOption = value.__class__
                 try:
                     log.debug(
-                        f"Updating {attr} with PyTrackOption and value {value.value}!"
+                        f"Updating {attr} with PyTrackOption!"
                     )
-                    setattr(
-                        type(self.child),
-                        attr,
-                        py_track_option(
-                            option=option, value=value.value, attr=attr, cls=self.child
-                        ),
+
+                    py_track_option = ParsedPyTrackOption(
+                        option=value.option,
+                        default_value=value.default_value,
+                        name=attr
                     )
-                except AttributeError:
-                    raise AttributeError("setattr went wrong!")
-            except AttributeError:
-                pass
 
-    @property
-    def id(self) -> str:
-        """Get multi_use id"""
-        if self._running:
-            return str(self._id)
+                    setattr(type(self.child), attr, py_track_option)
+                    remove_from__dict__.append(attr)
+                except ValueError:
+                    log.warning(f'Skipping {attr} update - might already be fixed!')
 
-        self._id = 0
-
-        return str(self._id)
+        # Need to remove them from __dict__, because when setting them inside
+        #  the __init__ the __dict__ is set and we don't want that!
+        for attr in remove_from__dict__:
+            log.debug(f"removing: {self.child.__dict__.pop(attr, None)} ")
 
     def update_dvc(self):
         """Update the DVCParams with the options from self.dvc
 
         This method searches for all PyTrackOptions that are defined within the __init__
         """
+        log.warning(f"checking for instance {self.child}")
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, PyTrackOption):
-                option = val.pytrack_dvc_option
+                option = val.option
                 new_vals = getattr(self.child, attr)
-                try:
-                    if isinstance(new_vals, list):
-                        [getattr(self.dvc, option).append(x) for x in new_vals]
-                    else:
-                        getattr(self.dvc, option).append(new_vals)
-                except AttributeError:
-                    log.debug(f"'DVCParams' object has no attribute '{option}'")
-
-    def has_results(self) -> bool:
-        """Check if a json file is generated by looking for defined results"""
-        for attr, val in vars(type(self.child)).items():
-            if isinstance(val, PyTrackOption):
-                if val.pytrack_dvc_option == "result":
-                    return True
-        return False
+                log.warning(f'processing {attr} - {new_vals}')
+                # check if it is a stage, that has to be handled extra
+                if hasattr(new_vals, 'pytrack'):
+                    if isinstance(new_vals.pytrack, PyTrackParent):
+                        getattr(self.dvc, option).append(new_vals.pytrack.dvc.json_file)
+                else:
+                    try:
+                        if isinstance(new_vals, list):
+                            [getattr(self.dvc, option).append(x) for x in new_vals]
+                        else:
+                            getattr(self.dvc, option).append(new_vals)
+                    except AttributeError:
+                        # results / params will be skipped
+                        log.debug(f"'DVCParams' object has no attribute '{option}'")
 
     def has_params(self) -> bool:
         """Check if any params are required by going through the defined params"""
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, PyTrackOption):
-                if val.pytrack_dvc_option == "params":
+                if val.option == "params":
                     return True
         return False
 
-    def _write_dvc(
-        self,
-        force=True,
-        exec_: bool = False,
-        always_changed: bool = False,
-        slurm: bool = False,
+    def write_dvc(
+            self,
+            force=True,
+            exec_: bool = False,
+            always_changed: bool = False,
+            slurm: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -256,7 +296,7 @@ class PyTrackParent:
         if self.has_params():
             script += [
                 "--params",
-                f"{self.dvc.internals_file}:{self.name}.{self.id}.params",
+                f"{self.dvc.internals_file}:{self.stage_name}.params",
             ]
 
         if self.nb_mode:
@@ -337,20 +377,6 @@ class PyTrackParent:
             "Could not find a working python interpreter to work with subprocesses!"
         )
 
-    @id.setter
-    def id(self, value):
-        """Change id if self._running
-
-        Parameters
-        ----------
-        value: int
-            New id
-
-        """
-        if not self._running:
-            raise ValueError("Can only set the value of id during dvc_run!")
-        self._id = value
-
     @property
     def name(self) -> str:
         """Used for naming the stage and dvc run
@@ -367,6 +393,10 @@ class PyTrackParent:
         """Module from which to import <name>
 
         Used for from <module> import <name>
+
+        Notes
+        -----
+        this can be changed when using nb_mode
         """
         if self._module is None:
             self._module = self.child.__class__.__module__
@@ -376,8 +406,7 @@ class PyTrackParent:
     def stage_name(self) -> str:
         """Get the stage name"""
         if self._stage_name is None:
-            self._stage_name = f"{self.name}_{self.id}"
-
+            return self.name
         return self._stage_name
 
     @stage_name.setter
@@ -385,18 +414,128 @@ class PyTrackParent:
         """Set the stage name"""
         self._stage_name = value
 
-    @property
-    def dvc_stages(self) -> dict:
-        """Load all stages from dvc.dvc_file"""
-        with open(self.dvc_file, "r") as f:
-            dvc_file = yaml.safe_load(f)
+    def save_internals(self):
+        """Write all changed internals to file
 
-        return dvc_file["stages"]
+        Update e.g. the parameters, out paths, etc. in the pytrack.json file
+        """
+        full_internals = self.internals_from_file
+        log.warning(f'Serializing {self.internals}')
+        full_internals[self.stage_name] = serializer(self.internals)
+        log.warning(f"Saving {full_internals[self.stage_name]}")
+        self.internals_from_file = full_internals
 
-    @property
-    def dvc_stage(self) -> dict:
-        """Load the current stage from dvc.dvc_file"""
+    def save_results(self):
+        """Save the results to the json file
+
+        Notes
+        -----
+        Adding the executed=True to ensure that a json file is always being saved
+        """
+        results = serializer(self.results)
+
+        if not is_jsonable(results):
+            raise ValueError(f"{results} is not JSON serializable")
+        log.debug(f"Writing {results} to {self.dvc.json_file}")
+
+        results['executed'] = True
+
+        self.dvc.json_file.write_text(
+            json.dumps(results, indent=4)
+        )
+
+    def load_internals(self):
+        """Load the internals from the pytrack.json file"""
         try:
-            return self.dvc_stages[f"{self.name}_{self.id}"]
+            log.warning(f'un-serialize {self.internals_from_file[self.stage_name]}')
+            self.internals = deserializer(
+                self.internals_from_file[self.stage_name]
+            )
         except KeyError:
-            return {}
+            log.warning(f'No internals found for {self.stage_name}')
+
+    def load_results(self):
+        """Load the results from file"""
+        try:
+            self.results = deserializer(
+                json.loads(self.dvc.json_file.read_text())
+            )
+        except FileNotFoundError:
+            log.warning("No results found!")
+
+    @property
+    def results(self) -> dict:
+        """Get all PyTrackOption results and combine them in a single dict"""
+        results = {}
+        for attr, val in vars(type(self.child)).items():
+            if isinstance(val, PyTrackOption):
+                if val.option == "result":
+                    results[val.name] = getattr(self.child, attr)
+        return results
+
+    @results.setter
+    def results(self, value: dict):
+        """Set the values for the results in the __dict__ attribute of the child
+
+        Parameters
+        ----------
+        value: dict
+            {result1: val1, result2: val2, ...}
+        """
+        for key, val in value.items():
+            self.child.__dict__[key] = val
+
+    @property
+    def internals(self):
+        """Get all PyTrackOptions (except results)"""
+        internals = {}
+        for attr, val in vars(type(self.child)).items():
+            if isinstance(val, PyTrackOption):
+                if val.option == "result":
+                    continue
+                option_dict = internals.get(val.option, {})
+                option_dict[val.name] = getattr(self.child, attr)
+
+                internals[val.option] = option_dict
+
+        return internals
+
+    @internals.setter
+    def internals(self, value: dict):
+        """Save all PyTrackOptions/Internals (except results)
+
+        Stores all passed options in the child.__dict__
+
+        Parameters
+        ----------
+        value: dict
+            {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
+        """
+        for option in value.values():
+            for key, val in option.items():
+                self.child.__dict__[key] = val
+
+    @property
+    def internals_from_file(self) -> dict:
+        """Load ALL internals from .pytrack.json"""
+        try:
+            with open(self.dvc.internals_file) as json_file:
+                return json.load(json_file)
+        except FileNotFoundError:
+            log.debug(f"Could not load params from {self.dvc.internals_file}!")
+        return {}
+
+    @internals_from_file.setter
+    def internals_from_file(self, value: dict):
+        """Update internals in .pytrack.json"""
+        log.debug(f"Writing updates to .pytrack.json as {value}")
+        value.update({"default": None})
+
+        if not is_jsonable(value):
+            raise ValueError(f"{value} is not JSON serializable")
+
+        Path(self.dvc.internals_file).parent.mkdir(exist_ok=True, parents=True)
+
+        self.dvc.internals_file.write_text(
+            json.dumps(value, indent=4)
+        )

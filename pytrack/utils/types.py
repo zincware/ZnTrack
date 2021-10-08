@@ -26,3 +26,8 @@ class NoneType:
     """
 
     pass
+
+
+class PyTrackType:
+    """Class to check against to see if it is part of PyTrack"""
+    pass

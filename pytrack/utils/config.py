@@ -16,6 +16,7 @@ class Config:
     """Collection of PyTrack configurations"""
 
     debug: bool = False  # not implemented yet
+    nb_name: str = None
 
 
 config = Config()

@@ -53,7 +53,7 @@ def test_init_without_overwriting(tmp_path):
     assert hello_world_1.argument_1 == 11235
 
 
-def test_init_with_overwriting(tmp_path):
+def test_load_works(tmp_path):
     """Test that pre-initializing DVC.params does result in changing values"""
     os.chdir(tmp_path)
     project = PyTrackProject()
@@ -62,11 +62,5 @@ def test_init_with_overwriting(tmp_path):
     hello_world_1 = HelloWorldwDefault()
     hello_world_1(argument_1=11235)
 
-    hello_world_2 = HelloWorldwDefault()
-
-    # it should overwrite the given param values,
-    #  because they are explicitly defined in the __init__
-    # and therefore not designed to be overwritten in the call
-    # mixing both is not recommended
-
-    assert hello_world_1.argument_1 == 314159
+    assert HelloWorldwDefault().argument_1 == 314159
+    assert HelloWorldwDefault(load=True).argument_1 == 11235

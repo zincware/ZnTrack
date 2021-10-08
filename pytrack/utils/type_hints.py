@@ -9,8 +9,10 @@ Copyright Contributors to the Zincware Project.
 Description: Type hinting class for IDE autocompletion
 """
 from pytrack.core.py_track import PyTrackParent
+from pytrack.core.parameter import DVC
 
 
 class TypeHintParent:
     def __init__(self):
         self.pytrack: PyTrackParent = PyTrackParent(child=self)
+        self._executed = DVC.result()
