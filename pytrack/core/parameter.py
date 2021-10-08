@@ -35,11 +35,12 @@ class PyTrackOption:
         self.name = name
 
     def __get__(self, instance: TypeHintParent, owner):
-        log.warning(f"Getting {self.option} / {self.name}")
+        log.warning(f"Getting {self.option} / {self.name} for {instance}")
         try:
             return instance.__dict__[self.name]
         except KeyError:
-            if isinstance(self.default_value, NoneType):
+            log.warning('KeyError: returning default value')
+            if self.default_value is NoneType:
                 return None
             return self.default_value
         except AttributeError:

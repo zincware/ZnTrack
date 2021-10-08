@@ -111,7 +111,6 @@ class PyTrackParent(PyTrackType):
         if self.load:
             self.load_internals()
             self.load_results()
-        self.update_dvc()
 
     def pre_call(self):
         """Method to be run before the call"""
@@ -141,6 +140,7 @@ class PyTrackParent(PyTrackType):
             your HEAD Node. You can check the commands in dvc.yaml!
 
         """
+        self.update_dvc()
         self.dvc.make_paths()
 
         self.write_dvc(force, exec_, always_changed, slurm)
@@ -197,7 +197,7 @@ class PyTrackParent(PyTrackType):
                             f"of {attr} from __init__ to class level!")
 
                 log.warning(f'Updating {attr} with {value.option} / {attr} '
-                            f'and {value.default_value}')
+                            f'and default {value.default_value}')
 
                 value: PyTrackOption  # or child instances
                 ParsedPyTrackOption = value.__class__
@@ -220,26 +220,32 @@ class PyTrackParent(PyTrackType):
         # Need to remove them from __dict__, because when setting them inside
         #  the __init__ the __dict__ is set and we don't want that!
         for attr in remove_from__dict__:
-            self.child.__dict__.pop(attr, None)
+            log.debug(f"removing: {self.child.__dict__.pop(attr, None)} ")
 
     def update_dvc(self):
         """Update the DVCParams with the options from self.dvc
 
         This method searches for all PyTrackOptions that are defined within the __init__
         """
-
+        log.warning(f"checking for instance {self.child}")
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, PyTrackOption):
                 option = val.option
                 new_vals = getattr(self.child, attr)
-                try:
-                    if isinstance(new_vals, list):
-                        [getattr(self.dvc, option).append(x) for x in new_vals]
-                    else:
-                        getattr(self.dvc, option).append(new_vals)
-                except AttributeError:
-                    # results / params will be skipped
-                    log.debug(f"'DVCParams' object has no attribute '{option}'")
+                log.warning(f'processing {attr} - {new_vals}')
+                # check if it is a stage, that has to be handled extra
+                if hasattr(new_vals, 'pytrack'):
+                    if isinstance(new_vals.pytrack, PyTrackParent):
+                        getattr(self.dvc, option).append(new_vals.pytrack.dvc.json_file)
+                else:
+                    try:
+                        if isinstance(new_vals, list):
+                            [getattr(self.dvc, option).append(x) for x in new_vals]
+                        else:
+                            getattr(self.dvc, option).append(new_vals)
+                    except AttributeError:
+                        # results / params will be skipped
+                        log.debug(f"'DVCParams' object has no attribute '{option}'")
 
     def has_params(self) -> bool:
         """Check if any params are required by going through the defined params"""
@@ -416,6 +422,7 @@ class PyTrackParent(PyTrackType):
         full_internals = self.internals_from_file
         log.warning(f'Serializing {self.internals}')
         full_internals[self.stage_name] = serializer(self.internals)
+        log.warning(f"Saving {full_internals[self.stage_name]}")
         self.internals_from_file = full_internals
 
     def save_results(self):
