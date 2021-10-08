@@ -35,15 +35,18 @@ class PyTrackOption:
         self.name = name
 
     def __get__(self, instance: TypeHintParent, owner):
-        # NOTE! the state in __dict__ will always be the serialized version!
-        #  because it will be set based on the config file
-        #  so un-serializing always takes place here!
         log.warning(f"Getting {self.option} / {self.name}")
         try:
             return instance.__dict__[self.name]
         except KeyError:
             if isinstance(self.default_value, NoneType):
                 return None
+            return self.default_value
+        except AttributeError:
+            log.warning(f'No value found for {self.option} / {self.name} '
+                        f'- returning default')
+            # This can happen, when instance has not been instantiated, yielding in no
+            #  __dict__ attribute. Returning the default value here.
             return self.default_value
 
     def __set__(self, instance: TypeHintParent, value):

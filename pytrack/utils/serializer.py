@@ -18,8 +18,8 @@ Notes
 """
 from pathlib import Path
 import numpy as np
-from pytrack.utils.types import PyTrackProperty
 from importlib import import_module
+from pytrack.utils.types import PyTrackType
 
 
 # Serializer
@@ -38,8 +38,25 @@ def conv_numpy_to_dict(value):
 
 
 def conv_class_to_dict(value):
-    if isinstance(value, PyTrackProperty):
-        value = {"cls": (value.__module__, value.__name__)}
+    """Serialize class instance
+
+    Parameters
+    ----------
+    value: decorated PyTrack stage
+        Assuming that pytrack stages are written to a file, we use the
+        __module and __name__ to later run __module.__name__(load=True)
+
+    Returns
+    --------
+    dict:
+        serialized dictionary containing the class module and name
+
+    """
+    try:
+        if isinstance(value.pytrack, PyTrackType):
+            value = {"cls": (value.__module__, value.__name__)}
+    except AttributeError:
+        pass
     return value
 
 

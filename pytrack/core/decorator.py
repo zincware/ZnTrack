@@ -18,8 +18,7 @@ import sys
 import typing
 import functools
 
-from .py_track import PyTrackParent
-from pytrack.utils.types import PyTrackProperty
+from .py_track import PyTrackProperty
 
 log = logging.getLogger(__name__)
 
@@ -191,8 +190,7 @@ class PyTrack:
                 parameters to be passed to the cls
             """
 
-            setattr(type(cls), "pytrack",
-                    PyTrackProperty(py_track_parent=PyTrackParent))
+            setattr(type(cls), "pytrack", PyTrackProperty())
 
             if id_ is not None:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")

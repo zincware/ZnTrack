@@ -20,6 +20,7 @@ from .parameter import PyTrackOption
 from pytrack.core.data_classes import DVCParams
 from pathlib import Path
 from pytrack.utils import is_jsonable, serializer, deserializer
+from pytrack.utils.types import PyTrackType
 
 from typing import TYPE_CHECKING
 
@@ -29,7 +30,41 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class PyTrackParent:
+class PyTrackProperty:
+    """Map the correct pytrack instance to the correct cls
+
+    This is required, because we use setattr(TYPE(cls)) and not on the
+    instance, so we need to distinguish between different instances,
+    otherwise there is only a single cls.pytrack for all instances!
+
+    We save the PyTrack instance in self.__dict__ to avoid this.
+    """
+
+    def __get__(self, instance, owner):
+        """
+
+        Parameters
+        ----------
+        instance: TypeHintParent
+            An instance of the decorated function
+        owner
+
+        Returns
+        -------
+        PyTrack:
+            the pytrack property to handle PyTrack
+        """
+        try:
+            return instance.__dict__['pytrack']
+        except KeyError:
+            instance.__dict__['pytrack'] = PyTrackParent(instance)
+            return instance.__dict__['pytrack']
+
+    def __set__(self, instance, value):
+        raise NotImplementedError('Can not change pytrack property!')
+
+
+class PyTrackParent(PyTrackType):
     """Parent class to be applied within the decorator"""
 
     def __init__(self, child):
@@ -379,6 +414,7 @@ class PyTrackParent:
         Update e.g. the parameters, out paths, etc. in the pytrack.json file
         """
         full_internals = self.internals_from_file
+        log.warning(f'Serializing {self.internals}')
         full_internals[self.stage_name] = serializer(self.internals)
         self.internals_from_file = full_internals
 
@@ -403,9 +439,13 @@ class PyTrackParent:
 
     def load_internals(self):
         """Load the internals from the pytrack.json file"""
-        self.internals = deserializer(
-            self.internals_from_file[self.stage_name]
-        )
+        try:
+            log.warning(f'un-serialize {self.internals_from_file[self.stage_name]}')
+            self.internals = deserializer(
+                self.internals_from_file[self.stage_name]
+            )
+        except KeyError:
+            log.warning(f'No internals found for {self.stage_name}')
 
     def load_results(self):
         """Load the results from file"""

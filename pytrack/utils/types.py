@@ -28,40 +28,6 @@ class NoneType:
     pass
 
 
-class PyTrackProperty:
-    """Map the correct pytrack instance to the correct cls
-
-    This is required, because we use setattr(TYPE(cls)) and not on the
-    instance, so we need to distinguish between different instances,
-    otherwise there is only a single cls.pytrack for all instances!
-
-    We save the PyTrack instance in self.__dict__ to avoid this.
-    """
-
-    def __init__(self, py_track_parent):
-        # Need to do this here, because of ciruclar imports
-        #  with the serializer
-        self.py_track_parent = py_track_parent
-
-    def __get__(self, instance, owner):
-        """
-
-        Parameters
-        ----------
-        instance: TypeHintParent
-            An instance of the decorated function
-        owner
-
-        Returns
-        -------
-        PyTrack:
-            the pytrack property to handle PyTrack
-        """
-        try:
-            return instance.__dict__['pytrack']
-        except KeyError:
-            instance.__dict__['pytrack'] = self.py_track_parent(instance)
-            return instance.__dict__['pytrack']
-
-    def __set__(self, instance, value):
-        raise NotImplementedError('Can not change pytrack property!')
+class PyTrackType:
+    """Class to check against to see if it is part of PyTrack"""
+    pass
