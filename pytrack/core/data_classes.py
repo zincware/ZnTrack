@@ -166,7 +166,7 @@ class DVCParams:
         -------
 
         """
-        self.json_file = self.outs_path / name
+        self.json_file = self.outs_path / f"{name}.json"
         self.outs_path.mkdir(exist_ok=True, parents=True)
 
 
