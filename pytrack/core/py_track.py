@@ -72,6 +72,7 @@ class PyTrackParent:
         - updating which attributes are parameters and results
 
         """
+        self.fix_pytrackoptions()
         self.update_dvc()
 
     def pre_call(self):
@@ -129,6 +130,59 @@ class PyTrackParent:
         This method saves the results
         """
         self.save_results()
+
+    def fix_pytrackoptions(self):
+        """Fix PyTrackOption as attribute of the parent class
+
+        This is required, if the PyTrackOption is defined inside the __init__
+        because that means :code:`PyTrackOption in vars(hello_world)` but we require
+        :code:`PyTrackOption in vars(hello_world.__class__)` so with this code we update
+        the parent class
+
+        Notes
+        -----
+        It should be preferred to set them not in the __init__ but under the class
+        definition to make them parts of the parent class
+            >>> class HelloWorld:
+            >>>     option=PyTrackOption()
+
+
+        """
+
+        remove_from__dict__ = []
+
+        for attr, value in vars(self.child).items():
+            if isinstance(value, PyTrackOption):
+                # this is not hard coded, because when overwriting
+                # PyTrackOption those custom descriptors also need to be applied!
+                log.warning(f"DeprecationWarning: please move the definition "
+                            f"of {attr} from __init__ to class level!")
+
+                log.warning(f'Updating {attr} with {value.option} / {attr} '
+                            f'and {value.default_value}')
+
+                value: PyTrackOption  # or child instances
+                ParsedPyTrackOption = value.__class__
+                try:
+                    log.debug(
+                        f"Updating {attr} with PyTrackOption!"
+                    )
+
+                    py_track_option = ParsedPyTrackOption(
+                        option=value.option,
+                        default_value=value.default_value,
+                        name=attr
+                    )
+
+                    setattr(type(self.child), attr, py_track_option)
+                    remove_from__dict__.append(attr)
+                except ValueError:
+                    log.warning(f'Skipping {attr} update - might already be fixed!')
+
+        # Need to remove them from __dict__, because when setting them inside
+        #  the __init__ the __dict__ is set and we don't want that!
+        for attr in remove_from__dict__:
+            self.child.__dict__.pop(attr, None)
 
     def update_dvc(self):
         """Update the DVCParams with the options from self.dvc

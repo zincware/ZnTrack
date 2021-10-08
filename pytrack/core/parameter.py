@@ -24,9 +24,10 @@ if typing.TYPE_CHECKING:
 
 
 class PyTrackOption:
-    def __init__(self, option, default_value):
+    def __init__(self, option, default_value, name=None):
         self.option = option
         self.default_value = default_value
+        self.name = name
 
         if option == "result" and default_value is not NoneType:
             raise ValueError(f"Can not pre-initialize result! Found {default_value}")
@@ -35,7 +36,6 @@ class PyTrackOption:
 
     def __set_name__(self, owner, name):
         self.name = name
-        self.owner = owner
 
     def __get__(self, instance: TypeHintParent, owner):
         # NOTE! the state in __dict__ will always be the serialized version!
@@ -51,6 +51,12 @@ class PyTrackOption:
 
     def __set__(self, instance: TypeHintParent, value):
         log.warning(f"Changing {self.option} / {self.name} to {value}")
+
+        if isinstance(value, PyTrackOption):
+            log.warning(f'{self.option} / {self.name} is already a PyTrackOption - '
+                        f'Skipping updating it!')
+            return
+
         if instance.pytrack.load and self.option != "result":
             raise ValueError(f'Changing {self.option} is currently not allowed!')
 
@@ -78,9 +84,9 @@ class PyTrackOption:
             )
 
 
-
 class LazyProperty:
     """Lazy property that takes the attribute name for PyTrackOption definition"""
+
     def __set_name__(self, owner, name):
         """Descriptor default"""
         self.name = name
@@ -109,7 +115,6 @@ class DVC:
     deps = LazyProperty()
     outs = LazyProperty()
     metrics_no_cache = LazyProperty()
-
 
 # class _PyTrackOption:
 #     def __init__(
