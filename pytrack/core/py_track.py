@@ -296,7 +296,7 @@ class PyTrackParent(PyTrackType):
         if self.has_params():
             script += [
                 "--params",
-                f"{self.dvc.internals_file}:{self.name}.params",
+                f"{self.dvc.internals_file}:{self.stage_name}.params",
             ]
 
         if self.nb_mode:

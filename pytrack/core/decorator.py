@@ -201,12 +201,12 @@ class PyTrack:
                 load = True
 
             cls.pytrack.load = load
+            cls.pytrack.stage_name = self.name
+
             cls.pytrack.pre_init()
             log.debug(f"Processing {cls.pytrack}")
             result = func(cls, *args, **kwargs)
             cls.pytrack.post_init()
-
-            cls.pytrack.stage_name = self.name
 
             if self.nb_name is not None:
                 cls.pytrack._module = f"{self.nb_class_path}.{self.cls.__name__}"
