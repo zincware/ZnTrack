@@ -19,6 +19,7 @@ import typing
 import functools
 
 from .py_track import PyTrackProperty
+from pytrack.utils import config
 
 log = logging.getLogger(__name__)
 
@@ -58,6 +59,9 @@ class PyTrack:
         if cls is not None:
             raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
         self.cls = cls
+
+        if nb_name is None:
+            nb_name = config.nb_name
 
         self.exec_ = exec_
 
