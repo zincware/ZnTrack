@@ -19,6 +19,7 @@ import typing
 import functools
 
 from .py_track import PyTrackParent
+from pytrack.utils.types import PyTrackProperty
 
 log = logging.getLogger(__name__)
 
@@ -190,28 +191,8 @@ class PyTrack:
                 parameters to be passed to the cls
             """
 
-            def map_pytrack_to_dict(self_):
-                """Map the correct pytrack instance to the correct cls
-
-                This is required, because we use setattr(TYPE(cls)) and not on the
-                instance, so we need to distinguish between different instances,
-                otherwise there is only a single cls.pytrack for all instances!
-
-                We save the PyTrack instance in self.__dict__ to avoid this.
-
-                Attributes
-                ----------
-                self_: object
-                    The class object that is being converted into a PyTrack stage
-
-                """
-                try:
-                    return self_.__dict__['pytrack']
-                except KeyError:
-                    self_.__dict__['pytrack'] = PyTrackParent(self_)
-                    return self_.__dict__['pytrack']
-
-            setattr(type(cls), "pytrack", property(map_pytrack_to_dict))
+            setattr(type(cls), "pytrack",
+                    PyTrackProperty(py_track_parent=PyTrackParent))
 
             if id_ is not None:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")

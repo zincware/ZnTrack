@@ -12,9 +12,6 @@ from __future__ import annotations
 import logging
 import typing
 
-import json
-from pytrack.utils import is_jsonable, serializer, deserializer
-from pathlib import Path
 from pytrack.utils.types import NoneType
 
 log = logging.getLogger(__name__)
@@ -302,8 +299,8 @@ class DVC:
 #                 id_ = instance.pytrack.id
 #                 file = instance.pytrack.dvc.internals_file
 #
-#                 full_internals = self.get_full_internals(file)
-#                 stage = full_internals.get(name, {})
+#                 internals_from_file = self.get_full_internals(file)
+#                 stage = internals_from_file.get(name, {})
 #                 stage_w_id = stage.get(id_, {})
 #
 #                 option = stage_w_id.get(self.pytrack_dvc_option, {})
@@ -311,9 +308,9 @@ class DVC:
 #
 #                 stage_w_id[self.pytrack_dvc_option] = option
 #                 stage[id_] = stage_w_id
-#                 full_internals[name] = stage
+#                 internals_from_file[name] = stage
 #
-#                 self.set_full_internals(file, full_internals)
+#                 self.set_full_internals(file, internals_from_file)
 #
 #         else:
 #             raise ValueError(
@@ -326,10 +323,10 @@ class DVC:
 #         id_ = instance.pytrack.id
 #         file = instance.pytrack.dvc.internals_file
 #
-#         full_internals = self.get_full_internals(file)
+#         internals_from_file = self.get_full_internals(file)
 #
 #         return (
-#             full_internals.get(name, {}).get(id_, {}).get(self.pytrack_dvc_option, {})
+#             internals_from_file.get(name, {}).get(id_, {}).get(self.pytrack_dvc_option, {})
 #         )
 #
 #     @staticmethod

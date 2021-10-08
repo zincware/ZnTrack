@@ -16,10 +16,10 @@ import subprocess
 import json
 
 from .data_classes import SlurmConfig
-from .parameter import PyTrackOption, DVC
+from .parameter import PyTrackOption
 from pytrack.core.data_classes import DVCParams
 from pathlib import Path
-from pytrack.utils import is_jsonable
+from pytrack.utils import is_jsonable, serializer, deserializer
 
 from typing import TYPE_CHECKING
 
@@ -60,9 +60,9 @@ class PyTrackParent:
 
         # self.child._executed = DVC.result()
         self.dvc.set_json_file(self.name)
-        if self.load:
-            self.load_internals()
-            self.load_results()
+        # if self.load:
+        #     self.load_internals()
+        #     self.load_results()
 
     def post_init(self):
         """Post init command
@@ -73,6 +73,9 @@ class PyTrackParent:
 
         """
         self.fix_pytrackoptions()
+        if self.load:
+            self.load_internals()
+            self.load_results()
         self.update_dvc()
 
     def pre_call(self):
@@ -375,13 +378,9 @@ class PyTrackParent:
 
         Update e.g. the parameters, out paths, etc. in the pytrack.json file
         """
-        full_internals = self.full_internals
-        full_internals[self.stage_name] = self.internals
-        self.full_internals = full_internals
-
-    def load_internals(self):
-        """Load the internals from the pytrack.json file"""
-        self.internals = self.full_internals[self.stage_name]
+        full_internals = self.internals_from_file
+        full_internals[self.stage_name] = serializer(self.internals)
+        self.internals_from_file = full_internals
 
     def save_results(self):
         """Save the results to the json file
@@ -390,7 +389,7 @@ class PyTrackParent:
         -----
         Adding the executed=True to ensure that a json file is always being saved
         """
-        results = self.results
+        results = serializer(self.results)
 
         if not is_jsonable(results):
             raise ValueError(f"{results} is not JSON serializable")
@@ -402,10 +401,18 @@ class PyTrackParent:
             json.dumps(results, indent=4)
         )
 
+    def load_internals(self):
+        """Load the internals from the pytrack.json file"""
+        self.internals = deserializer(
+            self.internals_from_file[self.stage_name]
+        )
+
     def load_results(self):
         """Load the results from file"""
         try:
-            self.results = json.loads(self.dvc.json_file.read_text())
+            self.results = deserializer(
+                json.loads(self.dvc.json_file.read_text())
+            )
         except FileNotFoundError:
             log.warning("No results found!")
 
@@ -462,7 +469,7 @@ class PyTrackParent:
                 self.child.__dict__[key] = val
 
     @property
-    def full_internals(self) -> dict:
+    def internals_from_file(self) -> dict:
         """Load ALL internals from .pytrack.json"""
         try:
             with open(self.dvc.internals_file) as json_file:
@@ -471,8 +478,8 @@ class PyTrackParent:
             log.debug(f"Could not load params from {self.dvc.internals_file}!")
         return {}
 
-    @full_internals.setter
-    def full_internals(self, value: dict):
+    @internals_from_file.setter
+    def internals_from_file(self, value: dict):
         """Update internals in .pytrack.json"""
         log.debug(f"Writing updates to .pytrack.json as {value}")
         value.update({"default": None})

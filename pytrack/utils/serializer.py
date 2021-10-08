@@ -18,10 +18,12 @@ Notes
 """
 from pathlib import Path
 import numpy as np
+from pytrack.utils.types import PyTrackProperty
+from importlib import import_module
 
 
 # Serializer
-def conv_path_to_str(value):
+def conv_path_to_dict(value):
     """Convert Path to str"""
     if isinstance(value, Path):
         value = {"Path": value.as_posix()}
@@ -32,6 +34,12 @@ def conv_numpy_to_dict(value):
     """Convert numpy to a list, marked by a dictionary"""
     if isinstance(value, np.ndarray):
         value = {"np": value.tolist()}
+    return value
+
+
+def conv_class_to_dict(value):
+    if isinstance(value, PyTrackProperty):
+        value = {"cls": (value.__module__, value.__name__)}
     return value
 
 
@@ -52,10 +60,32 @@ def conv_dict_to_path(value):
     return value
 
 
+def conv_dict_to_class(value):
+    """
+
+    Parameters
+    ----------
+    value: dict
+        Expected a dict of type {'cls': (__module__, __name__)} to run
+        from __module__ import __name__ via importlib
+
+    Returns
+    -------
+    __name__(load=True)
+
+    """
+    if isinstance(value, dict):
+        if len(value) == 1 and "cls" in value:
+            module = import_module(value['cls'][0])
+            value = getattr(module, value['cls'][1])(load=True)
+    return value
+
+
 def serializer(data):
     """Serialize data so it can be stored in a json file"""
-    data = conv_path_to_str(data)
+    data = conv_path_to_dict(data)
     data = conv_numpy_to_dict(data)
+    data = conv_class_to_dict(data)
 
     if isinstance(data, list):
         return [serializer(x) for x in data]
@@ -69,6 +99,8 @@ def deserializer(data):
     """Deserialize data from the json file back to python objects"""
     data = conv_dict_to_numpy(data)
     data = conv_dict_to_path(data)
+    data = conv_dict_to_class(data)
+
     if isinstance(data, list):
         return [deserializer(x) for x in data]
     elif isinstance(data, dict):
