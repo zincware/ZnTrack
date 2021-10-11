@@ -196,7 +196,7 @@ class PyTrackParent(PyTrackType):
                 log.warning(f"DeprecationWarning: please move the definition "
                             f"of {attr} from __init__ to class level!")
 
-                log.warning(f'Updating {attr} with {value.option} / {attr} '
+                log.debug(f'Updating {attr} with {value.option} / {attr} '
                             f'and default {value.default_value}')
 
                 value: PyTrackOption  # or child instances
@@ -227,12 +227,12 @@ class PyTrackParent(PyTrackType):
 
         This method searches for all PyTrackOptions that are defined within the __init__
         """
-        log.warning(f"checking for instance {self.child}")
+        log.debug(f"checking for instance {self.child}")
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, PyTrackOption):
                 option = val.option
                 new_vals = getattr(self.child, attr)
-                log.warning(f'processing {attr} - {new_vals}')
+                log.debug(f'processing {attr} - {new_vals}')
                 # check if it is a stage, that has to be handled extra
                 if hasattr(new_vals, 'pytrack'):
                     if isinstance(new_vals.pytrack, PyTrackParent):
@@ -420,9 +420,9 @@ class PyTrackParent(PyTrackType):
         Update e.g. the parameters, out paths, etc. in the pytrack.json file
         """
         full_internals = self.internals_from_file
-        log.warning(f'Serializing {self.internals}')
+        log.debug(f'Serializing {self.internals}')
         full_internals[self.stage_name] = serializer(self.internals)
-        log.warning(f"Saving {full_internals[self.stage_name]}")
+        log.debug(f"Saving {full_internals[self.stage_name]}")
         self.internals_from_file = full_internals
 
     def save_results(self):
@@ -447,7 +447,7 @@ class PyTrackParent(PyTrackType):
     def load_internals(self):
         """Load the internals from the pytrack.json file"""
         try:
-            log.warning(f'un-serialize {self.internals_from_file[self.stage_name]}')
+            log.debug(f'un-serialize {self.internals_from_file[self.stage_name]}')
             self.internals = deserializer(
                 self.internals_from_file[self.stage_name]
             )

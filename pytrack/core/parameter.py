@@ -35,11 +35,11 @@ class PyTrackOption:
         self.name = name
 
     def __get__(self, instance: TypeHintParent, owner):
-        log.warning(f"Getting {self.option} / {self.name} for {instance}")
+        log.debug(f"Getting {self.option} / {self.name} for {instance}")
         try:
             return instance.__dict__[self.name]
         except KeyError:
-            log.warning('KeyError: returning default value')
+            log.debug('KeyError: returning default value')
             if self.default_value is NoneType:
                 return None
             return self.default_value
@@ -51,10 +51,10 @@ class PyTrackOption:
             return self.default_value
 
     def __set__(self, instance: TypeHintParent, value):
-        log.warning(f"Changing {self.option} / {self.name} to {value}")
+        log.debug(f"Changing {self.option} / {self.name} to {value}")
 
         if isinstance(value, PyTrackOption):
-            log.warning(f'{self.option} / {self.name} is already a PyTrackOption - '
+            log.debug(f'{self.option} / {self.name} is already a PyTrackOption - '
                         f'Skipping updating it!')
             return
 
@@ -71,14 +71,14 @@ class PyTrackOption:
     def check_input(self, value):
         """Check if the input value can be processed"""
         if isinstance(value, dict):
-            log.warning(
+            log.info(
                 f"Used mutable type dict for {self.option}! "
                 f"Always overwrite the {self.option} and don't alter it "
                 f"otherwise!, It won't work."
             )
 
         if isinstance(value, list):
-            log.warning(
+            log.info(
                 f"Used mutable type list for {self.option}! "
                 f"Always overwrite the {self.option} and don't append "
                 f"to it! It won't work."
