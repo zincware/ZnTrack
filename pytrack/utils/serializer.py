@@ -55,7 +55,7 @@ def conv_class_to_dict(value):
         serialized dictionary containing the class module and name
 
     """
-    if hasattr(value, 'pytrack'):
+    if hasattr(value, "pytrack"):
         if isinstance(value.pytrack, PyTrackType):
             value = {"cls": (value.__module__, value.__class__.__name__)}
     return value
@@ -95,8 +95,8 @@ def conv_dict_to_class(value):
     """
     if isinstance(value, dict):
         if len(value) == 1 and "cls" in value:
-            module = import_module(value['cls'][0])
-            value = getattr(module, value['cls'][1])
+            module = import_module(value["cls"][0])
+            value = getattr(module, value["cls"][1])
             value = PyTrackStage(cls=value)
     return value
 

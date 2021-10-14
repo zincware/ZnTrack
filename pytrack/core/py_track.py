@@ -55,13 +55,13 @@ class PyTrackProperty:
             the pytrack property to handle PyTrack
         """
         try:
-            return instance.__dict__['pytrack']
+            return instance.__dict__["pytrack"]
         except KeyError:
-            instance.__dict__['pytrack'] = PyTrackParent(instance)
-            return instance.__dict__['pytrack']
+            instance.__dict__["pytrack"] = PyTrackParent(instance)
+            return instance.__dict__["pytrack"]
 
     def __set__(self, instance, value):
-        raise NotImplementedError('Can not change pytrack property!')
+        raise NotImplementedError("Can not change pytrack property!")
 
 
 class PyTrackParent(PyTrackType):
@@ -90,8 +90,7 @@ class PyTrackParent(PyTrackType):
         self.nb_mode = False  # notebook mode
 
     def pre_init(self):
-        """Function to be called prior to the init
-        """
+        """Function to be called prior to the init"""
 
         # self.child._executed = DVC.result()
         self.dvc.set_json_file(self.name)
@@ -193,29 +192,31 @@ class PyTrackParent(PyTrackType):
             if isinstance(value, PyTrackOption):
                 # this is not hard coded, because when overwriting
                 # PyTrackOption those custom descriptors also need to be applied!
-                log.warning(f"DeprecationWarning: please move the definition "
-                            f"of {attr} from __init__ to class level!")
+                log.warning(
+                    f"DeprecationWarning: please move the definition "
+                    f"of {attr} from __init__ to class level!"
+                )
 
-                log.debug(f'Updating {attr} with {value.option} / {attr} '
-                            f'and default {value.default_value}')
+                log.debug(
+                    f"Updating {attr} with {value.option} / {attr} "
+                    f"and default {value.default_value}"
+                )
 
                 value: PyTrackOption  # or child instances
                 ParsedPyTrackOption = value.__class__
                 try:
-                    log.debug(
-                        f"Updating {attr} with PyTrackOption!"
-                    )
+                    log.debug(f"Updating {attr} with PyTrackOption!")
 
                     py_track_option = ParsedPyTrackOption(
                         option=value.option,
                         default_value=value.default_value,
-                        name=attr
+                        name=attr,
                     )
 
                     setattr(type(self.child), attr, py_track_option)
                     remove_from__dict__.append(attr)
                 except ValueError:
-                    log.warning(f'Skipping {attr} update - might already be fixed!')
+                    log.warning(f"Skipping {attr} update - might already be fixed!")
 
         # Need to remove them from __dict__, because when setting them inside
         #  the __init__ the __dict__ is set and we don't want that!
@@ -232,9 +233,9 @@ class PyTrackParent(PyTrackType):
             if isinstance(val, PyTrackOption):
                 option = val.option
                 new_vals = getattr(self.child, attr)
-                log.debug(f'processing {attr} - {new_vals}')
+                log.debug(f"processing {attr} - {new_vals}")
                 # check if it is a stage, that has to be handled extra
-                if hasattr(new_vals, 'pytrack'):
+                if hasattr(new_vals, "pytrack"):
                     if isinstance(new_vals.pytrack, PyTrackParent):
                         getattr(self.dvc, option).append(new_vals.pytrack.dvc.json_file)
                 else:
@@ -256,11 +257,11 @@ class PyTrackParent(PyTrackType):
         return False
 
     def write_dvc(
-            self,
-            force=True,
-            exec_: bool = False,
-            always_changed: bool = False,
-            slurm: bool = False,
+        self,
+        force=True,
+        exec_: bool = False,
+        always_changed: bool = False,
+        slurm: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -420,7 +421,7 @@ class PyTrackParent(PyTrackType):
         Update e.g. the parameters, out paths, etc. in the pytrack.json file
         """
         full_internals = self.internals_from_file
-        log.debug(f'Serializing {self.internals}')
+        log.debug(f"Serializing {self.internals}")
         full_internals[self.stage_name] = serializer(self.internals)
         log.debug(f"Saving {full_internals[self.stage_name]}")
         self.internals_from_file = full_internals
@@ -438,28 +439,22 @@ class PyTrackParent(PyTrackType):
             raise ValueError(f"{results} is not JSON serializable")
         log.debug(f"Writing {results} to {self.dvc.json_file}")
 
-        results['executed'] = True
+        results["executed"] = True
 
-        self.dvc.json_file.write_text(
-            json.dumps(results, indent=4)
-        )
+        self.dvc.json_file.write_text(json.dumps(results, indent=4))
 
     def load_internals(self):
         """Load the internals from the pytrack.json file"""
         try:
-            log.debug(f'un-serialize {self.internals_from_file[self.stage_name]}')
-            self.internals = deserializer(
-                self.internals_from_file[self.stage_name]
-            )
+            log.debug(f"un-serialize {self.internals_from_file[self.stage_name]}")
+            self.internals = deserializer(self.internals_from_file[self.stage_name])
         except KeyError:
-            log.warning(f'No internals found for {self.stage_name}')
+            log.warning(f"No internals found for {self.stage_name}")
 
     def load_results(self):
         """Load the results from file"""
         try:
-            self.results = deserializer(
-                json.loads(self.dvc.json_file.read_text())
-            )
+            self.results = deserializer(json.loads(self.dvc.json_file.read_text()))
         except FileNotFoundError:
             log.warning("No results found!")
 
@@ -541,6 +536,4 @@ class PyTrackParent(PyTrackType):
 
         Path(self.dvc.internals_file).parent.mkdir(exist_ok=True, parents=True)
 
-        self.dvc.internals_file.write_text(
-            json.dumps(value, indent=4)
-        )
+        self.dvc.internals_file.write_text(json.dumps(value, indent=4))

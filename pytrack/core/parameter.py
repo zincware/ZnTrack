@@ -39,13 +39,15 @@ class PyTrackOption:
         try:
             return instance.__dict__[self.name]
         except KeyError:
-            log.debug('KeyError: returning default value')
+            log.debug("KeyError: returning default value")
             if self.default_value is NoneType:
                 return None
             return self.default_value
         except AttributeError:
-            log.warning(f'No value found for {self.option} / {self.name} '
-                        f'- returning default')
+            log.warning(
+                f"No value found for {self.option} / {self.name} "
+                f"- returning default"
+            )
             # This can happen, when instance has not been instantiated, yielding in no
             #  __dict__ attribute. Returning the default value here.
             return self.default_value
@@ -54,15 +56,17 @@ class PyTrackOption:
         log.debug(f"Changing {self.option} / {self.name} to {value}")
 
         if isinstance(value, PyTrackOption):
-            log.debug(f'{self.option} / {self.name} is already a PyTrackOption - '
-                      f'Skipping updating it!')
+            log.debug(
+                f"{self.option} / {self.name} is already a PyTrackOption - "
+                f"Skipping updating it!"
+            )
             return
 
         if instance.pytrack.load and self.option != "result":
-            raise ValueError(f'Changing {self.option} is currently not allowed!')
+            raise ValueError(f"Changing {self.option} is currently not allowed!")
 
         if not instance.pytrack.running and self.option == "result":
-            raise ValueError(f'Changing {self.option} is currently not allowed')
+            raise ValueError(f"Changing {self.option} is currently not allowed")
 
         self.check_input(value)
 

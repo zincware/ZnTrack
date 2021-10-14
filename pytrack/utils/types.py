@@ -33,6 +33,7 @@ class PyTrackType:
 
     In comparison to PyTrackStage this is used to identify initiated stages
     """
+
     pass
 
 
@@ -48,10 +49,10 @@ class PyTrackStage:
     >>> type(vars(Stage())['pytrack']) == 'PyTrackType'
 
     """
+
     def __init__(self, cls):
         self.cls = cls
 
     def get(self):
         """Load the PyTrackStage"""
         return self.cls(load=True)
-

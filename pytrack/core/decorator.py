@@ -31,12 +31,12 @@ class PyTrack:
     """Decorator for converting a class into a PyTrack stage"""
 
     def __init__(
-            self,
-            cls=None,
-            nb_name: str = None,
-            name: str = None,
-            exec_: bool = False,
-            **kwargs,
+        self,
+        cls=None,
+        nb_name: str = None,
+        name: str = None,
+        exec_: bool = False,
+        **kwargs,
     ):
         """
 
@@ -134,9 +134,9 @@ class PyTrack:
                     imports += line
                 if reading_class:
                     if (
-                            re.match(r"\S", line)
-                            and not line.startswith("#")
-                            and not line.startswith("class")
+                        re.match(r"\S", line)
+                        and not line.startswith("#")
+                        and not line.startswith("class")
                     ):
                         reading_class = False
                 if reading_class or line.startswith("class"):
@@ -224,13 +224,13 @@ class PyTrack:
 
         @functools.wraps(func)
         def wrapper(
-                cls: TypeHintParent,
-                *args,
-                force=True,
-                exec_=self.exec_,
-                always_changed=False,
-                slurm=False,
-                **kwargs,
+            cls: TypeHintParent,
+            *args,
+            force=True,
+            exec_=self.exec_,
+            always_changed=False,
+            slurm=False,
+            **kwargs,
         ):
             """Wrapper around the call
 

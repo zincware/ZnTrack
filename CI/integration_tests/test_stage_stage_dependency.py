@@ -41,7 +41,7 @@ def test_stage_stage_dependency(tmp_path):
     os.chdir(tmp_path)
 
     stage_1 = Stage1()
-    stage_1(args='Test01')
+    stage_1(args="Test01")
     # Need to call the stage, to create the config file
     #  it does not make sense to access the results of a stage
     #  that has not at least been called
@@ -52,7 +52,7 @@ def test_stage_stage_dependency(tmp_path):
 
     # changing the value of Stage1 in the config file
     stage_1 = Stage1()
-    stage_1(args='Test02')
+    stage_1(args="Test02")
 
     # Loading the stage it should now have the new value
     stage_2b = Stage2(load=True)
