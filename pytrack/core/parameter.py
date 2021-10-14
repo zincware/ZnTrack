@@ -55,7 +55,7 @@ class PyTrackOption:
 
         if isinstance(value, PyTrackOption):
             log.debug(f'{self.option} / {self.name} is already a PyTrackOption - '
-                        f'Skipping updating it!')
+                      f'Skipping updating it!')
             return
 
         if instance.pytrack.load and self.option != "result":

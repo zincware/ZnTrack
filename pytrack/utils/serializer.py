@@ -20,7 +20,7 @@ import logging
 from pathlib import Path
 import numpy as np
 from importlib import import_module
-from pytrack.utils.types import PyTrackType
+from pytrack.utils.types import PyTrackType, PyTrackStage
 
 log = logging.getLogger(__name__)
 
@@ -89,13 +89,15 @@ def conv_dict_to_class(value):
 
     Returns
     -------
-    __name__(load=True)
+    PyTrackStage(cls=value):
+        cls that can be used to load a stage via PyTrackStage.get()
 
     """
     if isinstance(value, dict):
         if len(value) == 1 and "cls" in value:
             module = import_module(value['cls'][0])
-            value = getattr(module, value['cls'][1])(load=True)
+            value = getattr(module, value['cls'][1])
+            value = PyTrackStage(cls=value)
     return value
 
 

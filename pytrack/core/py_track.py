@@ -20,7 +20,7 @@ from .parameter import PyTrackOption
 from pytrack.core.data_classes import DVCParams
 from pathlib import Path
 from pytrack.utils import is_jsonable, serializer, deserializer
-from pytrack.utils.types import PyTrackType
+from pytrack.utils.types import PyTrackType, PyTrackStage
 
 from typing import TYPE_CHECKING
 
@@ -513,7 +513,12 @@ class PyTrackParent(PyTrackType):
         """
         for option in value.values():
             for key, val in option.items():
-                self.child.__dict__[key] = val
+                if isinstance(val, PyTrackStage):
+                    # Load the PyTrackStage
+                    self.child.__dict__[key] = val.get()
+                else:
+                    # Everything except the PyTrackStage
+                    self.child.__dict__[key] = val
 
     @property
     def internals_from_file(self) -> dict:
