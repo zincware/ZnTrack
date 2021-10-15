@@ -88,39 +88,33 @@ class DVCParams:
 
         Returns
         -------
-        str: E.g. for outs it will return a list of ["--outs", "outs_path/{id}_outs[0]", ...]
+        str: E.g. for outs it will return a list of
+            ["--outs", "outs_path/{id}_outs[0]", ...]
 
         """
-
-        def flatten(x):
-            """
-            Convert [[str, Path], [str, Path]] to [str, Path, str, Path]
-            """
-            return sum(x, [])
-
         out = []
 
         for dvc_param in self._dvc_params:
-            out.append(
-                flatten(
-                    [
-                        [f"--{dvc_param.replace('_', '-')}", x]
-                        for x in self.__dict__[dvc_param]
-                    ]
-                )
-            )
+            for param_val in getattr(self, dvc_param):
+                if param_val is None:
+                    # DVC can not process None, so we skip here but log it
+                    log.warning(f'Found {dvc_param} with value {param_val} that can'
+                                f'not be processed - skipping it.')
+                    continue
+                out += [f"--{dvc_param.replace('_', '-')}", param_val]
 
         if self.json_file is not None:
-            out += [["--outs", self.json_file]]
+            out += ["--outs", self.json_file]
 
-        return flatten(out)
+        return out
 
     def make_paths(self):
         """Create all paths that can possibly be used"""
         for key in self.__dict__:
             if key.endswith("path"):
                 if len(self.__dict__[key[:-5]]) > 0:
-                    # Check if the corresponding list has an entry - if not, you don't need to create the folder
+                    # Check if the corresponding list has an entry -
+                    # if not, you don't need to create the folder
                     self.__dict__[key].mkdir(exist_ok=True, parents=True)
 
         self.params_file.parent.mkdir(exist_ok=True, parents=True)
