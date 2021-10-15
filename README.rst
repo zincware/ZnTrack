@@ -14,46 +14,32 @@ parameters, dependencies and all DVC output types.
 .. code-block:: py
 
     from pytrack import PyTrack, DVC
+    from random import randrange
 
 
     @PyTrack()
-    class Linear:
-        def __init__(self):
-            """Define all DVC parameter, dependencies and outputs"""
-            self.values_file = DVC.deps()
-            self.a1 = DVC.params()
-            self.b = DVC.params()
-            self.out = DVC.result()
+    class HelloWorld:
+        """Define a PyTrack Stage"""
+        max_number = DVC.params()
+        random_number = DVC.result()
 
-        def __call__(self, a1, b, values_file):
-            """
-            Parameters
-            ----------
-            a1: float
-                Any a1 for calculating a1 * x + b
-            b: float
-                Any b for calculating a1 * x + b
-            values_file: str
-                Path to a comma seperated file of values for x
-            """
-            self.values_file = values_file
-            self.a1 = a1
-            self.b = b
+        def __call__(self, max_number):
+            """Pass tracked arguments"""
+            self.max_number = max_number
 
         def run(self):
-            """Command that is run by DVC"""
-            values = [float(x) for x in self.values_file.read_text().split(",")]
-            self.out = [self.a1 * x + self.b for x in values]
+            """Command to be run by DVC"""
+            self.random_number = randrange(self.max_number)
 
 This stage can be used via
 
 .. code-block:: py
 
-    linear = Linear()
-    linear(3, 7, "values.csv")
+    hello_world = HelloWorld()
+    hello_world(max_number=512)
 
 which builds the DVC stage and can be used e.g., through :code:`dvc repro`.
-The results can then be accessed easily via :code:`Linear(id_=0).out`.
+The results can then be accessed easily via :code:`HelloWorld(load=True).random_number`.
 
 
 Installation
