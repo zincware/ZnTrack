@@ -140,7 +140,6 @@ class PyTrackParent(PyTrackType):
 
         """
         self.update_dvc()
-        self.dvc.make_paths()
 
         self.write_dvc(force, exec_, always_changed, slurm)
 
