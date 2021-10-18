@@ -23,10 +23,7 @@ log = logging.getLogger(__name__)
 class DVCParams:
     """PyTracks DVCParams"""
 
-    # pytrack Parameter
-    multi_use: bool = False
-    params_file: Path = Path("config", "params.json")
-    # internals_file: Path = Path("config", ".pytrack.json") # TODO should be a hidden file
+    # PyTrack Parameter
     internals_file: Path = Path("config", "pytrack.json")
 
     json_file: Union[Path, str, None] = None
@@ -39,23 +36,18 @@ class DVCParams:
     outs_path: Path = Path("outs")
 
     outs_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
-    outs_no_cache_path: Path = Path("outs")
 
     outs_persistent: Union[List[Path], List[str]] = field(default_factory=list)
-    outs_persistent_path: Path = Path("outs")
 
     metrics: Union[List[Path], List[str]] = field(default_factory=list)
-    metrics_path: Path = Path("metrics")
 
     metrics_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
-    metrics_no_cache_path: Path = Path("metrics")
 
     plots: Union[List[Path], List[str]] = field(default_factory=list)
-    plots_path: Path = Path("plots")
 
     plots_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
-    plots_no_cache_path: Path = Path("plots")
 
+    # TODO maybe remove this:
     _dvc_params: List[str] = field(
         default_factory=lambda: [
             "deps",
@@ -73,13 +65,6 @@ class DVCParams:
 
     def __post_init__(self):
         """Combine the DVC Parameter with their associated path."""
-        for dvc_param in self._dvc_params:
-            if dvc_param == "deps":  # deps have no associated path but can be anywhere
-                continue
-            # TODO use setattr / getattr
-            self.__dict__[dvc_param] = [
-                self.__dict__[f"{dvc_param}_path"] / x for x in self.__dict__[dvc_param]
-            ]
         if self.json_file is not None:
             self.json_file = self.outs_path / self.json_file
 
@@ -89,7 +74,7 @@ class DVCParams:
         Returns
         -------
         str: E.g. for outs it will return a list of
-            ["--outs", "outs_path/{id}_outs[0]", ...]
+            ["--outs", "outs[0]", ...]
 
         """
         out = []
@@ -110,43 +95,8 @@ class DVCParams:
 
     def make_paths(self):
         """Create all paths that can possibly be used"""
-        for key in self.__dict__:
-            if key.endswith("path"):
-                if len(self.__dict__[key[:-5]]) > 0:
-                    # Check if the corresponding list has an entry -
-                    # if not, you don't need to create the folder
-                    self.__dict__[key].mkdir(exist_ok=True, parents=True)
-
-        self.params_file.parent.mkdir(exist_ok=True, parents=True)
-
         if self.json_file is not None:
             self.outs_path.mkdir(exist_ok=True, parents=True)
-
-    def load_from_file(self, json_file, dvc_stage: dict):
-        """Create a DVCParams fromm reading dvc.yaml
-
-        Parameters
-        ----------
-        json_file: str
-            Name of the json file e.g. O_Stage.json
-        dvc_stage: dict
-            A dictionary containing the content from dvc.yaml for this stage
-
-        """
-        for dvc_param in self._dvc_params:
-            try:
-                if json_file is not None and dvc_param == "outs":
-                    outs = []
-                    for stage_param in dvc_stage[dvc_param]:
-                        if stage_param.endswith(json_file):
-                            self.json_file = Path(stage_param)
-                        else:
-                            outs.append(Path(stage_param))
-                    self.outs = outs
-                else:
-                    self.__dict__[dvc_param] = [Path(x) for x in dvc_stage[dvc_param]]
-            except KeyError:
-                pass
 
     def set_json_file(self, name):
         """

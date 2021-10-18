@@ -91,12 +91,7 @@ class PyTrackParent(PyTrackType):
 
     def pre_init(self):
         """Function to be called prior to the init"""
-
-        # self.child._executed = DVC.result()
         self.dvc.set_json_file(self.name)
-        # if self.load:
-        #     self.load_internals()
-        #     self.load_results()
 
     def post_init(self):
         """Post init command
