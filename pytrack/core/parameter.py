@@ -129,6 +129,15 @@ class LazyProperty:
 class DVC:
     params = LazyProperty()
     result = LazyProperty()
+
     deps = LazyProperty()
+
     outs = LazyProperty()
+    outs_no_cache = LazyProperty()
+    outs_persistent = LazyProperty()
+
+    metrics = LazyProperty()
     metrics_no_cache = LazyProperty()
+
+    plots = LazyProperty()
+    plots_no_cache = LazyProperty()

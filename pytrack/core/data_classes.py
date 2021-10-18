@@ -83,8 +83,10 @@ class DVCParams:
             for param_val in getattr(self, dvc_param):
                 if param_val is None:
                     # DVC can not process None, so we skip here but log it
-                    log.warning(f'Found {dvc_param} with value {param_val} that can'
-                                f'not be processed - skipping it.')
+                    log.warning(
+                        f"Found {dvc_param} with value {param_val} that can"
+                        f"not be processed - skipping it."
+                    )
                     continue
                 out += [f"--{dvc_param.replace('_', '-')}", param_val]
 
