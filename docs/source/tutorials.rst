@@ -5,4 +5,4 @@ Tutorials
    :maxdepth: 1
    :caption: Contents:
 
-   _tutorials/estimate_pi_with_mc.ipynb
+   _tutorials/estimate_pi_with_mc/estimate_pi_with_mc.ipynb
