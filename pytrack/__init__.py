@@ -24,7 +24,7 @@ __all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC", "config"]
 __version__ = "0.1.3"
 
 
-logger = logging.getLogger("pytrack")
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # Formatter for advanced logging
