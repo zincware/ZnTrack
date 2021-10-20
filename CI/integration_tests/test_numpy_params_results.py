@@ -15,7 +15,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 import numpy as np
 
 temp_dir = TemporaryDirectory()
@@ -23,9 +23,9 @@ temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
 
 
-@PyTrack()
+@Node()
 class ComputeA:
-    """PyTrack stage A"""
+    """Node stage A"""
 
     def __init__(self):
         self.inp = DVC.params()
@@ -53,7 +53,7 @@ def prepare_env():
 
 def test_stage_addition():
     """Check that the dvc repro works"""
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
 
@@ -69,7 +69,7 @@ def test_stage_addition():
 
 def test_stage_addition_run():
     """Check that the PyTracks run method works"""
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
 

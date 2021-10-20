@@ -6,21 +6,21 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: PyTrack parameter
+Description: Node parameter
 """
 from __future__ import annotations
 import logging
 import typing
 
-from pytrack.utils.types import NoneType
+from zntrack.utils.types import NoneType
 
 log = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
-    from pytrack.utils.type_hints import TypeHintParent
+    from zntrack.utils.type_hints import TypeHintParent
 
 
-class PyTrackOption:
+class ZnTrackOption:
     def __init__(self, option, default_value, name=None):
         self.option = option
         self.default_value = default_value
@@ -30,11 +30,11 @@ class PyTrackOption:
             raise ValueError(f"Can not pre-initialize result! Found {default_value}")
 
     def _get(self, instance: TypeHintParent, owner):
-        """Overwrite this method for custom PyTrackOption get method"""
+        """Overwrite this method for custom ZnTrackOption get method"""
         raise NotImplementedError
 
     def _set(self, instance: TypeHintParent, value):
-        """Overwrite this method for custom PyTrackOption set method"""
+        """Overwrite this method for custom ZnTrackOption set method"""
         raise NotImplementedError
 
     def __set_name__(self, owner, name):
@@ -85,43 +85,43 @@ class PyTrackOption:
         try:
             self._set(instance, value)
         except NotImplementedError:
-            if isinstance(value, PyTrackOption):
+            if isinstance(value, ZnTrackOption):
                 log.debug(
-                    f"{self.option} / {self.name} is already a PyTrackOption - "
+                    f"{self.option} / {self.name} is already a ZnTrackOption - "
                     f"Skipping updating it!"
                 )
                 return
 
-            if instance.pytrack.load and self.option != "result":
+            if instance.zntrack.load and self.option != "result":
                 raise ValueError(f"Changing {self.option} is currently not allowed!")
 
-            if not instance.pytrack.running and self.option == "result":
+            if not instance.zntrack.running and self.option == "result":
                 raise ValueError(f"Changing {self.option} is currently not allowed")
 
             instance.__dict__[self.name] = value
 
 
 class LazyProperty:
-    """Lazy property that takes the attribute name for PyTrackOption definition"""
+    """Lazy property that takes the attribute name for ZnTrackOption definition"""
 
     def __set_name__(self, owner, name):
         """Descriptor default"""
         self.name = name
 
     def __get__(self, instance, owner):
-        def pass_name(value=NoneType) -> PyTrackOption:
+        def pass_name(value=NoneType) -> ZnTrackOption:
             """
             Parameters
             ----------
             value: any
-                Any value to be passed as default to the PyTrackOption
+                Any value to be passed as default to the ZnTrackOption
 
             Returns
             -------
-            instantiated PyTrackOption with correct set name and default values
+            instantiated ZnTrackOption with correct set name and default values
 
             """
-            return PyTrackOption(option=self.name, default_value=value)
+            return ZnTrackOption(option=self.name, default_value=value)
 
         return pass_name
 

@@ -13,15 +13,15 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 import numpy as np
 
 cwd = os.getcwd()
 
 
-@PyTrack()
+@Node()
 class ComputeA:
-    """PyTrack stage A"""
+    """Node stage A"""
 
     def __init__(self):
         self.inp = DVC.params()
@@ -49,7 +49,7 @@ def prepare_env():
 
 def test_instance_interference(tmp_path):
     """Check that the instances do not interact with each other"""
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
 

@@ -8,12 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from pytrack import PyTrack, DVC
+from zntrack import Node, DVC
 import shutil
 import os
 
 
-@PyTrack()
+@Node()
 class Stage1:
     args = DVC.params()
 
@@ -24,7 +24,7 @@ class Stage1:
         pass
 
 
-@PyTrack()
+@Node()
 class Stage2:
     stage_1: Stage1 = DVC.deps(Stage1(load=True))
 

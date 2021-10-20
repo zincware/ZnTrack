@@ -6,19 +6,19 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: The class for the PyTrackProject
+Description: The class for the ZnTrackProject
 """
 import logging
 
-from pytrack.interface import DVCInterface
+from zntrack.interface import DVCInterface
 import subprocess
 from datetime import datetime
 
 log = logging.getLogger(__name__)
 
 
-class PyTrackProject(DVCInterface):
-    """PyTrack Project to handle experiments via subprocess calls to DVC"""
+class ZnTrackProject(DVCInterface):
+    """Node Project to handle experiments via subprocess calls to DVC"""
 
     def __init__(self, name: str = None):
         """

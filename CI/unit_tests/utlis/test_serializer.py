@@ -9,7 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: tests for the serializers and deserializers
 """
 
-from pytrack.utils.serializer import serializer, deserializer
+from zntrack.utils.serializer import serializer, deserializer
 import pytest
 from pathlib import Path
 import numpy as np

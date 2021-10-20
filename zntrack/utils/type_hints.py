@@ -6,8 +6,13 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: Providing a project class that can run experiments
+Description: Type hinting class for IDE autocompletion
 """
-from .py_track_project import PyTrackProject
+from zntrack.core.zntrack import ZnTrackParent
+from zntrack.core.parameter import DVC
 
-__all__ = ["PyTrackProject"]
+
+class TypeHintParent:
+    def __init__(self):
+        self.zntrack: ZnTrackParent = ZnTrackParent(child=self)
+        self._executed = DVC.result()

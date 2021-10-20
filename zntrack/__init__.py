@@ -10,8 +10,8 @@ Description: Standard python init file for the main directory
 """
 
 from .core.parameter import DVC
-from .core.decorator import PyTrack
-from .project import PyTrackProject
+from .core.decorator import Node
+from .project import ZnTrackProject
 from .interface import DVCInterface
 from .utils import config
 
@@ -19,7 +19,7 @@ import logging
 import sys
 
 #
-__all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC", "config"]
+__all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config"]
 
 __version__ = "0.1.2"
 

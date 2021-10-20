@@ -15,7 +15,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 import numpy as np
 
 temp_dir = TemporaryDirectory()
@@ -26,7 +26,7 @@ cwd = os.getcwd()
 # TODO tests should also test .run() and not just dvc repro for better coverage!
 
 
-@PyTrack()
+@Node()
 class Model:
     def __init__(self):
         self.model_params = DVC.params()
@@ -77,7 +77,7 @@ def prepare_env():
 
 def test_stage_addition():
     """Check that the dvc repro works"""
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     test_model_1 = Model1(15)

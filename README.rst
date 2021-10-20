@@ -1,25 +1,25 @@
 |build| |docs| |license| |code style|
 
-PyTrack
+ZnTrack
 -------
-A Python package to use DVC for parameter and data control
+The ZnTrack :code:`zɪŋk træk` package provides a Python ORM for DVC.
 
 For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
 
 Example
 ========
-PyTrack allows you to convert most Python classes into a DVC stage, including
+ZnTrack allows you to convert most Python classes into a DVC stage, including
 parameters, dependencies and all DVC output types.
 
 .. code-block:: py
 
-    from pytrack import PyTrack, DVC
+    from zntrack import Node, DVC
     from random import randrange
 
 
-    @PyTrack()
+    @Node()
     class HelloWorld:
-        """Define a PyTrack Stage"""
+        """Define a ZnTrack Node"""
         # parameter to be tracked
         max_number = DVC.params()   
         # parameter to store as output
@@ -51,25 +51,25 @@ Simply run:
 
 .. code-block:: bash
 
-   pip install py-track
+   pip install zntrack
 
 Or you can install from source with:
 
 .. code-block:: bash
 
-   git clone https://github.com/zincware/py-track.git
-   cd py-track
-   pip3 install .
+   git clone https://github.com/zincware/ZnTrack.git
+   cd ZnTrack
+   pip install .
 
 .. badges
 
-.. |build| image:: https://github.com/zincware/py-track/actions/workflows/pytest.yaml/badge.svg
+.. |build| image:: https://github.com/zincware/ZnTrack/actions/workflows/pytest.yaml/badge.svg
     :alt: Build tests passing
     :target: https://github.com/zincware/py-test/blob/readme_badges/
 
-.. |docs| image:: https://readthedocs.org/projects/py-track/badge/?version=latest&style=flat
+.. |docs| image:: https://readthedocs.org/projects/ZnTrack/badge/?version=latest&style=flat
     :alt: Build tests passing
-    :target: https://py-track.readthedocs.io/en/latest/
+    :target: https://zntrack.readthedocs.io/en/latest/
 
 .. |license| image:: https://img.shields.io/badge/License-EPL-purple.svg?style=flat
     :alt: Project license

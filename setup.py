@@ -4,15 +4,15 @@ with open("README.rst", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="py-track",
+    name="zntrack",
     version="0.1.2",
     author="Zincware",
     author_email="zincwarecode@gmail.com",
     description="A python package for parameter and data version control with DVC",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/zincware/py-track",
-    download_url="https://github.com/zincware/py-track/archive/beta.tar.gz",
+    url="https://github.com/zincware/ZnTrack",
+    download_url="https://github.com/zincware/ZnTrack/archive/beta.tar.gz",
     keywords=["dvc", "machine learning", "parameter tracking"],
     packages=setuptools.find_packages(),
     classifiers=[

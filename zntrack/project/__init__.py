@@ -6,17 +6,8 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: 
+Description: Providing a project class that can run experiments
 """
-from dataclasses import dataclass
+from .zntrack_project import ZnTrackProject
 
-
-@dataclass
-class Config:
-    """Collection of PyTrack configurations"""
-
-    debug: bool = False  # not implemented yet
-    nb_name: str = None
-
-
-config = Config()
+__all__ = ["ZnTrackProject"]

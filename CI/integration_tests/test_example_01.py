@@ -14,7 +14,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 from pathlib import Path
 
 temp_dir = TemporaryDirectory()
@@ -22,7 +22,7 @@ temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
 
 
-@PyTrack()
+@Node()
 class StageIO:
     def __init__(self):
         """Class constructor
@@ -47,7 +47,7 @@ class StageIO:
         Path(self.outs).write_text("".join(file_content))
 
 
-@PyTrack()
+@Node()
 class StageAddition:
     def __init__(self):
         """Class constructor
@@ -95,7 +95,7 @@ def prepare_env():
 
 def test_stage_addition():
     """Check that the dvc repro works"""
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     stage = StageAddition()
@@ -118,7 +118,7 @@ def test_stage_addition():
 
 
 def test_stage_io():
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.name = "Test1"
     project.create_dvc_repository()
 

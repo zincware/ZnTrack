@@ -1,4 +1,4 @@
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 from pathlib import Path
 import json
 import os
@@ -10,22 +10,22 @@ temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
 
 
-@PyTrack()
+@Node()
 class BasicTest:
     """BasicTest class"""
 
     def __init__(self):
-        """Constructor of the PyTrack test instance"""
+        """Constructor of the Node test instance"""
         self.deps = DVC.deps([Path("deps1", "input.json"), Path("deps2", "input.json")])
         self.parameters = DVC.params()
         self.results = DVC.result()
 
     def __call__(self, **kwargs):
-        """Call Method of the PyTrack test instance"""
+        """Call Method of the Node test instance"""
         self.parameters = kwargs
 
     def run(self):
-        """Run method of the PyTrack test instance"""
+        """Run method of the Node test instance"""
         self.results = {"name": self.parameters["name"]}
 
 
@@ -35,7 +35,7 @@ def prepare_env():
     shutil.copy(__file__, temp_dir.name)
     os.chdir(temp_dir.name)
 
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     base = BasicTest()

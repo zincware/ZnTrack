@@ -1,7 +1,7 @@
-from pytrack import PyTrack
+from zntrack import Node
 
 
-class TextToFile(PyTrack):
+class TextToFile(Node):
     def __init__(self, id_=None, filter_=None):
         super().__init__(id_, filter_)
         self.post_init(id_, filter_)

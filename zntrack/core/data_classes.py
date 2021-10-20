@@ -6,7 +6,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: PyTrack dataclasses
+Description: Node dataclasses
 """
 
 from __future__ import annotations
@@ -23,8 +23,8 @@ log = logging.getLogger(__name__)
 class DVCParams:
     """PyTracks DVCParams"""
 
-    # PyTrack Parameter
-    internals_file: Path = Path("config", "pytrack.json")
+    # Node Parameter
+    internals_file: Path = Path("config", "zntrack.json")
 
     json_file: Union[Path, str, None] = None
 
