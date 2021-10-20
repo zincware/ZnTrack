@@ -84,7 +84,7 @@ class DVCParams:
             for param_val in getattr(self, dvc_param):
                 if param_val in processed_params:
                     log.warning(
-                        f'Parameter {dvc_param}:{param_val} found more than once'
+                        f"Parameter {dvc_param}:{param_val} found more than once"
                     )
                     continue
                 if param_val is None:

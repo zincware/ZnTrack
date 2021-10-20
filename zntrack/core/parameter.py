@@ -56,6 +56,13 @@ class ZnTrackOption:
             except KeyError:
                 log.debug("KeyError: returning default value")
                 if self.default_value is NoneType:
+                    if instance.zntrack.load:
+                        raise ValueError(
+                            f"Can not load {self.option} / {self.name} for {instance}!"
+                            f" Check, if the Node you are trying to access has been run?"
+                            f" Check, if you are trying to access some results e.g. in "
+                            f"the __init__, before the graph has been executed."
+                        )
                     return None
                 return self.default_value
             except AttributeError:
