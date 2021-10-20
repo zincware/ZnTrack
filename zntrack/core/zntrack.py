@@ -135,10 +135,10 @@ class ZnTrackParent(ZnTrackType):
 
         """
         self.update_dvc()
+        self.save_internals()
 
         self.write_dvc(force, exec_, always_changed, slurm)
 
-        self.save_internals()
 
     def pre_run(self):
         """Command to be run before run
