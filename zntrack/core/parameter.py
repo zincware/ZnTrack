@@ -6,18 +6,18 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: PyTrack parameter
+Description: Node parameter
 """
 from __future__ import annotations
 import logging
 import typing
 
-from pytrack.utils.types import NoneType
+from zntrack.utils.types import NoneType
 
 log = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
-    from pytrack.utils.type_hints import TypeHintParent
+    from zntrack.utils.type_hints import TypeHintParent
 
 
 class PyTrackOption:

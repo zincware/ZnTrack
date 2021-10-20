@@ -1,5 +1,5 @@
-PyTrack Class
+Node Class
 ============================
 
-.. autoclass:: pytrack.PyTrack
+.. autoclass:: pytrack.Node
     :members:

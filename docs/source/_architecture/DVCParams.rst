@@ -1,4 +1,4 @@
-PyTrack Dataclasses
+Node Dataclasses
 ============================
 
 .. autoclass:: pytrack.core.dataclasses.DVCParams

@@ -9,18 +9,18 @@ Copyright Contributors to the Zincware Project.
 Description: 
 """
 import pytest
-from pytrack import PyTrack, PyTrackProject
+from zntrack import Node, PyTrackProject
 import shutil
 import os
 from subprocess import CalledProcessError
 
 
-@PyTrack()
+@Node()
 class RaiseValueError:
     """BasicTest class"""
 
     def run(self):
-        """Run method of the PyTrack test instance"""
+        """Run method of the Node test instance"""
         raise ValueError("Testing ValueError")
 
 

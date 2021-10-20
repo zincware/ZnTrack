@@ -1,12 +1,12 @@
-from pytrack import PyTrack, DVCParams
+from zntrack import Node, DVCParams
 import tensorflow as tf
 import numpy as np
 import json
 
 
-class LoadData(PyTrack):
+class LoadData(Node):
     def __init__(self, id_=None, filter_=None):
-        """Constructor oft the LoadData PyTrack Instance
+        """Constructor oft the LoadData Node Instance
 
         Parameters
         ----------
@@ -82,9 +82,9 @@ class LoadData(PyTrack):
             self.results = {"shape": x_train.shape, "targets": len(np.unique(y_train))}
 
 
-class FitModel(PyTrack):
+class FitModel(Node):
     def __init__(self, id_=None, filter_=None):
-        """Constructor oft the FitModel PyTrack Instance
+        """Constructor oft the FitModel Node Instance
 
         Parameters
         ----------
@@ -162,9 +162,9 @@ class FitModel(PyTrack):
         model.save(str(self.files.outs[0]))
 
 
-class EvaluateModel(PyTrack):
+class EvaluateModel(Node):
     def __init__(self, id_=None, filter_=None):
-        """Constructor oft the EvaluateModel PyTrack Instance
+        """Constructor oft the EvaluateModel Node Instance
 
         Parameters
         ----------

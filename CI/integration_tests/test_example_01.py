@@ -14,7 +14,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, PyTrackProject
 from pathlib import Path
 
 temp_dir = TemporaryDirectory()
@@ -22,7 +22,7 @@ temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
 
 
-@PyTrack()
+@Node()
 class StageIO:
     def __init__(self):
         """Class constructor
@@ -47,7 +47,7 @@ class StageIO:
         Path(self.outs).write_text("".join(file_content))
 
 
-@PyTrack()
+@Node()
 class StageAddition:
     def __init__(self):
         """Class constructor

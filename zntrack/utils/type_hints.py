@@ -6,17 +6,13 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: 
+Description: Type hinting class for IDE autocompletion
 """
-from dataclasses import dataclass
+from zntrack.core.zntrack import PyTrackParent
+from zntrack.core.parameter import DVC
 
 
-@dataclass
-class Config:
-    """Collection of PyTrack configurations"""
-
-    debug: bool = False  # not implemented yet
-    nb_name: str = None
-
-
-config = Config()
+class TypeHintParent:
+    def __init__(self):
+        self.pytrack: PyTrackParent = PyTrackParent(child=self)
+        self._executed = DVC.result()

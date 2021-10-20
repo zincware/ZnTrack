@@ -6,7 +6,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: PyTrack decorators
+Description: Node decorators
 """
 from __future__ import annotations
 
@@ -18,17 +18,17 @@ import sys
 import typing
 import functools
 
-from .py_track import PyTrackProperty
-from pytrack.utils import config
+from .zntrack import PyTrackProperty
+from zntrack.utils import config
 
 log = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
-    from pytrack.utils.type_hints import TypeHintParent
+    from zntrack.utils.type_hints import TypeHintParent
 
 
-class PyTrack:
-    """Decorator for converting a class into a PyTrack stage"""
+class Node:
+    """Decorator for converting a class into a Node stage"""
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class PyTrack:
         Parameters
         ----------
         cls: object
-            Required for use as decorator with @PyTrack
+            Required for use as decorator with @Node
         nb_name: str
             Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables jupyter
             support
@@ -88,7 +88,7 @@ class PyTrack:
         Parameters
         ----------
         args: tuple
-            The first arg might be the class, if @PyTrack() is used, otherwise args
+            The first arg might be the class, if @Node() is used, otherwise args
             that are passed to the cls
         kwargs: dict
             kwargs that are passed to the cls
@@ -103,7 +103,7 @@ class PyTrack:
         log.debug(f"call kwargs: {kwargs}")
 
         if self.cls is None:
-            # This is what gets called with PyTrack()
+            # This is what gets called with Node()
             self.cls = args[0]
             self.return_with_args = False
 
@@ -142,9 +142,9 @@ class PyTrack:
                 if reading_class or line.startswith("class"):
                     reading_class = True
                     class_definition += line
-                if line.startswith("@PyTrack"):
+                if line.startswith("@Node"):
                     reading_class = True
-                    class_definition += "@PyTrack()\n"
+                    class_definition += "@Node()\n"
 
         src = imports + "\n\n" + class_definition
 
@@ -159,7 +159,7 @@ class PyTrack:
     def apply_decorator(self):
         """Apply the decorators to the class methods"""
         if "run" not in vars(self.cls):
-            raise NotImplementedError("PyTrack class must implement a run method!")
+            raise NotImplementedError("Node class must implement a run method!")
 
         if "__call__" not in vars(self.cls):
             setattr(self.cls, "__call__", lambda *args: None)
@@ -185,7 +185,7 @@ class PyTrack:
             Parameters
             ----------
             cls: TypeHintParent
-                a PyTrack decorated class instance
+                a Node decorated class instance
             id_: int
                 soon to be depreciated alternative to load
             load: bool

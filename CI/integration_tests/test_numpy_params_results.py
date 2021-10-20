@@ -15,7 +15,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, PyTrackProject
 import numpy as np
 
 temp_dir = TemporaryDirectory()
@@ -23,9 +23,9 @@ temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
 
 
-@PyTrack()
+@Node()
 class ComputeA:
-    """PyTrack stage A"""
+    """Node stage A"""
 
     def __init__(self):
         self.inp = DVC.params()

@@ -8,11 +8,11 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, PyTrackProject
 import os
 
 
-@PyTrack()
+@Node()
 class HelloWorld:
     def __init__(self):
         self.argument_1 = DVC.params()
@@ -24,7 +24,7 @@ class HelloWorld:
         pass
 
 
-@PyTrack()
+@Node()
 class HelloWorldwDefault:
     def __init__(self):
         self.argument_1 = DVC.params(314159)

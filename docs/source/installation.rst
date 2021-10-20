@@ -1,13 +1,13 @@
 Installation
 ============
 
-PyTrack can be most easily installed via pip:
+Node can be most easily installed via pip:
 
 .. code-block:: bash
 
     pip install py-track
 
-If you want to install PyTrack from source you can use
+If you want to install Node from source you can use
 
 .. code-block:: bash
 

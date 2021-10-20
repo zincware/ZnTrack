@@ -1,18 +1,18 @@
-.. PyTrack documentation master file, created by
+.. Node documentation master file, created by
    sphinx-quickstart on Mon Jun  7 17:11:53 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyTrack's documentation!
+Welcome to Node's documentation!
 ===================================
-PyTrack is `zincwarecode's <https://zincwarecode.com>`_ first developer package
+Node is `zincwarecode's <https://zincwarecode.com>`_ first developer package
 and in fact, the first released on PyPi, so we are glad you are here.
-PyTrack is built to help you write code that can easily be shared and reproduced.
+Node is built to help you write code that can easily be shared and reproduced.
 It uses `Data Version Control <https://dvc.org/>`_ to track generated files and parameters.
-PyTrack is designed as a developer package aiming to be used in other software packages.
+Node is designed as a developer package aiming to be used in other software packages.
 If you are not planning on writing such packages we highly recommend looking up DVC first.
 
-PyTrack might still be helpful for you as it provides an Object Oriented
+Node might still be helpful for you as it provides an Object Oriented
 wrapper for DVC.
 It contains an experimental feature that enables the usage of Python classes
 from within a Jupyter Notebook while utilizing DVC tracking.

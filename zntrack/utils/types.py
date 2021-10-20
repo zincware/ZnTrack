@@ -13,7 +13,7 @@ Description:
 class NoneType:
     """Class for checking set values
 
-    This class is never used outside of PyTrack, so it can be used
+    This class is never used outside of Node, so it can be used
     to identify if the value has been changed via
     >>> value = NoneType
     >>> if value == NoneType:
@@ -29,7 +29,7 @@ class NoneType:
 
 
 class PyTrackType:
-    """Class to check against to see if it is part of PyTrack
+    """Class to check against to see if it is part of Node
 
     In comparison to PyTrackStage this is used to identify initiated stages
     """

@@ -12,7 +12,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # -- Project information -----------------------------------------------------
 
-project = "PyTrack"
+project = "ZnTrack"
 copyright = "2021, Zincware"
 author = "Fabian Zills, Samuel Tovey"
 

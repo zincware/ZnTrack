@@ -6,7 +6,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: PyTrack core
+Description: Node core
 """
 
 from __future__ import annotations
@@ -17,15 +17,15 @@ import json
 
 from .data_classes import SlurmConfig
 from .parameter import PyTrackOption
-from pytrack.core.data_classes import DVCParams
+from zntrack.core.data_classes import DVCParams
 from pathlib import Path
-from pytrack.utils import is_jsonable, serializer, deserializer
-from pytrack.utils.types import PyTrackType, PyTrackStage
+from zntrack.utils import is_jsonable, serializer, deserializer
+from zntrack.utils.types import PyTrackType, PyTrackStage
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from pytrack.utils.type_hints import TypeHintParent
+    from zntrack.utils.type_hints import TypeHintParent
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class PyTrackProperty:
     instance, so we need to distinguish between different instances,
     otherwise there is only a single cls.pytrack for all instances!
 
-    We save the PyTrack instance in self.__dict__ to avoid this.
+    We save the Node instance in self.__dict__ to avoid this.
     """
 
     def __get__(self, instance, owner):
@@ -51,8 +51,8 @@ class PyTrackProperty:
 
         Returns
         -------
-        PyTrack:
-            the pytrack property to handle PyTrack
+        Node:
+            the pytrack property to handle Node
         """
         try:
             return instance.__dict__["pytrack"]

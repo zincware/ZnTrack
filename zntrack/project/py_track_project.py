@@ -10,7 +10,7 @@ Description: The class for the PyTrackProject
 """
 import logging
 
-from pytrack.interface import DVCInterface
+from zntrack.interface import DVCInterface
 import subprocess
 from datetime import datetime
 
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 
 class PyTrackProject(DVCInterface):
-    """PyTrack Project to handle experiments via subprocess calls to DVC"""
+    """Node Project to handle experiments via subprocess calls to DVC"""
 
     def __init__(self, name: str = None):
         """

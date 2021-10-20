@@ -20,7 +20,7 @@ import logging
 from pathlib import Path
 import numpy as np
 from importlib import import_module
-from pytrack.utils.types import PyTrackType, PyTrackStage
+from zntrack.utils.types import PyTrackType, PyTrackStage
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ def conv_class_to_dict(value):
 
     Parameters
     ----------
-    value: decorated PyTrack stage
+    value: decorated Node stage
         Assuming that pytrack stages are written to a file, we use the
         __module and __name__ to later run __module.__name__(load=True)
 

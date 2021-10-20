@@ -1,8 +1,8 @@
-from pytrack import PyTrack
+from zntrack import Node
 from .Example01 import TextToFile
 
 
-class ProcessData(PyTrack):
+class ProcessData(Node):
     def __init__(self, id_=None, filter_=None):
         super().__init__(id_, filter_)
         self.post_init(id_, filter_)

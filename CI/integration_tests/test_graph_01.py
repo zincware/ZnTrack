@@ -14,7 +14,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytrack import PyTrack, DVC, PyTrackProject
+from zntrack import Node, DVC, PyTrackProject
 import numpy as np
 
 temp_dir = TemporaryDirectory()
@@ -22,9 +22,9 @@ temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
 
 
-@PyTrack()
+@Node()
 class ComputeA:
-    """PyTrack stage A"""
+    """Node stage A"""
 
     def __init__(self):
         self.inp = DVC.params()
@@ -37,9 +37,9 @@ class ComputeA:
         self.out = np.power(2, self.inp).item()
 
 
-@PyTrack()
+@Node()
 class ComputeB:
-    """PyTrack stage B"""
+    """Node stage B"""
 
     def __init__(self):
         self.inp = DVC.params()
@@ -52,9 +52,9 @@ class ComputeB:
         self.out = np.power(3, self.inp).item()
 
 
-@PyTrack()
+@Node()
 class ComputeAB:
-    """PyTrack stage AB, depending on A&B"""
+    """Node stage AB, depending on A&B"""
 
     def __init__(self):
         self.a = DVC.deps(ComputeA(id_=0))
@@ -72,9 +72,9 @@ class ComputeAB:
         self.out = a + b
 
 
-@PyTrack(name="Stage_A")
+@Node(name="Stage_A")
 class ComputeANamed:
-    """PyTrack stage A"""
+    """Node stage A"""
 
     def __init__(self):
         self.inp = DVC.params()
@@ -87,9 +87,9 @@ class ComputeANamed:
         self.out = np.power(2, self.inp).item()
 
 
-@PyTrack(name="Stage_AB")
+@Node(name="Stage_AB")
 class ComputeABNamed:
-    """PyTrack stage AB, depending on A&B with a custom stage name"""
+    """Node stage AB, depending on A&B with a custom stage name"""
 
     def __init__(self):
         self.a: ComputeANamed = DVC.deps(ComputeANamed(id_=0))

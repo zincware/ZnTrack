@@ -1,6 +1,6 @@
 |build| |docs| |license| |code style|
 
-PyTrack
+Node
 -------
 A Python package to use DVC for parameter and data control
 
@@ -8,18 +8,18 @@ For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
 
 Example
 ========
-PyTrack allows you to convert most Python classes into a DVC stage, including
+Node allows you to convert most Python classes into a DVC stage, including
 parameters, dependencies and all DVC output types.
 
 .. code-block:: py
 
-    from pytrack import PyTrack, DVC
+    from pytrack import Node, DVC
     from random import randrange
 
 
-    @PyTrack()
+    @Node()
     class HelloWorld:
-        """Define a PyTrack Stage"""
+        """Define a Node Stage"""
         # parameter to be tracked
         max_number = DVC.params()   
         # parameter to store as output
