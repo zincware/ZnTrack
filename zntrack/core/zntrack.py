@@ -450,7 +450,9 @@ class ZnTrackParent(ZnTrackType):
         try:
             self.results = deserializer(json.loads(self.dvc.json_file.read_text()))
         except FileNotFoundError:
-            log.warning("No results found!")
+            # this can happen when you have a dependency that has not yet been run.
+            #  in that case it should not print the warning and just continue
+            log.debug("No results found!")
 
     @property
     def results(self) -> dict:
