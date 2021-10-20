@@ -20,8 +20,10 @@ parameters, dependencies and all DVC output types.
     @PyTrack()
     class HelloWorld:
         """Define a PyTrack Stage"""
-        max_number = DVC.params()
-        random_number = DVC.result()
+        # parameter to be tracked
+        max_number = DVC.params()   
+        # parameter to store as output
+        random_number = DVC.result()  
 
         def __call__(self, max_number):
             """Pass tracked arguments"""
