@@ -29,8 +29,11 @@ def check_signature(func):
 
     @wraps(func)
     def wrapper(self, *args, **kwargs):
-        input_signature = [key for key in signature(func).parameters if
-                           key not in ["self", "args", "kwargs"]]
+        input_signature = [
+            key
+            for key in signature(func).parameters
+            if key not in ["self", "args", "kwargs"]
+        ]
         parsed_func = func(self, *args, **kwargs)
 
         for idx, arg in enumerate(args):
