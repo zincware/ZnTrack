@@ -1,5 +1,5 @@
 Interface Base
 =================
 
-.. autoclass:: pytrack.interface.base.DVCInterface
+.. autoclass:: zntrack.interface.base.DVCInterface
     :members:

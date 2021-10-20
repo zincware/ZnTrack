@@ -1,5 +1,5 @@
 Node Class
 ============================
 
-.. autoclass:: pytrack.Node
+.. autoclass:: zntrack.Node
     :members:

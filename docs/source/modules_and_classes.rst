@@ -5,9 +5,8 @@ Modules and Classes
    :maxdepth: 1
    :caption: Core:
 
-   _architecture/py_track
+   _architecture/zntrack
    _architecture/DVCParams
-   _architecture/Files
    _architecture/SlurmConfig
 
 .. toctree::

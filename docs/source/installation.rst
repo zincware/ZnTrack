@@ -1,18 +1,18 @@
 Installation
 ============
 
-Node can be most easily installed via pip:
+ZnTrack can be most easily installed via pip:
 
 .. code-block:: bash
 
-    pip install py-track
+    pip install zntrack
 
-If you want to install Node from source you can use
+If you want to install ZnTrack from source you can use
 
 .. code-block:: bash
 
-    git clone https://github.com/zincware/py-track.git
-    cd py-track
+    git clone https://github.com/zincware/ZnTrack.git
+    cd ZnTrack
     pip install .
 
 If you are a developer we suggest using
@@ -27,6 +27,6 @@ This can be done as follows:
 
 .. code-block:: bash
 
-    cd py-track/docs
+    cd ZnTrack/docs
     make html
-    firefox/chrome/open/safari py-track/docs/build/index.html
+    firefox/chrome/open/safari ZnTrack/docs/build/index.html

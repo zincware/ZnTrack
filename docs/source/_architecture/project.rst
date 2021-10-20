@@ -1,5 +1,5 @@
 ZnTrackProject
 =================
 
-.. autoclass:: pytrack.project.ZnTrackProject
+.. autoclass:: zntrack.project.ZnTrackProject
     :members:

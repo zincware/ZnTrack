@@ -76,7 +76,7 @@ class Node:
             log.warning(
                 "Jupyter support is an experimental feature! Please save your "
                 "notebook before running this command!\n"
-                "Submit issues to https://github.com/zincware/py-track."
+                "Submit issues to https://github.com/zincware/ZnTrack."
             )
             nb_name = Path(nb_name)
         self.nb_name = nb_name

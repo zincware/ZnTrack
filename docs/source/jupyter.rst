@@ -1,12 +1,12 @@
 Jupyter Support
 ===============
 
-Node provides experimental Jupyter notebook support for DVC.
+ZnTrack provides experimental Jupyter notebook support for DVC.
 This allows for the use of DVC without writing custom packages.
 
-To provide Node functionality within Jupyter Notebooks, we convert the
-notebook into a *.py file and then extract the class definitions.
-For every Node class defined a file in :code:`src` is generated.
+To provide ZnTrack functionality within Jupyter Notebooks, we convert the
+notebook into a :code:`*.py` file and then extract the class definitions.
+For every ZnTrack class defined a file in :code:`src` is generated.
 These files will be used by DVC to run the stage.
 
 Because copying the content to a new file can cause major issues and there
@@ -17,7 +17,7 @@ In general one may write:
 
 .. code-block:: python
 
-    from pytrack import Node, parameter, result, DVCParams,
+    from zntrack import Node, parameter, result, DVCParams,
 
     nb_name="JupyterPyTrack.ipynb"
 

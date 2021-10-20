@@ -1,5 +1,5 @@
 SlurmConfig Dataclass
 =====================
 
-.. autoclass:: pytrack.core.dataclasses.SlurmConfig
+.. autoclass:: zntrack.core.data_classes.SlurmConfig
     :members:
