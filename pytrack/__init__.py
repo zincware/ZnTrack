@@ -21,7 +21,7 @@ import sys
 #
 __all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC", "config"]
 
-__version__ = "0.1.3"
+__version__ = "0.1.2"
 
 
 logger = logging.getLogger(__name__)
