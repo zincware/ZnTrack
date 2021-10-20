@@ -8,6 +8,6 @@ Copyright Contributors to the Zincware Project.
 
 Description: Providing a project class that can run experiments
 """
-from .py_track_project import PyTrackProject
+from .zntrack_project import ZnTrackProject
 
-__all__ = ["PyTrackProject"]
+__all__ = ["ZnTrackProject"]

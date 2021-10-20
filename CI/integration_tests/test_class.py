@@ -1,4 +1,4 @@
-from zntrack import Node, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 from pathlib import Path
 import json
 import os
@@ -35,7 +35,7 @@ def prepare_env():
     shutil.copy(__file__, temp_dir.name)
     os.chdir(temp_dir.name)
 
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     base = BasicTest()

@@ -24,7 +24,7 @@ class DVCParams:
     """PyTracks DVCParams"""
 
     # Node Parameter
-    internals_file: Path = Path("config", "pytrack.json")
+    internals_file: Path = Path("config", "zntrack.json")
 
     json_file: Union[Path, str, None] = None
 

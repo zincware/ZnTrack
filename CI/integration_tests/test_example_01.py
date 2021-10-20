@@ -14,7 +14,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 from pathlib import Path
 
 temp_dir = TemporaryDirectory()
@@ -95,7 +95,7 @@ def prepare_env():
 
 def test_stage_addition():
     """Check that the dvc repro works"""
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     stage = StageAddition()
@@ -118,7 +118,7 @@ def test_stage_addition():
 
 
 def test_stage_io():
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.name = "Test1"
     project.create_dvc_repository()
 

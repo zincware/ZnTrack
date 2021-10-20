@@ -13,7 +13,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 import numpy as np
 
 cwd = os.getcwd()
@@ -49,7 +49,7 @@ def prepare_env():
 
 def test_instance_interference(tmp_path):
     """Check that the instances do not interact with each other"""
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
 

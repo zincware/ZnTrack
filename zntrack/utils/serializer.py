@@ -20,7 +20,7 @@ import logging
 from pathlib import Path
 import numpy as np
 from importlib import import_module
-from zntrack.utils.types import PyTrackType, PyTrackStage
+from zntrack.utils.types import ZnTrackType, ZnTrackStage
 
 log = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ def conv_class_to_dict(value):
     Parameters
     ----------
     value: decorated Node stage
-        Assuming that pytrack stages are written to a file, we use the
+        Assuming that zntrack stages are written to a file, we use the
         __module and __name__ to later run __module.__name__(load=True)
 
     Returns
@@ -55,8 +55,8 @@ def conv_class_to_dict(value):
         serialized dictionary containing the class module and name
 
     """
-    if hasattr(value, "pytrack"):
-        if isinstance(value.pytrack, PyTrackType):
+    if hasattr(value, "zntrack"):
+        if isinstance(value.zntrack, ZnTrackType):
             value = {"cls": (value.__module__, value.__class__.__name__)}
     return value
 
@@ -89,15 +89,15 @@ def conv_dict_to_class(value):
 
     Returns
     -------
-    PyTrackStage(cls=value):
-        cls that can be used to load a stage via PyTrackStage.get()
+    ZnTrackStage(cls=value):
+        cls that can be used to load a stage via ZnTrackStage.get()
 
     """
     if isinstance(value, dict):
         if len(value) == 1 and "cls" in value:
             module = import_module(value["cls"][0])
             value = getattr(module, value["cls"][1])
-            value = PyTrackStage(cls=value)
+            value = ZnTrackStage(cls=value)
     return value
 
 

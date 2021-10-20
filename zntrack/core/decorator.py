@@ -18,7 +18,7 @@ import sys
 import typing
 import functools
 
-from .zntrack import PyTrackProperty
+from .zntrack import ZnTrackProperty
 from zntrack.utils import config
 
 log = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ class Node:
         cls: object
             Required for use as decorator with @Node
         nb_name: str
-            Name of the jupyter notebook e.g. PyTrackNb.ipynb which enables jupyter
+            Name of the jupyter notebook e.g. ZnTrackNb.ipynb which enables jupyter
             support
         name: str
             A custom name for the DVC stage.
@@ -57,7 +57,7 @@ class Node:
         kwargs: No kwargs are implemented
         """
         if cls is not None:
-            raise ValueError("Please use `@Pytrack()` instead of `@Pytrack`.")
+            raise ValueError("Please use `@Node()` instead of `@Node`.")
         self.cls = cls
 
         if nb_name is None:
@@ -194,26 +194,26 @@ class Node:
                 parameters to be passed to the cls
             """
 
-            setattr(type(cls), "pytrack", PyTrackProperty())
+            setattr(type(cls), "zntrack", ZnTrackProperty())
 
             if id_ is not None:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.pytrack.load = load
-            cls.pytrack.stage_name = self.name
+            cls.zntrack.load = load
+            cls.zntrack.stage_name = self.name
 
-            cls.pytrack.pre_init()
-            log.debug(f"Processing {cls.pytrack}")
+            cls.zntrack.pre_init()
+            log.debug(f"Processing {cls.zntrack}")
             result = func(cls, *args, **kwargs)
-            cls.pytrack.post_init()
+            cls.zntrack.post_init()
 
             if self.nb_name is not None:
-                cls.pytrack._module = f"{self.nb_class_path}.{self.cls.__name__}"
-                cls.pytrack.nb_mode = True
+                cls.zntrack._module = f"{self.nb_class_path}.{self.cls.__name__}"
+                cls.zntrack.nb_mode = True
 
-            if cls.pytrack.module == "__main__":
-                cls.pytrack._module = Path(sys.argv[0]).stem
+            if cls.zntrack.module == "__main__":
+                cls.zntrack._module = Path(sys.argv[0]).stem
 
             return result
 
@@ -255,9 +255,9 @@ class Node:
             decorated class
 
             """
-            cls.pytrack.pre_call()
+            cls.zntrack.pre_call()
             function = func(cls, *args, **kwargs)
-            cls.pytrack.post_call(force, exec_, always_changed, slurm)
+            cls.zntrack.post_call(force, exec_, always_changed, slurm)
             return function
 
         return wrapper
@@ -269,9 +269,9 @@ class Node:
         @functools.wraps(func)
         def wrapper(cls: TypeHintParent):
             """Wrapper around the run method"""
-            cls.pytrack.pre_run()
+            cls.zntrack.pre_run()
             function = func(cls)
-            cls.pytrack.post_run()
+            cls.zntrack.post_run()
             return function
 
         return wrapper

@@ -8,7 +8,7 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, DVC, PyTrackProject
+from zntrack import Node, DVC, ZnTrackProject
 import os
 
 
@@ -39,7 +39,7 @@ class HelloWorldwDefault:
 def test_init_without_overwriting(tmp_path):
     """Test that initializing empty DVC.params does not result in changing values"""
     os.chdir(tmp_path)
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     hello_world_1 = HelloWorld()
@@ -56,7 +56,7 @@ def test_init_without_overwriting(tmp_path):
 def test_load_works(tmp_path):
     """Test that pre-initializing DVC.params does result in changing values"""
     os.chdir(tmp_path)
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     hello_world_1 = HelloWorldwDefault()

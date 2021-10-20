@@ -28,25 +28,25 @@ class NoneType:
     pass
 
 
-class PyTrackType:
+class ZnTrackType:
     """Class to check against to see if it is part of Node
 
-    In comparison to PyTrackStage this is used to identify initiated stages
+    In comparison to ZnTrackStage this is used to identify initiated stages
     """
 
     pass
 
 
-class PyTrackStage:
-    """Class to identify PyTrackStages
+class ZnTrackStage:
+    """Class to identify ZnTrackStages
 
-    This is used internally to mark a class definition as a PyTrackStage.
-    In comparison to PyTrackType this is used to mark a class as a Stage that has not
+    This is used internally to mark a class definition as a ZnTrackStage.
+    In comparison to ZnTrackType this is used to mark a class as a Stage that has not
     been called.
 
-    >>> type(vars(Stage)['pytrack']) == 'PyTrackProperty'
+    >>> type(vars(Stage)['zntrack']) == 'ZnTrackProperty'
     # can not use the following:
-    >>> type(vars(Stage())['pytrack']) == 'PyTrackType'
+    >>> type(vars(Stage())['zntrack']) == 'ZnTrackType'
 
     """
 
@@ -54,5 +54,5 @@ class PyTrackStage:
         self.cls = cls
 
     def get(self):
-        """Load the PyTrackStage"""
+        """Load the ZnTrackStage"""
         return self.cls(load=True)

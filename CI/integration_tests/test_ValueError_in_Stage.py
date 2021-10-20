@@ -9,7 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: 
 """
 import pytest
-from zntrack import Node, PyTrackProject
+from zntrack import Node, ZnTrackProject
 import shutil
 import os
 from subprocess import CalledProcessError
@@ -34,7 +34,7 @@ def test_project(tmp_path):
     shutil.copy(__file__, tmp_path)
     os.chdir(tmp_path)
 
-    project = PyTrackProject()
+    project = ZnTrackProject()
     project.create_dvc_repository()
 
     error_stage = RaiseValueError()

@@ -16,11 +16,11 @@ import subprocess
 import json
 
 from .data_classes import SlurmConfig
-from .parameter import PyTrackOption
+from .parameter import ZnTrackOption
 from zntrack.core.data_classes import DVCParams
 from pathlib import Path
 from zntrack.utils import is_jsonable, serializer, deserializer
-from zntrack.utils.types import PyTrackType, PyTrackStage
+from zntrack.utils.types import ZnTrackType, ZnTrackStage
 
 from typing import TYPE_CHECKING
 
@@ -30,12 +30,12 @@ if TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
-class PyTrackProperty:
-    """Map the correct pytrack instance to the correct cls
+class ZnTrackProperty:
+    """Map the correct zntrack instance to the correct cls
 
     This is required, because we use setattr(TYPE(cls)) and not on the
     instance, so we need to distinguish between different instances,
-    otherwise there is only a single cls.pytrack for all instances!
+    otherwise there is only a single cls.zntrack for all instances!
 
     We save the Node instance in self.__dict__ to avoid this.
     """
@@ -52,19 +52,19 @@ class PyTrackProperty:
         Returns
         -------
         Node:
-            the pytrack property to handle Node
+            the zntrack property to handle Node
         """
         try:
-            return instance.__dict__["pytrack"]
+            return instance.__dict__["zntrack"]
         except KeyError:
-            instance.__dict__["pytrack"] = PyTrackParent(instance)
-            return instance.__dict__["pytrack"]
+            instance.__dict__["zntrack"] = ZnTrackParent(instance)
+            return instance.__dict__["zntrack"]
 
     def __set__(self, instance, value):
-        raise NotImplementedError("Can not change pytrack property!")
+        raise NotImplementedError("Can not change zntrack property!")
 
 
-class PyTrackParent(PyTrackType):
+class ZnTrackParent(ZnTrackType):
     """Parent class to be applied within the decorator"""
 
     def __init__(self, child):
@@ -101,7 +101,7 @@ class PyTrackParent(PyTrackType):
         - updating which attributes are parameters and results
 
         """
-        self.fix_pytrackoptions()
+        self.fix_zntrackoptions()
         if self.load:
             self.load_internals()
             self.load_results()
@@ -161,13 +161,14 @@ class PyTrackParent(PyTrackType):
         This method saves the results
         """
         self.save_results()
+        self.save_results()
 
-    def fix_pytrackoptions(self):
-        """Fix PyTrackOption as attribute of the parent class
+    def fix_zntrackoptions(self):
+        """Fix ZnTrackOption as attribute of the parent class
 
-        This is required, if the PyTrackOption is defined inside the __init__
-        because that means :code:`PyTrackOption in vars(hello_world)` but we require
-        :code:`PyTrackOption in vars(hello_world.__class__)` so with this code we update
+        This is required, if the znTrackOption is defined inside the __init__
+        because that means :code:`ZnTrackOption in vars(hello_world)` but we require
+        :code:`ZnTrackOption in vars(hello_world.__class__)` so with this code we update
         the parent class
 
         Notes
@@ -175,7 +176,7 @@ class PyTrackParent(PyTrackType):
         It should be preferred to set them not in the __init__ but under the class
         definition to make them parts of the parent class
             >>> class HelloWorld:
-            >>>     option=PyTrackOption()
+            >>>     option=ZnTrackOption()
 
 
         """
@@ -183,9 +184,9 @@ class PyTrackParent(PyTrackType):
         remove_from__dict__ = []
 
         for attr, value in vars(self.child).items():
-            if isinstance(value, PyTrackOption):
+            if isinstance(value, ZnTrackOption):
                 # this is not hard coded, because when overwriting
-                # PyTrackOption those custom descriptors also need to be applied!
+                # ZnTrackOption those custom descriptors also need to be applied!
                 log.warning(
                     f"DeprecationWarning: please move the definition "
                     f"of {attr} from __init__ to class level!"
@@ -196,12 +197,12 @@ class PyTrackParent(PyTrackType):
                     f"and default {value.default_value}"
                 )
 
-                value: PyTrackOption  # or child instances
-                ParsedPyTrackOption = value.__class__
+                value: ZnTrackOption  # or child instances
+                ParsedZnTrackOption = value.__class__
                 try:
-                    log.debug(f"Updating {attr} with PyTrackOption!")
+                    log.debug(f"Updating {attr} with ZnTrackOption!")
 
-                    py_track_option = ParsedPyTrackOption(
+                    py_track_option = ParsedZnTrackOption(
                         option=value.option,
                         default_value=value.default_value,
                         name=attr,
@@ -220,18 +221,18 @@ class PyTrackParent(PyTrackType):
     def update_dvc(self):
         """Update the DVCParams with the options from self.dvc
 
-        This method searches for all PyTrackOptions that are defined within the __init__
+        This method searches for all ZnTrackOptions that are defined within the __init__
         """
         log.debug(f"checking for instance {self.child}")
         for attr, val in vars(type(self.child)).items():
-            if isinstance(val, PyTrackOption):
+            if isinstance(val, ZnTrackOption):
                 option = val.option
                 new_vals = getattr(self.child, attr)
                 log.debug(f"processing {attr} - {new_vals}")
                 # check if it is a stage, that has to be handled extra
-                if hasattr(new_vals, "pytrack"):
-                    if isinstance(new_vals.pytrack, PyTrackParent):
-                        getattr(self.dvc, option).append(new_vals.pytrack.dvc.json_file)
+                if hasattr(new_vals, "zntrack"):
+                    if isinstance(new_vals.zntrack, ZnTrackParent):
+                        getattr(self.dvc, option).append(new_vals.zntrack.dvc.json_file)
                 else:
                     try:
                         if isinstance(new_vals, list):
@@ -245,7 +246,7 @@ class PyTrackParent(PyTrackType):
     def has_params(self) -> bool:
         """Check if any params are required by going through the defined params"""
         for attr, val in vars(type(self.child)).items():
-            if isinstance(val, PyTrackOption):
+            if isinstance(val, ZnTrackOption):
                 if val.option == "params":
                     return True
         return False
@@ -412,7 +413,7 @@ class PyTrackParent(PyTrackType):
     def save_internals(self):
         """Write all changed internals to file
 
-        Update e.g. the parameters, out paths, etc. in the pytrack.json file
+        Update e.g. the parameters, out paths, etc. in the zntrack.json file
         """
         full_internals = self.internals_from_file
         log.debug(f"Serializing {self.internals}")
@@ -438,7 +439,7 @@ class PyTrackParent(PyTrackType):
         self.dvc.json_file.write_text(json.dumps(results, indent=4))
 
     def load_internals(self):
-        """Load the internals from the pytrack.json file"""
+        """Load the internals from the zntrack.json file"""
         try:
             log.debug(f"un-serialize {self.internals_from_file[self.stage_name]}")
             self.internals = deserializer(self.internals_from_file[self.stage_name])
@@ -454,10 +455,10 @@ class PyTrackParent(PyTrackType):
 
     @property
     def results(self) -> dict:
-        """Get all PyTrackOption results and combine them in a single dict"""
+        """Get all ZnTrackOption results and combine them in a single dict"""
         results = {}
         for attr, val in vars(type(self.child)).items():
-            if isinstance(val, PyTrackOption):
+            if isinstance(val, ZnTrackOption):
                 if val.option == "result":
                     results[val.name] = getattr(self.child, attr)
         return results
@@ -476,10 +477,10 @@ class PyTrackParent(PyTrackType):
 
     @property
     def internals(self):
-        """Get all PyTrackOptions (except results)"""
+        """Get all ZnTrackOptions (except results)"""
         internals = {}
         for attr, val in vars(type(self.child)).items():
-            if isinstance(val, PyTrackOption):
+            if isinstance(val, ZnTrackOption):
                 if val.option == "result":
                     continue
                 option_dict = internals.get(val.option, {})
@@ -491,7 +492,7 @@ class PyTrackParent(PyTrackType):
 
     @internals.setter
     def internals(self, value: dict):
-        """Save all PyTrackOptions/Internals (except results)
+        """Save all ZnTrackOptions/Internals (except results)
 
         Stores all passed options in the child.__dict__
 
@@ -502,16 +503,16 @@ class PyTrackParent(PyTrackType):
         """
         for option in value.values():
             for key, val in option.items():
-                if isinstance(val, PyTrackStage):
-                    # Load the PyTrackStage
+                if isinstance(val, ZnTrackStage):
+                    # Load the ZnTrackStage
                     self.child.__dict__[key] = val.get()
                 else:
-                    # Everything except the PyTrackStage
+                    # Everything except the ZnTrackStage
                     self.child.__dict__[key] = val
 
     @property
     def internals_from_file(self) -> dict:
-        """Load ALL internals from .pytrack.json"""
+        """Load ALL internals from .zntrack.json"""
         try:
             with open(self.dvc.internals_file) as json_file:
                 return json.load(json_file)
@@ -521,8 +522,8 @@ class PyTrackParent(PyTrackType):
 
     @internals_from_file.setter
     def internals_from_file(self, value: dict):
-        """Update internals in .pytrack.json"""
-        log.debug(f"Writing updates to .pytrack.json as {value}")
+        """Update internals in .zntrack.json"""
+        log.debug(f"Writing updates to .zntrack.json as {value}")
         value.update({"default": None})
 
         if not is_jsonable(value):
