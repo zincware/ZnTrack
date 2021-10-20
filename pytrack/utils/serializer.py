@@ -16,12 +16,17 @@ Notes
     Please consider using DVC.outs() and save them in a binary file format.
 
 """
+import logging
 from pathlib import Path
 import numpy as np
+from importlib import import_module
+from pytrack.utils.types import PyTrackType, PyTrackStage
+
+log = logging.getLogger(__name__)
 
 
 # Serializer
-def conv_path_to_str(value):
+def conv_path_to_dict(value):
     """Convert Path to str"""
     if isinstance(value, Path):
         value = {"Path": value.as_posix()}
@@ -32,6 +37,27 @@ def conv_numpy_to_dict(value):
     """Convert numpy to a list, marked by a dictionary"""
     if isinstance(value, np.ndarray):
         value = {"np": value.tolist()}
+    return value
+
+
+def conv_class_to_dict(value):
+    """Serialize class instance
+
+    Parameters
+    ----------
+    value: decorated PyTrack stage
+        Assuming that pytrack stages are written to a file, we use the
+        __module and __name__ to later run __module.__name__(load=True)
+
+    Returns
+    --------
+    dict:
+        serialized dictionary containing the class module and name
+
+    """
+    if hasattr(value, "pytrack"):
+        if isinstance(value.pytrack, PyTrackType):
+            value = {"cls": (value.__module__, value.__class__.__name__)}
     return value
 
 
@@ -52,10 +78,34 @@ def conv_dict_to_path(value):
     return value
 
 
+def conv_dict_to_class(value):
+    """
+
+    Parameters
+    ----------
+    value: dict
+        Expected a dict of type {'cls': (__module__, __name__)} to run
+        from __module__ import __name__ via importlib
+
+    Returns
+    -------
+    PyTrackStage(cls=value):
+        cls that can be used to load a stage via PyTrackStage.get()
+
+    """
+    if isinstance(value, dict):
+        if len(value) == 1 and "cls" in value:
+            module = import_module(value["cls"][0])
+            value = getattr(module, value["cls"][1])
+            value = PyTrackStage(cls=value)
+    return value
+
+
 def serializer(data):
     """Serialize data so it can be stored in a json file"""
-    data = conv_path_to_str(data)
+    data = conv_path_to_dict(data)
     data = conv_numpy_to_dict(data)
+    data = conv_class_to_dict(data)
 
     if isinstance(data, list):
         return [serializer(x) for x in data]
@@ -69,6 +119,8 @@ def deserializer(data):
     """Deserialize data from the json file back to python objects"""
     data = conv_dict_to_numpy(data)
     data = conv_dict_to_path(data)
+    data = conv_dict_to_class(data)
+
     if isinstance(data, list):
         return [deserializer(x) for x in data]
     elif isinstance(data, dict):

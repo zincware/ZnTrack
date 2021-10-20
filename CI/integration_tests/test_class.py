@@ -1,8 +1,6 @@
-from unittest import TestCase
 from pytrack import PyTrack, DVC, PyTrackProject
 from pathlib import Path
 import json
-import subprocess
 import os
 import shutil
 from tempfile import TemporaryDirectory
@@ -49,8 +47,7 @@ def prepare_env():
             json.dump({"id": idx}, f)
 
     project.name = "Test1"
-    project.run()
-    project.load()
+    project.repro()
 
     yield
 
@@ -58,14 +55,9 @@ def prepare_env():
     temp_dir.cleanup()
 
 
-def test_query_by_id():
-    base = BasicTest(id_=0)
-    assert base.pytrack.id == "0"
-
-
 def test_parameters():
     """Test that the parameters are read correctly"""
-    base = BasicTest(id_=0)
+    base = BasicTest(load=True)
     assert base.parameters == dict(
         name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256]
     )
@@ -73,11 +65,11 @@ def test_parameters():
 
 def test_results():
     """Test that the results are read correctly"""
-    base = BasicTest(id_=0)
+    base = BasicTest(load=True)
     assert base.results == {"name": "PyTest"}
 
 
 def test_deps():
     """Test that the dependencies are stored correctly"""
-    base = BasicTest(id_=0)
+    base = BasicTest(load=True)
     assert base.deps == [Path("deps1", "input.json"), Path("deps2", "input.json")]

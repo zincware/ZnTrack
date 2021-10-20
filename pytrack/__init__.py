@@ -13,6 +13,26 @@ from .core.parameter import DVC
 from .core.decorator import PyTrack
 from .project import PyTrackProject
 from .interface import DVCInterface
+from .utils import config
+
+import logging
+import sys
 
 #
-__all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC"]
+__all__ = ["PyTrack", "PyTrackProject", "DVCInterface", "DVC", "config"]
+
+__version__ = "0.1.2"
+
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Formatter for advanced logging
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s (%(levelname)s): %(message)s")
+
+channel = logging.StreamHandler(sys.stdout)
+channel.setLevel(logging.DEBUG)
+channel.setFormatter(formatter)
+
+logger.addHandler(channel)

@@ -29,9 +29,13 @@ information or write an issue on Github for https://github.com/zincware/py-track
    :maxdepth: 1
    :caption: User Guide:
 
-   Overview/Functionality.ipynb
-   Overview/Introduction.ipynb
-   Overview/PassingClasses.ipynb
+   _overview/01_Intro/01_Intro.ipynb
+   _overview/02_passing_classes/PassingClasses.ipynb
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Examples:
+
    tutorials
 
 .. toctree::

@@ -12,85 +12,22 @@ from __future__ import annotations
 import logging
 import typing
 
-import json
-from pytrack.utils import is_jsonable, serializer, deserializer
-from pathlib import Path
-from typing import Union
+from pytrack.utils.types import NoneType
 
-log = logging.getLogger(__file__)
+log = logging.getLogger(__name__)
 
 if typing.TYPE_CHECKING:
     from pytrack.utils.type_hints import TypeHintParent
 
 
 class PyTrackOption:
-    def __init__(
-        self,
-        value: Union[str, tuple] = None,
-        option: str = None,
-        attr: str = None,
-        cls: TypeHintParent = None,
-    ):
-        """PyTrack Descriptor to handle the loading and writing of files
+    def __init__(self, option, default_value, name=None):
+        self.option = option
+        self.default_value = default_value
+        self.name = name
 
-        Parameters
-        ----------
-        option: str
-            One of the DVC options, e.g., params, outs, ...
-        value:
-            default value
-        attr
-        cls
-        """
-        if option is None:
-            log.warning("Using a custom PyTrackOption! No default values supported!")
-            option = "custom"
-
-        self.pytrack_dvc_option = option
-        self.value = value
-        self.check_input(value)
-        if value is not None and cls is not None:
-            value = self.make_serializable(value)
-            self.set_internals(cls, {attr: value})
-
-    def __get__(self, instance: TypeHintParent, owner):
-        """Get the value of this instance from pytrack_internals and return it"""
-        try:
-            return self._get(instance, owner)
-        except NotImplementedError:
-            if self.pytrack_dvc_option == "result":
-                return deserializer(
-                    self.get_results(instance).get(self.get_name(instance))
-                )
-            else:
-                output = self.get_internals(instance).get(self.get_name(instance), "")
-                output = deserializer(output)
-                if self.pytrack_dvc_option in ["params", "deps"]:
-                    return output
-                else:
-                    # combine with the associated path, defined in pytrack.dvc
-                    file_path: Path = getattr(
-                        instance.pytrack.dvc, f"{self.pytrack_dvc_option}_path"
-                    )
-                    if isinstance(output, list):
-                        return [file_path / x for x in output]
-                    elif isinstance(output, str):
-                        return file_path / output
-                    else:
-                        return output
-
-    def __set__(self, instance: TypeHintParent, value):
-        """Update the value"""
-        try:
-            self._set(instance, value)
-        except NotImplementedError:
-            if self.pytrack_dvc_option != "result":
-                self.check_input(value)
-            log.debug(f"Updating {self.get_name(instance)} with {value}")
-
-            value = self.make_serializable(value)
-
-            self.set_internals(instance, {self.get_name(instance): value})
+        if option == "result" and default_value is not NoneType:
+            raise ValueError(f"Can not pre-initialize result! Found {default_value}")
 
     def _get(self, instance: TypeHintParent, owner):
         """Overwrite this method for custom PyTrackOption get method"""
@@ -100,237 +37,107 @@ class PyTrackOption:
         """Overwrite this method for custom PyTrackOption set method"""
         raise NotImplementedError
 
-    def make_serializable(self, value):
-        """Make value serializable to save as json"""
-        if isinstance(value, self.__class__):
-            value = value.value
+    def __set_name__(self, owner, name):
+        """Descriptor method to determine the name of the attribute"""
+        self.name = name
 
-        # Check if the passed value is a PyTrack class
-        # if so, add its json file as a dependency to this stage.
-        if hasattr(value, "pytrack"):
-            # Allow self.deps = DVC.deps(Stage(id_=0))
-            if self.pytrack_dvc_option == "deps":
-                new_value = value.pytrack.dvc.json_file
-                if new_value is None:
-                    raise ValueError(f"Stage {value} has no results assigned to it!")
-                else:
-                    value = new_value
+    def __get__(self, instance: TypeHintParent, owner):
+        """Get the stored value
 
-        value = serializer(value)
-
-        return value
-
-    def get_name(self, instance):
+        typically this reads the stored value from the instance __dict__.
+        If no value can be found the configured default value is returned
         """
+        log.debug(f"Getting {self.option} / {self.name} for {instance}")
+        try:
+            return self._get(instance, owner)
+        except NotImplementedError:
+            try:
+                return instance.__dict__[self.name]
+            except KeyError:
+                log.debug("KeyError: returning default value")
+                if self.default_value is NoneType:
+                    return None
+                return self.default_value
+            except AttributeError:
+                log.warning(
+                    f"No value found for {self.option} / {self.name} "
+                    f"- returning default"
+                )
+                # This can happen, when instance has not been instantiated, yielding in
+                # no __dict__ attribute. Returning the default value here.
+                return self.default_value
+
+    def __set__(self, instance: TypeHintParent, value):
+        """Write the value to the instances __dict__
+
+        typically write the given value to the instances __dict__
 
         Parameters
         ----------
-        instance: TypeHintParent
-            A instance of the Parent that contains
+        instance
+        value
 
         Returns
         -------
-        str: Name of this instance, e.g., self.abc = DVC.outs() returns "abc"
 
         """
-        for attr, val in vars(type(instance)).items():
-            if val == self:
-                return attr
-
-        raise ValueError(f"Could not find {self} in instance {instance}")
-
-    def check_input(self, value):
-        if isinstance(value, dict):
-            log.warning(
-                f"Used mutable type dict for {self.pytrack_dvc_option}! "
-                f"Always overwrite the {self.pytrack_dvc_option} and don't alter it otherwise!"
-                f" It won't work."
-            )
-
-        if isinstance(value, list):
-            log.warning(
-                f"Used mutable type list for {self.pytrack_dvc_option}! "
-                f"Always overwrite the {self.pytrack_dvc_option} and don't append to it!"
-                f" It won't work."
-            )
-
-    def set_internals(self, instance: TypeHintParent, value: dict):
-        """Set the Internals for this instance (Stage & Id)
-
-        This writes them to self._pytrack_all_parameters, i.e., to the config file.
-        """
-        if isinstance(value, dict):
-            if self.pytrack_dvc_option == "result":
-                if not instance.pytrack.allow_result_change:
-                    if instance.pytrack.is_init:
-                        log.debug("ValueError Exception during init!")
-                        return
-                    else:
-                        raise ValueError(
-                            "Result can only be changed within `run` call!"
-                        )
-                    # log.warning("Result can only be changed within `run` call!")
-                    # return
-                if not is_jsonable(value):
-                    raise ValueError("Results must be JSON serializable")
-                log.debug(f"Processing value {value}")
-                results = self.get_results(instance)
-                results.update(value)
-                self.set_results(instance, results)
-
-            else:
+        log.debug(f"Changing {self.option} / {self.name} to {value}")
+        try:
+            self._set(instance, value)
+        except NotImplementedError:
+            if isinstance(value, PyTrackOption):
                 log.debug(
-                    f"Param_Change: {instance.pytrack.allow_param_change} on {instance.pytrack}"
+                    f"{self.option} / {self.name} is already a PyTrackOption - "
+                    f"Skipping updating it!"
                 )
-                if not instance.pytrack.allow_param_change:
-                    if instance.pytrack.is_init:
-                        log.debug("ValueError Exception during init!")
-                        return
-                    else:
-                        raise ValueError(
-                            "This stage is being loaded. Parameters can not be set!"
-                        )
-                value = self.make_serializable(value)
-                name = instance.pytrack.name
-                id_ = instance.pytrack.id
-                file = instance.pytrack.dvc.internals_file
+                return
 
-                full_internals = self.get_full_internals(file)
-                stage = full_internals.get(name, {})
-                stage_w_id = stage.get(id_, {})
+            if instance.pytrack.load and self.option != "result":
+                raise ValueError(f"Changing {self.option} is currently not allowed!")
 
-                option = stage_w_id.get(self.pytrack_dvc_option, {})
-                option.update(value)
+            if not instance.pytrack.running and self.option == "result":
+                raise ValueError(f"Changing {self.option} is currently not allowed")
 
-                stage_w_id[self.pytrack_dvc_option] = option
-                stage[id_] = stage_w_id
-                full_internals[name] = stage
+            instance.__dict__[self.name] = value
 
-                self.set_full_internals(file, full_internals)
 
-        else:
-            raise ValueError(
-                f"Value has to be a dictionary but found {type(value)} instead!"
-            )
+class LazyProperty:
+    """Lazy property that takes the attribute name for PyTrackOption definition"""
 
-    def get_internals(self, instance: TypeHintParent):
-        """Get the parameters for this instance (Stage & Id)"""
-        name = instance.pytrack.name
-        id_ = instance.pytrack.id
-        file = instance.pytrack.dvc.internals_file
+    def __set_name__(self, owner, name):
+        """Descriptor default"""
+        self.name = name
 
-        full_internals = self.get_full_internals(file)
+    def __get__(self, instance, owner):
+        def pass_name(value=NoneType) -> PyTrackOption:
+            """
+            Parameters
+            ----------
+            value: any
+                Any value to be passed as default to the PyTrackOption
 
-        return (
-            full_internals.get(name, {}).get(id_, {}).get(self.pytrack_dvc_option, {})
-        )
+            Returns
+            -------
+            instantiated PyTrackOption with correct set name and default values
 
-    @staticmethod
-    def get_full_internals(file) -> dict:
-        """Load ALL internals from .pytrack.json"""
-        try:
-            with open(file) as json_file:
-                return json.load(json_file)
-        except FileNotFoundError:
-            log.debug(f"Could not load params from {file}!")
-        return {}
+            """
+            return PyTrackOption(option=self.name, default_value=value)
 
-    @staticmethod
-    def set_full_internals(file, value: dict):
-        """Update internals in .pytrack.json"""
-        log.debug(f"Writing updates to .pytrack.json as {value}")
-        value.update({"default": None})
-
-        if not is_jsonable(value):
-            raise ValueError(f"{value} is not JSON serializable")
-
-        Path(file).parent.mkdir(exist_ok=True, parents=True)
-
-        with open(file, "w") as json_file:
-            json.dump(value, json_file, indent=4)
-
-    @staticmethod
-    def get_results(instance: TypeHintParent):
-        file = instance.pytrack.dvc.json_file
-        try:
-            with open(file) as f:
-                result = json.load(f)
-            log.debug(f"Loading results {result}")
-            return result
-        except FileNotFoundError:
-            log.warning("No results found!")
-            return {}
-
-    @staticmethod
-    def set_results(instance: TypeHintParent, value):
-        file = instance.pytrack.dvc.json_file
-        if not is_jsonable(value):
-            raise ValueError(f"{value} is not JSON serializable")
-        log.debug(f"Writing {value} to {file}")
-        with open(file, "w") as f:
-            json.dump(value, f, indent=4)
-        log.debug("successful!")
-
-    def __repr__(self):
-        return f"Descriptor for {self.pytrack_dvc_option}"
+        return pass_name
 
 
 class DVC:
-    """Basically a dataclass of DVC methods
+    params = LazyProperty()
+    result = LazyProperty()
 
-    Referring to https://dvc.org/doc/command-reference/run#options
-    """
+    deps = LazyProperty()
 
-    def __init__(self):
-        """Basically a dataclass of DVC methods"""
-        raise NotImplementedError(
-            "Cannot initialize DVC - this class is only for accessing its methods!"
-        )
+    outs = LazyProperty()
+    outs_no_cache = LazyProperty()
+    outs_persistent = LazyProperty()
 
-    @staticmethod
-    def params(value=None):
-        """Parameter for PyTrack
+    metrics = LazyProperty()
+    metrics_no_cache = LazyProperty()
 
-        Parameters
-        ----------
-        obj: any class object that the parameter will take on, so that type hinting does not raise issues
-
-        Returns
-        -------
-        cls: Class that inherits from obj
-
-        """
-
-        return PyTrackOption(value, option="params")
-
-    @staticmethod
-    def result(value=None):
-        """Parameter for PyTrack
-
-        Parameters
-        ----------
-        obj: any class object that the parameter will take on, so that type hinting does not raise issues
-        outs: Future Version, allows for defining the type ot output
-
-        Returns
-        -------
-        cls: Class that inherits from obj
-
-        """
-
-        if value is not None:
-            raise ValueError("Can not pre-initialize result!")
-
-        return PyTrackOption(value, option="result")
-
-    @staticmethod
-    def deps(value=None):
-        return PyTrackOption(value, option="deps")
-
-    @staticmethod
-    def outs(value=None):
-        return PyTrackOption(value, option="outs")
-
-    @staticmethod
-    def metrics_no_cache(value=None):
-        return PyTrackOption(value, option="metrics_no_cache")
+    plots = LazyProperty()
+    plots_no_cache = LazyProperty()

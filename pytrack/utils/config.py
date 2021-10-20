@@ -6,11 +6,17 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: Standard python init file for the utils directory
+Description: 
 """
+from dataclasses import dataclass
 
-from .utils import is_jsonable
-from .serializer import serializer, deserializer
-from .config import config
 
-__all__ = ["is_jsonable", "serializer", "deserializer", "config"]
+@dataclass
+class Config:
+    """Collection of PyTrack configurations"""
+
+    debug: bool = False  # not implemented yet
+    nb_name: str = None
+
+
+config = Config()
