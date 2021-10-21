@@ -80,7 +80,13 @@ class DVCParams:
         out = []
 
         for dvc_param in self._dvc_params:
+            processed_params = []
             for param_val in getattr(self, dvc_param):
+                if param_val in processed_params:
+                    log.warning(
+                        f"Parameter {dvc_param}:{param_val} found more than once"
+                    )
+                    continue
                 if param_val is None:
                     # DVC can not process None, so we skip here but log it
                     log.warning(
@@ -89,6 +95,8 @@ class DVCParams:
                     )
                     continue
                 out += [f"--{dvc_param.replace('_', '-')}", param_val]
+
+                processed_params.append(param_val)
 
         if self.json_file is not None:
             out += ["--outs", self.json_file]
@@ -101,19 +109,14 @@ class DVCParams:
             self.outs_path.mkdir(exist_ok=True, parents=True)
 
     def set_json_file(self, name):
-        """
+        """Store the json file path in the dataclass
 
         Parameters
         ----------
         name: str
-            The name of the json file, e.g. 0_Stage.json
-
-        Returns
-        -------
-
+            The name of the json file, e.g. Stage.json
         """
         self.json_file = self.outs_path / f"{name}.json"
-        self.outs_path.mkdir(exist_ok=True, parents=True)
 
 
 @dataclass(frozen=True, order=True)
