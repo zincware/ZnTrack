@@ -41,6 +41,7 @@ class SubtractOne:
 
 @Node()
 class Summation:
+    """Stage that is actually tested, containing the multiple dependencies"""
     inp = DVC.deps([AddOne(load=True), SubtractOne(load=True)])
     number = DVC.result()
 
@@ -50,6 +51,10 @@ class Summation:
 
 @Node()
 class SummationTuple:
+    """Stage that is actually tested, containing the multiple dependencies
+
+    Additionally testing for tuple conversion here!
+    """
     inp = DVC.deps((AddOne(load=True), SubtractOne(load=True)))
     number = DVC.result()
 
