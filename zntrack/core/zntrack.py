@@ -134,6 +134,7 @@ class ZnTrackParent(ZnTrackType):
             your HEAD Node. You can check the commands in dvc.yaml!
 
         """
+        self.dvc.make_paths()
         self.update_dvc()
         self.save_internals()
 
@@ -450,7 +451,7 @@ class ZnTrackParent(ZnTrackType):
             log.debug(f"un-serialize {self.internals_from_file[self.stage_name]}")
             self.internals = deserializer(self.internals_from_file[self.stage_name])
         except KeyError:
-            log.warning(f"No internals found for {self.stage_name}")
+            log.debug(f"No internals found for {self.stage_name}")
 
     def load_results(self):
         """Load the results from file"""

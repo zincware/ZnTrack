@@ -109,19 +109,14 @@ class DVCParams:
             self.outs_path.mkdir(exist_ok=True, parents=True)
 
     def set_json_file(self, name):
-        """
+        """Store the json file path in the dataclass
 
         Parameters
         ----------
         name: str
-            The name of the json file, e.g. 0_Stage.json
-
-        Returns
-        -------
-
+            The name of the json file, e.g. Stage.json
         """
         self.json_file = self.outs_path / f"{name}.json"
-        self.outs_path.mkdir(exist_ok=True, parents=True)
 
 
 @dataclass(frozen=True, order=True)
