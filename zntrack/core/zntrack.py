@@ -521,6 +521,10 @@ class ZnTrackParent(ZnTrackType):
                         self.child.__dict__[key] = []
                         for item in val:
                             self.child.__dict__[key].append(item.get())
+                    else:
+                        # Don't like the double call here, but I don't know how to
+                        #  avoid it atm.
+                        self.child.__dict__[key] = val
                 else:
                     # Everything except the ZnTrackStage
                     self.child.__dict__[key] = val
