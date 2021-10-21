@@ -235,7 +235,14 @@ class ZnTrackParent(ZnTrackType):
                 else:
                     try:
                         if isinstance(new_vals, list):
-                            [getattr(self.dvc, option).append(x) for x in new_vals]
+                            for item in new_vals:
+                                if hasattr(item, "zntrack"):
+                                    if isinstance(item.zntrack, ZnTrackParent):
+                                        getattr(self.dvc, option).append(
+                                            item.zntrack.dvc.json_file
+                                        )
+                                else:
+                                    getattr(self.dvc, option).append(item)
                         else:
                             getattr(self.dvc, option).append(new_vals)
                     except AttributeError:
@@ -507,6 +514,12 @@ class ZnTrackParent(ZnTrackType):
                 if isinstance(val, ZnTrackStage):
                     # Load the ZnTrackStage
                     self.child.__dict__[key] = val.get()
+                elif isinstance(val, list):
+                    if isinstance(val[0], ZnTrackStage):
+                        # handle DVC.deps([A(load=True), B(load=True), ...])
+                        self.child.__dict__[key] = []
+                        for item in val:
+                            self.child.__dict__[key].append(item.get())
                 else:
                     # Everything except the ZnTrackStage
                     self.child.__dict__[key] = val

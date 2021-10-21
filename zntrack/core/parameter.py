@@ -23,6 +23,11 @@ if typing.TYPE_CHECKING:
 class ZnTrackOption:
     def __init__(self, option, default_value, name=None):
         self.option = option
+
+        if isinstance(default_value, tuple):
+            log.warning("Converting tuple to list!")
+            default_value = list(default_value)
+
         self.default_value = default_value
         self.name = name
 
@@ -88,6 +93,10 @@ class ZnTrackOption:
         -------
 
         """
+        if isinstance(instance, tuple):
+            log.warning("Converting tuple to list!")
+            instance = list(instance)
+
         log.debug(f"Changing {self.option} / {self.name} to {value}")
         try:
             self._set(instance, value)
