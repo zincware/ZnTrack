@@ -26,8 +26,7 @@ class HelloWorld:
 
 
 def test_project(tmp_path):
-    """Test that Nodes with exec_=True work
-    """
+    """Test that Nodes with exec_=True work"""
     shutil.copy(__file__, tmp_path)
     os.chdir(tmp_path)
 
