@@ -53,6 +53,6 @@ class ZnTrackStage:
     def __init__(self, cls):
         self.cls = cls
 
-    def get(self):
+    def load_zntrack_node(self):
         """Load the ZnTrackStage"""
         return self.cls(load=True)

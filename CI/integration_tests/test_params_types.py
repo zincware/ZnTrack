@@ -45,7 +45,13 @@ def fix_int() -> int:
     return 42
 
 
-@pytest.mark.parametrize('arg', ['fix_list', 'fix_int', 'fix_dict'], indirect=True)
+@pytest.fixture
+def fix_empty_list() -> list:
+    return []
+
+
+@pytest.mark.parametrize('arg', ['fix_list', 'fix_int', 'fix_dict', 'fix_empty_list'],
+                         indirect=True)
 def test_params(arg, tmp_path):
     os.chdir(tmp_path)
 

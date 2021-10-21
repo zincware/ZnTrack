@@ -259,11 +259,11 @@ class ZnTrackParent(ZnTrackType):
         return False
 
     def write_dvc(
-        self,
-        force=True,
-        exec_: bool = False,
-        always_changed: bool = False,
-        slurm: bool = False,
+            self,
+            force=True,
+            exec_: bool = False,
+            always_changed: bool = False,
+            slurm: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -514,16 +514,14 @@ class ZnTrackParent(ZnTrackType):
             for key, val in option.items():
                 if isinstance(val, ZnTrackStage):
                     # Load the ZnTrackStage
-                    self.child.__dict__[key] = val.get()
+                    self.child.__dict__[key] = val.load_zntrack_node()
                 elif isinstance(val, list):
-                    if isinstance(val[0], ZnTrackStage):
-                        # handle DVC.deps([A(load=True), B(load=True), ...])
-                        self.child.__dict__[key] = []
-                        for item in val:
-                            self.child.__dict__[key].append(item.get())
-                    else:
-                        # Don't like the double call here, but I don't know how to
-                        #  avoid it atm.
+                    try:
+                        self.child.__dict__[key] = [
+                            item.load_zntrack_node() for item in val
+                        ]
+                    except AttributeError:
+                        # Everything except the ZnTrackStage
                         self.child.__dict__[key] = val
                 else:
                     # Everything except the ZnTrackStage
