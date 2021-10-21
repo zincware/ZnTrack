@@ -21,7 +21,32 @@ if typing.TYPE_CHECKING:
 
 
 class ZnTrackOption:
+    """Descriptor for all DVC options
+
+    This class handles the __get__ and __set__ for the DVC options.
+    For most cases this means storing them in the __init__ and keeping track of,
+    which Options are used.
+    This is required to allow for load=True which updates all ZnTrackOptions,
+    based on the computed or otherwise stored values.
+
+    """
+
     def __init__(self, option, default_value, name=None):
+        """Instantiate a ZnTrackOption Descriptor
+
+        Parameters
+        ----------
+        option: str
+            One of the given options of DVC. The string should also be defined
+            inside the dataclass!
+        default_value:
+            Any serializable value which can be used as e.g.
+            DVC.params("this is a default").
+        name: str
+            Required when __set_name__ can not be used, e.g. if the ZnTrackOption
+            is defined in the __init__ on not on a class level. It defines
+            the name of the descriptor (for self.attr it would be attr).
+        """
         self.option = option
 
         if isinstance(default_value, tuple):
