@@ -60,9 +60,6 @@ class Node:
             raise ValueError("Please use `@Node()` instead of `@Node`.")
         self.cls = cls
 
-        if nb_name is None:
-            nb_name = config.nb_name
-
         self.exec_ = exec_
 
         self.name = name
@@ -70,6 +67,9 @@ class Node:
         self.kwargs = kwargs
         self.return_with_args = True
         log.debug(f"decorator_kwargs: {kwargs}")
+
+        if nb_name is None:
+            nb_name = config.nb_name
 
         # jupyter
         if nb_name is not None:
