@@ -13,7 +13,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, DVC, ZnTrackProject
+from zntrack import Node, dvc, ZnTrackProject
 import numpy as np
 
 cwd = os.getcwd()
@@ -24,8 +24,8 @@ class ComputeA:
     """Node stage A"""
 
     def __init__(self):
-        self.inp = DVC.params()
-        self.out = DVC.result()
+        self.inp = dvc.params()
+        self.out = dvc.result()
 
     def __call__(self, inp):
         self.inp = inp

@@ -8,14 +8,14 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, DVC
+from zntrack import Node, dvc
 import os
 import pytest
 
 
 @Node()
 class CheckType:
-    params = DVC.params()
+    params = dvc.params()
 
     def __call__(self, params):
         self.params = params

@@ -8,14 +8,14 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, DVC
+from zntrack import Node, dvc
 import shutil
 import os
 
 
 @Node()
 class Stage1:
-    args = DVC.params()
+    args = dvc.params()
 
     def __call__(self, args):
         self.args = args
@@ -26,7 +26,7 @@ class Stage1:
 
 @Node()
 class Stage2:
-    stage_1: Stage1 = DVC.deps(Stage1(load=True))
+    stage_1: Stage1 = dvc.deps(Stage1(load=True))
 
     def __call__(self, *args, **kwargs):
         pass

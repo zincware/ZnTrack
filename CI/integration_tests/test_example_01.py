@@ -14,7 +14,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, DVC, ZnTrackProject
+from zntrack import Node, dvc, ZnTrackProject
 from pathlib import Path
 
 temp_dir = TemporaryDirectory()
@@ -29,9 +29,9 @@ class StageIO:
 
         Definition of parameters and results
         """
-        self.outs = DVC.outs(Path("calculation.txt"))
-        self.deps = DVC.deps()
-        self.param = DVC.params()
+        self.outs = dvc.outs(Path("calculation.txt"))
+        self.deps = dvc.deps()
+        self.param = dvc.params()
 
     def __call__(self, file):
         """User input"""
@@ -54,13 +54,13 @@ class StageAddition:
 
         Definition of parameters and results
         """
-        self.outs = DVC.outs(Path("calculation.txt"))
+        self.outs = dvc.outs(Path("calculation.txt"))
 
-        self.n_1 = DVC.params()  # seems optional now
-        self.n_2 = DVC.params()
+        self.n_1 = dvc.params()  # seems optional now
+        self.n_2 = dvc.params()
 
-        self.sum = DVC.result()
-        self.dif = DVC.result()
+        self.sum = dvc.result()
+        self.dif = dvc.result()
 
     def __call__(self, n_1, n_2):
         """User input

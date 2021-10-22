@@ -29,16 +29,21 @@ class ZnTrackOption:
     This is required to allow for load=True which updates all ZnTrackOptions,
     based on the computed or otherwise stored values.
 
+    Attributes
+    ----------
+    option: str
+        One of the given options of DVC. The string should also be defined
+        inside the dataclass!
+
     """
 
-    def __init__(self, option, default_value, name=None):
+    option = None
+
+    def __init__(self, default_value=NoneType, name=None, option=None):
         """Instantiate a ZnTrackOption Descriptor
 
         Parameters
         ----------
-        option: str
-            One of the given options of DVC. The string should also be defined
-            inside the dataclass!
         default_value:
             Any serializable value which can be used as e.g.
             DVC.params("this is a default").
@@ -47,7 +52,8 @@ class ZnTrackOption:
             is defined in the __init__ on not on a class level. It defines
             the name of the descriptor (for self.attr it would be attr).
         """
-        self.option = option
+        if option is not None:
+            self.option = option
 
         if isinstance(default_value, tuple):
             log.warning("Converting tuple to list!")
@@ -56,7 +62,7 @@ class ZnTrackOption:
         self.default_value = default_value
         self.name = name
 
-        if option == "result" and default_value is not NoneType:
+        if self.option == "result" and default_value is not NoneType:
             raise ValueError(f"Can not pre-initialize result! Found {default_value}")
 
     def _get(self, instance: TypeHintParent, owner):
@@ -142,45 +148,3 @@ class ZnTrackOption:
                 raise ValueError(f"Changing {self.option} is currently not allowed")
 
             instance.__dict__[self.name] = value
-
-
-class LazyProperty:
-    """Lazy property that takes the attribute name for ZnTrackOption definition"""
-
-    def __set_name__(self, owner, name):
-        """Descriptor default"""
-        self.name = name
-
-    def __get__(self, instance, owner):
-        def pass_name(value=NoneType) -> ZnTrackOption:
-            """
-            Parameters
-            ----------
-            value: any
-                Any value to be passed as default to the ZnTrackOption
-
-            Returns
-            -------
-            instantiated ZnTrackOption with correct set name and default values
-
-            """
-            return ZnTrackOption(option=self.name, default_value=value)
-
-        return pass_name
-
-
-class DVC:
-    params = LazyProperty()
-    result = LazyProperty()
-
-    deps = LazyProperty()
-
-    outs = LazyProperty()
-    outs_no_cache = LazyProperty()
-    outs_persistent = LazyProperty()
-
-    metrics = LazyProperty()
-    metrics_no_cache = LazyProperty()
-
-    plots = LazyProperty()
-    plots_no_cache = LazyProperty()

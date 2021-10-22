@@ -15,7 +15,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, DVC, ZnTrackProject
+from zntrack import Node, dvc, ZnTrackProject
 import numpy as np
 
 temp_dir = TemporaryDirectory()
@@ -29,12 +29,12 @@ cwd = os.getcwd()
 @Node()
 class Model:
     def __init__(self):
-        self.model_params = DVC.params()
-        self.model_class = DVC.params()
+        self.model_params = dvc.params()
+        self.model_class = dvc.params()
 
         self.model_dict = {Model1.__name__: Model1, Model2.__name__: Model2}
 
-        self.result = DVC.result()
+        self.result = dvc.result()
 
     def __call__(self, model):
         self.model_params = model.params

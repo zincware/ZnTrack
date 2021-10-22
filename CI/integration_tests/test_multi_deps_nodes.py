@@ -8,14 +8,14 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, DVC, ZnTrackProject
+from zntrack import Node, dvc, ZnTrackProject
 import os
 import shutil
 
 
 @Node()
 class CreateNumbers:
-    number = DVC.result()
+    number = dvc.result()
 
     def run(self):
         self.number = 42
@@ -23,8 +23,8 @@ class CreateNumbers:
 
 @Node()
 class AddOne:
-    inp = DVC.deps(CreateNumbers(load=True))
-    number = DVC.result()
+    inp = dvc.deps(CreateNumbers(load=True))
+    number = dvc.result()
 
     def run(self):
         self.number = self.inp.number + 1
@@ -32,8 +32,8 @@ class AddOne:
 
 @Node()
 class SubtractOne:
-    inp = DVC.deps(CreateNumbers(load=True))
-    number = DVC.result()
+    inp = dvc.deps(CreateNumbers(load=True))
+    number = dvc.result()
 
     def run(self):
         self.number = self.inp.number - 1
@@ -43,8 +43,8 @@ class SubtractOne:
 class Summation:
     """Stage that is actually tested, containing the multiple dependencies"""
 
-    inp = DVC.deps([AddOne(load=True), SubtractOne(load=True)])
-    number = DVC.result()
+    inp = dvc.deps([AddOne(load=True), SubtractOne(load=True)])
+    number = dvc.result()
 
     def run(self):
         self.number = self.inp[0].number + self.inp[1].number
@@ -57,8 +57,8 @@ class SummationTuple:
     Additionally testing for tuple conversion here!
     """
 
-    inp = DVC.deps((AddOne(load=True), SubtractOne(load=True)))
-    number = DVC.result()
+    inp = dvc.deps((AddOne(load=True), SubtractOne(load=True)))
+    number = dvc.result()
 
     def run(self):
         self.number = self.inp[0].number + self.inp[1].number

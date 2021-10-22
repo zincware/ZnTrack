@@ -9,7 +9,8 @@ Copyright Contributors to the Zincware Project.
 Description: Standard python init file for the main directory
 """
 
-from .core.parameter import DVC
+from .dvc import DVC
+import zntrack.dvc
 from .core.decorator import Node
 from .project import ZnTrackProject
 from .interface import DVCInterface
@@ -19,7 +20,7 @@ import logging
 import sys
 
 #
-__all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config"]
+__all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config", "dvc"]
 
 __version__ = "0.1.3"
 
