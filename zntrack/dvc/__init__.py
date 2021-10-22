@@ -8,8 +8,15 @@ Copyright Contributors to the Zincware Project.
 
 Description: Collection of DVC options
 
-Based on ZnTrackOption python descriptors this gives access to them beeing used
+Based on ZnTrackOption python descriptors this gives access to them being used
 to define e.g. dependencies
+
+Examples
+--------
+
+>>> @Node()
+>>> class HelloWorld
+>>>     vars = dvc.params()
 """
 import logging
 
@@ -18,6 +25,7 @@ from zntrack.core.parameter import ZnTrackOption
 log = logging.getLogger(__name__)
 
 
+# All available DVC cmd options + results
 class params(ZnTrackOption):
     option = "params"
 
@@ -58,6 +66,9 @@ class plots_no_cache(ZnTrackOption):
     option = "plots_no_cache"
 
 
+# Deprecated method DVC, logging a DeprecationWarning:
+
+
 class _log_DeprecationWarning:
     """Method to raise a DeprecationWarning."""
 
@@ -70,24 +81,23 @@ class _log_DeprecationWarning:
             "params": params,
             "result": result,
             "deps": deps,
-
             "outs": outs,
             "outs_no_cache": outs_no_cache,
             "outs_persistent": outs_persistent,
-
             "metrics": metrics,
             "metrics_no_cache": metrics_no_cache,
-
             "plots": plots,
-            "plots_no_cache": plots_no_cache
+            "plots_no_cache": plots_no_cache,
         }
 
-        log.warning('DeprecationWarning: Please use zntrack.dvc instead of zntrack.DVC')
+        log.warning("DeprecationWarning: Please use zntrack.dvc instead of zntrack.DVC")
 
         return switcher[self.name]
 
 
 class DVC:
+    """Deprecated method DVC, logging a DeprecationWarning"""
+
     params = _log_DeprecationWarning()
     result = _log_DeprecationWarning()
     deps = _log_DeprecationWarning()
