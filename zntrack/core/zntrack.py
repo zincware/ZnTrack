@@ -261,11 +261,11 @@ class ZnTrackParent(ZnTrackType):
         return False
 
     def write_dvc(
-            self,
-            force=True,
-            exec_: bool = False,
-            always_changed: bool = False,
-            slurm: bool = False,
+        self,
+        force=True,
+        exec_: bool = False,
+        always_changed: bool = False,
+        slurm: bool = False,
     ):
         """Write the DVC file using run.
 
