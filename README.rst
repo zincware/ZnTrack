@@ -1,7 +1,10 @@
 |build| |docs| |license| |code style|
 
-ZnTrack
--------
+.. image:: https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/img/zntrack.png
+
+Object-Relational Mapping for DVC
+---------------------------------
+
 The ZnTrack :code:`zɪŋk træk` package provides a Python ORM for DVC.
 
 For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
