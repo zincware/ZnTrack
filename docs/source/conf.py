@@ -77,8 +77,8 @@ html_theme_options = {
     "logo_only": True,
     "display_version": False,
 }
-html_logo = "img/py_track.png"
-html_favicon = "img/py_track.png"
+html_logo = "img/zntrack.png"
+html_favicon = "img/zntrack_favicon.png"
 html_theme_options = {
     "logo_only": True,
     "display_version": False,
