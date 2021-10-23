@@ -8,14 +8,14 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, DVC
+from zntrack import Node, dvc
 import os
 import pytest
 
 
 @Node()
 class CheckType:
-    params = DVC.params()
+    params = dvc.params()
 
     def __call__(self, params):
         self.params = params
@@ -45,7 +45,14 @@ def fix_int() -> int:
     return 42
 
 
-@pytest.mark.parametrize('arg', ['fix_list', 'fix_int', 'fix_dict'], indirect=True)
+@pytest.fixture
+def fix_empty_list() -> list:
+    return []
+
+
+@pytest.mark.parametrize(
+    "arg", ["fix_list", "fix_int", "fix_dict", "fix_empty_list"], indirect=True
+)
 def test_params(arg, tmp_path):
     os.chdir(tmp_path)
 

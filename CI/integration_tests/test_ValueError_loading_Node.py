@@ -9,7 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description:
 """
 import pytest
-from zntrack import Node, ZnTrackProject, DVC
+from zntrack import Node, ZnTrackProject, dvc
 import shutil
 import os
 
@@ -18,7 +18,7 @@ import os
 class HelloWorld:
     """BasicTest class"""
 
-    output = DVC.result()
+    output = dvc.result()
 
     def run(self):
         """Run method of the Node test instance"""

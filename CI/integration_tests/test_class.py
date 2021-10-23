@@ -1,4 +1,4 @@
-from zntrack import Node, DVC, ZnTrackProject
+from zntrack import Node, dvc, ZnTrackProject
 from pathlib import Path
 import json
 import os
@@ -16,9 +16,9 @@ class BasicTest:
 
     def __init__(self):
         """Constructor of the Node test instance"""
-        self.deps = DVC.deps([Path("deps1", "input.json"), Path("deps2", "input.json")])
-        self.parameters = DVC.params()
-        self.results = DVC.result()
+        self.deps = dvc.deps([Path("deps1", "input.json"), Path("deps2", "input.json")])
+        self.parameters = dvc.params()
+        self.results = dvc.result()
 
     def __call__(self, **kwargs):
         """Call Method of the Node test instance"""

@@ -223,32 +223,34 @@ class ZnTrackParent(ZnTrackType):
 
         This method searches for all ZnTrackOptions that are defined within the __init__
         """
+
+        def write_to_dvc(value):
+            """Add the given value to the self.dvc dataclass"""
+            try:
+                # Check if the passed value is a Node. If yes
+                #  add the json file as a dependency
+                getattr(self.dvc, option).append(value.zntrack.dvc.json_file)
+            except AttributeError:
+                try:
+                    getattr(self.dvc, option).append(value)
+                except AttributeError:
+                    # results / params will be skipped
+                    #  they are not part of the dataclass.
+                    log.debug(f"'DVCParams' object has no attribute '{option}'")
+
         log.debug(f"checking for instance {self.child}")
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, ZnTrackOption):
                 option = val.option
-                new_vals = getattr(self.child, attr)
-                log.debug(f"processing {attr} - {new_vals}")
-                # check if it is a stage, that has to be handled extra
-                if hasattr(new_vals, "zntrack"):
-                    if isinstance(new_vals.zntrack, ZnTrackParent):
-                        getattr(self.dvc, option).append(new_vals.zntrack.dvc.json_file)
+                child_val = getattr(self.child, attr)
+                log.debug(f"processing {attr} - {child_val}")
+                # check if it is a Node, that has to be handled extra
+
+                if isinstance(child_val, list) or isinstance(child_val, tuple):
+                    for item in child_val:
+                        write_to_dvc(item)
                 else:
-                    try:
-                        if isinstance(new_vals, list):
-                            for item in new_vals:
-                                if hasattr(item, "zntrack"):
-                                    if isinstance(item.zntrack, ZnTrackParent):
-                                        getattr(self.dvc, option).append(
-                                            item.zntrack.dvc.json_file
-                                        )
-                                else:
-                                    getattr(self.dvc, option).append(item)
-                        else:
-                            getattr(self.dvc, option).append(new_vals)
-                    except AttributeError:
-                        # results / params will be skipped
-                        log.debug(f"'DVCParams' object has no attribute '{option}'")
+                    write_to_dvc(child_val)
 
     def has_params(self) -> bool:
         """Check if any params are required by going through the defined params"""
@@ -514,16 +516,14 @@ class ZnTrackParent(ZnTrackType):
             for key, val in option.items():
                 if isinstance(val, ZnTrackStage):
                     # Load the ZnTrackStage
-                    self.child.__dict__[key] = val.get()
+                    self.child.__dict__[key] = val.load_zntrack_node()
                 elif isinstance(val, list):
-                    if isinstance(val[0], ZnTrackStage):
-                        # handle DVC.deps([A(load=True), B(load=True), ...])
-                        self.child.__dict__[key] = []
-                        for item in val:
-                            self.child.__dict__[key].append(item.get())
-                    else:
-                        # Don't like the double call here, but I don't know how to
-                        #  avoid it atm.
+                    try:
+                        self.child.__dict__[key] = [
+                            item.load_zntrack_node() for item in val
+                        ]
+                    except AttributeError:
+                        # Everything except the ZnTrackStage
                         self.child.__dict__[key] = val
                 else:
                     # Everything except the ZnTrackStage

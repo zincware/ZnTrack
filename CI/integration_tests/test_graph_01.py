@@ -14,7 +14,7 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, DVC, ZnTrackProject
+from zntrack import Node, dvc, ZnTrackProject
 import numpy as np
 
 temp_dir = TemporaryDirectory()
@@ -27,8 +27,8 @@ class ComputeA:
     """Node stage A"""
 
     def __init__(self):
-        self.inp = DVC.params()
-        self.out = DVC.result()
+        self.inp = dvc.params()
+        self.out = dvc.result()
 
     def __call__(self, inp):
         self.inp = inp
@@ -42,8 +42,8 @@ class ComputeB:
     """Node stage B"""
 
     def __init__(self):
-        self.inp = DVC.params()
-        self.out = DVC.result()
+        self.inp = dvc.params()
+        self.out = dvc.result()
 
     def __call__(self, inp):
         self.inp = inp
@@ -57,11 +57,11 @@ class ComputeAB:
     """Node stage AB, depending on A&B"""
 
     def __init__(self):
-        self.a = DVC.deps(ComputeA(id_=0))
-        self.b = DVC.deps(ComputeB(id_=0))
-        self.out = DVC.result()
+        self.a = dvc.deps(ComputeA(id_=0))
+        self.b = dvc.deps(ComputeB(id_=0))
+        self.out = dvc.result()
 
-        self.param = DVC.params()
+        self.param = dvc.params()
 
     def __call__(self):
         self.param = "default"
@@ -77,8 +77,8 @@ class ComputeANamed:
     """Node stage A"""
 
     def __init__(self):
-        self.inp = DVC.params()
-        self.out = DVC.result()
+        self.inp = dvc.params()
+        self.out = dvc.result()
 
     def __call__(self, inp):
         self.inp = inp
@@ -92,11 +92,11 @@ class ComputeABNamed:
     """Node stage AB, depending on A&B with a custom stage name"""
 
     def __init__(self):
-        self.a: ComputeANamed = DVC.deps(ComputeANamed(id_=0))
-        self.b: ComputeB = DVC.deps(ComputeB(id_=0))
-        self.out = DVC.result()
+        self.a: ComputeANamed = dvc.deps(ComputeANamed(id_=0))
+        self.b: ComputeB = dvc.deps(ComputeB(id_=0))
+        self.out = dvc.result()
 
-        self.param = DVC.params()
+        self.param = dvc.params()
 
     def __call__(self):
         self.param = "default"
