@@ -8,6 +8,7 @@ Modules and Classes
    _architecture/zntrack
    _architecture/DVCParams
    _architecture/SlurmConfig
+   _architecture/descriptors
 
 .. toctree::
    :maxdepth: 1
