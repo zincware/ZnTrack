@@ -16,7 +16,7 @@ parameters, dependencies and all DVC output types.
 
 .. code-block:: py
 
-    from zntrack import Node, DVC
+    from zntrack import Node, dvc
     from random import randrange
 
 
@@ -24,9 +24,9 @@ parameters, dependencies and all DVC output types.
     class HelloWorld:
         """Define a ZnTrack Node"""
         # parameter to be tracked
-        max_number = DVC.params()   
+        max_number = dvc.params()
         # parameter to store as output
-        random_number = DVC.result()  
+        random_number = dvc.result()
 
         def __call__(self, max_number):
             """Pass tracked arguments"""
