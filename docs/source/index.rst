@@ -31,6 +31,7 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
 
    _overview/01_Intro/01_Intro.ipynb
    _overview/02_passing_classes/PassingClasses.ipynb
+   jupyter.rst
 
 .. toctree::
    :maxdepth: 1
