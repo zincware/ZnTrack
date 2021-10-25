@@ -12,9 +12,8 @@ It uses `Data Version Control <https://dvc.org/>`_ to track generated files and 
 ZnTrack is designed as a developer package aiming to be used in other software packages.
 If you are not planning on writing such packages we highly recommend looking up DVC first.
 
-ZnTrack might still be helpful for you as it provides an Object Oriented
-wrapper for DVC.
-It contains an experimental feature that enables the usage of Python classes
+ZnTrack might still be helpful for you as it provides an Object-Relational Mapping for DVC in Python.
+Additionally, it provides an experimental feature that enables the usage of Python classes
 from within a Jupyter Notebook while utilizing DVC tracking.
 Please have a look at the Tutorials and Documentation for detailed
 information or write an issue on Github for https://github.com/zincware/ZnTrack

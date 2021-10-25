@@ -46,6 +46,8 @@ This stage can be used via
 which builds the DVC stage and can be used e.g., through :code:`dvc repro`.
 The results can then be accessed easily via :code:`HelloWorld(load=True).random_number`.
 
+More detailed examples and further information can be found in the `ZnTrack Documentation <https://zntrack.readthedocs.io/en/latest/>`_.
+
 
 Installation
 ============
