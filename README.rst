@@ -5,7 +5,7 @@
 Object-Relational Mapping for DVC
 ---------------------------------
 
-The ZnTrack :code:`zɪŋk træk` package provides a Python ORM for DVC.
+The ZnTrack [zɪŋk træk] package provides a Python ORM for DVC.
 
 For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
 
