@@ -70,9 +70,9 @@ Or you can install from source with:
     :alt: Build tests passing
     :target: https://github.com/zincware/py-test/blob/readme_badges/
 
-.. |docs| image:: https://readthedocs.org/projects/ZnTrack/badge/?version=latest&style=flat
-    :alt: Build tests passing
-    :target: https://zntrack.readthedocs.io/en/latest/
+.. |docs|  image:: https://readthedocs.org/projects/zntrack/badge/?version=latest
+    :target: https://zntrack.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
 .. |license| image:: https://img.shields.io/badge/License-EPL-purple.svg?style=flat
     :alt: Project license
