@@ -19,7 +19,7 @@ In general one may write:
 
     from zntrack import Node, config, dvc,
 
-    dvc.nb_name="JupyterPyTrack.ipynb"
+    dvc.nb_name="JupyterZnTrack.ipynb"
 
     @Node()
     class Stage:
