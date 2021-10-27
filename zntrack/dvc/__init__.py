@@ -32,6 +32,7 @@ class params(ZnTrackOption):
 
 class result(ZnTrackOption):
     option = "result"
+    load = True
 
 
 class deps(ZnTrackOption):

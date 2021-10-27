@@ -161,7 +161,6 @@ class ZnTrackParent(ZnTrackType):
         This method saves the results
         """
         self.save_results()
-        self.save_results()
 
     def fix_zntrackoptions(self):
         """Fix ZnTrackOption as attribute of the parent class
@@ -296,7 +295,8 @@ class ZnTrackParent(ZnTrackType):
         script = ["dvc", "run", "-n", self.stage_name]
 
         script += self.dvc.get_dvc_arguments()
-        # TODO if no DVC.result are assigned, no json file will be written!
+        # TODO if no DVC.result / loaded option
+        #  are assigned, no json file will be written!
 
         if self.has_params():
             script += [
@@ -488,11 +488,11 @@ class ZnTrackParent(ZnTrackType):
 
     @property
     def internals(self):
-        """Get all ZnTrackOptions (except results)"""
+        """Get all ZnTrackOptions (except loaded)"""
         internals = {}
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, ZnTrackOption):
-                if val.option == "result":
+                if val.load:
                     continue
                 option_dict = internals.get(val.option, {})
                 option_dict[val.name] = getattr(self.child, attr)
@@ -503,7 +503,7 @@ class ZnTrackParent(ZnTrackType):
 
     @internals.setter
     def internals(self, value: dict):
-        """Save all ZnTrackOptions/Internals (except results)
+        """Save all ZnTrackOptions/Internals (except loaded)
 
         Stores all passed options in the child.__dict__
 
