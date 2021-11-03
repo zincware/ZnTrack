@@ -22,7 +22,7 @@ import sys
 #
 __all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config", "dvc"]
 
-__version__ = "0.1.4"
+__version__ = "0.1.5"
 
 
 logger = logging.getLogger(__name__)
