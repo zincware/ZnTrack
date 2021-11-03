@@ -217,43 +217,60 @@ class ZnTrackParent(ZnTrackType):
         for attr in remove_from__dict__:
             log.debug(f"removing: {self.child.__dict__.pop(attr, None)} ")
 
+    def write_to_dvc(self, value, option):
+        """Add the given value to the self.dvc dataclass
+
+        Parameters
+        ----------
+        value:
+            Either a str/path to a file or a ZnTrackType class
+            where all ZnTrackType.affected_files will be added to the dependencies
+        option: str
+            A DVC option e.g. outs, or metric_no_cache, ...
+
+        """
+        try:
+            # Check if the passed value is a Node. If yes
+            #  add the json file as a dependency
+            dvc_option_list = getattr(self.dvc, option)
+            value.zntrack.update_dvc()
+            log.debug(f"Found Node dependency. Calling update_dvc on {value}")
+            dvc_option_list += value.zntrack.affected_files
+            setattr(self.dvc, option, dvc_option_list)
+        except AttributeError:
+            try:
+                getattr(self.dvc, option).append(value)
+            except AttributeError:
+                # results / params will be skipped
+                #  they are not part of the dataclass.
+                log.debug(f"'DVCParams' object has no attribute '{option}'")
+
     def update_dvc(self):
         """Update the DVCParams with the options from self.dvc
 
         This method searches for all ZnTrackOptions that are defined within the __init__
         """
 
-        def write_to_dvc(value):
-            """Add the given value to the self.dvc dataclass"""
-            try:
-                # Check if the passed value is a Node. If yes
-                #  add the json file as a dependency
-                dvc_option_list = getattr(self.dvc, option)
-                value.zntrack.update_dvc()
-                log.debug(f"Found Node dependency. Calling update_dvc on {value}")
-                dvc_option_list += value.zntrack.affected_files
-                setattr(self.dvc, option, dvc_option_list)
-            except AttributeError:
-                try:
-                    getattr(self.dvc, option).append(value)
-                except AttributeError:
-                    # results / params will be skipped
-                    #  they are not part of the dataclass.
-                    log.debug(f"'DVCParams' object has no attribute '{option}'")
-
         log.debug(f"checking for instance {self.child}")
         for attr, val in vars(type(self.child)).items():
             if isinstance(val, ZnTrackOption):
                 option = val.option
+                # This function updates self.dvc
+                # it does not (yet) have to access the results from
+                # ZnTrackOptions with load=True but only needs to know
+                # the files! Neither does it have to know the
+                # params!
+                if val.load or option == "params":
+                    continue
                 child_val = getattr(self.child, attr)
                 log.debug(f"processing {attr} - {child_val}")
                 # check if it is a Node, that has to be handled extra
 
                 if isinstance(child_val, list) or isinstance(child_val, tuple):
                     for item in child_val:
-                        write_to_dvc(item)
+                        self.write_to_dvc(item, option)
                 else:
-                    write_to_dvc(child_val)
+                    self.write_to_dvc(child_val, option)
 
     def has_params(self) -> bool:
         """Check if any params are required by going through the defined params"""

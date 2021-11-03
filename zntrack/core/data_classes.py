@@ -127,7 +127,7 @@ class DVCParams:
             list of str/Path that this Node writes to
         """
         # Ignore dependencies, they will not be changed by this Node
-        output_types = [x for x in self._dvc_params if x is not "deps"]
+        output_types = [x for x in self._dvc_params if x != "deps"]
         affected_files = [self.json_file]
         for output_type in output_types:
             if getattr(self, output_type) is not None:

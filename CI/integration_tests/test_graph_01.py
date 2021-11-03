@@ -133,7 +133,7 @@ def test_stage_addition():
 
     project.run()
     project.load()
-    finished_stage = ComputeAB(id_=0)
+    finished_stage = ComputeAB(load=True)
     assert finished_stage.out == 31
 
 
