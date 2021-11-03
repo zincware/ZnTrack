@@ -111,7 +111,8 @@ class ZnTrackParent(ZnTrackType):
         if self.load:
             raise ValueError("This stage is being loaded and can not be called.")
 
-    def post_call(self, force=False, exec_=False, always_changed=False, slurm=False):
+    def post_call(self, force=False, exec_=False, always_changed=False, slurm=False,
+                  silent=False):
         """Method after call
 
         This function should always be the last one in the __call__ method,
@@ -132,13 +133,16 @@ class ZnTrackParent(ZnTrackType):
             Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't
             mean that every stage uses slurm and you may accidentally run stages on
             your HEAD Node. You can check the commands in dvc.yaml!
+        silent: bool
+            If called with exec_=True this allows to hide the output from the
+            subprocess call.
 
         """
         self.dvc.make_paths()
         self.update_dvc()
         self.save_internals()
 
-        self.write_dvc(force, exec_, always_changed, slurm)
+        self.write_dvc(force, exec_, always_changed, slurm, silent)
 
     def pre_run(self):
         """Command to be run before run
@@ -281,11 +285,12 @@ class ZnTrackParent(ZnTrackType):
         return False
 
     def write_dvc(
-        self,
-        force=True,
-        exec_: bool = False,
-        always_changed: bool = False,
-        slurm: bool = False,
+            self,
+            force=True,
+            exec_: bool = False,
+            always_changed: bool = False,
+            slurm: bool = False,
+            silent: bool = False
     ):
         """Write the DVC file using run.
 
@@ -304,6 +309,9 @@ class ZnTrackParent(ZnTrackType):
             or for testing
         slurm: bool, default = False
             Use SLURM to run DVC stages on a Cluster.
+        silent: bool
+            If called with exec_=True this allows to hide the output from the
+            subprocess call.
 
         Notes
         -----
@@ -311,7 +319,8 @@ class ZnTrackParent(ZnTrackType):
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
-        log.warning("--- Writing new DVC file! ---")
+        if not silent:
+            log.warning("--- Writing new DVC file! ---")
 
         script = ["dvc", "run", "-n", self.stage_name]
 
@@ -330,11 +339,12 @@ class ZnTrackParent(ZnTrackType):
 
         if force:
             script.append("--force")
-            log.warning("Overwriting existing configuration!")
+            if not silent:
+                log.warning("Overwriting existing configuration!")
         #
         if not exec_:
             script.append("--no-exec")
-        else:
+        elif not silent:
             log.warning(
                 "You will not be able to see the stdout/stderr "
                 "of the process in real time!"
@@ -368,10 +378,11 @@ class ZnTrackParent(ZnTrackType):
             "output in real time!"
         )
         process = subprocess.run(script, capture_output=True)
-        if len(process.stdout) > 0:
-            log.info(process.stdout.decode())
-        if len(process.stderr) > 0:
-            log.warning(process.stderr.decode())
+        if not silent:
+            if len(process.stdout) > 0:
+                log.info(process.stdout.decode())
+            if len(process.stderr) > 0:
+                log.warning(process.stderr.decode())
 
     @property
     def python_interpreter(self):
