@@ -111,8 +111,9 @@ class ZnTrackParent(ZnTrackType):
         if self.load:
             raise ValueError("This stage is being loaded and can not be called.")
 
-    def post_call(self, force=False, exec_=False, always_changed=False, slurm=False,
-                  silent=False):
+    def post_call(
+        self, force=False, exec_=False, always_changed=False, slurm=False, silent=False
+    ):
         """Method after call
 
         This function should always be the last one in the __call__ method,
@@ -285,12 +286,12 @@ class ZnTrackParent(ZnTrackType):
         return False
 
     def write_dvc(
-            self,
-            force=True,
-            exec_: bool = False,
-            always_changed: bool = False,
-            slurm: bool = False,
-            silent: bool = False
+        self,
+        force=True,
+        exec_: bool = False,
+        always_changed: bool = False,
+        slurm: bool = False,
+        silent: bool = False,
     ):
         """Write the DVC file using run.
 
