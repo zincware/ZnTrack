@@ -40,6 +40,7 @@ class ZnTrackOption:
         The simplest example is dvc.result() (== zn.outs())
 
     """
+
     option = None
     load = False
 

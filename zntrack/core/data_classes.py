@@ -118,6 +118,22 @@ class DVCParams:
         """
         self.json_file = self.outs_path / f"{name}.json"
 
+    def get_affected_files(self) -> list:
+        """Collects all files that this Node writes to
+
+        Returns
+        -------
+        affected_files: list
+            list of str/Path that this Node writes to
+        """
+        # Ignore dependencies, they will not be changed by this Node
+        output_types = [x for x in self._dvc_params if x is not "deps"]
+        affected_files = [self.json_file]
+        for output_type in output_types:
+            if getattr(self, output_type) is not None:
+                affected_files += getattr(self, output_type)
+        return affected_files
+
 
 @dataclass(frozen=True, order=True)
 class SlurmConfig:

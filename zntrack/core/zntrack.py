@@ -228,7 +228,11 @@ class ZnTrackParent(ZnTrackType):
             try:
                 # Check if the passed value is a Node. If yes
                 #  add the json file as a dependency
-                getattr(self.dvc, option).append(value.zntrack.dvc.json_file)
+                dvc_option_list = getattr(self.dvc, option)
+                value.zntrack.update_dvc()
+                log.debug(f"Found Node dependency. Calling update_dvc on {value}")
+                dvc_option_list += value.zntrack.affected_files
+                setattr(self.dvc, option, dvc_option_list)
             except AttributeError:
                 try:
                     getattr(self.dvc, option).append(value)
@@ -430,6 +434,14 @@ class ZnTrackParent(ZnTrackType):
         log.debug(f"Saving {full_internals[self.stage_name]}")
         self.internals_from_file = full_internals
 
+    def load_internals(self):
+        """Load the internals from the zntrack.json file"""
+        try:
+            log.debug(f"un-serialize {self.internals_from_file[self.stage_name]}")
+            self.internals = deserializer(self.internals_from_file[self.stage_name])
+        except KeyError:
+            log.debug(f"No internals found for {self.stage_name}")
+
     def save_results(self):
         """Save the results to the json file
 
@@ -446,14 +458,6 @@ class ZnTrackParent(ZnTrackType):
         results["executed"] = True
 
         self.dvc.json_file.write_text(json.dumps(results, indent=4))
-
-    def load_internals(self):
-        """Load the internals from the zntrack.json file"""
-        try:
-            log.debug(f"un-serialize {self.internals_from_file[self.stage_name]}")
-            self.internals = deserializer(self.internals_from_file[self.stage_name])
-        except KeyError:
-            log.debug(f"No internals found for {self.stage_name}")
 
     def load_results(self):
         """Load the results from file"""
@@ -483,6 +487,8 @@ class ZnTrackParent(ZnTrackType):
         value: dict
             {result1: val1, result2: val2, ...}
         """
+        # TODO this is the same function for internals and results,
+        #  except for some special cases so they could be combined.
         for key, val in value.items():
             self.child.__dict__[key] = val
 
@@ -551,3 +557,13 @@ class ZnTrackParent(ZnTrackType):
         Path(self.dvc.internals_file).parent.mkdir(exist_ok=True, parents=True)
 
         self.dvc.internals_file.write_text(json.dumps(value, indent=4))
+
+    @property
+    def affected_files(self):
+        """Get a list of all files, that are affected by this stage
+
+        This will contain the stage.json for results, but also
+        all outs, plot, metrics, ... and also all files changed by
+        zn.<option>
+        """
+        return self.dvc.get_affected_files()
