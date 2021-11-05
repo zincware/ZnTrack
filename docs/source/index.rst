@@ -30,7 +30,7 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
 
    _overview/01_Intro/01_Intro.ipynb
    _overview/02_passing_classes/PassingClasses.ipynb
-   _overview/03_metrics_and_plots/03_metrics_and_plots.ipynb
+   _overview/04_metrics_and_plots/04_metrics_and_plots.ipynb
    jupyter.rst
 
 .. toctree::
