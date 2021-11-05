@@ -12,10 +12,12 @@ import pytest
 from zntrack import Node
 import os
 
+
 @Node()
 class HelloWorld:
     def run(self):
         pass
+
 
 def test_pre_call(tmp_path):
     """Check, that calling a loaded Node raises an error"""
