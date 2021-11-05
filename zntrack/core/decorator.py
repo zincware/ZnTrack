@@ -36,6 +36,7 @@ class Node:
         nb_name: str = None,
         name: str = None,
         exec_: bool = False,
+        silent: bool = False,
         **kwargs,
     ):
         """
@@ -54,6 +55,9 @@ class Node:
         exec_: bool
             Set the default value for exec_.
             If true, always run this stage immediately.
+        silent: bool
+            If called with exec_=True this allows to hide the output from the
+            subprocess call.
         kwargs: No kwargs are implemented
         """
         if cls is not None:
@@ -61,6 +65,7 @@ class Node:
         self.cls = cls
 
         self.exec_ = exec_
+        self.silent = silent
 
         self.name = name
 
@@ -230,6 +235,7 @@ class Node:
             exec_=self.exec_,
             always_changed=False,
             slurm=False,
+            silent=self.silent,
             **kwargs,
         ):
             """Wrapper around the call
@@ -248,6 +254,9 @@ class Node:
                 Whether to use dvc with the always_changed argument
             slurm: bool
                 Using SLURM with SRUN. (Experimental feature)
+            silent: bool
+                If called with exec_=True this allows to hide the output from the
+                subprocess call.
             kwargs
 
             Returns
@@ -257,7 +266,7 @@ class Node:
             """
             cls.zntrack.pre_call()
             function = func(cls, *args, **kwargs)
-            cls.zntrack.post_call(force, exec_, always_changed, slurm)
+            cls.zntrack.post_call(force, exec_, always_changed, slurm, silent)
             return function
 
         return wrapper

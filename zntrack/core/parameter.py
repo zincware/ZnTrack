@@ -34,10 +34,15 @@ class ZnTrackOption:
     option: str
         One of the given options of DVC. The string should also be defined
         inside the dataclass!
+    load: bool
+        Load this Option  to memory when the stage is called with Stage(load=True)
+        This is usually true for zn.<option> and false for dvc.<option>.
+        The simplest example is dvc.result() (== zn.outs())
 
     """
 
     option = None
+    load = False
 
     def __init__(self, default_value=NoneType, name=None, option=None):
         """Instantiate a ZnTrackOption Descriptor
@@ -62,8 +67,10 @@ class ZnTrackOption:
         self.default_value = default_value
         self.name = name
 
-        if self.option == "result" and default_value is not NoneType:
-            raise ValueError(f"Can not pre-initialize result! Found {default_value}")
+        if self.load and default_value is not NoneType:
+            raise ValueError(
+                f"Can not pre-initialize loaded option! Found {default_value}"
+            )
 
     def _get(self, instance: TypeHintParent, owner):
         """Overwrite this method for custom ZnTrackOption get method"""
@@ -141,10 +148,10 @@ class ZnTrackOption:
                 )
                 return
 
-            if instance.zntrack.load and self.option != "result":
+            if instance.zntrack.load and not self.load:
                 raise ValueError(f"Changing {self.option} is currently not allowed!")
 
-            if not instance.zntrack.running and self.option == "result":
+            if not instance.zntrack.running and self.load:
                 raise ValueError(f"Changing {self.option} is currently not allowed")
 
             instance.__dict__[self.name] = value

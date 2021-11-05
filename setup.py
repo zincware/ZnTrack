@@ -5,7 +5,7 @@ with open("README.rst", "r") as fh:
 
 setuptools.setup(
     name="zntrack",
-    version="0.1.4",
+    version="0.1.5",
     author="Zincware",
     author_email="zincwarecode@gmail.com",
     description="A python package for parameter and data version control with DVC",
@@ -22,5 +22,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-    install_requires=["dvc", "PyYAML"],
+    install_requires=["dvc"],
 )

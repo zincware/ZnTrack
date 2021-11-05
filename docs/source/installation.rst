@@ -30,3 +30,6 @@ This can be done as follows:
     cd ZnTrack/docs
     make html
     firefox/chrome/open/safari ZnTrack/docs/build/index.html
+
+If you are using conda and having issues with :code:`pandoc` you might be able to
+resolve them using :code:`conda install pandoc`.

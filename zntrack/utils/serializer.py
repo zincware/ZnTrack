@@ -18,9 +18,15 @@ Notes
 """
 import logging
 from pathlib import Path
-import numpy as np
 from importlib import import_module
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
+
+try:
+    import numpy as np
+
+    use_np = True
+except ImportError:
+    use_np = False
 
 log = logging.getLogger(__name__)
 
@@ -104,8 +110,9 @@ def conv_dict_to_class(value):
 def serializer(data):
     """Serialize data so it can be stored in a json file"""
     data = conv_path_to_dict(data)
-    data = conv_numpy_to_dict(data)
     data = conv_class_to_dict(data)
+    if use_np:
+        data = conv_numpy_to_dict(data)
 
     if isinstance(data, list):
         return [serializer(x) for x in data]
@@ -117,9 +124,10 @@ def serializer(data):
 
 def deserializer(data):
     """Deserialize data from the json file back to python objects"""
-    data = conv_dict_to_numpy(data)
     data = conv_dict_to_path(data)
     data = conv_dict_to_class(data)
+    if use_np:
+        data = conv_dict_to_numpy(data)
 
     if isinstance(data, list):
         return [deserializer(x) for x in data]

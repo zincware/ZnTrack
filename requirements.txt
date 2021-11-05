@@ -8,3 +8,4 @@ sphinx==4.0.2
 pandoc
 numpy
 matplotlib
+pandas

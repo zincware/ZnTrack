@@ -83,9 +83,7 @@ class DVCParams:
             processed_params = []
             for param_val in getattr(self, dvc_param):
                 if param_val in processed_params:
-                    log.warning(
-                        f"Parameter {dvc_param}:{param_val} found more than once"
-                    )
+                    log.debug(f"Parameter {dvc_param}:{param_val} found more than once")
                     continue
                 if param_val is None:
                     # DVC can not process None, so we skip here but log it
@@ -117,6 +115,22 @@ class DVCParams:
             The name of the json file, e.g. Stage.json
         """
         self.json_file = self.outs_path / f"{name}.json"
+
+    def get_affected_files(self) -> list:
+        """Collects all files that this Node writes to
+
+        Returns
+        -------
+        affected_files: list
+            list of str/Path that this Node writes to
+        """
+        # Ignore dependencies, they will not be changed by this Node
+        output_types = [x for x in self._dvc_params if x != "deps"]
+        affected_files = [self.json_file]
+        for output_type in output_types:
+            if getattr(self, output_type) is not None:
+                affected_files += getattr(self, output_type)
+        return affected_files
 
 
 @dataclass(frozen=True, order=True)
