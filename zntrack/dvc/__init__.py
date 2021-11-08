@@ -25,7 +25,7 @@ from zntrack.core.parameter import ZnTrackOption
 log = logging.getLogger(__name__)
 
 
-# All available DVC cmd options + descriptors_from_file
+# All available DVC cmd options + results
 # detailed explanations on https://dvc.org/doc/command-reference/run#options
 
 

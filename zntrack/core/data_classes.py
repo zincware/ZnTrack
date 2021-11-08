@@ -100,8 +100,15 @@ class ZnFiles:
     """Collection of ZnFiles
 
     Files that support load=true.
-    These files will be stored in nodes/<stagename>/file
+    These files will be stored in nodes/<node_name>/file
 
+
+    Attributes
+    ----------
+    node_name: str
+        Name of the node to create the directory
+    directory: Path
+        default directory for node outputs
     """
 
     node_name: str

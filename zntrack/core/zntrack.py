@@ -155,16 +155,9 @@ class ZnTrackParent(ZnTrackType):
     def pre_run(self):
         """Command to be run before run
 
-        Updates descriptor_parameters.
-
-        Notes
-        -----
-         Not using super run_ because run ALWAYS has to implemented in the child class
-         and should otherwise raise and error!
+        Updates internals.
 
         """
-        # self.dvc.make_paths()
-        # required if your are inside a temporary directory
         self.running = True
 
     def post_run(self):
