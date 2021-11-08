@@ -27,7 +27,7 @@ class StageIO:
     def __init__(self):
         """Class constructor
 
-        Definition of parameters and results
+        Definition of parameters and descriptors_from_file
         """
         self.outs = dvc.outs(Path("calculation.txt"))
         self.deps = dvc.deps()
@@ -52,7 +52,7 @@ class StageAddition:
     def __init__(self):
         """Class constructor
 
-        Definition of parameters and results
+        Definition of parameters and descriptors_from_file
         """
         self.outs = dvc.outs(Path("calculation.txt"))
 

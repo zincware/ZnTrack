@@ -25,7 +25,7 @@ from zntrack.core.parameter import ZnTrackOption
 log = logging.getLogger(__name__)
 
 
-# All available DVC cmd options + results
+# All available DVC cmd options + descriptors_from_file
 # detailed explanations on https://dvc.org/doc/command-reference/run#options
 
 
@@ -36,7 +36,7 @@ class result(ZnTrackOption):
     >>> value = {"data": [1, 2, 3, 4]}
     """
 
-    option = "result"
+    option = "outs"
     load = True
 
 

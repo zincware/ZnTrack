@@ -26,7 +26,7 @@ __version__ = "0.1.5"
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # Formatter for advanced logging
 # formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

@@ -43,7 +43,7 @@ def test_stage_stage_dependency(tmp_path):
     stage_1 = Stage1()
     stage_1(args="Test01")
     # Need to call the stage, to create the config file
-    #  it does not make sense to access the results of a stage
+    #  it does not make sense to access the descriptors_from_file of a stage
     #  that has not at least been called
     stage_2 = Stage2()
     stage_2()
