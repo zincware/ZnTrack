@@ -103,7 +103,7 @@ class ZnTrackOption:
                         raise ValueError(
                             f"Can not load {self.option} / {self.name} for {instance}!"
                             f" Check, if the Node you are trying to access has been "
-                            f"run? Check, if you are trying to access some descriptors_from_file e.g."
+                            f"run? Check, if you are trying to access some results e.g."
                             f" in the __init__, before the graph has been executed. You"
                             f" could consider adding `exec_=True` to your class to "
                             f"circumvent this behaviour."

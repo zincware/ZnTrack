@@ -44,7 +44,7 @@ This stage can be used via
     hello_world(max_number=512)
 
 which builds the DVC stage and can be used e.g., through :code:`dvc repro`.
-The descriptors_from_file can then be accessed easily via :code:`HelloWorld(load=True).random_number`.
+The results can then be accessed easily via :code:`HelloWorld(load=True).random_number`.
 
 More detailed examples and further information can be found in the `ZnTrack Documentation <https://zntrack.readthedocs.io/en/latest/>`_.
 
