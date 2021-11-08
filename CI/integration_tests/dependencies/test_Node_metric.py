@@ -51,6 +51,7 @@ class ComputeMeaningZn:
 @Node()
 class PrintMeaningZn:
     """Class depending on ComputeMeaningZn"""
+
     computation: ComputeMeaningZn = dvc.deps(ComputeMeaningZn(load=True))
     result = zn.outs()
 

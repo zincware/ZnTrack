@@ -23,6 +23,7 @@ log = logging.getLogger(__name__)
 # with the exception that these will be loaded to memory when.
 # for direct file references use dvc.<option> instead.
 
+
 class outs(ZnTrackOption):
     option = "outs"
     load = True
