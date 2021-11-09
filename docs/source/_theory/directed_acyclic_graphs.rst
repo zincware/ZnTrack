@@ -147,12 +147,12 @@ network. This could also include a type of pre-training on the network for more 
 schemes. The outcome of this node is a file called `weights.txt` which stores the
 weights of the neural network.
 
-These two nodes, whilst very important the success of the complete model training, are
-complete unrelated to one another. Initialization is independent of the data selection
-and vice versa. An immediate consequence of this is that the two process could be run in
-parallel with no issues of communication. Indeed this is one huge benefit of graph based
-computations, they allow one to quickly identify processes that can be run independently
-in parallel.
+These two nodes, whilst very important to the success of the complete model training,
+are complete unrelated to one another. Initialization is independent of the data
+selection and vice versa. An immediate consequence of this is that the two process could
+be run in parallel with no issues of communication. Indeed this is one huge benefit of
+graph based computations, they allow one to quickly identify processes that can be run
+independently in parallel.
 
 Another benefit of this comes when I want to change for example, how much data I use
 in training. If I have already executed this graph once and the outcomes of the
