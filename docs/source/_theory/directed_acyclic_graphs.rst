@@ -29,7 +29,7 @@ line with no particular direction. Mathematically, one would write this as follo
    E &= \{ \{1, 2\}, \{2, 3\}, \{3, 4\}, \{4, 5\}, \{5, 1\} \}
 
 Note that the edge set :math:`E` is a set consisting of smaller sets denoted by their
-curly braces $\{ \}$. An important property of a set is that it cannot contain repeated
+curly braces :math:`\{ \}`. An important property of a set is that it cannot contain repeated
 elements and that the elements are permutation invariant. This means that the set
 :math:`\{5, 1\}` is equal to the set :math:`\{1, 5\}`. The consequence graphically is
 that the graph we have described with :math:`G` is undirected. This can be understood
