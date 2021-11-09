@@ -174,10 +174,10 @@ and the experiment can be considered valid. This is however, only half the battl
 
 Just by running the graph many times and getting several outputs we do not immediately
 track the parameters. This is where a graph manager like ZnTrack or its fundamental
-library DVC become essential. These libraries store each execution of a graph as a
-branch in a git repository. This means that your workflow for each input are stored
-independently an can be easily compared. For example, you may produce a graph for this
-problem comparing number of training points to accuracy with fixed weight
+library `DVC <https://dvc.org>`_ become essential. These libraries store each execution
+of a graph as a branch in a git repository. This means that your workflow for each input
+are stored independently an can be easily compared. For example, you may produce a graph
+for this problem comparing number of training points to accuracy with fixed weight
 initialization.
 
 .. image:: ../img/NN_Accuracy.png
