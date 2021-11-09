@@ -18,5 +18,5 @@ if __name__ == "__main__":
     plt.ylabel("Accuracy %")
     plt.legend(loc=2)
     plt.grid()
-    plt.savefig("NN_Accuracy.png", dpi=400)
+    plt.savefig("NN_Accuracy.png", dpi=400, transparent=True)
     plt.show()
