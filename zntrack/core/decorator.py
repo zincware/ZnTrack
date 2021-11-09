@@ -184,7 +184,14 @@ class Node:
         """Decorator to handle the init of the decorated class"""
 
         @functools.wraps(func)
-        def wrapper(cls: TypeHintParent, *args, id_=None, load: bool = False, **kwargs):
+        def wrapper(
+            cls: TypeHintParent,
+            *args,
+            id_=None,
+            load: bool = False,
+            name: str = self.name,
+            **kwargs,
+        ):
             """Wrapper around the init
 
             Parameters
@@ -193,6 +200,8 @@ class Node:
                 a Node decorated class instance
             id_: int
                 soon to be depreciated alternative to load
+            name: str
+                Overwrite for the default name based on class.__name__
             load: bool
                 Load the state and prohibit parameter changes
             args, kwargs:
@@ -205,10 +214,7 @@ class Node:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.zntrack.load = load
-            cls.zntrack.stage_name = self.name
-
-            cls.zntrack.pre_init()
+            cls.zntrack.pre_init(name=name, load=load)
             log.debug(f"Processing {cls.zntrack}")
             result = func(cls, *args, **kwargs)
             cls.zntrack.post_init()
