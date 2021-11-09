@@ -36,7 +36,7 @@ class result(ZnTrackOption):
     >>> value = {"data": [1, 2, 3, 4]}
     """
 
-    option = "result"
+    option = "outs"
     load = True
 
 

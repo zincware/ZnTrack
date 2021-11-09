@@ -26,14 +26,11 @@ class DVCParams:
     # Node Parameter
     internals_file: Path = Path("config", "zntrack.json")
 
-    json_file: Union[Path, str, None] = None
-
     # DVC Parameter
     deps: List[Path] = field(default_factory=list)
     # Has no path, because it always comes as a path object already
 
     outs: Union[List[Path], List[str]] = field(default_factory=list)
-    outs_path: Path = Path("outs")
 
     outs_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
 
@@ -47,27 +44,6 @@ class DVCParams:
 
     plots_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
 
-    # TODO maybe remove this:
-    _dvc_params: List[str] = field(
-        default_factory=lambda: [
-            "deps",
-            "outs",
-            "outs_no_cache",
-            "outs_persistent",
-            "metrics",
-            "metrics_no_cache",
-            "plots",
-            "plots_no_cache",
-        ],
-        init=False,
-        repr=False,
-    )
-
-    def __post_init__(self):
-        """Combine the DVC Parameter with their associated path."""
-        if self.json_file is not None:
-            self.json_file = self.outs_path / self.json_file
-
     def get_dvc_arguments(self) -> list:
         """Combine the attributes with the corresponding DVC option
 
@@ -79,7 +55,9 @@ class DVCParams:
         """
         out = []
 
-        for dvc_param in self._dvc_params:
+        for dvc_param in self.__dataclass_fields__:
+            if dvc_param == "internals_file":
+                continue
             processed_params = []
             for param_val in getattr(self, dvc_param):
                 if param_val in processed_params:
@@ -96,25 +74,7 @@ class DVCParams:
 
                 processed_params.append(param_val)
 
-        if self.json_file is not None:
-            out += ["--outs", self.json_file]
-
         return out
-
-    def make_paths(self):
-        """Create all paths that can possibly be used"""
-        if self.json_file is not None:
-            self.outs_path.mkdir(exist_ok=True, parents=True)
-
-    def set_json_file(self, name):
-        """Store the json file path in the dataclass
-
-        Parameters
-        ----------
-        name: str
-            The name of the json file, e.g. Stage.json
-        """
-        self.json_file = self.outs_path / f"{name}.json"
 
     def get_affected_files(self) -> list:
         """Collects all files that this Node writes to
@@ -125,12 +85,50 @@ class DVCParams:
             list of str/Path that this Node writes to
         """
         # Ignore dependencies, they will not be changed by this Node
-        output_types = [x for x in self._dvc_params if x != "deps"]
-        affected_files = [self.json_file]
+        output_types = [
+            x for x in self.__dataclass_fields__ if x not in ["deps", "internals_file"]
+        ]
+        affected_files = []
         for output_type in output_types:
             if getattr(self, output_type) is not None:
                 affected_files += getattr(self, output_type)
         return affected_files
+
+
+@dataclass(frozen=False, order=True, init=True)
+class ZnFiles:
+    """Collection of ZnFiles
+
+    Files that support load=true.
+    These files will be stored in nodes/<node_name>/file
+
+
+    Attributes
+    ----------
+    node_name: str
+        Name of the node to create the directory
+    directory: Path
+        default directory for node outputs
+    """
+
+    node_name: str
+    directory: Path = Path("nodes")
+
+    outs: Path = Path("outs.json")
+    outs_no_cache: Path = Path("outs_no_cache.json")
+    outs_persistent: Path = Path("outs_persistent.json")
+    metrics: Path = Path("metrics.json")
+    metrics_no_cache: Path = Path("metrics_no_cache.json")
+    plots: Path = Path("plots.json")
+    plots_no_cache: Path = Path("plots_no_cache.json")
+
+    def make_path(self):
+        self.node_path.mkdir(parents=True, exist_ok=True)
+
+    @property
+    def node_path(self) -> Path:
+        """Path to the directory where all files are stored"""
+        return self.directory / self.node_name
 
 
 @dataclass(frozen=True, order=True)

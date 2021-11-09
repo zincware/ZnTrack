@@ -10,7 +10,7 @@ Description:
 """
 import subprocess
 
-from zntrack import Node, dvc
+from zntrack import Node, dvc, zn
 from pathlib import Path
 import json
 import shutil
@@ -36,6 +36,29 @@ class PrintMeaning:
         print(self.computation.metric.read_text())
 
 
+# The same but with zn
+@Node()
+class ComputeMeaningZn:
+    """BasicTest class"""
+
+    metric = zn.metrics()
+
+    def run(self):
+        """Run method of the Node test instance"""
+        self.metric = {"my_metric": 42}
+
+
+@Node()
+class PrintMeaningZn:
+    """Class depending on ComputeMeaningZn"""
+
+    computation: ComputeMeaningZn = dvc.deps(ComputeMeaningZn(load=True))
+    result = zn.outs()
+
+    def run(self):
+        self.result = self.computation.metric["my_metric"]
+
+
 def test_project(tmp_path):
     """Check that metric files are added to the dependencies when depending on a Node"""
     shutil.copy(__file__, tmp_path)
@@ -52,7 +75,18 @@ def test_project(tmp_path):
     print_meaning.zntrack.update_dvc()
 
     assert ComputeMeaning(load=True).metric in print_meaning.zntrack.dvc.deps
-    assert (
-        ComputeMeaning(load=True).zntrack.dvc.json_file
-        in print_meaning.zntrack.dvc.deps
-    )
+
+
+def test_with_zn(tmp_path):
+    """Check the same test but using zn.metric instead"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
+    subprocess.check_call(["git", "init"])
+    subprocess.check_call(["dvc", "init"])
+
+    ComputeMeaningZn()()
+    PrintMeaningZn()()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert PrintMeaningZn(load=True).result == 42
