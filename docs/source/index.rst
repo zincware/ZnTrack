@@ -36,6 +36,12 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
 
 .. toctree::
    :maxdepth: 1
+   :caption: Theory:
+
+   _theory/directed_acyclic_graphs
+
+.. toctree::
+   :maxdepth: 1
    :caption: Examples:
 
    tutorials
