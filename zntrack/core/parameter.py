@@ -58,6 +58,9 @@ class ZnTrackOption:
             Required when __set_name__ can not be used, e.g. if the ZnTrackOption
             is defined in the __init__ on not on a class level. It defines
             the name of the descriptor (for self.attr it would be attr).
+        option: str
+            One of the given options of DVC. The string should also be defined
+            inside the dataclass!
         load: bool
             Load this Option  to memory when the stage is called with Stage(load=True)
             This is usually true for zn.<option> and false for dvc.<option>.

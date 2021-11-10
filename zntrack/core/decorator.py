@@ -128,6 +128,12 @@ class Node:
             return self.cls
 
     def check_for_metadata_decorators(self):
+        """Check if the decorated class has any metadata collection
+
+        Go through all functions of the decorated class and check if one of them
+        is an instance of the MetaData decorator. If this is the case we need
+        to add the metadata zn.metrics to the class!
+        """
 
         for key, val in vars(self.cls).items():
             try:

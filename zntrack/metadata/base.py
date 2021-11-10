@@ -15,11 +15,10 @@ import re
 
 
 class MetaData(ABC):
-    """
+    """Base class for implementing MetaData decorators
 
     Attributes
     ----------
-
     name_of_metric: str
         A string that is unique for this metadata, it can not share the same startswith
         with any other metadata, e.g. "timeit" and "timeit_advanced" is not allowed!
@@ -28,11 +27,22 @@ class MetaData(ABC):
     name_of_metric: str
 
     def __init__(self, func: Callable):
+        """Get the decorated function
+
+        The MetaData decorator does not take arguments!
+        @MetaData() does not work, use @MetaData or implement
+        a version that supports both!
+
+        Parameters
+        ----------
+        func
+        """
         self.func: Callable = func
         self.func_name = self.func.__name__
 
     @abstractmethod
     def __call__(self, cls, *args, **kwargs):
+        """Actuall decorator"""
         raise NotImplementedError
 
     def __get__(self, instance, owner):

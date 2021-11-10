@@ -173,9 +173,15 @@ class ZnTrackParent(ZnTrackType):
     def add_metadata_descriptor(self):
         """Create a descriptor which is called metadata
 
-        this descriptor is a metrics option in DVC
+        this descriptor is a metrics option in DVC,
+        similar to `metadata=zn.metrics()`
         """
         log.debug("Adding ZnTrackOption for cls.metadata ")
+        if hasattr(type(self.child), "metadata") or hasattr(self.child, "metadata"):
+            raise AttributeError(
+                f"Can not collect metadata, because {self.child.__class__} "
+                f"already implements a metadata method!"
+            )
         py_track_option = ZnTrackOption(option="metrics", name="metadata", load=True)
 
         setattr(type(self.child), "metadata", py_track_option)
