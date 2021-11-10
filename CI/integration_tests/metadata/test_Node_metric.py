@@ -19,7 +19,6 @@ import numpy as np
 
 @Node()
 class SleepNode:
-
     @TimeIt
     def run(self):
         self.sleep_2()
@@ -47,7 +46,6 @@ def test_timeit(tmp_path):
 
     metadata = SleepNode(load=True).metadata
 
-    np.testing.assert_almost_equal(metadata['sleep_2:timeit'], 2., decimal=1)
-    np.testing.assert_almost_equal(metadata['sleep_5:timeit'], 5., decimal=1)
-    np.testing.assert_almost_equal(metadata['run:timeit'], 7., decimal=1)
-
+    np.testing.assert_almost_equal(metadata["sleep_2:timeit"], 2.0, decimal=1)
+    np.testing.assert_almost_equal(metadata["sleep_5:timeit"], 5.0, decimal=1)
+    np.testing.assert_almost_equal(metadata["run:timeit"], 7.0, decimal=1)
