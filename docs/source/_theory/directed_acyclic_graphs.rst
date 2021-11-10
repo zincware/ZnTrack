@@ -198,7 +198,7 @@ With these theoretical topics out of the way it is good to cover some important 
 that will be helpful to your use of the ZnTrack package.
 
 1. A node in the graph should be considered completely independent. That is to say,
-   nodes existing downstream from another node does not have direct communication with
+   nodes existing downstream from another node do not have direct communication with
    upstream node. The consequence of this is that in a node you cannot call information
    that exists within a previous node. The two are unaware of each other except for
    cached data which is stored on disk after the execution of a node. Keep this in mind
