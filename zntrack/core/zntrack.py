@@ -175,7 +175,7 @@ class ZnTrackParent(ZnTrackType):
 
         this descriptor is a metrics option in DVC
         """
-        log.debug("Adding metadata ZnTrackOption")
+        log.debug("Adding ZnTrackOption for cls.metadata ")
         py_track_option = ZnTrackOption(option="metrics", name="metadata", load=True)
 
         setattr(type(self.child), "metadata", py_track_option)
