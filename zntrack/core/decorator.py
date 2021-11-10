@@ -20,6 +20,7 @@ import functools
 
 from .zntrack import ZnTrackProperty
 from zntrack.utils import config
+from zntrack.metadata import MetaData
 
 log = logging.getLogger(__name__)
 
@@ -73,6 +74,8 @@ class Node:
         self.return_with_args = True
         log.debug(f"decorator_kwargs: {kwargs}")
 
+        self.has_metadata = False
+
         if nb_name is None:
             nb_name = config.nb_name
 
@@ -112,6 +115,8 @@ class Node:
             self.cls = args[0]
             self.return_with_args = False
 
+        self.check_for_metadata_decorators()
+
         self.apply_decorator()
 
         if self.nb_name is not None:
@@ -121,6 +126,16 @@ class Node:
             return self.cls(*args, **kwargs)
         else:
             return self.cls
+
+    def check_for_metadata_decorators(self):
+
+        for key, val in vars(self.cls).items():
+            try:
+                if isinstance(val, MetaData):
+                    self.has_metadata = True
+                    log.debug(f"{key} is decorated with {val.name_of_metric}!")
+            except AttributeError:
+                pass
 
     def jupyter_class_to_file(self):
         """Extract the class definition form a ipynb file"""
@@ -207,6 +222,7 @@ class Node:
 
             cls.zntrack.load = load
             cls.zntrack.stage_name = self.name
+            cls.zntrack.has_metadata = self.has_metadata
 
             cls.zntrack.pre_init()
             log.debug(f"Processing {cls.zntrack}")

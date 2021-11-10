@@ -44,7 +44,9 @@ class ZnTrackOption:
     option = None
     load = False
 
-    def __init__(self, default_value=NoneType, name=None, option=None):
+    def __init__(
+        self, default_value=NoneType, name=None, option=None, load: bool = None
+    ):
         """Instantiate a ZnTrackOption Descriptor
 
         Parameters
@@ -56,9 +58,16 @@ class ZnTrackOption:
             Required when __set_name__ can not be used, e.g. if the ZnTrackOption
             is defined in the __init__ on not on a class level. It defines
             the name of the descriptor (for self.attr it would be attr).
+        load: bool
+            Load this Option  to memory when the stage is called with Stage(load=True)
+            This is usually true for zn.<option> and false for dvc.<option>.
+            The simplest example is dvc.result() (== zn.outs())
         """
         if option is not None:
             self.option = option
+
+        if load is not None:
+            self.load = load
 
         if isinstance(default_value, tuple):
             log.warning("Converting tuple to list!")

@@ -82,6 +82,7 @@ class ZnTrackParent(ZnTrackType):
 
         self.running = False  # is set to true, when run_dvc
         self.load = False
+        self.has_metadata = False
 
         self.dvc_file = "dvc.yaml"
         # This is True while inside the init to avoid ValueErrors
@@ -109,6 +110,8 @@ class ZnTrackParent(ZnTrackType):
 
         """
         self.update_options_defined_in_init()
+        if self.has_metadata:
+            self.add_metadata_descriptor()
         if self.load:
             self.load_internals()
             # TODO
@@ -167,6 +170,16 @@ class ZnTrackParent(ZnTrackType):
         """
         self.save_descriptors_to_file()
 
+    def add_metadata_descriptor(self):
+        """Create a descriptor which is called metadata
+
+        this descriptor is a metrics option in DVC
+        """
+        log.debug("Adding metadata ZnTrackOption")
+        py_track_option = ZnTrackOption(option="metrics", name="metadata", load=True)
+
+        setattr(type(self.child), "metadata", py_track_option)
+
     def update_options_defined_in_init(self):
         """Fix ZnTrackOption as attribute of the parent class
 
@@ -210,8 +223,8 @@ class ZnTrackParent(ZnTrackType):
                         option=value.option,
                         default_value=value.default_value,
                         name=attr,
+                        load=value.load,
                     )
-                    py_track_option.load = value.load
 
                     setattr(type(self.child), attr, py_track_option)
                     remove_from__dict__.append(attr)
