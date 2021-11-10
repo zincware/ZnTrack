@@ -15,6 +15,7 @@ from time import time
 
 class TimeIt(MetaData):
     """TimeIt decorator that saves the execution time of decorated method"""
+
     name_of_metric = "timeit"
 
     def __call__(self, cls, *args, **kwargs):
