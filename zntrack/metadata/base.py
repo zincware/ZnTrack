@@ -11,9 +11,20 @@ Description:
 
 from typing import Callable
 from abc import ABC, abstractmethod
+import re
 
 
 class MetaData(ABC):
+    """
+
+    Attributes
+    ----------
+
+    name_of_metric: str
+        A string that is unique for this metadata, it can not share the same startswith
+        with any other metadata, e.g. "timeit" and "timeit_advanced" is not allowed!
+    """
+
     name_of_metric: str
 
     def __init__(self, func: Callable):
@@ -41,7 +52,33 @@ class MetaData(ABC):
         return partial(self.__call__, instance)
 
     def save_metadata(self, cls, value):
+        """Save metadata to the class dict
+
+        Will save the metadata as func_name:metric_name dictionary entry.
+        If the func was called multiple times it will increment automatically by
+        func_name_<#>:metric_name
+
+        Parameters
+        ----------
+        cls: the class that has the cls.metadata ZnTrackOption
+        value:
+            Any value that should be saved
+        """
+
         try:
-            cls.metadata.update({f"{self.func_name}:{self.name_of_metric}": value})
+            _ = cls.metadata
         except ValueError:
-            cls.metadata = {f"{self.func_name}:{self.name_of_metric}": value}
+            cls.metadata = {}
+
+        pattern = re.compile(rf"{self.func_name}(_[1-9]+)?:{self.name_of_metric}")
+
+        number_already_collected = len(list(filter(pattern.match, cls.metadata)))
+
+        if number_already_collected == 0:
+            metadata_name = f"{self.func_name}:{self.name_of_metric}"
+        else:
+            metadata_name = (
+                f"{self.func_name}_{number_already_collected}:{self.name_of_metric}"
+            )
+
+        cls.metadata[metadata_name] = value
