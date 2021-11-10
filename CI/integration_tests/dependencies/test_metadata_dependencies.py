@@ -28,6 +28,7 @@ class HelloWorld:
 @Node()
 class PrintName:
     """Node that depends on HelloWorld but not on the TimeIt"""
+
     hello_world: HelloWorld = dvc.deps(HelloWorld(load=True))
 
     def run(self):
