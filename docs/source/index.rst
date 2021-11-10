@@ -32,6 +32,7 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
    _overview/02_passing_classes/PassingClasses.ipynb
    _overview/03_dependencies/dependencies.ipynb
    _overview/04_metrics_and_plots/04_metrics_and_plots.ipynb
+   _overview/05_metadata/05_metadata.ipynb
    jupyter.rst
 
 .. toctree::
