@@ -82,6 +82,7 @@ class ZnTrackParent(ZnTrackType):
 
         self.running = False  # is set to true, when run_dvc
         self.load = False
+        self.has_metadata = False
 
         self.dvc_file = "dvc.yaml"
         # This is True while inside the init to avoid ValueErrors
@@ -109,10 +110,14 @@ class ZnTrackParent(ZnTrackType):
 
         """
         self.update_options_defined_in_init()
+        if self.has_metadata:
+            self.add_metadata_descriptor()
         if self.load:
             self.load_internals()
             # TODO
             self.load_descriptors_from_file()
+            # update_dvc is not necessary but also should not hurt?!
+            self.update_dvc()
 
     def pre_call(self):
         """Method to be run before the call"""
@@ -167,6 +172,17 @@ class ZnTrackParent(ZnTrackType):
         """
         self.save_descriptors_to_file()
 
+    def add_metadata_descriptor(self):
+        """Create a descriptor which is called metadata
+
+        this descriptor is a metrics option in DVC,
+        similar to `metadata=zn.metrics()`
+        """
+        log.debug("Adding ZnTrackOption for cls.metadata ")
+        py_track_option = ZnTrackOption(option="metadata", name="metadata", load=True)
+
+        setattr(type(self.child), "metadata", py_track_option)
+
     def update_options_defined_in_init(self):
         """Fix ZnTrackOption as attribute of the parent class
 
@@ -210,8 +226,8 @@ class ZnTrackParent(ZnTrackType):
                         option=value.option,
                         default_value=value.default_value,
                         name=attr,
+                        load=value.load,
                     )
-                    py_track_option.load = value.load
 
                     setattr(type(self.child), attr, py_track_option)
                     remove_from__dict__.append(attr)
@@ -237,7 +253,7 @@ class ZnTrackParent(ZnTrackType):
         """
         try:
             # Check if the passed value is a Node. If yes
-            #  add the json file as a dependency
+            #  add all affected files as dependencies
             dvc_option_list = getattr(self.dvc, option)
             value.zntrack.update_dvc()
             log.debug(f"Found Node dependency. Calling update_dvc on {value}")
@@ -266,6 +282,12 @@ class ZnTrackParent(ZnTrackType):
                     continue
                 if val.load:
                     file = self.zn_files.node_path / getattr(self.zn_files, option)
+                    # We want the filename to be metadata from the zn_files
+                    #  but the dvc option is metrics
+                    #  TODO filename and option should be coupled more loosely
+                    #    for load=True options to avoid this part here!
+                    if option == "metadata":
+                        option = "metrics"
                     # need to create the paths, because it is required for
                     # dvc to write the .gitignore
                     self.zn_files.make_path()

@@ -85,13 +85,18 @@ class DVCParams:
             list of str/Path that this Node writes to
         """
         # Ignore dependencies, they will not be changed by this Node
+
         output_types = [
             x for x in self.__dataclass_fields__ if x not in ["deps", "internals_file"]
         ]
         affected_files = []
         for output_type in output_types:
             if getattr(self, output_type) is not None:
-                affected_files += getattr(self, output_type)
+                file_list = getattr(self, output_type)
+                # remove metadata from the affect files, because
+                #  they should never be a dependency
+                file_list = [x for x in file_list if x.name != "metadata.json"]
+                affected_files += file_list
         return affected_files
 
 
@@ -118,6 +123,7 @@ class ZnFiles:
     outs_no_cache: Path = Path("outs_no_cache.json")
     outs_persistent: Path = Path("outs_persistent.json")
     metrics: Path = Path("metrics.json")
+    metadata: Path = Path("metadata.json")
     metrics_no_cache: Path = Path("metrics_no_cache.json")
     plots: Path = Path("plots.json")
     plots_no_cache: Path = Path("plots_no_cache.json")
