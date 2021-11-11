@@ -9,6 +9,6 @@ Copyright Contributors to the Zincware Project.
 Description: meta data collections such as execution times
 """
 from .base import MetaData
-from .decorators import TimeIt
+from .decorators import TimeIt, TimeItMean
 
-__all__ = ["MetaData", "TimeIt"]
+__all__ = ["MetaData", "TimeIt", "TimeItMean"]
