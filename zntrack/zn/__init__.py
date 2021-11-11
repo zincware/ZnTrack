@@ -29,9 +29,9 @@ class outs(ZnTrackOption):
     load = True
 
 
-class plots(ZnTrackOption):
-    option = "plots"
-    load = True
+# class plots(ZnTrackOption):
+#     option = "plots"
+#     load = True
 
 
 class metrics(ZnTrackOption):
