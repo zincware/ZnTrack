@@ -13,7 +13,7 @@ from .base import MetaData
 from time import time
 import statistics
 import json
-from pathlib import Path
+from zntrack.utils.type_hints import TypeHintParent
 
 
 class TimeIt(MetaData):
@@ -39,7 +39,7 @@ class TimeItMean(MetaData):
 
     name_of_metric = "TimeItMean"
 
-    def __call__(self, cls, *args, **kwargs):
+    def __call__(self, cls: TypeHintParent, *args, **kwargs):
         """Measure the execution time by storing the time
         before and after the function call
         """
@@ -47,14 +47,12 @@ class TimeItMean(MetaData):
         parsed_func = self.func(cls, *args, **kwargs)
         stop_time = time()
 
-        # TODO this should use a proper temp file, we can generate one and
-        #  have clean up command as post_run command. Maybe have
-        #  cls.zntrack.get_temp_file(key=name_of_metric_func_name) -> Path
-        tmp_file = Path(f"{self.name_of_metric}_{self.func_name}.json")
+        tmp_file_name = f"{self.name_of_metric}_{self.func_name}.json"
+        tmp_file = cls.zntrack.get_temporary_file(name=tmp_file_name)
 
         try:
             data = json.loads(tmp_file.read_text())
-        except FileNotFoundError:
+        except json.decoder.JSONDecodeError:
             data = []
 
         data.append(stop_time - start_time)

@@ -21,8 +21,9 @@ from zntrack.core.data_classes import DVCParams, ZnFiles
 from pathlib import Path
 from zntrack.utils import is_jsonable, serializer, deserializer
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
+import tempfile
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from zntrack.utils.type_hints import TypeHintParent
@@ -90,6 +91,8 @@ class ZnTrackParent(ZnTrackType):
         self.dvc = DVCParams()
         self.nb_mode = False  # notebook mode
         self._zn_files = None
+
+        self.temporary_files: Dict[str, Path] = {}
 
     @property
     def zn_files(self) -> ZnFiles:
@@ -171,6 +174,8 @@ class ZnTrackParent(ZnTrackType):
         This method saves the descriptors_from_file
         """
         self.save_descriptors_to_file()
+        # clean up temp_files:
+        [file.unlink() for file in self.temporary_files.values()]
 
     def add_metadata_descriptor(self):
         """Create a descriptor which is called metadata
@@ -652,3 +657,26 @@ class ZnTrackParent(ZnTrackType):
         zn.<option>
         """
         return self.dvc.get_affected_files()
+
+    def get_temporary_file(self, name) -> Path:
+        """Get a file for the duration of the lifetime of this Node
+
+        Parameters
+        ----------
+        name: str
+            identifier for this file
+
+        Returns
+        -------
+        temporary_file: Path
+            A file, either freshly created or loaded from a dictionary for the lifetime
+            of this Nodes instance. The file will be removed when the run method ends.
+
+        """
+        try:
+            _ = self.temporary_files[name]
+        except KeyError:
+            self.temporary_files[name] = Path(
+                tempfile.NamedTemporaryFile(delete=False).name
+            )
+        return self.temporary_files[name]
