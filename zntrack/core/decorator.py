@@ -235,9 +235,7 @@ class Node:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.zntrack.has_metadata = self.has_metadata
-
-            cls.zntrack.pre_init(name=name, load=load)
+            cls.zntrack.pre_init(name=name, load=load, has_metadata=self.has_metadata)
             log.debug(f"Processing {cls.zntrack}")
             parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_init()
