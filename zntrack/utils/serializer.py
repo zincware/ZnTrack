@@ -63,8 +63,13 @@ def conv_class_to_dict(value):
     """
     if hasattr(value, "zntrack"):
         if isinstance(value.zntrack, ZnTrackType):
-            value = {"cls": (
-            value.zntrack.module, value.__class__.__name__, value.zntrack.stage_name)}
+            value = {
+                "cls": (
+                    value.zntrack.module,
+                    value.__class__.__name__,
+                    value.zntrack.stage_name,
+                )
+            }
     return value
 
 
