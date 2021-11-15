@@ -97,7 +97,7 @@ class ZnTrackParent(ZnTrackType):
             self._zn_files = ZnFiles(node_name=self.stage_name)
         return self._zn_files
 
-    def pre_init(self, name: str, load: bool):
+    def pre_init(self, name: str, load: bool, has_metadata: bool):
         """Function to be called prior to the init
 
         Parameters
@@ -110,6 +110,7 @@ class ZnTrackParent(ZnTrackType):
         """
         self.stage_name = name
         self.load = load
+        self.has_metadata = has_metadata
         pass
 
     def post_init(self):
