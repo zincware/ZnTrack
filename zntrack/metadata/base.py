@@ -12,6 +12,7 @@ Description:
 from typing import Callable
 from abc import ABC, abstractmethod
 import re
+from functools import partial
 
 
 class MetaData(ABC):
@@ -25,7 +26,7 @@ class MetaData(ABC):
 
     name_of_metric: str
 
-    def __init__(self, func: Callable):
+    def __init__(self, func: Callable = None, *args, **kwargs):
         """Get the decorated function
 
         The MetaData decorator does not take arguments!
@@ -34,15 +35,34 @@ class MetaData(ABC):
 
         Parameters
         ----------
-        func
+        func: Callable
+            the method to be decorated
+        *args:
+            possible args for subclassed decorator(-makers)
+        **kwargs:
+            possible kwargs for subclassed decorator(-makers)
         """
         self.func: Callable = func
-        self.func_name = self.func.__name__
+        try:
+            self.func_name = func.__name__
+        except AttributeError:
+            # func was not passed yet!
+            pass
+
+    def __call__(self, func):
+        """Call method to handle init/non-init decorators"""
+        return self.create(func)
+
+    @classmethod
+    def create(cls, func, *args, **kwargs):
+        """Overwrite this method if you want to use args/kwargs"""
+        print("Creating MetaData decorator")
+        return cls(func, *args, **kwargs)
 
     @abstractmethod
-    def __call__(self, cls, *args, **kwargs):
-        """Actuall decorator"""
-        raise NotImplementedError
+    def call(self, cls, *args, **kwargs):
+        """actual wrapper to be used for decorating the method"""
+        return self.func(cls, *args, **kwargs)
 
     def __get__(self, instance, owner):
         """Converting decorator into descriptor
@@ -55,10 +75,7 @@ class MetaData(ABC):
         See the following answer for a full explanation why this is required
         https://stackoverflow.com/questions/30104047/how-can-i-decorate-an-instance-method-with-a-decorator-class
         """
-
-        from functools import partial
-
-        return partial(self.__call__, instance)
+        return partial(self.call, instance)
 
     def save_metadata(self, cls, value, use_regex: bool = True):
         """Save metadata to the class dict
@@ -69,7 +86,8 @@ class MetaData(ABC):
 
         Parameters
         ----------
-        cls: the class that has the cls.metadata ZnTrackOption
+        cls:
+            Instance of the class containing the decorated method
         value:
             Any value that should be saved
         use_regex: bool, default = True

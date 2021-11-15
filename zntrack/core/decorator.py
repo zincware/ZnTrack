@@ -300,6 +300,7 @@ class Node:
         @functools.wraps(func)
         def wrapper(cls: TypeHintParent):
             """Wrapper around the run method"""
+            print("Creating Run Decorator")
             cls.zntrack.pre_run()
             parsed_function = func(cls)
             cls.zntrack.post_run()

@@ -21,7 +21,7 @@ class TimeIt(MetaData):
 
     name_of_metric = "timeit"
 
-    def __call__(self, cls, *args, **kwargs):
+    def call(self, cls, *args, **kwargs):
         """Measure the execution time by storing the time
         before and after the function call
         """
@@ -38,6 +38,9 @@ class TimeItMean(MetaData):
     """TimeIt decorator that computes the mean and std over multiple runs"""
 
     name_of_metric = "TimeItMean"
+
+    def call(self, cls, *args, **kwargs):
+        pass
 
     def __call__(self, cls: TypeHintParent, *args, **kwargs):
         """Measure the execution time by storing the time
