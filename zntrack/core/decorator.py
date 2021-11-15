@@ -232,7 +232,7 @@ class Node:
 
             cls.zntrack.pre_init()
             log.debug(f"Processing {cls.zntrack}")
-            result = func(cls, *args, **kwargs)
+            parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_init()
 
             if self.nb_name is not None:
@@ -242,7 +242,7 @@ class Node:
             if cls.zntrack.module == "__main__":
                 cls.zntrack._module = Path(sys.argv[0]).stem
 
-            return result
+            return parsed_function
 
         return wrapper
 
@@ -287,9 +287,9 @@ class Node:
 
             """
             cls.zntrack.pre_call()
-            function = func(cls, *args, **kwargs)
+            parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_call(force, exec_, always_changed, slurm, silent)
-            return function
+            return parsed_function
 
         return wrapper
 
@@ -301,8 +301,8 @@ class Node:
         def wrapper(cls: TypeHintParent):
             """Wrapper around the run method"""
             cls.zntrack.pre_run()
-            function = func(cls)
+            parsed_function = func(cls)
             cls.zntrack.post_run()
-            return function
+            return parsed_function
 
         return wrapper
