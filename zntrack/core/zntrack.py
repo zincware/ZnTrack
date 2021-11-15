@@ -292,7 +292,7 @@ class ZnTrackParent(ZnTrackType):
                 if option == "params":
                     # params is processed  differently
                     continue
-                if val.load:
+                elif val.load:
                     file = self.zn_files.node_path / getattr(self.zn_files, option)
                     # We want the filename to be metadata from the zn_files
                     #  but the dvc option is metrics
@@ -310,6 +310,7 @@ class ZnTrackParent(ZnTrackType):
                     # check if it is a Node, that has to be handled extra
 
                     if isinstance(child_val, list) or isinstance(child_val, tuple):
+                        # process lists/tuples if more than a single value is given
                         for item in child_val:
                             self.write_to_dvc(item, option)
                     else:
