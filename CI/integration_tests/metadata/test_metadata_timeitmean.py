@@ -41,6 +41,6 @@ def test_timeitmean(tmp_path):
 
     metadata = SleepNode(load=True).metadata
 
-    np.testing.assert_almost_equal(metadata["sleep:TimeItMean"]['mean'], 1.0, decimal=3)
-    np.testing.assert_almost_equal(metadata["sleep:TimeItMean"]['std'], 0.0, decimal=3)
-    assert metadata["sleep:TimeItMean"]['runs'] == 10
+    np.testing.assert_almost_equal(metadata["sleep:TimeItMean"]["mean"], 1.0, decimal=3)
+    np.testing.assert_almost_equal(metadata["sleep:TimeItMean"]["std"], 0.0, decimal=3)
+    assert metadata["sleep:TimeItMean"]["runs"] == 10
