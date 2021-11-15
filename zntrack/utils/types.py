@@ -50,9 +50,10 @@ class ZnTrackStage:
 
     """
 
-    def __init__(self, cls):
+    def __init__(self, cls, name):
         self.cls = cls
+        self.name = name
 
     def load_zntrack_node(self):
         """Load the ZnTrackStage"""
-        return self.cls(load=True)
+        return self.cls(load=True, name=self.name)
