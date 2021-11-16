@@ -11,7 +11,9 @@ Description: Code for using subclasses / inheritance with ZnTrack
 import logging
 
 from zntrack import dvc
+from zntrack.utils.type_hints import TypeHintParent
 import inspect
+import abc
 
 log = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ class Child:
     outs: list = []
 
 
-class Base:
+class Base(TypeHintParent):
     """Base class for ZnTrack class inheritance cases
 
     Attributes
@@ -94,3 +96,8 @@ class Base:
                 self.outs.append(output)
             except AttributeError:
                 self.outs = [output]
+
+    @abc.abstractmethod
+    def run(self):
+        """Run method to be called by DVC"""
+        pass

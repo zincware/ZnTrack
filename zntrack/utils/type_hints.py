@@ -14,6 +14,7 @@ from abc import ABC, abstractmethod
 
 class TypeHintParent(ABC):
     """Parent class for all ZnTrack Nodes"""
+
     zntrack: ZnTrackParent
 
     def __call__(self, *args, **kwargs):
