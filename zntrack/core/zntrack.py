@@ -93,6 +93,7 @@ class ZnTrackParent(ZnTrackType):
 
     @property
     def zn_files(self) -> ZnFiles:
+        """Get instance of the ZnFiles dataclass initialized with the stage name"""
         if self._zn_files is None:
             self._zn_files = ZnFiles(node_name=self.stage_name)
         return self._zn_files
@@ -107,11 +108,13 @@ class ZnTrackParent(ZnTrackType):
             name based on the class.__name__
         load: bool
             set the stage to be loaded
+        has_metadata: bool
+            check by the decorator if any methods write to self.metadata.
+            This can e.g. be TimeIt decorators.
         """
         self.stage_name = name
         self.load = load
         self.has_metadata = has_metadata
-        pass
 
     def post_init(self):
         """Post init command
@@ -137,7 +140,8 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-        self, force=False, exec_=False, always_changed=False, slurm=False, silent=False
+            self, force=False, exec_=False, always_changed=False, slurm=False,
+            silent=False
     ):
         """Method after call
 
@@ -325,12 +329,12 @@ class ZnTrackParent(ZnTrackType):
         return False
 
     def write_dvc(
-        self,
-        force=True,
-        exec_: bool = False,
-        always_changed: bool = False,
-        slurm: bool = False,
-        silent: bool = False,
+            self,
+            force=True,
+            exec_: bool = False,
+            always_changed: bool = False,
+            slurm: bool = False,
+            silent: bool = False,
     ):
         """Write the DVC file using run.
 
