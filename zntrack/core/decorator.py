@@ -205,7 +205,14 @@ class Node:
         """Decorator to handle the init of the decorated class"""
 
         @functools.wraps(func)
-        def wrapper(cls: TypeHintParent, *args, id_=None, load: bool = False, **kwargs):
+        def wrapper(
+            cls: TypeHintParent,
+            *args,
+            id_=None,
+            load: bool = False,
+            name: str = self.name,
+            **kwargs,
+        ):
             """Wrapper around the init
 
             Parameters
@@ -214,6 +221,8 @@ class Node:
                 a Node decorated class instance
             id_: int
                 soon to be depreciated alternative to load
+            name: str
+                Overwrite for the default name based on class.__name__
             load: bool
                 Load the state and prohibit parameter changes
             args, kwargs:
@@ -226,13 +235,9 @@ class Node:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.zntrack.load = load
-            cls.zntrack.stage_name = self.name
-            cls.zntrack.has_metadata = self.has_metadata
-
-            cls.zntrack.pre_init()
+            cls.zntrack.pre_init(name=name, load=load, has_metadata=self.has_metadata)
             log.debug(f"Processing {cls.zntrack}")
-            result = func(cls, *args, **kwargs)
+            parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_init()
 
             if self.nb_name is not None:
@@ -242,7 +247,7 @@ class Node:
             if cls.zntrack.module == "__main__":
                 cls.zntrack._module = Path(sys.argv[0]).stem
 
-            return result
+            return parsed_function
 
         return wrapper
 
@@ -287,9 +292,9 @@ class Node:
 
             """
             cls.zntrack.pre_call()
-            function = func(cls, *args, **kwargs)
+            parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_call(force, exec_, always_changed, slurm, silent)
-            return function
+            return parsed_function
 
         return wrapper
 
@@ -301,8 +306,8 @@ class Node:
         def wrapper(cls: TypeHintParent):
             """Wrapper around the run method"""
             cls.zntrack.pre_run()
-            function = func(cls)
+            parsed_function = func(cls)
             cls.zntrack.post_run()
-            return function
+            return parsed_function
 
         return wrapper

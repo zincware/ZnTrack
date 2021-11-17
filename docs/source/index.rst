@@ -28,11 +28,12 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
    :maxdepth: 1
    :caption: User Guide:
 
-   _overview/01_Intro/01_Intro.ipynb
-   _overview/02_passing_classes/PassingClasses.ipynb
-   _overview/03_dependencies/dependencies.ipynb
-   _overview/04_metrics_and_plots/04_metrics_and_plots.ipynb
-   _overview/05_metadata/05_metadata.ipynb
+   _overview/01_Intro.ipynb
+   _overview/02_PassingClasses.ipynb
+   _overview/03_dependencies.ipynb
+   _overview/04_metrics_and_plots.ipynb
+   _overview/05_metadata.ipynb
+   _overview/06_named_nodes.ipynb
    jupyter.rst
 
 .. toctree::
