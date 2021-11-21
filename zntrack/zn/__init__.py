@@ -12,6 +12,8 @@ The following can be used to store e.g. metrics directly without
 defining and writing to a file
 """
 import logging
+import importlib
+import inspect
 
 from zntrack.core.parameter import ZnTrackOption
 
@@ -37,3 +39,68 @@ class outs(ZnTrackOption):
 class metrics(ZnTrackOption):
     option = "metrics"
     load = True
+
+
+class Method(ZnTrackOption):
+    """ZnTrack methods passing descriptor
+
+    This descriptor allows to pass a class instance that is not a ZnTrack Node as a
+    method that can be used later. It requires that all passed class attributes have
+    the same name in the __init__ and via getattr an that they are serializable.
+
+    Example
+    --------
+    >>> class HelloWorld:
+    >>>     def __init__(self, name):
+    >>>         self.name = name
+    >>> @Node()
+    >>> class MyNode
+    >>>     my_method = Method()
+    >>> MyNode().my_method = HelloWorld(name="Max")
+
+    """
+
+    option = "params"
+    load = False
+
+    def _get(self, instance, owner):
+        """Custom Get for methods
+
+        Returns
+        -------
+        object:
+            An instance of the passed classed instantiated with the correct arguments.
+        """
+        methods = instance.__dict__[self.name]
+        module = importlib.import_module(methods["module"])
+        cls = getattr(module, methods["name"])
+
+        return cls(**methods["kwargs"])
+
+    def _set(self, instance, value: object):
+        """Custom Set of Methods
+
+        Save module, name and kwargs from the class state
+        """
+        methods = {
+            "module": value.__class__.__module__,
+            "name": value.__class__.__name__,
+            "kwargs": {},
+        }
+
+        for key in inspect.signature(value.__class__.__init__).parameters:
+            if key == "self":
+                continue
+            if key in ["args", "kwargs"]:
+                log.error(f"Can not convert {key}!")
+                continue
+            try:
+                methods["kwargs"][key] = getattr(value, key)
+            except AttributeError:
+                raise AttributeError(
+                    f"Could not find {key} in passed method! Please use "
+                    f"@check_signature from ZnTrack to check that the method signature"
+                    f" fits the method attributes"
+                )
+
+        instance.__dict__[self.name] = methods
