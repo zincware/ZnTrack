@@ -93,8 +93,8 @@ class Method(ZnTrackOption):
             # if the class is originally imported from main,
             #  it will be copied to the same module path as the
             #  ZnTrack Node source code.
-            if methods['module'] == "__main__":
-                methods['module'] = instance.zntrack.module
+            if methods["module"] == "__main__":
+                methods["module"] = instance.zntrack.module
 
         for key in inspect.signature(value.__class__.__init__).parameters:
             if key == "self":
