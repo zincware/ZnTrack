@@ -17,7 +17,7 @@ import json
 
 from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
-from zntrack.core.data_classes import DVCParams, ZnFiles
+from zntrack.core.data_classes import DVCParams, ZnFiles, DVCOptions
 from pathlib import Path
 from zntrack.utils import is_jsonable, serializer, deserializer
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
@@ -83,12 +83,12 @@ class ZnTrackParent(ZnTrackType):
         self.running = False  # is set to true, when run_dvc
         self.load = False
         self.has_metadata = False
-        self.external_data = False
 
         self.dvc_file = "dvc.yaml"
         # This is True while inside the init to avoid ValueErrors
 
         self.dvc = DVCParams()
+        self.dvc_options: DVCOptions = None
         self.nb_mode = False  # notebook mode
         self._zn_files = None
 
@@ -99,7 +99,7 @@ class ZnTrackParent(ZnTrackType):
             self._zn_files = ZnFiles(node_name=self.stage_name)
         return self._zn_files
 
-    def pre_init(self, name: str, load: bool, has_metadata: bool, external_data: bool):
+    def pre_init(self, name: str, load: bool, has_metadata: bool):
         """Function to be called prior to the init
 
         Parameters
@@ -112,14 +112,10 @@ class ZnTrackParent(ZnTrackType):
         has_metadata: bool
             check by the decorator if any methods write to self.metadata.
             This can e.g. be TimeIt decorators.
-        external_data: bool, default = False
-            Add the `--external` argument to the dvc run command, that indicates that
-            outs or deps can be located outside of the repository
         """
         self.stage_name = name
         self.load = load
         self.has_metadata = has_metadata
-        self.external_data = external_data
 
     def post_init(self):
         """Post init command
@@ -145,7 +141,13 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-        self, force=False, exec_=False, always_changed=False, slurm=False, silent=False
+        self,
+        force: bool,
+        no_exec: bool,
+        always_changed: bool,
+        slurm: bool,
+        silent: bool,
+        external: bool,
     ):
         """Method after call
 
@@ -156,7 +158,7 @@ class ZnTrackParent(ZnTrackType):
         ----------
         force: bool, default=False
             Use dvc run with `--force` to overwrite previous stages!
-        exec_: bool, default=False
+        no_exec: bool, default=False
             Run the stage directly and don't use dvc with '--no-exec'.
             This will not output stdout/stderr in real time and should only be used
             for fast functions!
@@ -168,14 +170,24 @@ class ZnTrackParent(ZnTrackType):
             mean that every stage uses slurm and you may accidentally run stages on
             your HEAD Node. You can check the commands in dvc.yaml!
         silent: bool
-            If called with exec_=True this allows to hide the output from the
+            If called with no_exec=False this allows to hide the output from the
             subprocess call.
+        external: bool, default = False
+            Add the `--external` argument to the dvc run command, that indicates that
+            outs or deps can be located outside of the repository
 
         """
         self.update_dvc()
         self.save_internals()
 
-        self.write_dvc(force, exec_, always_changed, slurm, silent)
+        self.dvc_options = DVCOptions(
+            force=force,
+            no_exec=no_exec,
+            always_changed=always_changed,
+            external=external,
+        )
+
+        self.write_dvc(slurm, silent)
 
     def pre_run(self):
         """Command to be run before run
@@ -334,9 +346,6 @@ class ZnTrackParent(ZnTrackType):
 
     def write_dvc(
         self,
-        force=True,
-        exec_: bool = False,
-        always_changed: bool = False,
         slurm: bool = False,
         silent: bool = False,
     ):
@@ -347,18 +356,10 @@ class ZnTrackParent(ZnTrackType):
 
         Parameters
         ----------
-        force: bool, default = False
-            Force DVC to rerun this stage, even if the parameters haven't changed!
-        exec_: bool, default = False
-            if False, only write the stage to the dvc.yaml and run later.
-             Otherwise the stage and ALL dependencies will be executed!
-        always_changed: bool, default = False
-            Tell DVC to always rerun this stage, e.g. for non-deterministic stages
-            or for testing
         slurm: bool, default = False
             Use SLURM to run DVC stages on a Cluster.
         silent: bool
-            If called with exec_=True this allows to hide the output from the
+            If called with no_exec=False this allows to hide the output from the
             subprocess call.
 
         Notes
@@ -385,27 +386,9 @@ class ZnTrackParent(ZnTrackType):
         if self.nb_mode:
             script += ["--deps", Path(*self.module.split(".")).with_suffix(".py")]
 
-        if self.external_data:
-            script.append("--external")
-            if not silent:
-                log.info("Enabling external data!")
+        script.extend(self.dvc_options.get_dvc_arguments())
 
-        if force:
-            script.append("--force")
-            if not silent:
-                log.warning("Overwriting existing configuration!")
-        #
-        if not exec_:
-            script.append("--no-exec")
-        elif not silent:
-            log.warning(
-                "You will not be able to see the stdout/stderr "
-                "of the process in real time!"
-            )
-        #
-        if always_changed:
-            script.append("--always-changed")
-        #
+        # TODO use dataclass get_option to write the script!
         if slurm:
             log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             log.warning(

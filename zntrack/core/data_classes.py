@@ -20,6 +20,53 @@ log = logging.getLogger(__name__)
 
 
 @dataclass(frozen=False, order=True, init=True)
+class DVCOptions:
+    """Extension to the DVCParams
+
+    DVCParams handles e.g. I/O whilst DVCOptions handles all other parameters,
+    such as the name, exec, force, commit, external, ...
+
+    See Also
+    --------
+    https://dvc.org/doc/command-reference/run
+    """
+
+    no_commit: bool = False
+    external: bool = False
+    always_changed: bool = False
+    no_exec: bool = False
+    force: bool = False
+    no_run_cache: bool = False
+
+    def get_dvc_arguments(self) -> list:
+        """Get the activated options
+
+        Returns
+        -------
+        list: A list of strings for the subprocess call
+            ["--no-commit", "--external"]
+
+        """
+        out = []
+
+        for dvc_option in self.__dataclass_fields__:
+            value = getattr(self, dvc_option)
+            if isinstance(value, bool):
+                if value:
+                    out.append(f"--{dvc_option.replace('_', '-')}")
+                else:
+                    if dvc_option == "no_exec":
+                        log.warning(
+                            "You will not be able to see the stdout/stderr "
+                            "of the process in real time!"
+                        )
+            else:
+                raise NotImplementedError("Currently only boolean values are supported")
+
+        return out
+
+
+@dataclass(frozen=False, order=True, init=True)
 class DVCParams:
     """PyTracks DVCParams"""
 

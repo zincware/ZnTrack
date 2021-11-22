@@ -36,9 +36,9 @@ class Node:
         cls=None,
         nb_name: str = None,
         name: str = None,
-        exec_: bool = False,
+        no_exec: bool = True,
         silent: bool = False,
-        external_data: bool = False,
+        external: bool = False,
         **kwargs,
     ):
         """
@@ -54,13 +54,13 @@ class Node:
             A custom name for the DVC stage.
             !There is currently no check in place, that avoids overwriting an existing
             stage!
-        exec_: bool
-            Set the default value for exec_.
+        no_exec: bool
+            Set the default value for no_exec.
             If true, always run this stage immediately.
         silent: bool
-            If called with exec_=True this allows to hide the output from the
+            If called with no_exec=False this allows to hide the output from the
             subprocess call.
-        external_data: bool, default = False
+        external bool, default = False
             Add the `--external` argument to the dvc run command, that indicates that
             outs or deps can be located outside of the repository
         kwargs: No kwargs are implemented
@@ -69,8 +69,8 @@ class Node:
             raise ValueError("Please use `@Node()` instead of `@Node`.")
         self.cls = cls
 
-        self.exec_ = exec_
-        self.external_data = external_data
+        self.no_exec = no_exec
+        self.external = external
         self.silent = silent
 
         self.name = name
@@ -244,7 +244,6 @@ class Node:
                 name=name,
                 load=load,
                 has_metadata=self.has_metadata,
-                external_data=self.external_data,
             )
             log.debug(f"Processing {cls.zntrack}")
             parsed_function = func(cls, *args, **kwargs)
@@ -269,10 +268,11 @@ class Node:
             cls: TypeHintParent,
             *args,
             force=True,
-            exec_=self.exec_,
+            no_exec=self.no_exec,
             always_changed=False,
             slurm=False,
             silent=self.silent,
+            external=self.external,
             **kwargs,
         ):
             """Wrapper around the call
@@ -285,15 +285,18 @@ class Node:
                 Args to be passed to the class
             force: bool
                 Whether to use dvc with the force argument
-            exec_: bool
-                Whether to use dvc with the exec argument
+            no_exec: bool
+                Whether to use dvc with the no_exec argument
             always_changed: bool
                 Whether to use dvc with the always_changed argument
             slurm: bool
                 Using SLURM with SRUN. (Experimental feature)
             silent: bool
-                If called with exec_=True this allows to hide the output from the
+                If called with no_exec=False this allows to hide the output from the
                 subprocess call.
+            external: bool, default = False
+                Add the `--external` argument to the dvc run command, that indicates
+                that outs or deps can be located outside of the repository
             kwargs
 
             Returns
@@ -303,7 +306,14 @@ class Node:
             """
             cls.zntrack.pre_call()
             parsed_function = func(cls, *args, **kwargs)
-            cls.zntrack.post_call(force, exec_, always_changed, slurm, silent)
+            cls.zntrack.post_call(
+                force=force,
+                no_exec=no_exec,
+                always_changed=always_changed,
+                slurm=slurm,
+                silent=silent,
+                external=external,
+            )
             return parsed_function
 
         return wrapper
