@@ -38,6 +38,7 @@ class Node:
         name: str = None,
         exec_: bool = False,
         silent: bool = False,
+        external_data: bool = False,
         **kwargs,
     ):
         """
@@ -59,6 +60,9 @@ class Node:
         silent: bool
             If called with exec_=True this allows to hide the output from the
             subprocess call.
+        external_data: bool, default = False
+            Add the `--external` argument to the dvc run command, that indicates that
+            outs or deps can be located outside of the repository
         kwargs: No kwargs are implemented
         """
         if cls is not None:
@@ -66,6 +70,7 @@ class Node:
         self.cls = cls
 
         self.exec_ = exec_
+        self.external_data = external_data
         self.silent = silent
 
         self.name = name
@@ -235,7 +240,12 @@ class Node:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.zntrack.pre_init(name=name, load=load, has_metadata=self.has_metadata)
+            cls.zntrack.pre_init(
+                name=name,
+                load=load,
+                has_metadata=self.has_metadata,
+                external_data=self.external_data,
+            )
             log.debug(f"Processing {cls.zntrack}")
             parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_init()

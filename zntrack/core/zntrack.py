@@ -83,6 +83,7 @@ class ZnTrackParent(ZnTrackType):
         self.running = False  # is set to true, when run_dvc
         self.load = False
         self.has_metadata = False
+        self.external_data = False
 
         self.dvc_file = "dvc.yaml"
         # This is True while inside the init to avoid ValueErrors
@@ -98,7 +99,7 @@ class ZnTrackParent(ZnTrackType):
             self._zn_files = ZnFiles(node_name=self.stage_name)
         return self._zn_files
 
-    def pre_init(self, name: str, load: bool, has_metadata: bool):
+    def pre_init(self, name: str, load: bool, has_metadata: bool, external_data: bool):
         """Function to be called prior to the init
 
         Parameters
@@ -111,10 +112,14 @@ class ZnTrackParent(ZnTrackType):
         has_metadata: bool
             check by the decorator if any methods write to self.metadata.
             This can e.g. be TimeIt decorators.
+        external_data: bool, default = False
+            Add the `--external` argument to the dvc run command, that indicates that
+            outs or deps can be located outside of the repository
         """
         self.stage_name = name
         self.load = load
         self.has_metadata = has_metadata
+        self.external_data = external_data
 
     def post_init(self):
         """Post init command
@@ -379,6 +384,11 @@ class ZnTrackParent(ZnTrackType):
 
         if self.nb_mode:
             script += ["--deps", Path(*self.module.split(".")).with_suffix(".py")]
+
+        if self.external_data:
+            script.append("--external")
+            if not silent:
+                log.info("Enabling external data!")
 
         if force:
             script.append("--force")
