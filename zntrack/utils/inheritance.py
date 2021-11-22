@@ -10,11 +10,6 @@ Description: Code for using subclasses / inheritance with ZnTrack
 """
 import logging
 
-from zntrack import dvc
-from zntrack.utils.type_hints import TypeHintParent
-import inspect
-import abc
-
 log = logging.getLogger(__name__)
 
 
