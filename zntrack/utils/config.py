@@ -9,6 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: 
 """
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass
@@ -17,6 +18,7 @@ class Config:
 
     debug: bool = False  # not implemented yet
     nb_name: str = None
+    nb_class_path: Path = Path("src")
 
 
 config = Config()
