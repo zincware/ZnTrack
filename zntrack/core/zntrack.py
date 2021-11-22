@@ -142,12 +142,9 @@ class ZnTrackParent(ZnTrackType):
 
     def post_call(
         self,
-        force: bool,
-        no_exec: bool,
-        always_changed: bool,
+        dvc_options: DVCOptions,
         slurm: bool,
         silent: bool,
-        external: bool,
     ):
         """Method after call
 
@@ -156,15 +153,8 @@ class ZnTrackParent(ZnTrackType):
 
         Parameters
         ----------
-        force: bool, default=False
-            Use dvc run with `--force` to overwrite previous stages!
-        no_exec: bool, default=False
-            Run the stage directly and don't use dvc with '--no-exec'.
-            This will not output stdout/stderr in real time and should only be used
-            for fast functions!
-        always_changed: bool, default=False
-            Set the always changed dvc argument. See the official DVC docs.
-            Can be useful for debugging / development.
+        dvc_options: DVCOptions
+            Dataclass collecting all the optional DVC options, e.g. force, external,...
         slurm: bool, default=False
             Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't
             mean that every stage uses slurm and you may accidentally run stages on
@@ -172,20 +162,12 @@ class ZnTrackParent(ZnTrackType):
         silent: bool
             If called with no_exec=False this allows to hide the output from the
             subprocess call.
-        external: bool, default = False
-            Add the `--external` argument to the dvc run command, that indicates that
-            outs or deps can be located outside of the repository
 
         """
         self.update_dvc()
         self.save_internals()
 
-        self.dvc_options = DVCOptions(
-            force=force,
-            no_exec=no_exec,
-            always_changed=always_changed,
-            external=external,
-        )
+        self.dvc_options = dvc_options
 
         self.write_dvc(slurm, silent)
 

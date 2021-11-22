@@ -19,6 +19,7 @@ import typing
 import functools
 
 from .zntrack import ZnTrackProperty
+from zntrack.core.data_classes import DVCOptions
 from zntrack.utils import config
 from zntrack.metadata import MetaData
 
@@ -304,15 +305,20 @@ class Node:
             decorated class
 
             """
-            cls.zntrack.pre_call()
-            parsed_function = func(cls, *args, **kwargs)
-            cls.zntrack.post_call(
+
+            dvc_options = DVCOptions(
                 force=force,
                 no_exec=no_exec,
                 always_changed=always_changed,
+                external=external,
+            )
+
+            cls.zntrack.pre_call()
+            parsed_function = func(cls, *args, **kwargs)
+            cls.zntrack.post_call(
+                dvc_options=dvc_options,
                 slurm=slurm,
                 silent=silent,
-                external=external,
             )
             return parsed_function
 
