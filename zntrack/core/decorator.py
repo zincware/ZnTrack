@@ -73,8 +73,8 @@ class Node:
             raise ValueError("Please use `@Node()` instead of `@Node`.")
         self.cls = cls
 
-        if 'exec_' in kwargs:
-            self.no_exec = not kwargs.get('exec_')
+        if "exec_" in kwargs:
+            self.no_exec = not kwargs.get("exec_")
             log.warning("DeprecationWarning: Please use no_exec instead of exec_")
         else:
             self.no_exec = no_exec
@@ -317,8 +317,8 @@ class Node:
 
             """
 
-            if 'exec_' in kwargs:
-                no_exec = not kwargs.pop('exec_')
+            if "exec_" in kwargs:
+                no_exec = not kwargs.pop("exec_")
                 log.warning("DeprecationWarning: Please use no_exec instead of exec_")
 
             dvc_options = DVCOptions(
