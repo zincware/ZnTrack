@@ -88,7 +88,6 @@ class Node:
             )
             nb_name = Path(nb_name)
         self.nb_name = nb_name
-        self.nb_class_path = Path("src")
 
     def __call__(self, *args, **kwargs):
         """
@@ -174,8 +173,8 @@ class Node:
 
         src = imports + "\n\n" + class_definition
 
-        src_file = Path(self.nb_class_path, self.cls.__name__).with_suffix(".py")
-        self.nb_class_path.mkdir(exist_ok=True, parents=True)
+        src_file = Path(config.nb_class_path, self.cls.__name__).with_suffix(".py")
+        config.nb_class_path.mkdir(exist_ok=True, parents=True)
 
         src_file.write_text(src)
 
@@ -241,7 +240,7 @@ class Node:
             cls.zntrack.post_init()
 
             if self.nb_name is not None:
-                cls.zntrack._module = f"{self.nb_class_path}.{self.cls.__name__}"
+                cls.zntrack._module = f"{config.nb_class_path}.{self.cls.__name__}"
                 cls.zntrack.nb_mode = True
 
             if cls.zntrack.module == "__main__":

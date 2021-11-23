@@ -9,8 +9,19 @@ Copyright Contributors to the Zincware Project.
 Description: Type hinting class for IDE autocompletion
 """
 from zntrack.core.zntrack import ZnTrackParent
+from abc import ABC, abstractmethod
 
 
-class TypeHintParent:
-    def __init__(self):
-        self.zntrack: ZnTrackParent = ZnTrackParent(child=self)
+class TypeHintParent(ABC):
+    """Parent class for all ZnTrack Nodes"""
+
+    zntrack: ZnTrackParent
+
+    def __call__(self, *args, **kwargs):
+        """Default call method to save e.g. parameters"""
+        pass
+
+    @abstractmethod
+    def run(self):
+        """Run method to be called by DVC"""
+        pass

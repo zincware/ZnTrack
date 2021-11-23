@@ -605,7 +605,16 @@ class ZnTrackParent(ZnTrackType):
                 if val.load:
                     continue
                 option_dict = internals.get(val.option, {})
-                option_dict[val.name] = getattr(self.child, attr)
+                # Values in the dictionary are of HIGHER PRIORITY, because some
+                #  methods e.g. use a descriptor and store the values in a serialized
+                #  way in the __dict__ (e.g. zn.Methods())
+                try:
+                    option_dict[val.name] = self.child.__dict__[attr]
+                except KeyError:
+                    # if the values are not stored in the __dict__
+                    #  they are often only accessible via a getattr.
+                    #  Although this is of LESS PRIORITY!
+                    option_dict[val.name] = getattr(self.child, attr)
 
                 internals[val.option] = option_dict
 
