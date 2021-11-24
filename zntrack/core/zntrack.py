@@ -19,7 +19,7 @@ from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
 from zntrack.core.data_classes import DVCParams, ZnFiles
 from pathlib import Path
-from zntrack.utils import is_jsonable, serializer, deserializer
+from zntrack.utils import is_jsonable, serializer, deserializer, config
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
 
 from typing import TYPE_CHECKING
@@ -169,6 +169,9 @@ class ZnTrackParent(ZnTrackType):
         """
         self.update_dvc()
         self.save_internals()
+
+        if config.no_dvc:
+            return
 
         self.write_dvc(force, exec_, always_changed, slurm, silent)
 
