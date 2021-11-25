@@ -55,9 +55,9 @@ class DependenciesCollector:
 
 
 @Node()
-class DependenciesCollectorWithOuts:
+class DepsCollwOuts:
     dependencies = dvc.deps()
-    outs: Path = dvc.outs("DependenciesCollectorWithOuts.txt")
+    outs: Path = dvc.outs(Path("lorem.txt"))
 
     def __call__(self, dependencies):
         self.dependencies = dependencies
@@ -85,10 +85,12 @@ def test_dvc_outs(dvc_repo_path):
     dependencies_collector = DependenciesCollector()
     dependencies_collector(dependencies=DVCOuts(load=True))
 
-    subprocess.check_call(['dvc', 'repro'])
+    subprocess.check_call(["dvc", "repro"])
 
-    assert DependenciesCollector(
-        load=True).dependencies.data_file.read_text() == "Lorem Ipsum"
+    assert (
+        DependenciesCollector(load=True).dependencies.data_file.read_text()
+        == "Lorem Ipsum"
+    )
 
 
 def test_zn_outs(dvc_repo_path):
@@ -100,7 +102,7 @@ def test_zn_outs(dvc_repo_path):
     dependencies_collector = DependenciesCollector()
     dependencies_collector(dependencies=ZnOuts(load=True))
 
-    subprocess.check_call(['dvc', 'repro'])
+    subprocess.check_call(["dvc", "repro"])
 
     assert DependenciesCollector(load=True).dependencies.data == "Lorem Ipsum"
 
@@ -114,10 +116,12 @@ def test_dvc_zn_outs(dvc_repo_path):
     dependencies_collector = DependenciesCollector()
     dependencies_collector(dependencies=DVCZnOuts(load=True))
 
-    subprocess.check_call(['dvc', 'repro'])
+    subprocess.check_call(["dvc", "repro"])
 
-    assert DependenciesCollector(
-        load=True).dependencies.data_file.read_text() == "Lorem Ipsum"
+    assert (
+        DependenciesCollector(load=True).dependencies.data_file.read_text()
+        == "Lorem Ipsum"
+    )
 
     assert DependenciesCollector(load=True).dependencies.data == "Lorem Ipsum"
 
@@ -133,9 +137,10 @@ def test_expand_dependencies(dvc_repo_path):
 
     dependencies_collector = DependenciesCollector(name="Collector02")
     dependencies_collector(
-        dependencies=DependenciesCollector(name="Collector01", load=True))
+        dependencies=DependenciesCollector(name="Collector01", load=True)
+    )
 
-    subprocess.check_call(['dvc', 'repro'])
+    subprocess.check_call(["dvc", "repro"])
 
 
 def test_expand_dependencies_with_outs(dvc_repo_path):
@@ -144,11 +149,10 @@ def test_expand_dependencies_with_outs(dvc_repo_path):
     dvc_zn_outs = DVCZnOuts()
     dvc_zn_outs()
 
-    dependencies_collector = DependenciesCollectorWithOuts(name="Collector01")
+    dependencies_collector = DepsCollwOuts(name="Collector01")
     dependencies_collector(dependencies=DVCZnOuts(load=True))
 
-    dependencies_collector = DependenciesCollectorWithOuts(name="Collector02")
-    dependencies_collector(
-        dependencies=DependenciesCollectorWithOuts(name="Collector01", load=True))
+    dependencies_collector = DepsCollwOuts(name="Collector02")
+    dependencies_collector(dependencies=DepsCollwOuts(name="Collector01", load=True))
 
-    subprocess.check_call(['dvc', 'repro'])
+    subprocess.check_call(["dvc", "repro"])

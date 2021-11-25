@@ -95,7 +95,7 @@ class DVCParams:
                 file_list = getattr(self, output_type)
                 # remove metadata from the affect files, because
                 #  they should never be a dependency
-                file_list = [x for x in file_list if x.name != "metadata.json"]
+                file_list = [x for x in file_list if Path(x).name != "metadata.json"]
                 affected_files += file_list
         return affected_files
 
