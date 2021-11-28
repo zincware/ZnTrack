@@ -267,6 +267,10 @@ class ZnTrackParent(ZnTrackType):
         for attr in remove_from__dict__:
             log.debug(f"removing: {self.child.__dict__.pop(attr, None)} ")
 
+    def has_params(self) -> bool:
+        """Check if any params are required by going through the defined params"""
+        return any([val.option == "params" for val in self.zntrack_options.values()])
+
     #################################
     # properties
     #################################
@@ -279,7 +283,7 @@ class ZnTrackParent(ZnTrackType):
         return self._zn_files
 
     @property
-    def python_interpreter(self):
+    def python_interpreter(self) -> str:
         """Find the most suitable python interpreter
 
         Try to run subprocess check calls to see, which python interpreter
@@ -352,57 +356,6 @@ class ZnTrackParent(ZnTrackType):
         self._stage_name = value
 
     @property
-    def descriptor_parameters(self):
-        """Get all ZnTrackOptions (except loaded)"""
-        internals = {}
-        for attr, val in self.zntrack_options.items():
-            if val.load:
-                continue
-            option_dict = internals.get(val.option, {})
-            # Values in the dictionary are of HIGHER PRIORITY, because some
-            #  methods e.g. use a descriptor and store the values in a serialized
-            #  way in the __dict__ (e.g. zn.Methods())
-            try:
-                option_dict[val.name] = self.child.__dict__[attr]
-            except KeyError:
-                # if the values are not stored in the __dict__
-                #  they are often only accessible via a getattr.
-                #  Although this is of LESS PRIORITY!
-                option_dict[val.name] = getattr(self.child, attr)
-
-            internals[val.option] = option_dict
-
-        return internals
-
-    @descriptor_parameters.setter
-    def descriptor_parameters(self, value: dict):
-        """Save all ZnTrackOptions/Internals (except loaded)
-
-        Stores all passed options in the child.__dict__
-
-        Parameters
-        ----------
-        value: dict
-            {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
-        """
-        for option in value.values():
-            for key, val in option.items():
-                if isinstance(val, ZnTrackStage):
-                    # Load the ZnTrackStage
-                    self.child.__dict__[key] = val.load_zntrack_node()
-                elif isinstance(val, list):
-                    try:
-                        self.child.__dict__[key] = [
-                            item.load_zntrack_node() for item in val
-                        ]
-                    except AttributeError:
-                        # Everything except the ZnTrackStage
-                        self.child.__dict__[key] = val
-                else:
-                    # Everything except the ZnTrackStage
-                    self.child.__dict__[key] = val
-
-    @property
     def zntrack_options(self) -> Dict[str, ZnTrackOption]:
         """Get all ZnTracKOptions in child
 
@@ -419,7 +372,7 @@ class ZnTrackParent(ZnTrackType):
         return zntrack_options
 
     #################################
-    # the messy rest
+    # more complex functions
     #################################
 
     def update_dvc(self):
@@ -458,10 +411,6 @@ class ZnTrackParent(ZnTrackType):
                 else:
                     self.dvc.update(child_val, option)
 
-    def has_params(self) -> bool:
-        """Check if any params are required by going through the defined params"""
-        return any([val.option == "params" for val in self.zntrack_options.values()])
-
     def write_dvc(
         self,
         slurm: bool = False,
@@ -492,8 +441,6 @@ class ZnTrackParent(ZnTrackType):
         script = ["dvc", "run", "-n", self.stage_name]
 
         script += self.dvc.dvc_arguments
-        # TODO if no DVC.result / loaded option
-        #  are assigned, no json file will be written!
 
         if self.has_params():
             script += [
@@ -506,7 +453,6 @@ class ZnTrackParent(ZnTrackType):
 
         script.extend(self.dvc_options.dvc_arguments)
 
-        # TODO use dataclass get_option to write the script!
         if slurm:
             log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             log.warning(
@@ -543,9 +489,29 @@ class ZnTrackParent(ZnTrackType):
 
         Update e.g. the parameters, out paths, etc. in the zntrack.json file
         """
+        descriptor_parameters = {}
+
+        for attr, val in self.zntrack_options.items():
+            if val.load:
+                continue
+            option_dict = descriptor_parameters.get(val.option, {})
+            # Values in the dictionary are of HIGHER PRIORITY, because some
+            #  methods e.g. use a descriptor and store the values in a serialized
+            #  way in the __dict__ (e.g. zn.Methods())
+            try:
+                option_dict[val.name] = self.child.__dict__[attr]
+            except KeyError:
+                # if the values are not stored in the __dict__
+                #  they are often only accessible via a getattr.
+                #  Although this is of LESS PRIORITY!
+                option_dict[val.name] = getattr(self.child, attr)
+
+            descriptor_parameters[val.option] = option_dict
+
+        log.debug(f"Serializing {descriptor_parameters}")
+
         full_internals = self.dvc.internals
-        log.debug(f"Serializing {self.descriptor_parameters}")
-        full_internals[self.stage_name] = serializer(self.descriptor_parameters)
+        full_internals[self.stage_name] = serializer(descriptor_parameters)
         log.debug(f"Saving {full_internals[self.stage_name]}")
         self.dvc.internals = full_internals
 
@@ -553,8 +519,26 @@ class ZnTrackParent(ZnTrackType):
         """Load the descriptor_parameters from the zntrack.json file"""
         try:
             log.debug(f"un-serialize {self.dvc.internals[self.stage_name]}")
-            self.descriptor_parameters = deserializer(
-                self.dvc.internals[self.stage_name]
-            )
+            stage_internals = deserializer(self.dvc.internals[self.stage_name])
+
+            # stage_internals = {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
+
+            for option in stage_internals.values():
+                for key, val in option.items():
+                    if isinstance(val, ZnTrackStage):
+                        # Load the ZnTrackStage
+                        self.child.__dict__[key] = val.load_zntrack_node()
+                    elif isinstance(val, list):
+                        try:
+                            self.child.__dict__[key] = [
+                                item.load_zntrack_node() for item in val
+                            ]
+                        except AttributeError:
+                            # Everything except the ZnTrackStage
+                            self.child.__dict__[key] = val
+                    else:
+                        # Everything except the ZnTrackStage
+                        self.child.__dict__[key] = val
+
         except KeyError:
             log.debug(f"No descriptor_parameters found for {self.stage_name}")
