@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Union, List
 import json
 
-from zntrack.utils import is_jsonable
+from zntrack.utils import is_jsonable, deserializer, serializer
 
 log = logging.getLogger(__name__)
 
@@ -41,7 +41,8 @@ class DVCOptions:
     force: bool = False
     no_run_cache: bool = False
 
-    def get_dvc_arguments(self) -> list:
+    @property
+    def dvc_arguments(self) -> list:
         """Get the activated options
 
         Returns
@@ -94,7 +95,40 @@ class DVCParams:
 
     plots_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
 
-    def get_dvc_arguments(self) -> list:
+    def update(self, value, option):
+        """Update internals
+
+        Update the selected internal (by option) with the given value.
+        In the case of a ZnTrackOption it will update via the affected files.
+
+        Parameters
+        ----------
+        value:
+            Either a str/path to a file or a ZnTrackType class
+            where all ZnTrackType.affected_files will be added to the dependencies
+        option: str
+            A DVC option e.g. outs, or metric_no_cache, ...
+
+        """
+        try:
+            value.zntrack.dvc: DVCParams
+            # Check if the passed value is a Node. If yes
+            #  add all affected files as dependencies
+            value.zntrack.update_dvc()
+            log.debug(f"Found Node dependency. Calling update_dvc on {value}")
+            dvc_option_list = getattr(self, option)
+            dvc_option_list += value.zntrack.dvc.affected_files
+            setattr(self, option, dvc_option_list)
+        except AttributeError:
+            try:
+                getattr(self, option).append(value)
+            except AttributeError:
+                # descriptors_from_file / params will be skipped
+                #  they are not part of the dataclass.
+                log.debug(f"'DVCParams' object has no attribute '{option}'")
+
+    @property
+    def dvc_arguments(self) -> list:
         """Combine the attributes with the corresponding DVC option
 
         Returns
@@ -224,6 +258,34 @@ class ZnFiles:
     def node_path(self) -> Path:
         """Path to the directory where all files are stored"""
         return self.directory / self.node_name
+
+    @property
+    def internals(self) -> dict:
+        data = {}
+        for option in self.__annotations__:
+            file = self.node_path / getattr(self, option)
+            try:
+                data.update(
+                    deserializer(json.loads(file.read_text()))
+                )
+            except FileNotFoundError:
+                log.debug(f"No descriptors_from_file found for {option}!")
+
+        return data
+
+    @internals.setter
+    def internals(self, values: dict):
+        for option, values in values.items():
+            # At least one file will be written -> create the directory
+            self.make_path()
+            file = self.node_path / getattr(self, option)
+
+            data = serializer(values)
+            if not is_jsonable(data):
+                raise ValueError(f"{data} is not JSON serializable")
+            log.debug(f"Writing {file} to {file}")
+
+            file.write_text(json.dumps(data, indent=4))
 
 
 @dataclass(frozen=True, order=True)
