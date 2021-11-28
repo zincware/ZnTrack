@@ -265,9 +265,7 @@ class ZnFiles:
         for option in self.__annotations__:
             file = self.node_path / getattr(self, option)
             try:
-                data.update(
-                    deserializer(json.loads(file.read_text()))
-                )
+                data.update(deserializer(json.loads(file.read_text())))
             except FileNotFoundError:
                 log.debug(f"No descriptors_from_file found for {option}!")
 
