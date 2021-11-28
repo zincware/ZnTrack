@@ -47,4 +47,3 @@ def test_load_before_repro(tmp_path):
     a(3)
 
     project.repro()
-
