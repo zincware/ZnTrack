@@ -19,7 +19,7 @@ from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
 from zntrack.core.data_classes import DVCParams, ZnFiles, DVCOptions
 from pathlib import Path
-from zntrack.utils import is_jsonable, serializer, deserializer
+from zntrack.utils import is_jsonable, serializer, deserializer, config
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
 
 from typing import TYPE_CHECKING
@@ -167,8 +167,10 @@ class ZnTrackParent(ZnTrackType):
         self.update_dvc()
         self.save_internals()
 
-        self.dvc_options = dvc_options
+        if config.no_dvc:
+            return
 
+        self.dvc_options = dvc_options
         self.write_dvc(slurm, silent)
 
     def pre_run(self):
@@ -580,7 +582,16 @@ class ZnTrackParent(ZnTrackType):
                 if val.load:
                     continue
                 option_dict = internals.get(val.option, {})
-                option_dict[val.name] = getattr(self.child, attr)
+                # Values in the dictionary are of HIGHER PRIORITY, because some
+                #  methods e.g. use a descriptor and store the values in a serialized
+                #  way in the __dict__ (e.g. zn.Methods())
+                try:
+                    option_dict[val.name] = self.child.__dict__[attr]
+                except KeyError:
+                    # if the values are not stored in the __dict__
+                    #  they are often only accessible via a getattr.
+                    #  Although this is of LESS PRIORITY!
+                    option_dict[val.name] = getattr(self.child, attr)
 
                 internals[val.option] = option_dict
 
