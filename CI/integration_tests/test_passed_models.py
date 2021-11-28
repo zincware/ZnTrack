@@ -84,6 +84,7 @@ def test_stage_addition(tmp_path):
 
     project.name = "TestModel2"
     project.run()
+    project.repro()
 
     project.load("TestModel1")
     model = Model(id_=0)

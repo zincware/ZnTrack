@@ -38,6 +38,9 @@ class DVCZnOuts:
     data_file: Path = dvc.outs(Path("data"))
     data: str = zn.outs()
 
+    def __call__(self, *args, **kwargs):
+        pass
+
     def run(self):
         self.data_file.write_text("Lorem Ipsum")
         self.data = "Lorem Ipsum"
@@ -143,7 +146,8 @@ def test_expand_dependencies(dvc_repo_path):
     subprocess.check_call(["dvc", "repro"])
 
 
-def test_expand_dependencies_with_outs(dvc_repo_path):
+def test_exp_deps_w_outs(dvc_repo_path):
+    """test_expand_dependencies_with_outs"""
     os.chdir(dvc_repo_path)
 
     dvc_zn_outs = DVCZnOuts()

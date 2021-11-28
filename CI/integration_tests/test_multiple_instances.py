@@ -34,7 +34,7 @@ class ComputeA:
         self.out = np.power(2, self.inp).item()
 
 
-def test_instance_interference(tmp_path):
+def test_load_before_repro(tmp_path):
     """Check that the instances do not interact with each other"""
     shutil.copy(__file__, tmp_path)
     os.chdir(tmp_path)
@@ -46,5 +46,5 @@ def test_instance_interference(tmp_path):
     _ = ComputeA(id_=0)
     a(3)
 
-    project.run()
-    project.load()
+    project.repro()
+

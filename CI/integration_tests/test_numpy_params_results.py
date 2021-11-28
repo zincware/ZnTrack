@@ -50,7 +50,7 @@ def test_stage_addition(tmp_path):
     a(np.arange(5))
 
     project.run()
-    project.load()
+    project.repro()
     finished_stage = ComputeA(id_=0)
     np.testing.assert_array_equal(finished_stage.out, np.array([1, 2, 4, 8, 16]))
     np.testing.assert_array_equal(finished_stage.inp, np.arange(5))

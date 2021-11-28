@@ -121,7 +121,7 @@ def test_stage_addition(tmp_path):
     ab()
 
     project.run()
-    project.load()
+    project.repro()
     finished_stage = ComputeAB(load=True)
     assert finished_stage.out == 31
 

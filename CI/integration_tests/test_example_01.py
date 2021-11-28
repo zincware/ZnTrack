@@ -97,6 +97,7 @@ def test_stage_addition(tmp_path):
     stage(50, 100)
     project.name = "Test2"
     project.run()
+    project.repro()
 
     project.load("Test1")
     finished_stage = StageAddition(id_=0)
@@ -119,7 +120,7 @@ def test_stage_io(tmp_path):
     stage = StageIO()
     stage(deps.resolve())
     project.run()
-    project.load()
+    project.repro()
 
     stage = StageIO(id_=0)
 
