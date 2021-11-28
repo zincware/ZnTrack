@@ -15,6 +15,9 @@ import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union, List
+import json
+
+from zntrack.utils import is_jsonable
 
 log = logging.getLogger(__name__)
 
@@ -124,8 +127,13 @@ class DVCParams:
 
         return out
 
-    def get_affected_files(self) -> list:
+    @property
+    def affected_files(self) -> list:
         """Collects all files that this Node writes to
+
+        This will contain the stage.json for descriptors_from_file, but also
+        all outs, plot, metrics, ... and also all files changed by
+        zn.<option>
 
         Returns
         -------
@@ -146,6 +154,39 @@ class DVCParams:
                 file_list = [x for x in file_list if Path(x).name != "metadata.json"]
                 affected_files += file_list
         return affected_files
+
+    @property
+    def internals(self) -> dict:
+        """Load the content of the internals_file as dict
+
+        Returns
+        -------
+        dict:
+            JSON content of internals file converted to a dict.
+            When the file is not available it will return an empty dict
+        """
+        try:
+            return json.loads(self.internals_file.read_text())
+        except FileNotFoundError:
+            log.debug(f"Could not load params from {self.internals_file}!")
+        return {}
+
+    @internals.setter
+    def internals(self, value: dict):
+        """Update the internals_file
+
+        Save the content of value to the internals file.
+        This will overwrite the file entirely and therefore it must be updated /
+        read in before writing to it.
+        """
+        log.debug(f"Writing updates to {self.internals_file} as {value}")
+        value.update({"default": None})
+
+        if not is_jsonable(value):
+            raise ValueError(f"{value} is not JSON serializable")
+
+        self.internals_file.parent.mkdir(exist_ok=True, parents=True)
+        self.internals_file.write_text(json.dumps(value, indent=4))
 
 
 @dataclass(frozen=False, order=True, init=True)
