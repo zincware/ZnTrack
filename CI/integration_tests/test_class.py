@@ -29,11 +29,10 @@ class BasicTest:
         self.results = {"name": self.parameters["name"]}
 
 
-@pytest.fixture(autouse=True)
-def prepare_env():
-    temp_dir = TemporaryDirectory()
-    shutil.copy(__file__, temp_dir.name)
-    os.chdir(temp_dir.name)
+@pytest.fixture
+def project_path(tmp_path):
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
 
     project = ZnTrackProject()
     project.create_dvc_repository()
@@ -49,27 +48,27 @@ def prepare_env():
     project.name = "Test1"
     project.repro()
 
-    yield
-
-    os.chdir(cwd)
-    temp_dir.cleanup()
+    return tmp_path
 
 
-def test_parameters():
+def test_parameters(project_path):
     """Test that the parameters are read correctly"""
+    os.chdir(project_path)
     base = BasicTest(load=True)
     assert base.parameters == dict(
         name="PyTest", values=[2, 4, 8, 16, 32, 64, 128, 256]
     )
 
 
-def test_results():
+def test_results(project_path):
     """Test that the results are read correctly"""
+    os.chdir(project_path)
     base = BasicTest(load=True)
     assert base.results == {"name": "PyTest"}
 
 
-def test_deps():
+def test_deps(project_path):
     """Test that the dependencies are stored correctly"""
+    os.chdir(project_path)
     base = BasicTest(load=True)
     assert base.deps == [Path("deps1", "input.json"), Path("deps2", "input.json")]

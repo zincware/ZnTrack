@@ -63,20 +63,10 @@ class Model2:
         self.parent.result = f"TestModel2 received params: {self.params}!"
 
 
-@pytest.fixture(autouse=True)
-def prepare_env():
-    temp_dir = TemporaryDirectory()
-    shutil.copy(__file__, temp_dir.name)
-    os.chdir(temp_dir.name)
-
-    yield
-
-    os.chdir(cwd)
-    temp_dir.cleanup()
-
-
-def test_stage_addition():
+def test_stage_addition(tmp_path):
     """Check that the dvc repro works"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.create_dvc_repository()
 
