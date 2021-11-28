@@ -34,6 +34,7 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
    _overview/04_metrics_and_plots.ipynb
    _overview/05_metadata.ipynb
    _overview/06_named_nodes.ipynb
+   _overview/OptionalDVC.ipynb
    jupyter.rst
 
 .. toctree::

@@ -17,7 +17,7 @@ import json
 
 from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
-from zntrack.core.data_classes import DVCParams, ZnFiles
+from zntrack.core.data_classes import DVCParams, ZnFiles, DVCOptions
 from pathlib import Path
 from zntrack.utils import is_jsonable, serializer, deserializer, config
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
@@ -88,6 +88,7 @@ class ZnTrackParent(ZnTrackType):
         # This is True while inside the init to avoid ValueErrors
 
         self.dvc = DVCParams()
+        self.dvc_options: DVCOptions = None
         self.nb_mode = False  # notebook mode
         self._zn_files = None
 
@@ -140,7 +141,10 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-        self, force=False, exec_=False, always_changed=False, slurm=False, silent=False
+        self,
+        dvc_options: DVCOptions,
+        slurm: bool,
+        silent: bool,
     ):
         """Method after call
 
@@ -149,21 +153,14 @@ class ZnTrackParent(ZnTrackType):
 
         Parameters
         ----------
-        force: bool, default=False
-            Use dvc run with `--force` to overwrite previous stages!
-        exec_: bool, default=False
-            Run the stage directly and don't use dvc with '--no-exec'.
-            This will not output stdout/stderr in real time and should only be used
-            for fast functions!
-        always_changed: bool, default=False
-            Set the always changed dvc argument. See the official DVC docs.
-            Can be useful for debugging / development.
+        dvc_options: DVCOptions
+            Dataclass collecting all the optional DVC options, e.g. force, external,...
         slurm: bool, default=False
             Use `SRUN` with self.slurm_config for this stage - WARNING this doesn't
             mean that every stage uses slurm and you may accidentally run stages on
             your HEAD Node. You can check the commands in dvc.yaml!
         silent: bool
-            If called with exec_=True this allows to hide the output from the
+            If called with no_exec=False this allows to hide the output from the
             subprocess call.
 
         """
@@ -173,7 +170,8 @@ class ZnTrackParent(ZnTrackType):
         if config.no_dvc:
             return
 
-        self.write_dvc(force, exec_, always_changed, slurm, silent)
+        self.dvc_options = dvc_options
+        self.write_dvc(slurm, silent)
 
     def pre_run(self):
         """Command to be run before run
@@ -332,9 +330,6 @@ class ZnTrackParent(ZnTrackType):
 
     def write_dvc(
         self,
-        force=True,
-        exec_: bool = False,
-        always_changed: bool = False,
         slurm: bool = False,
         silent: bool = False,
     ):
@@ -345,18 +340,10 @@ class ZnTrackParent(ZnTrackType):
 
         Parameters
         ----------
-        force: bool, default = False
-            Force DVC to rerun this stage, even if the parameters haven't changed!
-        exec_: bool, default = False
-            if False, only write the stage to the dvc.yaml and run later.
-             Otherwise the stage and ALL dependencies will be executed!
-        always_changed: bool, default = False
-            Tell DVC to always rerun this stage, e.g. for non-deterministic stages
-            or for testing
         slurm: bool, default = False
             Use SLURM to run DVC stages on a Cluster.
         silent: bool
-            If called with exec_=True this allows to hide the output from the
+            If called with no_exec=False this allows to hide the output from the
             subprocess call.
 
         Notes
@@ -383,22 +370,9 @@ class ZnTrackParent(ZnTrackType):
         if self.nb_mode:
             script += ["--deps", Path(*self.module.split(".")).with_suffix(".py")]
 
-        if force:
-            script.append("--force")
-            if not silent:
-                log.warning("Overwriting existing configuration!")
-        #
-        if not exec_:
-            script.append("--no-exec")
-        elif not silent:
-            log.warning(
-                "You will not be able to see the stdout/stderr "
-                "of the process in real time!"
-            )
-        #
-        if always_changed:
-            script.append("--always-changed")
-        #
+        script.extend(self.dvc_options.get_dvc_arguments())
+
+        # TODO use dataclass get_option to write the script!
         if slurm:
             log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             log.warning(
