@@ -214,7 +214,6 @@ class DVCParams:
         read in before writing to it.
         """
         log.debug(f"Writing updates to {self.internals_file} as {value}")
-        value.update({"default": None})
 
         if not is_jsonable(value):
             raise ValueError(f"{value} is not JSON serializable")
