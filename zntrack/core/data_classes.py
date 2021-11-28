@@ -203,7 +203,7 @@ class DVCParams:
             return json.loads(self.internals_file.read_text())
         except FileNotFoundError:
             log.debug(f"Could not load params from {self.internals_file}!")
-        return {}
+            return {}
 
     @internals.setter
     def internals(self, value: dict):
@@ -251,18 +251,28 @@ class ZnFiles:
     plots: Path = Path("plots.json")
     plots_no_cache: Path = Path("plots_no_cache.json")
 
-    def make_path(self):
-        self.node_path.mkdir(parents=True, exist_ok=True)
-
     @property
     def node_path(self) -> Path:
         """Path to the directory where all files are stored"""
         return self.directory / self.node_name
 
+    def make_path(self):
+        """Create the directory for the nodes outputs"""
+        self.node_path.mkdir(parents=True, exist_ok=True)
+
     @property
     def internals(self) -> dict:
+        """Load all zn.<options> from files and deserialize them
+
+        Returns
+        -------
+        dict:
+            A dictionary of the de-serialized zn.<options> in form of a dictionary
+            {option_name: value}
+
+        """
         data = {}
-        for option in self.__annotations__:
+        for option in self.__dataclass_fields__:
             file = self.node_path / getattr(self, option)
             try:
                 data.update(deserializer(json.loads(file.read_text())))
@@ -273,6 +283,14 @@ class ZnFiles:
 
     @internals.setter
     def internals(self, values: dict):
+        """Save all zn.<options> into the respective files
+
+        Parameters
+        ----------
+        values: dict
+            A dictionary of {option_name, values} that will be serialized and saved
+            into the corresponding json file
+        """
         for option, values in values.items():
             # At least one file will be written -> create the directory
             self.make_path()
