@@ -70,7 +70,8 @@ class DVCParams:
                         f"not be processed - skipping it."
                     )
                     continue
-                out += [f"--{dvc_param.replace('_', '-')}", param_val]
+                # Always convert to posix path
+                out += [f"--{dvc_param.replace('_', '-')}", Path(param_val).as_posix()]
 
                 processed_params.append(param_val)
 
