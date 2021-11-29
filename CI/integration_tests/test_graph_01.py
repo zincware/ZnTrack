@@ -105,21 +105,10 @@ class ComputeABNamed:
         self.out = self.a.out + self.b.out
 
 
-@pytest.fixture(autouse=True)
-def prepare_env():
-    """Create temporary directory"""
-    temp_dir = TemporaryDirectory()
-    shutil.copy(__file__, temp_dir.name)
-    os.chdir(temp_dir.name)
-
-    yield
-
-    os.chdir(cwd)
-    temp_dir.cleanup()
-
-
-def test_stage_addition():
+def test_stage_addition(tmp_path):
     """Check that the dvc repro works"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
@@ -132,13 +121,15 @@ def test_stage_addition():
     ab()
 
     project.run()
-    project.load()
+    project.repro()
     finished_stage = ComputeAB(load=True)
     assert finished_stage.out == 31
 
 
-def test_stage_addition_named():
+def test_stage_addition_named(tmp_path):
     """Check that the dvc repro works with named stages"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
@@ -155,8 +146,10 @@ def test_stage_addition_named():
     assert finished_stage.out == 31
 
 
-def test_stage_addition_run():
+def test_stage_addition_run(tmp_path):
     """Check that the PyTracks run method works"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
@@ -176,8 +169,10 @@ def test_stage_addition_run():
     assert finished_stage.out == 31
 
 
-def test_stage_addition_named_run():
+def test_stage_addition_named_run(tmp_path):
     """Check that the PyTracks run method works with named stages"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.name = "test01"
     project.create_dvc_repository()
@@ -197,8 +192,10 @@ def test_stage_addition_named_run():
     assert finished_stage.out == 31
 
 
-def test_named_single_stage():
+def test_named_single_stage(tmp_path):
     """Test a single named stage"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.create_dvc_repository()
 

@@ -81,20 +81,10 @@ class StageAddition:
         Path(self.outs).write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
 
 
-@pytest.fixture(autouse=True)
-def prepare_env():
-    temp_dir = TemporaryDirectory()
-    shutil.copy(__file__, temp_dir.name)
-    os.chdir(temp_dir.name)
-
-    yield
-
-    os.chdir(cwd)
-    temp_dir.cleanup()
-
-
-def test_stage_addition():
+def test_stage_addition(tmp_path):
     """Check that the dvc repro works"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.create_dvc_repository()
 
@@ -107,6 +97,7 @@ def test_stage_addition():
     stage(50, 100)
     project.name = "Test2"
     project.run()
+    project.repro()
 
     project.load("Test1")
     finished_stage = StageAddition(id_=0)
@@ -117,7 +108,9 @@ def test_stage_addition():
     assert finished_stage.sum == 150
 
 
-def test_stage_io():
+def test_stage_io(tmp_path):
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.name = "Test1"
     project.create_dvc_repository()
@@ -127,7 +120,7 @@ def test_stage_io():
     stage = StageIO()
     stage(deps.resolve())
     project.run()
-    project.load()
+    project.repro()
 
     stage = StageIO(id_=0)
 

@@ -37,7 +37,7 @@ class outs(ZnTrackOption):
 
 
 class metrics(ZnTrackOption):
-    option = "metrics"
+    option = "metrics_no_cache"
     load = True
 
 
