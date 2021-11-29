@@ -8,6 +8,8 @@ Copyright Contributors to the Zincware Project.
 
 Description: 
 """
+import pytest
+
 from zntrack import Node, dvc, zn
 from zntrack.core.data_classes import DVCOptions, DVCParams, ZnFiles
 import os
@@ -33,10 +35,13 @@ def test_dvc_options(tmp_path):
     ]
 
 
-def test_dvc_params_update(tmp_path):
-    os.chdir(tmp_path)
+@pytest.fixture
+def dvc_params():
+    return DVCParams(node_name="test_node")
 
-    dvc_params = DVCParams()
+
+def test_dvc_params_update(tmp_path, dvc_params):
+    os.chdir(tmp_path)
 
     dvc_params.update(value="deps.json", option="deps")
     dvc_params.update(value="outs.json", option="outs")
@@ -44,7 +49,7 @@ def test_dvc_params_update(tmp_path):
     assert dvc_params.dvc_arguments == ["--deps", "deps.json", "--outs", "outs.json"]
 
 
-def test_dvc_params_update_node_dvc(tmp_path):
+def test_dvc_params_update_node_dvc(tmp_path, dvc_params):
     os.chdir(tmp_path)
 
     @Node()
@@ -55,7 +60,6 @@ def test_dvc_params_update_node_dvc(tmp_path):
         def run(self):
             pass
 
-    dvc_params = DVCParams()
     dvc_params.update(value=DVCTest(load=True), option="deps")
 
     assert dvc_params.dvc_arguments == [
@@ -66,7 +70,7 @@ def test_dvc_params_update_node_dvc(tmp_path):
     ]
 
 
-def test_dvc_params_update_node_zn(tmp_path):
+def test_dvc_params_update_node_zn(tmp_path, dvc_params):
     os.chdir(tmp_path)
 
     @Node()
@@ -77,7 +81,6 @@ def test_dvc_params_update_node_zn(tmp_path):
         def run(self):
             pass
 
-    dvc_params = DVCParams()
     dvc_params.update(value=DVCTest(load=True), option="deps")
 
     assert dvc_params.dvc_arguments == [
@@ -88,7 +91,7 @@ def test_dvc_params_update_node_zn(tmp_path):
     ]
 
 
-def test_dvc_params_update_node_zn2(tmp_path):
+def test_dvc_params_update_node_zn2(tmp_path, dvc_params):
     os.chdir(tmp_path)
 
     @Node()
@@ -99,7 +102,6 @@ def test_dvc_params_update_node_zn2(tmp_path):
         def run(self):
             pass
 
-    dvc_params = DVCParams()
     dvc_params.update(value=DVCTest(load=True), option="deps")
 
     assert dvc_params.dvc_arguments == [
@@ -110,10 +112,8 @@ def test_dvc_params_update_node_zn2(tmp_path):
     ]
 
 
-def test_dvc_params_affected_files(tmp_path):
+def test_dvc_params_affected_files(tmp_path, dvc_params):
     os.chdir(tmp_path)
-
-    dvc_params = DVCParams()
 
     dvc_params.update(value="deps.json", option="deps")
 
@@ -123,10 +123,8 @@ def test_dvc_params_affected_files(tmp_path):
     assert dvc_params.affected_files == [f"file_{x}" for x in range(10)]
 
 
-def test_dvc_params_internals(tmp_path):
+def test_dvc_params_internals(tmp_path, dvc_params):
     os.chdir(tmp_path)
-
-    dvc_params = DVCParams()
 
     internal_test = {"a": 1, "b": "test", "c": {"nested": True}}
 

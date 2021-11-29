@@ -75,7 +75,8 @@ class DVCParams:
     """PyTracks DVCParams"""
 
     # Node Parameter
-    internals_file: Path = Path("config", "zntrack.json")
+    node_name: str
+    internals_path: Path = Path("config")
 
     # DVC Parameter
     deps: List[Path] = field(default_factory=list)
@@ -94,6 +95,11 @@ class DVCParams:
     plots: Union[List[Path], List[str]] = field(default_factory=list)
 
     plots_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
+
+    @property
+    def internals_file(self) -> Path:
+        """Path to the parameter file"""
+        return self.internals_path / f"{self.node_name}.json"
 
     def update(self, value, option):
         """Update internals
@@ -140,7 +146,7 @@ class DVCParams:
         out = []
 
         for dvc_param in self.__dataclass_fields__:
-            if dvc_param == "internals_file":
+            if dvc_param in ["internals_path", "node_name"]:
                 continue
             processed_params = []
             for param_val in getattr(self, dvc_param):
@@ -177,7 +183,7 @@ class DVCParams:
         # Ignore dependencies, they will not be changed by this Node
 
         output_types = [
-            x for x in self.__dataclass_fields__ if x not in ["deps", "internals_file"]
+            x for x in self.__dataclass_fields__ if x not in ["deps", "internals_path", "node_name"]
         ]
         affected_files = []
         for output_type in output_types:
@@ -213,7 +219,7 @@ class DVCParams:
         This will overwrite the file entirely and therefore it must be updated /
         read in before writing to it.
         """
-        log.debug(f"Writing updates to {self.internals_file} as {value}")
+        log.debug(f"Saving dvc.internals {value}")
 
         if not is_jsonable(value):
             raise ValueError(f"{value} is not JSON serializable")
