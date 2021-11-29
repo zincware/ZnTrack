@@ -102,7 +102,7 @@ class DVCParams:
     @property
     def _exclude_from_loop(self) -> list:
         """All values of the dataclass that should be excluded when looping over"""
-        return ['node_name', 'internals_file', 'hidden_internals_file']
+        return ["node_name", "internals_file", "hidden_internals_file"]
 
     def update(self, value, option):
         """Update internals
