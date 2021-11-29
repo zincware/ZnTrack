@@ -454,7 +454,10 @@ class ZnTrackParent(ZnTrackType):
             ]
 
         if self.nb_mode:
-            script += ["--deps", Path(*self.module.split(".")).with_suffix(".py")]
+            script += [
+                "--deps",
+                Path(*self.module.split(".")).with_suffix(".py").as_posix(),
+            ]
 
         script.extend(self.dvc_options.dvc_arguments)
 
