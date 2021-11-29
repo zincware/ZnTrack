@@ -75,22 +75,20 @@ class ZnTrackParent(ZnTrackType):
         # Parameters that will be overwritten by "child" classes
         self.slurm_config: SlurmConfig = SlurmConfig()
 
-        # Properties
-
-        self._module = None
-        self._stage_name = None
-
         self.running = False  # is set to true, when run_dvc
         self.load = False
         self.has_metadata = False
 
-        self.dvc_file = "dvc.yaml"
-        # This is True while inside the init to avoid ValueErrors
-
-        self.dvc = DVCParams()
-        self.dvc_options: DVCOptions = None
         self.nb_mode = False  # notebook mode
+
+        self.dvc_options: DVCOptions = DVCOptions()
+
+        # Property Storage
+        self._dvc = None
         self._zn_files = None
+
+        self._module = None
+        self._stage_name = None
 
     #################################
     # decorating methods
@@ -137,10 +135,10 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-        self,
-        dvc_options: DVCOptions,
-        slurm: bool,
-        silent: bool,
+            self,
+            dvc_options: DVCOptions,
+            slurm: bool,
+            silent: bool,
     ):
         """Method after call
 
@@ -283,6 +281,13 @@ class ZnTrackParent(ZnTrackType):
         return self._zn_files
 
     @property
+    def dvc(self) -> DVCParams:
+        """Get the DVCParams initialized with the stage name"""
+        if self._dvc is None:
+            self._dvc = DVCParams(node_name=self.stage_name)
+        return self._dvc
+
+    @property
     def python_interpreter(self) -> str:
         """Find the most suitable python interpreter
 
@@ -412,9 +417,9 @@ class ZnTrackParent(ZnTrackType):
                     self.dvc.update(child_val, option)
 
     def write_dvc(
-        self,
-        slurm: bool = False,
-        silent: bool = False,
+            self,
+            slurm: bool = False,
+            silent: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -445,7 +450,7 @@ class ZnTrackParent(ZnTrackType):
         if self.has_params():
             script += [
                 "--params",
-                f"{self.dvc.internals_file}:{self.stage_name}.params",
+                f"{self.dvc.internals_file}:params",
             ]
 
         if self.nb_mode:
@@ -509,17 +514,13 @@ class ZnTrackParent(ZnTrackType):
             descriptor_parameters[val.option] = option_dict
 
         log.debug(f"Serializing {descriptor_parameters}")
-
-        full_internals = self.dvc.internals
-        full_internals[self.stage_name] = serializer(descriptor_parameters)
-        log.debug(f"Saving {full_internals[self.stage_name]}")
-        self.dvc.internals = full_internals
+        self.dvc.internals = serializer(descriptor_parameters)
 
     def load_internals(self):
         """Load the descriptor_parameters from the zntrack.json file"""
         try:
-            log.debug(f"un-serialize {self.dvc.internals[self.stage_name]}")
-            stage_internals = deserializer(self.dvc.internals[self.stage_name])
+            log.debug(f"un-serialize {self.dvc.internals}")
+            stage_internals = deserializer(self.dvc.internals)
 
             # stage_internals = {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
 
