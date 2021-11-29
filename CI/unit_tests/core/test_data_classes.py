@@ -11,7 +11,7 @@ Description:
 import pytest
 
 from zntrack import Node, dvc, zn
-from zntrack.core.data_classes import DVCOptions, DVCParams, ZnFiles
+from zntrack.core.data_classes import DVCOptions, DVCParams, ZnParams
 import os
 
 
@@ -135,4 +135,4 @@ def test_dvc_params_internals(tmp_path, dvc_params):
 
 def test_zn_files():
     pass
-    # TODO add missing tests for ZnFiles!
+    # TODO add missing tests for ZnParams!

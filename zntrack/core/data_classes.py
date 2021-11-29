@@ -183,7 +183,9 @@ class DVCParams:
         # Ignore dependencies, they will not be changed by this Node
 
         output_types = [
-            x for x in self.__dataclass_fields__ if x not in ["deps", "internals_path", "node_name"]
+            x
+            for x in self.__dataclass_fields__
+            if x not in ["deps", "internals_path", "node_name"]
         ]
         affected_files = []
         for output_type in output_types:
@@ -229,8 +231,8 @@ class DVCParams:
 
 
 @dataclass(frozen=False, order=True, init=True)
-class ZnFiles:
-    """Collection of ZnFiles
+class ZnParams:
+    """Collection of ZnParams
 
     Files that support load=true.
     These files will be stored in nodes/<node_name>/file
