@@ -17,7 +17,7 @@ import json
 
 from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
-from zntrack.core.data_classes import DVCParams, ZnFiles, DVCOptions
+from zntrack.core.data_classes import DVCParams, ZnParams, DVCOptions
 from pathlib import Path
 from zntrack.utils import is_jsonable, serializer, deserializer, config
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
@@ -85,7 +85,7 @@ class ZnTrackParent(ZnTrackType):
 
         # Property Storage
         self._dvc = None
-        self._zn_files = None
+        self._zn = None
 
         self._module = None
         self._stage_name = None
@@ -125,7 +125,7 @@ class ZnTrackParent(ZnTrackType):
             self.add_metadata_descriptor()
         if self.load:
             self.load_internals()
-            self.child.__dict__.update(self.zn_files.internals)
+            self.child.__dict__.update(self.zn.internals)
             # update_dvc is not necessary but also should not hurt?!
             self.update_dvc()
 
@@ -135,10 +135,10 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-            self,
-            dvc_options: DVCOptions,
-            slurm: bool,
-            silent: bool,
+        self,
+        dvc_options: DVCOptions,
+        slurm: bool,
+        silent: bool,
     ):
         """Method after call
 
@@ -192,7 +192,7 @@ class ZnTrackParent(ZnTrackType):
                 except KeyError:
                     desc_from_file[val.option] = {val.name: getattr(self.child, attr)}
 
-        self.zn_files.internals = desc_from_file
+        self.zn.internals = desc_from_file
 
     #################################
     # stand-alone methods
@@ -274,11 +274,11 @@ class ZnTrackParent(ZnTrackType):
     #################################
 
     @property
-    def zn_files(self) -> ZnFiles:
-        """Get instance of the ZnFiles dataclass initialized with the stage name"""
-        if self._zn_files is None:
-            self._zn_files = ZnFiles(node_name=self.stage_name)
-        return self._zn_files
+    def zn(self) -> ZnParams:
+        """Get instance of the ZnParams dataclass initialized with the stage name"""
+        if self._zn is None:
+            self._zn = ZnParams(node_name=self.stage_name)
+        return self._zn
 
     @property
     def dvc(self) -> DVCParams:
@@ -396,8 +396,8 @@ class ZnTrackParent(ZnTrackType):
                 # params is processed  differently
                 continue
             elif val.load:
-                file = self.zn_files.node_path / getattr(self.zn_files, option)
-                # We want the filename to be metadata from the zn_files
+                file = self.zn.node_path / getattr(self.zn, option)
+                # We want the filename to be metadata from the zn
                 #  but the dvc option is metrics
                 #  TODO filename and option should be coupled more loosely
                 #    for load=True options to avoid this part here!
@@ -405,7 +405,7 @@ class ZnTrackParent(ZnTrackType):
                     option = "metrics"
                 # need to create the paths, because it is required for
                 # dvc to write the .gitignore
-                self.zn_files.make_path()
+                self.zn.make_path()
                 self.dvc.update(file, option)
             else:
                 child_val = getattr(self.child, attr)
@@ -420,9 +420,9 @@ class ZnTrackParent(ZnTrackType):
                     self.dvc.update(child_val, option)
 
     def write_dvc(
-            self,
-            slurm: bool = False,
-            silent: bool = False,
+        self,
+        slurm: bool = False,
+        silent: bool = False,
     ):
         """Write the DVC file using run.
 
