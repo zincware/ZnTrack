@@ -5,14 +5,15 @@
 Object-Relational Mapping for DVC
 ---------------------------------
 
-The ZnTrack [zɪŋk træk] package provides a Python ORM for DVC.
+The ZnTrack [zɪŋk træk] package provides an easy-to-use interface for DVC directly from within Python.
+It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml` as well as an the script and much more.
 
 For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
 
 Example
 ========
-ZnTrack allows you to convert most Python classes into a DVC stage, including
-parameters, dependencies and all DVC output types.
+With ZnTrack a DVC Node on the computational graph can be written as a Python class.
+DVC Options, such as parameters, input dependencies and output files are class attributes.
 
 .. code-block:: py
 
