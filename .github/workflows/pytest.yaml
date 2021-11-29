@@ -29,9 +29,9 @@ jobs:
         uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install requirements
+      - name: Install dev requirements
         run: |
-          pip3 install -r requirements.txt
+          pip3 install -r dev-requirements.txt
       - name: Install package
         run: |
           pip3 install .
