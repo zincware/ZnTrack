@@ -284,10 +284,7 @@ class ZnTrackParent(ZnTrackType):
     def dvc(self) -> DVCParams:
         """Get the DVCParams initialized with the stage name"""
         if self._dvc is None:
-            if config.single_config:
-                self._dvc = DVCParams(node_name="zntrack")
-            else:
-                self._dvc = DVCParams(node_name=self.stage_name)
+            self._dvc = DVCParams(node_name=self.stage_name)
         return self._dvc
 
     @property
@@ -451,11 +448,10 @@ class ZnTrackParent(ZnTrackType):
         script += self.dvc.dvc_arguments
 
         if self.has_params():
-            script += ["--params"]
-            if config.single_config:
-                script += [f"{self.dvc.internals_file}:{self.stage_name}.params"]
-            else:
-                script += [f"{self.dvc.internals_file}:params"]
+            script += [
+                "--params",
+                f"{self.dvc.internals_file}:params",
+            ]
 
         if self.nb_mode:
             script += ["--deps", Path(*self.module.split(".")).with_suffix(".py")]
@@ -517,23 +513,14 @@ class ZnTrackParent(ZnTrackType):
 
             descriptor_parameters[val.option] = option_dict
 
-        if config.single_config:
-            full_internals = self.dvc.internals
-            full_internals[self.stage_name] = serializer(descriptor_parameters)
-            log.debug(f"Saving {full_internals[self.stage_name]}")
-            self.dvc.internals = full_internals
-        else:
-            log.debug(f"Serializing {descriptor_parameters}")
-            self.dvc.internals = serializer(descriptor_parameters)
+        log.debug(f"Serializing {descriptor_parameters}")
+        self.dvc.internals = serializer(descriptor_parameters)
 
     def load_internals(self):
         """Load the descriptor_parameters from the zntrack.json file"""
         try:
             log.debug(f"un-serialize {self.dvc.internals}")
-            if config.single_config:
-                stage_internals = deserializer(self.dvc.internals[self.stage_name])
-            else:
-                stage_internals = deserializer(self.dvc.internals)
+            stage_internals = deserializer(self.dvc.internals)
 
             # stage_internals = {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
 

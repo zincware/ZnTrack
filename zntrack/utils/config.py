@@ -26,15 +26,12 @@ class Config:
         The path where jupyter notebooks should write the *.py
     no_dvc: bool, default = False
         Do not write a dvc file when true.
-    single_config: bool, experimental
-        Have a single config/zntrack.json instead of one per Node
     """
 
     debug: bool = False  # not implemented yet
     nb_name: str = None
     nb_class_path: Path = Path("src")
     no_dvc: bool = False
-    single_config: bool = False
 
 
 config = Config()
