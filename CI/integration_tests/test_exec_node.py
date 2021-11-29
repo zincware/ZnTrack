@@ -13,7 +13,7 @@ import shutil
 import os
 
 
-@Node(exec_=True)
+@Node(no_exec=False)
 class HelloWorld:
     """BasicTest class"""
 

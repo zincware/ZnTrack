@@ -19,6 +19,7 @@ import typing
 import functools
 
 from .zntrack import ZnTrackProperty
+from zntrack.core.data_classes import DVCOptions
 from zntrack.utils import config
 from zntrack.metadata import MetaData
 
@@ -36,8 +37,10 @@ class Node:
         cls=None,
         nb_name: str = None,
         name: str = None,
-        exec_: bool = False,
+        no_exec: bool = True,
         silent: bool = False,
+        external: bool = False,
+        no_commit: bool = False,
         **kwargs,
     ):
         """
@@ -53,19 +56,30 @@ class Node:
             A custom name for the DVC stage.
             !There is currently no check in place, that avoids overwriting an existing
             stage!
-        exec_: bool
-            Set the default value for exec_.
+        no_exec: bool
+            Set the default value for no_exec.
             If true, always run this stage immediately.
         silent: bool
-            If called with exec_=True this allows to hide the output from the
+            If called with no_exec=False this allows to hide the output from the
             subprocess call.
+        external: bool, default = False
+            Add the `--external` argument to the dvc run command, that indicates that
+            outs or deps can be located outside of the repository
+        no_commit: bool, default=False
+            Add the `--no-commit` argument to the dvc run command
         kwargs: No kwargs are implemented
         """
         if cls is not None:
             raise ValueError("Please use `@Node()` instead of `@Node`.")
         self.cls = cls
 
-        self.exec_ = exec_
+        if "exec_" in kwargs:
+            self.no_exec = not kwargs.get("exec_")
+            log.warning("DeprecationWarning: Please use no_exec instead of exec_")
+        else:
+            self.no_exec = no_exec
+        self.external = external
+        self.no_commit = no_commit
         self.silent = silent
 
         self.name = name
@@ -234,7 +248,11 @@ class Node:
                 log.debug("DeprecationWarning: Argument id_ will be removed eventually")
                 load = True
 
-            cls.zntrack.pre_init(name=name, load=load, has_metadata=self.has_metadata)
+            cls.zntrack.pre_init(
+                name=name,
+                load=load,
+                has_metadata=self.has_metadata,
+            )
             log.debug(f"Processing {cls.zntrack}")
             parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_init()
@@ -258,10 +276,12 @@ class Node:
             cls: TypeHintParent,
             *args,
             force=True,
-            exec_=self.exec_,
+            no_exec=self.no_exec,
             always_changed=False,
             slurm=False,
             silent=self.silent,
+            external=self.external,
+            no_commit=self.no_commit,
             **kwargs,
         ):
             """Wrapper around the call
@@ -274,15 +294,20 @@ class Node:
                 Args to be passed to the class
             force: bool
                 Whether to use dvc with the force argument
-            exec_: bool
-                Whether to use dvc with the exec argument
+            no_exec: bool, default=True
+                Whether to use dvc with the no_exec argument
             always_changed: bool
                 Whether to use dvc with the always_changed argument
             slurm: bool
                 Using SLURM with SRUN. (Experimental feature)
             silent: bool
-                If called with exec_=True this allows to hide the output from the
+                If called with no_exec=False this allows to hide the output from the
                 subprocess call.
+            external: bool, default = False
+                Add the `--external` argument to the dvc run command, that indicates
+                that outs or deps can be located outside of the repository
+            no_commit: bool, default=False
+                Add the `no-commit` dvc run argument.
             kwargs
 
             Returns
@@ -290,9 +315,26 @@ class Node:
             decorated class
 
             """
+
+            if "exec_" in kwargs:
+                no_exec = not kwargs.pop("exec_")
+                log.warning("DeprecationWarning: Please use no_exec instead of exec_")
+
+            dvc_options = DVCOptions(
+                force=force,
+                no_exec=no_exec,
+                always_changed=always_changed,
+                external=external,
+                no_commit=no_commit,
+            )
+
             cls.zntrack.pre_call()
             parsed_function = func(cls, *args, **kwargs)
-            cls.zntrack.post_call(force, exec_, always_changed, slurm, silent)
+            cls.zntrack.post_call(
+                dvc_options=dvc_options,
+                slurm=slurm,
+                silent=silent,
+            )
             return parsed_function
 
         return wrapper
