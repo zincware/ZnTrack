@@ -22,5 +22,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
-    install_requires=["dvc"],
+    install_requires=["dvc", "pyYAML"],
 )

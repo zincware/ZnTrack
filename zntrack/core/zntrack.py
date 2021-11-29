@@ -265,10 +265,6 @@ class ZnTrackParent(ZnTrackType):
         for attr in remove_from__dict__:
             log.debug(f"removing: {self.child.__dict__.pop(attr, None)} ")
 
-    def has_params(self) -> bool:
-        """Check if any params are required by going through the defined params"""
-        return any([val.option == "params" for val in self.zntrack_options.values()])
-
     #################################
     # properties
     #################################
@@ -376,6 +372,28 @@ class ZnTrackParent(ZnTrackType):
                 zntrack_options[attr] = val
         return zntrack_options
 
+    @property
+    def has_user_params(self) -> bool:
+        """Check for any dvc.params()
+
+        Returns
+        --------
+        bool:
+            If the Node has any dvc.params() that will be passed to the params file
+             and are of interest to the user
+        """
+        return "params" in self.dvc.internals
+
+    @property
+    def has_zntrack_params(self) -> bool:
+        """Check for any other dvc.<option> except params
+
+        If any other dvc.<option> has to store some values they will be seperated
+        from the dvc.params() in a separate file which is usually of no interest
+        to the user.
+        """
+        return any([key for key in self.dvc.internals if key == "params"])
+
     #################################
     # more complex functions
     #################################
@@ -447,10 +465,15 @@ class ZnTrackParent(ZnTrackType):
 
         script += self.dvc.dvc_arguments
 
-        if self.has_params():
+        if self.has_user_params:
             script += [
                 "--params",
-                f"{self.dvc.internals_file}:params",
+                f"{self.dvc.internals_file}:{self.stage_name}",
+            ]
+        if self.has_zntrack_params:
+            script += [
+                "--params",
+                f"{self.dvc.hidden_internals_file}:{self.stage_name}",
             ]
 
         if self.nb_mode:

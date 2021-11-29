@@ -16,6 +16,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Union, List
 import json
+import yaml
 
 from zntrack.utils import is_jsonable, deserializer, serializer
 
@@ -76,7 +77,9 @@ class DVCParams:
 
     # Node Parameter
     node_name: str
-    internals_path: Path = Path("config")
+
+    internals_file: Path = Path("params.yaml")
+    hidden_internals_file: Path = Path(".zntrack.json")
 
     # DVC Parameter
     deps: List[Path] = field(default_factory=list)
@@ -97,9 +100,9 @@ class DVCParams:
     plots_no_cache: Union[List[Path], List[str]] = field(default_factory=list)
 
     @property
-    def internals_file(self) -> Path:
-        """Path to the parameter file"""
-        return self.internals_path / f"{self.node_name}.json"
+    def _exclude_from_loop(self) -> list:
+        """All values of the dataclass that should be excluded when looping over"""
+        return ['node_name', 'internals_file', 'hidden_internals_file']
 
     def update(self, value, option):
         """Update internals
@@ -146,7 +149,7 @@ class DVCParams:
         out = []
 
         for dvc_param in self.__dataclass_fields__:
-            if dvc_param in ["internals_path", "node_name"]:
+            if dvc_param in self._exclude_from_loop:
                 continue
             processed_params = []
             for param_val in getattr(self, dvc_param):
@@ -185,7 +188,7 @@ class DVCParams:
         output_types = [
             x
             for x in self.__dataclass_fields__
-            if x not in ["deps", "internals_path", "node_name"]
+            if x not in ["deps"] + self._exclude_from_loop
         ]
         affected_files = []
         for output_type in output_types:
@@ -198,36 +201,106 @@ class DVCParams:
         return affected_files
 
     @property
-    def internals(self) -> dict:
-        """Load the content of the internals_file as dict
+    def _user_params(self) -> dict:
+        """Any Params that result from dvc.params()
 
         Returns
         -------
         dict:
-            JSON content of internals file converted to a dict.
-            When the file is not available it will return an empty dict
+            A dictionary of all params for this Node {param: value}
+            If not available will raise AttributeError
         """
         try:
-            return json.loads(self.internals_file.read_text())
-        except FileNotFoundError:
-            log.debug(f"Could not load params from {self.internals_file}!")
-            return {}
+            _user_params = yaml.safe_load(self.internals_file.read_text())
+            return _user_params[self.node_name]
+        except (FileNotFoundError, KeyError):
+            # Either there is no file or the node_name does not exist
+            # we do not return {} because we want to catch the Error
+            raise AttributeError(f"Could not load params from {self.internals_file}!")
 
-    @internals.setter
-    def internals(self, value: dict):
-        """Update the internals_file
+    @_user_params.setter
+    def _user_params(self, value):
+        """Update any params related to dvc.params()
 
-        Save the content of value to the internals file.
-        This will overwrite the file entirely and therefore it must be updated /
-        read in before writing to it.
+        Parameters
+        ----------
+        value: dict
+            A dictionary containing all params for this Node {param: value}
+            that will be written to the respective params file
         """
-        log.debug(f"Saving dvc.internals {value}")
-
         if not is_jsonable(value):
             raise ValueError(f"{value} is not JSON serializable")
 
-        self.internals_file.parent.mkdir(exist_ok=True, parents=True)
-        self.internals_file.write_text(json.dumps(value, indent=4))
+        try:
+            _user_params = yaml.safe_load(self.internals_file.read_text())
+        except FileNotFoundError:
+            _user_params = {}
+        _user_params[self.node_name] = value
+
+        with self.internals_file.open("w") as f:
+            yaml.safe_dump(_user_params, f)
+
+    @property
+    def _zntrack_params(self):
+        """Internal zntrack params for this Node
+
+        E.g. these can be {outs: {my_out: val}, ...}
+        """
+        try:
+            _hidden_internals = json.loads(self.hidden_internals_file.read_text())
+            return _hidden_internals.get(self.node_name, {})
+        except FileNotFoundError:
+            log.debug(f"Could not load params from {self.hidden_internals_file}!")
+            return {}
+
+    @_zntrack_params.setter
+    def _zntrack_params(self, value):
+        """Update internal zntrack params in the respective file for this Node
+
+        Parameters
+        ----------
+        value: dict
+            zntrack params for this node, these can be {outs: {my_out: val}, ...}
+
+        """
+        if not is_jsonable(value):
+            raise ValueError(f"{value} is not JSON serializable")
+        try:
+            _hidden_internals = json.loads(self.hidden_internals_file.read_text())
+        except FileNotFoundError:
+            _hidden_internals = {}
+        _hidden_internals[self.node_name] = value
+
+        self.hidden_internals_file.write_text(json.dumps(_hidden_internals, indent=4))
+
+    @property
+    def internals(self) -> dict:
+        """Combined user parameter and zntrack parameter for this Node
+
+        Returns
+        -------
+        dict:
+            user parameter (dvc.params()) and zntrack parameter (e.g. dvc.outs(<file>))
+        """
+
+        internals = self._zntrack_params
+
+        try:
+            internals["params"] = self._user_params
+        except AttributeError:
+            # Don't want the key params if failed
+            pass
+
+        return internals
+
+    @internals.setter
+    def internals(self, value: dict):
+        """Update user parameter and zntrack parameter for this Node"""
+        try:
+            self._user_params = value.pop("params")
+        except KeyError:
+            log.debug("No dvc.params() found")
+        self._zntrack_params = value
 
 
 @dataclass(frozen=False, order=True, init=True)
