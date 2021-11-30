@@ -135,10 +135,10 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-        self,
-        dvc_options: DVCOptions,
-        slurm: bool,
-        silent: bool,
+            self,
+            dvc_options: DVCOptions,
+            slurm: bool,
+            silent: bool,
     ):
         """Method after call
 
@@ -384,16 +384,6 @@ class ZnTrackParent(ZnTrackType):
         """
         return "params" in self.dvc.internals
 
-    @property
-    def has_zntrack_params(self) -> bool:
-        """Check for any other dvc.<option> except params
-
-        If any other dvc.<option> has to store some values they will be seperated
-        from the dvc.params() in a separate file which is usually of no interest
-        to the user.
-        """
-        return any([key for key in self.dvc.internals if key == "params"])
-
     #################################
     # more complex functions
     #################################
@@ -435,9 +425,9 @@ class ZnTrackParent(ZnTrackType):
                     self.dvc.update(child_val, option)
 
     def write_dvc(
-        self,
-        slurm: bool = False,
-        silent: bool = False,
+            self,
+            slurm: bool = False,
+            silent: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -469,11 +459,6 @@ class ZnTrackParent(ZnTrackType):
             script += [
                 "--params",
                 f"{self.dvc.internals_file}:{self.stage_name}",
-            ]
-        if self.has_zntrack_params:
-            script += [
-                "--params",
-                f"{self.dvc.hidden_internals_file}:{self.stage_name}",
             ]
 
         if self.nb_mode:
