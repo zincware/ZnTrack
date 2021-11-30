@@ -135,10 +135,10 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-            self,
-            dvc_options: DVCOptions,
-            slurm: bool,
-            silent: bool,
+        self,
+        dvc_options: DVCOptions,
+        slurm: bool,
+        silent: bool,
     ):
         """Method after call
 
@@ -425,9 +425,9 @@ class ZnTrackParent(ZnTrackType):
                     self.dvc.update(child_val, option)
 
     def write_dvc(
-            self,
-            slurm: bool = False,
-            silent: bool = False,
+        self,
+        slurm: bool = False,
+        silent: bool = False,
     ):
         """Write the DVC file using run.
 
