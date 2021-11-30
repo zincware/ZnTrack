@@ -6,7 +6,7 @@ required_packages = pathlib.Path("requirements.txt").read_text().splitlines()
 
 setuptools.setup(
     name="zntrack",
-    version="0.1.6",
+    version="0.2.0",
     author="Zincware",
     author_email="zincwarecode@gmail.com",
     description="A python package for parameter and data version control with DVC",
