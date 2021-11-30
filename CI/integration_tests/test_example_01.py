@@ -119,7 +119,6 @@ def test_stage_io(tmp_path):
 
     stage = StageIO()
     stage(deps.resolve())
-    project.run()
     project.repro()
 
     stage = StageIO(id_=0)
