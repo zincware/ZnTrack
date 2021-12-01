@@ -15,6 +15,9 @@ import shutil
 import tempfile
 
 from zntrack.utils.config import config
+from typing import Dict, Any
+import hashlib
+import base64
 
 
 # https://stackoverflow.com/questions/42033142/is-there-an-easy-way-to-check-if-an-object-is-json-serializable-in-python
@@ -66,3 +69,35 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
     os.chdir(temp_dir.name)
 
     return temp_dir
+
+
+def dict_hash(dictionary: Dict[str, Any], length: int = 22) -> str:
+    """Convert dictionary to a (truncated) md5 hash
+
+    Parameters
+    ----------
+    dictionary: dict
+        any json serializable dictionary
+    length: int, default=22
+        length of the hash. The max length is 24, but the hash value can be
+        truncated for convenience and e.g. shorter file names
+
+    References
+    ----------
+    https://www.doc.ic.ac.uk/~nuric/coding/how-to-hash-a-dictionary-in-python.html
+
+    Returns
+    -------
+    md5_hash_base64: str
+        The base64 encoded and truncated md5 hash of the dictionary
+
+    """
+    md5_hash = hashlib.md5()
+
+    encoded_dict = json.dumps(dictionary, sort_keys=True).encode()
+    md5_hash.update(encoded_dict)
+    md5_hash_base64 = base64.b64encode(md5_hash.digest())
+    # convert to string
+    md5_hash_base64 = md5_hash_base64.decode("utf-8")
+
+    return md5_hash_base64[:length]
