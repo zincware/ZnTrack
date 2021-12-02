@@ -104,7 +104,7 @@ class DVCParams:
         """All values of the dataclass that should be excluded when looping over"""
         return ["node_name", "internals_file", "hidden_internals_file"]
 
-    def update(self, value, option):
+    def update(self, value, option: str):
         """Update internals
 
         Update the selected internal (by option) with the given value.
@@ -219,7 +219,7 @@ class DVCParams:
             raise AttributeError(f"Could not load params from {self.internals_file}!")
 
     @_user_params.setter
-    def _user_params(self, value):
+    def _user_params(self, value: dict):
         """Update any params related to dvc.params()
 
         Parameters
@@ -254,7 +254,7 @@ class DVCParams:
             return {}
 
     @_zntrack_params.setter
-    def _zntrack_params(self, value):
+    def _zntrack_params(self, value: dict):
         """Update internal zntrack params in the respective file for this Node
 
         Parameters
