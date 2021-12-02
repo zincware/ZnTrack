@@ -2,11 +2,7 @@ name: Check black coding style
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
 
 jobs:
   doc:

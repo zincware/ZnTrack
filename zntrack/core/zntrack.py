@@ -17,12 +17,12 @@ import json
 
 from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
-from zntrack.core.data_classes import DVCParams, ZnFiles, DVCOptions
+from zntrack.core.data_classes import DVCParams, ZnParams, DVCOptions
 from pathlib import Path
 from zntrack.utils import is_jsonable, serializer, deserializer, config
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from zntrack.utils.type_hints import TypeHintParent
@@ -75,29 +75,24 @@ class ZnTrackParent(ZnTrackType):
         # Parameters that will be overwritten by "child" classes
         self.slurm_config: SlurmConfig = SlurmConfig()
 
-        # Properties
-
-        self._module = None
-        self._stage_name = None
-
         self.running = False  # is set to true, when run_dvc
         self.load = False
         self.has_metadata = False
 
-        self.dvc_file = "dvc.yaml"
-        # This is True while inside the init to avoid ValueErrors
-
-        self.dvc = DVCParams()
-        self.dvc_options: DVCOptions = None
         self.nb_mode = False  # notebook mode
-        self._zn_files = None
 
-    @property
-    def zn_files(self) -> ZnFiles:
-        """Get instance of the ZnFiles dataclass initialized with the stage name"""
-        if self._zn_files is None:
-            self._zn_files = ZnFiles(node_name=self.stage_name)
-        return self._zn_files
+        self.dvc_options: DVCOptions = DVCOptions()
+
+        # Property Storage
+        self._dvc = None
+        self._zn = None
+
+        self._module = None
+        self._stage_name = None
+
+    #################################
+    # decorating methods
+    #################################
 
     def pre_init(self, name: str, load: bool, has_metadata: bool):
         """Function to be called prior to the init
@@ -130,8 +125,7 @@ class ZnTrackParent(ZnTrackType):
             self.add_metadata_descriptor()
         if self.load:
             self.load_internals()
-            # TODO
-            self.load_descriptors_from_file()
+            self.child.__dict__.update(self.zn.internals)
             # update_dvc is not necessary but also should not hurt?!
             self.update_dvc()
 
@@ -184,9 +178,25 @@ class ZnTrackParent(ZnTrackType):
     def post_run(self):
         """Method to be executed after run
 
-        This method saves the descriptors_from_file
+        Save all zn.<option> from the child.__dict__
+        to files so that they can be loaded again
         """
-        self.save_descriptors_to_file()
+
+        desc_from_file = {}
+        for attr, val in self.zntrack_options.items():
+            if val.load:
+                try:
+                    desc_from_file[val.option].update(
+                        {val.name: getattr(self.child, attr)}
+                    )
+                except KeyError:
+                    desc_from_file[val.option] = {val.name: getattr(self.child, attr)}
+
+        self.zn.internals = desc_from_file
+
+    #################################
+    # stand-alone methods
+    #################################
 
     def add_metadata_descriptor(self):
         """Create a descriptor which is called metadata
@@ -255,157 +265,26 @@ class ZnTrackParent(ZnTrackType):
         for attr in remove_from__dict__:
             log.debug(f"removing: {self.child.__dict__.pop(attr, None)} ")
 
-    def write_to_dvc(self, value, option):
-        """Add the given value to the self.dvc dataclass
-
-        Parameters
-        ----------
-        value:
-            Either a str/path to a file or a ZnTrackType class
-            where all ZnTrackType.affected_files will be added to the dependencies
-        option: str
-            A DVC option e.g. outs, or metric_no_cache, ...
-
-        """
-        try:
-            # Check if the passed value is a Node. If yes
-            #  add all affected files as dependencies
-            dvc_option_list = getattr(self.dvc, option)
-            value.zntrack.update_dvc()
-            log.debug(f"Found Node dependency. Calling update_dvc on {value}")
-            dvc_option_list += value.zntrack.affected_files
-            setattr(self.dvc, option, dvc_option_list)
-        except AttributeError:
-            try:
-                getattr(self.dvc, option).append(value)
-            except AttributeError:
-                # descriptors_from_file / params will be skipped
-                #  they are not part of the dataclass.
-                log.debug(f"'DVCParams' object has no attribute '{option}'")
-
-    def update_dvc(self):
-        """Update the DVCParams with the options from self.dvc
-
-        This method searches for all ZnTrackOptions that are defined within the __init__
-        """
-
-        log.debug(f"checking for instance {self.child}")
-        for attr, val in vars(type(self.child)).items():
-            if isinstance(val, ZnTrackOption):
-                option = val.option
-                if option == "params":
-                    # params is processed  differently
-                    continue
-                elif val.load:
-                    file = self.zn_files.node_path / getattr(self.zn_files, option)
-                    # We want the filename to be metadata from the zn_files
-                    #  but the dvc option is metrics
-                    #  TODO filename and option should be coupled more loosely
-                    #    for load=True options to avoid this part here!
-                    if option == "metadata":
-                        option = "metrics"
-                    # need to create the paths, because it is required for
-                    # dvc to write the .gitignore
-                    self.zn_files.make_path()
-                    self.write_to_dvc(file, option)
-                else:
-                    child_val = getattr(self.child, attr)
-                    log.debug(f"processing {attr} - {child_val}")
-                    # check if it is a Node, that has to be handled extra
-
-                    if isinstance(child_val, list) or isinstance(child_val, tuple):
-                        # process lists/tuples if more than a single value is given
-                        for item in child_val:
-                            self.write_to_dvc(item, option)
-                    else:
-                        self.write_to_dvc(child_val, option)
-
-    def has_params(self) -> bool:
-        """Check if any params are required by going through the defined params"""
-        for attr, val in vars(type(self.child)).items():
-            if isinstance(val, ZnTrackOption):
-                if val.option == "params":
-                    return True
-        return False
-
-    def write_dvc(
-        self,
-        slurm: bool = False,
-        silent: bool = False,
-    ):
-        """Write the DVC file using run.
-
-        If it already exists it'll tell you that the stage is already persistent and
-        has been run before. Otherwise it'll run the stage for you.
-
-        Parameters
-        ----------
-        slurm: bool, default = False
-            Use SLURM to run DVC stages on a Cluster.
-        silent: bool
-            If called with no_exec=False this allows to hide the output from the
-            subprocess call.
-
-        Notes
-        -----
-        If the dependencies for a stage change this function won't necessarily tell you.
-        Use 'dvc status' to check, if the stage needs to be rerun.
-
-        """
-        if not silent:
-            log.warning("--- Writing new DVC file! ---")
-
-        script = ["dvc", "run", "-n", self.stage_name]
-
-        script += self.dvc.get_dvc_arguments()
-        # TODO if no DVC.result / loaded option
-        #  are assigned, no json file will be written!
-
-        if self.has_params():
-            script += [
-                "--params",
-                f"{self.dvc.internals_file}:{self.stage_name}.params",
-            ]
-
-        if self.nb_mode:
-            script += ["--deps", Path(*self.module.split(".")).with_suffix(".py")]
-
-        script.extend(self.dvc_options.get_dvc_arguments())
-
-        # TODO use dataclass get_option to write the script!
-        if slurm:
-            log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            log.warning(
-                "Make sure, that every stage uses SLURM! If a stage does not have SLURM"
-                " enabled, the command will be run on the HEAD NODE! Check the dvc.yaml"
-                " file before running! There are no checks implemented to test, "
-                "that only SRUN is in use!"
-            )
-            log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-
-            script.append("srun")
-            script.append("-n")
-            script.append(f"{self.slurm_config.n}")
-        #
-        script.append(
-            f"""{self.python_interpreter} -c "from {self.module} import {self.name}; """
-            f"""{self.name}(load=True, name='{self.stage_name}').run()" """
-        )
-        log.debug(f"running script: {' '.join([str(x) for x in script])}")
-
-        log.debug(
-            "If you are using a jupyter notebook, you may not be able to see the "
-            "output in real time!"
-        )
-        process = subprocess.run(script, capture_output=True)
-        if not silent:
-            if len(process.stdout) > 0:
-                log.info(process.stdout.decode())
-            if len(process.stderr) > 0:
-                log.warning(process.stderr.decode())
+    #################################
+    # properties
+    #################################
 
     @property
-    def python_interpreter(self):
+    def zn(self) -> ZnParams:
+        """Get instance of the ZnParams dataclass initialized with the stage name"""
+        if self._zn is None:
+            self._zn = ZnParams(node_name=self.stage_name)
+        return self._zn
+
+    @property
+    def dvc(self) -> DVCParams:
+        """Get the DVCParams initialized with the stage name"""
+        if self._dvc is None:
+            self._dvc = DVCParams(node_name=self.stage_name)
+        return self._dvc
+
+    @property
+    def python_interpreter(self) -> str:
         """Find the most suitable python interpreter
 
         Try to run subprocess check calls to see, which python interpreter
@@ -477,183 +356,201 @@ class ZnTrackParent(ZnTrackType):
         """Set the stage name"""
         self._stage_name = value
 
+    @property
+    def zntrack_options(self) -> Dict[str, ZnTrackOption]:
+        """Get all ZnTracKOptions in child
+
+        Returns
+        -------
+        dict:
+            A dictionary containing all ZnTrackOptions and their corresponding name
+            in child as {name: ZnTrackOption}
+        """
+        zntrack_options = {}
+        for attr, val in vars(type(self.child)).items():
+            if isinstance(val, ZnTrackOption):
+                zntrack_options[attr] = val
+        return zntrack_options
+
+    @property
+    def has_user_params(self) -> bool:
+        """Check for any dvc.params()
+
+        Returns
+        --------
+        bool:
+            If the Node has any dvc.params() that will be passed to the params file
+             and are of interest to the user
+        """
+        return "params" in self.dvc.internals
+
+    #################################
+    # more complex functions
+    #################################
+
+    def update_dvc(self):
+        """Update the DVCParams with the options from self.dvc
+
+        This method searches for all ZnTrackOptions that are defined within the __init__
+        """
+
+        log.debug(f"checking for instance {self.child}")
+        for attr, val in self.zntrack_options.items():
+            option = val.option
+            if option == "params":
+                # params is processed  differently
+                continue
+            elif val.load:
+                file = self.zn.node_path / getattr(self.zn, option)
+                # We want the filename to be metadata from the zn
+                #  but the dvc option is metrics
+                #  TODO filename and option should be coupled more loosely
+                #    for load=True options to avoid this part here!
+                if option == "metadata":
+                    option = "metrics"
+                # need to create the paths, because it is required for
+                # dvc to write the .gitignore
+                self.zn.make_path()
+                self.dvc.update(file, option)
+            else:
+                child_val = getattr(self.child, attr)
+                log.debug(f"processing {attr} - {child_val}")
+                # check if it is a Node, that has to be handled extra
+
+                if isinstance(child_val, list) or isinstance(child_val, tuple):
+                    # process lists/tuples if more than a single value is given
+                    for item in child_val:
+                        self.dvc.update(item, option)
+                else:
+                    self.dvc.update(child_val, option)
+
+    def write_dvc(
+        self,
+        slurm: bool = False,
+        silent: bool = False,
+    ):
+        """Write the DVC file using run.
+
+        If it already exists it'll tell you that the stage is already persistent and
+        has been run before. Otherwise it'll run the stage for you.
+
+        Parameters
+        ----------
+        slurm: bool, default = False
+            Use SLURM to run DVC stages on a Cluster.
+        silent: bool
+            If called with no_exec=False this allows to hide the output from the
+            subprocess call.
+
+        Notes
+        -----
+        If the dependencies for a stage change this function won't necessarily tell you.
+        Use 'dvc status' to check, if the stage needs to be rerun.
+
+        """
+        if not silent:
+            log.warning("--- Writing new DVC file! ---")
+
+        script = ["dvc", "run", "-n", self.stage_name]
+
+        script += self.dvc.dvc_arguments
+
+        if self.has_user_params:
+            script += [
+                "--params",
+                f"{self.dvc.internals_file}:{self.stage_name}",
+            ]
+
+        if self.nb_mode:
+            script += [
+                "--deps",
+                Path(*self.module.split(".")).with_suffix(".py").as_posix(),
+            ]
+
+        script.extend(self.dvc_options.dvc_arguments)
+
+        if slurm:
+            log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            log.warning(
+                "Make sure, that every stage uses SLURM! If a stage does not have SLURM"
+                " enabled, the command will be run on the HEAD NODE! Check the dvc.yaml"
+                " file before running! There are no checks implemented to test, "
+                "that only SRUN is in use!"
+            )
+            log.warning("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+            script.append("srun")
+            script.append("-n")
+            script.append(f"{self.slurm_config.n}")
+        #
+        script.append(
+            f"""{self.python_interpreter} -c "from {self.module} import {self.name}; """
+            f"""{self.name}(load=True, name='{self.stage_name}').run()" """
+        )
+        log.debug(f"running script: {' '.join([str(x) for x in script])}")
+
+        log.debug(
+            "If you are using a jupyter notebook, you may not be able to see the "
+            "output in real time!"
+        )
+        process = subprocess.run(script, capture_output=True)
+        if not silent:
+            if len(process.stdout) > 0:
+                log.info(process.stdout.decode())
+            if len(process.stderr) > 0:
+                log.warning(process.stderr.decode())
+
     def save_internals(self):
         """Write all changed descriptor_parameters to file
 
         Update e.g. the parameters, out paths, etc. in the zntrack.json file
         """
-        full_internals = self.descriptor_parameters_from_file
-        log.debug(f"Serializing {self.descriptor_parameters}")
-        full_internals[self.stage_name] = serializer(self.descriptor_parameters)
-        log.debug(f"Saving {full_internals[self.stage_name]}")
-        self.descriptor_parameters_from_file = full_internals
+        descriptor_parameters = {}
+
+        for attr, val in self.zntrack_options.items():
+            if val.load:
+                continue
+            option_dict = descriptor_parameters.get(val.option, {})
+            # Values in the dictionary are of HIGHER PRIORITY, because some
+            #  methods e.g. use a descriptor and store the values in a serialized
+            #  way in the __dict__ (e.g. zn.Methods())
+            try:
+                option_dict[val.name] = self.child.__dict__[attr]
+            except KeyError:
+                # if the values are not stored in the __dict__
+                #  they are often only accessible via a getattr.
+                #  Although this is of LESS PRIORITY!
+                option_dict[val.name] = getattr(self.child, attr)
+
+            descriptor_parameters[val.option] = option_dict
+
+        log.debug(f"Serializing {descriptor_parameters}")
+        self.dvc.internals = serializer(descriptor_parameters)
 
     def load_internals(self):
         """Load the descriptor_parameters from the zntrack.json file"""
         try:
-            log.debug(
-                f"un-serialize {self.descriptor_parameters_from_file[self.stage_name]}"
-            )
-            self.descriptor_parameters = deserializer(
-                self.descriptor_parameters_from_file[self.stage_name]
-            )
-        except KeyError:
-            log.debug(f"No descriptor_parameters found for {self.stage_name}")
+            log.debug(f"un-serialize {self.dvc.internals}")
+            stage_internals = deserializer(self.dvc.internals)
 
-    def save_descriptors_to_file(self):
-        """Save the descriptors_from_file to the json file
+            # stage_internals = {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
 
-        Notes
-        -----
-        Adding the executed=True to ensure that a json file is always being saved
-        """
-
-        for option, values in self.descriptors_from_file.items():
-            # At least one file will be written -> create the directory
-            self.zn_files.make_path()
-            file = self.zn_files.node_path / getattr(self.zn_files, option)
-
-            data = serializer(values)
-            if not is_jsonable(data):
-                raise ValueError(f"{data} is not JSON serializable")
-            log.debug(f"Writing {file} to {file}")
-
-            file.write_text(json.dumps(data, indent=4))
-
-    def load_descriptors_from_file(self):
-        """Load the descriptors_from_file from file"""
-        data = {}
-
-        for option in self.zn_files.__dataclass_fields__:
-            file = self.zn_files.node_path / getattr(self.zn_files, option)
-            try:
-                data_ = json.loads(file.read_text())
-                data.update(deserializer(data_))
-            except FileNotFoundError:
-                log.debug(f"No descriptors_from_file found for {option}!")
-
-        self.descriptors_from_file = data
-
-    @property
-    def descriptors_from_file(self) -> dict:
-        """Get all descriptors with load=True
-
-        This property loads all descriptors that use load=True and should be loaded
-        into memory.
-
-        Returns
-        -------
-        values: dict
-            Returns a dictionary that contains all ZnTrackOptions with load=True
-            as a dict {option: {name: val}}
-        """
-        values = {}
-        for attr, val in vars(type(self.child)).items():
-            if isinstance(val, ZnTrackOption):
-                if val.load:
-                    try:
-                        values[val.option].update({val.name: getattr(self.child, attr)})
-                    except KeyError:
-                        values[val.option] = {val.name: getattr(self.child, attr)}
-        return values
-
-    @descriptors_from_file.setter
-    def descriptors_from_file(self, values: dict):
-        """Set the values for the descriptors_from_file in the __dict__ attribute of
-         the child
-
-        Parameters
-        ----------
-        values: dict
-            {result1: val1, result2: val2, ...}
-        """
-        # TODO this is the same function for descriptor_parameters
-        #  and descriptors_from_file, except for some special cases
-        #  so they could be combined
-        for key, val in values.items():
-            self.child.__dict__[key] = val
-
-    @property
-    def descriptor_parameters(self):
-        """Get all ZnTrackOptions (except loaded)"""
-        internals = {}
-        for attr, val in vars(type(self.child)).items():
-            if isinstance(val, ZnTrackOption):
-                if val.load:
-                    continue
-                option_dict = internals.get(val.option, {})
-                # Values in the dictionary are of HIGHER PRIORITY, because some
-                #  methods e.g. use a descriptor and store the values in a serialized
-                #  way in the __dict__ (e.g. zn.Methods())
-                try:
-                    option_dict[val.name] = self.child.__dict__[attr]
-                except KeyError:
-                    # if the values are not stored in the __dict__
-                    #  they are often only accessible via a getattr.
-                    #  Although this is of LESS PRIORITY!
-                    option_dict[val.name] = getattr(self.child, attr)
-
-                internals[val.option] = option_dict
-
-        return internals
-
-    @descriptor_parameters.setter
-    def descriptor_parameters(self, value: dict):
-        """Save all ZnTrackOptions/Internals (except loaded)
-
-        Stores all passed options in the child.__dict__
-
-        Parameters
-        ----------
-        value: dict
-            {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
-        """
-        for option in value.values():
-            for key, val in option.items():
-                if isinstance(val, ZnTrackStage):
-                    # Load the ZnTrackStage
-                    self.child.__dict__[key] = val.load_zntrack_node()
-                elif isinstance(val, list):
-                    try:
-                        self.child.__dict__[key] = [
-                            item.load_zntrack_node() for item in val
-                        ]
-                    except AttributeError:
+            for option in stage_internals.values():
+                for key, val in option.items():
+                    if isinstance(val, ZnTrackStage):
+                        # Load the ZnTrackStage
+                        self.child.__dict__[key] = val.load_zntrack_node()
+                    elif isinstance(val, list):
+                        try:
+                            self.child.__dict__[key] = [
+                                item.load_zntrack_node() for item in val
+                            ]
+                        except AttributeError:
+                            # Everything except the ZnTrackStage
+                            self.child.__dict__[key] = val
+                    else:
                         # Everything except the ZnTrackStage
                         self.child.__dict__[key] = val
-                else:
-                    # Everything except the ZnTrackStage
-                    self.child.__dict__[key] = val
 
-    @property
-    def descriptor_parameters_from_file(self) -> dict:
-        """Load ALL descriptor parameters from .zntrack.json"""
-        try:
-            with open(self.dvc.internals_file) as json_file:
-                return json.load(json_file)
-        except FileNotFoundError:
-            log.debug(f"Could not load params from {self.dvc.internals_file}!")
-        return {}
-
-    @descriptor_parameters_from_file.setter
-    def descriptor_parameters_from_file(self, value: dict):
-        """Update descriptor parameters in .zntrack.json"""
-        log.debug(f"Writing updates to .zntrack.json as {value}")
-        value.update({"default": None})
-
-        if not is_jsonable(value):
-            raise ValueError(f"{value} is not JSON serializable")
-
-        Path(self.dvc.internals_file).parent.mkdir(exist_ok=True, parents=True)
-
-        self.dvc.internals_file.write_text(json.dumps(value, indent=4))
-
-    @property
-    def affected_files(self):
-        """Get a list of all files, that are affected by this stage
-
-        This will contain the stage.json for descriptors_from_file, but also
-        all outs, plot, metrics, ... and also all files changed by
-        zn.<option>
-        """
-        return self.dvc.get_affected_files()
+        except KeyError:
+            log.debug(f"No descriptor_parameters found for {self.stage_name}")

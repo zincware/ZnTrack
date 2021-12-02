@@ -21,6 +21,9 @@ class GetNumber:
     input_number = dvc.params()
     output_number = zn.outs()
 
+    def __call__(self, *args, **kwargs):
+        pass
+
     def run(self):
         self.output_number = self.input_number
 

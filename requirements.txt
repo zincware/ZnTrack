@@ -1,11 +1,2 @@
-pytest
-sphinx_rtd_theme
-IPython
-nbsphinx
-numpydoc
-sphinx-copybutton
-sphinx==4.0.2
-pandoc
-numpy
-matplotlib
-pandas
+dvc
+PyYAML

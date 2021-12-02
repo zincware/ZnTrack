@@ -95,11 +95,12 @@ class Node:
 
         # jupyter
         if nb_name is not None:
-            log.warning(
-                "Jupyter support is an experimental feature! Please save your "
-                "notebook before running this command!\n"
-                "Submit issues to https://github.com/zincware/ZnTrack."
-            )
+            if not self.silent:
+                log.warning(
+                    "Jupyter support is an experimental feature! Please save your "
+                    "notebook before running this command!\n"
+                    "Submit issues to https://github.com/zincware/ZnTrack."
+                )
             nb_name = Path(nb_name)
         self.nb_name = nb_name
 
@@ -159,7 +160,13 @@ class Node:
     def jupyter_class_to_file(self):
         """Extract the class definition form a ipynb file"""
 
-        subprocess.run(["jupyter", "nbconvert", "--to", "script", self.nb_name])
+        if self.silent:
+            _ = subprocess.run(
+                ["jupyter", "nbconvert", "--to", "script", self.nb_name],
+                capture_output=True,
+            )
+        else:
+            subprocess.run(["jupyter", "nbconvert", "--to", "script", self.nb_name])
 
         reading_class = False
 
