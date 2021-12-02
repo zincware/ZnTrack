@@ -2,13 +2,20 @@
 
 .. image:: https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/img/zntrack.png
 
-Object-Relational Mapping for DVC
----------------------------------
-
-The ZnTrack [zɪŋk træk] package provides an easy-to-use interface for DVC directly from within Python.
-It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml` as well as an the script and much more.
-
-For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
+Parameter Tracking for Python
+-----------------------------
+ZnTrack [zɪŋk træk] is an easy-to-use package for tracking parameters in your Python
+projects.
+What is a parameter? Anything set by a user in your code, for example, the number of
+layers in a neural network layer or the window size of a moving average.
+ZnTrack works by storing the values of parameters in Python classes and functions and
+monitoring how they change for several different runs.
+These changes can then be compared graphically to see what effect they had on your
+workflow.
+Beyond the standard tracking of parameters in a project, ZnTrack can be used to deploy
+jobs with a set of different parameter values, avoid the re-running of components of code
+where parameters have not changed, and to identify computational bottlenecks in your
+code.
 
 Example
 ========
@@ -48,6 +55,17 @@ which builds the DVC stage and can be used e.g., through :code:`dvc repro`.
 The results can then be accessed easily via :code:`HelloWorld(load=True).random_number`.
 
 More detailed examples and further information can be found in the `ZnTrack Documentation <https://zntrack.readthedocs.io/en/latest/>`_.
+
+Technical Details
+=================
+
+ZnTrack as an Object-Relational Mapping for DVC
+-----------------------------------------------
+
+On a fundamental level the ZnTrack [zɪŋk træk] package provides an easy-to-use interface for DVC directly from Python.
+It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml` as well as an the script and much more.
+
+For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
 
 
 Installation
