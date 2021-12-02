@@ -62,8 +62,8 @@ Technical Details
 ZnTrack as an Object-Relational Mapping for DVC
 -----------------------------------------------
 
-On a fundamental level the ZnTrack [zɪŋk træk] package provides an easy-to-use interface for DVC directly from Python.
-It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml` as well as an the script and much more.
+On a fundamental level the ZnTrack package provides an easy-to-use interface for DVC directly from Python.
+It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml` as well as in the script and much more.
 
 For more information on DVC visit their `homepage <https://dvc.org/doc>`_.
 
