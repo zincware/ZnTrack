@@ -16,19 +16,19 @@ from .project import ZnTrackProject
 from .interface import DVCInterface
 from .utils import config
 from .utils.serializer import ZnTrackTypeConverter, ZnTrackStageConverter
-import znconv
+import znjson
 
 import logging
 import sys
 
 # register converters
-znconv.config.ACTIVE_CONVERTER = [
+znjson.config.ACTIVE_CONVERTER = [
     ZnTrackTypeConverter,
     ZnTrackStageConverter,
-    znconv.PathlibConverter,
+    znjson.PathlibConverter,
 ]
 try:
-    znconv.register(znconv.NumpyConverter)
+    znjson.register(znjson.NumpyConverter)
 except ModuleNotFoundError:
     pass
 

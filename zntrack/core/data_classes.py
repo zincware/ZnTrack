@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Union, List
 import json
 import yaml
-import znconv
+import znjson
 
 from zntrack.utils import is_jsonable
 
@@ -213,7 +213,7 @@ class DVCParams:
         """
         try:
             _user_params = yaml.safe_load(self.internals_file.read_text())
-            _user_params = json.loads(json.dumps(_user_params), cls=znconv.ZnDecoder)
+            _user_params = json.loads(json.dumps(_user_params), cls=znjson.ZnDecoder)
             return _user_params[self.node_name]
         except (FileNotFoundError, KeyError):
             # Either there is no file or the node_name does not exist
@@ -236,7 +236,7 @@ class DVCParams:
             _user_params = {}
         _user_params[self.node_name] = value
 
-        _user_params = json.loads(json.dumps(_user_params, cls=znconv.ZnEncoder))
+        _user_params = json.loads(json.dumps(_user_params, cls=znjson.ZnEncoder))
 
         with self.internals_file.open("w") as f:
             yaml.safe_dump(_user_params, f)
@@ -249,7 +249,7 @@ class DVCParams:
         """
         try:
             _hidden_internals = json.loads(
-                self.hidden_internals_file.read_text(), cls=znconv.ZnDecoder
+                self.hidden_internals_file.read_text(), cls=znjson.ZnDecoder
             )
             return _hidden_internals.get(self.node_name, {})
         except FileNotFoundError:
@@ -268,14 +268,14 @@ class DVCParams:
         """
         try:
             _hidden_internals = json.loads(
-                self.hidden_internals_file.read_text(), cls=znconv.ZnDecoder
+                self.hidden_internals_file.read_text(), cls=znjson.ZnDecoder
             )
         except FileNotFoundError:
             _hidden_internals = {}
         _hidden_internals[self.node_name] = value
 
         self.hidden_internals_file.write_text(
-            json.dumps(_hidden_internals, indent=4, cls=znconv.ZnEncoder)
+            json.dumps(_hidden_internals, indent=4, cls=znjson.ZnEncoder)
         )
 
     @property
@@ -360,7 +360,7 @@ class ZnParams:
         for option in self.__dataclass_fields__:
             file = self.node_path / getattr(self, option)
             try:
-                data.update(json.loads(file.read_text(), cls=znconv.ZnDecoder))
+                data.update(json.loads(file.read_text(), cls=znjson.ZnDecoder))
             except FileNotFoundError:
                 log.debug(f"No descriptors_from_file found for {option}!")
 
@@ -381,7 +381,7 @@ class ZnParams:
             self.make_path()
             file = self.node_path / getattr(self, option)
 
-            file.write_text(json.dumps(values, indent=4, cls=znconv.ZnEncoder))
+            file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
 
 
 @dataclass(frozen=True, order=True)

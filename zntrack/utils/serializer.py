@@ -18,12 +18,12 @@ Notes
 """
 import logging
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
-import znconv
+import znjson
 
 log = logging.getLogger(__name__)
 
 
-class ZnTrackTypeConverter(znconv.ConverterBase):
+class ZnTrackTypeConverter(znjson.ConverterBase):
     """Main Serializer for ZnTrack Nodes, e.g. as dependencies"""
 
     instance = ZnTrackType
@@ -48,7 +48,7 @@ class ZnTrackTypeConverter(znconv.ConverterBase):
         return False
 
 
-class ZnTrackStageConverter(znconv.ConverterBase):
+class ZnTrackStageConverter(znjson.ConverterBase):
     """
 
     Required, because when loading the .zntrack file and then serializing it again
