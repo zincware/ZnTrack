@@ -15,9 +15,22 @@ from .core.decorator import Node
 from .project import ZnTrackProject
 from .interface import DVCInterface
 from .utils import config
+from .utils.serializer import ZnTrackTypeConverter, ZnTrackStageConverter
+import znconv
 
 import logging
 import sys
+
+# register converters
+znconv.config.ACTIVE_CONVERTER = [
+    ZnTrackTypeConverter,
+    ZnTrackStageConverter,
+    znconv.PathlibConverter,
+]
+try:
+    znconv.register(znconv.NumpyConverter)
+except ModuleNotFoundError:
+    pass
 
 #
 __all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config", "dvc"]
