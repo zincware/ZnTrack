@@ -17,7 +17,7 @@ jobs with a set of different parameter values, avoid the re-running of component
 where parameters have not changed, and to identify computational bottlenecks in your
 code.
 
-**⚙️ ZnTrack is still in an early stage of development and it is possible that it can undergo some noticeable API changes until ZnTrack v1.0 is released.**
+**ZnTrack is still in an early stage of development and it is possible that it can undergo some noticeable API changes until ZnTrack v1.0 is released.**
 
 Example
 ========
