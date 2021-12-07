@@ -1,4 +1,4 @@
-|build| |docs| |license| |code style|
+|build| |docs| |license| |code style| |coverage|
 
 .. image:: https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/img/zntrack.png
 
@@ -102,3 +102,8 @@ Or you can install from source with:
 .. |code style| image:: https://img.shields.io/badge/code%20style-black-black
     :alt: Code style: black
     :target: https://github.com/psf/black/
+    
+.. |coverage| image:: https://coveralls.io/repos/github/zincware/ZnTrack/badge.svg?branch=add_coveralls
+    :alt: Code coverage
+    :target: https://coveralls.io/github/zincware/ZnTrack?branch=add_coveralls
+
