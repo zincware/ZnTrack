@@ -11,14 +11,15 @@ Description: Node dataclasses
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union, List
-import json
+from typing import List, Union
+
 import yaml
 
-from zntrack.utils import is_jsonable, deserializer, serializer
+from zntrack.utils import deserializer, is_jsonable, serializer
 
 log = logging.getLogger(__name__)
 

@@ -8,15 +8,15 @@ Copyright Contributors to the Zincware Project.
 
 Description: Another test for PyTest
 """
+import os
 import shutil
 import subprocess
-
-import pytest
-import os
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, dvc, ZnTrackProject
 import numpy as np
+import pytest
+
+from zntrack import Node, ZnTrackProject, dvc
 
 temp_dir = TemporaryDirectory()
 

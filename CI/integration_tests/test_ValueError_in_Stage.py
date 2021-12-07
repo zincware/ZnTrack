@@ -8,11 +8,13 @@ Copyright Contributors to the Zincware Project.
 
 Description: 
 """
-import pytest
-from zntrack import Node, ZnTrackProject
-import shutil
 import os
+import shutil
 from subprocess import CalledProcessError
+
+import pytest
+
+from zntrack import Node, ZnTrackProject
 
 
 @Node()

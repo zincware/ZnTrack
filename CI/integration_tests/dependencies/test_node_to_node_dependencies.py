@@ -8,13 +8,14 @@ Copyright Contributors to the Zincware Project.
 
 Description: Check that all dependencies work as expected
 """
+import os
+import shutil
 import subprocess
+from pathlib import Path
+
+import pytest
 
 from zntrack import Node, dvc, zn
-from pathlib import Path
-import pytest
-import shutil
-import os
 
 
 @Node()

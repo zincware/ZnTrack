@@ -17,9 +17,10 @@ Notes
 
 """
 import logging
-from pathlib import Path
 from importlib import import_module
-from zntrack.utils.types import ZnTrackType, ZnTrackStage
+from pathlib import Path
+
+from zntrack.utils.types import ZnTrackStage, ZnTrackType
 
 try:
     import numpy as np

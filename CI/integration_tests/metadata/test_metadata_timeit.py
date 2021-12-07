@@ -9,12 +9,14 @@ Copyright Contributors to the Zincware Project.
 Description:
 """
 
-from zntrack import Node, ZnTrackProject
-from zntrack.metadata import TimeIt
-from time import sleep
 import os
 import shutil
+from time import sleep
+
 import numpy as np
+
+from zntrack import Node, ZnTrackProject
+from zntrack.metadata import TimeIt
 
 
 @Node()

@@ -8,10 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description: Test that a single stage with multiple different names works
 """
-import pytest
-from zntrack import Node, ZnTrackProject, dvc
-import shutil
 import os
+import shutil
+
+import pytest
+
+from zntrack import Node, ZnTrackProject, dvc
 
 
 @Node()

@@ -11,9 +11,9 @@ Description: zn.<option>
 The following can be used to store e.g. metrics directly without
 defining and writing to a file
 """
-import logging
 import importlib
 import inspect
+import logging
 
 from zntrack.core.parameter import ZnTrackOption
 

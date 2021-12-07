@@ -8,13 +8,13 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
+import json
+import os
+import shutil
 import subprocess
+from pathlib import Path
 
 from zntrack import Node, dvc, zn
-from pathlib import Path
-import json
-import shutil
-import os
 
 
 @Node()

@@ -8,11 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description: 
 """
+import os
+
 import pytest
 
 from zntrack import Node, dvc, zn
 from zntrack.core.data_classes import DVCOptions, DVCParams, ZnParams
-import os
 
 
 def test_dvc_options(tmp_path):

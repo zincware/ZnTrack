@@ -8,11 +8,11 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
+import json
 import logging
 import subprocess
-import json
-from typing import List
 from pathlib import Path
+from typing import List
 
 log = logging.getLogger(__name__)
 

@@ -8,8 +8,8 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from inspect import signature
 from functools import wraps
+from inspect import signature
 
 
 def check_signature(func):
