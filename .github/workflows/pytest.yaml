@@ -45,6 +45,8 @@ jobs:
           pytest --cov-report=term-missing --cov=zntrack CI/
 
       - name: Coveralls
-        uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          coveralls
+        

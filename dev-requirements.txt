@@ -11,3 +11,4 @@ matplotlib
 pandas
 coverage
 pytest-cov
+coveralls
