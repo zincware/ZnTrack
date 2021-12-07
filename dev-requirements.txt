@@ -9,3 +9,5 @@ pandoc
 numpy
 matplotlib
 pandas
+isort
+black
