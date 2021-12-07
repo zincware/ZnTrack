@@ -42,11 +42,9 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
-          pytest --cov-report=term-missing --cov=zntrack CI/
+          coverage run -m pytest
 
       - name: Coveralls
+        uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          coveralls
-        
