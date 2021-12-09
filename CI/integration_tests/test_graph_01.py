@@ -10,16 +10,10 @@ Description: Simple test for graph execution
 """
 import os
 import shutil
-from tempfile import TemporaryDirectory
 
 import numpy as np
-import pytest
 
 from zntrack import Node, ZnTrackProject, dvc
-
-temp_dir = TemporaryDirectory()
-
-cwd = os.getcwd()
 
 
 @Node()

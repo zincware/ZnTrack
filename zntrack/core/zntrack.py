@@ -408,9 +408,6 @@ class ZnTrackParent(ZnTrackType):
                 #    for load=True options to avoid this part here!
                 if option == "metadata":
                     option = "metrics"
-                # need to create the paths, because it is required for
-                # dvc to write the .gitignore
-                self.zn.make_path()
                 self.dvc.update(file, option)
             else:
                 child_val = getattr(self.child, attr)
@@ -450,6 +447,10 @@ class ZnTrackParent(ZnTrackType):
         """
         if not silent:
             log.warning("--- Writing new DVC file! ---")
+
+        # need to create the paths, because it is required for
+        # dvc to write the .gitignore
+        self.zn.make_path()
 
         script = ["dvc", "run", "-n", self.stage_name]
 

@@ -8,89 +8,97 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-import json
+import dataclasses
+import copy
 import logging
 import subprocess
-from pathlib import Path
+import json
 from typing import List
+from pathlib import Path
 
 log = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class Experiment:
+    """Collection of the output of dvc exp show --show-json"""
+
+    name: str
+    hash: str
+    timestamp: str
+    queued: bool
+    running: bool
+    executor: str
+    params: dict
+    metrics: dict
 
 
 class DVCInterface:
     """A Python Interface for DVC"""
 
-    def __init__(self, dvc_path: str = "."):
-        """DVCInterface for getting experiments and loading data from multiple experiments
-
-        Parameters
-        ----------
-        dvc_path: str
-                Path to the DVC repository to use
+    def __init__(self):
+        """DVCInterface for getting experiments and loading data from
+        multiple experiments
         """
-        self.dvc_path = dvc_path
         self._experiments = None
-        self._exp_dict = None
+        self._exp_list = None
 
     @property
     def experiments(self) -> dict:
         """Get all experiments in json format"""
         if self._experiments is None:
-            # Only load it once! This speeds things up. If experiments change during the lifetime
-            # of this instance they won't be registered except _reset is called!
+            # Only load it once! This speeds things up. If experiments change
+            # during the lifetime of this instance they won't be
+            # registered except _reset is called!
             cmd = ["dvc", "exp", "show", "--show-json", "-A"]
             log.debug(f"DVC command: {cmd}")
-            out = subprocess.run(cmd, capture_output=True, cwd=self.dvc_path)
-            self._experiments = json.loads(out.stdout)
+            out = subprocess.run(cmd, capture_output=True)
+            self._experiments = json.loads(out.stdout.decode("utf-8").split("\r\n")[0])
         return self._experiments
 
     @property
-    def exp_dict(self) -> dict:
-        """Get all experiment names and hash values
+    def exp_list(self) -> List[Experiment]:
+        """Get all experiment names and hash values for the current commit
 
         Returns
         -------
-        dict: A dictionary containing {name: hash}
+        list[Experiment]: A list containing experiment dataclasses
         """
-        if self._exp_dict is None:
-            exp_dict = {}
-            for key, workspace in self.experiments.items():
-                if key == "workspace":
-                    continue
-                for exp in workspace:
-                    if exp == "baseline":
-                        try:
-                            exp_dict[workspace[exp]["name"]] = key
-                        except KeyError:
-                            exp_dict[key] = key
-                    else:
-                        try:
-                            exp_dict[workspace[exp]["name"]] = exp
-                        except KeyError:
-                            exp_dict[key] = exp
-            self._exp_dict = exp_dict
-        return self._exp_dict
+
+        if self._exp_list is None:
+            experiments = copy.deepcopy(self.experiments)
+            experiments.pop("workspace")
+            experiment_dict = next(iter(experiments.values()))
+
+            exp_list = []
+            for key, vals in experiment_dict.items():
+                if key == "baseline":
+                    key = next(iter(experiments))
+                exp_list.append(Experiment(hash=key, **vals["data"]))
+
+            self._exp_list = exp_list
+        return self._exp_list
 
     def _reset(self):
         """Reset properties to be loaded again"""
         self._experiments = None
-        self._exp_dict = None
+        self._exp_list = None
 
     def load_files_into_directory(
         self, files: List[str], path: str = "experiments", experiments: List[str] = None
     ):
         """Save files from multiple experiments in a single directory
 
-        Create a parent directory "path" that contains subdirectories for each experiment where the requested
-        files are saved.
+        Create a parent directory "path" that contains subdirectories for each
+        experiment where the requested files are saved.
 
         Parameters
         ----------
         files: list
-            A list of files or directories to load into path
+            A list of files or directories to load into path.
         path: str
-            The  path where the files should be saved at. If the path is not absolute it is always relative
-            to the dvc_path!
+            The  path where the files should be saved at. If the path is not absolute
+            it is always relative to the dvc_path!
         experiments: list, default=None
             A list of experiment names to query. If None all experiments will be loaded.
 
@@ -98,20 +106,13 @@ class DVCInterface:
         path = Path(path)
         path.mkdir(exist_ok=True, parents=True)
         if experiments is None:
-            exp_dict = self.exp_dict
+            exp_list = self.exp_list
         else:
-            exp_dict = {}
-            for key in experiments:
-                try:
-                    exp_dict[key] = self.exp_dict[key]
-                except KeyError:
-                    raise KeyError(
-                        f" '{key}' could not be found in the list of experiments"
-                    )
+            exp_list = [x for x in self.exp_list if x.name in experiments]
 
-        for experiment in exp_dict:
+        for experiment in exp_list:
             for file in files:
-                out_path = path / experiment
+                out_path = path / experiment.name
                 out_path.mkdir(parents=True, exist_ok=True)
                 cmd = [
                     "dvc",
@@ -119,9 +120,9 @@ class DVCInterface:
                     ".",
                     file,
                     "--rev",
-                    exp_dict[experiment],
+                    experiment.hash,
                     "--out",
                     out_path,
                 ]
                 log.debug(f"DVC command: {cmd}")
-                subprocess.run(cmd, cwd=self.dvc_path)
+                subprocess.run(cmd)
