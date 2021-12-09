@@ -13,13 +13,12 @@ from __future__ import annotations
 
 import logging
 import subprocess
-import json
 
 from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
 from zntrack.core.data_classes import DVCParams, ZnParams, DVCOptions
 from pathlib import Path
-from zntrack.utils import is_jsonable, serializer, deserializer, config
+from zntrack.utils import config
 from zntrack.utils.types import ZnTrackType, ZnTrackStage
 
 from typing import TYPE_CHECKING, Dict
@@ -525,14 +524,12 @@ class ZnTrackParent(ZnTrackType):
 
             descriptor_parameters[val.option] = option_dict
 
-        log.debug(f"Serializing {descriptor_parameters}")
-        self.dvc.internals = serializer(descriptor_parameters)
+        self.dvc.internals = descriptor_parameters
 
     def load_internals(self):
         """Load the descriptor_parameters from the zntrack.json file"""
         try:
-            log.debug(f"un-serialize {self.dvc.internals}")
-            stage_internals = deserializer(self.dvc.internals)
+            stage_internals = self.dvc.internals
 
             # stage_internals = {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
 
