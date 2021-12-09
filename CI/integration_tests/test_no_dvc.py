@@ -34,6 +34,7 @@ def test_no_dvc_true(tmp_path):
 
 
 def test_no_dvc_false(tmp_path):
+    """Default behaviour when not inside a DVC repository""""
     os.chdir(tmp_path)
     with pytest.raises(subprocess.CalledProcessError):
         HelloWorld()(no_dvc=False)
