@@ -58,6 +58,6 @@ def fix_empty_list() -> list:
 def test_params(arg, tmp_path):
     os.chdir(tmp_path)
 
-    CheckType()(params=arg)
+    CheckType()(params=arg, no_dvc=True)
 
     assert CheckType(load=True).params == arg
