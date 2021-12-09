@@ -13,7 +13,6 @@ import pytest
 from zntrack import Node, dvc, zn
 from zntrack.core.data_classes import DVCOptions, DVCParams, ZnParams
 import os
-import pathlib
 
 
 def test_dvc_options(tmp_path):
@@ -142,8 +141,4 @@ def test_zn_files():
 def test_zn_files_node_path(tmp_path):
     os.chdir(tmp_path)
     zn_params = ZnParams(node_name="test_node")
-    assert pathlib.Path().resolve() == tmp_path
-    assert (
-        zn_params.node_path.resolve()
-        == (tmp_path / zn_params.directory / zn_params.node_name).resolve()
-    )
+    assert zn_params.node_path == zn_params.directory / zn_params.node_name
