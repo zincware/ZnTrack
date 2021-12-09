@@ -17,8 +17,10 @@ Notes
 
 """
 import logging
-from zntrack.utils.types import ZnTrackType, ZnTrackStage
+
 import znjson
+
+from zntrack.utils.types import ZnTrackStage, ZnTrackType
 
 log = logging.getLogger(__name__)
 

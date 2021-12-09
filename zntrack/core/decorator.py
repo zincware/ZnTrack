@@ -10,18 +10,19 @@ Description: Node decorators
 """
 from __future__ import annotations
 
+import functools
 import logging
-import subprocess
-from pathlib import Path
 import re
+import subprocess
 import sys
 import typing
-import functools
+from pathlib import Path
+
+from zntrack.core.data_classes import DVCOptions
+from zntrack.metadata import MetaData
+from zntrack.utils import config
 
 from .zntrack import ZnTrackProperty
-from zntrack.core.data_classes import DVCOptions
-from zntrack.utils import config
-from zntrack.metadata import MetaData
 
 log = logging.getLogger(__name__)
 

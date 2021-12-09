@@ -9,9 +9,9 @@ Copyright Contributors to the Zincware Project.
 Description:
 """
 
-from typing import Callable
-from abc import ABC, abstractmethod
 import re
+from abc import ABC, abstractmethod
+from typing import Callable
 
 
 class MetaData(ABC):

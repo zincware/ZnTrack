@@ -9,8 +9,9 @@ Copyright Contributors to the Zincware Project.
 Description:
 """
 
-from .base import MetaData
 from time import time
+
+from .base import MetaData
 
 
 class TimeIt(MetaData):

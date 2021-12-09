@@ -8,14 +8,14 @@ Copyright Contributors to the Zincware Project.
 
 Description: Add some simple integration tests
 """
-import shutil
-
-import pytest
 import os
+import shutil
+from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from zntrack import Node, dvc, ZnTrackProject
-from pathlib import Path
+import pytest
+
+from zntrack import Node, ZnTrackProject, dvc
 
 temp_dir = TemporaryDirectory()
 

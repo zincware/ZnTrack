@@ -8,12 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description: Simple test for graph execution
 """
+import os
 import shutil
 
-import os
-
-from zntrack import Node, dvc, ZnTrackProject
 import numpy as np
+
+from zntrack import Node, ZnTrackProject, dvc
 
 
 @Node()

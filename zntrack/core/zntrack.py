@@ -13,15 +13,15 @@ from __future__ import annotations
 
 import logging
 import subprocess
+from pathlib import Path
+from typing import TYPE_CHECKING, Dict
+
+from zntrack.core.data_classes import DVCOptions, DVCParams, ZnParams
+from zntrack.utils import config
+from zntrack.utils.types import ZnTrackStage, ZnTrackType
 
 from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
-from zntrack.core.data_classes import DVCParams, ZnParams, DVCOptions
-from pathlib import Path
-from zntrack.utils import config
-from zntrack.utils.types import ZnTrackType, ZnTrackStage
-
-from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from zntrack.utils.type_hints import TypeHintParent

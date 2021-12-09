@@ -8,12 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description: Test dependencies for named nodes
 """
+import os
+import shutil
 import subprocess
+from typing import List
 
 from zntrack import Node, dvc, zn
-import shutil
-import os
-from typing import List
 
 
 @Node()

@@ -8,8 +8,9 @@ Copyright Contributors to the Zincware Project.
 
 Description: Type hinting class for IDE autocompletion
 """
-from zntrack.core.zntrack import ZnTrackParent
 from abc import ABC, abstractmethod
+
+from zntrack.core.zntrack import ZnTrackParent
 
 
 class TypeHintParent(ABC):

@@ -11,12 +11,12 @@ Description:
 import os
 import pathlib
 import shutil
+import subprocess
 
-from zntrack.interface import DVCInterface
 import pytest
 
 from zntrack import Node, dvc, zn
-import subprocess
+from zntrack.interface import DVCInterface
 
 
 @Node()
