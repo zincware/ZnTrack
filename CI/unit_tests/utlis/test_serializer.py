@@ -18,7 +18,10 @@ import numpy as np
 @pytest.fixture
 def path_dict():
     return {
-        "a": {"b": {"c": Path("hello1.py"), "d": "hello2.py"}, "e": Path("hello3.py"),}
+        "a": {
+            "b": {"c": Path("hello1.py"), "d": "hello2.py"},
+            "e": Path("hello3.py"),
+        }
     }
 
 
