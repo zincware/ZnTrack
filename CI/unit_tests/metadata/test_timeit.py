@@ -9,6 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: 
 """
 from unittest.mock import Mock
+
 from zntrack.metadata.decorators import TimeIt
 
 
