@@ -9,6 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: 
 """
 import os
+import pathlib
 import shutil
 
 from zntrack.interface import DVCInterface
@@ -34,21 +35,65 @@ class HelloWorld:
 def single_experiment_path(tmp_path):
     shutil.copy(__file__, tmp_path)
     os.chdir(tmp_path)
-    subprocess.run(['git', 'init'])
-    subprocess.run(['dvc', 'init'])
+    subprocess.run(["git", "init"])
+    subprocess.run(["dvc", "init"])
 
     HelloWorld()(inputs=1)
-    subprocess.run(['git', 'add', '.'])
-    subprocess.run(['git', 'commit', '-m', 'Init'])
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "Init"])
 
-    subprocess.run(['dvc', 'repro'])
+    subprocess.run(["dvc", "repro"])
 
     return tmp_path
 
 
-def test_experiments(single_experiment_path):
-    """Check that loading works and look for the default workspace environment"""
-    os.chdir(single_experiment_path)
+@pytest.fixture()
+def multi_experiment_path(tmp_path):
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
+    subprocess.run(["git", "init"])
+    subprocess.run(["dvc", "init"])
 
+    HelloWorld()(inputs=1)
+    subprocess.run(["git", "add", "."])
+    subprocess.run(["git", "commit", "-m", "Init"])
+
+    subprocess.run(["dvc", "repro"])
+
+    HelloWorld()(inputs=2)
+    subprocess.run(["dvc", "exp", "run", "-n", "Test02"])
+    HelloWorld()(inputs=3)
+    subprocess.run(["dvc", "exp", "run", "-n", "Test03"])
+
+    return tmp_path
+
+
+@pytest.fixture()
+def loaded_dvc_interface(single_experiment_path) -> DVCInterface:
+    os.chdir(single_experiment_path)
+    return DVCInterface()
+
+
+def test_experiments(loaded_dvc_interface):
+    """Check that loading works and look for the default workspace environment"""
+    assert "workspace" in loaded_dvc_interface.experiments
+
+
+def test_exp_list(loaded_dvc_interface):
+    assert loaded_dvc_interface.exp_list[0].name == "master"
+    assert len(loaded_dvc_interface.exp_list) == 1
+
+
+def test__reset(loaded_dvc_interface):
+    loaded_dvc_interface._reset()
+    assert loaded_dvc_interface.exp_list[0].name == "master"
+
+
+def test_load_files_into_directory(multi_experiment_path):
+    os.chdir(multi_experiment_path)
     interface = DVCInterface()
-    assert "workspace" in interface.experiments
+    interface.load_files_into_directory(
+        files=["nodes/HelloWorld/outs.json"], experiments=["Test02", "Test03"]
+    )
+    assert pathlib.Path("experiments/Test02/outs.json").exists()
+    assert pathlib.Path("experiments/Test03/outs.json").exists()
