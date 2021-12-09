@@ -103,7 +103,7 @@ Or you can install from source with:
     :alt: Code style: black
     :target: https://github.com/psf/black/
     
-.. |coverage| image:: https://coveralls.io/repos/github/zincware/ZnTrack/badge.svg?branch=add_coveralls
+.. |coverage| image:: https://coveralls.io/repos/github/zincware/ZnTrack/badge.svg
     :alt: Code coverage
     :target: https://coveralls.io/github/zincware/ZnTrack?branch=add_coveralls
 
