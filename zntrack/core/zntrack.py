@@ -78,6 +78,7 @@ class ZnTrackParent(ZnTrackType):
         self.load = False
         self.has_metadata = False
 
+        self.no_dvc = False
         self.nb_mode = False  # notebook mode
 
         self.dvc_options: DVCOptions = DVCOptions()
@@ -128,8 +129,15 @@ class ZnTrackParent(ZnTrackType):
             # update_dvc is not necessary but also should not hurt?!
             self.update_dvc()
 
-    def pre_call(self):
-        """Method to be run before the call"""
+    def pre_call(self, no_dvc):
+        """Method to be run before the call
+
+        Parameters
+        ----------
+        no_dvc: bool, default=False
+                Do not create a dvc.yaml / use dvc run
+        """
+        self.no_dvc = no_dvc
         if self.load:
             raise ValueError("This stage is being loaded and can not be called.")
 
@@ -160,7 +168,7 @@ class ZnTrackParent(ZnTrackType):
         self.update_dvc()
         self.save_internals()
 
-        if config.no_dvc:
+        if self.no_dvc:
             return
 
         self.dvc_options = dvc_options
@@ -493,7 +501,7 @@ class ZnTrackParent(ZnTrackType):
             "If you are using a jupyter notebook, you may not be able to see the "
             "output in real time!"
         )
-        process = subprocess.run(script, capture_output=True)
+        process = subprocess.run(script, capture_output=True, check=True)
         if not silent:
             if len(process.stdout) > 0:
                 log.info(process.stdout.decode())

@@ -42,6 +42,7 @@ class Node:
         silent: bool = False,
         external: bool = False,
         no_commit: bool = False,
+        no_dvc: bool = config.no_dvc,
         **kwargs,
     ):
         """
@@ -68,6 +69,8 @@ class Node:
             outs or deps can be located outside of the repository
         no_commit: bool, default=False
             Add the `--no-commit` argument to the dvc run command
+        no_dvc: bool, default=False
+            Do not create a dvc.yaml file / use dvc run
         kwargs: No kwargs are implemented
         """
         if cls is not None:
@@ -82,6 +85,7 @@ class Node:
         self.external = external
         self.no_commit = no_commit
         self.silent = silent
+        self.no_dvc = no_dvc
 
         self.name = name
 
@@ -290,6 +294,7 @@ class Node:
             silent=self.silent,
             external=self.external,
             no_commit=self.no_commit,
+            no_dvc=self.no_dvc,
             **kwargs,
         ):
             """Wrapper around the call
@@ -316,6 +321,8 @@ class Node:
                 that outs or deps can be located outside of the repository
             no_commit: bool, default=False
                 Add the `no-commit` dvc run argument.
+            no_dvc: bool, default=False
+                Do not create a dvc.yaml / use dvc run
             kwargs
 
             Returns
@@ -336,7 +343,7 @@ class Node:
                 no_commit=no_commit,
             )
 
-            cls.zntrack.pre_call()
+            cls.zntrack.pre_call(no_dvc=no_dvc)
             parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_call(
                 dvc_options=dvc_options,
