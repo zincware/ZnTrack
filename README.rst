@@ -105,5 +105,5 @@ Or you can install from source with:
     
 .. |coverage| image:: https://coveralls.io/repos/github/zincware/ZnTrack/badge.svg
     :alt: Code coverage
-    :target: https://coveralls.io/github/zincware/ZnTrack?branch=add_coveralls
+    :target: https://coveralls.io/github/zincware/ZnTrack
 
