@@ -118,7 +118,7 @@ class DVCInterface:
                     "dvc",
                     "get",
                     ".",
-                    file,
+                    Path(file).as_posix(),
                     "--rev",
                     experiment.hash,
                     "--out",
