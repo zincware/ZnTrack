@@ -443,6 +443,10 @@ class ZnTrackParent(ZnTrackType):
         if not silent:
             log.warning("--- Writing new DVC file! ---")
 
+        # need to create the paths, because it is required for
+        # dvc to write the .gitignore
+        self.zn.make_path()
+
         script = ["dvc", "run", "-n", self.stage_name]
 
         script += self.dvc.dvc_arguments
