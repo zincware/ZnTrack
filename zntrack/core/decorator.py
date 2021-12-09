@@ -256,9 +256,7 @@ class Node:
                 load = True
 
             cls.zntrack.pre_init(
-                name=name,
-                load=load,
-                has_metadata=self.has_metadata,
+                name=name, load=load, has_metadata=self.has_metadata,
             )
             log.debug(f"Processing {cls.zntrack}")
             parsed_function = func(cls, *args, **kwargs)
@@ -338,9 +336,7 @@ class Node:
             cls.zntrack.pre_call()
             parsed_function = func(cls, *args, **kwargs)
             cls.zntrack.post_call(
-                dvc_options=dvc_options,
-                slurm=slurm,
-                silent=silent,
+                dvc_options=dvc_options, slurm=slurm, silent=silent,
             )
             return parsed_function
 

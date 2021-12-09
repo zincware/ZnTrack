@@ -135,10 +135,7 @@ class ZnTrackParent(ZnTrackType):
             raise ValueError("This stage is being loaded and can not be called.")
 
     def post_call(
-        self,
-        dvc_options: DVCOptions,
-        slurm: bool,
-        silent: bool,
+        self, dvc_options: DVCOptions, slurm: bool, silent: bool,
     ):
         """Method after call
 
@@ -408,9 +405,6 @@ class ZnTrackParent(ZnTrackType):
                 #    for load=True options to avoid this part here!
                 if option == "metadata":
                     option = "metrics"
-                # need to create the paths, because it is required for
-                # dvc to write the .gitignore
-                self.zn.make_path()
                 self.dvc.update(file, option)
             else:
                 child_val = getattr(self.child, attr)
@@ -425,9 +419,7 @@ class ZnTrackParent(ZnTrackType):
                     self.dvc.update(child_val, option)
 
     def write_dvc(
-        self,
-        slurm: bool = False,
-        silent: bool = False,
+        self, slurm: bool = False, silent: bool = False,
     ):
         """Write the DVC file using run.
 
