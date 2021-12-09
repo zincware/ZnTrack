@@ -31,7 +31,7 @@ znjson.config.ACTIVE_CONVERTER = [
 ]
 try:
     znjson.register(znjson.NumpyConverter)
-except ModuleNotFoundError:
+except AttributeError:
     pass
 
 #
