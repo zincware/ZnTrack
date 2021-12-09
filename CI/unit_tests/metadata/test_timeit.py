@@ -24,7 +24,8 @@ def test_timeit():
     cls_mock.metadata = {}
     time_it(cls_mock)
 
-    assert cls_mock.metadata == {"cls_method:timeit": 0.0}
+    assert cls_mock.metadata.keys() == {"cls_method:timeit": 0.0}.keys()
+    assert all([isinstance(x, float) for x in cls_mock.metadata.values()])
 
 
 def test_timeit_multi_run():
@@ -35,4 +36,8 @@ def test_timeit_multi_run():
     time_it(cls_mock)
     time_it(cls_mock)
 
-    assert cls_mock.metadata == {"cls_method:timeit": 0.0, "cls_method_1:timeit": 0.0}
+    assert (
+        cls_mock.metadata.keys()
+        == {"cls_method:timeit": 0.0, "cls_method_1:timeit": 0.0}.keys()
+    )
+    assert all([isinstance(x, float) for x in cls_mock.metadata.values()])
