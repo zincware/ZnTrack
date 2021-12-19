@@ -26,3 +26,9 @@ class TypeHintParent(ABC):
     def run(self):
         """Run method to be called by DVC"""
         pass
+
+    @classmethod
+    def load(cls, name=None):
+        if name is None:
+            return cls(load=True)
+        return cls(load=True, name=name)

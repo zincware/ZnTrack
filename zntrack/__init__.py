@@ -14,14 +14,13 @@ import sys
 
 import znjson
 
-import zntrack.dvc
-
-from .core.decorator import Node
-from .dvc import DVC
-from .interface import DVCInterface
-from .project import ZnTrackProject
-from .utils import config
-from .utils.serializer import ZnTrackStageConverter, ZnTrackTypeConverter
+from zntrack.core.decorator import Node
+from zntrack.dvc import DVC
+from zntrack.interface import DVCInterface
+from zntrack.project import ZnTrackProject
+from zntrack.utils import config
+from zntrack.utils.serializer import ZnTrackStageConverter, ZnTrackTypeConverter
+from zntrack.utils.type_hints import TypeHintParent
 
 # register converters
 znjson.config.ACTIVE_CONVERTER = [
@@ -35,7 +34,15 @@ except AttributeError:
     pass
 
 #
-__all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config", "dvc"]
+__all__ = [
+    "Node",
+    "ZnTrackProject",
+    "DVCInterface",
+    "DVC",
+    "config",
+    "dvc",
+    "TypeHintParent",
+]
 
 __version__ = "0.2.0"
 
