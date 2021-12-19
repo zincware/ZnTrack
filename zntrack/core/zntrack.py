@@ -13,16 +13,15 @@ from __future__ import annotations
 
 import logging
 import subprocess
-import json
+from pathlib import Path
+from typing import TYPE_CHECKING, Dict
+
+from zntrack.core.data_classes import DVCOptions, DVCParams, ZnParams
+from zntrack.utils import config
+from zntrack.utils.types import ZnTrackStage, ZnTrackType
 
 from .data_classes import SlurmConfig
 from .parameter import ZnTrackOption
-from zntrack.core.data_classes import DVCParams, ZnParams, DVCOptions
-from pathlib import Path
-from zntrack.utils import is_jsonable, serializer, deserializer, config
-from zntrack.utils.types import ZnTrackType, ZnTrackStage
-
-from typing import TYPE_CHECKING, Dict
 
 if TYPE_CHECKING:
     from zntrack.utils.type_hints import TypeHintParent
@@ -79,6 +78,7 @@ class ZnTrackParent(ZnTrackType):
         self.load = False
         self.has_metadata = False
 
+        self.no_dvc = False
         self.nb_mode = False  # notebook mode
 
         self.dvc_options: DVCOptions = DVCOptions()
@@ -129,8 +129,15 @@ class ZnTrackParent(ZnTrackType):
             # update_dvc is not necessary but also should not hurt?!
             self.update_dvc()
 
-    def pre_call(self):
-        """Method to be run before the call"""
+    def pre_call(self, no_dvc):
+        """Method to be run before the call
+
+        Parameters
+        ----------
+        no_dvc: bool, default=False
+                Do not create a dvc.yaml / use dvc run
+        """
+        self.no_dvc = no_dvc
         if self.load:
             raise ValueError("This stage is being loaded and can not be called.")
 
@@ -161,7 +168,7 @@ class ZnTrackParent(ZnTrackType):
         self.update_dvc()
         self.save_internals()
 
-        if config.no_dvc:
+        if self.no_dvc:
             return
 
         self.dvc_options = dvc_options
@@ -408,9 +415,6 @@ class ZnTrackParent(ZnTrackType):
                 #    for load=True options to avoid this part here!
                 if option == "metadata":
                     option = "metrics"
-                # need to create the paths, because it is required for
-                # dvc to write the .gitignore
-                self.zn.make_path()
                 self.dvc.update(file, option)
             else:
                 child_val = getattr(self.child, attr)
@@ -450,6 +454,10 @@ class ZnTrackParent(ZnTrackType):
         """
         if not silent:
             log.warning("--- Writing new DVC file! ---")
+
+        # need to create the paths, because it is required for
+        # dvc to write the .gitignore
+        self.zn.make_path()
 
         script = ["dvc", "run", "-n", self.stage_name]
 
@@ -493,7 +501,7 @@ class ZnTrackParent(ZnTrackType):
             "If you are using a jupyter notebook, you may not be able to see the "
             "output in real time!"
         )
-        process = subprocess.run(script, capture_output=True)
+        process = subprocess.run(script, capture_output=True, check=True)
         if not silent:
             if len(process.stdout) > 0:
                 log.info(process.stdout.decode())
@@ -524,14 +532,12 @@ class ZnTrackParent(ZnTrackType):
 
             descriptor_parameters[val.option] = option_dict
 
-        log.debug(f"Serializing {descriptor_parameters}")
-        self.dvc.internals = serializer(descriptor_parameters)
+        self.dvc.internals = descriptor_parameters
 
     def load_internals(self):
         """Load the descriptor_parameters from the zntrack.json file"""
         try:
-            log.debug(f"un-serialize {self.dvc.internals}")
-            stage_internals = deserializer(self.dvc.internals)
+            stage_internals = self.dvc.internals
 
             # stage_internals = {param: {param1: val1, ...}, deps: {deps1: val1, ...}}
 

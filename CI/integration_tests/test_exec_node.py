@@ -8,24 +8,38 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, ZnTrackProject, dvc
-import shutil
 import os
+import shutil
+
+from zntrack import Node, ZnTrackProject, dvc
 
 
 @Node(no_exec=False)
 class HelloWorld:
-    """BasicTest class"""
 
     output = dvc.result()
 
+    def __call__(self, *args, **kwargs):
+        pass
+
     def run(self):
-        """Run method of the Node test instance"""
+        self.output = 43
+
+
+@Node(exec_=True)
+class HelloWorldDepreciated:
+
+    output = dvc.result()
+
+    def __call__(self, *args, **kwargs):
+        pass
+
+    def run(self):
         self.output = 43
 
 
 def test_project(tmp_path):
-    """Test that Nodes with exec_=True work"""
+    """Test that Nodes with no_exec=False work"""
     shutil.copy(__file__, tmp_path)
     os.chdir(tmp_path)
 
@@ -35,3 +49,16 @@ def test_project(tmp_path):
     HelloWorld()()
 
     assert HelloWorld(load=True).output == 43
+
+
+def test_project_depreciated(tmp_path):
+    """Test that Nodes with exec_=True work"""
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
+
+    project = ZnTrackProject()
+    project.create_dvc_repository()
+
+    HelloWorldDepreciated()()
+
+    assert HelloWorldDepreciated(load=True).output == 43

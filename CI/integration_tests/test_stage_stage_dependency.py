@@ -8,9 +8,10 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, dvc
-import shutil
 import os
+import shutil
+
+from zntrack import Node, dvc
 
 
 @Node()
@@ -41,18 +42,18 @@ def test_stage_stage_dependency(tmp_path):
     os.chdir(tmp_path)
 
     stage_1 = Stage1()
-    stage_1(args="Test01")
+    stage_1(args="Test01", no_dvc=True)
     # Need to call the stage, to create the config file
     #  it does not make sense to access the results of a stage
     #  that has not at least been called
     stage_2 = Stage2()
-    stage_2()
+    stage_2(no_dvc=True)
 
     stage_2a = Stage2(load=True)
 
     # changing the value of Stage1 in the config file
     stage_1 = Stage1()
-    stage_1(args="Test02")
+    stage_1(args="Test02", no_dvc=True)
 
     # Loading the stage it should now have the new value
     stage_2b = Stage2(load=True)

@@ -8,11 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description: 
 """
+import os
+
 import pytest
 
 from zntrack import Node, dvc, zn
 from zntrack.core.data_classes import DVCOptions, DVCParams, ZnParams
-import os
 
 
 def test_dvc_options(tmp_path):
@@ -136,3 +137,9 @@ def test_dvc_params_internals(tmp_path, dvc_params):
 def test_zn_files():
     pass
     # TODO add missing tests for ZnParams!
+
+
+def test_zn_files_node_path(tmp_path):
+    os.chdir(tmp_path)
+    zn_params = ZnParams(node_name="test_node")
+    assert zn_params.node_path == zn_params.directory / zn_params.node_name

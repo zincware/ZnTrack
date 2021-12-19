@@ -9,11 +9,13 @@ Copyright Contributors to the Zincware Project.
 Description:
 """
 
-from zntrack import Node, ZnTrackProject, zn, dvc
-from zntrack.metadata import TimeIt
 import os
 import shutil
+
 import numpy as np
+
+from zntrack import Node, ZnTrackProject, dvc, zn
+from zntrack.metadata import TimeIt
 
 
 @Node()

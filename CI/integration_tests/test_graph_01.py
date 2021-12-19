@@ -8,18 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description: Simple test for graph execution
 """
+import os
 import shutil
 
-import pytest
-import os
-from tempfile import TemporaryDirectory
-
-from zntrack import Node, dvc, ZnTrackProject
 import numpy as np
 
-temp_dir = TemporaryDirectory()
-
-cwd = os.getcwd()
+from zntrack import Node, ZnTrackProject, dvc
 
 
 @Node()

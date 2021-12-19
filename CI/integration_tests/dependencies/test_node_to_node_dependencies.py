@@ -8,13 +8,14 @@ Copyright Contributors to the Zincware Project.
 
 Description: Check that all dependencies work as expected
 """
+import os
+import shutil
 import subprocess
+from pathlib import Path
+
+import pytest
 
 from zntrack import Node, dvc, zn
-from pathlib import Path
-import pytest
-import shutil
-import os
 
 
 @Node()
@@ -146,7 +147,7 @@ def test_expand_dependencies(dvc_repo_path):
     subprocess.check_call(["dvc", "repro"])
 
 
-def test_exp_deps_w_outs(dvc_repo_path):
+def _test_exp_deps_w_outs(dvc_repo_path):
     """test_expand_dependencies_with_outs"""
     os.chdir(dvc_repo_path)
 

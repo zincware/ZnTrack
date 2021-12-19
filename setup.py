@@ -1,5 +1,6 @@
-import setuptools
 import pathlib
+
+import setuptools
 
 long_description = pathlib.Path("README.rst").read_text()
 required_packages = pathlib.Path("requirements.txt").read_text().splitlines()
@@ -22,6 +23,6 @@ setuptools.setup(
         "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=required_packages,
 )
