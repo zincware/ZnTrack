@@ -107,8 +107,8 @@ class Method(ZnTrackOption):
             except AttributeError:
                 raise AttributeError(
                     f"Could not find {key} in passed method! Please use "
-                    f"@check_signature from ZnTrack to check that the method signature"
-                    f" fits the method attributes"
+                    "@check_signature from ZnTrack to check that the method signature"
+                    " fits the method attributes"
                 )
 
         instance.__dict__[self.name] = methods

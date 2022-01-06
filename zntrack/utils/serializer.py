@@ -6,7 +6,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: List of functions that are applied to serialize and deserialize Python Objects
+Description: List of functions that are used to serialize and deserialize Python Objects
 
 Notes
 -----
@@ -20,7 +20,8 @@ import logging
 
 import znjson
 
-from zntrack.utils.types import ZnTrackStage, ZnTrackType
+from zntrack.core.base import Node
+from zntrack.utils.types import ZnTrackStage
 
 log = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ log = logging.getLogger(__name__)
 class ZnTrackTypeConverter(znjson.ConverterBase):
     """Main Serializer for ZnTrack Nodes, e.g. as dependencies"""
 
-    instance = ZnTrackType
+    instance = Node
     representation = "ZnTrackType"
 
     def _encode(self, obj) -> dict:
@@ -41,13 +42,12 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
     def _decode(self, value: dict):
         """Prepare serialized Node to be converted back"""
+        # TODO why not yield the instance directly?
         return ZnTrackStage(**value)
 
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""
-        if hasattr(other, "zntrack"):
-            return isinstance(other.zntrack, self.instance)
-        return False
+        return isinstance(other, Node)
 
 
 class ZnTrackStageConverter(znjson.ConverterBase):

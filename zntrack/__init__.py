@@ -17,7 +17,6 @@ import znjson
 import zntrack.dvc
 
 from .core.decorator import Node
-from .dvc import DVC
 from .interface import DVCInterface
 from .project import ZnTrackProject
 from .utils import config
@@ -35,9 +34,9 @@ except AttributeError:
     pass
 
 #
-__all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config", "dvc"]
+__all__ = ["Node", "ZnTrackProject", "DVCInterface", "config", "dvc"]
 
-__version__ = "0.2.0"
+__version__ = "0.2.2"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
