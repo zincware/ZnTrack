@@ -6,7 +6,7 @@ from zntrack import dvc, zn
 from zntrack.core.base import Node
 
 
-class TestNode01(Node):
+class ExampleNode01(Node):
     inputs = dvc.params()
     outputs = zn.outs()
 
@@ -24,10 +24,10 @@ def test_run(tmp_path):
     subprocess.check_call(["git", "init"])
     subprocess.check_call(["dvc", "init"])
 
-    test_node_1 = TestNode01(inputs="Lorem Ipsum")
+    test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
     test_node_1.write_dvc()
 
     subprocess.check_call(["dvc", "repro"])
 
-    load_test_node_1 = TestNode01.load()
+    load_test_node_1 = ExampleNode01.load()
     assert load_test_node_1.outputs == "Lorem Ipsum"
