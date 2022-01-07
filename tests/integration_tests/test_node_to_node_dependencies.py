@@ -43,8 +43,8 @@ class DVCZnOuts(Node):
 class DependenciesCollector(Node):
     dependencies = dvc.deps()
 
-    def __init__(self, dependencies=None):
-        super().__init__()
+    def __init__(self, dependencies=None, name=None):
+        super().__init__(name=name)
         self.dependencies = dependencies
 
     def run(self):
@@ -55,9 +55,11 @@ class DepsCollwOuts(Node):
     dependencies = dvc.deps()
     outs: Path = dvc.outs()
 
-    def __init__(self, dependencies):
-        super().__init__()
-        self.outs = Path("lorem.txt")
+    def __init__(self, dependencies=None, name=None):
+        super().__init__(name=name)
+        # must add a name, if the Node is used with two different names to avoid
+        # writing to the same file!
+        self.outs = Path(f"{self.zntrack.stage_name}_lorem.txt")
         self.dependencies = dependencies
 
     def run(self):
@@ -116,33 +118,38 @@ def test_dvc_zn_outs(dvc_repo_path):
     assert DependenciesCollector.load().dependencies.data == "Lorem Ipsum"
 
 
-# def test_expand_dependencies(dvc_repo_path):
-#     os.chdir(dvc_repo_path)
-#
-#     DVCZnOuts().write_dvc()
-#
-#     dependencies_collector = DependenciesCollector(name="Collector01")
-#     dependencies_collector(dependencies=DVCZnOuts(load=True))
-#
-#     dependencies_collector = DependenciesCollector(name="Collector02")
-#     dependencies_collector(
-#         dependencies=DependenciesCollector(name="Collector01", load=True)
-#     )
-#
-#     subprocess.check_call(["dvc", "repro"])
+def test_expand_dependencies(dvc_repo_path):
+    os.chdir(dvc_repo_path)
+
+    DVCZnOuts().write_dvc()
+
+    DependenciesCollector(name="Collector01", dependencies=DVCZnOuts.load()).write_dvc()
+    DependenciesCollector(name="Collector02", dependencies=DVCZnOuts.load()).write_dvc()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert (
+        DependenciesCollector.load(name="Collector01").dependencies.data == "Lorem Ipsum"
+    )
+    assert (
+        DependenciesCollector.load(name="Collector02").dependencies.data == "Lorem Ipsum"
+    )
 
 
-# def _test_exp_deps_w_outs(dvc_repo_path):
-#     """test_expand_dependencies_with_outs"""
-#     os.chdir(dvc_repo_path)
-#
-#     dvc_zn_outs = DVCZnOuts()
-#     dvc_zn_outs()
-#
-#     dependencies_collector = DepsCollwOuts(name="Collector01")
-#     dependencies_collector(dependencies=DVCZnOuts(load=True))
-#
-#     dependencies_collector = DepsCollwOuts(name="Collector02")
-#     dependencies_collector(dependencies=DepsCollwOuts(name="Collector01", load=True))
-#
-#     subprocess.check_call(["dvc", "repro"])
+def test_exp_deps_w_outs(dvc_repo_path):
+    """test_expand_dependencies_with_outs"""
+    os.chdir(dvc_repo_path)
+
+    DVCZnOuts().write_dvc()
+
+    DepsCollwOuts(name="Collector01", dependencies=DVCZnOuts.load()).write_dvc()
+    DepsCollwOuts(
+        name="Collector02", dependencies=DepsCollwOuts.load(name="Collector01")
+    ).write_dvc()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert DepsCollwOuts.load("Collector01").dependencies.data == "Lorem Ipsum"
+    assert (
+        DepsCollwOuts.load("Collector02").dependencies.dependencies.data == "Lorem Ipsum"
+    )

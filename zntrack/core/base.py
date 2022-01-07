@@ -47,8 +47,8 @@ class ZnTrack:
     params_file = pathlib.Path("params.yaml")
     zntrack_file = pathlib.Path("zntrack.json")
 
-    def __init__(self, parent):
-        self._stage_name = None
+    def __init__(self, parent, name=None):
+        self._stage_name = name
         self._module = None
         self.parent = parent
         self.option_tracker = ZnTrackOptionTracker()
@@ -98,6 +98,7 @@ class ZnTrack:
         str: Name of this class
 
         """
+        # TODO rename stage_name to name and remove name/rename it
         return self.parent.__class__.__name__
 
     @property
@@ -138,10 +139,14 @@ class ZnTrack:
         files = []
         for option in self.option_tracker.dvc_options:
             value = getattr(self.parent, option.name)
-            if isinstance(value, list) or isinstance(value, tuple):
-                files += [pathlib.Path(x) for x in value]
+            # TODO allow for arbitrary recursion depth, maybe log a warning if depth > 10
+            if isinstance(value, Node):
+                files += list(value.zntrack.affected_files)
             else:
-                files.append(pathlib.Path(value))
+                if isinstance(value, list) or isinstance(value, tuple):
+                    files += [pathlib.Path(x) for x in value]
+                else:
+                    files.append(pathlib.Path(value))
         # Handle Zn Options
         for value in self.option_tracker.zn_options:
             files.append(self.zn_outs_path / f"{value.option}.json")
@@ -321,7 +326,7 @@ class ZnTrack:
         # Add command to run the script
         script.append(
             f"""{self.python_interpreter} -c "from {self.module} import {self.name}; """
-            f"""{self.name}.load().run_and_save()" """
+            f"""{self.name}.load(name='{self.stage_name}').run_and_save()" """
         )
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
@@ -357,8 +362,8 @@ class Node(abc.ABC):
 
     has_metadata = False
 
-    def __init__(self):
-        self._zntrack = ZnTrack(self)
+    def __init__(self, name=None):
+        self._zntrack = ZnTrack(self, name=name)
 
     @property
     def zntrack(self) -> ZnTrack:
@@ -378,7 +383,20 @@ class Node(abc.ABC):
         # ignored by dvc/zn.<option>. Also check if
         # NoneType in vars(MyNode(NoneType, NoneType, ...)).values()
         # and raise an error when trying to pass something that is not a parameter
-        instance = cls()
+        if name is None or name == cls.__name__:
+            # If the  name was not changed by the user, they might not want to
+            # use it, so instead of mandating 'super().__init__(name)' we ignore it,
+            # if the name is equal to the cls name
+            instance = cls()
+        else:
+            try:
+                instance = cls(name=name)
+            except TypeError:
+                raise TypeError(
+                    "Please check if name is passed to the super call. Otherwise add"
+                    " '__init__(self, name=None)' and 'super().__init__(name=name)'."
+                )
+
         instance.zntrack.load()
         return instance
 
