@@ -187,3 +187,71 @@ def test_save_zn_options(tmp_path):
         pathlib.Path("nodes", "ExampleOnlyZnOuts", "outs.json").read_text()
     )
     assert zn_outs == {"params1": "Lorem", "params2": "Ipsum"}
+
+
+def test_load_params(tmp_path):
+    os.chdir(tmp_path)
+    params_file = pathlib.Path("params.yaml")
+    example_node = ExampleOnlyParams()
+
+    # test without a file
+    example_node.zntrack._load_params()
+
+    assert example_node.params1 is None
+    assert example_node.params2 is None
+
+    # and now with a file
+    params_file.write_text(
+        json.dumps({"ExampleOnlyParams": {"params1": "Lorem", "params2": "Ipsum"}})
+    )
+
+    example_node.zntrack._load_params()
+
+    assert example_node.params1 == "Lorem"
+    assert example_node.params2 == "Ipsum"
+
+
+def test_load_dvc_options(tmp_path):
+    os.chdir(tmp_path)
+    zntrack_file = pathlib.Path("zntrack.json")
+
+    example_node = ExampleOnlyDVCOuts()
+    # test without a file
+
+    example_node.zntrack._load_dvc_options()
+
+    assert example_node.params1 is None
+    assert example_node.params2 is None
+
+    # # and now with a file
+    zntrack_file.write_text(
+        json.dumps({"ExampleOnlyDVCOuts": {"params1": "Lorem", "params2": "Ipsum"}})
+    )
+
+    example_node.zntrack._load_dvc_options()
+
+    assert example_node.params1 == "Lorem"
+    assert example_node.params2 == "Ipsum"
+
+
+def test_load_zn_options(tmp_path):
+    os.chdir(tmp_path)
+
+    file = pathlib.Path("nodes", "ExampleOnlyZnOuts", "outs.json")
+
+    example_node = ExampleOnlyZnOuts()
+    # test without a file
+
+    example_node.zntrack._load_zn_options()
+
+    assert example_node.params1 is None
+    assert example_node.params2 is None
+
+    # # and now with a file
+    file.parent.mkdir(parents=True, exist_ok=True)
+    file.write_text(json.dumps({"params1": "Lorem", "params2": "Ipsum"}))
+
+    example_node.zntrack._load_zn_options()
+
+    assert example_node.params1 == "Lorem"
+    assert example_node.params2 == "Ipsum"

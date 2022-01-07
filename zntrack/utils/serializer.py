@@ -43,7 +43,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     def _decode(self, value: dict):
         """Prepare serialized Node to be converted back"""
         # TODO why not yield the instance directly?
-        return ZnTrackStage(**value)
+        return ZnTrackStage(**value).load_zntrack_node()
 
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""
@@ -57,6 +57,7 @@ class ZnTrackStageConverter(znjson.ConverterBase):
     some classes might not be loaded but in the state of ZnTrackStage instead.
     """
 
+    # TODO remove
     instance = ZnTrackStage
     representation = "ZnTrackStage"
 

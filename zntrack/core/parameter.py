@@ -38,8 +38,10 @@ class ZnTrackOption:
     option = None
     load = False
 
-    def __init__(self, name=None, option=None, load: bool = None):
+    def __init__(self, **kwargs):
         """Instantiate a ZnTrackOption Descriptor
+
+        Does only support kwargs and no args!
 
         Parameters
         ----------
@@ -55,6 +57,11 @@ class ZnTrackOption:
             This is usually true for zn.<option> and false for dvc.<option>.
             The simplest example is dvc.result() (== zn.outs())
         """
+
+        name = kwargs.get("name", None)
+        option = kwargs.get("option", None)
+        load = kwargs.get("load", None)
+
         if option is not None:
             self.option = option
 

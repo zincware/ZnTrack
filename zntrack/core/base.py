@@ -16,6 +16,7 @@ import json
 import logging
 import pathlib
 import subprocess
+import sys
 import typing
 
 import yaml
@@ -24,6 +25,22 @@ import znjson
 from zntrack.core.parameter import ZnTrackOption
 
 log = logging.getLogger(__name__)
+
+
+def handle_single_dvc_option(option: ZnTrackOption, value) -> [str, str]:
+    if isinstance(value, Node):
+        if option.option == "deps":
+            for file in value.zntrack.affected_files:
+                return ["--deps", file]
+        else:
+            raise NotImplementedError(f"Can not convert {value} to {option.option}")
+    elif isinstance(value, str):
+        file = pathlib.Path(value).as_posix()
+        return [f"--{option.dvc_parameter}", file]
+    elif isinstance(value, pathlib.Path):
+        return [f"--{option.dvc_parameter}", value.as_posix()]
+    else:
+        raise NotImplementedError(f"Type {type(value)} is currently not supported")
 
 
 class ZnTrack:
@@ -94,7 +111,10 @@ class ZnTrack:
         this can be changed when using nb_mode
         """
         if self._module is None:
-            self._module = self.parent.__class__.__module__
+            if self.parent.__class__.__module__ == "__main__":
+                self._module = pathlib.Path(sys.argv[0]).stem
+            else:
+                self._module = self.parent.__class__.__module__
         return self._module
 
     @property
@@ -117,7 +137,11 @@ class ZnTrack:
     def affected_files(self) -> typing.Set[pathlib.Path]:
         files = []
         for option in self.option_tracker.dvc_options:
-            files.append(pathlib.Path(getattr(self.parent, option.name)))
+            value = getattr(self.parent, option.name)
+            if isinstance(value, list) or isinstance(value, tuple):
+                files += [pathlib.Path(x) for x in value]
+            else:
+                files.append(pathlib.Path(value))
         # Handle Zn Options
         for value in self.option_tracker.zn_options:
             files.append(self.zn_outs_path / f"{value.option}.json")
@@ -151,17 +175,28 @@ class ZnTrack:
             with self.params_file.open("r") as f:
                 full_params_file = yaml.safe_load(f)
         except FileNotFoundError:
-            full_params_file = {}
-        self.parent.__dict__.update(full_params_file[self.stage_name])
+            log.debug(f"No Parameter file ({self.params_file}) found!")
+            return
+        try:
+            self.parent.__dict__.update(full_params_file[self.stage_name])
+        except KeyError:
+            log.debug(f"No Parameters for {self.stage_name} found in {self.params_file}")
 
     def _load_dvc_options(self):
         try:
-            zntrack_file = json.loads(self.zntrack_file.read_text(), cls=znjson.ZnDecoder)
+            zntrack_file = json.loads(self.zntrack_file.read_text())
         except FileNotFoundError:
             log.debug(f"Could not load params from {self.zntrack_file}!")
-            zntrack_file = {}
-
-        self.parent.__dict__.update(zntrack_file[self.stage_name])
+            return
+        try:
+            # The problem here is, that I can not / don't want to load all Nodes but only
+            # the ones, that are in [self.stage_name], so we only deserialize them
+            data = json.loads(
+                json.dumps(zntrack_file[self.stage_name]), cls=znjson.ZnDecoder
+            )
+            self.parent.__dict__.update(data)
+        except KeyError:
+            log.debug(f"No DVC Options for {self.stage_name} found in {self.params_file}")
 
     def _load_zn_options(self):
         # TODO this is not save an will read all json files in that directory!
@@ -169,7 +204,7 @@ class ZnTrack:
         options = {}
 
         for file in self.zn_outs_path.glob("*.json"):
-            options.update(json.loads(file.read_text()))
+            options.update(json.loads(file.read_text(), cls=znjson.ZnDecoder))
 
         self.parent.__dict__.update(options)
 
@@ -230,7 +265,7 @@ class ZnTrack:
         self.zn_outs_path.mkdir(parents=True, exist_ok=True)
         for option, values in options.items():
             file = self.zn_outs_path / f"{option}.json"
-            file.write_text(json.dumps(values, indent=4))
+            file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
 
         return options
 
@@ -269,23 +304,11 @@ class ZnTrack:
         # Handle DVC options
         for option in self.option_tracker.dvc_options:
             value = getattr(self.parent, option.name)
-            if isinstance(value, Node):
-                if option.option == "deps":
-                    for file in value.zntrack.affected_files:
-                        script += ["--deps", file]
-                else:
-                    raise NotImplementedError(
-                        f"Can not convert {value} to {option.option}"
-                    )
-            elif isinstance(value, str):
-                file = pathlib.Path(value).as_posix()
-                script += [f"--{option.dvc_parameter}", file]
-            elif isinstance(value, pathlib.Path):
-                script += [f"--{option.dvc_parameter}", value.as_posix()]
+            if isinstance(value, list) or isinstance(value, tuple):
+                for single_value in value:
+                    script += handle_single_dvc_option(option, single_value)
             else:
-                raise NotImplementedError(
-                    f"Type {type(value)} is currently not supported"
-                )
+                script += handle_single_dvc_option(option, value)
         # Handle Zn Options
         zn_options_set = set()
         for value in self.option_tracker.zn_options:
