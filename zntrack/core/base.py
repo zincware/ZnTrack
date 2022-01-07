@@ -43,11 +43,80 @@ def handle_single_dvc_option(option: ZnTrackOption, value) -> [str, str]:
         raise NotImplementedError(f"Type {type(value)} is currently not supported")
 
 
+@dataclasses.dataclass(frozen=False, order=True, init=True)
+class DVCOptions:
+    """Extension to the DVCParams
+    DVCParams handles e.g. I/O whilst DVCOptions handles all other parameters,
+    such as the name, exec, force, commit, external, ...
+    See Also
+    --------
+    https://dvc.org/doc/command-reference/run
+    """
+
+    no_commit: bool = False
+    external: bool = False
+    always_changed: bool = False
+    no_exec: bool = False
+    force: bool = False
+    no_run_cache: bool = False
+
+    @property
+    def dvc_arguments(self) -> list:
+        """Get the activated options
+        Returns
+        -------
+        list: A list of strings for the subprocess call
+            ["--no-commit", "--external"]
+        """
+        out = []
+
+        for dvc_option in self.__dataclass_fields__:
+            value = getattr(self, dvc_option)
+            if isinstance(value, bool):
+                if value:
+                    out.append(f"--{dvc_option.replace('_', '-')}")
+                else:
+                    if dvc_option == "no_exec":
+                        log.warning(
+                            "You will not be able to see the stdout/stderr "
+                            "of the process in real time!"
+                        )
+            else:
+                raise NotImplementedError("Currently only boolean values are supported")
+
+        return out
+
+
 class ZnTrack:
     params_file = pathlib.Path("params.yaml")
     zntrack_file = pathlib.Path("zntrack.json")
 
-    def __init__(self, parent, name=None):
+    def __init__(
+        self,
+        parent,
+        name=None,
+        nb_name: str = None,
+        no_exec: bool = True,
+        external: bool = False,
+        no_commit: bool = False,
+        has_metadata: bool = False,
+        force: bool = True,
+        always_changed: bool = False,
+        no_run_cache: bool = False,
+    ):
+
+        self.dvc_options = DVCOptions(
+            no_commit=no_commit,
+            external=external,
+            always_changed=always_changed,
+            no_exec=no_exec,
+            force=force,
+            no_run_cache=no_run_cache,
+        )
+
+        self.nb_name = nb_name
+        self.has_metadata = has_metadata
+
         self._stage_name = name
         self._module = None
         self.parent = parent
@@ -298,7 +367,9 @@ class ZnTrack:
         if not silent:
             log.warning("--- Writing new DVC file! ---")
 
-        script = ["dvc", "run", "-n", self.stage_name, "--no-exec", "--force"]
+        script = ["dvc", "run", "-n", self.stage_name]
+
+        script += self.dvc_options.dvc_arguments
 
         # Handle Parameter
         if len(self.option_tracker.params) > 0:
@@ -354,7 +425,6 @@ class ZnTrackOptionTracker:
 
 class Node(abc.ABC):
     nb_name: str = None
-    name: str = None
     no_exec: bool = True
     silent: bool = False
     external: bool = False
@@ -364,6 +434,9 @@ class Node(abc.ABC):
 
     def __init__(self, name=None):
         self._zntrack = ZnTrack(self, name=name)
+
+    def __call__(self, *args, **kwargs):
+        raise NotImplementedError("Please see <migration tutorial>")
 
     @property
     def zntrack(self) -> ZnTrack:
@@ -404,6 +477,6 @@ class Node(abc.ABC):
         self.run()
         self.save()
 
-    @abc.abstractmethod
+    # @abc.abstractmethod
     def run(self):
         raise NotImplementedError  #

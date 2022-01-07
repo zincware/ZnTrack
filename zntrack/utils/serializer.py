@@ -40,35 +40,10 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
             "name": obj.zntrack.stage_name,
         }
 
-    def _decode(self, value: dict):
-        """Prepare serialized Node to be converted back"""
-        # TODO why not yield the instance directly?
+    def _decode(self, value: dict) -> Node:
+        """return serialized Node"""
         return ZnTrackStage(**value).load_zntrack_node()
 
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""
         return isinstance(other, Node)
-
-
-class ZnTrackStageConverter(znjson.ConverterBase):
-    """
-
-    Required, because when loading the .zntrack file and then serializing it again
-    some classes might not be loaded but in the state of ZnTrackStage instead.
-    """
-
-    # TODO remove
-    instance = ZnTrackStage
-    representation = "ZnTrackStage"
-
-    def _encode(self, obj: ZnTrackStage):
-        """Convert ZnTrackStage to dict"""
-        return {
-            "module": obj.module,
-            "cls": obj.cls,
-            "name": obj.name,
-        }
-
-    def _decode(self, value: dict):
-        """Convert dict to ZnTrackStage"""
-        return ZnTrackStage(**value)

@@ -29,17 +29,6 @@ log = logging.getLogger(__name__)
 # detailed explanations on https://dvc.org/doc/command-reference/run#options
 
 
-class result(ZnTrackOption):
-    """Special ZnTrack type that handles all serializeable data in a single file
-
-    >>> value = result()
-    >>> value = {"data": [1, 2, 3, 4]}
-    """
-
-    option = "outs"
-    load = True
-
-
 class params(ZnTrackOption):
     option = "params"
 

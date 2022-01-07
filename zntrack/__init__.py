@@ -16,16 +16,15 @@ import znjson
 
 import zntrack.dvc as dvc
 
-from .core.decorator import Node
+from .core import Node
 from .interface import DVCInterface
 from .project import ZnTrackProject
 from .utils import config
-from .utils.serializer import ZnTrackStageConverter, ZnTrackTypeConverter
+from .utils.serializer import ZnTrackTypeConverter
 
 # register converters
 znjson.config.ACTIVE_CONVERTER = [
     ZnTrackTypeConverter,
-    ZnTrackStageConverter,
     znjson.PathlibConverter,
 ]
 try:
