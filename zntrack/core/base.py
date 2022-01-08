@@ -15,6 +15,7 @@ import dataclasses
 import json
 import logging
 import pathlib
+import re
 import subprocess
 import sys
 import typing
@@ -23,6 +24,7 @@ import yaml
 import znjson
 
 from zntrack.core.parameter import ZnTrackOption
+from zntrack.utils import config
 
 log = logging.getLogger(__name__)
 
@@ -41,6 +43,54 @@ def handle_single_dvc_option(option: ZnTrackOption, value) -> [str, str]:
         return [f"--{option.dvc_parameter}", value.as_posix()]
     else:
         raise NotImplementedError(f"Type {type(value)} is currently not supported")
+
+
+def jupyter_class_to_file(silent, nb_name, module_name):
+    """Extract the class definition form a ipynb file"""
+
+    nb_name = pathlib.Path(nb_name)
+
+    if silent:
+        _ = subprocess.run(
+            ["jupyter", "nbconvert", "--to", "script", nb_name],
+            capture_output=True,
+        )
+    else:
+        subprocess.run(["jupyter", "nbconvert", "--to", "script", nb_name])
+
+    reading_class = False
+
+    imports = ""
+
+    class_definition = ""
+
+    with open(pathlib.Path(nb_name).with_suffix(".py"), "r") as f:
+        for line in f:
+            if line.startswith("import") or line.startswith("from"):
+                imports += line
+            if reading_class:
+                if (
+                    re.match(r"\S", line)
+                    and not line.startswith("#")
+                    and not line.startswith("class")
+                ):
+                    reading_class = False
+            if reading_class or line.startswith("class"):
+                reading_class = True
+                class_definition += line
+            if line.startswith("@Node"):
+                reading_class = True
+                class_definition += "@Node()\n"
+
+    src = imports + "\n\n" + class_definition
+
+    src_file = pathlib.Path(config.nb_class_path, module_name).with_suffix(".py")
+    config.nb_class_path.mkdir(exist_ok=True, parents=True)
+
+    src_file.write_text(src)
+
+    # Remove converted ipynb file
+    nb_name.with_suffix(".py").unlink()
 
 
 @dataclasses.dataclass(frozen=False, order=True, init=True)
@@ -95,7 +145,7 @@ class ZnTrack:
         self,
         parent,
         name=None,
-        nb_name: str = None,
+        nb_name: str = config.nb_name,
         no_exec: bool = True,
         external: bool = False,
         no_commit: bool = False,
@@ -370,6 +420,19 @@ class ZnTrack:
         script = ["dvc", "run", "-n", self.stage_name]
 
         script += self.dvc_options.dvc_arguments
+
+        # Jupyter Notebook
+        if self.nb_name is not None:
+            self._module = f"{config.nb_class_path}.{self.parent.__class__.__name__}"
+
+            jupyter_class_to_file(
+                silent=silent, nb_name=self.nb_name, module_name=self.module
+            )
+
+            script += [
+                "--deps",
+                pathlib.Path(*self.module.split(".")).with_suffix(".py").as_posix(),
+            ]
 
         # Handle Parameter
         if len(self.option_tracker.params) > 0:
