@@ -19,12 +19,12 @@ from zntrack import Node, dvc, zn
 from zntrack.interface import DVCInterface
 
 
-@Node()
-class HelloWorld:
+class HelloWorld(Node):
     outputs = zn.outs()
     inputs = dvc.params()
 
-    def __call__(self, inputs):
+    def __init__(self, inputs=None, name=None):
+        super(HelloWorld, self).__init__(name=name)
         self.inputs = inputs
 
     def run(self):
@@ -38,7 +38,7 @@ def single_experiment_path(tmp_path):
     subprocess.run(["git", "init"])
     subprocess.run(["dvc", "init"])
 
-    HelloWorld()(inputs=1)
+    HelloWorld(inputs=1).write_dvc()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
 
@@ -54,15 +54,15 @@ def multi_experiment_path(tmp_path):
     subprocess.run(["git", "init"])
     subprocess.run(["dvc", "init"])
 
-    HelloWorld()(inputs=1)
+    HelloWorld(inputs=1).write_dvc()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
 
     subprocess.run(["dvc", "repro"])
 
-    HelloWorld()(inputs=2)
+    HelloWorld(inputs=2).write_dvc()
     subprocess.run(["dvc", "exp", "run", "-n", "Test02"])
-    HelloWorld()(inputs=3)
+    HelloWorld(inputs=3).write_dvc()
     subprocess.run(["dvc", "exp", "run", "-n", "Test03"])
 
     return tmp_path

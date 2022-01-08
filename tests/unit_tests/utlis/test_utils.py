@@ -8,7 +8,10 @@ Copyright Contributors to the Zincware Project.
 
 Description: Test class for testing utils
 """
-from zntrack.utils import is_jsonable
+import os
+import pathlib
+
+from zntrack.utils import cwd_temp_dir, is_jsonable
 
 
 def test_is_jsonable():
@@ -18,3 +21,11 @@ def test_is_jsonable():
     """
     assert is_jsonable({"a": 1}) is True
     assert is_jsonable({"a": is_jsonable}) is False
+
+
+def test_cwd_temp_dir():
+    new_dir = cwd_temp_dir(required_files=[__file__])
+    assert pathlib.Path(new_dir.name) == pathlib.Path(os.getcwd())
+    assert next(pathlib.Path(new_dir.name).glob("*.py")).name == "test_utils.py"
+    os.chdir("..")
+    new_dir.cleanup()

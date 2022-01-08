@@ -82,6 +82,7 @@ class Method(ZnTrackOption):
 
         Save module, name and kwargs from the class state
         """
+        # TODO do not use this, pickle the whole class instead and use znjson for this
         methods = {
             "module": value.__class__.__module__,
             "name": value.__class__.__name__,
@@ -89,12 +90,12 @@ class Method(ZnTrackOption):
         }
 
         # If using Jupyter Notebooks
-        if instance.zntrack.nb_mode:
-            # if the class is originally imported from main,
-            #  it will be copied to the same module path as the
-            #  ZnTrack Node source code.
-            if methods["module"] == "__main__":
-                methods["module"] = instance.zntrack.module
+        # if instance.zntrack.nb_mode:
+        #     # if the class is originally imported from main,
+        #     #  it will be copied to the same module path as the
+        #     #  ZnTrack Node source code.
+        #     if methods["module"] == "__main__":
+        #         methods["module"] = instance.zntrack.module
 
         for key in inspect.signature(value.__class__.__init__).parameters:
             if key == "self":
