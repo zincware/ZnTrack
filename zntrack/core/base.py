@@ -467,11 +467,13 @@ class ZnTrackOptionTracker:
     zn_options: list[ZnTrackOption] = dataclasses.field(default_factory=list)
     zn_iterables: list[ZnTrackOption] = dataclasses.field(default_factory=list)
 
+    check_iterable: bool = True
+
     def update(self, cls):
         for option in vars(type(cls)).values():
             if isinstance(option, ZnTrackOption):
                 if option.option == "params":
-                    if option.iterable:
+                    if option.iterable and self.check_iterable:
                         if option not in self.zn_iterables:
                             self.zn_iterables.append(option)
                     else:
@@ -483,6 +485,17 @@ class ZnTrackOptionTracker:
                 else:
                     if option not in self.dvc_options:
                         self.dvc_options.append(option)
+
+    def get_dict(self, cls):
+        result = {}
+        for param in self.params:
+            result[param.name] = getattr(cls, param.name)
+        for option in self.dvc_options:
+            result[option.name] = getattr(cls, option.name)
+        for option in self.zn_options:
+            result[option.name] = getattr(cls, option.name)
+
+        return result
 
 
 class Node(abc.ABC):
