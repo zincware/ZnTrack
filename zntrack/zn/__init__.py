@@ -41,6 +41,12 @@ class metrics(ZnTrackOption):
     load = True
 
 
+class iterable(ZnTrackOption):
+    option = "params"
+    load = True
+    iterable = True
+
+
 class Method(ZnTrackOption):
     """ZnTrack methods passing descriptor
 

@@ -91,10 +91,10 @@ def test_module(example_node):
 
 
 def test_stage_name(example_node):
-    assert example_node.zntrack.stage_name == "ExampleNode"
+    assert example_node.zntrack.node_name == "ExampleNode"
 
-    example_node.zntrack.stage_name = "Lorem Ipsum"
-    assert example_node.zntrack.stage_name == "Lorem Ipsum"
+    example_node.zntrack.node_name = "Lorem Ipsum"
+    assert example_node.zntrack.node_name == "Lorem Ipsum"
 
 
 def test_zn_outs_path(example_node):

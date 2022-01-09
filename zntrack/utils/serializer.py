@@ -37,7 +37,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
         return {
             "module": obj.zntrack.module,
             "cls": obj.__class__.__name__,
-            "name": obj.zntrack.stage_name,
+            "name": obj.zntrack.node_name,
         }
 
     def _decode(self, value: dict) -> Node:

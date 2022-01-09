@@ -59,7 +59,7 @@ class DepsCollwOuts(Node):
         super().__init__(name=name)
         # must add a name, if the Node is used with two different names to avoid
         # writing to the same file!
-        self.outs = Path(f"{self.zntrack.stage_name}_lorem.txt")
+        self.outs = Path(f"{self.zntrack.node_name}_lorem.txt")
         self.dependencies = dependencies
 
     def run(self):

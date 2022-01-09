@@ -155,10 +155,15 @@ class ZnTrack:
         self.nb_name = nb_name
         self.has_metadata = has_metadata
 
-        self._stage_name = name
+        self._node_name = name
         self._module = None
         self.parent = parent
-        self.option_tracker = ZnTrackOptionTracker()
+        self._option_tracker = ZnTrackOptionTracker()
+
+    @property
+    def option_tracker(self):
+        self._option_tracker.update(self.parent)
+        return self._option_tracker
 
     @property
     def python_interpreter(self) -> str:
@@ -205,7 +210,7 @@ class ZnTrack:
         str: Name of this class
 
         """
-        # TODO rename stage_name to name and remove name/rename it
+        # TODO rename node_name to name and remove name/rename it
         return self.parent.__class__.__name__
 
     @property
@@ -226,20 +231,22 @@ class ZnTrack:
         return self._module
 
     @property
-    def stage_name(self) -> str:
+    def node_name(self) -> str:
         """Get the stage name"""
-        if self._stage_name is None:
+        if self._node_name is None:
+            if self.parent.node_name is not None:
+                return self.parent.node_name
             return self.name
-        return self._stage_name
+        return self._node_name
 
     @property
     def zn_outs_path(self) -> pathlib.Path:
-        return pathlib.Path("nodes") / self.stage_name
+        return pathlib.Path("nodes") / self.node_name
 
-    @stage_name.setter
-    def stage_name(self, value):
+    @node_name.setter
+    def node_name(self, value):
         """Set the stage name"""
-        self._stage_name = value
+        self._node_name = value
 
     @property
     def affected_files(self) -> typing.Set[pathlib.Path]:
@@ -259,25 +266,10 @@ class ZnTrack:
             files.append(self.zn_outs_path / f"{value.option}.json")
         return set(files)
 
-    def update_option_tracker(self):
-        for option in vars(type(self.parent)).values():
-            if isinstance(option, ZnTrackOption):
-                if option.option == "params":
-                    if option not in self.option_tracker.params:
-                        self.option_tracker.params.append(option)
-                elif option.load:
-                    if option not in self.option_tracker.zn_options:
-                        self.option_tracker.zn_options.append(option)
-                else:
-                    if option not in self.option_tracker.dvc_options:
-                        self.option_tracker.dvc_options.append(option)
-
     def load(self):
-        # 0. Find all ZnTrackOptions and update the option_tracker
         # 1. Load params from yaml file
         # 2. Load dvc options from zntrack file
         # 3. Load zn options from /nodes/<node_name>/...
-        self.update_option_tracker()
         self._load_params()
         self._load_dvc_options()
         self._load_zn_options()
@@ -290,9 +282,9 @@ class ZnTrack:
             log.debug(f"No Parameter file ({self.params_file}) found!")
             return
         try:
-            self.parent.__dict__.update(full_params_file[self.stage_name])
+            self.parent.__dict__.update(full_params_file[self.node_name])
         except KeyError:
-            log.debug(f"No Parameters for {self.stage_name} found in {self.params_file}")
+            log.debug(f"No Parameters for {self.node_name} found in {self.params_file}")
 
     def _load_dvc_options(self):
         try:
@@ -302,13 +294,13 @@ class ZnTrack:
             return
         try:
             # The problem here is, that I can not / don't want to load all Nodes but only
-            # the ones, that are in [self.stage_name], so we only deserialize them
+            # the ones, that are in [self.node_name], so we only deserialize them
             data = json.loads(
-                json.dumps(zntrack_file[self.stage_name]), cls=znjson.ZnDecoder
+                json.dumps(zntrack_file[self.node_name]), cls=znjson.ZnDecoder
             )
             self.parent.__dict__.update(data)
         except KeyError:
-            log.debug(f"No DVC Options for {self.stage_name} found in {self.params_file}")
+            log.debug(f"No DVC Options for {self.node_name} found in {self.params_file}")
 
     def _load_zn_options(self):
         # TODO this is not save an will read all json files in that directory!
@@ -321,11 +313,9 @@ class ZnTrack:
         self.parent.__dict__.update(options)
 
     def save(self):
-        # 0. Find all ZnTrackOptions and update the option_tracker
         # 1. Save params to yaml file
         # 2. Save dvc options to zntrack file
         # 3. Save zn.<option> to /nodes/<node_name>/...
-        self.update_option_tracker()
         self._save_params()
         self._save_dvc_options()
         self._save_zn_options()
@@ -334,13 +324,12 @@ class ZnTrack:
         params = {}
         for param in self.option_tracker.params:
             params[param.name] = getattr(self.parent, param.name)
-
         try:
             with self.params_file.open("r") as f:
                 full_params_file = yaml.safe_load(f)
         except FileNotFoundError:
             full_params_file = {}
-        full_params_file[self.stage_name] = params
+        full_params_file[self.node_name] = params
 
         with self.params_file.open("w") as f:
             yaml.safe_dump(full_params_file, f, indent=4)
@@ -356,7 +345,7 @@ class ZnTrack:
             log.debug(f"Could not load params from {self.zntrack_file}!")
             zntrack_file = {}
 
-        zntrack_file[self.stage_name] = options
+        zntrack_file[self.node_name] = options
 
         self.zntrack_file.write_text(
             json.dumps(zntrack_file, indent=4, cls=znjson.ZnEncoder)
@@ -405,7 +394,7 @@ class ZnTrack:
         if not silent:
             log.warning("--- Writing new DVC file! ---")
 
-        script = ["dvc", "run", "-n", self.stage_name]
+        script = ["dvc", "run", "-n", self.node_name]
 
         script += self.dvc_options.dvc_arguments
 
@@ -426,7 +415,7 @@ class ZnTrack:
         if len(self.option_tracker.params) > 0:
             script += [
                 "--params",
-                f"{self.params_file}:{self.stage_name}",
+                f"{self.params_file}:{self.node_name}",
             ]
         # Handle DVC options
         for option in self.option_tracker.dvc_options:
@@ -448,7 +437,7 @@ class ZnTrack:
         # Add command to run the script
         script.append(
             f"""{self.python_interpreter} -c "from {self.module} import {self.name}; """
-            f"""{self.name}.load(name='{self.stage_name}').run_and_save()" """
+            f"""{self.name}.load(name='{self.node_name}').run_and_save()" """
         )
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
@@ -472,6 +461,24 @@ class ZnTrackOptionTracker:
     params: list[ZnTrackOption] = dataclasses.field(default_factory=list)
     dvc_options: list[ZnTrackOption] = dataclasses.field(default_factory=list)
     zn_options: list[ZnTrackOption] = dataclasses.field(default_factory=list)
+    zn_iterables: list[ZnTrackOption] = dataclasses.field(default_factory=list)
+
+    def update(self, cls):
+        for option in vars(type(cls)).values():
+            if isinstance(option, ZnTrackOption):
+                if option.option == "params":
+                    if option.iterable:
+                        if option not in self.zn_iterables:
+                            self.zn_iterables.append(option)
+                    else:
+                        if option not in self.params:
+                            self.params.append(option)
+                elif option.load:
+                    if option not in self.zn_options:
+                        self.zn_options.append(option)
+                else:
+                    if option not in self.dvc_options:
+                        self.dvc_options.append(option)
 
 
 class Node(abc.ABC):
@@ -501,6 +508,7 @@ class Node(abc.ABC):
             force=force,
             no_run_cache=no_run_cache,
         )
+
         self._zntrack = ZnTrack(self, name=name, dvc_options=dvc_options)
 
     def __call__(self, *args, **kwargs):
@@ -517,13 +525,12 @@ class Node(abc.ABC):
         self.save()
         self.zntrack.write_dvc()
 
+    @property
+    def node_name(self) -> str:
+        return None
+
     @classmethod
     def load(cls, name=None) -> Node:
-        # Load without using the init?
-        # pass zntrack.NoneType to every args/kwargs - that will then be
-        # ignored by dvc/zn.<option>. Also check if
-        # NoneType in vars(MyNode(NoneType, NoneType, ...)).values()
-        # and raise an error when trying to pass something that is not a parameter
         if name is None or name == cls.__name__:
             # If the  name was not changed by the user, they might not want to
             # use it, so instead of mandating 'super().__init__(name)' we ignore it,
@@ -547,4 +554,4 @@ class Node(abc.ABC):
 
     # @abc.abstractmethod
     def run(self):
-        raise NotImplementedError  #
+        raise NotImplementedError
