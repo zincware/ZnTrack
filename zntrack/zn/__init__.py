@@ -41,6 +41,11 @@ class metrics(ZnTrackOption):
     load = True
 
 
+class params(ZnTrackOption):
+    option = "params"
+    load = True
+
+
 class iterable(ZnTrackOption):
     option = "params"
     load = True
