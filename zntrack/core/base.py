@@ -144,25 +144,13 @@ class ZnTrack:
     def __init__(
         self,
         parent,
+        dvc_options: DVCOptions = DVCOptions(),
         name=None,
         nb_name: str = config.nb_name,
-        no_exec: bool = True,
-        external: bool = False,
-        no_commit: bool = False,
         has_metadata: bool = False,
-        force: bool = True,
-        always_changed: bool = False,
-        no_run_cache: bool = False,
     ):
 
-        self.dvc_options = DVCOptions(
-            no_commit=no_commit,
-            external=external,
-            always_changed=always_changed,
-            no_exec=no_exec,
-            force=force,
-            no_run_cache=no_run_cache,
-        )
+        self.dvc_options = dvc_options
 
         self.nb_name = nb_name
         self.has_metadata = has_metadata
@@ -495,8 +483,25 @@ class Node(abc.ABC):
 
     has_metadata = False
 
-    def __init__(self, name=None):
-        self._zntrack = ZnTrack(self, name=name)
+    def __init__(
+        self,
+        name=None,
+        no_exec: bool = True,
+        external: bool = False,
+        no_commit: bool = False,
+        force: bool = True,
+        always_changed: bool = False,
+        no_run_cache: bool = False,
+    ):
+        dvc_options = DVCOptions(
+            no_commit=no_commit,
+            external=external,
+            always_changed=always_changed,
+            no_exec=no_exec,
+            force=force,
+            no_run_cache=no_run_cache,
+        )
+        self._zntrack = ZnTrack(self, name=name, dvc_options=dvc_options)
 
     def __call__(self, *args, **kwargs):
         raise NotImplementedError("Please see <migration tutorial>")

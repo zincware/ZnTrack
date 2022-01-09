@@ -38,7 +38,7 @@ class ZnTrackOption:
     option = None
     load = False
 
-    def __init__(self, **kwargs):
+    def __init__(self, default_value=None, **kwargs):
         """Instantiate a ZnTrackOption Descriptor
 
         Does only support kwargs and no args!
@@ -61,6 +61,8 @@ class ZnTrackOption:
         name = kwargs.get("name", None)
         option = kwargs.get("option", None)
         load = kwargs.get("load", None)
+
+        self.default_value = default_value
 
         if option is not None:
             self.option = option
@@ -94,14 +96,13 @@ class ZnTrackOption:
         typically this reads the stored value from the instance __dict__.
         If no value can be found the configured default value is returned
         """
+        if instance is None:
+            return self
         log.debug(f"Getting {self.option} / {self.name} for {instance}")
         try:
             return self._get(instance, owner)
         except NotImplementedError:
-            try:
-                return instance.__dict__[self.name]
-            except KeyError:
-                ValueError(f"Can not load {self.option} / {self.name} for {instance}!")
+            return instance.__dict__.get(self.name, self.default_value)
 
     def __set__(self, instance, value):
         """Write the value to the instances __dict__
