@@ -48,6 +48,13 @@ def handle_single_dvc_option(option: ZnTrackOption, value) -> [str, str]:
 def jupyter_class_to_file(silent, nb_name, module_name):
     """Extract the class definition form a ipynb file"""
 
+    log.warning(
+        "Jupyter support is an experimental feature! Please save your "
+        "notebook before running this command!\n"
+        "Submit issues to https://github.com/zincware/ZnTrack."
+    )
+    log.warning(f"Converting {nb_name} to file {module_name}.py")
+
     nb_name = pathlib.Path(nb_name)
 
     if silent:
@@ -64,7 +71,7 @@ def jupyter_class_to_file(silent, nb_name, module_name):
 
     class_definition = ""
 
-    with open(pathlib.Path(nb_name).with_suffix(".py"), "r") as f:
+    with pathlib.Path(nb_name).with_suffix(".py").open("r") as f:
         for line in f:
             if line.startswith("import") or line.startswith("from"):
                 imports += line
@@ -146,12 +153,14 @@ class ZnTrack:
         parent,
         dvc_options: DVCOptions = DVCOptions(),
         name=None,
-        nb_name: str = config.nb_name,
+        nb_name: str = None,
         has_metadata: bool = False,
     ):
 
         self.dvc_options = dvc_options
 
+        if nb_name is None:
+            nb_name = config.nb_name
         self.nb_name = nb_name
         self.has_metadata = has_metadata
 
@@ -407,7 +416,7 @@ class ZnTrack:
             self._module = f"{config.nb_class_path}.{self.parent.__class__.__name__}"
 
             jupyter_class_to_file(
-                silent=silent, nb_name=self.nb_name, module_name=self.module
+                silent=silent, nb_name=self.nb_name, module_name=self.name
             )
 
             script += [
