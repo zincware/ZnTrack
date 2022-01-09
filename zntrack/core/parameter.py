@@ -12,10 +12,12 @@ from __future__ import annotations
 
 import logging
 
+from zntrack.descriptor import Descriptor
+
 log = logging.getLogger(__name__)
 
 
-class ZnTrackOption:
+class ZnTrackOption(Descriptor):
     """Descriptor for all DVC options
 
     This class handles the __get__ and __set__ for the DVC options.
@@ -37,6 +39,7 @@ class ZnTrackOption:
 
     option = None
     load = False
+    iterable = False
 
     def __init__(self, default_value=None, **kwargs):
         """Instantiate a ZnTrackOption Descriptor
@@ -58,11 +61,10 @@ class ZnTrackOption:
             The simplest example is dvc.result() (== zn.outs())
         """
 
+        super().__init__(default_value)
         name = kwargs.get("name", None)
         option = kwargs.get("option", None)
         load = kwargs.get("load", None)
-
-        self.default_value = default_value
 
         if option is not None:
             self.option = option
@@ -78,49 +80,5 @@ class ZnTrackOption:
     def __repr__(self):
         return f"{self.__class__}({hex(id(self))}) for <{self.name}>"
 
-    def _get(self, instance, owner):
-        """Overwrite this method for custom ZnTrackOption get method"""
-        raise NotImplementedError
-
-    def _set(self, instance, value):
-        """Overwrite this method for custom ZnTrackOption set method"""
-        raise NotImplementedError
-
-    def __set_name__(self, owner, name):
-        """Descriptor method to determine the name of the attribute"""
-        self.name = name
-
-    def __get__(self, instance, owner):
-        """Get the stored value
-
-        typically this reads the stored value from the instance __dict__.
-        If no value can be found the configured default value is returned
-        """
-        if instance is None:
-            return self
-        log.debug(f"Getting {self.option} / {self.name} for {instance}")
-        try:
-            return self._get(instance, owner)
-        except NotImplementedError:
-            return instance.__dict__.get(self.name, self.default_value)
-
-    def __set__(self, instance, value):
-        """Write the value to the instances __dict__
-
-        Write the given value to the instances __dict__
-
-        Parameters
-        ----------
-        instance
-        value
-
-        """
-        if isinstance(instance, tuple):
-            log.warning("Converting tuple to list!")
-            instance = list(instance)
-
-        log.debug(f"Changing {self.option} / {self.name} to {value}")
-        try:
-            self._set(instance, value)
-        except NotImplementedError:
-            instance.__dict__[self.name] = value
+    def __str__(self):
+        return f"{self.option} / {self.name}"
