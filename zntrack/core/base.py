@@ -169,6 +169,8 @@ class ZnTrack:
         self.parent = parent
         self._option_tracker = ZnTrackOptionTracker()
 
+        self.is_loaded = False
+
     @property
     def option_tracker(self):
         self._option_tracker.update(self.parent)
@@ -286,6 +288,7 @@ class ZnTrack:
         self._load_params()
         self._load_dvc_options()
         self._load_zn_options()
+        self.is_loaded = True
 
     def _load_params(self):
         try:
