@@ -234,8 +234,12 @@ class ZnTrack:
     def node_name(self) -> str:
         """Get the stage name"""
         if self._node_name is None:
-            if self.parent.node_name is not None:
-                return self.parent.node_name
+            try:
+                if self.parent.node_name is not None:
+                    return self.parent.node_name
+            except AttributeError:
+                # no node_name implement
+                pass
             return self.name
         return self._node_name
 

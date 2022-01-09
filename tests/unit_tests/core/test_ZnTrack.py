@@ -106,17 +106,15 @@ def test_python_interpreter(example_node):
 
 
 def test_update_option_tracker(full_example_node):
-    assert len(full_example_node.zntrack.option_tracker.params) == 0
-    assert len(full_example_node.zntrack.option_tracker.dvc_options) == 0
-    assert len(full_example_node.zntrack.option_tracker.zn_options) == 0
-    full_example_node.zntrack.update_option_tracker()
+    assert len(full_example_node.zntrack._option_tracker.params) == 0
+    assert len(full_example_node.zntrack._option_tracker.dvc_options) == 0
+    assert len(full_example_node.zntrack._option_tracker.zn_options) == 0
     assert len(full_example_node.zntrack.option_tracker.params) == 2
     assert len(full_example_node.zntrack.option_tracker.dvc_options) == 2
     assert len(full_example_node.zntrack.option_tracker.zn_options) == 2
 
 
 def test_affected_files(full_example_node):
-    full_example_node.zntrack.update_option_tracker()
     assert full_example_node.zntrack.affected_files == {
         pathlib.Path("nodes", "FullExampleNode", "outs.json"),
         pathlib.Path("outs1"),
@@ -125,8 +123,6 @@ def test_affected_files(full_example_node):
 
 
 def test_update_twice(full_example_node):
-    full_example_node.zntrack.update_option_tracker()
-    full_example_node.zntrack.update_option_tracker()
     assert len(full_example_node.zntrack.option_tracker.params) == 2
     assert len(full_example_node.zntrack.option_tracker.dvc_options) == 2
     assert len(full_example_node.zntrack.option_tracker.zn_options) == 2
@@ -138,7 +134,6 @@ def test_save_params(tmp_path):
     example = ExampleOnlyParams()
     example.write()
 
-    example.zntrack.update_option_tracker()
     example.zntrack._save_params()
 
     with example.zntrack.params_file.open("r") as f:
@@ -167,7 +162,6 @@ def test_save_dvc_options(tmp_path):
     example = ExampleOnlyDVCOuts()
     example.write()
 
-    example.zntrack.update_option_tracker()
     example.zntrack._save_dvc_options()
 
     zntrack_file = json.loads(example.zntrack.zntrack_file.read_text())
@@ -180,7 +174,6 @@ def test_save_zn_options(tmp_path):
     example = ExampleOnlyZnOuts()
     example.write()
 
-    example.zntrack.update_option_tracker()
     example.zntrack._save_zn_options()
 
     zn_outs = json.loads(
