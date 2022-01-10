@@ -8,8 +8,9 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
-from zntrack import Node, DVC, ZnTrackProject
 import os
+
+from zntrack import DVC, Node, ZnTrackProject
 
 
 @Node()

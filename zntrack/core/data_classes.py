@@ -11,14 +11,16 @@ Description: Node dataclasses
 
 from __future__ import annotations
 
+import json
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Union, List
-import json
-import yaml
+from typing import List, Union
 
-from zntrack.utils import is_jsonable, deserializer, serializer
+import yaml
+import znjson
+
+from zntrack.utils import is_jsonable
 
 log = logging.getLogger(__name__)
 
@@ -212,6 +214,7 @@ class DVCParams:
         """
         try:
             _user_params = yaml.safe_load(self.internals_file.read_text())
+            _user_params = json.loads(json.dumps(_user_params), cls=znjson.ZnDecoder)
             return _user_params[self.node_name]
         except (FileNotFoundError, KeyError):
             # Either there is no file or the node_name does not exist
@@ -228,14 +231,13 @@ class DVCParams:
             A dictionary containing all params for this Node {param: value}
             that will be written to the respective params file
         """
-        if not is_jsonable(value):
-            raise ValueError(f"{value} is not JSON serializable")
-
         try:
             _user_params = yaml.safe_load(self.internals_file.read_text())
         except FileNotFoundError:
             _user_params = {}
         _user_params[self.node_name] = value
+
+        _user_params = json.loads(json.dumps(_user_params, cls=znjson.ZnEncoder))
 
         with self.internals_file.open("w") as f:
             yaml.safe_dump(_user_params, f)
@@ -247,7 +249,9 @@ class DVCParams:
         E.g. these can be {outs: {my_out: val}, ...}
         """
         try:
-            _hidden_internals = json.loads(self.hidden_internals_file.read_text())
+            _hidden_internals = json.loads(
+                self.hidden_internals_file.read_text(), cls=znjson.ZnDecoder
+            )
             return _hidden_internals.get(self.node_name, {})
         except FileNotFoundError:
             log.debug(f"Could not load params from {self.hidden_internals_file}!")
@@ -263,15 +267,17 @@ class DVCParams:
             zntrack params for this node, these can be {outs: {my_out: val}, ...}
 
         """
-        if not is_jsonable(value):
-            raise ValueError(f"{value} is not JSON serializable")
         try:
-            _hidden_internals = json.loads(self.hidden_internals_file.read_text())
+            _hidden_internals = json.loads(
+                self.hidden_internals_file.read_text(), cls=znjson.ZnDecoder
+            )
         except FileNotFoundError:
             _hidden_internals = {}
         _hidden_internals[self.node_name] = value
 
-        self.hidden_internals_file.write_text(json.dumps(_hidden_internals, indent=4))
+        self.hidden_internals_file.write_text(
+            json.dumps(_hidden_internals, indent=4, cls=znjson.ZnEncoder)
+        )
 
     @property
     def internals(self) -> dict:
@@ -355,7 +361,7 @@ class ZnParams:
         for option in self.__dataclass_fields__:
             file = self.node_path / getattr(self, option)
             try:
-                data.update(deserializer(json.loads(file.read_text())))
+                data.update(json.loads(file.read_text(), cls=znjson.ZnDecoder))
             except FileNotFoundError:
                 log.debug(f"No descriptors_from_file found for {option}!")
 
@@ -376,12 +382,7 @@ class ZnParams:
             self.make_path()
             file = self.node_path / getattr(self, option)
 
-            data = serializer(values)
-            if not is_jsonable(data):
-                raise ValueError(f"{data} is not JSON serializable")
-            log.debug(f"Writing {file} to {file}")
-
-            file.write_text(json.dumps(data, indent=4))
+            file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
 
 
 @dataclass(frozen=True, order=True)

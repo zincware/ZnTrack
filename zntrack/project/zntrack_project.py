@@ -9,10 +9,10 @@ Copyright Contributors to the Zincware Project.
 Description: The class for the ZnTrackProject
 """
 import logging
-
-from zntrack.interface import DVCInterface
 import subprocess
 from datetime import datetime
+
+from zntrack.interface import DVCInterface
 
 log = logging.getLogger(__name__)
 

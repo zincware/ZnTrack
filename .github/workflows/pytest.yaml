@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  test:
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -16,9 +16,8 @@ jobs:
       matrix:
         python-version:
           - "3.10"
-          - 3.9.7
+          - 3.9
           - 3.8
-          - 3.7
         os:
           - ubuntu-latest
           - windows-latest
@@ -42,4 +41,9 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
-          pytest
+          coverage run -m pytest
+      - name: Coveralls
+        env:
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        run: |
+          coveralls

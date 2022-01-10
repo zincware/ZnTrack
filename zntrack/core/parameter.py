@@ -9,6 +9,7 @@ Copyright Contributors to the Zincware Project.
 Description: Node parameter
 """
 from __future__ import annotations
+
 import logging
 import typing
 
@@ -120,7 +121,10 @@ class ZnTrackOption:
                             f" could consider adding `exec_=True` to your class to "
                             f"circumvent this behaviour."
                         )
-                    return None
+                    raise ValueError(
+                        f"Can not access {self.option} / {self.name} for "
+                        f"{instance}, because it is not loaded!"
+                    )
                 return self.default_value
             except AttributeError:
                 log.warning(
@@ -160,10 +164,9 @@ class ZnTrackOption:
                 )
                 return
 
-            if instance.zntrack.load and not self.load:
+            if (instance.zntrack.load and not self.load) or (
+                not instance.zntrack.running and self.load
+            ):
                 raise ValueError(f"Changing {self.option} is currently not allowed!")
-
-            if not instance.zntrack.running and self.load:
-                raise ValueError(f"Changing {self.option} is currently not allowed")
 
             instance.__dict__[self.name] = value

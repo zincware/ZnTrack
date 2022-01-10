@@ -8,6 +8,7 @@ Copyright Contributors to the Zincware Project.
 
 Description:
 """
+from importlib import import_module
 
 
 class NoneType:
@@ -50,10 +51,25 @@ class ZnTrackStage:
 
     """
 
-    def __init__(self, cls, name):
+    def __init__(self, module, cls, name):
+        """
+
+        Parameters
+        ----------
+        module: str
+            Name of the module to import from
+        cls: str
+            Name of the class to import from the module
+        name: str
+            Name of the ZnTrack Node
+        """
+        self.module = module
         self.cls = cls
         self.name = name
 
     def load_zntrack_node(self):
         """Load the ZnTrackStage"""
-        return self.cls(load=True, name=self.name)
+        module = import_module(self.module)
+        cls = getattr(module, self.cls)
+
+        return cls(load=True, name=self.name)

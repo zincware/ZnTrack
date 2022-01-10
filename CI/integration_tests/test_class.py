@@ -1,10 +1,12 @@
-from zntrack import Node, dvc, ZnTrackProject
-from pathlib import Path
 import json
 import os
 import shutil
+from pathlib import Path
 from tempfile import TemporaryDirectory
+
 import pytest
+
+from zntrack import Node, ZnTrackProject, dvc
 
 temp_dir = TemporaryDirectory()
 cwd = os.getcwd()
