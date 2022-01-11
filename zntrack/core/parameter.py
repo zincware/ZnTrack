@@ -60,10 +60,6 @@ class ZnTrackOption(Descriptor):
         super().__init__(default_value)
         self.name = kwargs.get("name", None)
 
-    @property
-    def dvc_parameter(self):
-        return self.metadata.dvc_option.replace("_", "-")
-
     def __repr__(self):
         return f"{self.__class__}({hex(id(self))}) for <{self.name}>"
 

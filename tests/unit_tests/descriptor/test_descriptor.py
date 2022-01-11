@@ -1,6 +1,6 @@
 import pytest
 
-from zntrack.descriptor.base import Descriptor, Metadata
+from zntrack.descriptor.descriptor import Descriptor, Metadata
 
 
 def test_metadata():

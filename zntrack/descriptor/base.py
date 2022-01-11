@@ -9,17 +9,9 @@ import typing
 import yaml
 import znjson
 
+from .descriptor import Descriptor
+
 log = logging.getLogger(__name__)
-
-
-@dataclasses.dataclass
-class Metadata:
-    dvc_option: str
-    zntrack_type: str
-
-    @property
-    def dvc_args(self):
-        return self.dvc_option.replace("_", "-")
 
 
 @dataclasses.dataclass
@@ -63,8 +55,6 @@ class DescriptorIO:
         files = []
         for option in self._descriptor_list.data:
             value = getattr(self, option.name)
-            if value is None:
-                continue
             if option.metadata.zntrack_type == "zn":
                 # Handle Zn Options
                 files.append(
@@ -73,7 +63,9 @@ class DescriptorIO:
                     / f"{option.metadata.dvc_option}.json"
                 )
             elif option.metadata.zntrack_type == "dvc":
-                if isinstance(value, list) or isinstance(value, tuple):
+                if value is None:
+                    pass
+                elif isinstance(value, list) or isinstance(value, tuple):
                     files += [pathlib.Path(x) for x in value]
                 else:
                     files.append(pathlib.Path(value))
@@ -103,7 +95,7 @@ class DescriptorIO:
         return file_content
 
     @staticmethod
-    def _save_file(file: pathlib.Path, value: dict):
+    def _write_file(file: pathlib.Path, value: dict):
         """Save dict to file
 
         Store dictionary to json or yaml file
@@ -115,7 +107,7 @@ class DescriptorIO:
         value: dict
             Any serializable data to save
         """
-        if file.suffix == ".yaml":
+        if file.suffix in [".yaml", ".yml"]:
             with file.open("w") as f:
                 yaml.safe_dump(value, f, indent=4)
         elif file.suffix == ".json":
@@ -130,13 +122,13 @@ class DescriptorIO:
             file_content = {}
 
         values = self._descriptor_list.filter(zntrack_type)
-        if key:
+        if key is not None:
             file_content[key] = values
         else:
             file_content = values
 
         log.debug(f"Saving {key} to {file}: ({values})")
-        self._save_file(file, file_content)
+        self._write_file(file, file_content)
 
     def _load_from_file(
         self, file: pathlib.Path, key: str = None, raise_error: bool = False
@@ -167,41 +159,3 @@ class DescriptorIO:
     @node_name.setter
     def node_name(self, value):
         self._node_name = value
-
-
-class Descriptor:
-    metadata: Metadata = None
-
-    def __init__(self, default_value=None):
-        self.default_value = default_value
-        self.owner = None
-        self.instance = None
-        self.name = ""
-
-    def __set_name__(self, owner, name):
-        self.owner = owner
-        self.name = name
-
-    def get(self, instance, owner):
-        """Overwrite this method for custom get method"""
-        raise NotImplementedError
-
-    def set(self, instance, value):
-        """Overwrite this method for custom set method"""
-        raise NotImplementedError
-
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        log.debug(f"Get {self} from {instance}")
-        try:
-            return self.get(instance, owner)
-        except NotImplementedError:
-            return instance.__dict__.get(self.name, self.default_value)
-
-    def __set__(self, instance, value):
-        log.debug(f"Set {self} from {instance}")
-        try:
-            self.set(instance, value)
-        except NotImplementedError:
-            instance.__dict__[self.name] = value

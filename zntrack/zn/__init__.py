@@ -16,7 +16,7 @@ import inspect
 import logging
 
 from zntrack.core.parameter import ZnTrackOption
-from zntrack.descriptor.base import Metadata
+from zntrack.descriptor import Metadata
 
 log = logging.getLogger(__name__)
 
