@@ -37,10 +37,6 @@ class ZnTrackOption(Descriptor):
 
     """
 
-    option = None
-    load = False
-    iterable = False
-
     def __init__(self, default_value=None, **kwargs):
         """Instantiate a ZnTrackOption Descriptor
 
@@ -62,23 +58,14 @@ class ZnTrackOption(Descriptor):
         """
 
         super().__init__(default_value)
-        name = kwargs.get("name", None)
-        option = kwargs.get("option", None)
-        load = kwargs.get("load", None)
-
-        if option is not None:
-            self.option = option
-
-        if load is not None:
-            self.load = load
-        self.name = name
+        self.name = kwargs.get("name", None)
 
     @property
     def dvc_parameter(self):
-        return self.option.replace("_", "-")
+        return self.metadata.dvc_option.replace("_", "-")
 
     def __repr__(self):
         return f"{self.__class__}({hex(id(self))}) for <{self.name}>"
 
     def __str__(self):
-        return f"{self.option} / {self.name}"
+        return f"{self.metadata.dvc_option} / {self.name}"

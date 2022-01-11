@@ -16,6 +16,7 @@ import inspect
 import logging
 
 from zntrack.core.parameter import ZnTrackOption
+from zntrack.descriptor.base import Metadata
 
 log = logging.getLogger(__name__)
 
@@ -27,29 +28,23 @@ log = logging.getLogger(__name__)
 
 
 class outs(ZnTrackOption):
-    option = "outs"
-    load = True
+    metadata = Metadata(dvc_option="outs", zntrack_type="zn")
 
 
-# class plots(ZnTrackOption):
-#     option = "plots"
-#     load = True
+class deps(ZnTrackOption):
+    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
 
 
 class metrics(ZnTrackOption):
-    option = "metrics_no_cache"
-    load = True
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="zn")
 
 
 class params(ZnTrackOption):
-    option = "params"
-    load = True
+    metadata = Metadata(dvc_option="params", zntrack_type="params")
 
 
 class iterable(ZnTrackOption):
-    option = "params"
-    load = True
-    iterable = True
+    metadata = Metadata(dvc_option="params", zntrack_type="iterable")
 
 
 class Method(ZnTrackOption):
@@ -71,8 +66,7 @@ class Method(ZnTrackOption):
 
     """
 
-    option = "params"
-    load = False
+    metadata = Metadata(dvc_option="params", zntrack_type="method")
 
     def _get(self, instance, owner):
         """Custom Get for methods
