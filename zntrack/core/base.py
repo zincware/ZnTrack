@@ -20,6 +20,7 @@ import znjson
 
 from zntrack.descriptor.base import DescriptorIO
 from zntrack.utils import config
+from zntrack.utils.utils import deprecated
 
 from .jupyter import jupyter_class_to_file
 
@@ -48,7 +49,20 @@ def get_dvc_arguments(options: dict) -> list:
     return out
 
 
-def handle_deps(value):
+def handle_deps(value) -> list:
+    """Find all dependencies of value
+
+    Parameters
+    ----------
+    value: any
+        list, string, tuple, Path or Node instance
+
+    Returns
+    -------
+    list:
+        A list of strings like ["--deps", "<path>", --deps, "<path>", ...]
+
+    """
     script = []
     if isinstance(value, list) or isinstance(value, tuple):
         for x in value:
@@ -64,6 +78,8 @@ def handle_deps(value):
 
 
 class Node(DescriptorIO):
+    """Main parent class for all ZnTrack Node"""
+
     is_loaded: bool = False
 
     _module = None
@@ -115,8 +131,12 @@ class Node(DescriptorIO):
             "Could not find a working python interpreter to work with subprocesses!"
         )
 
+    @deprecated(
+        reason="Please see <migration tutorial> from v0.2 to v0.3 in the documentation",
+        version="v0.3",
+    )
     def __call__(self, *args, **kwargs):
-        raise NotImplementedError("Please see <migration tutorial>")
+        pass
 
     def save(self):
         self._save_to_file(

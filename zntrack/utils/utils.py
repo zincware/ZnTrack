@@ -10,11 +10,14 @@ Description:
 """
 
 import json
+import logging
 import os
 import shutil
 import tempfile
 
 from zntrack.utils.config import config
+
+log = logging.getLogger(__name__)
 
 
 # https://stackoverflow.com/questions/42033142/is-there-an-easy-way-to-check-if-an-object-is-json-serializable-in-python
@@ -66,3 +69,19 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
     os.chdir(temp_dir.name)
 
     return temp_dir
+
+
+def deprecated(reason, version="v0.0.0"):
+    """Depreciation Warning"""
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            log.critical(
+                f"DeprecationWarning for {func.__name__}: {reason} (Deprecated since"
+                f" {version})"
+            )
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
