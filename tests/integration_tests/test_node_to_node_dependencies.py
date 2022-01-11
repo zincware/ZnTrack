@@ -59,7 +59,7 @@ class DepsCollwOuts(Node):
         super().__init__(name=name)
         # must add a name, if the Node is used with two different names to avoid
         # writing to the same file!
-        self.outs = Path(f"{self.zntrack.node_name}_lorem.txt")
+        self.outs = Path(f"{self.node_name}_lorem.txt")
         self.dependencies = dependencies
 
     def run(self):
@@ -79,9 +79,9 @@ def dvc_repo_path(tmp_path):
 def test_dvc_outs(dvc_repo_path):
     os.chdir(dvc_repo_path)
 
-    DVCOuts().write_dvc()
+    DVCOuts().write_graph()
 
-    DependenciesCollector(dependencies=DVCOuts.load()).write_dvc()
+    DependenciesCollector(dependencies=DVCOuts.load()).write_graph()
 
     subprocess.check_call(["dvc", "repro"])
 
@@ -93,9 +93,9 @@ def test_dvc_outs(dvc_repo_path):
 def test_zn_outs(dvc_repo_path):
     os.chdir(dvc_repo_path)
 
-    ZnOuts().write_dvc()
+    ZnOuts().write_graph()
 
-    DependenciesCollector(dependencies=ZnOuts.load()).write_dvc()
+    DependenciesCollector(dependencies=ZnOuts.load()).write_graph()
 
     subprocess.check_call(["dvc", "repro"])
 
@@ -105,9 +105,9 @@ def test_zn_outs(dvc_repo_path):
 def test_dvc_zn_outs(dvc_repo_path):
     os.chdir(dvc_repo_path)
 
-    DVCZnOuts().write_dvc()
+    DVCZnOuts().write_graph()
 
-    DependenciesCollector(dependencies=DVCZnOuts.load()).write_dvc()
+    DependenciesCollector(dependencies=DVCZnOuts.load()).write_graph()
 
     subprocess.check_call(["dvc", "repro"])
 
@@ -121,10 +121,10 @@ def test_dvc_zn_outs(dvc_repo_path):
 def test_expand_dependencies(dvc_repo_path):
     os.chdir(dvc_repo_path)
 
-    DVCZnOuts().write_dvc()
+    DVCZnOuts().write_graph()
 
-    DependenciesCollector(name="Collector01", dependencies=DVCZnOuts.load()).write_dvc()
-    DependenciesCollector(name="Collector02", dependencies=DVCZnOuts.load()).write_dvc()
+    DependenciesCollector(name="Collector01", dependencies=DVCZnOuts.load()).write_graph()
+    DependenciesCollector(name="Collector02", dependencies=DVCZnOuts.load()).write_graph()
 
     subprocess.check_call(["dvc", "repro"])
 
@@ -140,12 +140,12 @@ def test_exp_deps_w_outs(dvc_repo_path):
     """test_expand_dependencies_with_outs"""
     os.chdir(dvc_repo_path)
 
-    DVCZnOuts().write_dvc()
+    DVCZnOuts().write_graph()
 
-    DepsCollwOuts(name="Collector01", dependencies=DVCZnOuts.load()).write_dvc()
+    DepsCollwOuts(name="Collector01", dependencies=DVCZnOuts.load()).write_graph()
     DepsCollwOuts(
         name="Collector02", dependencies=DepsCollwOuts.load(name="Collector01")
-    ).write_dvc()
+    ).write_graph()
 
     subprocess.check_call(["dvc", "repro"])
 

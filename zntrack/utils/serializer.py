@@ -35,9 +35,9 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     def _encode(self, obj) -> dict:
         """Convert Node to serializable dict"""
         return {
-            "module": obj.zntrack.module,
+            "module": obj.module,
             "cls": obj.__class__.__name__,
-            "name": obj.zntrack.node_name,
+            "name": obj.node_name,
         }
 
     def _decode(self, value: dict) -> Node:

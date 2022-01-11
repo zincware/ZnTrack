@@ -45,6 +45,9 @@ class DescriptorIO:
 
     _node_name = None
 
+    def __init__(self, name=None):
+        self.node_name = name
+
     @property
     def _descriptor_list(self) -> DescriptorList:
         """Get all descriptors of this instance"""
@@ -116,7 +119,7 @@ class DescriptorIO:
             with file.open("w") as f:
                 yaml.safe_dump(value, f, indent=4)
         elif file.suffix == ".json":
-            file.write_text(json.dumps(value, indent=4))
+            file.write_text(json.dumps(value, indent=4, cls=znjson.ZnEncoder))
 
     def _save_to_file(self, file: pathlib.Path, zntrack_type: str, key: str = None):
         file = pathlib.Path(file)  # optional
@@ -135,15 +138,25 @@ class DescriptorIO:
         log.debug(f"Saving {key} to {file}: ({values})")
         self._save_file(file, file_content)
 
-    def _load_from_file(self, file: pathlib.Path, key: str = None):
-        file = pathlib.Path(file)  # optional
-        file_content = self._read_file(file)
-        if key is not None:
-            values = file_content[key]
-        else:
-            values = file_content
-        log.debug(f"Loading {key} from {file}: ({values})")
-        self.__dict__.update(values)
+    def _load_from_file(
+        self, file: pathlib.Path, key: str = None, raise_error: bool = False
+    ):
+        try:
+            file = pathlib.Path(file)  # optional
+            file_content = self._read_file(file)
+            # The problem here is, that I can not / don't want to load all Nodes but only
+            # the ones, that are in [self.node_name], so we only deserialize them
+            if key is not None:
+                values = json.loads(json.dumps(file_content[key]), cls=znjson.ZnDecoder)
+            else:
+                values = json.loads(json.dumps(file_content), cls=znjson.ZnDecoder)
+            log.debug(f"Loading {key} from {file}: ({values})")
+            self.__dict__.update(values)
+        except FileNotFoundError as e:
+            if raise_error:
+                raise e
+            else:
+                pass
 
     @property
     def node_name(self):

@@ -25,7 +25,7 @@ def test_run(tmp_path):
     subprocess.check_call(["dvc", "init"])
 
     test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
-    test_node_1.write_dvc()
+    test_node_1.write_graph()
 
     subprocess.check_call(["dvc", "repro"])
 

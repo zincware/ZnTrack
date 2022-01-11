@@ -178,6 +178,12 @@ class Node(DescriptorIO):
         self._save_to_file(
             file=pathlib.Path("zntrack.json"), zntrack_type="dvc", key=self.node_name
         )
+        self._save_to_file(
+            file=pathlib.Path("zntrack.json"), zntrack_type="deps", key=self.node_name
+        )
+        self._save_to_file(
+            file=pathlib.Path("params.yaml"), zntrack_type="params", key=self.node_name
+        )
         for option, values in self._descriptor_list.filter(
             zntrack_type="zn", return_with_type=True
         ).items():
@@ -191,12 +197,9 @@ class Node(DescriptorIO):
         for option in self._descriptor_list.filter(
             zntrack_type="zn", return_with_type=True
         ):
-            try:
-                self._load_from_file(
-                    file=pathlib.Path("nodes") / self.node_name / f"{option}.json"
-                )
-            except FileNotFoundError:
-                pass
+            self._load_from_file(
+                file=pathlib.Path("nodes") / self.node_name / f"{option}.json"
+            )
         self.is_loaded = True
 
     def write_graph(
