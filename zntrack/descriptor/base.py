@@ -131,7 +131,11 @@ class DescriptorIO:
         self._write_file(file, file_content)
 
     def _load_from_file(
-        self, file: pathlib.Path, key: str = None, raise_error: bool = False
+        self,
+        file: pathlib.Path,
+        key: str = None,
+        raise_file_error: bool = False,
+        raise_key_error: bool = True,
     ):
         try:
             file = pathlib.Path(file)  # optional
@@ -145,7 +149,12 @@ class DescriptorIO:
             log.debug(f"Loading {key} from {file}: ({values})")
             self.__dict__.update(values)
         except FileNotFoundError as e:
-            if raise_error:
+            if raise_file_error:
+                raise e
+            else:
+                pass
+        except KeyError as e:
+            if raise_key_error:
                 raise e
             else:
                 pass

@@ -166,9 +166,9 @@ def test_load_from_file_err():
     example = ExampleClass()
 
     with pytest.raises(FileNotFoundError):
-        example._load_from_file(file=pathlib.Path("params.yaml"), raise_error=True)
+        example._load_from_file(file=pathlib.Path("param.yaml"), raise_file_error=True)
 
-    assert example._load_from_file(file=pathlib.Path("params.yaml")) is None
+    assert example._load_from_file(file=pathlib.Path("param.yaml")) is None
 
 
 class ExampleClassWithParams(DescriptorIO):

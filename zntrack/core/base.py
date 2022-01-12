@@ -96,6 +96,9 @@ class Node(DescriptorIO):
         """
         if self._module is None:
             if self.__class__.__module__ == "__main__":
+                if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
+                    # special case for e.g. testing
+                    return self.__class__.__module__
                 return pathlib.Path(sys.argv[0]).stem
             else:
                 return self.__class__.__module__
@@ -156,13 +159,18 @@ class Node(DescriptorIO):
             file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
 
     def _load(self):
-        self._load_from_file(file=pathlib.Path("params.yaml"), key=self.node_name)
-        self._load_from_file(file=pathlib.Path("zntrack.json"), key=self.node_name)
+        self._load_from_file(
+            file=pathlib.Path("params.yaml"), key=self.node_name, raise_key_error=False
+        )
+        self._load_from_file(
+            file=pathlib.Path("zntrack.json"), key=self.node_name, raise_key_error=False
+        )
         for option in self._descriptor_list.filter(
             zntrack_type="zn", return_with_type=True
         ):
             self._load_from_file(
-                file=pathlib.Path("nodes") / self.node_name / f"{option}.json"
+                file=pathlib.Path("nodes") / self.node_name / f"{option}.json",
+                raise_key_error=False,
             )
         self.is_loaded = True
 
@@ -277,9 +285,36 @@ class Node(DescriptorIO):
 
     @classmethod
     def load(cls, name=None) -> Node:
-        instance = cls()
-        if name not in (None, cls.__name__):
-            instance.node_name = name
+        """
+
+        Parameters
+        ----------
+        name
+
+        Returns
+        -------
+
+        Examples
+        --------
+        Always have this, so that the name can be passed through
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+
+        """
+
+        try:
+            instance = cls(name=name)
+        except TypeError:
+            log.warning(
+                "Can not pass <name> to the super.__init__ and trying workaround! This"
+                " can lead to unexpected behaviour and can be avoided by passing (*args,"
+                " **kwargs) to the super().__init__(*args, **kwargs)"
+            )
+            instance = cls()
+            if name not in (None, cls.__name__):
+                instance.node_name = name
+
         instance._load()
         return instance
 
