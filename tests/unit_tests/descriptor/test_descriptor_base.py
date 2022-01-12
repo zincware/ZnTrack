@@ -5,19 +5,12 @@ from unittest.mock import mock_open, patch
 import pytest
 import yaml
 
-from zntrack import dvc, zn
+from zntrack import zn
 from zntrack.descriptor.base import DescriptorIO
 
 
 class ExampleClass(DescriptorIO):
     pass
-
-
-def test_node_name_get():
-    example = ExampleClass()
-    assert example.node_name == "ExampleClass"
-    example._node_name = "NamedExample"
-    assert example.node_name == "NamedExample"
 
 
 def test_node_name_set():
@@ -57,14 +50,9 @@ def test_save_file_yaml():
     with patch.object(pathlib.Path, "open", pathlib_open):
         example._write_file(pathlib.Path("example.yaml"), {"a": "b"})
 
-        open_mock.assert_called_with(pathlib.Path("example.yaml"), "w")
-        # Due to pyYAML calling write for every single letter?!?! we can't use this test
-        # open_mock().write.assert_called_once_with(
-        #     yaml.safe_dump({"a": "b"}, indent=4)
-        # )
-
-        # and use this worse version of it
-        assert len(open_mock.mock_calls) == 10  # {}
+        args, kwargs = open_mock.call_args
+        assert args[0] == pathlib.Path("example.yaml")
+        open_mock().write.assert_called_once_with(yaml.safe_dump({"a": "b"}, indent=4))
 
 
 def test_save_file_yml():
@@ -78,14 +66,9 @@ def test_save_file_yml():
     with patch.object(pathlib.Path, "open", pathlib_open):
         example._write_file(pathlib.Path("example.yml"), {"a": "b"})
 
-        open_mock.assert_called_with(pathlib.Path("example.yml"), "w")
-        # Due to pyYAML calling write for every single letter?!?! we can't use this test
-        # open_mock().write.assert_called_once_with(
-        #     yaml.safe_dump({"a": "b"}, indent=4)
-        # )
-
-        # and use this worse version of it
-        assert len(open_mock.mock_calls) == 10  # {}
+        args, kwargs = open_mock.call_args
+        assert args[0] == pathlib.Path("example.yml")
+        open_mock().write.assert_called_once_with(yaml.safe_dump({"a": "b"}, indent=4))
 
 
 def test_read_file_json():
@@ -240,26 +223,3 @@ def test_descriptor_list_filter():
     assert example._descriptor_list.filter(
         zntrack_type="params", return_with_type=True
     ) == {"params": {"param1": 1, "param2": 2}}
-
-
-class ExampleAffectedFiles(DescriptorIO):
-    param = zn.params()
-    zn_outs = zn.outs()
-    zn_metrics = zn.metrics()
-    dvc_outs = dvc.outs("dvc_outs.dat")
-    dvc_metrics = dvc.outs("dvc_metrics.json")
-    dvc_empty = dvc.outs()
-    dvc_outs_lst = dvc.outs(["a.dat", "b.dat"])
-
-
-def test_affected_files():
-    example = ExampleAffectedFiles()
-
-    assert example.affected_files == {
-        pathlib.Path("dvc_metrics.json"),
-        pathlib.Path("dvc_outs.dat"),
-        pathlib.Path("nodes/ExampleAffectedFiles/metrics_no_cache.json"),
-        pathlib.Path("nodes/ExampleAffectedFiles/outs.json"),
-        pathlib.Path("a.dat"),
-        pathlib.Path("b.dat"),
-    }

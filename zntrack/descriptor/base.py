@@ -32,14 +32,6 @@ class DescriptorList:
 
 
 class DescriptorIO:
-    params_file = pathlib.Path("params.yaml")
-    zntrack_file = pathlib.Path("zntrack.json")
-
-    _node_name = None
-
-    def __init__(self, name=None):
-        self.node_name = name
-
     @property
     def _descriptor_list(self) -> DescriptorList:
         """Get all descriptors of this instance"""
@@ -48,28 +40,6 @@ class DescriptorIO:
             if isinstance(option, Descriptor):
                 descriptor_list.append(option)
         return DescriptorList(parent=self, data=descriptor_list)
-
-    @property
-    def affected_files(self) -> typing.Set[pathlib.Path]:
-        """list of all files that can be changed by this instance"""
-        files = []
-        for option in self._descriptor_list.data:
-            value = getattr(self, option.name)
-            if option.metadata.zntrack_type == "zn":
-                # Handle Zn Options
-                files.append(
-                    pathlib.Path("nodes")
-                    / self.node_name
-                    / f"{option.metadata.dvc_option}.json"
-                )
-            elif option.metadata.zntrack_type == "dvc":
-                if value is None:
-                    pass
-                elif isinstance(value, list) or isinstance(value, tuple):
-                    files += [pathlib.Path(x) for x in value]
-                else:
-                    files.append(pathlib.Path(value))
-        return set(files)
 
     @staticmethod
     def _read_file(file: pathlib.Path) -> dict:
@@ -108,20 +78,24 @@ class DescriptorIO:
             Any serializable data to save
         """
         if file.suffix in [".yaml", ".yml"]:
-            with file.open("w") as f:
-                yaml.safe_dump(value, f, indent=4)
+            file.write_text(yaml.safe_dump(value, indent=4))
         elif file.suffix == ".json":
             file.write_text(json.dumps(value, indent=4, cls=znjson.ZnEncoder))
 
-    def _save_to_file(self, file: pathlib.Path, zntrack_type: str, key: str = None):
-        file = pathlib.Path(file)  # optional
-
+    def _save_to_file(
+        self, file: pathlib.Path, zntrack_type: typing.Union[str, list], key: str = None
+    ):
         try:
             file_content = self._read_file(file)
         except FileNotFoundError:
             file_content = {}
 
-        values = self._descriptor_list.filter(zntrack_type)
+        if isinstance(zntrack_type, list):
+            values = {}
+            for type_ in zntrack_type:
+                values.update(self._descriptor_list.filter(type_))
+        else:
+            values = self._descriptor_list.filter(zntrack_type)
         if key is not None:
             file_content[key] = values
         else:
@@ -138,7 +112,6 @@ class DescriptorIO:
         raise_key_error: bool = True,
     ):
         try:
-            file = pathlib.Path(file)  # optional
             file_content = self._read_file(file)
             # The problem here is, that I can not / don't want to load all Nodes but only
             # the ones, that are in [self.node_name], so we only deserialize them
@@ -158,13 +131,3 @@ class DescriptorIO:
                 raise e
             else:
                 pass
-
-    @property
-    def node_name(self):
-        if self._node_name is None:
-            return self.__class__.__name__
-        return self._node_name
-
-    @node_name.setter
-    def node_name(self, value):
-        self._node_name = value
