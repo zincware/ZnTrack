@@ -68,13 +68,15 @@ class GraphWriter(DescriptorIO):
         self.node_name = kwargs.get("name", None)
 
     @property
-    def node_name(self):
+    def node_name(self) -> str:
+        """Name of this node"""
         if self._node_name is None:
             return self.__class__.__name__
         return self._node_name
 
     @node_name.setter
     def node_name(self, value):
+        """Overwrite the default node name based on the class name"""
         self._node_name = value
 
     def save(self):

@@ -55,17 +55,22 @@ class Node(GraphWriter):
         version="v0.3",
     )
     def __call__(self, *args, **kwargs):
+        """Still here for a depreciation warning for migrating to class based ZnTrack"""
         pass
 
     def save(self):
+        """Save Class state to files"""
+        # Save dvc.<option>, dvc.deps, zn.Method
         self._save_to_file(
             file=pathlib.Path("zntrack.json"),
             zntrack_type=["dvc", "deps", "method"],
             key=self.node_name,
         )
+        # Save dvc/zn.<params>
         self._save_to_file(
             file=pathlib.Path("params.yaml"), zntrack_type="params", key=self.node_name
         )
+        # Save zn.<option> including zn.outs, zn.metrics, ...
         for option, values in self._descriptor_list.filter(
             zntrack_type="zn", return_with_type=True
         ).items():
@@ -74,6 +79,7 @@ class Node(GraphWriter):
             file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
 
     def _load(self):
+        """Load class state from files"""
         self._load_from_file(
             file=pathlib.Path("params.yaml"), key=self.node_name, raise_key_error=False
         )
@@ -95,10 +101,11 @@ class Node(GraphWriter):
 
         Parameters
         ----------
-        name
+        name: Node name
 
         Returns
         -------
+        Instance of this class with the state loaded from files
 
         Examples
         --------
@@ -125,9 +132,11 @@ class Node(GraphWriter):
         return instance
 
     def run_and_save(self):
+        """Main method to run for the actual calculation"""
         self.run()
         self.save()
 
     # @abc.abstractmethod
     def run(self):
+        """Overwrite this method for the actual calculation"""
         raise NotImplementedError

@@ -18,12 +18,20 @@ class Descriptor:
     metadata: Metadata = None
 
     def __init__(self, default_value=None):
+        """
+
+        Parameters
+        ----------
+        default_value:
+            Any default value to __get__ if the __set__ was never called.
+        """
         self.default_value = default_value
         self.owner = None
         self.instance = None
         self.name = ""
 
     def __set_name__(self, owner, name):
+        """Store name of the descriptor in the parent class"""
         self.owner = owner
         self.name = name
 

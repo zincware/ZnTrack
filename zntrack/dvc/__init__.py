@@ -22,6 +22,7 @@ import logging
 
 from zntrack.core.parameter import ZnTrackOption
 from zntrack.descriptor import Metadata
+from zntrack.utils.utils import deprecated
 
 log = logging.getLogger(__name__)
 
@@ -34,9 +35,12 @@ class params(ZnTrackOption):
     # depreciated
     metadata = Metadata(dvc_option="params", zntrack_type="params")
 
+    @deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
+    def __init__(self, default_value=None):
+        super().__init__(default_value)
+
 
 class deps(ZnTrackOption):
-    # depreciated
     metadata = Metadata(dvc_option="deps", zntrack_type="deps")
 
 

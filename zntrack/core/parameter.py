@@ -25,16 +25,6 @@ class ZnTrackOption(Descriptor):
     which Options are used.
     This is required to allow for load=True which updates all ZnTrackOptions,
     based on the computed or otherwise stored values.
-
-    Attributes
-    ----------
-    option: str
-        One of the given options of DVC. The string should also be defined
-        inside the dataclass!
-    load: bool
-        Load this Option  to memory when the stage is called with Stage(load=True)
-        This is true for zn.<option> and false for dvc.<option>.
-
     """
 
     def __init__(self, default_value=None, **kwargs):
@@ -44,17 +34,8 @@ class ZnTrackOption(Descriptor):
 
         Parameters
         ----------
-        name: str
-            Required when __set_name__ can not be used, e.g. if the ZnTrackOption
-            is defined in the __init__ on not on a class level. It defines
-            the name of the descriptor (for self.attr it would be attr).
-        option: str
-            One of the given options of DVC. The string should also be defined
-            inside the dataclass!
-        load: bool
-            Load this Option  to memory when the stage is called with Stage(load=True)
-            This is usually true for zn.<option> and false for dvc.<option>.
-            The simplest example is dvc.result() (== zn.outs())
+        default_value:
+            Any default value to __get__ if the __set__ was never called.
         """
 
         super().__init__(default_value)

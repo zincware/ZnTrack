@@ -19,7 +19,24 @@ class DescriptorList:
     parent: DescriptorIO
     data: typing.List[Descriptor] = dataclasses.field(default_factory=list)
 
-    def filter(self, zntrack_type, return_with_type=False):
+    def filter(self, zntrack_type: str, return_with_type=False) -> dict:
+        """Filter the descriptor instances by zntrack_type
+
+        Parameters
+        ----------
+        zntrack_type: str
+            The zntrack_type of the descriptors to gather
+        return_with_type: bool, default=False
+            return a dictionary with the Descriptor.metadata.dvc_option as keys
+
+        Returns
+        -------
+        dict:
+            either {attr_name: attr_value}
+            or
+            {descriptor.dvc_option: {attr_name: attr_value}}
+
+        """
         data = [x for x in self.data if x.metadata.zntrack_type == zntrack_type]
         if return_with_type:
             types_dict = {x.metadata.dvc_option: {} for x in data}
@@ -43,7 +60,7 @@ class DescriptorIO:
 
     @staticmethod
     def _read_file(file: pathlib.Path) -> dict:
-        """Read a json/yaml file
+        """Read a json/yaml file without the znjson.Decoder
 
         Parameters
         ----------
@@ -85,6 +102,19 @@ class DescriptorIO:
     def _save_to_file(
         self, file: pathlib.Path, zntrack_type: typing.Union[str, list], key: str = None
     ):
+        """Save class descriptors to files
+
+        Parameters
+        ----------
+        file: pathlib.Path
+            The file to update
+        zntrack_type: [str, list]
+            the zntrack_type key/s to filter the descriptors for and save into the
+            given file under the respective keys
+        key, default=None: str
+            A primary key to update in the file. If None the full file will be overwritten
+
+        """
         try:
             file_content = self._read_file(file)
         except FileNotFoundError:
@@ -111,6 +141,21 @@ class DescriptorIO:
         raise_file_error: bool = False,
         raise_key_error: bool = True,
     ):
+        """Load class descriptor values from file
+
+        Updates the self.__dict__ with the loaded values
+
+        Parameters
+        ----------
+        file: pathlib.Path
+            the file to read from
+        key, default=None: str
+            The key if the file contains information of multiple instances
+        raise_file_error: bool
+            Raise a FileNotFoundError if the file does not exist
+        raise_key_error: bool
+            Raise a KeyError if the given key does not exist in the file
+        """
         try:
             file_content = self._read_file(file)
             # The problem here is, that I can not / don't want to load all Nodes but only
