@@ -21,6 +21,8 @@ Examples
 import logging
 
 from zntrack.core.parameter import ZnTrackOption
+from zntrack.descriptor import Metadata
+from zntrack.utils.utils import deprecated
 
 log = logging.getLogger(__name__)
 
@@ -30,36 +32,41 @@ log = logging.getLogger(__name__)
 
 
 class params(ZnTrackOption):
-    option = "params"
+    # depreciated
+    metadata = Metadata(dvc_option="params", zntrack_type="params")
+
+    @deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
+    def __init__(self, default_value=None):
+        super().__init__(default_value)
 
 
 class deps(ZnTrackOption):
-    option = "deps"
+    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
 
 
 class outs(ZnTrackOption):
-    option = "outs"
+    metadata = Metadata(dvc_option="outs", zntrack_type="dvc")
 
 
 class outs_no_cache(ZnTrackOption):
-    option = "outs_no_cache"
+    metadata = Metadata(dvc_option="outs_no_cache", zntrack_type="dvc")
 
 
 class outs_persistent(ZnTrackOption):
-    option = "outs_persistent"
+    metadata = Metadata(dvc_option="outs_persistent", zntrack_type="dvc")
 
 
 class metrics(ZnTrackOption):
-    option = "metrics"
+    metadata = Metadata(dvc_option="metrics", zntrack_type="dvc")
 
 
 class metrics_no_cache(ZnTrackOption):
-    option = "metrics_no_cache"
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="dvc")
 
 
 class plots(ZnTrackOption):
-    option = "plots"
+    metadata = Metadata(dvc_option="plots", zntrack_type="dvc")
 
 
 class plots_no_cache(ZnTrackOption):
-    option = "plots_no_cache"
+    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type="dvc")

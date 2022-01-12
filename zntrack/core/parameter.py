@@ -25,21 +25,7 @@ class ZnTrackOption(Descriptor):
     which Options are used.
     This is required to allow for load=True which updates all ZnTrackOptions,
     based on the computed or otherwise stored values.
-
-    Attributes
-    ----------
-    option: str
-        One of the given options of DVC. The string should also be defined
-        inside the dataclass!
-    load: bool
-        Load this Option  to memory when the stage is called with Stage(load=True)
-        This is true for zn.<option> and false for dvc.<option>.
-
     """
-
-    option = None
-    load = False
-    iterable = False
 
     def __init__(self, default_value=None, **kwargs):
         """Instantiate a ZnTrackOption Descriptor
@@ -48,37 +34,15 @@ class ZnTrackOption(Descriptor):
 
         Parameters
         ----------
-        name: str
-            Required when __set_name__ can not be used, e.g. if the ZnTrackOption
-            is defined in the __init__ on not on a class level. It defines
-            the name of the descriptor (for self.attr it would be attr).
-        option: str
-            One of the given options of DVC. The string should also be defined
-            inside the dataclass!
-        load: bool
-            Load this Option  to memory when the stage is called with Stage(load=True)
-            This is usually true for zn.<option> and false for dvc.<option>.
-            The simplest example is dvc.result() (== zn.outs())
+        default_value:
+            Any default value to __get__ if the __set__ was never called.
         """
 
         super().__init__(default_value)
-        name = kwargs.get("name", None)
-        option = kwargs.get("option", None)
-        load = kwargs.get("load", None)
-
-        if option is not None:
-            self.option = option
-
-        if load is not None:
-            self.load = load
-        self.name = name
-
-    @property
-    def dvc_parameter(self):
-        return self.option.replace("_", "-")
+        self.name = kwargs.get("name", None)
 
     def __repr__(self):
         return f"{self.__class__}({hex(id(self))}) for <{self.name}>"
 
     def __str__(self):
-        return f"{self.option} / {self.name}"
+        return f"{self.metadata.dvc_option} / {self.name}"

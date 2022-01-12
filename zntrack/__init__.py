@@ -20,12 +20,13 @@ from .core import Node
 from .interface import DVCInterface
 from .project import ZnTrackProject
 from .utils import config
-from .utils.serializer import ZnTrackTypeConverter
+from .utils.serializer import MethodConverter, ZnTrackTypeConverter
 
 # register converters
 znjson.config.ACTIVE_CONVERTER = [
     ZnTrackTypeConverter,
     znjson.PathlibConverter,
+    MethodConverter,
 ]
 try:
     znjson.register(znjson.NumpyConverter)

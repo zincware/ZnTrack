@@ -16,6 +16,8 @@ Notes
     Please consider using DVC.outs() and save them in a binary file format.
 
 """
+import importlib
+import inspect
 import logging
 
 import znjson
@@ -35,9 +37,9 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     def _encode(self, obj) -> dict:
         """Convert Node to serializable dict"""
         return {
-            "module": obj.zntrack.module,
+            "module": obj.module,
             "cls": obj.__class__.__name__,
-            "name": obj.zntrack.node_name,
+            "name": obj.node_name,
         }
 
     def _decode(self, value: dict) -> Node:
@@ -47,3 +49,49 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""
         return isinstance(other, Node)
+
+
+class MethodConverter(znjson.ConverterBase):
+
+    representation = "zn.method"
+
+    def _encode(self, obj):
+        methods = {
+            "module": obj.__class__.__module__,
+            "name": obj.__class__.__name__,
+            "kwargs": {},
+        }
+
+        # If using Jupyter Notebooks
+        # if instance.zntrack.nb_mode:
+        #     # if the class is originally imported from main,
+        #     #  it will be copied to the same module path as the
+        #     #  ZnTrack Node source code.
+        #     if methods["module"] == "__main__":
+        #         methods["module"] = instance.zntrack.module
+
+        for key in inspect.signature(obj.__class__.__init__).parameters:
+            if key == "self":
+                continue
+            if key in ["args", "kwargs"]:
+                log.error(f"Can not convert {key}!")
+                continue
+            try:
+                methods["kwargs"][key] = getattr(obj, key)
+            except AttributeError:
+                raise AttributeError(
+                    f"Could not find {key} in passed method! Please use "
+                    "@check_signature from ZnTrack to check that the method signature"
+                    " fits the method attributes"
+                )
+
+        return methods
+
+    def _decode(self, value: dict):
+        module = importlib.import_module(value["module"])
+        cls = getattr(module, value["name"])
+
+        return cls(**value["kwargs"])
+
+    def __eq__(self, other):
+        return other.znjson_zn_method

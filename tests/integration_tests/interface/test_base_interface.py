@@ -38,7 +38,7 @@ def single_experiment_path(tmp_path):
     subprocess.run(["git", "init"])
     subprocess.run(["dvc", "init"])
 
-    HelloWorld(inputs=1).write_dvc()
+    HelloWorld(inputs=1).write_graph()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
 
@@ -54,15 +54,15 @@ def multi_experiment_path(tmp_path):
     subprocess.run(["git", "init"])
     subprocess.run(["dvc", "init"])
 
-    HelloWorld(inputs=1).write_dvc()
+    HelloWorld(inputs=1).write_graph()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
 
     subprocess.run(["dvc", "repro"])
 
-    HelloWorld(inputs=2).write_dvc()
+    HelloWorld(inputs=2).write_graph()
     subprocess.run(["dvc", "exp", "run", "-n", "Test02"])
-    HelloWorld(inputs=3).write_dvc()
+    HelloWorld(inputs=3).write_graph()
     subprocess.run(["dvc", "exp", "run", "-n", "Test03"])
 
     return tmp_path
