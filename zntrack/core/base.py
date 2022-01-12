@@ -60,7 +60,7 @@ class Node(GraphWriter):
     def save(self):
         self._save_to_file(
             file=pathlib.Path("zntrack.json"),
-            zntrack_type=["dvc", "deps"],
+            zntrack_type=["dvc", "deps", "method"],
             key=self.node_name,
         )
         self._save_to_file(

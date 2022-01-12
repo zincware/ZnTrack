@@ -11,7 +11,7 @@ class ExampleDVCOutsNode(GraphWriter):
 def test_node_name_get():
     example = ExampleDVCOutsNode()
     assert example.node_name == "ExampleDVCOutsNode"
-    example._node_name = ("NamedExample",)
+    example._node_name = "NamedExample"
     assert example.node_name == "NamedExample"
 
 
