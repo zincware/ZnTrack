@@ -40,9 +40,9 @@ def test_save_file_json():
         # use to check the calls
         # assert open_mock.mock_calls == {}
 
-        open_mock.assert_called_with(
-            pathlib.Path("example.json"), mode="w", encoding=None, errors=None
-        )
+        args, kwargs = open_mock.call_args
+        assert args[0] == pathlib.Path("example.json")
+
         open_mock().write.assert_called_once_with(json.dumps({"a": "b"}, indent=4))
 
 
@@ -99,9 +99,8 @@ def test_read_file_json():
     with patch.object(pathlib.Path, "open", pathlib_open):
         assert example._read_file(pathlib.Path("example.json")) == {"a": "b"}
 
-        open_mock.assert_called_with(
-            pathlib.Path("example.json"), mode="r", encoding=None, errors=None
-        )
+        args, kwargs = open_mock.call_args
+        assert args[0] == pathlib.Path("example.json")
 
 
 def test_read_file_yaml():
@@ -191,9 +190,9 @@ def test_save_to_file():
         # use to check the calls
         # assert open_mock.mock_calls == {}
 
-        open_mock.assert_called_with(
-            pathlib.Path("params.json"), mode="w", encoding=None, errors=None
-        )
+        args, kwargs = open_mock.call_args
+        assert args[0] == pathlib.Path("params.json")
+
         open_mock().write.assert_called_once_with(
             json.dumps({"param1": 1, "param2": 2}, indent=4)
         )
@@ -216,9 +215,9 @@ def test_save_to_file_w_key():
         # use to check the calls
         # assert open_mock.mock_calls == {}
 
-        open_mock.assert_called_with(
-            pathlib.Path("params.json"), mode="w", encoding=None, errors=None
-        )
+        args, kwargs = open_mock.call_args
+        assert args[0] == pathlib.Path("params.json")
+
         open_mock().write.assert_called_once_with(
             json.dumps({"node_name": {"param1": 1, "param2": 2}}, indent=4)
         )
