@@ -22,6 +22,7 @@ import logging
 
 from zntrack.core.parameter import ZnTrackOption
 from zntrack.descriptor import Metadata
+from zntrack.utils.constants import zn_types
 from zntrack.utils.utils import deprecated
 
 log = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ log = logging.getLogger(__name__)
 
 class params(ZnTrackOption):
     # depreciated
-    metadata = Metadata(dvc_option="params", zntrack_type="params")
+    metadata = Metadata(dvc_option="params", zntrack_type=zn_types.params)
 
     @deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
     def __init__(self, default_value=None):
@@ -41,32 +42,32 @@ class params(ZnTrackOption):
 
 
 class deps(ZnTrackOption):
-    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
+    metadata = Metadata(dvc_option="deps", zntrack_type=zn_types.deps)
 
 
 class outs(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs", zntrack_type="dvc")
+    metadata = Metadata(dvc_option="outs", zntrack_type=zn_types.dvc)
 
 
 class outs_no_cache(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs_no_cache", zntrack_type="dvc")
+    metadata = Metadata(dvc_option="outs_no_cache", zntrack_type=zn_types.dvc)
 
 
 class outs_persistent(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs_persistent", zntrack_type="dvc")
+    metadata = Metadata(dvc_option="outs_persistent", zntrack_type=zn_types.dvc)
 
 
 class metrics(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics", zntrack_type="dvc")
+    metadata = Metadata(dvc_option="metrics", zntrack_type=zn_types.dvc)
 
 
 class metrics_no_cache(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="dvc")
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=zn_types.dvc)
 
 
 class plots(ZnTrackOption):
-    metadata = Metadata(dvc_option="plots", zntrack_type="dvc")
+    metadata = Metadata(dvc_option="plots", zntrack_type=zn_types.dvc)
 
 
 class plots_no_cache(ZnTrackOption):
-    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type="dvc")
+    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=zn_types.dvc)

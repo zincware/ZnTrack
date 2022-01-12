@@ -15,6 +15,7 @@ import logging
 
 from zntrack.core.parameter import ZnTrackOption
 from zntrack.descriptor import Metadata
+from zntrack.utils.constants import zn_types
 
 log = logging.getLogger(__name__)
 
@@ -26,23 +27,23 @@ log = logging.getLogger(__name__)
 
 
 class outs(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs", zntrack_type="zn")
+    metadata = Metadata(dvc_option="outs", zntrack_type=zn_types.zn)
 
 
 class deps(ZnTrackOption):
-    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
+    metadata = Metadata(dvc_option="deps", zntrack_type=zn_types.deps)
 
 
 class metrics(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="zn")
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=zn_types.zn)
 
 
 class params(ZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="params")
+    metadata = Metadata(dvc_option="params", zntrack_type=zn_types.params)
 
 
 class iterable(ZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="iterable")
+    metadata = Metadata(dvc_option="params", zntrack_type=zn_types.iterable)
 
 
 class Method(ZnTrackOption):
@@ -64,7 +65,7 @@ class Method(ZnTrackOption):
 
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type="method")
+    metadata = Metadata(dvc_option="params", zntrack_type=zn_types.method)
 
     def __get__(self, instance, owner):
         if instance is None:

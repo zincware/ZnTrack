@@ -9,6 +9,8 @@ import typing
 import yaml
 import znjson
 
+from zntrack.utils.utils import dict_hash
+
 from .descriptor import Descriptor
 
 log = logging.getLogger(__name__)
@@ -46,6 +48,14 @@ class DescriptorList:
                 )
             return types_dict
         return {x.name: getattr(self.parent, x.name) for x in data}
+
+    @property
+    def full_data_dict(self) -> dict:
+        return {x.name: getattr(self.parent, x.name) for x in self.data}
+
+    @property
+    def hash(self) -> str:
+        return dict_hash(self.full_data_dict)
 
 
 class DescriptorIO:
