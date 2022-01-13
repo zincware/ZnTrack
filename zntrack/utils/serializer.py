@@ -19,11 +19,11 @@ Notes
 import importlib
 import inspect
 import logging
+from importlib import import_module
 
 import znjson
 
 from zntrack.core.base import Node
-from zntrack.utils.types import ZnTrackStage
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +44,10 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
     def _decode(self, value: dict) -> Node:
         """return serialized Node"""
-        return ZnTrackStage(**value).load_zntrack_node()
+        module = import_module(value["module"])
+        cls = getattr(module, value["cls"])
+
+        return cls.load(name=value["name"])
 
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""
