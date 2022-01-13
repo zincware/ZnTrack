@@ -19,7 +19,9 @@ class DescriptorList:
     parent: DescriptorIO
     data: typing.List[Descriptor] = dataclasses.field(default_factory=list)
 
-    def filter(self, zntrack_type: str, return_with_type=False) -> dict:
+    def filter(
+        self, zntrack_type: typing.Union[str, list], return_with_type=False
+    ) -> dict:
         """Filter the descriptor instances by zntrack_type
 
         Parameters
@@ -37,7 +39,9 @@ class DescriptorList:
             {descriptor.dvc_option: {attr_name: attr_value}}
 
         """
-        data = [x for x in self.data if x.metadata.zntrack_type == zntrack_type]
+        if not isinstance(zntrack_type, list):
+            zntrack_type = [zntrack_type]
+        data = [x for x in self.data if x.metadata.zntrack_type in zntrack_type]
         if return_with_type:
             types_dict = {x.metadata.dvc_option: {} for x in data}
             for x in data:

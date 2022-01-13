@@ -14,6 +14,10 @@ from abc import ABC, abstractmethod
 from typing import Callable
 
 
+class DescriptorMissing(Exception):
+    pass
+
+
 class MetaData(ABC):
     """Base class for implementing MetaData decorators
 
@@ -76,13 +80,19 @@ class MetaData(ABC):
         """
 
         try:
-            _ = cls.metadata
-        except ValueError:
-            cls.metadata = {}
+            metadata_attr, metadata = next(
+                iter(cls._descriptor_list.filter(zntrack_type="metadata").items())
+            )
+        except StopIteration:
+            raise DescriptorMissing(
+                "Could not find a metadata descriptor. Please add zn.metadata()!"
+            )
+        if metadata is None:
+            metadata = {}
 
         pattern = re.compile(rf"{self.func_name}(_[1-9]+)?:{self.name_of_metric}")
 
-        number_already_collected = len(list(filter(pattern.match, cls.metadata)))
+        number_already_collected = len(list(filter(pattern.match, metadata)))
 
         if number_already_collected == 0:
             metadata_name = f"{self.func_name}:{self.name_of_metric}"
@@ -90,5 +100,5 @@ class MetaData(ABC):
             metadata_name = (
                 f"{self.func_name}_{number_already_collected}:{self.name_of_metric}"
             )
-
-        cls.metadata[metadata_name] = value
+        metadata[metadata_name] = value
+        setattr(cls, metadata_attr, metadata)

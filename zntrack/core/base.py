@@ -17,6 +17,7 @@ import sys
 
 import znjson
 
+import zntrack
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.utils import deprecated
 
@@ -72,9 +73,10 @@ class Node(GraphWriter):
         )
         # Save zn.<option> including zn.outs, zn.metrics, ...
         for option, values in self._descriptor_list.filter(
-            zntrack_type="zn", return_with_type=True
+            zntrack_type=["zn", "metadata"], return_with_type=True
         ).items():
             file = pathlib.Path("nodes") / self.node_name / f"{option}.json"
+            log.debug(f"Saving {option} to {file}")
             file.parent.mkdir(parents=True, exist_ok=True)
             file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
 
@@ -87,7 +89,7 @@ class Node(GraphWriter):
             file=pathlib.Path("zntrack.json"), key=self.node_name, raise_key_error=False
         )
         for option in self._descriptor_list.filter(
-            zntrack_type="zn", return_with_type=True
+            zntrack_type=["zn", "metadata"], return_with_type=True
         ):
             self._load_from_file(
                 file=pathlib.Path("nodes") / self.node_name / f"{option}.json",
@@ -129,6 +131,11 @@ class Node(GraphWriter):
                 instance.node_name = name
 
         instance._load()
+
+        if zntrack.config.nb_name is not None:
+            # TODO maybe check if it exists and otherwise keep default?
+            instance._module = f"{zntrack.config.nb_class_path}.{cls.__name__}"
+
         return instance
 
     def run_and_save(self):

@@ -45,6 +45,10 @@ class iterable(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type="iterable")
 
 
+class metadata(ZnTrackOption):
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="metadata")
+
+
 class Method(ZnTrackOption):
     """ZnTrack methods passing descriptor
 

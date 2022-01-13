@@ -91,7 +91,7 @@ class GraphWriter(DescriptorIO):
         files = []
         for option in self._descriptor_list.data:
             value = getattr(self, option.name)
-            if option.metadata.zntrack_type == "zn":
+            if option.metadata.zntrack_type == ["zn", "metadata"]:
                 # Handle Zn Options
                 files.append(
                     pathlib.Path("nodes")
@@ -219,7 +219,7 @@ class GraphWriter(DescriptorIO):
                 else:
                     script += [f"--{option.metadata.dvc_args}", value]
             # Handle Zn Options
-            elif option.metadata.zntrack_type == "zn":
+            elif option.metadata.zntrack_type in ["zn", "metadata"]:
                 zn_options_set.add(
                     (
                         f"--{option.metadata.dvc_args}",
@@ -247,4 +247,9 @@ class GraphWriter(DescriptorIO):
             "output in real time!"
         )
 
-        subprocess.check_call(script)
+        process = subprocess.run(script, capture_output=True, check=True)
+        if not silent:
+            if len(process.stdout) > 0:
+                log.info(process.stdout.decode())
+            if len(process.stderr) > 0:
+                log.warning(process.stderr.decode())
