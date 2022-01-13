@@ -58,7 +58,7 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
         The temporary  directory file. Close with temp_dir.cleanup() at the end.
 
     """
-    temp_dir = tempfile.TemporaryDirectory()
+    temp_dir = tempfile.TemporaryDirectory()  # add ignore_cleanup_errors=True in Py3.10?
 
     if config.nb_name is not None:
         shutil.copy(config.nb_name, temp_dir.name)

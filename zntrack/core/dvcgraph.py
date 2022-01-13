@@ -166,6 +166,17 @@ class GraphWriter(DescriptorIO):
 
         """
 
+        if nb_name is None:
+            nb_name = config.nb_name
+
+        # Jupyter Notebook
+        if nb_name is not None:
+            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
+
+            jupyter_class_to_file(
+                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
+            )
+
         self.save()
 
         if not silent:
@@ -183,17 +194,9 @@ class GraphWriter(DescriptorIO):
                 "no_run_cache": no_run_cache,
             }
         )
-        if nb_name is None:
-            nb_name = config.nb_name
 
         # Jupyter Notebook
         if nb_name is not None:
-            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
-
-            jupyter_class_to_file(
-                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
-            )
-
             script += [
                 "--deps",
                 pathlib.Path(*self.module.split(".")).with_suffix(".py").as_posix(),

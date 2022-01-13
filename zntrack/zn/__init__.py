@@ -73,4 +73,5 @@ class Method(ZnTrackOption):
         value = instance.__dict__.get(self.name, self.default_value)
         # Set some attribute for the serializer
         value.znjson_zn_method = True
+        value.znjson_module = instance.module
         return value

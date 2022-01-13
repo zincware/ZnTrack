@@ -2,6 +2,7 @@ from zntrack import zn
 
 
 class ExampleClass:
+    module = None  # must mock the module here
     method = zn.Method()
 
 

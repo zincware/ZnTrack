@@ -23,6 +23,7 @@ from importlib import import_module
 
 import znjson
 
+import zntrack
 from zntrack.core.base import Node
 
 log = logging.getLogger(__name__)
@@ -66,12 +67,13 @@ class MethodConverter(znjson.ConverterBase):
         }
 
         # If using Jupyter Notebooks
-        # if instance.zntrack.nb_mode:
-        #     # if the class is originally imported from main,
-        #     #  it will be copied to the same module path as the
-        #     #  ZnTrack Node source code.
-        #     if methods["module"] == "__main__":
-        #         methods["module"] = instance.zntrack.module
+
+        if zntrack.config.nb_name is not None:
+            # if the class is originally imported from main,
+            #  it will be copied to the same module path as the
+            #  ZnTrack Node source code.
+            if methods["module"] == "__main__":
+                methods["module"] = obj.znjson_module
 
         for key in inspect.signature(obj.__class__.__init__).parameters:
             if key == "self":
