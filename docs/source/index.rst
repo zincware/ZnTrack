@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Welcome to ZnTrack's documentation!
-===================================
+====================================
 ZnTrack is `zincwarecode's <https://zincwarecode.com>`_ first developer package
 and in fact, the first released on PyPi, so we are glad you are here.
 ZnTrack is built to help you write code that can easily be shared and reproduced.
@@ -25,17 +25,8 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
    installation
 
 .. toctree::
-   :maxdepth: 1
-   :caption: User Guide:
 
-   _overview/01_Intro.ipynb
-   _overview/02_PassingClasses.ipynb
-   _overview/03_dependencies.ipynb
-   _overview/04_metrics_and_plots.ipynb
-   _overview/05_metadata.ipynb
-   _overview/06_named_nodes.ipynb
-   _overview/OptionalDVC.ipynb
-   jupyter.rst
+   tutorials
 
 .. toctree::
    :maxdepth: 1
@@ -47,7 +38,7 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
    :maxdepth: 1
    :caption: Examples:
 
-   tutorials
+   examples
 
 .. toctree::
    :maxdepth: 1
