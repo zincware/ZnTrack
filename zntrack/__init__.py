@@ -14,20 +14,17 @@ import sys
 
 import znjson
 
-import zntrack.dvc
-
-from .core.decorator import Node
-from .dvc import DVC
+from .core import Node
 from .interface import DVCInterface
 from .project import ZnTrackProject
 from .utils import config
-from .utils.serializer import ZnTrackStageConverter, ZnTrackTypeConverter
+from .utils.serializer import MethodConverter, ZnTrackTypeConverter
 
 # register converters
 znjson.config.ACTIVE_CONVERTER = [
     ZnTrackTypeConverter,
-    ZnTrackStageConverter,
     znjson.PathlibConverter,
+    MethodConverter,
 ]
 try:
     znjson.register(znjson.NumpyConverter)
@@ -35,9 +32,9 @@ except AttributeError:
     pass
 
 #
-__all__ = ["Node", "ZnTrackProject", "DVCInterface", "DVC", "config", "dvc"]
+__all__ = ["Node", "ZnTrackProject", "DVCInterface", "config"]
 
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

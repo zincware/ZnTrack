@@ -17,16 +17,15 @@ In general one may write:
 
 .. code-block:: python
 
-    from zntrack import Node, config, dvc,
+    from zntrack import Node, config, zn,
 
-    dvc.nb_name="JupyterZnTrack.ipynb"
+    config.nb_name="JupyterZnTrack.ipynb"
 
-    @Node()
-    class Stage:
-        output = dvc.result()
+    class Stage(Node):
+        output = zn.outs()
         def run(self):
             """Actual computation"""
             self.output = "lorem ipsum"
 
 Here :code:`nb_name` has to match the name of the notebook, because we can not easily identify this name during runtime.
-Then you can run :code:`stage = Stage(load=True)` as usual.
+Then you can run :code:`stage = Stage.load()` as usual.

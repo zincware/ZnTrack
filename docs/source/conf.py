@@ -14,7 +14,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # -- Project information -----------------------------------------------------
 
 project = "ZnTrack"
-copyright = "2021, Zincware"
+copyright = "2022, Zincware"
 author = "Fabian Zills, Samuel Tovey"
 
 # The full version, including alpha/beta/rc tags
@@ -41,6 +41,7 @@ extensions = [
     "numpydoc",
     "sphinx_copybutton",
     "nbsphinx",
+    "nbsphinx_link",
     "IPython.sphinxext.ipython_console_highlighting",
     "IPython.sphinxext.ipython_directive",
     "sphinx.ext.autosectionlabel",
