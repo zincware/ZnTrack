@@ -60,7 +60,13 @@ class ZnTrackProject(DVCInterface):
         """Add this experiment to the queue and run the full queue"""
         self.queue(name=name)
         self.run_all()
-        self.load(name=name)
+        for x in range(3):
+            try:
+                self.load(name=name)
+            except subprocess.CalledProcessError as e:
+                # sometimes it takes more than one trial (windows)
+                if x == 2:
+                    raise e
         log.info("Finished")
 
     def load(self, name=None):
