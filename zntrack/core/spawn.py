@@ -14,9 +14,9 @@ log = logging.getLogger(__name__)
 class SpawnNode(Node, abc.ABC):
     is_spawned: bool = False
 
+    _iterator = None
+
     def iterator(self):
-        # TODO must set all params
-        # TODO must change the ZnTrackOption to iterable = False
         params_lst = []
         params_names = []
         for p_name, p_val in self._descriptor_list.filter(
@@ -27,15 +27,20 @@ class SpawnNode(Node, abc.ABC):
 
         for combination in itertools.product(*params_lst):
             parameter_dict = {x[0]: x[1] for x in zip(params_names, combination)}
+            # check if the current combination fits the filter
             if not self.spawn_filter(**parameter_dict):
                 log.debug(f"Skipping Node with params: {parameter_dict}")
                 continue
+
+            # Create an instance
             instance = self.load(name=self.node_name)
+            instance.is_spawned = True
             # update the iterable types with type params
             for value, name in zip(combination, params_names):
                 setattr(instance, name, value)
             log.debug(f"Spawning Node with params: {parameter_dict}")
-            instance.is_spawned = True
+            # need to load after the params are set, so that the hash is correct
+            instance._load()
             yield instance
 
     def spawn_filter(self, **kwargs) -> bool:
@@ -49,11 +54,14 @@ class SpawnNode(Node, abc.ABC):
 
         Examples
         --------
+        >>> from zntrack import zn
         >>> class Spawner(SpawnNode)
         >>>     iterable = zn.Iterable([1, 2, 3])
         >>>     def spawn_filter(self, iterable):
         >>>         # do not spawn nodes for iterable >= 2
         >>>         return iterable < 2
+        >>>     def run(self):
+        >>>         pass # do some computation here with self.iterable
         Returns
         -------
         bool:
@@ -62,20 +70,20 @@ class SpawnNode(Node, abc.ABC):
         return True
 
     def __iter__(self):
-        self.__dict__["_iterator"] = self.iterator()
+        self._iterator = self.iterator()
         return self
 
     def __next__(self) -> SpawnNode:
-        return next(self.__dict__["_iterator"])
+        return next(self._iterator)
 
     def save(self):
         super(SpawnNode, self).save()
-        if self.is_spawned:
-            self._save_to_file(
-                file=pathlib.Path("params.yaml"),
-                zntrack_type=[zn_types.params, zn_types.iterable],
-                key=self.node_name,
-            )
+        # need to overwrite the iterable params
+        self._save_to_file(
+            file=pathlib.Path("params.yaml"),
+            zntrack_type=[zn_types.params, zn_types.iterable],
+            key=self.node_name,
+        )
 
     @property
     def node_name(self) -> str:
@@ -101,6 +109,7 @@ class SpawnNode(Node, abc.ABC):
         force: bool = True,
         no_run_cache: bool = False,
     ):
+        self.save()
         for node in self:
             Node.write_graph(
                 node,

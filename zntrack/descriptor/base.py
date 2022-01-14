@@ -61,7 +61,7 @@ class DescriptorList:
 
     @property
     def hash(self) -> str:
-        return dict_hash(self.full_data_dict)
+        return dict_hash(self.full_data_dict)[1:]  # remove the sign
 
 
 class DescriptorIO:
@@ -144,12 +144,11 @@ class DescriptorIO:
         except FileNotFoundError:
             file_content = {}
 
-        if isinstance(zntrack_type, list):
-            values = {}
-            for type_ in zntrack_type:
-                values.update(self._descriptor_list.filter(type_))
-        else:
-            values = self._descriptor_list.filter(zntrack_type)
+        if not isinstance(zntrack_type, list):
+            zntrack_type = [zntrack_type]
+        values = {}
+        for type_ in zntrack_type:
+            values.update(self._descriptor_list.filter(type_))
         if key is not None:
             file_content[key] = values
         else:
