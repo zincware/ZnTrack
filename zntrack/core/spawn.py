@@ -30,7 +30,7 @@ class SpawnNode(Node, abc.ABC):
             if not self.spawn_filter(**parameter_dict):
                 log.debug(f"Skipping Node with params: {parameter_dict}")
                 continue
-            instance = self.load()
+            instance = self.load(name=self.node_name)
             # update the iterable types with type params
             for value, name in zip(combination, params_names):
                 setattr(instance, name, value)
@@ -80,37 +80,36 @@ class SpawnNode(Node, abc.ABC):
     @property
     def node_name(self) -> str:
         node_name = super(SpawnNode, self).node_name
-        return f"{node_name}_{self._descriptor_list.hash}"
+        if self.is_spawned:
+            return f"{node_name}_{self._descriptor_list.hash}"
+        else:
+            return node_name
 
     @node_name.setter
     def node_name(self, value):
         """Overwrite the default node name based on the class name"""
         self._node_name = value
 
-    # def write_graph(
-    #     self,
-    #     silent: bool = False,
-    #     nb_name: str = None,
-    #     no_commit: bool = False,
-    #     external: bool = False,
-    #     always_changed: bool = False,
-    #     no_exec: bool = True,
-    #     force: bool = True,
-    #     no_run_cache: bool = False,
-    # ):
-    #     for node in self:
-    #         Node.write_graph(
-    #             node,
-    #             silent,
-    #             nb_name,
-    #             no_commit,
-    #             external,
-    #             always_changed,
-    #             no_exec,
-    #             force,
-    #             no_run_cache,
-    #         )
-
-    def spawn_nodes(self):
+    def write_graph(
+        self,
+        silent: bool = False,
+        nb_name: str = None,
+        no_commit: bool = False,
+        external: bool = False,
+        always_changed: bool = False,
+        no_exec: bool = True,
+        force: bool = True,
+        no_run_cache: bool = False,
+    ):
         for node in self:
-            node.write_graph()
+            Node.write_graph(
+                node,
+                silent,
+                nb_name,
+                no_commit,
+                external,
+                always_changed,
+                no_exec,
+                force,
+                no_run_cache,
+            )
