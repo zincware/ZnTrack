@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/License-EPL-purple.svg?style=flat)](https://www.eclipse.org/legal/epl-2.0/faq.php)
 [![code-style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black/)
 [![Documentation](https://readthedocs.org/projects/zntrack/badge/?version=latest)](https://zntrack.readthedocs.io/en/latest/?badge=latest)
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/zincware/ZnTrack/HEAD)
 
 ![Logo](https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/img/zntrack.png)
 
