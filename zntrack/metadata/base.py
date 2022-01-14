@@ -46,7 +46,7 @@ class MetaData(ABC):
 
     @abstractmethod
     def __call__(self, cls, *args, **kwargs):
-        """Actuall decorator"""
+        """Actual decorator"""
         raise NotImplementedError
 
     def __get__(self, instance, owner):

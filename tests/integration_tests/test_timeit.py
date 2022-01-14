@@ -38,7 +38,6 @@ class SleepClass(Node):
 
 
 def test_timeit_no_metadata_err(proj_path):
-    # SleepClass().write_graph(no_exec=False)
     with pytest.raises(DescriptorMissing):
         SleepClassNoMetadata().run_and_save()
 

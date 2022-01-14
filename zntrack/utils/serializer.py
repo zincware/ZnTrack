@@ -60,6 +60,7 @@ class MethodConverter(znjson.ConverterBase):
     representation = "zn.method"
 
     def _encode(self, obj):
+        """Serialize the object"""
         methods = {
             "module": obj.__class__.__module__,
             "name": obj.__class__.__name__,
@@ -93,10 +94,12 @@ class MethodConverter(znjson.ConverterBase):
         return methods
 
     def _decode(self, value: dict):
+        """Deserialize the object"""
         module = importlib.import_module(value["module"])
         cls = getattr(module, value["name"])
 
         return cls(**value["kwargs"])
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
+        """Identify if this serializer should be applied"""
         return other.znjson_zn_method

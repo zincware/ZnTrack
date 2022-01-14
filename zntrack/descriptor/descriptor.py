@@ -44,6 +44,7 @@ class Descriptor:
         raise NotImplementedError
 
     def __get__(self, instance, owner):
+        """Get from instance.__dict__"""
         if instance is None:
             return self
         log.debug(f"Get {self} from {instance}")
@@ -53,6 +54,7 @@ class Descriptor:
             return instance.__dict__.get(self.name, self.default_value)
 
     def __set__(self, instance, value):
+        """Save value to instance.__dict__"""
         log.debug(f"Set {self} from {instance}")
         try:
             self.set(instance, value)

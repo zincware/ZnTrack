@@ -13,7 +13,6 @@ from __future__ import annotations
 import json
 import logging
 import pathlib
-import sys
 
 import znjson
 
@@ -28,28 +27,6 @@ class Node(GraphWriter):
     """Main parent class for all ZnTrack Node"""
 
     is_loaded: bool = False
-
-    _module = None
-
-    @property
-    def module(self) -> str:
-        """Module from which to import <name>
-
-        Used for from <module> import <name>
-
-        Notes
-        -----
-        this can be changed when using nb_mode
-        """
-        if self._module is None:
-            if self.__class__.__module__ == "__main__":
-                if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
-                    # special case for e.g. testing
-                    return self.__class__.__module__
-                return pathlib.Path(sys.argv[0]).stem
-            else:
-                return self.__class__.__module__
-        return self._module
 
     @deprecated(
         reason="Please see <migration tutorial> from v0.2 to v0.3 in the documentation",

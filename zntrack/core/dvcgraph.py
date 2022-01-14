@@ -1,6 +1,7 @@
 import logging
 import pathlib
 import subprocess
+import sys
 import typing
 
 from zntrack.descriptor.base import DescriptorIO
@@ -62,7 +63,10 @@ def get_dvc_arguments(options: dict) -> list:
 
 
 class GraphWriter(DescriptorIO):
+    """Write the DVC Graph"""
+
     _node_name = None
+    _module = None
 
     def __init__(self, *args, **kwargs):
         self.node_name = kwargs.get("name", None)
@@ -79,10 +83,28 @@ class GraphWriter(DescriptorIO):
         """Overwrite the default node name based on the class name"""
         self._node_name = value
 
-    def save(self):
-        raise NotImplementedError
-
+    @property
     def module(self) -> str:
+        """Module from which to import <name>
+
+        Used for from <module> import <name>
+
+        Notes
+        -----
+        this can be changed when using nb_mode
+        """
+        if self._module is None:
+            if self.__class__.__module__ == "__main__":
+                if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
+                    # special case for e.g. testing
+                    return self.__class__.__module__
+                return pathlib.Path(sys.argv[0]).stem
+            else:
+                return self.__class__.__module__
+        return self._module
+
+    def save(self):
+        """Some method to save the class state"""
         raise NotImplementedError
 
     @property
@@ -158,6 +180,14 @@ class GraphWriter(DescriptorIO):
         silent: bool
             If called with no_exec=False this allows to hide the output from the
             subprocess call.
+        nb_name: str
+            Notebook name when not using config.nb_name (this is not recommended)
+        no_commit: dvc parameter
+        external: dvc parameter
+        always_changed: dvc parameter
+        no_exec: dvc parameter
+        force: dvc parameter
+        no_run_cache: dvc parameter
 
         Notes
         -----

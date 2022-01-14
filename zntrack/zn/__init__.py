@@ -71,6 +71,7 @@ class Method(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type="method")
 
     def __get__(self, instance, owner):
+        """Add some custom attributes to the instance to identify it in znjson"""
         if instance is None:
             return self
         log.debug(f"Get {self} from {instance}")
