@@ -4,10 +4,9 @@ import subprocess
 import sys
 import typing
 
+from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.descriptor.base import DescriptorIO
 from zntrack.utils import config
-
-from .jupyter import jupyter_class_to_file
 
 log = logging.getLogger(__name__)
 
