@@ -1,6 +1,7 @@
 import logging
 import pathlib
 import subprocess
+import sys
 import typing
 
 from zntrack.descriptor.base import DescriptorIO
@@ -62,7 +63,13 @@ def get_dvc_arguments(options: dict) -> list:
 
 
 class GraphWriter(DescriptorIO):
+    """Write the DVC Graph
+
+    Main method that handles writing the Graph / dvc.yaml file
+    """
+
     _node_name = None
+    _module = None
 
     def __init__(self, *args, **kwargs):
         self.node_name = kwargs.get("name", None)
@@ -79,10 +86,28 @@ class GraphWriter(DescriptorIO):
         """Overwrite the default node name based on the class name"""
         self._node_name = value
 
-    def save(self):
-        raise NotImplementedError
-
+    @property
     def module(self) -> str:
+        """Module from which to import <name>
+
+        Used for from <module> import <name>
+
+        Notes
+        -----
+        this can be changed when using nb_mode
+        """
+        if self._module is None:
+            if self.__class__.__module__ == "__main__":
+                if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
+                    # special case for e.g. testing
+                    return self.__class__.__module__
+                return pathlib.Path(sys.argv[0]).stem
+            else:
+                return self.__class__.__module__
+        return self._module
+
+    def save(self):
+        """Some method to save the class state"""
         raise NotImplementedError
 
     @property
@@ -91,7 +116,7 @@ class GraphWriter(DescriptorIO):
         files = []
         for option in self._descriptor_list.data:
             value = getattr(self, option.name)
-            if option.metadata.zntrack_type == "zn":
+            if option.metadata.zntrack_type in ["zn", "metadata"]:
                 # Handle Zn Options
                 files.append(
                     pathlib.Path("nodes")
@@ -158,6 +183,14 @@ class GraphWriter(DescriptorIO):
         silent: bool
             If called with no_exec=False this allows to hide the output from the
             subprocess call.
+        nb_name: str
+            Notebook name when not using config.nb_name (this is not recommended)
+        no_commit: dvc parameter
+        external: dvc parameter
+        always_changed: dvc parameter
+        no_exec: dvc parameter
+        force: dvc parameter
+        no_run_cache: dvc parameter
 
         Notes
         -----
@@ -165,6 +198,17 @@ class GraphWriter(DescriptorIO):
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+
+        if nb_name is None:
+            nb_name = config.nb_name
+
+        # Jupyter Notebook
+        if nb_name is not None:
+            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
+
+            jupyter_class_to_file(
+                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
+            )
 
         self.save()
 
@@ -183,17 +227,9 @@ class GraphWriter(DescriptorIO):
                 "no_run_cache": no_run_cache,
             }
         )
-        if nb_name is None:
-            nb_name = config.nb_name
 
         # Jupyter Notebook
         if nb_name is not None:
-            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
-
-            jupyter_class_to_file(
-                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
-            )
-
             script += [
                 "--deps",
                 pathlib.Path(*self.module.split(".")).with_suffix(".py").as_posix(),
@@ -216,7 +252,7 @@ class GraphWriter(DescriptorIO):
                 else:
                     script += [f"--{option.metadata.dvc_args}", value]
             # Handle Zn Options
-            elif option.metadata.zntrack_type == "zn":
+            elif option.metadata.zntrack_type in ["zn", "metadata"]:
                 zn_options_set.add(
                     (
                         f"--{option.metadata.dvc_args}",
@@ -244,4 +280,9 @@ class GraphWriter(DescriptorIO):
             "output in real time!"
         )
 
-        subprocess.check_call(script)
+        process = subprocess.run(script, capture_output=True, check=True)
+        if not silent:
+            if len(process.stdout) > 0:
+                log.info(process.stdout.decode())
+            if len(process.stderr) > 0:
+                log.warning(process.stderr.decode())

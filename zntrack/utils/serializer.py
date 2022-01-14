@@ -19,11 +19,12 @@ Notes
 import importlib
 import inspect
 import logging
+from importlib import import_module
 
 import znjson
 
+import zntrack
 from zntrack.core.base import Node
-from zntrack.utils.types import ZnTrackStage
 
 log = logging.getLogger(__name__)
 
@@ -44,7 +45,10 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
     def _decode(self, value: dict) -> Node:
         """return serialized Node"""
-        return ZnTrackStage(**value).load_zntrack_node()
+        module = import_module(value["module"])
+        cls = getattr(module, value["cls"])
+
+        return cls.load(name=value["name"])
 
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""
@@ -56,6 +60,7 @@ class MethodConverter(znjson.ConverterBase):
     representation = "zn.method"
 
     def _encode(self, obj):
+        """Serialize the object"""
         methods = {
             "module": obj.__class__.__module__,
             "name": obj.__class__.__name__,
@@ -63,12 +68,13 @@ class MethodConverter(znjson.ConverterBase):
         }
 
         # If using Jupyter Notebooks
-        # if instance.zntrack.nb_mode:
-        #     # if the class is originally imported from main,
-        #     #  it will be copied to the same module path as the
-        #     #  ZnTrack Node source code.
-        #     if methods["module"] == "__main__":
-        #         methods["module"] = instance.zntrack.module
+
+        if zntrack.config.nb_name is not None:
+            # if the class is originally imported from main,
+            #  it will be copied to the same module path as the
+            #  ZnTrack Node source code.
+            if methods["module"] == "__main__":
+                methods["module"] = obj.znjson_module
 
         for key in inspect.signature(obj.__class__.__init__).parameters:
             if key == "self":
@@ -88,10 +94,12 @@ class MethodConverter(znjson.ConverterBase):
         return methods
 
     def _decode(self, value: dict):
+        """Deserialize the object"""
         module = importlib.import_module(value["module"])
         cls = getattr(module, value["name"])
 
         return cls(**value["kwargs"])
 
-    def __eq__(self, other):
+    def __eq__(self, other) -> bool:
+        """Identify if this serializer should be applied"""
         return other.znjson_zn_method

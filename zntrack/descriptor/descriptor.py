@@ -6,6 +6,16 @@ log = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class Metadata:
+    """Descriptor Metadata
+
+    Attributes
+    ----------
+    dvc_option: str
+        The command to be run by dvc, e.g. params
+    zntrack_type: str
+        Another identifier used by zntrack to distinguish e.g. zn from dvc descriptors
+    """
+
     dvc_option: str
     zntrack_type: str
 
@@ -15,6 +25,23 @@ class Metadata:
 
 
 class Descriptor:
+    """Python Descriptor with metadata
+
+    This class allows to add metadata to arbitrary class arguments:
+
+    >>> class HelloWorld
+    >>>     value = Descriptor()
+    >>>     def __init__(self):
+    >>>         self.value = 25
+    >>>
+    >>> print(HelloWorld.value.metadata)
+    >>> print(HelloWorld().value)
+
+    References
+    ----------
+    https://docs.python.org/3/howto/descriptor.html
+    """
+
     metadata: Metadata = None
 
     def __init__(self, default_value=None):
@@ -44,6 +71,7 @@ class Descriptor:
         raise NotImplementedError
 
     def __get__(self, instance, owner):
+        """Get from instance.__dict__"""
         if instance is None:
             return self
         log.debug(f"Get {self} from {instance}")
@@ -53,6 +81,7 @@ class Descriptor:
             return instance.__dict__.get(self.name, self.default_value)
 
     def __set__(self, instance, value):
+        """Save value to instance.__dict__"""
         log.debug(f"Set {self} from {instance}")
         try:
             self.set(instance, value)

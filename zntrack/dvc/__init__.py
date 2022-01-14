@@ -33,7 +33,6 @@ log = logging.getLogger(__name__)
 
 
 class params(ZnTrackOption):
-    # depreciated
     metadata = Metadata(dvc_option="params", zntrack_type=zn_types.params)
 
     @deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")

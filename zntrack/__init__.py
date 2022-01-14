@@ -14,8 +14,6 @@ import sys
 
 import znjson
 
-import zntrack.dvc as dvc
-
 from .core import Node
 from .interface import DVCInterface
 from .project import ZnTrackProject
@@ -34,7 +32,7 @@ except AttributeError:
     pass
 
 #
-__all__ = ["Node", "ZnTrackProject", "DVCInterface", "config", "dvc"]
+__all__ = ["Node", "ZnTrackProject", "DVCInterface", "config"]
 
 __version__ = "0.3.0"
 

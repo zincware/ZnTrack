@@ -46,6 +46,10 @@ class iterable(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type=zn_types.iterable)
 
 
+class metadata(ZnTrackOption):
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="metadata")
+
+
 class Method(ZnTrackOption):
     """ZnTrack methods passing descriptor
 
@@ -68,10 +72,12 @@ class Method(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type=zn_types.method)
 
     def __get__(self, instance, owner):
+        """Add some custom attributes to the instance to identify it in znjson"""
         if instance is None:
             return self
         log.debug(f"Get {self} from {instance}")
         value = instance.__dict__.get(self.name, self.default_value)
         # Set some attribute for the serializer
         value.znjson_zn_method = True
+        value.znjson_module = instance.module
         return value
