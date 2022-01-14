@@ -2,7 +2,7 @@ import pathlib
 
 import setuptools
 
-long_description = pathlib.Path("README.rst").read_text()
+long_description = pathlib.Path("README.md").read_text()
 required_packages = pathlib.Path("requirements.txt").read_text().splitlines()
 
 setuptools.setup(
