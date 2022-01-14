@@ -63,7 +63,10 @@ def get_dvc_arguments(options: dict) -> list:
 
 
 class GraphWriter(DescriptorIO):
-    """Write the DVC Graph"""
+    """Write the DVC Graph
+
+    Main method that handles writing the Graph / dvc.yaml file
+    """
 
     _node_name = None
     _module = None

@@ -24,7 +24,16 @@ log = logging.getLogger(__name__)
 
 
 class Node(GraphWriter):
-    """Main parent class for all ZnTrack Node"""
+    """Main parent class for all ZnTrack Node
+
+    The methods implemented in this class are primarily loading and saving parameters.
+    This includes restoring the Node from files and saving results to files after run.
+
+    Attributes
+    ----------
+    is_loaded: bool
+        if the class is loaded this can be used to only run certain code, e.g. in the init
+    """
 
     is_loaded: bool = False
 
