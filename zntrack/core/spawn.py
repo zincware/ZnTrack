@@ -26,16 +26,40 @@ class SpawnNode(Node, abc.ABC):
             params_names.append(p_name)
 
         for combination in itertools.product(*params_lst):
+            parameter_dict = {x[0]: x[1] for x in zip(params_names, combination)}
+            if not self.spawn_filter(**parameter_dict):
+                log.debug(f"Skipping Node with params: {parameter_dict}")
+                continue
             instance = self.load()
             # update the iterable types with type params
             for value, name in zip(combination, params_names):
                 setattr(instance, name, value)
-            log.debug(
-                "Spawning Node with params:"
-                f" { {x[0]: x[1] for x in zip(combination, params_names)} }"
-            )
+            log.debug(f"Spawning Node with params: {parameter_dict}")
             instance.is_spawned = True
             yield instance
+
+    def spawn_filter(self, **kwargs) -> bool:
+        """Check if a Node with the given parameters should be spawned
+
+        Parameters
+        ----------
+        kwargs: dict
+            a dictionary with zn.iterable attribute names as keys and the respective
+            values of this iteration.
+
+        Examples
+        --------
+        >>> class Spawner(SpawnNode)
+        >>>     iterable = zn.Iterable([1, 2, 3])
+        >>>     def spawn_filter(self, iterable):
+        >>>         # do not spawn nodes for iterable >= 2
+        >>>         return iterable < 2
+        Returns
+        -------
+        bool:
+            spawn the node
+        """
+        return True
 
     def __iter__(self):
         self.__dict__["_iterator"] = self.iterator()
