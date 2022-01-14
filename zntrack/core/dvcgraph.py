@@ -91,7 +91,7 @@ class GraphWriter(DescriptorIO):
         files = []
         for option in self._descriptor_list.data:
             value = getattr(self, option.name)
-            if option.metadata.zntrack_type == ["zn", "metadata"]:
+            if option.metadata.zntrack_type in ["zn", "metadata"]:
                 # Handle Zn Options
                 files.append(
                     pathlib.Path("nodes")
