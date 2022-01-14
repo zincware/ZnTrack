@@ -38,7 +38,11 @@ class Node(GraphWriter):
     is_loaded: bool = False
 
     @deprecated(
-        reason="Please see <migration tutorial> from v0.2 to v0.3 in the documentation",
+        reason=(
+            "Please check out https://zntrack.readthedocs.io/en/latest/_tutorials/"
+            "migration_guide_v3.html for a migration tutorial from "
+            "ZnTrack v0.2 to v0.3"
+        ),
         version="v0.3",
     )
     def __call__(self, *args, **kwargs):
