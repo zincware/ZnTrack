@@ -2,12 +2,12 @@ import pathlib
 
 import setuptools
 
-long_description = pathlib.Path("README.rst").read_text()
+long_description = pathlib.Path("README.md").read_text()
 required_packages = pathlib.Path("requirements.txt").read_text().splitlines()
 
 setuptools.setup(
     name="zntrack",
-    version="0.2.1",
+    version="0.3.0",
     author="zincwarecode",
     author_email="zincwarecode@gmail.com",
     description="A Python package for parameter and data version control with DVC",
