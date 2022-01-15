@@ -1,0 +1,6 @@
+#!/bin/bash
+
+pip install -r dev-requirements.txt
+
+git config --global user.name "John Doe"
+git config --global user.email johndoe@example.com
