@@ -102,4 +102,7 @@ class MethodConverter(znjson.ConverterBase):
 
     def __eq__(self, other) -> bool:
         """Identify if this serializer should be applied"""
-        return other.znjson_zn_method
+        try:
+            return other.znjson_zn_method
+        except AttributeError:
+            return False
