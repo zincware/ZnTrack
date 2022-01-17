@@ -5,7 +5,7 @@ from zntrack.core.dvcgraph import GraphWriter, get_dvc_arguments, handle_deps
 
 
 class ExampleDVCOutsNode(GraphWriter):
-    outs = dvc.outs("example.dat")
+    outs = dvc.outs(pathlib.Path("example.dat"))
 
 
 def test_node_name_get():
@@ -33,8 +33,8 @@ class ExampleAffectedFiles(GraphWriter):
     param = zn.params()
     zn_outs = zn.outs()
     zn_metrics = zn.metrics()
-    dvc_outs = dvc.outs("dvc_outs.dat")
-    dvc_metrics = dvc.outs("dvc_metrics.json")
+    dvc_outs = dvc.outs(pathlib.Path("dvc_outs.dat"))
+    dvc_metrics = dvc.outs(pathlib.Path("dvc_metrics.json"))
     dvc_empty = dvc.outs()
     dvc_outs_lst = dvc.outs(["a.dat", "b.dat"])
 
@@ -47,6 +47,30 @@ def test_affected_files():
         pathlib.Path("dvc_outs.dat"),
         pathlib.Path("nodes/ExampleAffectedFiles/metrics_no_cache.json"),
         pathlib.Path("nodes/ExampleAffectedFiles/outs.json"),
-        pathlib.Path("a.dat"),
-        pathlib.Path("b.dat"),
+        "a.dat",
+        "b.dat",
     }
+
+
+class ExampleClassWithParams(GraphWriter):
+    param1 = zn.params(default_value=1)
+    param2 = zn.params(default_value=2)
+
+
+def test__descriptor_list():
+    example = ExampleClassWithParams()
+
+    assert len(example._descriptor_list.data) == 2
+
+
+def test_descriptor_list_filter():
+    example = ExampleClassWithParams()
+
+    assert example._descriptor_list.filter(zntrack_type="params") == {
+        "param1": 1,
+        "param2": 2,
+    }
+
+    assert example._descriptor_list.filter(
+        zntrack_type="params", return_with_type=True
+    ) == {"params": {"param1": 1, "param2": 2}}
