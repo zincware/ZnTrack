@@ -50,3 +50,27 @@ def test_affected_files():
         "a.dat",
         "b.dat",
     }
+
+
+class ExampleClassWithParams(GraphWriter):
+    param1 = zn.params(default_value=1)
+    param2 = zn.params(default_value=2)
+
+
+def test__descriptor_list():
+    example = ExampleClassWithParams()
+
+    assert len(example._descriptor_list.data) == 2
+
+
+def test_descriptor_list_filter():
+    example = ExampleClassWithParams()
+
+    assert example._descriptor_list.filter(zntrack_type="params") == {
+        "param1": 1,
+        "param2": 2,
+    }
+
+    assert example._descriptor_list.filter(
+        zntrack_type="params", return_with_type=True
+    ) == {"params": {"param1": 1, "param2": 2}}
