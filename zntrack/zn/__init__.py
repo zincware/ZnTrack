@@ -76,9 +76,15 @@ class Method(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type="method")
 
     def get_filename(self, instance) -> File:
-        return File(path=pathlib.Path("params.yaml"), key=instance.node_name)
+        """Does not really have a single file but params.yaml and zntrack.json"""
+        return None
 
     def save(self, instance):
+        """Overwrite the save method
+
+        For methods saving is split between params.yaml for the parameters and
+        zntrack.json for the class to be imported and instantiated.
+        """
         file = File(path=pathlib.Path("params.yaml"), key=instance.node_name)
         value = self.__get__(instance, self.owner)
         serialized_value = json.loads(json.dumps(value, cls=znjson.ZnEncoder))
@@ -117,6 +123,11 @@ class Method(ZnTrackOption):
     def load(
         self, instance, raise_file_error: bool = False, raise_key_error: bool = True
     ):
+        """Overwrite the load method
+
+        For methods loading is split between params.yaml for the parameters and
+        zntrack.json for the class to be imported and instantiated.
+        """
         file = self.get_filename(instance)
         try:
             params = file_io.read_file(pathlib.Path("params.yaml"))[instance.node_name][

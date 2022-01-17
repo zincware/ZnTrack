@@ -90,6 +90,15 @@ class ZnTrackOption(Descriptor):
         return filename_dict[self.metadata.zntrack_type]
 
     def save(self, instance):
+        """Save this descriptor for the given instance to file
+
+        Parameters
+        ----------
+        instance: Node
+            instance where the Descriptor is attached to.
+            Similar to __get__(instance) this requires the instance
+            to be passed manually.
+        """
         file = self.get_filename(instance)
 
         try:
@@ -111,6 +120,19 @@ class ZnTrackOption(Descriptor):
     def load(
         self, instance, raise_file_error: bool = False, raise_key_error: bool = True
     ):
+        """Load this descriptor value into the given instance
+
+        Updates the instance.__dict__
+
+        Parameters
+        ----------
+        instance: Node
+            instance where the Descriptor is attached to.
+            Similar to __get__(instance) this requires the instance
+            to be passed manually.
+        raise_file_error: bool
+        raise_key_error: bool
+        """
         file = self.get_filename(instance)
         try:
             file_content = file_io.read_file(file.path)
