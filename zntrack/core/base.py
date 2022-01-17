@@ -10,11 +10,7 @@ Description:
 """
 from __future__ import annotations
 
-import json
 import logging
-import pathlib
-
-import znjson
 
 import zntrack
 from zntrack.core.dvcgraph import GraphWriter
@@ -52,39 +48,13 @@ class Node(GraphWriter):
     def save(self):
         """Save Class state to files"""
         # Save dvc.<option>, dvc.deps, zn.Method
-        self._save_to_file(
-            file=pathlib.Path("zntrack.json"),
-            zntrack_type=["dvc", "deps", "method"],
-            key=self.node_name,
-        )
-        # Save dvc/zn.<params>
-        self._save_to_file(
-            file=pathlib.Path("params.yaml"), zntrack_type="params", key=self.node_name
-        )
-        # Save zn.<option> including zn.outs, zn.metrics, ...
-        for option, values in self._descriptor_list.filter(
-            zntrack_type=["zn", "metadata"], return_with_type=True
-        ).items():
-            file = pathlib.Path("nodes") / self.node_name / f"{option}.json"
-            log.debug(f"Saving {option} to {file}")
-            file.parent.mkdir(parents=True, exist_ok=True)
-            file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
+        for option in self._descriptor_list.data:
+            option.save(instance=self)
 
     def _load(self):
         """Load class state from files"""
-        self._load_from_file(
-            file=pathlib.Path("params.yaml"), key=self.node_name, raise_key_error=False
-        )
-        self._load_from_file(
-            file=pathlib.Path("zntrack.json"), key=self.node_name, raise_key_error=False
-        )
-        for option in self._descriptor_list.filter(
-            zntrack_type=["zn", "metadata"], return_with_type=True
-        ):
-            self._load_from_file(
-                file=pathlib.Path("nodes") / self.node_name / f"{option}.json",
-                raise_key_error=False,
-            )
+        for option in self._descriptor_list.data:
+            option.load(instance=self, raise_key_error=False)
         self.is_loaded = True
 
     @classmethod

@@ -5,7 +5,7 @@ from zntrack.core.dvcgraph import GraphWriter, get_dvc_arguments, handle_deps
 
 
 class ExampleDVCOutsNode(GraphWriter):
-    outs = dvc.outs("example.dat")
+    outs = dvc.outs(pathlib.Path("example.dat"))
 
 
 def test_node_name_get():
@@ -33,8 +33,8 @@ class ExampleAffectedFiles(GraphWriter):
     param = zn.params()
     zn_outs = zn.outs()
     zn_metrics = zn.metrics()
-    dvc_outs = dvc.outs("dvc_outs.dat")
-    dvc_metrics = dvc.outs("dvc_metrics.json")
+    dvc_outs = dvc.outs(pathlib.Path("dvc_outs.dat"))
+    dvc_metrics = dvc.outs(pathlib.Path("dvc_metrics.json"))
     dvc_empty = dvc.outs()
     dvc_outs_lst = dvc.outs(["a.dat", "b.dat"])
 
@@ -47,6 +47,6 @@ def test_affected_files():
         pathlib.Path("dvc_outs.dat"),
         pathlib.Path("nodes/ExampleAffectedFiles/metrics_no_cache.json"),
         pathlib.Path("nodes/ExampleAffectedFiles/outs.json"),
-        pathlib.Path("a.dat"),
-        pathlib.Path("b.dat"),
+        "a.dat",
+        "b.dat",
     }

@@ -11,10 +11,15 @@ Description: zn.<option>
 The following can be used to store e.g. metrics directly without
 defining and writing to a file
 """
+import json
 import logging
+import pathlib
 
-from zntrack.core.parameter import ZnTrackOption
+import znjson
+
+from zntrack.core.parameter import File, ZnTrackOption
 from zntrack.descriptor import Metadata
+from zntrack.utils import file_io
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +74,73 @@ class Method(ZnTrackOption):
     """
 
     metadata = Metadata(dvc_option="params", zntrack_type="method")
+
+    def get_filename(self, instance) -> File:
+        return File(path=pathlib.Path("params.yaml"), key=instance.node_name)
+
+    def save(self, instance):
+        file = File(path=pathlib.Path("params.yaml"), key=instance.node_name)
+        value = self.__get__(instance, self.owner)
+        serialized_value = json.loads(json.dumps(value, cls=znjson.ZnEncoder))
+
+        # Write to params.yaml
+        try:
+            params_file_content = file_io.read_file(file.path)
+        except FileNotFoundError:
+            params_file_content = {}
+
+        try:
+            _ = params_file_content[file.key]
+        except KeyError:
+            params_file_content[file.key] = {}
+
+        params_file_content[file.key].update(
+            {self.name: serialized_value["value"].pop("kwargs")}
+        )
+        file_io.write_file(file.path, params_file_content)
+
+        # write to zntrack.json
+        file = File(pathlib.Path("zntrack.json"), key=instance.node_name)
+        try:
+            zntrack_file_content = file_io.read_file(file.path)
+        except FileNotFoundError:
+            zntrack_file_content = {}
+
+        try:
+            _ = zntrack_file_content[file.key]
+        except KeyError:
+            zntrack_file_content[file.key] = {}
+
+        zntrack_file_content[file.key].update({self.name: serialized_value})
+        file_io.write_file(file.path, zntrack_file_content)
+
+    def load(
+        self, instance, raise_file_error: bool = False, raise_key_error: bool = True
+    ):
+        file = self.get_filename(instance)
+        try:
+            params = file_io.read_file(pathlib.Path("params.yaml"))[instance.node_name][
+                self.name
+            ]
+            cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))[
+                instance.node_name
+            ][self.name]
+
+            cls_dict["value"]["kwargs"] = params
+            value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
+
+            log.debug(f"Loading {file.key} from {file}: ({value})")
+            instance.__dict__.update({self.name: value})
+        except FileNotFoundError as e:
+            if raise_file_error:
+                raise e
+            else:
+                pass
+        except KeyError as e:
+            if raise_key_error:
+                raise e
+            else:
+                pass
 
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""

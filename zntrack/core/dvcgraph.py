@@ -1,10 +1,13 @@
+from __future__ import annotations
+
+import dataclasses
 import logging
 import pathlib
 import subprocess
 import sys
 import typing
 
-from zntrack.descriptor.base import DescriptorIO
+from zntrack.core.parameter import ZnTrackOption
 from zntrack.utils import config
 
 from .jupyter import jupyter_class_to_file
@@ -62,7 +65,47 @@ def get_dvc_arguments(options: dict) -> list:
     return out
 
 
-class GraphWriter(DescriptorIO):
+@dataclasses.dataclass
+class DescriptorList:
+    """Dataclass to collect all descriptors of some parent class"""
+
+    parent: GraphWriter
+    data: typing.List[ZnTrackOption] = dataclasses.field(default_factory=list)
+
+    def filter(
+        self, zntrack_type: typing.Union[str, list], return_with_type=False
+    ) -> dict:
+        """Filter the descriptor instances by zntrack_type
+
+        Parameters
+        ----------
+        zntrack_type: str
+            The zntrack_type of the descriptors to gather
+        return_with_type: bool, default=False
+            return a dictionary with the Descriptor.metadata.dvc_option as keys
+
+        Returns
+        -------
+        dict:
+            either {attr_name: attr_value}
+            or
+            {descriptor.dvc_option: {attr_name: attr_value}}
+
+        """
+        if not isinstance(zntrack_type, list):
+            zntrack_type = [zntrack_type]
+        data = [x for x in self.data if x.metadata.zntrack_type in zntrack_type]
+        if return_with_type:
+            types_dict = {x.metadata.dvc_option: {} for x in data}
+            for x in data:
+                types_dict[x.metadata.dvc_option].update(
+                    {x.name: getattr(self.parent, x.name)}
+                )
+            return types_dict
+        return {x.name: getattr(self.parent, x.name) for x in data}
+
+
+class GraphWriter:
     """Write the DVC Graph
 
     Main method that handles writing the Graph / dvc.yaml file
@@ -73,6 +116,15 @@ class GraphWriter(DescriptorIO):
 
     def __init__(self, *args, **kwargs):
         self.node_name = kwargs.get("name", None)
+
+    @property
+    def _descriptor_list(self) -> DescriptorList:
+        """Get all descriptors of this instance"""
+        descriptor_list = []
+        for option in vars(type(self)).values():
+            if isinstance(option, ZnTrackOption):
+                descriptor_list.append(option)
+        return DescriptorList(parent=self, data=descriptor_list)
 
     @property
     def node_name(self) -> str:
@@ -115,21 +167,17 @@ class GraphWriter(DescriptorIO):
         """list of all files that can be changed by this instance"""
         files = []
         for option in self._descriptor_list.data:
-            value = getattr(self, option.name)
-            if option.metadata.zntrack_type in ["zn", "metadata"]:
-                # Handle Zn Options
-                files.append(
-                    pathlib.Path("nodes")
-                    / self.node_name
-                    / f"{option.metadata.dvc_option}.json"
-                )
-            elif option.metadata.zntrack_type == "dvc":
-                if value is None:
-                    pass
-                elif isinstance(value, list) or isinstance(value, tuple):
-                    files += [pathlib.Path(x) for x in value]
+            file = option.get_filename(self)
+            if file.tracked:
+                files.append(file.path)
+            elif file.value_tracked:
+                value = getattr(self, option.name)
+                if isinstance(value, list):
+                    files += value
                 else:
-                    files.append(pathlib.Path(value))
+                    files.append(value)
+
+        files = [x for x in files if x is not None]
         return set(files)
 
     @property
