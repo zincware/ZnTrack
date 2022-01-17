@@ -63,7 +63,7 @@ class ZnTrackOption(Descriptor):
         return f"{self.metadata.dvc_option} / {self.name}"
 
     def get_filename(self, instance) -> File:
-
+        """Get the name of the file this ZnTrackOption will save its values to"""
         filename_dict = {
             "params": File(path=pathlib.Path("params.yaml"), key=instance.node_name),
             "deps": File(path=pathlib.Path("zntrack.json"), key=instance.node_name),
