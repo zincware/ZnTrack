@@ -77,7 +77,7 @@ class Method(ZnTrackOption):
 
     def get_filename(self, instance) -> File:
         """Does not really have a single file but params.yaml and zntrack.json"""
-        return None
+        return File(path=pathlib.Path("params.yaml"))
 
     def save(self, instance):
         """Overwrite the save method
