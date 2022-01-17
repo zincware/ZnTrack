@@ -46,3 +46,17 @@ def test_run_twice_diff_params(proj_path):
     SingleNode(data_class=ExampleMethod(2, 2)).write_graph()
     subprocess.check_call(["dvc", "repro"])
     assert SingleNode.load().result == 4
+
+
+class SingleNodeWithDefault(Node):
+    data_class: ExampleMethod = zn.Method(ExampleMethod(2, 2))
+    result = zn.outs()
+
+    def run(self):
+        self.result = self.data_class.param1 + self.data_class.param2
+
+
+def test_run_with_default(proj_path):
+    SingleNodeWithDefault().write_graph(no_exec=False)
+
+    assert SingleNodeWithDefault.load().result == 4
