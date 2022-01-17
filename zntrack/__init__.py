@@ -34,7 +34,7 @@ except AttributeError:
 #
 __all__ = ["Node", "ZnTrackProject", "DVCInterface", "config"]
 
-__version__ = "0.3.0"
+__version__ = "0.3.1"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
