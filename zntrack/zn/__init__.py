@@ -30,31 +30,24 @@ log = logging.getLogger(__name__)
 # for direct file references use dvc.<option> instead.
 
 
-class outs(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs", zntrack_type="zn")
+class SplitZnTrackOption(ZnTrackOption):
+    """Method to split a value into params.yaml and zntrack.json
 
-
-class deps(ZnTrackOption):
-    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
-
-
-class metrics(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="zn")
-
-
-class params(ZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="params")
+    Serialize data into params.yaml if human-readable and the type in zntrack.json
+    """
 
     def save(self, instance):
         """Overwrite the save method
 
-        For methods saving is split between params.yaml for the parameters and
-        zntrack.json for the class to be imported and instantiated.
+        This save method tries to split the value into params.yaml and zntrack.json.
+        This allows e.g. having pathlib.Path() as a zn.params or a dataclass as zn.Method
+        where the path as string / the dataclass as dict is stored in params.yaml
         """
         value = self.__get__(instance, self.owner)
         serialized_value = json.loads(json.dumps(value, cls=znjson.ZnEncoder))
 
         try:
+            # if znjson was used to serialize the data, it will have a _type key
             _ = serialized_value["_type"]
 
             # Write to params.yaml
@@ -73,15 +66,19 @@ class params(ZnTrackOption):
                 value=serialized_value,
             )
         except (KeyError, AttributeError, TypeError):
-            super(params, self).save(instance)
+            # KeyError if serialized_value is a normal dict
+            # AttributeError when serialized_value.pop does not exist
+            # TypeError <..>
+            super().save(instance)
 
     def load(
         self, instance, raise_file_error: bool = False, raise_key_error: bool = True
     ):
         """Overwrite the load method
 
-        For methods loading is split between params.yaml for the parameters and
-        zntrack.json for the class to be imported and instantiated.
+        Try to load from zntrack.json / params.yaml in a combined approach first,
+        if no entry in zntrack.json is found, load from params.yaml only without
+        deserializing.
         """
         file = self.get_filename(instance)
 
@@ -89,31 +86,36 @@ class params(ZnTrackOption):
             _ = file_io.read_file(pathlib.Path("zntrack.json"))[instance.node_name][
                 self.name
             ]
-            try:
-                params = file_io.read_file(pathlib.Path("params.yaml"))[
-                    instance.node_name
-                ][self.name]
-                cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))[
-                    instance.node_name
-                ][self.name]
+            params_values = file_io.read_file(pathlib.Path("params.yaml"))[
+                instance.node_name
+            ][self.name]
+            cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))[
+                instance.node_name
+            ][self.name]
 
-                cls_dict["value"] = params
-                value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
+            cls_dict["value"] = params_values
+            value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
 
-                log.debug(f"Loading {file.key} from {file}: ({value})")
-                instance.__dict__.update({self.name: value})
-            except FileNotFoundError as e:
-                if raise_file_error:
-                    raise e
-                else:
-                    pass
-            except KeyError as e:
-                if raise_key_error:
-                    raise e
-                else:
-                    pass
+            log.debug(f"Loading {file.key} from {file}: ({value})")
+            instance.__dict__.update({self.name: value})
         except (AttributeError, KeyError, TypeError, FileNotFoundError):
             super().load(instance, raise_file_error, raise_key_error)
+
+
+class outs(ZnTrackOption):
+    metadata = Metadata(dvc_option="outs", zntrack_type="zn")
+
+
+class deps(ZnTrackOption):
+    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
+
+
+class metrics(ZnTrackOption):
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="zn")
+
+
+class params(SplitZnTrackOption):
+    metadata = Metadata(dvc_option="params", zntrack_type="params")
 
 
 class iterable(ZnTrackOption):
@@ -124,7 +126,7 @@ class metadata(ZnTrackOption):
     metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="metadata")
 
 
-class Method(ZnTrackOption):
+class Method(SplitZnTrackOption):
     """ZnTrack methods passing descriptor
 
     This descriptor allows to pass a class instance that is not a ZnTrack Node as a
@@ -148,64 +150,6 @@ class Method(ZnTrackOption):
     def get_filename(self, instance) -> File:
         """Does not really have a single file but params.yaml and zntrack.json"""
         return File(path=pathlib.Path("params.yaml"))
-
-    def save(self, instance):
-        """Overwrite the save method
-
-        For methods saving is split between params.yaml for the parameters and
-        zntrack.json for the class to be imported and instantiated.
-        """
-        value = self.__get__(instance, self.owner)
-        serialized_value = json.loads(json.dumps(value, cls=znjson.ZnEncoder))
-
-        # Write to params.yaml
-        file_io.update_config_file(
-            file=pathlib.Path("params.yaml"),
-            node_name=instance.node_name,
-            value_name=self.name,
-            value=serialized_value["value"].pop("kwargs"),
-        )
-
-        # write to zntrack.json
-        file_io.update_config_file(
-            file=pathlib.Path("zntrack.json"),
-            node_name=instance.node_name,
-            value_name=self.name,
-            value=serialized_value,
-        )
-
-    def load(
-        self, instance, raise_file_error: bool = False, raise_key_error: bool = True
-    ):
-        """Overwrite the load method
-
-        For methods loading is split between params.yaml for the parameters and
-        zntrack.json for the class to be imported and instantiated.
-        """
-        file = self.get_filename(instance)
-        try:
-            params = file_io.read_file(pathlib.Path("params.yaml"))[instance.node_name][
-                self.name
-            ]
-            cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))[
-                instance.node_name
-            ][self.name]
-
-            cls_dict["value"]["kwargs"] = params
-            value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
-
-            log.debug(f"Loading {file.key} from {file}: ({value})")
-            instance.__dict__.update({self.name: value})
-        except FileNotFoundError as e:
-            if raise_file_error:
-                raise e
-            else:
-                pass
-        except KeyError as e:
-            if raise_key_error:
-                raise e
-            else:
-                pass
 
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""

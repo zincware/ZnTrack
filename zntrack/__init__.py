@@ -27,7 +27,7 @@ znjson.config.ACTIVE_CONVERTER = [
     MethodConverter,
 ]
 try:
-    znjson.register(znjson.NumpyConverter)
+    znjson.register([znjson.NumpyConverter, znjson.SmallNumpyConverter])
 except AttributeError:
     pass
 
