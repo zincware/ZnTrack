@@ -108,9 +108,7 @@ class ZnTrackOption(Descriptor):
             value=self.__get__(instance, self.owner),
         )
 
-    def load(
-        self, instance, raise_file_error: bool = False, raise_key_error: bool = True
-    ):
+    def load(self, instance):
         """Load this descriptor value into the given instance
 
         Updates the instance.__dict__
@@ -121,8 +119,6 @@ class ZnTrackOption(Descriptor):
             instance where the Descriptor is attached to.
             Similar to __get__(instance) this requires the instance
             to be passed manually.
-        raise_file_error: bool
-        raise_key_error: bool
         """
         file = self.get_filename(instance)
         try:
@@ -140,13 +136,5 @@ class ZnTrackOption(Descriptor):
 
             log.debug(f"Loading {file.key} from {file}: ({values})")
             instance.__dict__.update({self.name: values})
-        except FileNotFoundError as e:
-            if raise_file_error:
-                raise e
-            else:
-                pass
-        except KeyError as e:
-            if raise_key_error:
-                raise e
-            else:
-                pass
+        except (FileNotFoundError, KeyError):
+            pass
