@@ -85,40 +85,24 @@ class Method(ZnTrackOption):
         For methods saving is split between params.yaml for the parameters and
         zntrack.json for the class to be imported and instantiated.
         """
-        file = File(path=pathlib.Path("params.yaml"), key=instance.node_name)
         value = self.__get__(instance, self.owner)
         serialized_value = json.loads(json.dumps(value, cls=znjson.ZnEncoder))
 
         # Write to params.yaml
-        try:
-            params_file_content = file_io.read_file(file.path)
-        except FileNotFoundError:
-            params_file_content = {}
-
-        try:
-            _ = params_file_content[file.key]
-        except KeyError:
-            params_file_content[file.key] = {}
-
-        params_file_content[file.key].update(
-            {self.name: serialized_value["value"].pop("kwargs")}
+        file_io.update_config_file(
+            file=pathlib.Path("params.yaml"),
+            node_name=instance.node_name,
+            value_name=self.name,
+            value=serialized_value["value"].pop("kwargs"),
         )
-        file_io.write_file(file.path, params_file_content)
 
         # write to zntrack.json
-        file = File(pathlib.Path("zntrack.json"), key=instance.node_name)
-        try:
-            zntrack_file_content = file_io.read_file(file.path)
-        except FileNotFoundError:
-            zntrack_file_content = {}
-
-        try:
-            _ = zntrack_file_content[file.key]
-        except KeyError:
-            zntrack_file_content[file.key] = {}
-
-        zntrack_file_content[file.key].update({self.name: serialized_value})
-        file_io.write_file(file.path, zntrack_file_content)
+        file_io.update_config_file(
+            file=pathlib.Path("zntrack.json"),
+            node_name=instance.node_name,
+            value_name=self.name,
+            value=serialized_value,
+        )
 
     def load(
         self, instance, raise_file_error: bool = False, raise_key_error: bool = True
