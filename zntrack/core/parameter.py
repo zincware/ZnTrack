@@ -101,21 +101,12 @@ class ZnTrackOption(Descriptor):
         """
         file = self.get_filename(instance)
 
-        try:
-            file_content = file_io.read_file(file.path)
-        except FileNotFoundError:
-            file_content = {}
-
-        if file.key is not None:
-            try:
-                _ = file_content[file.key]
-            except KeyError:
-                file_content[file.key] = {}
-            file_content[file.key].update({self.name: self.__get__(instance, self.owner)})
-        else:
-            file_content.update({self.name: self.__get__(instance, self.owner)})
-
-        file_io.write_file(file.path, file_content)
+        file_io.update_config_file(
+            file.path,
+            node_name=file.key,
+            value_name=self.name,
+            value=self.__get__(instance, self.owner),
+        )
 
     def load(
         self, instance, raise_file_error: bool = False, raise_key_error: bool = True
