@@ -45,6 +45,76 @@ class metrics(ZnTrackOption):
 class params(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type="params")
 
+    def save(self, instance):
+        """Overwrite the save method
+
+        For methods saving is split between params.yaml for the parameters and
+        zntrack.json for the class to be imported and instantiated.
+        """
+        value = self.__get__(instance, self.owner)
+        serialized_value = json.loads(json.dumps(value, cls=znjson.ZnEncoder))
+
+        try:
+            _ = serialized_value["_type"]
+
+            # Write to params.yaml
+            file_io.update_config_file(
+                file=pathlib.Path("params.yaml"),
+                node_name=instance.node_name,
+                value_name=self.name,
+                value=serialized_value.pop("value"),
+            )
+
+            # write to zntrack.json
+            file_io.update_config_file(
+                file=pathlib.Path("zntrack.json"),
+                node_name=instance.node_name,
+                value_name=self.name,
+                value=serialized_value,
+            )
+        except (KeyError, AttributeError, TypeError):
+            super(params, self).save(instance)
+
+    def load(
+        self, instance, raise_file_error: bool = False, raise_key_error: bool = True
+    ):
+        """Overwrite the load method
+
+        For methods loading is split between params.yaml for the parameters and
+        zntrack.json for the class to be imported and instantiated.
+        """
+        file = self.get_filename(instance)
+
+        try:
+            _ = file_io.read_file(pathlib.Path("zntrack.json"))[instance.node_name][
+                self.name
+            ]
+            try:
+                params = file_io.read_file(pathlib.Path("params.yaml"))[
+                    instance.node_name
+                ][self.name]
+                cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))[
+                    instance.node_name
+                ][self.name]
+
+                cls_dict["value"] = params
+                value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
+
+                log.debug(f"Loading {file.key} from {file}: ({value})")
+                instance.__dict__.update({self.name: value})
+            except FileNotFoundError as e:
+                if raise_file_error:
+                    raise e
+                else:
+                    pass
+            except KeyError as e:
+                if raise_key_error:
+                    raise e
+                else:
+                    pass
+        except (AttributeError, KeyError, TypeError, FileNotFoundError):
+            super().load(instance, raise_file_error, raise_key_error)
+
 
 class iterable(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type="iterable")
