@@ -117,6 +117,12 @@ class GraphWriter:
     def __init__(self, *args, **kwargs):
         self.node_name = kwargs.get("name", None)
 
+        [
+            x.update_default()
+            for x in self._descriptor_list.data
+            if x.metadata.zntrack_type == "deps"
+        ]
+
     @property
     def _descriptor_list(self) -> DescriptorList:
         """Get all descriptors of this instance"""

@@ -12,8 +12,8 @@ from __future__ import annotations
 
 import logging
 
-import zntrack
 from zntrack.core.dvcgraph import GraphWriter
+from zntrack.utils.config import config
 from zntrack.utils.utils import deprecated
 
 log = logging.getLogger(__name__)
@@ -92,9 +92,9 @@ class Node(GraphWriter):
 
         instance._load()
 
-        if zntrack.config.nb_name is not None:
+        if config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
-            instance._module = f"{zntrack.config.nb_class_path}.{cls.__name__}"
+            instance._module = f"{config.nb_class_path}.{cls.__name__}"
 
         return instance
 

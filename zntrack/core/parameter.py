@@ -62,6 +62,22 @@ class ZnTrackOption(Descriptor):
     def __str__(self):
         return f"{self.metadata.dvc_option} / {self.name}"
 
+    def update_default(self):
+        """Update default_value
+
+        The default value is created upton instantiation of this descriptor,
+        if a new class is created via Instance.load() it does not automatically load
+        the default_value Nodes, so we must to this manually here
+        """
+        try:
+            for value in self.default_value:
+                # cheap trick because circular imports - TODO find clever fix!
+                if hasattr(value, "_load"):
+                    value._load()
+        except TypeError:
+            if hasattr(self.default_value, "_load"):
+                self.default_value._load()
+
     def get_filename(self, instance) -> File:
         """Get the name of the file this ZnTrackOption will save its values to"""
         filename_dict = {
