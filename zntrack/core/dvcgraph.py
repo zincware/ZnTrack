@@ -117,6 +117,12 @@ class GraphWriter:
     def __init__(self, *args, **kwargs):
         self.node_name = kwargs.get("name", None)
 
+        [
+            x.update_default()
+            for x in self._descriptor_list.data
+            if x.metadata.zntrack_type == "deps"
+        ]
+
     @property
     def _descriptor_list(self) -> DescriptorList:
         """Get all descriptors of this instance"""
@@ -220,6 +226,7 @@ class GraphWriter:
         no_exec: bool = True,
         force: bool = True,
         no_run_cache: bool = False,
+        dry_run: bool = False,
     ):
         """Write the DVC file using run.
 
@@ -239,6 +246,8 @@ class GraphWriter:
         no_exec: dvc parameter
         force: dvc parameter
         no_run_cache: dvc parameter
+        dry_run: bool, default = False
+            Only return the script but don't actually run anything
 
         Notes
         -----
@@ -328,9 +337,12 @@ class GraphWriter:
             "output in real time!"
         )
 
-        process = subprocess.run(script, capture_output=True, check=True)
-        if not silent:
-            if len(process.stdout) > 0:
-                log.info(process.stdout.decode())
-            if len(process.stderr) > 0:
-                log.warning(process.stderr.decode())
+        if dry_run:
+            return script
+        else:
+            process = subprocess.run(script, capture_output=True, check=True)
+            if not silent:
+                if len(process.stdout) > 0:
+                    log.info(process.stdout.decode())
+                if len(process.stderr) > 0:
+                    log.warning(process.stderr.decode())

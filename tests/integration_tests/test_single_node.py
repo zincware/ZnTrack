@@ -1,5 +1,7 @@
 import dataclasses
+import json
 import os
+import pathlib
 import shutil
 import subprocess
 
@@ -94,6 +96,13 @@ def test_datacls_method(proj_path):
     assert ExampleNodeWithDataClsMethod.load().result == 30
 
 
+def test_is_loaded(proj_path):
+    ExampleNode01(inputs="Lorem Ipsum").save()
+
+    assert not ExampleNode01().is_loaded
+    assert ExampleNode01.load().is_loaded
+
+
 def test_compute_method(proj_path):
     example = ExampleNodeWithCompMethod(method=ComputeMethod(5))
     example.write_graph()
@@ -106,3 +115,88 @@ def test_compute_method(proj_path):
 def test_metrics(proj_path):
     # TODO write something to zn.metrics and assert it with the result from dvc metrics ..
     pass
+
+
+class HelloWorld(Node):
+    argument_1 = zn.params()
+
+    def __init__(self, argument_1=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.argument_1 = argument_1
+
+    def run(self):
+        pass
+
+
+# Copy some tests from < 0.3 and adapt them
+
+
+class HelloWorldwDefault(Node):
+    argument_1 = zn.params(314159)
+
+    def __init__(self, argument_1=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        if argument_1 is not None:
+            self.argument_1 = argument_1
+
+    def run(self):
+        pass
+
+
+def test_load_works(proj_path):
+    """Test that pre-initializing zn.params does result in changing values"""
+
+    HelloWorldwDefault(argument_1=11235).save()
+
+    assert HelloWorldwDefault().argument_1 == 314159
+    assert HelloWorldwDefault.load().argument_1 == 11235
+
+
+class BasicTest(Node):
+    """BasicTest class"""
+
+    deps = zn.deps(
+        [pathlib.Path("deps1", "input.json"), pathlib.Path("deps2", "input.json")]
+    )
+    parameters = zn.params()
+    results = zn.outs()
+
+    def __init__(self, test_name=None, test_values=None, *args, **kwargs):
+        """Constructor of the Node test instance"""
+        super().__init__(*args, **kwargs)
+        self.parameters = {"test_name": test_name, "test_values": test_values}
+
+    def run(self):
+        """Run method of the Node test instance"""
+        self.results = {"name": self.parameters["test_name"]}
+
+
+@pytest.fixture()
+def basic_test_node_fixture(proj_path):
+    base = BasicTest(test_name="PyTest", test_values=[2, 4, 8, 16])
+    for idx, dep in enumerate(base.deps):
+        pathlib.Path(dep).parent.mkdir(exist_ok=True, parents=True)
+        with open(dep, "w") as f:
+            json.dump({"id": idx}, f)
+    base.write_graph(no_exec=False)
+
+
+def test_parameters(basic_test_node_fixture):
+    """Test that the parameters are read correctly"""
+    base = BasicTest.load()
+    assert base.parameters == dict(test_name="PyTest", test_values=[2, 4, 8, 16])
+
+
+def test_results(basic_test_node_fixture):
+    """Test that the results are read correctly"""
+    base = BasicTest.load()
+    assert base.results == {"name": "PyTest"}
+
+
+def test_deps(basic_test_node_fixture):
+    """Test that the dependencies are stored correctly"""
+    base = BasicTest.load()
+    assert base.deps == [
+        pathlib.Path("deps1", "input.json"),
+        pathlib.Path("deps2", "input.json"),
+    ]
