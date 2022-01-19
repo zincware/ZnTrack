@@ -33,6 +33,10 @@ class Node(GraphWriter):
 
     is_loaded: bool = False
 
+    def __init__(self, *args, **kwargs):
+        self.is_loaded = kwargs.pop("is_loaded", False)
+        super().__init__(*args, **kwargs)
+
     @deprecated(
         reason=(
             "Please check out https://zntrack.readthedocs.io/en/latest/_tutorials/"
@@ -79,7 +83,7 @@ class Node(GraphWriter):
         """
 
         try:
-            instance = cls(name=name)
+            instance = cls(name=name, is_loaded=True)
         except TypeError:
             log.warning(
                 "Can not pass <name> to the super.__init__ and trying workaround! This"
