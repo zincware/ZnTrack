@@ -48,14 +48,24 @@ class SplitZnTrackOption(ZnTrackOption):
 
         try:
             # if znjson was used to serialize the data, it will have a _type key
-            _ = serialized_value["_type"]
+            if isinstance(serialized_value, list):
+                params_data = []
+                zntrack_data = []
+                for value in serialized_value:
+                    _ = value["_type"]
+                    params_data.append(value.pop("value"))
+                    zntrack_data.append(value)
 
+            else:
+                _ = serialized_value["_type"]
+                params_data = serialized_value.pop("value")
+                zntrack_data = serialized_value
             # Write to params.yaml
             file_io.update_config_file(
                 file=pathlib.Path("params.yaml"),
                 node_name=instance.node_name,
                 value_name=self.name,
-                value=serialized_value.pop("value"),
+                value=params_data,
             )
 
             # write to zntrack.json
@@ -91,8 +101,17 @@ class SplitZnTrackOption(ZnTrackOption):
                 instance.node_name
             ][self.name]
 
-            cls_dict["value"] = params_values
-            value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
+            if isinstance(cls_dict, list):
+                value = []
+                for cls_dict_val, params_val in zip(cls_dict, params_values):
+                    cls_dict_val["value"] = params_val
+                    value.append(
+                        json.loads(json.dumps(cls_dict_val), cls=znjson.ZnDecoder)
+                    )
+            else:
+                cls_dict["value"] = params_values
+
+                value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
 
             log.debug(f"Loading {file.key} from {file}: ({value})")
             instance.__dict__.update({self.name: value})

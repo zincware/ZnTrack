@@ -142,6 +142,7 @@ class ZnTrackOption(Descriptor):
             # The problem here is, that I can not / don't want to load all Nodes but only
             # the ones, that are in [self.node_name], so we only deserialize them
             if file.key is not None:
+                # TODO only load self.name
                 values = json.loads(
                     json.dumps(file_content[file.key]), cls=znjson.ZnDecoder
                 )
