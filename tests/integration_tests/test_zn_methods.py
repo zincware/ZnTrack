@@ -1,9 +1,11 @@
 import dataclasses
 import os
+import pathlib
 import shutil
 import subprocess
 
 import pytest
+import yaml
 
 from zntrack import zn
 from zntrack.core.base import Node
@@ -60,3 +62,12 @@ def test_run_with_default(proj_path):
     SingleNodeWithDefault().write_graph(no_exec=False)
 
     assert SingleNodeWithDefault.load().result == 4
+
+
+def test_module(proj_path):
+    SingleNodeWithDefault().write_graph(no_exec=False)
+    params_dict = yaml.safe_load(pathlib.Path("params.yaml").read_text())
+
+    assert (
+        params_dict["SingleNodeWithDefault"]["data_class"]["module"] == "test_zn_methods"
+    )
