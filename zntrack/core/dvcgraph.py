@@ -311,12 +311,7 @@ class GraphWriter:
             # Handle Zn Options
             elif option.metadata.zntrack_type in ["zn", "metadata"]:
                 zn_options_set.add(
-                    (
-                        f"--{option.metadata.dvc_args}",
-                        pathlib.Path("nodes")
-                        / self.node_name
-                        / f"{option.metadata.dvc_option}.json",
-                    )
+                    (f"--{option.metadata.dvc_args}", option.get_filename(self).path)
                 )
             elif option.metadata.zntrack_type == "deps":
                 script += handle_deps(value)
