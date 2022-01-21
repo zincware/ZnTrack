@@ -3,7 +3,6 @@ from __future__ import annotations
 import abc
 import itertools
 import logging
-import pathlib
 
 from zntrack.core.base import Node
 from zntrack.utils.constants import zn_types
@@ -76,18 +75,9 @@ class SpawnNode(Node, abc.ABC):
     def __next__(self) -> SpawnNode:
         return next(self._iterator)
 
-    def save(self):
-        super(SpawnNode, self).save()
-        # need to overwrite the iterable params
-        self._save_to_file(
-            file=pathlib.Path("params.yaml"),
-            zntrack_type=[zn_types.params, zn_types.iterable],
-            key=self.node_name,
-        )
-
     @property
     def node_name(self) -> str:
-        node_name = super(SpawnNode, self).node_name
+        node_name = super().node_name
         if self.is_spawned:
             return f"{node_name}_{self._descriptor_list.hash}"
         else:
@@ -98,27 +88,7 @@ class SpawnNode(Node, abc.ABC):
         """Overwrite the default node name based on the class name"""
         self._node_name = value
 
-    def write_graph(
-        self,
-        silent: bool = False,
-        nb_name: str = None,
-        no_commit: bool = False,
-        external: bool = False,
-        always_changed: bool = False,
-        no_exec: bool = True,
-        force: bool = True,
-        no_run_cache: bool = False,
-    ):
+    def write_graph(self, *args, **kwargs):
         self.save()
         for node in self:
-            Node.write_graph(
-                node,
-                silent,
-                nb_name,
-                no_commit,
-                external,
-                always_changed,
-                no_exec,
-                force,
-                no_run_cache,
-            )
+            Node.write_graph(node, *args, **kwargs)
