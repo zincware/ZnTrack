@@ -53,14 +53,20 @@ def test_save():
     with patch.object(pathlib.Path, "open", pathlib_open):
         example.save()
 
-        # could not get it to work with assert_called_once_with
+        # TODO check that this is really correct and does not overwrite things!
         assert zntrack_mock().write.mock_calls == [
             call(
                 json.dumps(
-                    {"ExampleFullNode": {"dvc_outs": "file.txt", "deps": "deps.inp"}},
+                    {"ExampleFullNode": {"dvc_outs": "file.txt"}},
                     indent=4,
                 )
-            )
+            ),
+            call(
+                json.dumps(
+                    {"ExampleFullNode": {"deps": "deps.inp"}},
+                    indent=4,
+                )
+            ),
         ]
         assert params_mock().write.mock_calls == [
             call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4))
@@ -152,7 +158,5 @@ def test_run_and_save():
         assert example.outs == 42
 
     assert open_mock().write.mock_calls == [
-        call(json.dumps({"RunTestNode": {}}, indent=4)),
-        call(yaml.safe_dump({"RunTestNode": {}})),
         call(json.dumps({"outs": 42}, indent=4)),
     ]

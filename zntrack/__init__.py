@@ -27,14 +27,14 @@ znjson.config.ACTIVE_CONVERTER = [
     MethodConverter,
 ]
 try:
-    znjson.register(znjson.NumpyConverter)
+    znjson.register([znjson.NumpyConverter, znjson.SmallNumpyConverter])
 except AttributeError:
     pass
 
 #
 __all__ = ["Node", "ZnTrackProject", "DVCInterface", "config", "SpawnNode"]
 
-__version__ = "0.3.0"
+__version__ = "0.3.2"
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)

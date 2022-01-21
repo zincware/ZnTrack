@@ -30,7 +30,7 @@ class ZnTrackProject(DVCInterface):
         """
         super().__init__()
         if name is None:
-            name = f'PyTrackProject_{datetime.now().strftime("%Y_%m_%d-%H_%M_%S")}'
+            name = f'ZnTrackProject_{datetime.now().strftime("%Y_%m_%d-%H_%M_%S")}'
         self.name = name
 
     def queue(self, name: str = None):
@@ -60,24 +60,21 @@ class ZnTrackProject(DVCInterface):
         """Add this experiment to the queue and run the full queue"""
         self.queue(name=name)
         self.run_all()
-        for x in range(3):
-            try:
-                self.load(name=name)
-            except subprocess.CalledProcessError as e:
-                # sometimes it takes more than one trial (windows)
-                if x == 2:
-                    raise e
+        self.load(name=name)
+
         log.info("Finished")
 
     def load(self, name=None):
         """Load this project"""
         if name is not None:
             self.name = name
-        subprocess.check_call(["dvc", "exp", "apply", self.name])
-
-    def save(self):
-        """Save this project to a branch"""
-        subprocess.check_call(["dvc", "exp", "branch", self.name, self.name])
+        for x in range(3):
+            try:
+                subprocess.check_call(["dvc", "exp", "apply", self.name])
+            except subprocess.CalledProcessError as e:
+                # sometimes it takes more than one trial (windows)
+                if x == 2:
+                    raise e
 
     def create_dvc_repository(self):
         """Perform git and dvc init"""

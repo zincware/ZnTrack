@@ -10,14 +10,10 @@ Description:
 """
 from __future__ import annotations
 
-import json
 import logging
-import pathlib
 
-import znjson
-
-import zntrack
 from zntrack.core.dvcgraph import GraphWriter
+from zntrack.utils.config import config
 from zntrack.utils.utils import deprecated
 
 log = logging.getLogger(__name__)
@@ -37,6 +33,10 @@ class Node(GraphWriter):
 
     is_loaded: bool = False
 
+    def __init__(self, *args, **kwargs):
+        self.is_loaded = kwargs.pop("is_loaded", False)
+        super().__init__(*args, **kwargs)
+
     @deprecated(
         reason=(
             "Please check out https://zntrack.readthedocs.io/en/latest/_tutorials/"
@@ -52,39 +52,13 @@ class Node(GraphWriter):
     def save(self):
         """Save Class state to files"""
         # Save dvc.<option>, dvc.deps, zn.Method
-        self._save_to_file(
-            file=pathlib.Path("zntrack.json"),
-            zntrack_type=["dvc", "deps", "method"],
-            key=self.node_name,
-        )
-        # Save dvc/zn.<params>
-        self._save_to_file(
-            file=pathlib.Path("params.yaml"), zntrack_type="params", key=self.node_name
-        )
-        # Save zn.<option> including zn.outs, zn.metrics, ...
-        for option, values in self._descriptor_list.filter(
-            zntrack_type=["zn", "metadata"], return_with_type=True
-        ).items():
-            file = pathlib.Path("nodes") / self.node_name / f"{option}.json"
-            log.debug(f"Saving {option} to {file}")
-            file.parent.mkdir(parents=True, exist_ok=True)
-            file.write_text(json.dumps(values, indent=4, cls=znjson.ZnEncoder))
+        for option in self._descriptor_list.data:
+            option.save(instance=self)
 
     def _load(self):
         """Load class state from files"""
-        self._load_from_file(
-            file=pathlib.Path("params.yaml"), key=self.node_name, raise_key_error=False
-        )
-        self._load_from_file(
-            file=pathlib.Path("zntrack.json"), key=self.node_name, raise_key_error=False
-        )
-        for option in self._descriptor_list.filter(
-            zntrack_type=["zn", "metadata"], return_with_type=True
-        ):
-            self._load_from_file(
-                file=pathlib.Path("nodes") / self.node_name / f"{option}.json",
-                raise_key_error=False,
-            )
+        for option in self._descriptor_list.data:
+            option.load(instance=self)
         self.is_loaded = True
 
     @classmethod
@@ -109,7 +83,7 @@ class Node(GraphWriter):
         """
 
         try:
-            instance = cls(name=name)
+            instance = cls(name=name, is_loaded=True)
         except TypeError:
             log.warning(
                 "Can not pass <name> to the super.__init__ and trying workaround! This"
@@ -120,9 +94,9 @@ class Node(GraphWriter):
             if name not in (None, cls.__name__):
                 instance.node_name = name
 
-        if zntrack.config.nb_name is not None:
+        if config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
-            instance._module = f"{zntrack.config.nb_class_path}.{cls.__name__}"
+            instance._module = f"{config.nb_class_path}.{cls.__name__}"
 
         instance._load()
 

@@ -43,14 +43,15 @@ def jupyter_class_to_file(silent, nb_name, module_name):
                     re.match(r"\S", line)
                     and not line.startswith("#")
                     and not line.startswith("class")
+                    and not line.startswith("@")
                 ):
                     reading_class = False
             if reading_class or line.startswith("class"):
                 reading_class = True
                 class_definition += line
-            if line.startswith("@Node"):
+            if line.startswith("@"):  # handle decorators
                 reading_class = True
-                class_definition += "@Node()\n"
+                class_definition += line
 
     src = imports + "\n\n" + class_definition
 
