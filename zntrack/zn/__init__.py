@@ -23,6 +23,13 @@ from zntrack.utils import file_io
 
 log = logging.getLogger(__name__)
 
+try:
+    from .plots import plots
+
+    __all__ = [plots.__name__]
+except ImportError:
+    pass
+
 
 # module class definitions to be used via zn.<option>
 # detailed explanations on https://dvc.org/doc/command-reference/run#options
