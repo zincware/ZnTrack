@@ -11,12 +11,13 @@ from zntrack.utils.config import config
 def jupyter_class_to_file(silent, nb_name, module_name):
     """Extract the class definition form a ipynb file"""
 
-    log.warning(
-        "Jupyter support is an experimental feature! Please save your "
-        "notebook before running this command!\n"
-        "Submit issues to https://github.com/zincware/ZnTrack."
-    )
-    log.warning(f"Converting {nb_name} to file {module_name}.py")
+    if not silent:
+        log.warning(
+            "Jupyter support is an experimental feature! Please save your "
+            "notebook before running this command!\n"
+            "Submit issues to https://github.com/zincware/ZnTrack."
+        )
+        log.warning(f"Converting {nb_name} to file {module_name}.py")
 
     nb_name = pathlib.Path(nb_name)
 
