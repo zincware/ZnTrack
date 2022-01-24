@@ -181,7 +181,13 @@ class Method(SplitZnTrackOption):
             return self
         log.debug(f"Get {self} from {instance}")
         value = instance.__dict__.get(self.name, self.default_value)
-        # Set some attribute for the serializer
-        value.znjson_zn_method = True
-        value.znjson_module = instance.module
+        try:
+            # Set some attribute for the serializer
+            value.znjson_zn_method = True
+            value.znjson_module = instance.module
+        except AttributeError:
+            # could be list / tuple
+            for element in value:
+                element.znjson_zn_method = True
+                element.znjson_module = instance.module
         return value

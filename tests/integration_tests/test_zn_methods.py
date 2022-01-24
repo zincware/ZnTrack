@@ -3,6 +3,7 @@ import os
 import pathlib
 import shutil
 import subprocess
+import typing
 
 import pytest
 import yaml
@@ -27,6 +28,12 @@ class ExampleMethod:
     param2: int
 
 
+@dataclasses.dataclass
+class ExampleMethod2:
+    param3: int
+    param4: int
+
+
 class SingleNode(Node):
     data_class: ExampleMethod = zn.Method()
     dummy_param = zn.params(1)  # required to have some dependency
@@ -41,11 +48,10 @@ class SingleNode(Node):
 
 
 def test_run_twice_diff_params(proj_path):
-    SingleNode(data_class=ExampleMethod(1, 1)).write_graph()
-    subprocess.check_call(["dvc", "repro"])
+    SingleNode(data_class=ExampleMethod(1, 1)).write_graph(no_exec=False)
     assert SingleNode.load().result == 2
     # second run
-    SingleNode(data_class=ExampleMethod(2, 2)).write_graph()
+    SingleNode(data_class=ExampleMethod(2, 2)).write_graph(no_exec=False)
     subprocess.check_call(["dvc", "repro"])
     assert SingleNode.load().result == 4
 
@@ -71,3 +77,48 @@ def test_module(proj_path):
     assert (
         params_dict["SingleNodeWithDefault"]["data_class"]["module"] == "test_zn_methods"
     )
+
+
+class SingleNodeMethodList(Node):
+    data_classes: typing.List[ExampleMethod] = zn.Method()
+    dummy_param = zn.params(1)  # required to have some dependency
+    result = zn.outs()
+
+    def __init__(self, data_classes=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.data_classes = data_classes
+
+    def run(self):
+        self.result = sum([x.param1 + x.param2 for x in self.data_classes])
+
+
+def test_methods_list(proj_path):
+    single_node = SingleNodeMethodList(
+        data_classes=[
+            ExampleMethod(param1=1, param2=1),
+            ExampleMethod(param1=10, param2=10),
+        ]
+    )
+
+    assert isinstance(single_node.data_classes[0], ExampleMethod)
+
+    single_node.write_graph(no_exec=False)
+
+    assert SingleNodeMethodList.load().result == 22
+    assert isinstance(SingleNodeMethodList.load().data_classes[0], ExampleMethod)
+    assert SingleNodeMethodList.load().data_classes[0].param1 == 1
+    assert SingleNodeMethodList.load().data_classes[1].param1 == 10
+
+
+def test_diff_methods_list(proj_path):
+    single_node = SingleNodeMethodList(
+        data_classes=[
+            ExampleMethod(param1=1, param2=2),
+            ExampleMethod2(param3=3, param4=4),
+        ]
+    )
+
+    single_node.save()
+
+    assert isinstance(SingleNodeMethodList.load().data_classes[0], ExampleMethod)
+    assert isinstance(SingleNodeMethodList.load().data_classes[1], ExampleMethod2)
