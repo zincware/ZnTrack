@@ -109,8 +109,8 @@ class SimpleSpawnWithInit(SpawnNode):
     param1 = zn.iterable()
     result = zn.outs()
 
-    def __init__(self, param1=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, param1=None, **kwargs):
+        super().__init__(**kwargs)
         self.param1 = param1
 
     def run(self):
