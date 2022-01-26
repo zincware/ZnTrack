@@ -8,8 +8,8 @@ from zntrack import Node, zn
 class CheckType(Node):
     params = zn.params()
 
-    def __init__(self, params=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, params=None, **kwargs):
+        super().__init__(**kwargs)
         self.params = params
 
     def run(self):

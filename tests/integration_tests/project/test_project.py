@@ -10,8 +10,8 @@ class SimpleNode(Node):
     inputs = zn.params()
     outputs = zn.outs()
 
-    def __init__(self, inputs=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, inputs=None, **kwargs):
+        super().__init__(**kwargs)
         self.inputs = inputs
 
     def run(self):

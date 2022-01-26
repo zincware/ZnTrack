@@ -23,8 +23,8 @@ def proj_path(tmp_path):
 class SingleNode(Node):
     path1: pathlib.Path = dvc.outs()
 
-    def __init__(self, path_x=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, path_x=None, **kwargs):
+        super().__init__(**kwargs)
         self.path1 = pathlib.Path(f"{path_x}.json")
 
     def run(self):
@@ -34,8 +34,8 @@ class SingleNode(Node):
 class SingleNodeListOut(Node):
     paths: typing.List[pathlib.Path] = dvc.outs()
 
-    def __init__(self, paths=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, paths=None, **kwargs):
+        super().__init__(**kwargs)
         self.paths = paths
 
     def run(self):

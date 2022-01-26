@@ -39,6 +39,8 @@ def handle_deps(value) -> list:
                 script += ["--deps", pathlib.Path(file).as_posix()]
         elif isinstance(value, str) or isinstance(value, pathlib.Path):
             script += ["--deps", pathlib.Path(value).as_posix()]
+        elif value is None:
+            pass
         else:
             raise ValueError(f"Type {type(value)} is not supported!")
 
@@ -134,7 +136,7 @@ class GraphWriter:
     _node_name = None
     _module = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
 
         [

@@ -25,8 +25,8 @@ def proj_path(tmp_path):
 class SingleNode(Node):
     param1 = zn.params()
 
-    def __init__(self, param1=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, param1=None, **kwargs):
+        super().__init__(**kwargs)
         self.param1 = param1
 
 

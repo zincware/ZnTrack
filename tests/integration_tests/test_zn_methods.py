@@ -40,8 +40,8 @@ class SingleNode(Node):
     dummy_param = zn.params(1)  # required to have some dependency
     result = zn.outs()
 
-    def __init__(self, data_class=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data_class=None, **kwargs):
+        super().__init__(**kwargs)
         self.data_class = data_class
 
     def run(self):
@@ -76,8 +76,8 @@ class SingleNodeMethodList(Node):
     dummy_param = zn.params(1)  # required to have some dependency
     result = zn.outs()
 
-    def __init__(self, data_classes=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, data_classes=None, **kwargs):
+        super().__init__(**kwargs)
         self.data_classes = data_classes
 
     def run(self):

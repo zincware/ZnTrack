@@ -17,8 +17,8 @@ def proj_path(tmp_path):
 class ZnDeps(Node):
     deps = zn.deps()
 
-    def __init__(self, deps=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, deps=None, **kwargs):
+        super().__init__(**kwargs)
         self.deps = deps
 
 
@@ -39,8 +39,8 @@ class ParamsAndDeps(Node):
     param = zn.params()
     deps = dvc.deps()
 
-    def __init__(self, deps=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, deps=None, **kwargs):
+        super().__init__(**kwargs)
         if self.is_loaded:
             return
         self.param = deps

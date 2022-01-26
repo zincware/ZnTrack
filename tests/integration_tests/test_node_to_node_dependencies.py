@@ -12,8 +12,8 @@ from zntrack.core.base import Node
 class DVCOuts(Node):
     data_file: Path = dvc.outs()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.data_file = Path("data")
 
     def run(self):
@@ -31,8 +31,8 @@ class DVCZnOuts(Node):
     data_file: Path = dvc.outs()
     data: str = zn.outs()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.data_file = Path("data")
 
     def run(self):
@@ -43,8 +43,8 @@ class DVCZnOuts(Node):
 class DependenciesCollector(Node):
     dependencies = dvc.deps()
 
-    def __init__(self, dependencies=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, dependencies=None, **kwargs):
+        super().__init__(**kwargs)
         self.dependencies = dependencies
 
     def run(self):
@@ -55,8 +55,8 @@ class DepsCollwOuts(Node):
     dependencies = dvc.deps()
     outs: Path = dvc.outs()
 
-    def __init__(self, dependencies=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, dependencies=None, **kwargs):
+        super().__init__(**kwargs)
         # must add a name, if the Node is used with two different names to avoid
         # writing to the same file!
         self.outs = Path(f"{self.node_name}_lorem.txt")

@@ -40,9 +40,9 @@ class HelloWorld(Node):
     # parameter to store as output
     random_number = zn.outs()
 
-    def __init__(self, max_number=None, *args, **kwargs):
+    def __init__(self, max_number=None, **kwargs):
         """Pass tracked arguments"""
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.max_number = max_number
 
     def run(self):
