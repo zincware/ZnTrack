@@ -15,8 +15,8 @@ class ExampleNode01(Node):
     inputs = zn.params()
     outputs = zn.outs()
 
-    def __init__(self, inputs=None):
-        super().__init__()
+    def __init__(self, inputs=None, **kwargs):
+        super().__init__(**kwargs)
         self.inputs = inputs
 
     def run(self):
@@ -33,8 +33,8 @@ class ExampleNodeWithDataClsMethod(Node):
     my_datacls: ExampleDataClsMethod = zn.Method()
     result = zn.outs()
 
-    def __init__(self, method=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, method=None, **kwargs):
+        super().__init__(**kwargs)
         self.my_datacls = method
 
     def run(self):
@@ -53,8 +53,8 @@ class ExampleNodeWithCompMethod(Node):
     my_method: ComputeMethod = zn.Method()
     result = zn.outs()
 
-    def __init__(self, method=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, method=None, **kwargs):
+        super().__init__(**kwargs)
         self.my_method = method
 
     def run(self):
@@ -136,8 +136,8 @@ def test_metrics(proj_path):
 class HelloWorld(Node):
     argument_1 = zn.params()
 
-    def __init__(self, argument_1=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, argument_1=None, **kwargs):
+        super().__init__(**kwargs)
         self.argument_1 = argument_1
 
     def run(self):
@@ -150,8 +150,8 @@ class HelloWorld(Node):
 class HelloWorldwDefault(Node):
     argument_1 = zn.params(314159)
 
-    def __init__(self, argument_1=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, argument_1=None, **kwargs):
+        super().__init__(**kwargs)
         if argument_1 is not None:
             self.argument_1 = argument_1
 
@@ -177,9 +177,9 @@ class BasicTest(Node):
     parameters = zn.params()
     results = zn.outs()
 
-    def __init__(self, test_name=None, test_values=None, *args, **kwargs):
+    def __init__(self, test_name=None, test_values=None, **kwargs):
         """Constructor of the Node test instance"""
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.parameters = {"test_name": test_name, "test_values": test_values}
 
     def run(self):

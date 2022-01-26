@@ -10,8 +10,8 @@ class HelloWorld(Node):
     output = zn.outs()
     inputs = zn.params()
 
-    def __init__(self, inputs=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, inputs=None, **kwargs):
+        super().__init__(**kwargs)
         self.inputs = inputs
 
     def run(self):

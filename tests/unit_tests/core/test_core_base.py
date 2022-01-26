@@ -109,8 +109,8 @@ def test__load():
 
 
 class CorrectNode(Node):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.test_name = self.node_name
 
 

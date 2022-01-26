@@ -12,8 +12,8 @@ class ComputeA(Node):
     inp = zn.params()
     out = zn.outs()
 
-    def __init__(self, inp=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, inp=None, **kwargs):
+        super().__init__(**kwargs)
         self.inp = inp
 
     def run(self):
@@ -26,8 +26,8 @@ class ComputeB(Node):
     inp = zn.params()
     out = zn.outs()
 
-    def __init__(self, inp=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, inp=None, **kwargs):
+        super().__init__(**kwargs)
         self.inp = inp
 
     def run(self):
@@ -52,9 +52,9 @@ class ComputeANamed(Node):
     inp = zn.params()
     out = zn.outs()
 
-    def __init__(self, inp=None, *args, **kwargs):
+    def __init__(self, inp=None, **kwargs):
         kwargs["name"] = "Stage_A"
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.inp = inp
 
     def run(self):
@@ -70,9 +70,9 @@ class ComputeABNamed(Node):
 
     param = dvc.params()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         kwargs["name"] = "Stage_AB"
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.param = "default"
 
     def run(self):

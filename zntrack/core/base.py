@@ -95,8 +95,8 @@ class Node(GraphWriter):
         --------
         Always have this, so that the name can be passed through
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
 
         """
 
@@ -105,8 +105,8 @@ class Node(GraphWriter):
         except TypeError:
             log.warning(
                 "Can not pass <name> to the super.__init__ and trying workaround! This"
-                " can lead to unexpected behaviour and can be avoided by passing (*args,"
-                " **kwargs) to the super().__init__(*args, **kwargs)"
+                " can lead to unexpected behaviour and can be avoided by passing ("
+                " **kwargs) to the super().__init__(**kwargs)"
             )
             instance = cls()
             if name not in (None, cls.__name__):
