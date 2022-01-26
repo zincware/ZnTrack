@@ -46,7 +46,7 @@ def test_write_plots(proj_path):
 
 
 def test_load_plots(proj_path):
-    WritePlots().write_graph(no_exec=False)
+    WritePlots().run_and_save()
 
     df = pd.DataFrame({"value": [x for x in range(100)]})
     df.index.name = "index"
