@@ -131,3 +131,34 @@ def test_created_files(proj_path):
         },
     }
     assert params_dict["SingleNode"]["data_class"] == {"param1": 1, "param2": 2}
+
+
+class SingleNodeNoParams(Node):
+    data_class: ExampleMethod = zn.Method()
+    result = zn.outs()
+
+    def __init__(self, data_class=None, **kwargs):
+        super().__init__(**kwargs)
+        self.data_class = data_class
+
+    def run(self):
+        self.result = self.data_class.param1 + self.data_class.param2
+
+
+class EmptyMethod:
+    param1 = 1
+    param2 = 2
+
+
+def test_write_params(proj_path):
+    SingleNodeNoParams(data_class=ExampleMethod(1, 2)).write_graph(run=True)
+
+    dvc_dict = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    assert dvc_dict["stages"]["SingleNodeNoParams"]["params"] == ["SingleNodeNoParams"]
+
+
+def test_write_params_no_kwargs(proj_path):
+    SingleNodeNoParams(data_class=EmptyMethod()).write_graph(run=True)
+
+    dvc_dict = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    assert dvc_dict["stages"]["SingleNodeNoParams"]["params"] == ["SingleNodeNoParams"]
