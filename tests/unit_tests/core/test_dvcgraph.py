@@ -59,7 +59,7 @@ def test_handle_deps_unknown():
 
 
 def test_handle_deps_node():
-    assert handle_deps(ExampleDVCOutsNode()) == ["--deps", pathlib.Path("example.dat")]
+    assert handle_deps(ExampleDVCOutsNode()) == ["--deps", "example.dat"]
 
 
 class ExampleAffectedFiles(GraphWriter):
