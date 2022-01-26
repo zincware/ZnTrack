@@ -1,4 +1,5 @@
 import dataclasses
+import json
 import os
 import pathlib
 import shutil
@@ -70,15 +71,6 @@ def test_run_with_default(proj_path):
     assert SingleNodeWithDefault.load().result == 4
 
 
-def test_module(proj_path):
-    SingleNodeWithDefault().write_graph(no_exec=False)
-    params_dict = yaml.safe_load(pathlib.Path("params.yaml").read_text())
-
-    assert (
-        params_dict["SingleNodeWithDefault"]["data_class"]["module"] == "test_zn_methods"
-    )
-
-
 class SingleNodeMethodList(Node):
     data_classes: typing.List[ExampleMethod] = zn.Method()
     dummy_param = zn.params(1)  # required to have some dependency
@@ -122,3 +114,20 @@ def test_diff_methods_list(proj_path):
 
     assert isinstance(SingleNodeMethodList.load().data_classes[0], ExampleMethod)
     assert isinstance(SingleNodeMethodList.load().data_classes[1], ExampleMethod2)
+
+
+def test_created_files(proj_path):
+    # Test for https://github.com/zincware/ZnTrack/issues/192
+    SingleNode(data_class=ExampleMethod(1, 2)).save()
+
+    zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
+    params_dict = yaml.safe_load(pathlib.Path("params.yaml").read_text())
+
+    assert zntrack_dict["SingleNode"]["data_class"] == {
+        "_type": "zn.method",
+        "value": {
+            "module": "test_zn_methods",
+            "name": "ExampleMethod",
+        },
+    }
+    assert params_dict["SingleNode"]["data_class"] == {"param1": 1, "param2": 2}
