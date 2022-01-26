@@ -51,7 +51,7 @@ def test_save():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example.save()
+        example.save(results=True)
 
         # TODO check that this is really correct and does not overwrite things!
         assert zntrack_mock().write.mock_calls == [
