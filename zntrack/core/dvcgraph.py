@@ -36,9 +36,11 @@ def handle_deps(value) -> list:
     else:
         if isinstance(value, GraphWriter):
             for file in value.affected_files:
-                script += ["--deps", file]
+                script += ["--deps", pathlib.Path(file).as_posix()]
+        elif isinstance(value, str) or isinstance(value, pathlib.Path):
+            script += ["--deps", pathlib.Path(value).as_posix()]
         else:
-            script += ["--deps", value]
+            raise ValueError(f"Type {type(value)} is not supported!")
 
     return script
 
@@ -63,6 +65,24 @@ def get_dvc_arguments(options: dict) -> list:
                     "of the process in real time!"
                 )
     return out
+
+
+def handle_dvc(value, dvc_args) -> list:
+    """Convert list of dvc_paths to a dvc input string
+
+    >>> handle_dvc("src/file.txt", "outs") == ["--outs", "src/file.txt"]
+    """
+    if not (isinstance(value, list) or isinstance(value, tuple)):
+        value = [value]
+
+    def option_func(_dvc_path):
+        return f"--{dvc_args}"
+
+    def posix_func(dvc_path):
+        return pathlib.Path(dvc_path).as_posix()
+
+    # double list comprehension https://stackoverflow.com/a/11869360/10504481
+    return [f(x) for x in value for f in (option_func, posix_func)]
 
 
 @dataclasses.dataclass
@@ -301,17 +321,15 @@ class GraphWriter:
         zn_options_set = set()
         for option in self._descriptor_list.data:
             value = getattr(self, option.name)
-            # Handle DVC options
             if option.metadata.zntrack_type == "dvc":
-                if isinstance(value, list) or isinstance(value, tuple):
-                    for x in value:
-                        script += [f"--{option.metadata.dvc_args}", x]
-                else:
-                    script += [f"--{option.metadata.dvc_args}", value]
+                script += handle_dvc(value, option.metadata.dvc_args)
             # Handle Zn Options
             elif option.metadata.zntrack_type in ["zn", "metadata"]:
                 zn_options_set.add(
-                    (f"--{option.metadata.dvc_args}", option.get_filename(self).path)
+                    (
+                        f"--{option.metadata.dvc_args}",
+                        option.get_filename(self).path.as_posix(),
+                    )
                 )
             elif option.metadata.zntrack_type == "deps":
                 script += handle_deps(value)

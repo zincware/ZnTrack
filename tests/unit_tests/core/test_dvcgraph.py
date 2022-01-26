@@ -1,7 +1,14 @@
 import pathlib
 
+import pytest
+
 from zntrack import dvc, zn
-from zntrack.core.dvcgraph import GraphWriter, get_dvc_arguments, handle_deps
+from zntrack.core.dvcgraph import (
+    GraphWriter,
+    get_dvc_arguments,
+    handle_deps,
+    handle_dvc,
+)
 
 
 class ExampleDVCOutsNode(GraphWriter):
@@ -25,8 +32,42 @@ def test_handle_deps():
     assert handle_deps(["a.dat", "b.dat"]) == ["--deps", "a.dat", "--deps", "b.dat"]
 
 
+def test_handle_deps_posix():
+    """Change the path to posix for e.g. Windows users"""
+    # TODO this does not really test anything, but I don't know how to fix that,
+    #  because converting windows path to posix under linux does not work natively
+    assert handle_deps(r"src\file.txt") in [
+        ["--deps", "src/file.txt"],
+        ["--deps", r"src\file.txt"],
+    ]
+
+
+def test_handle_dvc():
+    assert handle_dvc(r"src\file.txt", "outs") in [
+        ["--outs", "src/file.txt"],
+        ["--outs", r"src\file.txt"],
+    ]
+    assert handle_dvc(["src/file.txt", "outs.txt"], "outs") == [
+        "--outs",
+        "src/file.txt",
+        "--outs",
+        "outs.txt",
+    ]
+    assert handle_dvc(("src/file.txt", "outs.txt"), "outs") == [
+        "--outs",
+        "src/file.txt",
+        "--outs",
+        "outs.txt",
+    ]
+
+
+def test_handle_deps_unknown():
+    with pytest.raises(ValueError):
+        handle_deps(handle_deps)
+
+
 def test_handle_deps_node():
-    assert handle_deps(ExampleDVCOutsNode()) == ["--deps", pathlib.Path("example.dat")]
+    assert handle_deps(ExampleDVCOutsNode()) == ["--deps", "example.dat"]
 
 
 class ExampleAffectedFiles(GraphWriter):
