@@ -319,7 +319,7 @@ class GraphWriter:
             ]
 
         # Handle Parameter
-        if len(self._descriptor_list.filter(zntrack_type="params")) > 0:
+        if len(self._descriptor_list.filter(zntrack_type=["params", "method"])) > 0:
             script += [
                 "--params",
                 f"params.yaml:{self.node_name}",
