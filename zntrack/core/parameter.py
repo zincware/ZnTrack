@@ -124,6 +124,16 @@ class ZnTrackOption(Descriptor):
             value=self.__get__(instance, self.owner),
         )
 
+    def mkdir(self, instance):
+        """Create a parent directory
+
+        For parameters that are saved in e.g. nodes/<node_name>/file.json
+        the nodes/<node_name>/ directory is created here. This is required
+        for DVC to create a .gitignore file in these directories.
+        """
+        file = self.get_filename(instance)
+        file.path.parent.mkdir(exist_ok=True, parents=True)
+
     def load(self, instance):
         """Load this descriptor value into the given instance
 
