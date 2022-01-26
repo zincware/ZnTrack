@@ -249,6 +249,7 @@ class GraphWriter:
         force: bool = True,
         no_run_cache: bool = False,
         dry_run: bool = False,
+        run: bool = None,
     ):
         """Write the DVC file using run.
 
@@ -266,6 +267,7 @@ class GraphWriter:
         external: dvc parameter
         always_changed: dvc parameter
         no_exec: dvc parameter
+        run: bool, inverse of no_exec. Will overwrite no_exec if set.
         force: dvc parameter
         no_run_cache: dvc parameter
         dry_run: bool, default = False
@@ -277,6 +279,8 @@ class GraphWriter:
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+        if run is not None:
+            no_exec = not run
 
         if nb_name is None:
             nb_name = config.nb_name

@@ -81,6 +81,22 @@ def test_run(proj_path):
     assert load_test_node_1.outputs == "Lorem Ipsum"
 
 
+def test_run_no_exec(proj_path):
+    test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    test_node_1.write_graph(no_exec=False)
+
+    load_test_node_1 = ExampleNode01.load()
+    assert load_test_node_1.outputs == "Lorem Ipsum"
+
+
+def test_run_exec(proj_path):
+    test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    test_node_1.write_graph(run=True)
+
+    load_test_node_1 = ExampleNode01.load()
+    assert load_test_node_1.outputs == "Lorem Ipsum"
+
+
 def test_datacls_method(proj_path):
     example = ExampleNodeWithDataClsMethod(method=ExampleDataClsMethod(10, 20))
     example.write_graph()
