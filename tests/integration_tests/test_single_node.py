@@ -216,3 +216,30 @@ def test_deps(basic_test_node_fixture):
         pathlib.Path("deps1", "input.json"),
         pathlib.Path("deps2", "input.json"),
     ]
+
+
+class MethodExample:
+    pass
+
+
+class DVCDepsNode(Node):
+    dependency_file = zn.deps()
+    other_one = zn.deps(None)
+    # test interaction with zn.Method here
+    method = zn.Method()
+
+    def __init__(self, deps=None, **kwargs):
+        super().__init__(**kwargs)
+        if not self.is_loaded:
+            self.dependency_file = deps
+            self.method = MethodExample()
+
+
+def test_dvc_deps_node(proj_path):
+    DVCDepsNode("test_traj.txt", name="simple_test").save()
+    assert DVCDepsNode.load(name="simple_test").dependency_file == "test_traj.txt"
+
+    DVCDepsNode(pathlib.Path("test_traj.txt"), name="simple_test").save()
+    assert DVCDepsNode.load(name="simple_test").dependency_file == pathlib.Path(
+        "test_traj.txt"
+    )
