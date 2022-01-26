@@ -120,7 +120,7 @@ def test_overwrite_outs(proj_path):
     # Do not create the file itself
     assert not out_file.exists()
     # Create the parent directory for .gitignore
-    assert not out_file.parent.exists()
+    assert out_file.parent.exists()
 
     subprocess.check_call(["dvc", "repro"])
 
