@@ -151,8 +151,8 @@ def test_multiple_deps(dvc_repo_path):
     assert isinstance(DependenciesCollector.load().dependencies[0], DVCOuts)
     assert isinstance(DependenciesCollector.load().dependencies[1], ZnOuts)
 
-    assert Path("data") in DependenciesCollector.load().write_graph(dry_run=True)
-    assert Path("nodes/ZnOuts/outs.json") in DependenciesCollector.load().write_graph(
+    assert "data" in DependenciesCollector.load().write_graph(dry_run=True)
+    assert "nodes/ZnOuts/outs.json" in DependenciesCollector.load().write_graph(
         dry_run=True
     )
 
