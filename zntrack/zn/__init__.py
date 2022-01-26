@@ -37,6 +37,42 @@ except ImportError:
 # for direct file references use dvc.<option> instead.
 
 
+def split_value(input_val):
+    """Split input_val into data for params.yaml and zntrack.json"""
+    try:
+        # zn.Method
+        params_data = input_val["value"].pop("kwargs")
+    except (AttributeError, TypeError):
+        # everything else
+        params_data = input_val.pop("value")
+    return params_data, input_val
+
+
+def combine_values(cls_dict: dict, params_val):
+    """Combine values from params.yaml and zntrack.json
+
+    Parameters
+    ----------
+    cls_dict: dict
+        loaded from zntrack.json
+    params_val:
+        Parameters from params.yaml
+
+    Returns
+    -------
+    Loaded object of type cls_dict[_type]
+
+    """
+    try:
+        # zn.Method
+        cls_dict["value"]["kwargs"] = params_val
+    except KeyError:
+        # everything else
+        cls_dict["value"] = params_val
+
+    return json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
+
+
 class SplitZnTrackOption(ZnTrackOption):
     """Method to split a value into params.yaml and zntrack.json
 
@@ -56,17 +92,13 @@ class SplitZnTrackOption(ZnTrackOption):
         try:
             # if znjson was used to serialize the data, it will have a _type key
             if isinstance(serialized_value, list):
-                params_data = []
-                zntrack_data = []
-                for value in serialized_value:
-                    _ = value["_type"]
-                    params_data.append(value.pop("value"))
-                    zntrack_data.append(value)
-
+                data = [split_value(x) for x in serialized_value]
+                params_data, zntrack_data = zip(*data)
             else:
+                # Check that correctly serialized
                 _ = serialized_value["_type"]
-                params_data = serialized_value.pop("value")
-                zntrack_data = serialized_value
+                params_data, zntrack_data = split_value(serialized_value)
+
             # Write to params.yaml
             file_io.update_config_file(
                 file=pathlib.Path("params.yaml"),
@@ -80,7 +112,7 @@ class SplitZnTrackOption(ZnTrackOption):
                 file=pathlib.Path("zntrack.json"),
                 node_name=instance.node_name,
                 value_name=self.name,
-                value=serialized_value,
+                value=zntrack_data,
             )
         except (KeyError, AttributeError, TypeError):
             # KeyError if serialized_value is a normal dict
@@ -98,27 +130,21 @@ class SplitZnTrackOption(ZnTrackOption):
         file = self.get_filename(instance)
 
         try:
+            # Check that we can read it
             _ = file_io.read_file(pathlib.Path("zntrack.json"))[instance.node_name][
                 self.name
             ]
-            params_values = file_io.read_file(pathlib.Path("params.yaml"))[
-                instance.node_name
-            ][self.name]
-            cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))[
-                instance.node_name
-            ][self.name]
+
+            params_values = file_io.read_file(pathlib.Path("params.yaml"))
+            cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))
+            # select <node><attribute> from the full params / zntrack file
+            params_values = params_values[instance.node_name][self.name]
+            cls_dict = cls_dict[instance.node_name][self.name]
 
             if isinstance(cls_dict, list):
-                value = []
-                for cls_dict_val, params_val in zip(cls_dict, params_values):
-                    cls_dict_val["value"] = params_val
-                    value.append(
-                        json.loads(json.dumps(cls_dict_val), cls=znjson.ZnDecoder)
-                    )
+                value = [combine_values(*x) for x in zip(cls_dict, params_values)]
             else:
-                cls_dict["value"] = params_values
-
-                value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
+                value = combine_values(cls_dict, params_values)
 
             log.debug(f"Loading {file.key} from {file}: ({value})")
             instance.__dict__.update({self.name: value})
@@ -181,7 +207,13 @@ class Method(SplitZnTrackOption):
             return self
         log.debug(f"Get {self} from {instance}")
         value = instance.__dict__.get(self.name, self.default_value)
-        # Set some attribute for the serializer
-        value.znjson_zn_method = True
-        value.znjson_module = instance.module
+        try:
+            # Set some attribute for the serializer
+            value.znjson_zn_method = True
+            value.znjson_module = instance.module
+        except AttributeError:
+            # could be list / tuple
+            for element in value:
+                element.znjson_zn_method = True
+                element.znjson_module = instance.module
         return value

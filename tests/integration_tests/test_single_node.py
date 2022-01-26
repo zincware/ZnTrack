@@ -15,8 +15,8 @@ class ExampleNode01(Node):
     inputs = zn.params()
     outputs = zn.outs()
 
-    def __init__(self, inputs=None):
-        super().__init__()
+    def __init__(self, inputs=None, **kwargs):
+        super().__init__(**kwargs)
         self.inputs = inputs
 
     def run(self):
@@ -33,8 +33,8 @@ class ExampleNodeWithDataClsMethod(Node):
     my_datacls: ExampleDataClsMethod = zn.Method()
     result = zn.outs()
 
-    def __init__(self, method=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, method=None, **kwargs):
+        super().__init__(**kwargs)
         self.my_datacls = method
 
     def run(self):
@@ -53,8 +53,8 @@ class ExampleNodeWithCompMethod(Node):
     my_method: ComputeMethod = zn.Method()
     result = zn.outs()
 
-    def __init__(self, method=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, method=None, **kwargs):
+        super().__init__(**kwargs)
         self.my_method = method
 
     def run(self):
@@ -76,6 +76,22 @@ def test_run(proj_path):
     test_node_1.write_graph()
 
     subprocess.check_call(["dvc", "repro"])
+
+    load_test_node_1 = ExampleNode01.load()
+    assert load_test_node_1.outputs == "Lorem Ipsum"
+
+
+def test_run_no_exec(proj_path):
+    test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    test_node_1.write_graph(no_exec=False)
+
+    load_test_node_1 = ExampleNode01.load()
+    assert load_test_node_1.outputs == "Lorem Ipsum"
+
+
+def test_run_exec(proj_path):
+    test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    test_node_1.write_graph(run=True)
 
     load_test_node_1 = ExampleNode01.load()
     assert load_test_node_1.outputs == "Lorem Ipsum"
@@ -112,6 +128,22 @@ def test_compute_method(proj_path):
     assert ExampleNodeWithCompMethod.load().result == 50
 
 
+def test_overwrite_outs(proj_path):
+    test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    out_file = pathlib.Path("nodes", "ExampleNode01", "outs.json")
+    test_node_1.write_graph()
+
+    # Do not create the file itself
+    assert not out_file.exists()
+    # Create the parent directory for .gitignore
+    assert out_file.parent.exists()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    # Now the file should exist after the Node ran.
+    assert out_file.exists()
+
+
 def test_metrics(proj_path):
     # TODO write something to zn.metrics and assert it with the result from dvc metrics ..
     pass
@@ -120,8 +152,8 @@ def test_metrics(proj_path):
 class HelloWorld(Node):
     argument_1 = zn.params()
 
-    def __init__(self, argument_1=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, argument_1=None, **kwargs):
+        super().__init__(**kwargs)
         self.argument_1 = argument_1
 
     def run(self):
@@ -134,8 +166,8 @@ class HelloWorld(Node):
 class HelloWorldwDefault(Node):
     argument_1 = zn.params(314159)
 
-    def __init__(self, argument_1=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, argument_1=None, **kwargs):
+        super().__init__(**kwargs)
         if argument_1 is not None:
             self.argument_1 = argument_1
 
@@ -161,9 +193,9 @@ class BasicTest(Node):
     parameters = zn.params()
     results = zn.outs()
 
-    def __init__(self, test_name=None, test_values=None, *args, **kwargs):
+    def __init__(self, test_name=None, test_values=None, **kwargs):
         """Constructor of the Node test instance"""
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.parameters = {"test_name": test_name, "test_values": test_values}
 
     def run(self):
@@ -200,3 +232,30 @@ def test_deps(basic_test_node_fixture):
         pathlib.Path("deps1", "input.json"),
         pathlib.Path("deps2", "input.json"),
     ]
+
+
+class MethodExample:
+    pass
+
+
+class DVCDepsNode(Node):
+    dependency_file = zn.deps()
+    other_one = zn.deps(None)
+    # test interaction with zn.Method here
+    method = zn.Method()
+
+    def __init__(self, deps=None, **kwargs):
+        super().__init__(**kwargs)
+        if not self.is_loaded:
+            self.dependency_file = deps
+            self.method = MethodExample()
+
+
+def test_dvc_deps_node(proj_path):
+    DVCDepsNode("test_traj.txt", name="simple_test").save()
+    assert DVCDepsNode.load(name="simple_test").dependency_file == "test_traj.txt"
+
+    DVCDepsNode(pathlib.Path("test_traj.txt"), name="simple_test").save()
+    assert DVCDepsNode.load(name="simple_test").dependency_file == pathlib.Path(
+        "test_traj.txt"
+    )

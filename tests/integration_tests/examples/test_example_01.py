@@ -11,11 +11,11 @@ class StageIO(Node):
     deps = dvc.deps()
     param = zn.params()
 
-    def __init__(self, file=None, *args, **kwargs):
+    def __init__(self, file=None, **kwargs):
         """Class constructor
         Definition of parameters and results
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.param = file
         self.deps = file
 
@@ -37,11 +37,11 @@ class StageAddition(Node):
     sum = zn.outs()
     dif = zn.outs()
 
-    def __init__(self, n_1=None, n_2=None, *args, **kwargs):
+    def __init__(self, n_1=None, n_2=None, **kwargs):
         """Class constructor
         Definition of parameters and results
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.n_1 = n_1
         self.n_2 = n_2
 

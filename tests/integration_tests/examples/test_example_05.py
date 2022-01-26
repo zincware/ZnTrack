@@ -12,8 +12,8 @@ class ComputeA(Node):
     inp = zn.params()
     out = zn.outs()
 
-    def __init__(self, inp=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, inp=None, **kwargs):
+        super().__init__(**kwargs)
         self.inp = inp
 
     def run(self):

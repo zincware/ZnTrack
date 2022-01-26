@@ -33,9 +33,9 @@ class Node(GraphWriter):
 
     is_loaded: bool = False
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.is_loaded = kwargs.pop("is_loaded", False)
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
     @deprecated(
         reason=(
@@ -49,11 +49,29 @@ class Node(GraphWriter):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
         pass
 
-    def save(self):
-        """Save Class state to files"""
+    def save(self, results: bool = False):
+        """Save Class state to files
+
+        Parameters
+        -----------
+        results: bool, default=False
+            Save changes in zn.<option>.
+            By default, this function saves e.g. parameters but does not save results
+            that are stored in zn.<option> and primarily zn.params / dvc.<option>
+            Set this option to True if they should be saved, e.g. in run_and_save
+        """
         # Save dvc.<option>, dvc.deps, zn.Method
         for option in self._descriptor_list.data:
-            option.save(instance=self)
+            if results:
+                # Save all
+                option.save(instance=self)
+            elif option.metadata.zntrack_type not in ["zn", "metrics"]:
+                # Filter out zn.<options>
+                option.save(instance=self)
+            else:
+                # Create the path for DVC to write a .gitignore file
+                # for the filtered files
+                option.mkdir(instance=self)
 
     def _load(self):
         """Load class state from files"""
@@ -77,8 +95,8 @@ class Node(GraphWriter):
         --------
         Always have this, so that the name can be passed through
 
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+        def __init__(self, **kwargs):
+            super().__init__(**kwargs)
 
         """
 
@@ -87,8 +105,8 @@ class Node(GraphWriter):
         except TypeError:
             log.warning(
                 "Can not pass <name> to the super.__init__ and trying workaround! This"
-                " can lead to unexpected behaviour and can be avoided by passing (*args,"
-                " **kwargs) to the super().__init__(*args, **kwargs)"
+                " can lead to unexpected behaviour and can be avoided by passing ("
+                " **kwargs) to the super().__init__(**kwargs)"
             )
             instance = cls()
             if name not in (None, cls.__name__):
@@ -105,7 +123,7 @@ class Node(GraphWriter):
     def run_and_save(self):
         """Main method to run for the actual calculation"""
         self.run()
-        self.save()
+        self.save(results=True)
 
     # @abc.abstractmethod
     def run(self):

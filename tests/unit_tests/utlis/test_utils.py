@@ -8,10 +8,13 @@ Copyright Contributors to the Zincware Project.
 
 Description: Test class for testing utils
 """
+import json
 import os
 import pathlib
 
-from zntrack.utils import cwd_temp_dir, is_jsonable
+import znjson
+
+from zntrack.utils import cwd_temp_dir, decode_dict, is_jsonable
 
 
 def test_is_jsonable():
@@ -29,3 +32,12 @@ def test_cwd_temp_dir():
     assert next(pathlib.Path(new_dir.name).glob("*.py")).name == "test_utils.py"
     os.chdir("..")
     new_dir.cleanup()
+
+
+def test_decode_dict_path():
+    path = pathlib.Path("test.txt")
+    dict_string = json.dumps(path, cls=znjson.ZnEncoder)
+    loaded_dict = json.loads(dict_string)
+    assert loaded_dict == {"_type": "pathlib.Path", "value": "test.txt"}
+    assert decode_dict(loaded_dict) == path
+    assert decode_dict(None) is None

@@ -18,6 +18,8 @@ import shutil
 import tempfile
 from typing import Any, Dict
 
+import znjson
+
 from zntrack.utils.config import config
 
 log = logging.getLogger(__name__)
@@ -88,6 +90,11 @@ def deprecated(reason, version="v0.0.0"):
         return wrapper
 
     return decorator
+
+
+def decode_dict(value):
+    """Decode dict that was loaded without znjson"""
+    return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
 
 
 def dict_hash(dictionary: Dict[str, Any], length: int = 22, md5: bool = False) -> str:
