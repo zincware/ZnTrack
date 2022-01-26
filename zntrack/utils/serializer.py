@@ -55,7 +55,6 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
 
 class MethodConverter(znjson.ConverterBase):
-
     representation = "zn.method"
 
     def _encode(self, obj):

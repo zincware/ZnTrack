@@ -15,6 +15,8 @@ import os
 import shutil
 import tempfile
 
+import znjson
+
 from zntrack.utils.config import config
 
 log = logging.getLogger(__name__)
@@ -85,3 +87,8 @@ def deprecated(reason, version="v0.0.0"):
         return wrapper
 
     return decorator
+
+
+def decode_dict(value):
+    """Decode dict that was loaded without znjson"""
+    return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
