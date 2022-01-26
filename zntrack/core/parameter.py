@@ -10,14 +10,11 @@ Description: Node parameter
 """
 from __future__ import annotations
 
-import json
 import logging
 import pathlib
 
-import znjson
-
 from zntrack.descriptor import Descriptor
-from zntrack.utils import file_io
+from zntrack.utils import decode_dict, file_io
 
 log = logging.getLogger(__name__)
 
@@ -150,16 +147,11 @@ class ZnTrackOption(Descriptor):
         try:
             file_content = file_io.read_file(file.path)
             # The problem here is, that I can not / don't want to load all Nodes but only
-            # the ones, that are in [self.node_name], so we only deserialize them
+            # the ones, that are in [self.node_name][self.name] for deserializing
             if file.key is not None:
-                # TODO only load self.name
-                values = json.loads(
-                    json.dumps(file_content[file.key]), cls=znjson.ZnDecoder
-                )
+                values = decode_dict(file_content[file.key].get(self.name, None))
             else:
-                values = json.loads(json.dumps(file_content), cls=znjson.ZnDecoder)
-
-            values = values.get(self.name, None)
+                values = decode_dict(file_content.get(self.name, None))
 
             log.debug(f"Loading {file.key} from {file}: ({values})")
             instance.__dict__.update({self.name: values})
