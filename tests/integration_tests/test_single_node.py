@@ -112,6 +112,22 @@ def test_compute_method(proj_path):
     assert ExampleNodeWithCompMethod.load().result == 50
 
 
+def test_overwrite_outs(proj_path):
+    test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    out_file = pathlib.Path("nodes", "ExampleNode01", "outs.json")
+    test_node_1.write_graph()
+
+    # Do not create the file itself
+    assert not out_file.exists()
+    # Create the parent directory for .gitignore
+    assert out_file.parent.exists()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    # Now the file should exist after the Node ran.
+    assert out_file.exists()
+
+
 def test_metrics(proj_path):
     # TODO write something to zn.metrics and assert it with the result from dvc metrics ..
     pass
