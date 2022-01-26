@@ -59,13 +59,25 @@ class SplitZnTrackOption(ZnTrackOption):
                 params_data = []
                 zntrack_data = []
                 for value in serialized_value:
+                    # Check that correctly serialized
                     _ = value["_type"]
-                    params_data.append(value.pop("value"))
+                    try:
+                        # zn.Method
+                        params_data.append(value["value"].pop("kwargs"))
+                    except (AttributeError, TypeError):
+                        # everything else
+                        params_data.append(value.pop("value"))
                     zntrack_data.append(value)
 
             else:
+                # Check that correctly serialized
                 _ = serialized_value["_type"]
-                params_data = serialized_value.pop("value")
+                try:
+                    # zn.Method
+                    params_data = serialized_value["value"].pop("kwargs")
+                except (AttributeError, TypeError):
+                    # everything else
+                    params_data = serialized_value.pop("value")
                 zntrack_data = serialized_value
             # Write to params.yaml
             file_io.update_config_file(
@@ -80,7 +92,7 @@ class SplitZnTrackOption(ZnTrackOption):
                 file=pathlib.Path("zntrack.json"),
                 node_name=instance.node_name,
                 value_name=self.name,
-                value=serialized_value,
+                value=zntrack_data,
             )
         except (KeyError, AttributeError, TypeError):
             # KeyError if serialized_value is a normal dict
@@ -98,9 +110,11 @@ class SplitZnTrackOption(ZnTrackOption):
         file = self.get_filename(instance)
 
         try:
+            # Check that we can read it
             _ = file_io.read_file(pathlib.Path("zntrack.json"))[instance.node_name][
                 self.name
             ]
+
             params_values = file_io.read_file(pathlib.Path("params.yaml"))[
                 instance.node_name
             ][self.name]
@@ -111,12 +125,22 @@ class SplitZnTrackOption(ZnTrackOption):
             if isinstance(cls_dict, list):
                 value = []
                 for cls_dict_val, params_val in zip(cls_dict, params_values):
-                    cls_dict_val["value"] = params_val
+                    try:
+                        # zn.Method
+                        cls_dict_val["value"]["kwargs"] = params_val
+                    except KeyError:
+                        # everything else
+                        cls_dict_val["value"] = params_val
                     value.append(
                         json.loads(json.dumps(cls_dict_val), cls=znjson.ZnDecoder)
                     )
             else:
-                cls_dict["value"] = params_values
+                try:
+                    # zn.Method
+                    cls_dict["value"]["kwargs"] = params_values
+                except KeyError:
+                    # everything else
+                    cls_dict["value"] = params_values
 
                 value = json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
 
