@@ -137,9 +137,9 @@ class SplitZnTrackOption(ZnTrackOption):
 
             params_values = file_io.read_file(pathlib.Path("params.yaml"))
             cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))
-
-            cls_dict = cls_dict[instance.node_name][self.name]
+            # select <node><attribute> from the full params / zntrack file
             params_values = params_values[instance.node_name][self.name]
+            cls_dict = cls_dict[instance.node_name][self.name]
 
             if isinstance(cls_dict, list):
                 value = [combine_values(*x) for x in zip(cls_dict, params_values)]
