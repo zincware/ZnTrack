@@ -136,7 +136,7 @@ class GraphWriter:
     _node_name = None
     _module = None
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
 
         [

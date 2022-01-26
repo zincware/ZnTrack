@@ -33,9 +33,9 @@ class Node(GraphWriter):
 
     is_loaded: bool = False
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, **kwargs):
         self.is_loaded = kwargs.pop("is_loaded", False)
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
 
     @deprecated(
         reason=(
