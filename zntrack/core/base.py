@@ -14,7 +14,8 @@ import logging
 
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.config import config
-from zntrack.utils.utils import deprecated
+from zntrack.utils.utils import deprecated, get_auto_init
+from zntrack.zn import params
 
 log = logging.getLogger(__name__)
 
@@ -48,6 +49,21 @@ class Node(GraphWriter):
     def __call__(self, *args, **kwargs):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
         pass
+
+    def __init_subclass__(cls, **kwargs):
+        """Add a dataclass-like init if None is provided"""
+
+        # User provides an __init__
+        if cls.__dict__.get("__init__") is not None:
+            return cls
+
+        # attach an automatically generated __init__ if None is provided
+        zn_option_fiels = []
+        for name, item in cls.__dict__.items():
+            if isinstance(item, params):
+                zn_option_fiels.append(name)
+
+        setattr(cls, "__init__", get_auto_init(fields=zn_option_fiels))
 
     def save(self, results: bool = False):
         """Save Class state to files

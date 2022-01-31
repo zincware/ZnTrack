@@ -12,9 +12,10 @@ import json
 import os
 import pathlib
 
+import pytest
 import znjson
 
-from zntrack.utils import cwd_temp_dir, decode_dict, is_jsonable
+from zntrack.utils import utils
 
 
 def test_is_jsonable():
@@ -22,12 +23,12 @@ def test_is_jsonable():
 
     Test is performed for a serializable dictionary and a non-serializable function.
     """
-    assert is_jsonable({"a": 1}) is True
-    assert is_jsonable({"a": is_jsonable}) is False
+    assert utils.is_jsonable({"a": 1}) is True
+    assert utils.is_jsonable({"a": utils.is_jsonable}) is False
 
 
 def test_cwd_temp_dir():
-    new_dir = cwd_temp_dir(required_files=[__file__])
+    new_dir = utils.cwd_temp_dir(required_files=[__file__])
     assert pathlib.Path(new_dir.name) == pathlib.Path(os.getcwd())
     assert next(pathlib.Path(new_dir.name).glob("*.py")).name == "test_utils.py"
     os.chdir("..")
@@ -39,5 +40,21 @@ def test_decode_dict_path():
     dict_string = json.dumps(path, cls=znjson.ZnEncoder)
     loaded_dict = json.loads(dict_string)
     assert loaded_dict == {"_type": "pathlib.Path", "value": "test.txt"}
-    assert decode_dict(loaded_dict) == path
-    assert decode_dict(None) is None
+    assert utils.decode_dict(loaded_dict) == path
+    assert utils.decode_dict(None) is None
+
+
+class Test:
+    pass
+
+
+def test_get_auto_init():
+    with pytest.raises(TypeError):
+        Test(foo="foo")
+
+    setattr(Test, "__init__", utils.get_auto_init(fields=["foo", "bar"]))
+
+    test = Test(foo="foo", bar="bar")
+
+    assert test.foo == "foo"
+    assert test.bar == "bar"

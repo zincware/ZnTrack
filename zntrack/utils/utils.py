@@ -14,6 +14,7 @@ import logging
 import os
 import shutil
 import tempfile
+import typing
 
 import znjson
 
@@ -92,3 +93,24 @@ def deprecated(reason, version="v0.0.0"):
 def decode_dict(value):
     """Decode dict that was loaded without znjson"""
     return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
+
+
+def get_auto_init(fields: typing.List[str]):
+    """Automatically create a __init__ based on fields
+    Parameters
+    ----------
+    fields: list[str]
+        A list of strings that will be used in the __init__, e.g. for [foo, bar]
+        it will create __init__(self, foo=None, bar=None) using **kwargs
+    """
+
+    def auto_init(self, **kwargs):
+        """Wrapper for the __init__"""
+        for field in fields:
+            try:
+                setattr(self, field, kwargs.pop(field))
+            except KeyError:
+                pass
+        super(type(self), self).__init__(**kwargs)
+
+    return auto_init
