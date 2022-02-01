@@ -6,7 +6,7 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: 
+Description:
 """
 from dataclasses import dataclass
 from pathlib import Path

@@ -4,11 +4,11 @@ import dataclasses
 import logging
 import pathlib
 import subprocess
-import sys
 import typing
 
 from zntrack.core.parameter import ZnTrackOption
 from zntrack.utils import config
+from zntrack.utils.utils import module_handler
 
 from .jupyter import jupyter_class_to_file
 
@@ -177,13 +177,7 @@ class GraphWriter:
         this can be changed when using nb_mode
         """
         if self._module is None:
-            if self.__class__.__module__ == "__main__":
-                if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
-                    # special case for e.g. testing
-                    return self.__class__.__module__
-                return pathlib.Path(sys.argv[0]).stem
-            else:
-                return self.__class__.__module__
+            return module_handler(self.__class__)
         return self._module
 
     def save(self):
