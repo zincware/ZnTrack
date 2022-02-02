@@ -19,27 +19,35 @@ def proj_path(tmp_path):
 
 
 @nodify(outs="test.txt", params={"text": "Lorem"})
-def example_func(cfg: NodeConfig):
+def example_func(cfg: NodeConfig) -> NodeConfig:
     out_file = pathlib.Path(cfg.outs)
     out_file.write_text(cfg.params.text)
+    return cfg
 
 
 def test_example_func(proj_path):
 
-    example_func()
+    example_func(run=True)
     assert pathlib.Path("test.txt").read_text() == "Lorem"
 
-
-@nodify(deps="test.txt", outs="test2.txt", params={"text": "Ipsum"})
-def deps_func(cfg: NodeConfig):
-    deps = pathlib.Path(cfg.deps)
-    context = deps.read_text()
-    outs = pathlib.Path(cfg.outs)
-    outs.write_text(f"{context} {cfg.params.text}")
+    cfg = example_func(exec_func=True)
+    assert cfg.outs == "test.txt"
+    assert cfg.params == {"text": "Lorem"}
+    assert cfg.deps is None
 
 
-def test_deps_func(proj_path):
-    example_func()
-    deps_func()
+@nodify(outs=[pathlib.Path("test.txt")], params={"text": "Lorem"})
+def example_func_lst_and_path(cfg: NodeConfig) -> NodeConfig:
+    cfg.outs[0].write_text(cfg.params.text)
+    return cfg
+
+
+def test_example_func_lst_and_path(proj_path):
+
+    example_func_lst_and_path(run=True)
     assert pathlib.Path("test.txt").read_text() == "Lorem"
-    assert pathlib.Path("test2.txt").read_text() == "Lorem Ipsum"
+
+    cfg = example_func_lst_and_path(exec_func=True)
+    assert cfg.outs == [pathlib.Path("test.txt")]
+    assert cfg.params == {"text": "Lorem"}
+    assert cfg.deps is None
