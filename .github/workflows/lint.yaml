@@ -1,0 +1,58 @@
+name: Check coding style
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  black:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Black Check
+        uses: psf/black@stable
+        with:
+          version: "22.1.0"
+
+  isort:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install isort
+        run: |
+          pip install isort==5.10.1
+      - name: run isort
+        run: |
+          isort --check-only --quiet .
+  flake8:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install flake8
+        run: |
+          pip install flake8==4.0.1
+      - name: run flake8
+        run: |
+          flake8 . --count --show-source --statistics
+  pylint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+      - name: Install package
+        run: |
+          pip install .
+      - name: Install pylint
+        run: |
+          pip install pylint
+      - name: run pylint
+        run: |
+          pylint zntrack

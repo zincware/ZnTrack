@@ -5,3 +5,34 @@ experimental_string_processing = true
 [tool.isort]
 profile = 'black'
 multi_line_output = 3
+
+[tool.coverage.run]
+relative_files = true
+branch = true
+# omit the tests themselves
+omit = ["*/tests/*", "*/tmp/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:"
+]
+ignore_errors = true
+
+[tool.coverage.html]
+directory = "coverage_html_report"
+
+[tool.pylint.messages_control]
+
+max-line-length = 90
+
+disable = [
+    "logging-fstring-interpolation",
+    "too-many-arguments",
+    # seems to fail for some cases
+    "no-else-return",
+    # allow for open TODOs
+    "fixme",
+]
