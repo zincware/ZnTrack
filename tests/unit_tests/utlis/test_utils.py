@@ -11,10 +11,12 @@ Description: Test class for testing utils
 import json
 import os
 import pathlib
+import sys
+from unittest.mock import MagicMock, patch
 
 import znjson
 
-from zntrack.utils import cwd_temp_dir, decode_dict, is_jsonable
+from zntrack.utils.utils import cwd_temp_dir, decode_dict, is_jsonable, module_handler
 
 
 def test_is_jsonable():
@@ -41,3 +43,16 @@ def test_decode_dict_path():
     assert loaded_dict == {"_type": "pathlib.Path", "value": "test.txt"}
     assert decode_dict(loaded_dict) == path
     assert decode_dict(None) is None
+
+
+def test_module_handler():
+    my_mock = MagicMock
+    my_mock.__module__ = "custom_module"
+    assert module_handler(my_mock) == "custom_module"
+
+    my_mock.__module__ = "__main__"
+    with patch.object(sys, "argv", ["ipykernel_launcher"]):
+        assert module_handler(my_mock) == "__main__"
+
+    with patch.object(sys, "argv", ["pytest-runner"]):
+        assert module_handler(my_mock) == "pytest-runner"
