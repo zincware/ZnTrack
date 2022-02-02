@@ -4,11 +4,11 @@ import dataclasses
 import logging
 import pathlib
 import subprocess
-import sys
 import typing
 
 from zntrack.core.parameter import ZnTrackOption
 from zntrack.utils import config
+from zntrack.utils.utils import module_handler
 
 from .jupyter import jupyter_class_to_file
 
@@ -47,26 +47,46 @@ def handle_deps(value) -> list:
     return script
 
 
-def get_dvc_arguments(options: dict) -> list:
-    """Get the activated options
+@dataclasses.dataclass
+class DVCRunOptions:
+    """Collection of DVC run options
 
-    Returns
-    -------
-    list: A list of strings for the subprocess call, e.g.:
-        ["--no-commit", "--external"]
+    Attributes
+    ----------
+    All attributes are documented under the dvc run method.
+
+    References
+    ----------
+    https://dvc.org/doc/command-reference/run#options
     """
-    out = []
 
-    for dvc_option, value in options.items():
-        if value:
-            out.append(f"--{dvc_option.replace('_', '-')}")
-        else:
-            if dvc_option == "no_exec":
-                log.warning(
-                    "You will not be able to see the stdout/stderr "
-                    "of the process in real time!"
-                )
-    return out
+    no_commit: bool
+    external: bool
+    always_changed: bool
+    no_run_cache: bool
+    no_exec: bool
+    force: bool
+
+    @property
+    def dvc_args(self) -> list:
+        """Get the activated options
+        Returns
+        -------
+        list: A list of strings for the subprocess call, e.g.:
+            ["--no-commit", "--external"]
+        """
+        out = []
+        for field_name in self.__dataclass_fields__:
+            value = getattr(self, field_name)
+            if value:
+                out.append(f"--{field_name.replace('_', '-')}")
+            else:
+                if field_name == "no_exec":
+                    log.warning(
+                        "You will not be able to see the stdout/stderr "
+                        "of the process in real time!"
+                    )
+        return out
 
 
 def handle_dvc(value, dvc_args) -> list:
@@ -177,13 +197,7 @@ class GraphWriter:
         this can be changed when using nb_mode
         """
         if self._module is None:
-            if self.__class__.__module__ == "__main__":
-                if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
-                    # special case for e.g. testing
-                    return self.__class__.__module__
-                return pathlib.Path(sys.argv[0]).stem
-            else:
-                return self.__class__.__module__
+            return module_handler(self.__class__)
         return self._module
 
     def save(self):
@@ -300,16 +314,14 @@ class GraphWriter:
 
         script = ["dvc", "run", "-n", self.node_name]
 
-        script += get_dvc_arguments(
-            {
-                "no_commit": no_commit,
-                "external": external,
-                "always_changed": always_changed,
-                "no_exec": no_exec,
-                "force": force,
-                "no_run_cache": no_run_cache,
-            }
-        )
+        script += DVCRunOptions(
+            no_commit=no_commit,
+            external=external,
+            always_changed=always_changed,
+            no_run_cache=no_run_cache,
+            no_exec=no_exec,
+            force=force,
+        ).dvc_args
 
         # Jupyter Notebook
         if nb_name is not None:

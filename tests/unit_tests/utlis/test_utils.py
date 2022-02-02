@@ -11,6 +11,8 @@ Description: Test class for testing utils
 import json
 import os
 import pathlib
+import sys
+from unittest.mock import MagicMock, patch
 
 import pytest
 import znjson
@@ -58,3 +60,16 @@ def test_get_auto_init():
 
     assert test.foo == "foo"
     assert test.bar == "bar"
+
+
+def test_module_handler():
+    my_mock = MagicMock
+    my_mock.__module__ = "custom_module"
+    assert utils.module_handler(my_mock) == "custom_module"
+
+    my_mock.__module__ = "__main__"
+    with patch.object(sys, "argv", ["ipykernel_launcher"]):
+        assert utils.module_handler(my_mock) == "__main__"
+
+    with patch.object(sys, "argv", ["pytest-runner"]):
+        assert utils.module_handler(my_mock) == "pytest-runner"
