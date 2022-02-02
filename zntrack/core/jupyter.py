@@ -9,7 +9,7 @@ from zntrack.utils.config import config
 
 
 def jupyter_class_to_file(silent, nb_name, module_name):
-    """Extract the class definition form a ipynb file"""
+    """Extract the class definition form an ipynb file"""
 
     if not silent:
         log.warning(
@@ -21,13 +21,10 @@ def jupyter_class_to_file(silent, nb_name, module_name):
 
     nb_name = pathlib.Path(nb_name)
 
-    if silent:
-        _ = subprocess.run(
-            ["jupyter", "nbconvert", "--to", "script", nb_name],
-            capture_output=True,
-        )
-    else:
-        subprocess.run(["jupyter", "nbconvert", "--to", "script", nb_name])
+    subprocess.run(
+        ["jupyter", "nbconvert", "--to", "script", nb_name],
+        capture_output=not silent,
+    )
 
     reading_class = False
 
@@ -44,6 +41,7 @@ def jupyter_class_to_file(silent, nb_name, module_name):
                     re.match(r"\S", line)
                     and not line.startswith("#")
                     and not line.startswith("class")
+                    and not line.startswith("def")
                     and not line.startswith("@")
                 ):
                     reading_class = False

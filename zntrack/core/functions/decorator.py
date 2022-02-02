@@ -1,3 +1,14 @@
+"""
+This program and the accompanying materials are made available under the terms of the
+Eclipse Public License v2.0 which accompanies this distribution, and is available at
+https://www.eclipse.org/legal/epl-v20.html
+SPDX-License-Identifier: EPL-2.0
+
+Copyright Contributors to the Zincware Project.
+
+Description: Function decorator for ZnTrack
+"""
+
 import dataclasses
 import logging
 import pathlib
@@ -7,7 +18,8 @@ import typing
 import dot4dict
 
 from zntrack.core.dvcgraph import DVCRunOptions
-from zntrack.utils import file_io, utils
+from zntrack.core.jupyter import jupyter_class_to_file
+from zntrack.utils import config, file_io, utils
 
 str_or_path = typing.Union[str, pathlib.Path]
 
@@ -147,6 +159,19 @@ def nodify(
             if run is not None:
                 no_exec = not run
 
+            if nb_name is None:
+                nb_name = config.nb_name
+
+            # Jupyter Notebook
+            if nb_name is not None:
+                module = f"{config.nb_class_path}.{func.__name__}"
+
+                jupyter_class_to_file(
+                    silent=silent, nb_name=nb_name, module_name=func.__name__
+                )
+            else:
+                module = utils.module_handler(func)
+
             cfg_file = pathlib.Path("zntrack.json")
             params_file = pathlib.Path("params.yaml")
             if exec_func:
@@ -189,9 +214,7 @@ def nodify(
                             value=value,
                         )
 
-            module = utils.module_handler(func)
             script = ["dvc", "run", "-n", func.__name__]
-
             script += DVCRunOptions(
                 no_commit=no_commit,
                 external=external,
@@ -203,6 +226,12 @@ def nodify(
 
             script += cfg.write_dvc_command(func.__name__)
 
+            if nb_name is not None:
+                script += [
+                    "--deps",
+                    pathlib.Path(*module.split(".")).with_suffix(".py").as_posix(),
+                ]
+
             import_str = f"""python -c "from {module} import {func.__name__};"""
             import_str += f"""{func.__name__}(exec_func=True)" """
             script += [import_str]
@@ -211,6 +240,7 @@ def nodify(
                 return script
             subprocess.check_call(script)
 
+            cfg.params = dot4dict.dotdict(cfg.params)
             return cfg
 
         return wrapper

@@ -51,6 +51,10 @@ def handle_deps(value) -> list:
 class DVCRunOptions:
     """Collection of DVC run options
 
+    Attributes
+    ----------
+    All attributes are documented under the dvc run method.
+
     References
     ----------
     https://dvc.org/doc/command-reference/run#options
