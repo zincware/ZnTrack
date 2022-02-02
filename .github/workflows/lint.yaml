@@ -40,7 +40,7 @@ jobs:
       - name: run flake8
         run: |
           flake8 . --count --show-source --statistics
-  pylint:
+  pylint-disabled:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
