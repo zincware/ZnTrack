@@ -54,5 +54,6 @@ jobs:
         run: |
           pip install pylint
       - name: run pylint
+        continue-on-error: true
         run: |
           pylint zntrack
