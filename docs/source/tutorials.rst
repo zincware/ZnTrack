@@ -17,5 +17,6 @@ The notebooks can be found in :code:`/examples/docs`.
    _overview/04_metrics_and_plots.ipynb
    _overview/05_metadata.ipynb
    _overview/06_named_nodes.ipynb
+   _overview/07_functions.ipynb
    _overview/OptionalDVC.ipynb
    jupyter.rst

@@ -55,14 +55,33 @@ This Node can then be saved as a DVC stage
 
 ````python
 HelloWorld(max_number=512).write_graph()
-````
-
-    
+````    
 
 which builds the DVC stage and can be used e.g., through `dvc repro`.
 The results can then be accessed easily via `HelloWorld.load().random_number`.
 
 More detailed examples and further information can be found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).
+
+## Wrap Python Functions
+ZnTrack also provides tools to convert a Python function into a DVC stage.
+This approach is much more lightweight than the class-based approach with only a reduced set of functionality.
+Therefore, it is recommended for smaller nodes that do not need the additional toolset that the class-based approach provides.
+
+````python
+from zntrack import nodify, NodeConfig
+import pathlib
+
+@nodify(outs=pathlib.Path("text.txt"), params={"text": "Lorem Ipsum"})
+def write_text(cfg: NodeConfig):
+    cfg.outs.write_text(
+        cfg.params.text
+    )
+````
+
+The ``cfg`` dataclass passed to the function provides access to all configured files
+and parameters via [dot4dict](https://github.com/zincware/dot4dict). The function body
+will be executed by the ``dvc repro`` command or if ran via `write_text(run=True)`.
+All parameters are loaded from or stored in ``params.yaml``.
 
 # Technical Details
 
@@ -100,3 +119,4 @@ The following (incomplete) list of other projects that either work together with
 - [DAGsHub Client](https://github.com/DAGsHub/client) - Logging parameters from within .Python 
 - [MLFlow](https://mlflow.org/) - A Machine Learning Lifecycle Platform.
 - [Metaflow](https://metaflow.org/) - A framework for real-life data science.
+- [Hydra](https://hydra.cc/) - A framework for elegantly configuring complex applications

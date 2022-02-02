@@ -1,6 +1,7 @@
 import json
 import logging
 import pathlib
+import typing
 
 import yaml
 import znjson
@@ -54,7 +55,12 @@ def write_file(file: pathlib.Path, value: dict, mkdir: bool = True):
         file.write_text(json.dumps(value, indent=4, cls=znjson.ZnEncoder))
 
 
-def update_config_file(file: pathlib.Path, node_name: str, value_name: str, value):
+def update_config_file(
+    file: pathlib.Path,
+    node_name: typing.Union[str, None],
+    value_name: typing.Union[str, None],
+    value,
+):
     """Update a configuration file
 
     The file structure for node_name is not None is something like
@@ -66,20 +72,30 @@ def update_config_file(file: pathlib.Path, node_name: str, value_name: str, valu
     ----------
     file: pathlib.Path
         The file to save to
-    node_name: str
+    node_name: str|None
         the node_name, if None the file is assumed to be {value_name: value}
-    value_name: str
-        the key of the value to update
+    value_name: str|None
+        the key of the value to update, if None the file is assumed to
+        be {node_name: value}.
     value:
         The value to write to the file
     """
     # Read file
+    if node_name is None and value_name is None:
+        raise ValueError("Either node_name or value_name must not be None")
+
     try:
         file_content = read_file(file)
     except FileNotFoundError:
         file_content = {}
     log.debug(f"Loading <{file}> content: {file_content}")
-    if node_name is not None:
+    if node_name is None:
+        log.debug(f"Update <{value_name}> with: {value}")
+        file_content[value_name] = value
+    elif value_name is None:
+        log.debug(f"Update <{node_name}> with: {value}")
+        file_content[node_name] = value
+    else:
         # select primary node name key
         node_content = file_content.get(node_name, {})
         log.debug(f"Gathered <{node_name}> content: {node_content}")
@@ -88,8 +104,5 @@ def update_config_file(file: pathlib.Path, node_name: str, value_name: str, valu
         log.debug(f"Update <{value_name}> with: {value}")
         # save to file
         file_content[node_name] = node_content
-    else:
-        log.debug(f"Update <{value_name}> with: {value}")
-        file_content[value_name] = value
     write_file(file, value=file_content)
     log.debug(f"Update <{file}> with: {file_content}")
