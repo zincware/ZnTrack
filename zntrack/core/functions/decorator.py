@@ -6,6 +6,7 @@ import typing
 
 import dot4dict
 
+from zntrack.core.dvcgraph import DVCRunOptions
 from zntrack.utils import file_io, utils
 
 str_or_path = typing.Union[str, pathlib.Path]
@@ -23,14 +24,20 @@ class NodeConfig:
 
     """
 
-    outs: typing.Union[str_or_path, typing.List[str_or_path]] = None
     deps: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    params: dot4dict.dotdict = dataclasses.field(default_factory=dict)
+    outs: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    outs_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    outs_persist: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    outs_persist_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    metrics: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    metrics_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    plots: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    plots_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
 
-    def write_dvc_command(self, node_name, import_str, no_exec: bool):
-        script = ["dvc", "run", "-n", node_name, "--force"]
-        if no_exec:
-            script += ["--no-exec"]
+    params: typing.Union[dot4dict.dotdict, dict] = dataclasses.field(default_factory=dict)
+
+    def write_dvc_command(self, node_name):
+        script = []
         if self.params is not None:
             if len(self.params) > 0:
                 script += ["--params", f"params.yaml:{node_name}"]
@@ -43,15 +50,25 @@ class NodeConfig:
             elif getattr(self, field) is not None:
                 script += [f"--{field.replace('_', '-')}", str(getattr(self, field))]
 
-        script.append(import_str)
-
         return script
 
 
 any_or_nodeconfig = typing.Union[typing.Any, NodeConfig]
 
 
-def nodify(outs=None, deps=None, params=None):
+def nodify(
+    *,
+    params=None,
+    outs=None,
+    outs_no_cache=None,
+    outs_persist=None,
+    outs_persist_no_cache=None,
+    metrics=None,
+    metrics_no_cache=None,
+    deps=None,
+    plots=None,
+    plots_no_cache=None,
+):
     """Main wrapper Function
 
     Parameters
@@ -69,7 +86,20 @@ def nodify(outs=None, deps=None, params=None):
     def func_collector(func):
         """Required for decorator to work"""
 
-        def wrapper(*, run=None, no_exec=True, exec_func=False) -> any_or_nodeconfig:
+        def wrapper(
+            *,
+            silent: bool = False,
+            nb_name: str = None,
+            no_commit: bool = False,
+            external: bool = False,
+            always_changed: bool = False,
+            no_exec: bool = True,
+            force: bool = True,
+            no_run_cache: bool = False,
+            dry_run: bool = False,
+            run: bool = None,
+            exec_func=False,
+        ) -> any_or_nodeconfig:
             """Wrap the function
 
             Parameters
@@ -104,7 +134,18 @@ def nodify(outs=None, deps=None, params=None):
                 cfg.params = dot4dict.dotdict(cfg.params)
                 return func(cfg)
             else:
-                cfg = NodeConfig(outs, deps, params)
+                cfg = NodeConfig(
+                    outs=outs,
+                    params=params,
+                    deps=deps,
+                    outs_no_cache=outs_no_cache,
+                    outs_persist=outs_persist,
+                    outs_persist_no_cache=outs_persist_no_cache,
+                    metrics=metrics,
+                    metrics_no_cache=metrics_no_cache,
+                    plots=plots,
+                    plots_no_cache=plots_no_cache,
+                )
                 for value_name, value in dataclasses.asdict(cfg).items():
                     if value_name == "params":
                         file_io.update_config_file(
@@ -122,11 +163,25 @@ def nodify(outs=None, deps=None, params=None):
                         )
 
             module = utils.module_handler(func)
+            script = ["dvc", "run", "-n", func.__name__]
+
+            script += DVCRunOptions(
+                no_commit=no_commit,
+                external=external,
+                always_changed=always_changed,
+                no_run_cache=no_run_cache,
+                no_exec=no_exec,
+                force=force,
+            ).dvc_args
+
+            script += cfg.write_dvc_command(func.__name__)
 
             import_str = f"""python -c "from {module} import {func.__name__};"""
             import_str += f"""{func.__name__}(exec_func=True)" """
-            script = cfg.write_dvc_command(func.__name__, import_str, no_exec=no_exec)
+            script += [import_str]
             log.debug(f"Running script: {script}")
+            if dry_run:
+                return script
             subprocess.check_call(script)
 
             return cfg

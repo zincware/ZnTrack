@@ -3,12 +3,7 @@ import pathlib
 import pytest
 
 from zntrack import dvc, zn
-from zntrack.core.dvcgraph import (
-    GraphWriter,
-    get_dvc_arguments,
-    handle_deps,
-    handle_dvc,
-)
+from zntrack.core.dvcgraph import DVCRunOptions, GraphWriter, handle_deps, handle_dvc
 
 
 class ExampleDVCOutsNode(GraphWriter):
@@ -23,9 +18,16 @@ def test_node_name_get():
 
 
 def test_get_dvc_arguments():
-    assert get_dvc_arguments(
-        {"force": True, "always_changed": False, "no_exec": True}
-    ) == ["--force", "--no-exec"]
+    dvc_options = DVCRunOptions(
+        force=True,
+        always_changed=False,
+        no_exec=True,
+        external=False,
+        no_commit=False,
+        no_run_cache=False,
+    )
+
+    assert dvc_options.dvc_args == ["--no-exec", "--force"]
 
 
 def test_handle_deps():

@@ -1,6 +1,7 @@
 import json
 import logging
 import pathlib
+import typing
 
 import yaml
 import znjson
@@ -54,7 +55,12 @@ def write_file(file: pathlib.Path, value: dict, mkdir: bool = True):
         file.write_text(json.dumps(value, indent=4, cls=znjson.ZnEncoder))
 
 
-def update_config_file(file: pathlib.Path, node_name: str, value_name: str, value):
+def update_config_file(
+    file: pathlib.Path,
+    node_name: typing.Union[str, None],
+    value_name: typing.Union[str, None],
+    value,
+):
     """Update a configuration file
 
     The file structure for node_name is not None is something like
@@ -66,9 +72,9 @@ def update_config_file(file: pathlib.Path, node_name: str, value_name: str, valu
     ----------
     file: pathlib.Path
         The file to save to
-    node_name: str
+    node_name: str|None
         the node_name, if None the file is assumed to be {value_name: value}
-    value_name: str
+    value_name: str|None
         the key of the value to update, if None the file is assumed to
         be {node_name: value}.
     value:
