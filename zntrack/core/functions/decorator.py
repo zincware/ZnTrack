@@ -36,7 +36,21 @@ class NodeConfig:
 
     params: typing.Union[dot4dict.dotdict, dict] = dataclasses.field(default_factory=dict)
 
-    def write_dvc_command(self, node_name):
+    def write_dvc_command(self, node_name: str) -> list:
+        """Collect dvc commands
+
+        Parameters
+        ----------
+        node_name:str
+            name of the node, usually func.__name__
+
+        Returns
+        -------
+        list: a list of all options like
+        ["--outs", "outs.txt", "--params", "params.yaml:<node_name>", ...]
+        handling lists of files as well the parameters
+
+        """
         script = []
         if self.params is not None:
             if len(self.params) > 0:
@@ -69,16 +83,19 @@ def nodify(
     plots=None,
     plots_no_cache=None,
 ):
-    """Main wrapper Function
+    """Main wrapper Function to convert a function into a DVC Stage
 
     Parameters
     ----------
-    outs: str|Path|list
-        for dvc run --outs
-    deps: str|Path|list
-        for dvc run --deps
     params: dict
         for the params.yaml file context
+    **kwargs: str|Path|list
+        All other parameters are related to dvc run commands and can be a str / Path
+        or a list of them
+
+    References
+    ----------
+    https://dvc.org/doc/command-reference/run#options
     """
     if not isinstance(params, dict) and params is not None:
         raise ValueError("Parameter must be dict or dot4dict.dotdict.")
@@ -106,10 +123,20 @@ def nodify(
             ----------
             exec_func: bool
                 Set to true to execute the function core
-            run: bool, default=False
-                opposite of no_exec with higher priority
-            no_exec: bool, default=True
-                dvc parameter
+            silent: bool
+                If called with no_exec=False this allows to hide the output from the
+                subprocess call.
+            nb_name: str
+                Notebook name when not using config.nb_name (this is not recommended)
+            no_commit: dvc parameter
+            external: dvc parameter
+            always_changed: dvc parameter
+            no_exec: dvc parameter
+            run: bool, inverse of no_exec. Will overwrite no_exec if set.
+            force: dvc parameter
+            no_run_cache: dvc parameter
+            dry_run: bool, default = False
+                Only return the script but don't actually run anything
 
             Returns
             -------

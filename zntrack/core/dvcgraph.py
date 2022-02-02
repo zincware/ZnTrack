@@ -49,6 +49,13 @@ def handle_deps(value) -> list:
 
 @dataclasses.dataclass
 class DVCRunOptions:
+    """Collection of DVC run options
+
+    References
+    ----------
+    https://dvc.org/doc/command-reference/run#options
+    """
+
     no_commit: bool
     external: bool
     always_changed: bool
