@@ -10,11 +10,13 @@ Description:
 """
 from __future__ import annotations
 
+import inspect
 import logging
 
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.config import config
-from zntrack.utils.utils import deprecated
+from zntrack.utils.utils import deprecated, get_auto_init
+from zntrack.zn import params
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +49,35 @@ class Node(GraphWriter):
     )
     def __call__(self, *args, **kwargs):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
+
+    def __init_subclass__(cls, **kwargs):
+        """Add a dataclass-like init if None is provided"""
+
+        # User provides an __init__
+        if cls.__dict__.get("__init__") is not None:
+            return cls
+
+        # attach an automatically generated __init__ if None is provided
+        zn_option_fields, sig_params = [], []
+        for name, item in cls.__dict__.items():
+            if isinstance(item, params):
+
+                # For the new __init__
+                zn_option_fields.append(name)
+
+                # For the new __signature__
+                sig_params.append(
+                    inspect.Parameter(
+                        name=name, kind=inspect.Parameter.POSITIONAL_OR_KEYWORD
+                    )
+                )
+
+        # Add new __init__ to the sub-class
+        setattr(cls, "__init__", get_auto_init(fields=zn_option_fields))
+
+        # Add new __signature__ to the sub-class
+        signature = inspect.Signature(parameters=sig_params)
+        setattr(cls, "__signature__", signature)
 
     def save(self, results: bool = False):
         """Save Class state to files

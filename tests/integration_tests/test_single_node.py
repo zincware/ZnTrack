@@ -259,3 +259,21 @@ def test_dvc_deps_node(proj_path):
     assert DVCDepsNode.load(name="simple_test").dependency_file == pathlib.Path(
         "test_traj.txt"
     )
+
+
+class SingleNodeNoInit(Node):
+    param1 = zn.params()
+    param2 = zn.params()
+
+    result = zn.outs()
+
+    def run(self):
+        self.result = self.param1 + self.param2
+
+
+def test_auto_init(proj_path):
+    SingleNodeNoInit(param1=25, param2=42).write_graph(no_exec=False)
+
+    assert SingleNodeNoInit.load().param1 == 25
+    assert SingleNodeNoInit.load().param2 == 42
+    assert SingleNodeNoInit.load().result == 25 + 42
