@@ -16,16 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import znjson
 
-from zntrack.utils.utils import cwd_temp_dir, decode_dict, is_jsonable, module_handler
-
-
-def test_is_jsonable():
-    """Test for is_jsonable
-
-    Test is performed for a serializable dictionary and a non-serializable function.
-    """
-    assert is_jsonable({"a": 1}) is True
-    assert is_jsonable({"a": is_jsonable}) is False
+from zntrack.utils.utils import cwd_temp_dir, decode_dict, module_handler
 
 
 def test_cwd_temp_dir():

@@ -10,6 +10,6 @@ Description: Standard python init file for the utils directory
 """
 
 from .config import config
-from .utils import cwd_temp_dir, decode_dict, is_jsonable
+from .utils import cwd_temp_dir, decode_dict
 
-__all__ = ["is_jsonable", "config", "cwd_temp_dir", "decode_dict"]
+__all__ = ["config", "cwd_temp_dir", "decode_dict"]

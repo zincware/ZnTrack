@@ -68,13 +68,13 @@ class ZnTrackProject(DVCInterface):
         """Load this project"""
         if name is not None:
             self.name = name
-        for x in range(3):
+        for trial in range(3):
             try:
                 subprocess.check_call(["dvc", "exp", "apply", self.name])
-            except subprocess.CalledProcessError as e:
+            except subprocess.CalledProcessError as error:
                 # sometimes it takes more than one trial (windows)
-                if x == 2:
-                    raise e
+                if trial == 2:
+                    raise error
 
     def create_dvc_repository(self):
         """Perform git and dvc init"""

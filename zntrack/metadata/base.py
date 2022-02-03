@@ -83,10 +83,10 @@ class MetaData(ABC):
             metadata_attr, metadata = next(
                 iter(cls._descriptor_list.filter(zntrack_type="metadata").items())
             )
-        except StopIteration:
+        except StopIteration as error:
             raise DescriptorMissing(
                 "Could not find a metadata descriptor. Please add zn.metadata()!"
-            )
+            ) from error
         if metadata is None:
             metadata = {}
 

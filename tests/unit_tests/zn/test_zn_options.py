@@ -17,3 +17,16 @@ def test_zn_method_get():
     assert example.method.znjson_zn_method
 
     assert isinstance(ExampleClass.method.__get__(None, None), zn.Method)
+
+
+class ExamplePlots:
+    module = None
+    node_name = "ExamplePlots"
+    plots = zn.plots()
+
+
+def test_zn_plots():
+    example = ExamplePlots()
+    # test save and load if there is nothing to save or load
+    assert ExamplePlots.plots.save(example) is None
+    assert ExamplePlots.plots.load(example) is None

@@ -52,7 +52,7 @@ class DVCInterface:
             # registered except _reset is called!
             cmd = ["dvc", "exp", "show", "--show-json", "-A"]
             log.debug(f"DVC command: {cmd}")
-            out = subprocess.run(cmd, capture_output=True)
+            out = subprocess.run(cmd, capture_output=True, check=True)
             self._experiments = json.loads(out.stdout.decode("utf-8").split("\r\n")[0])
         return self._experiments
 

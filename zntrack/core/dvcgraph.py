@@ -30,14 +30,14 @@ def handle_deps(value) -> list:
 
     """
     script = []
-    if isinstance(value, list) or isinstance(value, tuple):
-        for x in value:
-            script += handle_deps(x)
+    if isinstance(value, (list, tuple)):
+        for lst_val in value:
+            script += handle_deps(lst_val)
     else:
         if isinstance(value, GraphWriter):
             for file in value.affected_files:
                 script += ["--deps", pathlib.Path(file).as_posix()]
-        elif isinstance(value, str) or isinstance(value, pathlib.Path):
+        elif isinstance(value, (str, pathlib.Path)):
             script += ["--deps", pathlib.Path(value).as_posix()]
         elif value is None:
             pass
@@ -94,7 +94,7 @@ def handle_dvc(value, dvc_args) -> list:
 
     >>> handle_dvc("src/file.txt", "outs") == ["--outs", "src/file.txt"]
     """
-    if not (isinstance(value, list) or isinstance(value, tuple)):
+    if not isinstance(value, (list, tuple)):
         value = [value]
 
     def option_func(_dvc_path):
@@ -139,9 +139,9 @@ class DescriptorList:
         data = [x for x in self.data if x.metadata.zntrack_type in zntrack_type]
         if return_with_type:
             types_dict = {x.metadata.dvc_option: {} for x in data}
-            for x in data:
-                types_dict[x.metadata.dvc_option].update(
-                    {x.name: getattr(self.parent, x.name)}
+            for entity in data:
+                types_dict[entity.metadata.dvc_option].update(
+                    {entity.name: getattr(self.parent, entity.name)}
                 )
             return types_dict
         return {x.name: getattr(self.parent, x.name) for x in data}
@@ -158,12 +158,9 @@ class GraphWriter:
 
     def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
-
-        [
-            x.update_default()
-            for x in self._descriptor_list.data
-            if x.metadata.zntrack_type == "deps"
-        ]
+        for data in self._descriptor_list.data:
+            if data.metadata.zntrack_type == "deps":
+                data.update_default()
 
     @property
     def _descriptor_list(self) -> DescriptorList:
@@ -200,8 +197,17 @@ class GraphWriter:
             return module_handler(self.__class__)
         return self._module
 
-    def save(self):
-        """Some method to save the class state"""
+    def save(self, results: bool = False):
+        """Save Class state to files
+
+        Parameters
+        -----------
+        results: bool, default=False
+            Save changes in zn.<option>.
+            By default, this function saves e.g. parameters but does not save results
+            that are stored in zn.<option> and primarily zn.params / dvc.<option>
+            Set this option to True if they should be saved, e.g. in run_and_save
+        """
         raise NotImplementedError
 
     @property

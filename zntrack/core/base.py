@@ -47,7 +47,6 @@ class Node(GraphWriter):
     )
     def __call__(self, *args, **kwargs):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
-        pass
 
     def save(self, results: bool = False):
         """Save Class state to files

@@ -21,7 +21,7 @@ from zntrack.core.dvcgraph import DVCRunOptions
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.utils import config, file_io, utils
 
-str_or_path = typing.Union[str, pathlib.Path]
+StrOrPath = typing.Union[str, pathlib.Path]
 
 log = logging.getLogger(__name__)
 
@@ -36,15 +36,15 @@ class NodeConfig:
 
     """
 
-    deps: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    outs: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    outs_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    outs_persist: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    outs_persist_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    metrics: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    metrics_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    plots: typing.Union[str_or_path, typing.List[str_or_path]] = None
-    plots_no_cache: typing.Union[str_or_path, typing.List[str_or_path]] = None
+    deps: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    outs: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    outs_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    outs_persist: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    outs_persist_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    metrics: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    metrics_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    plots: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    plots_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
 
     params: typing.Union[dot4dict.dotdict, dict] = dataclasses.field(default_factory=dict)
 
@@ -79,7 +79,7 @@ class NodeConfig:
         return script
 
 
-any_or_nodeconfig = typing.Union[typing.Any, NodeConfig]
+AnyOrNodeConfig = typing.Union[typing.Any, NodeConfig]
 
 
 def nodify(
@@ -128,7 +128,7 @@ def nodify(
             dry_run: bool = False,
             run: bool = None,
             exec_func=False,
-        ) -> any_or_nodeconfig:
+        ) -> AnyOrNodeConfig:
             """Wrap the function
 
             Parameters
