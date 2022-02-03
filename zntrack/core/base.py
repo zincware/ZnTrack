@@ -11,6 +11,7 @@ Description:
 from __future__ import annotations
 
 import logging
+import inspect
 
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.config import config
@@ -57,12 +58,27 @@ class Node(GraphWriter):
             return cls
 
         # attach an automatically generated __init__ if None is provided
-        zn_option_fiels = []
+        zn_option_fields, sig_params = [], []
         for name, item in cls.__dict__.items():
             if isinstance(item, params):
-                zn_option_fiels.append(name)
 
-        setattr(cls, "__init__", get_auto_init(fields=zn_option_fiels))
+                # For the new __init__
+                zn_option_fields.append(name)
+
+                # For the new __signature__
+                sig_params.append(
+                    inspect.Parameter(
+                        name=name,
+                        kind=inspect.Parameter.POSITIONAL_OR_KEYWORD
+                    )
+                )
+
+        # Add new __init__ to the sub-class
+        setattr(cls, "__init__", get_auto_init(fields=zn_option_fields))
+
+        # Add new __signature__ to the sub-class
+        signature = inspect.Signature(parameters=sig_params)
+        setattr(cls, "__signature__", signature)
 
     def save(self, results: bool = False):
         """Save Class state to files
