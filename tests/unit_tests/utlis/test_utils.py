@@ -16,6 +16,7 @@ from unittest.mock import MagicMock, patch
 
 import znjson
 
+from zntrack.utils import utils
 from zntrack.utils.utils import cwd_temp_dir, decode_dict, module_handler
 
 
@@ -47,3 +48,18 @@ def test_module_handler():
 
     with patch.object(sys, "argv", ["pytest-runner"]):
         assert module_handler(my_mock) == "pytest-runner"
+
+
+def test_check_type():
+    assert utils.check_type("str", str)
+    assert not utils.check_type(["str"], str)
+    assert utils.check_type(["str"], str, allow_iterable=True)
+
+    assert utils.check_type(25, (int, str))
+    assert not utils.check_type([25, "str"], (int, str))
+    assert utils.check_type([25, "str"], (int, str), allow_iterable=True)
+
+    assert utils.check_type(["str"], list)
+    assert utils.check_type(None, str, allow_none=True)
+    assert not utils.check_type([None], str, allow_none=True)
+    assert utils.check_type([None], str, allow_none=True, allow_iterable=True)

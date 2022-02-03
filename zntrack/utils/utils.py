@@ -97,3 +97,32 @@ def module_handler(obj) -> str:
         return pathlib.Path(sys.argv[0]).stem
     else:
         return obj.__module__
+
+
+def check_type(obj, types, allow_iterable=False, allow_none=False) -> bool:
+    """Check if the obj is of any of the given types
+
+    Parameters
+    ----------
+    obj: object to check
+    types: single class or tuple of classes to check against
+    allow_iterable: check list entries if a list is provided
+    allow_none: accept None even if not in types.
+
+    Returns
+    -------
+
+    """
+    if isinstance(obj, (list, tuple, set)) and allow_iterable:
+        for value in obj:
+            if allow_none and value is None:
+                continue
+            if not isinstance(value, types):
+                return False
+    else:
+        if allow_none and obj is None:
+            return True
+        if not isinstance(obj, types):
+            return False
+
+    return True
