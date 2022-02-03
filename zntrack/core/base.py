@@ -10,8 +10,8 @@ Description:
 """
 from __future__ import annotations
 
-import logging
 import inspect
+import logging
 
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.config import config
@@ -68,8 +68,7 @@ class Node(GraphWriter):
                 # For the new __signature__
                 sig_params.append(
                     inspect.Parameter(
-                        name=name,
-                        kind=inspect.Parameter.POSITIONAL_OR_KEYWORD
+                        name=name, kind=inspect.Parameter.POSITIONAL_OR_KEYWORD
                     )
                 )
 
