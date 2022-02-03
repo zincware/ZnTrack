@@ -88,3 +88,17 @@ def test_wrong_params():
         @nodify(params="value")
         def node():
             pass
+
+
+def test_wrong_outs():
+    with pytest.raises(ValueError):
+
+        @nodify(outs=25)
+        def nodea():
+            pass
+
+    with pytest.raises(ValueError):
+
+        @nodify(outs=[25, "str"])
+        def nodeb():
+            pass

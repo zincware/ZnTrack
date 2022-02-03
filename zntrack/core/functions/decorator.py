@@ -80,20 +80,21 @@ class NodeConfig:
 
 
 AnyOrNodeConfig = typing.Union[typing.Any, NodeConfig]
+UnionListOrStrAndPath = typing.Union[typing.List[StrOrPath], StrOrPath]
 
 
 def nodify(
     *,
-    params=None,
-    outs=None,
-    outs_no_cache=None,
-    outs_persist=None,
-    outs_persist_no_cache=None,
-    metrics=None,
-    metrics_no_cache=None,
-    deps=None,
-    plots=None,
-    plots_no_cache=None,
+    params: dict = None,
+    outs: UnionListOrStrAndPath = None,
+    outs_no_cache: UnionListOrStrAndPath = None,
+    outs_persist: UnionListOrStrAndPath = None,
+    outs_persist_no_cache: UnionListOrStrAndPath = None,
+    metrics: UnionListOrStrAndPath = None,
+    metrics_no_cache: UnionListOrStrAndPath = None,
+    deps: UnionListOrStrAndPath = None,
+    plots: UnionListOrStrAndPath = None,
+    plots_no_cache: UnionListOrStrAndPath = None,
 ):
     """Main wrapper Function to convert a function into a DVC Stage
 
@@ -111,6 +112,27 @@ def nodify(
     """
     if not isinstance(params, dict) and params is not None:
         raise ValueError("Parameter must be dict or dot4dict.dotdict.")
+
+    # Check that the given type is correct
+    # TODO consider adding this to NodeConfig in the future
+    for option in [
+        outs,
+        outs_no_cache,
+        outs_persist,
+        outs_persist_no_cache,
+        metrics,
+        metrics_no_cache,
+        deps,
+        plots,
+        plots_no_cache,
+    ]:
+        if not utils.check_type(
+            option, (str, pathlib.Path), allow_iterable=True, allow_none=True
+        ):
+            raise ValueError(
+                f"{option} is not a supported type. "
+                "Please use single values or lists of <str> and <pathlib.Path>."
+            )
 
     def func_collector(func):
         """Required for decorator to work"""
