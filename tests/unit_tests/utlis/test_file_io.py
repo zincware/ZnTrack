@@ -1,7 +1,9 @@
 import json
+import os
 import pathlib
 from unittest.mock import mock_open, patch
 
+import pytest
 import yaml
 
 from zntrack.utils import file_io
@@ -39,6 +41,12 @@ def test_save_file_yaml():
         open_mock().write.assert_called_once_with(yaml.safe_dump({"a": "b"}, indent=4))
 
 
+def test_save_file_yaml_mkdir(tmp_path):
+    os.chdir(tmp_path)
+    file_io.write_file(pathlib.Path("src", "example.yaml"), {"a": "b"}, mkdir=True)
+    assert pathlib.Path("src").is_dir()
+
+
 def test_save_file_yml():
     open_mock = mock_open(read_data=None)
 
@@ -51,6 +59,11 @@ def test_save_file_yml():
         args, kwargs = open_mock.call_args
         assert args[0] == pathlib.Path("example.yml")
         open_mock().write.assert_called_once_with(yaml.safe_dump({"a": "b"}, indent=4))
+
+
+def test_save_file_txt():
+    with pytest.raises(ValueError):
+        file_io.write_file(pathlib.Path("example.txt"), {"a": "b"})
 
 
 def test_read_file_json():
@@ -88,6 +101,11 @@ def test_read_file_yml():
         assert file_io.read_file(pathlib.Path("example.yml")) == {"a": "b"}
 
         open_mock.assert_called_with(pathlib.Path("example.yml"), "r")
+
+
+def test_read_file_txt():
+    with pytest.raises(ValueError):
+        file_io.read_file(pathlib.Path("example.txt"))
 
 
 def test_update_config_file_json():
@@ -195,3 +213,10 @@ def test_update_config_file_yaml():
             indent=4,
         )
     )
+
+
+def test_update_config_error():
+    with pytest.raises(ValueError):
+        file_io.update_config_file(
+            file="file.txt", node_name=None, value_name=None, value={}
+        )

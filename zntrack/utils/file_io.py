@@ -28,7 +28,7 @@ def read_file(file: pathlib.Path) -> dict:
     elif file.suffix == ".json":
         file_content = json.loads(file.read_text())
     else:
-        raise NotImplementedError(f"File with suffix {file.suffix} is not supported")
+        raise ValueError(f"File with suffix {file.suffix} is not supported")
     return file_content
 
 
@@ -53,6 +53,8 @@ def write_file(file: pathlib.Path, value: dict, mkdir: bool = True):
         file.write_text(yaml.safe_dump(value, indent=4))
     elif file.suffix == ".json":
         file.write_text(json.dumps(value, indent=4, cls=znjson.ZnEncoder))
+    else:
+        raise ValueError(f"File with suffix {file.suffix} is not supported")
 
 
 def update_config_file(
