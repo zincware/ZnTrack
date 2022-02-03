@@ -55,6 +55,8 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
 
 class MethodConverter(znjson.ConverterBase):
+    """ZnJSON Converter for zn.method attributes"""
+
     representation = "zn.method"
 
     def _encode(self, obj):
@@ -81,12 +83,12 @@ class MethodConverter(znjson.ConverterBase):
                 continue
             try:
                 methods["kwargs"][key] = getattr(obj, key)
-            except AttributeError:
+            except AttributeError as error:
                 raise AttributeError(
                     f"Could not find {key} in passed method! Please use "
                     "@check_signature from ZnTrack to check that the method signature"
                     " fits the method attributes"
-                )
+                ) from error
 
         return methods
 
