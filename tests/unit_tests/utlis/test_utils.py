@@ -20,15 +20,6 @@ import znjson
 from zntrack.utils import utils
 
 
-def test_is_jsonable():
-    """Test for is_jsonable
-
-    Test is performed for a serializable dictionary and a non-serializable function.
-    """
-    assert utils.is_jsonable({"a": 1}) is True
-    assert utils.is_jsonable({"a": utils.is_jsonable}) is False
-
-
 def test_cwd_temp_dir():
     new_dir = utils.cwd_temp_dir(required_files=[__file__])
     assert pathlib.Path(new_dir.name) == pathlib.Path(os.getcwd())

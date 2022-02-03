@@ -48,7 +48,6 @@ class Node(GraphWriter):
     )
     def __call__(self, *args, **kwargs):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
-        pass
 
     def __init_subclass__(cls, **kwargs):
         """Add a dataclass-like init if None is provided"""

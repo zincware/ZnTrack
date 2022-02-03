@@ -10,6 +10,7 @@ Description: Node parameter
 """
 from __future__ import annotations
 
+import dataclasses
 import logging
 import pathlib
 
@@ -18,11 +19,18 @@ from zntrack.utils import decode_dict, file_io
 
 log = logging.getLogger(__name__)
 
-import dataclasses
-
 
 @dataclasses.dataclass
 class File:
+    """Dataclass for adding metadata to files
+
+    Attributes
+    ----------
+    path: pathlib.Path
+        The path to the file
+    # TODO add the rest
+    """
+
     path: pathlib.Path
     key: str = None
     tracked: bool = False  # the file itself is an affected_file
