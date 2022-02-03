@@ -43,6 +43,7 @@ def jupyter_class_to_file(silent, nb_name, module_name):
                     and not line.startswith("class")
                     and not line.startswith("def")
                     and not line.startswith("@")
+                    and not line.startswith(")")
                 ):
                     reading_class = False
             if reading_class or line.startswith("class"):
