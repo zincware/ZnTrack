@@ -1,4 +1,5 @@
 [![coeralls](https://coveralls.io/repos/github/zincware/ZnTrack/badge.svg)](https://coveralls.io/github/zincware/ZnTrack)
+[![Maintainability](https://api.codeclimate.com/v1/badges/f25e119bbd5d5ec74e2c/maintainability)](https://codeclimate.com/github/zincware/ZnTrack/maintainability)
 ![PyTest](https://github.com/zincware/ZnTrack/actions/workflows/pytest.yaml/badge.svg)
 [![PyPI version](https://badge.fury.io/py/zntrack.svg)](https://badge.fury.io/py/zntrack)
 [![License](https://img.shields.io/badge/License-EPL-purple.svg?style=flat)](https://www.eclipse.org/legal/epl-2.0/faq.php)
