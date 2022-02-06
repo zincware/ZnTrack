@@ -47,6 +47,10 @@ class outs(ZnTrackOption):
     metadata = Metadata(dvc_option="outs", zntrack_type="dvc")
 
 
+class checkpoints(ZnTrackOption):
+    metadata = Metadata(dvc_option="checkpoints", zntrack_type="dvc")
+
+
 class outs_no_cache(ZnTrackOption):
     metadata = Metadata(dvc_option="outs_no_cache", zntrack_type="dvc")
 
