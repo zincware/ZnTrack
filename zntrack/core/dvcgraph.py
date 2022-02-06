@@ -8,7 +8,7 @@ import typing
 
 from zntrack.core.parameter import ZnTrackOption
 from zntrack.utils import config
-from zntrack.utils.utils import module_handler
+from zntrack.utils.utils import DVCProcessError, module_handler
 
 from .jupyter import jupyter_class_to_file
 
@@ -399,9 +399,16 @@ class GraphWriter:
         if dry_run:
             return script
         else:
-            process = subprocess.run(script, capture_output=True, check=True)
-            if not silent:
-                if len(process.stdout) > 0:
-                    log.info(process.stdout.decode())
-                if len(process.stderr) > 0:
-                    log.warning(process.stderr.decode())
+            try:
+                process = subprocess.run(script, capture_output=True, check=True)
+                if not silent:
+                    if len(process.stdout) > 0:
+                        log.info(process.stdout.decode())
+                    if len(process.stderr) > 0:
+                        log.warning(process.stderr.decode())
+            except subprocess.CalledProcessError as err:
+                raise DVCProcessError(
+                    f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
+                    f"# failed after stdout: \n{err.stdout.decode()}"
+                    f"# with stderr: \n{err.stderr.decode()}"
+                ) from err

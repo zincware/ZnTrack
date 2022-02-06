@@ -148,3 +148,9 @@ def check_type(obj, types, allow_iterable=False, allow_none=False) -> bool:
             return False
 
     return True
+
+
+class DVCProcessError(Exception):
+    """DVC specific message for CalledProcessError"""
+
+    pass
