@@ -258,10 +258,40 @@ class GraphWriter:
             "Could not find a working python interpreter to work with subprocesses!"
         )
 
+    def convert_notebook(self, nb_name: str = None, silent: bool = False) -> str:
+        """Use jupyter_class_to_file to convert ipynb to py
+
+        Parameters
+        ----------
+        nb_name: str
+            Notebook name when not using config.nb_name (this is not recommended)
+        silent: bool, default = False
+            Reduce the amount of logging
+
+        Returns
+        -------
+        nb_name: str
+            Modified notebook name, if gathered from config.nb_name
+        """
+        if nb_name is None:
+            nb_name = config.nb_name
+
+        # Jupyter Notebook
+        if nb_name is not None:
+            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
+
+            jupyter_class_to_file(
+                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
+            )
+
+        self.save()
+        return nb_name
+
     def write_graph(
         self,
         silent: bool = False,
         nb_name: str = None,
+        no_notebook: bool = False,
         no_commit: bool = False,
         external: bool = False,
         always_changed: bool = False,
@@ -283,6 +313,9 @@ class GraphWriter:
             subprocess call.
         nb_name: str
             Notebook name when not using config.nb_name (this is not recommended)
+        no_notebook: bool, default = False
+            Do not convert the notebook to a py File, even if config.nb_name or nb_name
+            are provided.
         no_commit: dvc parameter
         external: dvc parameter
         always_changed: dvc parameter
@@ -302,19 +335,6 @@ class GraphWriter:
         if run is not None:
             no_exec = not run
 
-        if nb_name is None:
-            nb_name = config.nb_name
-
-        # Jupyter Notebook
-        if nb_name is not None:
-            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
-
-            jupyter_class_to_file(
-                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
-            )
-
-        self.save()
-
         if not silent:
             log.warning("--- Writing new DVC file! ---")
 
@@ -330,11 +350,13 @@ class GraphWriter:
         ).dvc_args
 
         # Jupyter Notebook
-        if nb_name is not None:
-            script += [
-                "--deps",
-                pathlib.Path(*self.module.split(".")).with_suffix(".py").as_posix(),
-            ]
+        if not no_notebook:
+            nb_name = self.convert_notebook(nb_name, silent)
+            if nb_name is not None:
+                script += [
+                    "--deps",
+                    pathlib.Path(*self.module.split(".")).with_suffix(".py").as_posix(),
+                ]
 
         # Handle Parameter
         if len(self._descriptor_list.filter(zntrack_type=["params", "method"])) > 0:
