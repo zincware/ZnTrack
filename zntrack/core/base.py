@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import pathlib
 
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.config import config
@@ -152,7 +153,9 @@ class Node(GraphWriter):
             )
             instance._module = f"{config.nb_class_path}.{cls.__name__}"
         if notebook is not None:
-            raise NotImplementedError("TODO: this is currently not implemented")
+            # only get the filename
+            module = pathlib.Path(notebook).stem
+            instance._module = module
 
         return instance
 
