@@ -110,7 +110,7 @@ class Node(GraphWriter):
         self.is_loaded = True
 
     @classmethod
-    def load(cls, name=None) -> Node:
+    def load(cls, name=None, notebook=None) -> Node:
         """
 
         Parameters
@@ -146,7 +146,13 @@ class Node(GraphWriter):
 
         if config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
+            log.warning(
+                "DeprecationWarning: using config.nb_name instead of passing"
+                " load(notebook=<nb>). "
+            )
             instance._module = f"{config.nb_class_path}.{cls.__name__}"
+        if notebook is not None:
+            raise NotImplementedError("TODO: this is currently not implemented")
 
         return instance
 
