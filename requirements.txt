@@ -2,4 +2,4 @@ dvc
 PyYAML
 znjson>=0.0.5
 dot4dict
-znipy @ git+git://github.com/zincware/ZnIPy.git#egg=znipy
+znipy
