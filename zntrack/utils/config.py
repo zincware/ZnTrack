@@ -34,4 +34,16 @@ class Config:
     no_dvc: bool = False
 
 
+@dataclass(frozen=True)
+class ZnTypes:
+    zn: str = "zn"
+    deps: str = "deps"
+    dvc: str = "dvc"
+    metadata: str = "metadata"
+    metrics: str = "metrics"
+    method: str = "method"
+    params: str = "params"
+    iterable: str = "iterable"
+
+
 config = Config()

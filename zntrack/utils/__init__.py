@@ -9,10 +9,12 @@ Copyright Contributors to the Zincware Project.
 Description: Standard python init file for the utils directory
 """
 
-from .config import config
-from .utils import (
+from zntrack.utils import exceptions, file_io
+from zntrack.utils.config import ZnTypes, config
+from zntrack.utils.utils import (
     cwd_temp_dir,
     decode_dict,
+    deprecated,
     module_handler,
     module_to_path,
     update_nb_name,
@@ -25,4 +27,8 @@ __all__ = [
     "module_handler",
     "update_nb_name",
     "module_to_path",
+    "deprecated",
+    "ZnTypes",
+    "file_io",
+    "exceptions",
 ]

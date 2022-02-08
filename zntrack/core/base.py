@@ -14,7 +14,7 @@ import inspect
 import logging
 
 from zntrack.core.dvcgraph import GraphWriter
-from zntrack.utils.config import config
+from zntrack.utils.config import ZnTypes, config
 from zntrack.utils.utils import deprecated, get_auto_init
 from zntrack.zn import params
 
@@ -95,7 +95,7 @@ class Node(GraphWriter):
             if results:
                 # Save all
                 option.save(instance=self)
-            elif option.metadata.zntrack_type not in ["zn", "metrics"]:
+            elif option.metadata.zntrack_type not in [ZnTypes.zn, ZnTypes.metrics]:
                 # Filter out zn.<options>
                 option.save(instance=self)
             else:

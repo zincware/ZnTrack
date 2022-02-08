@@ -157,7 +157,7 @@ class GraphWriter:
     def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
         for data in self._descriptor_list.data:
-            if data.metadata.zntrack_type == "deps":
+            if data.metadata.zntrack_type == utils.ZnTypes.deps:
                 data.update_default()
 
     @property
@@ -345,7 +345,14 @@ class GraphWriter:
                 ]
 
                 # Handle Parameter
-        if len(self._descriptor_list.filter(zntrack_type=["params", "method"])) > 0:
+        if (
+            len(
+                self._descriptor_list.filter(
+                    zntrack_type=[utils.ZnTypes.params, utils.ZnTypes.method]
+                )
+            )
+            > 0
+        ):
             script += [
                 "--params",
                 f"params.yaml:{self.node_name}",
@@ -353,17 +360,20 @@ class GraphWriter:
         zn_options_set = set()
         for option in self._descriptor_list.data:
             value = getattr(self, option.name)
-            if option.metadata.zntrack_type == "dvc":
+            if option.metadata.zntrack_type == utils.ZnTypes.dvc:
                 script += handle_dvc(value, option.metadata.dvc_args)
             # Handle Zn Options
-            elif option.metadata.zntrack_type in ["zn", "metadata"]:
+            elif option.metadata.zntrack_type in [
+                utils.ZnTypes.zn,
+                utils.ZnTypes.metadata,
+            ]:
                 zn_options_set.add(
                     (
                         f"--{option.metadata.dvc_args}",
                         option.get_filename(self).path.as_posix(),
                     )
                 )
-            elif option.metadata.zntrack_type == "deps":
+            elif option.metadata.zntrack_type == utils.ZnTypes.deps:
                 script += handle_deps(value)
 
         for pair in zn_options_set:

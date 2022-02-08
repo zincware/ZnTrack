@@ -13,6 +13,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import Callable
 
+from zntrack import utils
+
 
 class DescriptorMissing(Exception):
     pass
@@ -81,7 +83,11 @@ class MetaData(ABC):
 
         try:
             metadata_attr, metadata = next(
-                iter(cls._descriptor_list.filter(zntrack_type="metadata").items())
+                iter(
+                    cls._descriptor_list.filter(
+                        zntrack_type=utils.ZnTypes.metadata
+                    ).items()
+                )
             )
         except StopIteration as error:
             raise DescriptorMissing(

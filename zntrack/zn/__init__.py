@@ -17,9 +17,9 @@ import pathlib
 
 import znjson
 
+from zntrack import utils
 from zntrack.core.parameter import File, ZnTrackOption
 from zntrack.descriptor import Metadata
-from zntrack.utils import file_io
 
 log = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ class SplitZnTrackOption(ZnTrackOption):
                 params_data, zntrack_data = split_value(serialized_value)
 
             # Write to params.yaml
-            file_io.update_config_file(
+            utils.file_io.update_config_file(
                 file=pathlib.Path("params.yaml"),
                 node_name=instance.node_name,
                 value_name=self.name,
@@ -108,7 +108,7 @@ class SplitZnTrackOption(ZnTrackOption):
             )
 
             # write to zntrack.json
-            file_io.update_config_file(
+            utils.file_io.update_config_file(
                 file=pathlib.Path("zntrack.json"),
                 node_name=instance.node_name,
                 value_name=self.name,
@@ -131,12 +131,12 @@ class SplitZnTrackOption(ZnTrackOption):
 
         try:
             # Check that we can read it
-            _ = file_io.read_file(pathlib.Path("zntrack.json"))[instance.node_name][
+            _ = utils.file_io.read_file(pathlib.Path("zntrack.json"))[instance.node_name][
                 self.name
             ]
 
-            params_values = file_io.read_file(pathlib.Path("params.yaml"))
-            cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))
+            params_values = utils.file_io.read_file(pathlib.Path("params.yaml"))
+            cls_dict = utils.file_io.read_file(pathlib.Path("zntrack.json"))
             # select <node><attribute> from the full params / zntrack file
             params_values = params_values[instance.node_name][self.name]
             cls_dict = cls_dict[instance.node_name][self.name]
@@ -153,27 +153,29 @@ class SplitZnTrackOption(ZnTrackOption):
 
 
 class outs(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs", zntrack_type="zn")
+    metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.zn)
 
 
 class deps(ZnTrackOption):
-    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
+    metadata = Metadata(dvc_option="deps", zntrack_type=utils.ZnTypes.deps)
 
 
 class metrics(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="zn")
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.zn)
 
 
 class params(SplitZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="params")
+    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
 
 
 class iterable(ZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="iterable")
+    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.iterable)
 
 
 class metadata(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="metadata")
+    metadata = Metadata(
+        dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.metadata
+    )
 
 
 class Method(SplitZnTrackOption):
@@ -195,7 +197,7 @@ class Method(SplitZnTrackOption):
 
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type="method")
+    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.method)
 
     def get_filename(self, instance) -> File:
         """Does not really have a single file but params.yaml and zntrack.json"""

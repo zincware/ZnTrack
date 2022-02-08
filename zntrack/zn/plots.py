@@ -3,6 +3,7 @@ import pathlib
 
 import pandas as pd
 
+from zntrack import utils
 from zntrack.core.parameter import File, ZnTrackOption
 from zntrack.descriptor import Metadata
 
@@ -10,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class plots(ZnTrackOption):
-    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type="zn")
+    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=utils.ZnTypes.zn)
 
     def get_filename(self, instance) -> File:
         """Overwrite filename to csv"""
