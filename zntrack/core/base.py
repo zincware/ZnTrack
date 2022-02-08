@@ -95,7 +95,7 @@ class Node(GraphWriter):
             if results:
                 # Save all
                 option.save(instance=self)
-            elif option.metadata.zntrack_type not in [ZnTypes.zn, ZnTypes.metrics]:
+            elif option.metadata.zntrack_type not in [ZnTypes.results]:
                 # Filter out zn.<options>
                 option.save(instance=self)
             else:

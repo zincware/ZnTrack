@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class plots(ZnTrackOption):
-    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=utils.ZnTypes.zn)
+    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=utils.ZnTypes.results)
 
     def get_filename(self, instance) -> File:
         """Overwrite filename to csv"""

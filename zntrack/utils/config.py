@@ -36,14 +36,20 @@ class Config:
 
 @dataclass(frozen=True)
 class ZnTypes:
-    zn: str = "zn"
+    """Collection of ZnTrack Types to identify descriptors beyond their dvc option
+
+    Attributes
+    ----------
+    results: most zn.<options> like zn.outs() / zn.metrics() use this one
+    """
+
     deps: str = "deps"
     dvc: str = "dvc"
     metadata: str = "metadata"
-    metrics: str = "metrics"
     method: str = "method"
     params: str = "params"
     iterable: str = "iterable"
+    results: str = "results"
 
 
 config = Config()

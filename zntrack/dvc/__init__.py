@@ -33,6 +33,7 @@ log = logging.getLogger(__name__)
 
 class params(ZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
+    file = "params.yaml"
 
     @utils.deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
     def __init__(self, default_value=None):
@@ -41,35 +42,52 @@ class params(ZnTrackOption):
 
 class deps(ZnTrackOption):
     metadata = Metadata(dvc_option="deps", zntrack_type=utils.ZnTypes.deps)
+    file = "zntrack.json"
 
 
 class outs(ZnTrackOption):
     metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True
 
 
 class checkpoints(ZnTrackOption):
     metadata = Metadata(dvc_option="checkpoints", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True
 
 
 class outs_no_cache(ZnTrackOption):
     metadata = Metadata(dvc_option="outs_no_cache", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True
 
 
 class outs_persistent(ZnTrackOption):
     metadata = Metadata(dvc_option="outs_persistent", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True
 
 
 class metrics(ZnTrackOption):
     metadata = Metadata(dvc_option="metrics", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True
 
 
 class metrics_no_cache(ZnTrackOption):
     metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True
 
 
 class plots(ZnTrackOption):
     metadata = Metadata(dvc_option="plots", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True
 
 
 class plots_no_cache(ZnTrackOption):
     metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=utils.ZnTypes.dvc)
+    file = "zntrack.json"
+    value_tracked = True

@@ -341,14 +341,7 @@ class GraphWriter:
                 self.convert_notebook(nb_name, silent)
                 script += ["--deps", utils.module_to_path(self.module).as_posix()]
                 # Handle Parameter
-        if (
-            len(
-                self._descriptor_list.filter(
-                    zntrack_type=[utils.ZnTypes.params, utils.ZnTypes.method]
-                )
-            )
-            > 0
-        ):
+        if len(self._descriptor_list.filter(zntrack_type=[utils.ZnTypes.params])) > 0:
             script += [
                 "--params",
                 f"params.yaml:{self.node_name}",
@@ -360,7 +353,7 @@ class GraphWriter:
                 script += handle_dvc(value, option.metadata.dvc_args)
             # Handle Zn Options
             elif option.metadata.zntrack_type in [
-                utils.ZnTypes.zn,
+                utils.ZnTypes.results,
                 utils.ZnTypes.metadata,
             ]:
                 zn_options_set.add(

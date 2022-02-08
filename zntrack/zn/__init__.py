@@ -153,19 +153,21 @@ class SplitZnTrackOption(ZnTrackOption):
 
 
 class outs(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.zn)
+    metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.results)
 
 
 class deps(ZnTrackOption):
     metadata = Metadata(dvc_option="deps", zntrack_type=utils.ZnTypes.deps)
+    file = "zntrack.json"
 
 
 class metrics(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.zn)
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.results)
 
 
 class params(SplitZnTrackOption):
     metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
+    file = "params.yaml"
 
 
 class iterable(ZnTrackOption):
@@ -197,7 +199,7 @@ class Method(SplitZnTrackOption):
 
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.method)
+    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
 
     def get_filename(self, instance) -> File:
         """Does not really have a single file but params.yaml and zntrack.json"""
