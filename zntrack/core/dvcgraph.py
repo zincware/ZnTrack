@@ -381,7 +381,7 @@ class GraphWriter:
         if notebook is not None:
             script.append(
                 f"""{self.python_interpreter} -c "from znipy import NotebookLoader; """
-                f"""module = NotebookLoader('{notebook}').load_module(); """
+                f"""module = NotebookLoader().load_module('{notebook}'); """
                 f"""module.{cls_name}.load(name='{self.node_name}').run_and_save()" """
             )
         else:

@@ -43,7 +43,7 @@ class SerializedClass:
             cls = getattr(module, self.cls)
         except ModuleNotFoundError:
             # Try loading from jupyter notebook if otherwise not available
-            module = znipy.NotebookLoader(self.module).load_module()
+            module = znipy.NotebookLoader().load_module(self.module)
             cls = getattr(module, self.cls)
         return cls
 
