@@ -8,7 +8,8 @@ import typing
 
 from zntrack.core.parameter import ZnTrackOption
 from zntrack.utils import config
-from zntrack.utils.utils import DVCProcessError, module_handler
+from zntrack.utils.exceptions import DVCProcessError
+from zntrack.utils.utils import module_handler
 
 from .jupyter import jupyter_class_to_file
 

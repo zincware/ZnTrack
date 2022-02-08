@@ -9,7 +9,7 @@ import pytest
 
 from zntrack import dvc, zn
 from zntrack.core.base import Node
-from zntrack.utils.utils import DVCProcessError
+from zntrack.utils.exceptions import DVCProcessError
 
 
 class ExampleNode01(Node):
