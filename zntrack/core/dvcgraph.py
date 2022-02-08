@@ -385,6 +385,9 @@ class GraphWriter:
             f"""{self.python_interpreter} -c "from {self.module} import {cls_name}; """
             f"""{cls_name}.load(name='{self.node_name}').run_and_save()" """
         )
+
+        self.save()
+
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
         log.debug(
