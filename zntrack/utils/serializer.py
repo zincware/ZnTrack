@@ -48,11 +48,25 @@ class SerializedClass:
 
 @dataclasses.dataclass
 class SerializedNode(SerializedClass):
+    """
+    Attributes
+    ----------
+    name: str
+        The name in Node.load(name=<name>)
+    """
+
     name: str
 
 
 @dataclasses.dataclass
 class SerializedMethod(SerializedClass):
+    """
+    Attributes
+    ----------
+    kwargs: dict
+        The arguments to encode the method again, as in method = Method(**kwargs)
+    """
+
     kwargs: dict = dataclasses.field(default_factory=dict)
 
 
