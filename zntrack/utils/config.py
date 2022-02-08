@@ -35,6 +35,19 @@ class Config:
 
 
 @dataclass(frozen=True)
+class Files:
+    """Important File paths for ZnTrack to work
+
+    Notes
+    ------
+    Currently frozen because changing the value is not tested.
+    """
+
+    zntrack: Path = Path("zntrack.json")
+    params: Path = Path("params.yaml")
+
+
+@dataclass(frozen=True)
 class ZnTypes:
     """Collection of ZnTrack Types to identify descriptors beyond their dvc option
 

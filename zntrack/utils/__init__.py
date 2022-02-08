@@ -10,8 +10,9 @@ Description: Standard python init file for the utils directory
 """
 
 from zntrack.utils import exceptions, file_io
-from zntrack.utils.config import ZnTypes, config
+from zntrack.utils.config import Files, ZnTypes, config
 from zntrack.utils.utils import (
+    check_type,
     cwd_temp_dir,
     decode_dict,
     deprecated,
@@ -31,4 +32,6 @@ __all__ = [
     "ZnTypes",
     "file_io",
     "exceptions",
+    "Files",
+    "check_type",
 ]

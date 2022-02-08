@@ -17,9 +17,9 @@ import typing
 
 import dot4dict
 
+from zntrack import utils
 from zntrack.core.dvcgraph import DVCRunOptions
 from zntrack.core.jupyter import jupyter_class_to_file
-from zntrack.utils import config, file_io, utils
 
 StrOrPath = typing.Union[str, pathlib.Path]
 
@@ -66,7 +66,7 @@ class NodeConfig:
         script = []
         if self.params is not None:
             if len(self.params) > 0:
-                script += ["--params", f"params.yaml:{node_name}"]
+                script += ["--params", f"{utils.Files.params}:{node_name}"]
         for field in self.__dataclass_fields__:
             if field == "params":
                 continue
@@ -181,12 +181,11 @@ def nodify(
             if run is not None:
                 no_exec = not run
 
-            if nb_name is None:
-                nb_name = config.nb_name
+            nb_name = utils.update_nb_name(nb_name)
 
             # Jupyter Notebook
             if nb_name is not None:
-                module = f"{config.nb_class_path}.{func.__name__}"
+                module = f"{utils.config.nb_class_path}.{func.__name__}"
 
                 jupyter_class_to_file(
                     silent=silent, nb_name=nb_name, module_name=func.__name__
@@ -194,14 +193,16 @@ def nodify(
             else:
                 module = utils.module_handler(func)
 
-            cfg_file = pathlib.Path("zntrack.json")
-            params_file = pathlib.Path("params.yaml")
             if exec_func:
                 # TODO should exec_func always load from file or check if values
                 #  are passed and then update the files?
-                cfg_file_content = file_io.read_file(cfg_file)[func.__name__]
+                cfg_file_content = utils.file_io.read_file(utils.Files.zntrack)[
+                    func.__name__
+                ]
                 cfg_file_content = utils.decode_dict(cfg_file_content)
-                params_file_content = file_io.read_file(params_file)[func.__name__]
+                params_file_content = utils.file_io.read_file(utils.Files.params)[
+                    func.__name__
+                ]
                 cfg_file_content["params"] = params_file_content
 
                 cfg = NodeConfig(**cfg_file_content)
@@ -222,15 +223,15 @@ def nodify(
                 )
                 for value_name, value in dataclasses.asdict(cfg).items():
                     if value_name == "params":
-                        file_io.update_config_file(
-                            file=params_file,
+                        utils.file_io.update_config_file(
+                            file=utils.Files.params,
                             node_name=func.__name__,
                             value_name=None,
                             value=value,
                         )
                     else:
-                        file_io.update_config_file(
-                            file=cfg_file,
+                        utils.file_io.update_config_file(
+                            file=utils.Files.zntrack,
                             node_name=func.__name__,
                             value_name=value_name,
                             value=value,

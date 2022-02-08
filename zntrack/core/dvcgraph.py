@@ -344,7 +344,7 @@ class GraphWriter:
         if len(self._descriptor_list.filter(zntrack_type=[utils.ZnTypes.params])) > 0:
             script += [
                 "--params",
-                f"params.yaml:{self.node_name}",
+                f"{utils.Files.params}:{self.node_name}",
             ]
         zn_options_set = set()
         for option in self._descriptor_list.data:

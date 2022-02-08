@@ -45,10 +45,14 @@ class ZnTrackOption(Descriptor):
     which Options are used.
     This is required to allow for load=True which updates all ZnTrackOptions,
     based on the computed or otherwise stored values.
+
+    Attributes
+    ----------
+    file: str
+        Either the zntrack file or the parameter file
     """
 
     file = None
-    file_tracked = False
     value_tracked = False
 
     def __init__(self, default_value=None, **kwargs):
@@ -100,7 +104,6 @@ class ZnTrackOption(Descriptor):
             path=pathlib.Path(self.file),
             key=instance.node_name,
             value_tracked=self.value_tracked,
-            tracked=self.file_tracked,
         )
 
     def save(self, instance):
