@@ -339,11 +339,7 @@ class GraphWriter:
             self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
             if notebook:
                 self.convert_notebook(nb_name, silent)
-                script += [
-                    "--deps",
-                    utils.module_to_path(self.module).as_posix(),
-                ]
-
+                script += ["--deps", utils.module_to_path(self.module).as_posix()]
                 # Handle Parameter
         if (
             len(
