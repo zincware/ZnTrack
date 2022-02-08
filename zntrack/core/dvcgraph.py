@@ -105,44 +105,41 @@ def handle_dvc(value, dvc_args) -> list:
     return [f(x) for x in value for f in (option_func, posix_func)]
 
 
-@dataclasses.dataclass
-class DescriptorList:
-    """Dataclass to collect all descriptors of some parent class"""
+def filter_ZnTrackOption(
+    data, cls, zntrack_type: typing.Union[str, list], return_with_type=False
+) -> dict:
+    """Filter the descriptor instances by zntrack_type
 
-    parent: GraphWriter
-    data: typing.List[ZnTrackOption] = dataclasses.field(default_factory=list)
+    Parameters
+    ----------
+    data: List[ZnTrackOption]
+        The ZnTrack options to query through
+    cls:
+        The instance the ZnTrack options are attached to
+    zntrack_type: str
+        The zntrack_type of the descriptors to gather
+    return_with_type: bool, default=False
+        return a dictionary with the Descriptor.metadata.dvc_option as keys
 
-    def filter(
-        self, zntrack_type: typing.Union[str, list], return_with_type=False
-    ) -> dict:
-        """Filter the descriptor instances by zntrack_type
+    Returns
+    -------
+    dict:
+        either {attr_name: attr_value}
+        or
+        {descriptor.dvc_option: {attr_name: attr_value}}
 
-        Parameters
-        ----------
-        zntrack_type: str
-            The zntrack_type of the descriptors to gather
-        return_with_type: bool, default=False
-            return a dictionary with the Descriptor.metadata.dvc_option as keys
-
-        Returns
-        -------
-        dict:
-            either {attr_name: attr_value}
-            or
-            {descriptor.dvc_option: {attr_name: attr_value}}
-
-        """
-        if not isinstance(zntrack_type, list):
-            zntrack_type = [zntrack_type]
-        data = [x for x in self.data if x.metadata.zntrack_type in zntrack_type]
-        if return_with_type:
-            types_dict = {x.metadata.dvc_option: {} for x in data}
-            for entity in data:
-                types_dict[entity.metadata.dvc_option].update(
-                    {entity.name: getattr(self.parent, entity.name)}
-                )
-            return types_dict
-        return {x.name: getattr(self.parent, x.name) for x in data}
+    """
+    if not isinstance(zntrack_type, list):
+        zntrack_type = [zntrack_type]
+    data = [x for x in data if x.metadata.zntrack_type in zntrack_type]
+    if return_with_type:
+        types_dict = {x.metadata.dvc_option: {} for x in data}
+        for entity in data:
+            types_dict[entity.metadata.dvc_option].update(
+                {entity.name: getattr(cls, entity.name)}
+            )
+        return types_dict
+    return {x.name: getattr(cls, x.name) for x in data}
 
 
 class GraphWriter:
@@ -156,18 +153,18 @@ class GraphWriter:
 
     def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
-        for data in self._descriptor_list.data:
+        for data in self._descriptor_list:
             if data.metadata.zntrack_type == utils.ZnTypes.deps:
                 data.update_default()
 
     @property
-    def _descriptor_list(self) -> DescriptorList:
+    def _descriptor_list(self) -> typing.List[ZnTrackOption]:
         """Get all descriptors of this instance"""
         descriptor_list = []
         for option in vars(type(self)).values():
             if isinstance(option, ZnTrackOption):
                 descriptor_list.append(option)
-        return DescriptorList(parent=self, data=descriptor_list)
+        return descriptor_list
 
     @property
     def node_name(self) -> str:
@@ -212,7 +209,7 @@ class GraphWriter:
     def affected_files(self) -> typing.Set[pathlib.Path]:
         """list of all files that can be changed by this instance"""
         files = []
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             file = option.get_filename(self)
             if file.tracked:
                 files.append(file.path)
@@ -225,36 +222,6 @@ class GraphWriter:
 
         files = [x for x in files if x is not None]
         return set(files)
-
-    @property
-    def python_interpreter(self) -> str:
-        """Find the most suitable python interpreter
-
-        Try to run subprocess check calls to see, which python interpreter
-        should be selected
-
-        Returns
-        -------
-        interpreter: str
-            Name of the python interpreter that works with subprocess calls
-
-        """
-
-        for interpreter in ["python3", "python"]:
-            try:
-                subprocess.check_call(
-                    [interpreter, "--version"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                log.debug(f"Using command {interpreter} for dvc!")
-                return interpreter
-
-            except subprocess.CalledProcessError:
-                log.debug(f"{interpreter} is not working!")
-        raise ValueError(
-            "Could not find a working python interpreter to work with subprocesses!"
-        )
 
     @classmethod
     def convert_notebook(cls, nb_name: str = None, silent: bool = False):
@@ -341,13 +308,20 @@ class GraphWriter:
                 self.convert_notebook(nb_name, silent)
                 script += ["--deps", utils.module_to_path(self.module).as_posix()]
                 # Handle Parameter
-        if len(self._descriptor_list.filter(zntrack_type=[utils.ZnTypes.params])) > 0:
+        if (
+            len(
+                filter_ZnTrackOption(
+                    self._descriptor_list, self, zntrack_type=[utils.ZnTypes.params]
+                )
+            )
+            > 0
+        ):
             script += [
                 "--params",
                 f"{utils.Files.params}:{self.node_name}",
             ]
         zn_options_set = set()
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             value = getattr(self, option.name)
             if option.metadata.zntrack_type == utils.ZnTypes.dvc:
                 script += handle_dvc(value, option.metadata.dvc_args)
@@ -371,8 +345,8 @@ class GraphWriter:
         # Add command to run the script
         cls_name = self.__class__.__name__
         script.append(
-            f"""{self.python_interpreter} -c "from {self.module} import {cls_name}; """
-            f"""{cls_name}.load(name='{self.node_name}').run_and_save()" """
+            f"""{utils.get_python_interpreter()} -c "from {self.module} import """
+            f"""{cls_name}; {cls_name}.load(name='{self.node_name}').run_and_save()" """
         )
 
         self.save()

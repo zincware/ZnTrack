@@ -29,6 +29,7 @@ class File:
     path: pathlib.Path
         The path to the file
     # TODO add the rest
+    # TODO or remove this because it is not required
     """
 
     path: pathlib.Path

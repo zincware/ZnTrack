@@ -3,7 +3,13 @@ import pathlib
 import pytest
 
 from zntrack import dvc, zn
-from zntrack.core.dvcgraph import DVCRunOptions, GraphWriter, handle_deps, handle_dvc
+from zntrack.core.dvcgraph import (
+    DVCRunOptions,
+    GraphWriter,
+    filter_ZnTrackOption,
+    handle_deps,
+    handle_dvc,
+)
 
 
 class ExampleDVCOutsNode(GraphWriter):
@@ -103,17 +109,22 @@ class ExampleClassWithParams(GraphWriter):
 def test__descriptor_list():
     example = ExampleClassWithParams()
 
-    assert len(example._descriptor_list.data) == 2
+    assert len(example._descriptor_list) == 2
 
 
 def test_descriptor_list_filter():
     example = ExampleClassWithParams()
 
-    assert example._descriptor_list.filter(zntrack_type="params") == {
+    assert filter_ZnTrackOption(
+        data=example._descriptor_list, cls=example, zntrack_type="params"
+    ) == {
         "param1": 1,
         "param2": 2,
     }
 
-    assert example._descriptor_list.filter(
-        zntrack_type="params", return_with_type=True
+    assert filter_ZnTrackOption(
+        data=example._descriptor_list,
+        cls=example,
+        zntrack_type="params",
+        return_with_type=True,
     ) == {"params": {"param1": 1, "param2": 2}}

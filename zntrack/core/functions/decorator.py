@@ -255,8 +255,8 @@ def nodify(
                     pathlib.Path(*module.split(".")).with_suffix(".py").as_posix(),
                 ]
 
-            import_str = f"""python -c "from {module} import {func.__name__};"""
-            import_str += f"""{func.__name__}(exec_func=True)" """
+            import_str = f"""{utils.get_python_interpreter()} -c "from {module} import """
+            import_str += f"""{func.__name__}; {func.__name__}(exec_func=True)" """
             script += [import_str]
             log.debug(f"Running script: {script}")
             if dry_run:

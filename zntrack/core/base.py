@@ -91,7 +91,7 @@ class Node(GraphWriter):
             Set this option to True if they should be saved, e.g. in run_and_save
         """
         # Save dvc.<option>, dvc.deps, zn.Method
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             if results:
                 # Save all
                 option.save(instance=self)
@@ -105,7 +105,7 @@ class Node(GraphWriter):
 
     def _load(self):
         """Load class state from files"""
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             option.load(instance=self)
         self.is_loaded = True
 

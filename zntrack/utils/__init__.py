@@ -16,6 +16,7 @@ from zntrack.utils.utils import (
     cwd_temp_dir,
     decode_dict,
     deprecated,
+    get_python_interpreter,
     module_handler,
     module_to_path,
     update_nb_name,
@@ -34,4 +35,5 @@ __all__ = [
     "exceptions",
     "Files",
     "check_type",
+    "get_python_interpreter",
 ]

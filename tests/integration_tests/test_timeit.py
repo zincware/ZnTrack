@@ -7,7 +7,7 @@ import pytest
 
 from zntrack import Node, zn
 from zntrack.metadata import TimeIt
-from zntrack.metadata.base import DescriptorMissing
+from zntrack.utils.exceptions import DescriptorMissing
 
 
 @pytest.fixture

@@ -14,10 +14,7 @@ from abc import ABC, abstractmethod
 from typing import Callable
 
 from zntrack import utils
-
-
-class DescriptorMissing(Exception):
-    pass
+from zntrack.core.dvcgraph import filter_ZnTrackOption
 
 
 class MetaData(ABC):
@@ -84,13 +81,15 @@ class MetaData(ABC):
         try:
             metadata_attr, metadata = next(
                 iter(
-                    cls._descriptor_list.filter(
-                        zntrack_type=utils.ZnTypes.metadata
+                    filter_ZnTrackOption(
+                        data=cls._descriptor_list,
+                        cls=cls,
+                        zntrack_type=utils.ZnTypes.metadata,
                     ).items()
                 )
             )
         except StopIteration as error:
-            raise DescriptorMissing(
+            raise utils.exceptions.DescriptorMissing(
                 "Could not find a metadata descriptor. Please add zn.metadata()!"
             ) from error
         if metadata is None:
