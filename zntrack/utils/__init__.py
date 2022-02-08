@@ -10,6 +10,19 @@ Description: Standard python init file for the utils directory
 """
 
 from .config import config
-from .utils import cwd_temp_dir, decode_dict
+from .utils import (
+    cwd_temp_dir,
+    decode_dict,
+    module_handler,
+    module_to_path,
+    update_nb_name,
+)
 
-__all__ = ["config", "cwd_temp_dir", "decode_dict"]
+__all__ = [
+    "config",
+    "cwd_temp_dir",
+    "decode_dict",
+    "module_handler",
+    "update_nb_name",
+    "module_to_path",
+]

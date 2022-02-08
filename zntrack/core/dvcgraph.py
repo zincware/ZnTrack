@@ -6,12 +6,9 @@ import pathlib
 import subprocess
 import typing
 
+from zntrack import utils
+from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.parameter import ZnTrackOption
-from zntrack.utils import config
-from zntrack.utils.exceptions import DVCProcessError
-from zntrack.utils.utils import module_handler
-
-from .jupyter import jupyter_class_to_file
 
 log = logging.getLogger(__name__)
 
@@ -195,7 +192,7 @@ class GraphWriter:
         this can be changed when using nb_mode
         """
         if self._module is None:
-            return module_handler(self.__class__)
+            return utils.module_handler(self.__class__)
         return self._module
 
     def save(self, results: bool = False):
@@ -259,7 +256,8 @@ class GraphWriter:
             "Could not find a working python interpreter to work with subprocesses!"
         )
 
-    def convert_notebook(self, nb_name: str = None, silent: bool = False) -> str:
+    @classmethod
+    def convert_notebook(cls, nb_name: str = None, silent: bool = False):
         """Use jupyter_class_to_file to convert ipynb to py
 
         Parameters
@@ -268,31 +266,16 @@ class GraphWriter:
             Notebook name when not using config.nb_name (this is not recommended)
         silent: bool, default = False
             Reduce the amount of logging
-
-        Returns
-        -------
-        nb_name: str
-            Modified notebook name, if gathered from config.nb_name
         """
-        if nb_name is None:
-            nb_name = config.nb_name
+        nb_name = utils.update_nb_name(nb_name)
 
-        # Jupyter Notebook
-        if nb_name is not None:
-            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
-
-            jupyter_class_to_file(
-                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
-            )
-
-        self.save()
-        return nb_name
+        jupyter_class_to_file(silent=silent, nb_name=nb_name, module_name=cls.__name__)
 
     def write_graph(
         self,
         silent: bool = False,
         nb_name: str = None,
-        no_notebook: bool = False,
+        notebook: bool = True,
         no_commit: bool = False,
         external: bool = False,
         always_changed: bool = False,
@@ -314,9 +297,8 @@ class GraphWriter:
             subprocess call.
         nb_name: str
             Notebook name when not using config.nb_name (this is not recommended)
-        no_notebook: bool, default = False
-            Do not convert the notebook to a py File, even if config.nb_name or nb_name
-            are provided.
+        notebook: bool, default = True
+            convert the notebook to a py File
         no_commit: dvc parameter
         external: dvc parameter
         always_changed: dvc parameter
@@ -351,15 +333,18 @@ class GraphWriter:
         ).dvc_args
 
         # Jupyter Notebook
-        if not no_notebook:
-            nb_name = self.convert_notebook(nb_name, silent)
-            if nb_name is not None:
+        nb_name = utils.update_nb_name(nb_name)
+
+        if nb_name is not None:
+            self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
+            if notebook:
+                self.convert_notebook(nb_name, silent)
                 script += [
                     "--deps",
-                    pathlib.Path(*self.module.split(".")).with_suffix(".py").as_posix(),
+                    utils.module_to_path(self.module).as_posix(),
                 ]
 
-        # Handle Parameter
+                # Handle Parameter
         if len(self._descriptor_list.filter(zntrack_type=["params", "method"])) > 0:
             script += [
                 "--params",
@@ -408,7 +393,7 @@ class GraphWriter:
                     if len(process.stderr) > 0:
                         log.warning(process.stderr.decode())
             except subprocess.CalledProcessError as err:
-                raise DVCProcessError(
+                raise utils.exceptions.DVCProcessError(
                     f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
                     f"# failed after stdout: \n{err.stdout.decode()}"
                     f"# with stderr: \n{err.stderr.decode()}"

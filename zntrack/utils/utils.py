@@ -148,3 +148,15 @@ def check_type(obj, types, allow_iterable=False, allow_none=False) -> bool:
             return False
 
     return True
+
+
+def update_nb_name(nb_name: str) -> str:
+    """Check the config file for a nb_name if None provided"""
+    if nb_name is None:
+        return config.nb_name
+    return nb_name
+
+
+def module_to_path(module: str, suffix=".py") -> pathlib.Path:
+    """convert module a.b.c to path(a/b/c)"""
+    return pathlib.Path(*module.split(".")).with_suffix(suffix)
