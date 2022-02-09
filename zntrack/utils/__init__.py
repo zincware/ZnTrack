@@ -19,6 +19,7 @@ from zntrack.utils.utils import (
     get_python_interpreter,
     module_handler,
     module_to_path,
+    run_script,
     update_nb_name,
 )
 
@@ -36,4 +37,5 @@ __all__ = [
     "Files",
     "check_type",
     "get_python_interpreter",
+    "run_script",
 ]

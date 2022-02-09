@@ -12,7 +12,6 @@ Description: Function decorator for ZnTrack
 import dataclasses
 import logging
 import pathlib
-import subprocess
 import typing
 
 import dot4dict
@@ -261,7 +260,7 @@ def nodify(
             log.debug(f"Running script: {script}")
             if dry_run:
                 return script
-            subprocess.check_call(script)
+            utils.run_script(script, silent)
 
             cfg.params = dot4dict.dotdict(cfg.params)
             return cfg

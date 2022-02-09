@@ -22,6 +22,7 @@ import typing
 import znjson
 
 from zntrack.utils.config import config
+from zntrack.utils.exceptions import DVCProcessError
 
 log = logging.getLogger(__name__)
 
@@ -191,3 +192,29 @@ def get_python_interpreter() -> str:
     raise ValueError(
         "Could not find a working python interpreter to work with subprocesses!"
     )
+
+
+def run_script(script, silent):
+    """Run the DVC script via subprocess calls
+
+    Parameters
+    ----------
+    script: list[str]
+        A list of strings to pass the subprocess command
+
+    silent: bool,
+        reduce the output to a minimum
+    """
+    try:
+        process = subprocess.run(script, capture_output=True, check=True)
+        if not silent:
+            if len(process.stdout) > 0:
+                log.info(process.stdout.decode())
+            if len(process.stderr) > 0:
+                log.warning(process.stderr.decode())
+    except subprocess.CalledProcessError as err:
+        raise DVCProcessError(
+            f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
+            f"# failed after stdout: \n{err.stdout.decode()}"
+            f"# with stderr: \n{err.stderr.decode()}"
+        ) from err

@@ -3,7 +3,6 @@ from __future__ import annotations
 import dataclasses
 import logging
 import pathlib
-import subprocess
 import typing
 
 from zntrack import utils
@@ -359,17 +358,4 @@ class GraphWriter:
 
         if dry_run:
             return script
-        else:
-            try:
-                process = subprocess.run(script, capture_output=True, check=True)
-                if not silent:
-                    if len(process.stdout) > 0:
-                        log.info(process.stdout.decode())
-                    if len(process.stderr) > 0:
-                        log.warning(process.stderr.decode())
-            except subprocess.CalledProcessError as err:
-                raise utils.exceptions.DVCProcessError(
-                    f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
-                    f"# failed after stdout: \n{err.stdout.decode()}"
-                    f"# with stderr: \n{err.stderr.decode()}"
-                ) from err
+        utils.run_script(script, silent)
