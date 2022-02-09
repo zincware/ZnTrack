@@ -307,15 +307,14 @@ class GraphWriter:
             if notebook:
                 self.convert_notebook(nb_name, silent)
                 script += ["--deps", utils.module_to_path(self.module).as_posix()]
-                # Handle Parameter
-        if (
-            len(
-                filter_ZnTrackOption(
-                    self._descriptor_list, self, zntrack_type=[utils.ZnTypes.params]
-                )
-            )
-            > 0
-        ):
+
+        # Handle Parameter
+        params_list = filter_ZnTrackOption(
+            data=self._descriptor_list,
+            cls=self,
+            zntrack_type=[utils.ZnTypes.params],
+        )
+        if len(params_list) > 0:
             script += [
                 "--params",
                 f"{utils.Files.params}:{self.node_name}",
