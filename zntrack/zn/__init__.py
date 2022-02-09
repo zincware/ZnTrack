@@ -210,6 +210,12 @@ class Method(SplitZnTrackOption):
             return self
         log.debug(f"Get {self} from {instance}")
         value = instance.__dict__.get(self.name, self.default_value)
+        if value is None:
+            log.warning(
+                "Found NoneType but expected some class instance. Please open an issue on"
+                " github.com/zincware/ZnTrack if this causes unexpected behaviour."
+            )
+            return
         try:
             # Set some attribute for the serializer
             value.znjson_zn_method = True
