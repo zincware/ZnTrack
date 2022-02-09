@@ -194,7 +194,7 @@ def get_python_interpreter() -> str:
     )
 
 
-def run_script(script, silent):
+def run_script(script, silent=False):
     """Run the DVC script via subprocess calls
 
     Parameters
@@ -206,12 +206,7 @@ def run_script(script, silent):
         reduce the output to a minimum
     """
     try:
-        process = subprocess.run(script, capture_output=True, check=True)
-        if not silent:
-            if len(process.stdout) > 0:
-                log.info(process.stdout.decode())
-            if len(process.stderr) > 0:
-                log.warning(process.stderr.decode())
+        subprocess.run(script, capture_output=silent, check=True)
     except subprocess.CalledProcessError as err:
         raise DVCProcessError(
             f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
