@@ -36,20 +36,22 @@ def test_example_func(proj_path):
 
 def test_example_func_dry_run(proj_path):
     script = example_func(dry_run=True)
-    assert script == [
-        "dvc",
-        "run",
-        "-n",
-        "example_func",
-        "--no-exec",
-        "--force",
-        "--params",
-        "params.yaml:example_func",
-        "--outs",
-        "test.txt",
-        'python -c "from test_single_function import '
-        'example_func;example_func(exec_func=True)" ',
-    ]
+    assert " ".join(script) == " ".join(
+        [
+            "dvc",
+            "run",
+            "-n",
+            "example_func",
+            "--no-exec",
+            "--force",
+            "--params",
+            "params.yaml:example_func",
+            "--outs",
+            "test.txt",
+            'python -c "from test_single_function import '
+            'example_func; example_func(exec_func=True)" ',
+        ]
+    )
 
 
 @nodify(outs=[pathlib.Path("test.txt")], params={"text": "Lorem Ipsum"})
