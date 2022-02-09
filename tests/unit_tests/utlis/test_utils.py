@@ -83,3 +83,7 @@ def test_check_type():
 
 def test_python_interpreter():
     assert utils.get_python_interpreter() in ["python", "python3"]
+
+
+def test_module_to_path():
+    assert utils.module_to_path("src.module") == pathlib.Path("src", "module.py")
