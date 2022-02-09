@@ -206,7 +206,12 @@ def run_script(script, silent=False):
         reduce the output to a minimum
     """
     try:
-        subprocess.run(script, capture_output=silent, check=True)
+        process = subprocess.run(script, capture_output=True, check=True)
+        if not silent:
+            if len(process.stdout) > 0:
+                log.info(process.stdout.decode())
+            if len(process.stderr) > 0:
+                log.warning(process.stderr.decode())
     except subprocess.CalledProcessError as err:
         raise DVCProcessError(
             f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
