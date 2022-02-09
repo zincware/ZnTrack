@@ -5,6 +5,7 @@ import subprocess
 
 import pytest
 
+from zntrack import utils
 from zntrack.core.functions.decorator import NodeConfig, nodify
 
 
@@ -48,7 +49,7 @@ def test_example_func_dry_run(proj_path):
             "params.yaml:example_func",
             "--outs",
             "test.txt",
-            'python -c "from test_single_function import '
+            f'{utils.get_python_interpreter()} -c "from test_single_function import '
             'example_func; example_func(exec_func=True)" ',
         ]
     )
