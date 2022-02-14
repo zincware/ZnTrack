@@ -40,12 +40,21 @@ except ImportError:
 
 def split_value(input_val):
     """Split input_val into data for params.yaml and zntrack.json"""
-    try:
-        # zn.Method
-        params_data = input_val["value"].pop("kwargs")
-    except (AttributeError, TypeError):
-        # everything else
-        params_data = input_val.pop("value")
+    if isinstance(input_val, (list, tuple)):
+        data = [split_value(x) for x in input_val]
+        params_data, zntrack_data = zip(*data)
+    else:
+        try:
+            # zn.Method
+            params_data = input_val["value"].pop("kwargs")
+            params_data["_cls"] = input_val["value"]["cls"]
+            input_val["module"] = input_val["value"]["module"]
+
+            _ = input_val.pop("value")
+        except (AttributeError, TypeError):
+            # everything else
+            params_data = input_val.pop("value")
+            # TODO what is everything else?
     return params_data, input_val
 
 
@@ -64,14 +73,22 @@ def combine_values(cls_dict: dict, params_val):
     Loaded object of type cls_dict[_type]
 
     """
-    try:
-        # zn.Method
-        cls_dict["value"]["kwargs"] = params_val
-    except KeyError:
-        # everything else
-        cls_dict["value"] = params_val
+    result = {
+        "_type": cls_dict.pop("_type"),
+        "value": cls_dict,
+    }
+    if result["_type"] in ["zn.method"]:
+        try:
+            result["value"]["cls"] = params_val.pop("_cls")
+        except KeyError:
+            # using old file where the cls is stored in zntrack.json and not params.yaml
+            pass
+        result["value"]["kwargs"] = params_val
+    else:
+        # things that are not zn.method and do not have kwargs, such as pathlib, ...
+        result["value"] = params_val
 
-    return json.loads(json.dumps(cls_dict), cls=znjson.ZnDecoder)
+    return utils.decode_dict(result)
 
 
 class SplitZnTrackOption(ZnTrackOption):
@@ -92,13 +109,7 @@ class SplitZnTrackOption(ZnTrackOption):
 
         try:
             # if znjson was used to serialize the data, it will have a _type key
-            if isinstance(serialized_value, list):
-                data = [split_value(x) for x in serialized_value]
-                params_data, zntrack_data = zip(*data)
-            else:
-                # Check that correctly serialized
-                _ = serialized_value["_type"]
-                params_data, zntrack_data = split_value(serialized_value)
+            params_data, zntrack_data = split_value(serialized_value)
 
             # Write to params.yaml
             utils.file_io.update_config_file(
