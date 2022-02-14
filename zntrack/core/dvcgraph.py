@@ -3,14 +3,11 @@ from __future__ import annotations
 import dataclasses
 import logging
 import pathlib
-import subprocess
 import typing
 
+from zntrack import utils
+from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.parameter import ZnTrackOption
-from zntrack.utils import config
-from zntrack.utils.utils import module_handler
-
-from .jupyter import jupyter_class_to_file
 
 log = logging.getLogger(__name__)
 
@@ -107,44 +104,41 @@ def handle_dvc(value, dvc_args) -> list:
     return [f(x) for x in value for f in (option_func, posix_func)]
 
 
-@dataclasses.dataclass
-class DescriptorList:
-    """Dataclass to collect all descriptors of some parent class"""
+def filter_ZnTrackOption(
+    data, cls, zntrack_type: typing.Union[str, list], return_with_type=False
+) -> dict:
+    """Filter the descriptor instances by zntrack_type
 
-    parent: GraphWriter
-    data: typing.List[ZnTrackOption] = dataclasses.field(default_factory=list)
+    Parameters
+    ----------
+    data: List[ZnTrackOption]
+        The ZnTrack options to query through
+    cls:
+        The instance the ZnTrack options are attached to
+    zntrack_type: str
+        The zntrack_type of the descriptors to gather
+    return_with_type: bool, default=False
+        return a dictionary with the Descriptor.metadata.dvc_option as keys
 
-    def filter(
-        self, zntrack_type: typing.Union[str, list], return_with_type=False
-    ) -> dict:
-        """Filter the descriptor instances by zntrack_type
+    Returns
+    -------
+    dict:
+        either {attr_name: attr_value}
+        or
+        {descriptor.dvc_option: {attr_name: attr_value}}
 
-        Parameters
-        ----------
-        zntrack_type: str
-            The zntrack_type of the descriptors to gather
-        return_with_type: bool, default=False
-            return a dictionary with the Descriptor.metadata.dvc_option as keys
-
-        Returns
-        -------
-        dict:
-            either {attr_name: attr_value}
-            or
-            {descriptor.dvc_option: {attr_name: attr_value}}
-
-        """
-        if not isinstance(zntrack_type, list):
-            zntrack_type = [zntrack_type]
-        data = [x for x in self.data if x.metadata.zntrack_type in zntrack_type]
-        if return_with_type:
-            types_dict = {x.metadata.dvc_option: {} for x in data}
-            for entity in data:
-                types_dict[entity.metadata.dvc_option].update(
-                    {entity.name: getattr(self.parent, entity.name)}
-                )
-            return types_dict
-        return {x.name: getattr(self.parent, x.name) for x in data}
+    """
+    if not isinstance(zntrack_type, list):
+        zntrack_type = [zntrack_type]
+    data = [x for x in data if x.metadata.zntrack_type in zntrack_type]
+    if return_with_type:
+        types_dict = {x.metadata.dvc_option: {} for x in data}
+        for entity in data:
+            types_dict[entity.metadata.dvc_option].update(
+                {entity.name: getattr(cls, entity.name)}
+            )
+        return types_dict
+    return {x.name: getattr(cls, x.name) for x in data}
 
 
 class GraphWriter:
@@ -158,18 +152,18 @@ class GraphWriter:
 
     def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
-        for data in self._descriptor_list.data:
-            if data.metadata.zntrack_type == "deps":
+        for data in self._descriptor_list:
+            if data.metadata.zntrack_type == utils.ZnTypes.deps:
                 data.update_default()
 
     @property
-    def _descriptor_list(self) -> DescriptorList:
+    def _descriptor_list(self) -> typing.List[ZnTrackOption]:
         """Get all descriptors of this instance"""
         descriptor_list = []
         for option in vars(type(self)).values():
             if isinstance(option, ZnTrackOption):
                 descriptor_list.append(option)
-        return DescriptorList(parent=self, data=descriptor_list)
+        return descriptor_list
 
     @property
     def node_name(self) -> str:
@@ -194,7 +188,7 @@ class GraphWriter:
         this can be changed when using nb_mode
         """
         if self._module is None:
-            return module_handler(self.__class__)
+            return utils.module_handler(self.__class__)
         return self._module
 
     def save(self, results: bool = False):
@@ -214,7 +208,7 @@ class GraphWriter:
     def affected_files(self) -> typing.Set[pathlib.Path]:
         """list of all files that can be changed by this instance"""
         files = []
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             file = option.get_filename(self)
             if file.tracked:
                 files.append(file.path)
@@ -228,40 +222,26 @@ class GraphWriter:
         files = [x for x in files if x is not None]
         return set(files)
 
-    @property
-    def python_interpreter(self) -> str:
-        """Find the most suitable python interpreter
+    @classmethod
+    def convert_notebook(cls, nb_name: str = None, silent: bool = False):
+        """Use jupyter_class_to_file to convert ipynb to py
 
-        Try to run subprocess check calls to see, which python interpreter
-        should be selected
-
-        Returns
-        -------
-        interpreter: str
-            Name of the python interpreter that works with subprocess calls
-
+        Parameters
+        ----------
+        nb_name: str
+            Notebook name when not using config.nb_name (this is not recommended)
+        silent: bool, default = False
+            Reduce the amount of logging
         """
+        nb_name = utils.update_nb_name(nb_name)
 
-        for interpreter in ["python3", "python"]:
-            try:
-                subprocess.check_call(
-                    [interpreter, "--version"],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL,
-                )
-                log.debug(f"Using command {interpreter} for dvc!")
-                return interpreter
-
-            except subprocess.CalledProcessError:
-                log.debug(f"{interpreter} is not working!")
-        raise ValueError(
-            "Could not find a working python interpreter to work with subprocesses!"
-        )
+        jupyter_class_to_file(silent=silent, nb_name=nb_name, module_name=cls.__name__)
 
     def write_graph(
         self,
         silent: bool = False,
         nb_name: str = None,
+        notebook: bool = True,
         no_commit: bool = False,
         external: bool = False,
         always_changed: bool = False,
@@ -283,6 +263,8 @@ class GraphWriter:
             subprocess call.
         nb_name: str
             Notebook name when not using config.nb_name (this is not recommended)
+        notebook: bool, default = True
+            convert the notebook to a py File
         no_commit: dvc parameter
         external: dvc parameter
         always_changed: dvc parameter
@@ -302,19 +284,6 @@ class GraphWriter:
         if run is not None:
             no_exec = not run
 
-        if nb_name is None:
-            nb_name = config.nb_name
-
-        # Jupyter Notebook
-        if nb_name is not None:
-            self._module = f"{config.nb_class_path}.{self.__class__.__name__}"
-
-            jupyter_class_to_file(
-                silent=silent, nb_name=nb_name, module_name=self.__class__.__name__
-            )
-
-        self.save()
-
         if not silent:
             log.warning("--- Writing new DVC file! ---")
 
@@ -330,32 +299,42 @@ class GraphWriter:
         ).dvc_args
 
         # Jupyter Notebook
+        nb_name = utils.update_nb_name(nb_name)
+
         if nb_name is not None:
-            script += [
-                "--deps",
-                pathlib.Path(*self.module.split(".")).with_suffix(".py").as_posix(),
-            ]
+            self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
+            if notebook:
+                self.convert_notebook(nb_name, silent)
+                script += ["--deps", utils.module_to_path(self.module).as_posix()]
 
         # Handle Parameter
-        if len(self._descriptor_list.filter(zntrack_type=["params", "method"])) > 0:
+        params_list = filter_ZnTrackOption(
+            data=self._descriptor_list,
+            cls=self,
+            zntrack_type=[utils.ZnTypes.params],
+        )
+        if len(params_list) > 0:
             script += [
                 "--params",
-                f"params.yaml:{self.node_name}",
+                f"{utils.Files.params}:{self.node_name}",
             ]
         zn_options_set = set()
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             value = getattr(self, option.name)
-            if option.metadata.zntrack_type == "dvc":
+            if option.metadata.zntrack_type == utils.ZnTypes.dvc:
                 script += handle_dvc(value, option.metadata.dvc_args)
             # Handle Zn Options
-            elif option.metadata.zntrack_type in ["zn", "metadata"]:
+            elif option.metadata.zntrack_type in [
+                utils.ZnTypes.results,
+                utils.ZnTypes.metadata,
+            ]:
                 zn_options_set.add(
                     (
                         f"--{option.metadata.dvc_args}",
                         option.get_filename(self).path.as_posix(),
                     )
                 )
-            elif option.metadata.zntrack_type == "deps":
+            elif option.metadata.zntrack_type == utils.ZnTypes.deps:
                 script += handle_deps(value)
 
         for pair in zn_options_set:
@@ -364,9 +343,12 @@ class GraphWriter:
         # Add command to run the script
         cls_name = self.__class__.__name__
         script.append(
-            f"""{self.python_interpreter} -c "from {self.module} import {cls_name}; """
-            f"""{cls_name}.load(name='{self.node_name}').run_and_save()" """
+            f"""{utils.get_python_interpreter()} -c "from {self.module} import """
+            f"""{cls_name}; {cls_name}.load(name='{self.node_name}').run_and_save()" """
         )
+
+        self.save()
+
         log.debug(f"running script: {' '.join([str(x) for x in script])}")
 
         log.debug(
@@ -376,10 +358,4 @@ class GraphWriter:
 
         if dry_run:
             return script
-        else:
-            process = subprocess.run(script, capture_output=True, check=True)
-            if not silent:
-                if len(process.stdout) > 0:
-                    log.info(process.stdout.decode())
-                if len(process.stderr) > 0:
-                    log.warning(process.stderr.decode())
+        utils.run_dvc_cmd(script, silent)

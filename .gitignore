@@ -10,3 +10,4 @@ venv
 /dist/
 /py_track.egg-info/
 __pycache__/
+.pymon
