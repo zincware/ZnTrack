@@ -9,17 +9,18 @@ Copyright Contributors to the Zincware Project.
 Description: zn.<option>
 
 The following can be used to store e.g. metrics directly without
-defining and writing to a file
+defining and writing to a file explicitly. For more information on the individual methods
+see https://dvc.org/doc/command-reference/run#options
+
 """
 import json
 import logging
-import pathlib
 
 import znjson
 
+from zntrack import utils
 from zntrack.core.parameter import File, ZnTrackOption
 from zntrack.descriptor import Metadata
-from zntrack.utils import file_io
 
 log = logging.getLogger(__name__)
 
@@ -100,16 +101,16 @@ class SplitZnTrackOption(ZnTrackOption):
                 params_data, zntrack_data = split_value(serialized_value)
 
             # Write to params.yaml
-            file_io.update_config_file(
-                file=pathlib.Path("params.yaml"),
+            utils.file_io.update_config_file(
+                file=utils.Files.params,
                 node_name=instance.node_name,
                 value_name=self.name,
                 value=params_data,
             )
 
             # write to zntrack.json
-            file_io.update_config_file(
-                file=pathlib.Path("zntrack.json"),
+            utils.file_io.update_config_file(
+                file=utils.Files.zntrack,
                 node_name=instance.node_name,
                 value_name=self.name,
                 value=zntrack_data,
@@ -131,12 +132,12 @@ class SplitZnTrackOption(ZnTrackOption):
 
         try:
             # Check that we can read it
-            _ = file_io.read_file(pathlib.Path("zntrack.json"))[instance.node_name][
+            _ = utils.file_io.read_file(utils.Files.zntrack)[instance.node_name][
                 self.name
             ]
 
-            params_values = file_io.read_file(pathlib.Path("params.yaml"))
-            cls_dict = file_io.read_file(pathlib.Path("zntrack.json"))
+            params_values = utils.file_io.read_file(utils.Files.params)
+            cls_dict = utils.file_io.read_file(utils.Files.zntrack)
             # select <node><attribute> from the full params / zntrack file
             params_values = params_values[instance.node_name][self.name]
             cls_dict = cls_dict[instance.node_name][self.name]
@@ -153,27 +154,66 @@ class SplitZnTrackOption(ZnTrackOption):
 
 
 class outs(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs", zntrack_type="zn")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.results)
 
 
 class deps(ZnTrackOption):
-    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    metadata = Metadata(dvc_option="deps", zntrack_type=utils.ZnTypes.deps)
+    file = utils.Files.zntrack
 
 
 class metrics(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="zn")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.results)
 
 
 class params(SplitZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="params")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
+    file = utils.Files.params
 
 
 class iterable(ZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="iterable")
+    """Speciel ZnTrack option
+
+    This option defines an iterable parameter for spawning nodes.
+    """
+
+    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.iterable)
 
 
 class metadata(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="metadata")
+    """Speciel ZnTrack option
+
+    This option defines a <metrics_no_cache> output that is used by ZnTracks metadata
+    collectors.
+    """
+
+    metadata = Metadata(
+        dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.metadata
+    )
 
 
 class Method(SplitZnTrackOption):
@@ -195,11 +235,11 @@ class Method(SplitZnTrackOption):
 
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type="method")
+    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
 
     def get_filename(self, instance) -> File:
         """Does not really have a single file but params.yaml and zntrack.json"""
-        return File(path=pathlib.Path("params.yaml"))
+        return File(path=utils.Files.params)
 
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""
@@ -207,6 +247,12 @@ class Method(SplitZnTrackOption):
             return self
         log.debug(f"Get {self} from {instance}")
         value = instance.__dict__.get(self.name, self.default_value)
+        if value is None:
+            log.warning(
+                "Found NoneType but expected some class instance. Please open an issue on"
+                " github.com/zincware/ZnTrack if this causes unexpected behaviour."
+            )
+            return
         try:
             # Set some attribute for the serializer
             value.znjson_zn_method = True

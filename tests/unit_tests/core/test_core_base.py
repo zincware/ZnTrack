@@ -21,11 +21,6 @@ def test_node_module():
     assert example.module == "src.base"
 
 
-def test_python_interpreter():
-    example = ExampleDVCOutsNode()
-    assert example.python_interpreter in ["python", "python3"]
-
-
 class ExampleFullNode(Node):
     params = zn.params(10)
     zn_outs = zn.outs("outs")

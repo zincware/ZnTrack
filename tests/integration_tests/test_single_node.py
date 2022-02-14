@@ -7,8 +7,9 @@ import subprocess
 
 import pytest
 
-from zntrack import zn
+from zntrack import dvc, zn
 from zntrack.core.base import Node
+from zntrack.utils.exceptions import DVCProcessError
 
 
 class ExampleNode01(Node):
@@ -277,3 +278,17 @@ def test_auto_init(proj_path):
     assert SingleNodeNoInit.load().param1 == 25
     assert SingleNodeNoInit.load().param2 == 42
     assert SingleNodeNoInit.load().result == 25 + 42
+
+
+class OutsNotWritten(Node):
+    """Define an outs file that is not being created"""
+
+    outs = dvc.outs("does_not_exist.txt")
+
+    def run(self):
+        pass
+
+
+def test_OutsNotWritten(proj_path):
+    with pytest.raises(DVCProcessError):
+        OutsNotWritten().write_graph(run=True)

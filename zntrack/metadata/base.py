@@ -13,9 +13,8 @@ import re
 from abc import ABC, abstractmethod
 from typing import Callable
 
-
-class DescriptorMissing(Exception):
-    pass
+from zntrack import utils
+from zntrack.core.dvcgraph import filter_ZnTrackOption
 
 
 class MetaData(ABC):
@@ -77,14 +76,25 @@ class MetaData(ABC):
         cls: the class that has the cls.metadata ZnTrackOption
         value:
             Any value that should be saved
+
+        Raises
+        ------
+        DescriptorMissing:
+            If the Node does not contain a <zn.metadata> descriptor
         """
 
         try:
             metadata_attr, metadata = next(
-                iter(cls._descriptor_list.filter(zntrack_type="metadata").items())
+                iter(
+                    filter_ZnTrackOption(
+                        data=cls._descriptor_list,
+                        cls=cls,
+                        zntrack_type=utils.ZnTypes.metadata,
+                    ).items()
+                )
             )
         except StopIteration as error:
-            raise DescriptorMissing(
+            raise utils.exceptions.DescriptorMissing(
                 "Could not find a metadata descriptor. Please add zn.metadata()!"
             ) from error
         if metadata is None:

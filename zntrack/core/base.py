@@ -14,7 +14,7 @@ import inspect
 import logging
 
 from zntrack.core.dvcgraph import GraphWriter
-from zntrack.utils.config import config
+from zntrack.utils.config import ZnTypes, config
 from zntrack.utils.utils import deprecated, get_auto_init
 from zntrack.zn import params
 
@@ -91,11 +91,11 @@ class Node(GraphWriter):
             Set this option to True if they should be saved, e.g. in run_and_save
         """
         # Save dvc.<option>, dvc.deps, zn.Method
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             if results:
                 # Save all
                 option.save(instance=self)
-            elif option.metadata.zntrack_type not in ["zn", "metrics"]:
+            elif option.metadata.zntrack_type not in [ZnTypes.results]:
                 # Filter out zn.<options>
                 option.save(instance=self)
             else:
@@ -105,7 +105,7 @@ class Node(GraphWriter):
 
     def _load(self):
         """Load class state from files"""
-        for option in self._descriptor_list.data:
+        for option in self._descriptor_list:
             option.load(instance=self)
         self.is_loaded = True
 

@@ -14,8 +14,8 @@ import dataclasses
 import logging
 import pathlib
 
+from zntrack import utils
 from zntrack.descriptor import Descriptor
-from zntrack.utils import decode_dict, file_io
 
 log = logging.getLogger(__name__)
 
@@ -29,6 +29,7 @@ class File:
     path: pathlib.Path
         The path to the file
     # TODO add the rest
+    # TODO or remove this because it is not required
     """
 
     path: pathlib.Path
@@ -45,7 +46,15 @@ class ZnTrackOption(Descriptor):
     which Options are used.
     This is required to allow for load=True which updates all ZnTrackOptions,
     based on the computed or otherwise stored values.
+
+    Attributes
+    ----------
+    file: str
+        Either the zntrack file or the parameter file
     """
+
+    file = None
+    value_tracked = False
 
     def __init__(self, default_value=None, **kwargs):
         """Instantiate a ZnTrackOption Descriptor
@@ -85,30 +94,18 @@ class ZnTrackOption(Descriptor):
 
     def get_filename(self, instance) -> File:
         """Get the name of the file this ZnTrackOption will save its values to"""
-        filename_dict = {
-            "params": File(path=pathlib.Path("params.yaml"), key=instance.node_name),
-            "deps": File(path=pathlib.Path("zntrack.json"), key=instance.node_name),
-            "dvc": File(
-                path=pathlib.Path("zntrack.json"),
-                key=instance.node_name,
-                value_tracked=True,
-            ),
-            "method": File(path=pathlib.Path("zntrack.json"), key=instance.node_name),
-            # replace this with also params.json!
-            "zn": File(
+        if self.metadata.zntrack_type in [utils.ZnTypes.results, utils.ZnTypes.metadata]:
+            return File(
                 path=pathlib.Path(
                     "nodes", instance.node_name, f"{self.metadata.dvc_option}.json"
                 ),
                 tracked=True,
-            ),
-            "metadata": File(
-                path=pathlib.Path(
-                    "nodes", instance.node_name, f"{self.metadata.dvc_option}.json"
-                ),
-                tracked=True,
-            ),
-        }
-        return filename_dict[self.metadata.zntrack_type]
+            )
+        return File(
+            path=pathlib.Path(self.file),
+            key=instance.node_name,
+            value_tracked=self.value_tracked,
+        )
 
     def save(self, instance):
         """Save this descriptor for the given instance to file
@@ -122,7 +119,7 @@ class ZnTrackOption(Descriptor):
         """
         file = self.get_filename(instance)
 
-        file_io.update_config_file(
+        utils.file_io.update_config_file(
             file.path,
             node_name=file.key,
             value_name=self.name,
@@ -153,13 +150,13 @@ class ZnTrackOption(Descriptor):
         """
         file = self.get_filename(instance)
         try:
-            file_content = file_io.read_file(file.path)
+            file_content = utils.file_io.read_file(file.path)
             # The problem here is, that I can not / don't want to load all Nodes but only
             # the ones, that are in [self.node_name][self.name] for deserializing
             if file.key is not None:
-                values = decode_dict(file_content[file.key].get(self.name, None))
+                values = utils.decode_dict(file_content[file.key].get(self.name, None))
             else:
-                values = decode_dict(file_content.get(self.name, None))
+                values = utils.decode_dict(file_content.get(self.name, None))
 
             log.debug(f"Loading {file.key} from {file}: ({values})")
             instance.__dict__.update({self.name: values})

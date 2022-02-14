@@ -88,6 +88,19 @@ def test_dvc_outs(dvc_repo_path):
     )
 
 
+def test_dvc_reversed(dvc_repo_path):
+    """Create the instances first and at the end call write_graph"""
+
+    DependenciesCollector(dependencies=DVCOuts.load()).write_graph()
+    DVCOuts().write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert (
+        DependenciesCollector.load().dependencies.data_file.read_text() == "Lorem Ipsum"
+    )
+
+
 def test_zn_outs(dvc_repo_path):
     ZnOuts().write_graph()
 
