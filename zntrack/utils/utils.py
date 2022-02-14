@@ -194,7 +194,7 @@ def get_python_interpreter() -> str:
     )
 
 
-def run_script(script, silent=False):
+def run_dvc_cmd(script, silent=False):
     """Run the DVC script via subprocess calls
 
     Parameters

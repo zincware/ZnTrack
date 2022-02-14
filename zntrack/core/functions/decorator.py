@@ -260,7 +260,7 @@ def nodify(
             log.debug(f"Running script: {script}")
             if dry_run:
                 return script
-            utils.run_script(script, silent)
+            utils.run_dvc_cmd(script, silent)
 
             cfg.params = dot4dict.dotdict(cfg.params)
             return cfg

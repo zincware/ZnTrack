@@ -358,4 +358,4 @@ class GraphWriter:
 
         if dry_run:
             return script
-        utils.run_script(script, silent)
+        utils.run_dvc_cmd(script, silent)

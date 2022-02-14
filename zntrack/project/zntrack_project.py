@@ -41,7 +41,7 @@ class ZnTrackProject(DVCInterface):
         log.info("Running git add")
         subprocess.check_call(["git", "add", "."])
         log.info("Queue DVC stage")
-        utils.run_script(["dvc", "exp", "run", "--name", self.name, "--queue"])
+        utils.run_dvc_cmd(["dvc", "exp", "run", "--name", self.name, "--queue"])
 
     @staticmethod
     def remove_queue():
@@ -53,7 +53,7 @@ class ZnTrackProject(DVCInterface):
     def run_all():
         """Run all queried experiments"""
         log.info("RUN DVC stage")
-        utils.run_script(["dvc", "exp", "run", "--run-all"])
+        utils.run_dvc_cmd(["dvc", "exp", "run", "--run-all"])
         log.info("Running git add")
         subprocess.check_call(["git", "add", "."])
 
@@ -111,4 +111,4 @@ class ZnTrackProject(DVCInterface):
     @staticmethod
     def repro():
         """Run dvc repro"""
-        utils.run_script(["dvc", "repro"])
+        utils.run_dvc_cmd(["dvc", "repro"])
