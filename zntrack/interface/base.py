@@ -12,6 +12,7 @@ import copy
 import dataclasses
 import json
 import logging
+import pathlib
 import subprocess
 from pathlib import Path
 from typing import List
@@ -118,7 +119,7 @@ class DVCInterface:
                     "dvc",
                     "get",
                     ".",
-                    file,
+                    pathlib.Path(file).as_posix(),
                     "--rev",
                     experiment.hash,
                     "--out",
