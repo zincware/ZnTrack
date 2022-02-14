@@ -70,7 +70,7 @@ class ZnTrackOption(Descriptor):
 
         super().__init__(default_value)
         self.name = kwargs.get("name", None)
-        self.lazy = kwargs.get("lazy", True)
+        self.lazy = kwargs.get("lazy", False)
 
     def __repr__(self):
         return f"{self.__class__}({hex(id(self))}) for <{self.metadata.dvc_option}>"

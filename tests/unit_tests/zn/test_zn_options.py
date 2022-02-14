@@ -36,7 +36,7 @@ def test_zn_plots():
     example = ExamplePlots()
     # test save and load if there is nothing to save or load
     assert ExamplePlots.plots.save(example) is None
-    assert ExamplePlots.plots.load(example) is None
+    assert ExamplePlots.plots.update_instance(example, lazy=False) is None
 
 
 @dataclasses.dataclass

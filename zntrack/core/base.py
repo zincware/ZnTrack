@@ -103,14 +103,14 @@ class Node(GraphWriter):
                 # for the filtered files
                 option.mkdir(instance=self)
 
-    def _load(self, lazy=True):
+    def _load(self, lazy):
         """Load class state from files"""
         for option in self._descriptor_list:
             option.update_instance(instance=self, lazy=lazy)
         self.is_loaded = True
 
     @classmethod
-    def load(cls, name=None, lazy=True) -> Node:
+    def load(cls, name=None, lazy=False) -> Node:
         """
 
         Parameters
