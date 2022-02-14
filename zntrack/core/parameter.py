@@ -140,10 +140,10 @@ class ZnTrackOption(Descriptor):
 
     def get(self, instance, owner):
         if instance.__dict__.get(self.name) is LazyOption:
-            self.load(instance, lazy=False)
+            self.update_instance(instance, lazy=False)
         return instance.__dict__.get(self.name, self.default_value)
 
-    def load(self, instance, lazy):
+    def update_instance(self, instance, lazy):
         """Load this descriptor value into the given instance
 
         Updates the instance.__dict__

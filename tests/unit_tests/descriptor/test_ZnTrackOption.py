@@ -10,7 +10,7 @@ def test_lazy_load():
     lazy_obj = ExampleClass.lazy_option
 
     example_class = ExampleClass()
-    lazy_obj.load(instance=example_class, lazy=True)
+    lazy_obj.update_instance(instance=example_class, lazy=True)
 
     assert example_class.__dict__["lazy_option"] is LazyOption
 

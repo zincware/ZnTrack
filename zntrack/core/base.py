@@ -106,7 +106,7 @@ class Node(GraphWriter):
     def _load(self, lazy=True):
         """Load class state from files"""
         for option in self._descriptor_list:
-            option.load(instance=self, lazy=lazy)
+            option.update_instance(instance=self, lazy=lazy)
         self.is_loaded = True
 
     @classmethod

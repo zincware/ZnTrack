@@ -45,7 +45,7 @@ class plots(ZnTrackOption):
         file.path.parent.mkdir(exist_ok=True, parents=True)
         value.to_csv(file.path)
 
-    def load(self, instance, lazy):
+    def update_instance(self, instance, lazy):
         """Load value with pd.read_csv"""
         if lazy:
             instance.__dict__.update({self.name: LazyOption})

@@ -122,7 +122,7 @@ class SplitZnTrackOption(ZnTrackOption):
             # TypeError <..>
             super().save(instance)
 
-    def load(self, instance, lazy):
+    def update_instance(self, instance, lazy):
         """Overwrite the load method
 
         Try to load from zntrack.json / params.yaml in a combined approach first,
@@ -154,4 +154,4 @@ class SplitZnTrackOption(ZnTrackOption):
                 log.debug(f"Loading {file.key} from {file}: ({value})")
                 instance.__dict__.update({self.name: value})
             except (AttributeError, KeyError, TypeError, FileNotFoundError):
-                super().load(instance, lazy)
+                super().update_instance(instance, lazy)
