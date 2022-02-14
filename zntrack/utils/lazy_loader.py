@@ -1,0 +1,2 @@
+class LazyOption:
+    pass

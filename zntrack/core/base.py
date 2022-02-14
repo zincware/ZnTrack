@@ -103,14 +103,14 @@ class Node(GraphWriter):
                 # for the filtered files
                 option.mkdir(instance=self)
 
-    def _load(self):
+    def _load(self, lazy=True):
         """Load class state from files"""
         for option in self._descriptor_list:
-            option.load(instance=self)
+            option.load(instance=self, lazy=lazy)
         self.is_loaded = True
 
     @classmethod
-    def load(cls, name=None) -> Node:
+    def load(cls, name=None, lazy=True) -> Node:
         """
 
         Parameters
@@ -142,7 +142,7 @@ class Node(GraphWriter):
             if name not in (None, cls.__name__):
                 instance.node_name = name
 
-        instance._load()
+        instance._load(lazy=lazy)
 
         if config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?

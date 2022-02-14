@@ -6,6 +6,7 @@ import pandas as pd
 from zntrack import utils
 from zntrack.core.parameter import File, ZnTrackOption
 from zntrack.descriptor import Metadata
+from zntrack.utils.lazy_loader import LazyOption
 
 log = logging.getLogger(__name__)
 
@@ -44,10 +45,13 @@ class plots(ZnTrackOption):
         file.path.parent.mkdir(exist_ok=True, parents=True)
         value.to_csv(file.path)
 
-    def load(self, instance):
+    def load(self, instance, lazy):
         """Load value with pd.read_csv"""
-        file = self.get_filename(instance)
-        try:
-            instance.__dict__.update({self.name: pd.read_csv(file.path, index_col=0)})
-        except (FileNotFoundError, KeyError):
-            pass
+        if lazy:
+            instance.__dict__.update({self.name: LazyOption})
+        else:
+            file = self.get_filename(instance)
+            try:
+                instance.__dict__.update({self.name: pd.read_csv(file.path, index_col=0)})
+            except (FileNotFoundError, KeyError):
+                pass

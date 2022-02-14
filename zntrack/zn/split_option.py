@@ -16,6 +16,7 @@ import typing
 
 from zntrack import utils
 from zntrack.core.parameter import ZnTrackOption
+from zntrack.utils.lazy_loader import LazyOption
 
 log = logging.getLogger(__name__)
 
@@ -121,33 +122,36 @@ class SplitZnTrackOption(ZnTrackOption):
             # TypeError <..>
             super().save(instance)
 
-    def load(self, instance):
+    def load(self, instance, lazy):
         """Overwrite the load method
 
         Try to load from zntrack.json / params.yaml in a combined approach first,
         if no entry in zntrack.json is found, load from params.yaml only without
         deserializing.
         """
-        file = self.get_filename(instance)
 
-        try:
-            # Check that we can read it
-            _ = utils.file_io.read_file(utils.Files.zntrack)[instance.node_name][
-                self.name
-            ]
+        if lazy:
+            instance.__dict__.update({self.name: LazyOption})
+        else:
+            file = self.get_filename(instance)
+            try:
+                # Check that we can read it
+                _ = utils.file_io.read_file(utils.Files.zntrack)[instance.node_name][
+                    self.name
+                ]
 
-            params_values = utils.file_io.read_file(utils.Files.params)
-            cls_dict = utils.file_io.read_file(utils.Files.zntrack)
-            # select <node><attribute> from the full params / zntrack file
-            params_values = params_values[instance.node_name][self.name]
-            cls_dict = cls_dict[instance.node_name][self.name]
+                params_values = utils.file_io.read_file(utils.Files.params)
+                cls_dict = utils.file_io.read_file(utils.Files.zntrack)
+                # select <node><attribute> from the full params / zntrack file
+                params_values = params_values[instance.node_name][self.name]
+                cls_dict = cls_dict[instance.node_name][self.name]
 
-            if isinstance(cls_dict, list):
-                value = [combine_values(*x) for x in zip(cls_dict, params_values)]
-            else:
-                value = combine_values(cls_dict, params_values)
+                if isinstance(cls_dict, list):
+                    value = [combine_values(*x) for x in zip(cls_dict, params_values)]
+                else:
+                    value = combine_values(cls_dict, params_values)
 
-            log.debug(f"Loading {file.key} from {file}: ({value})")
-            instance.__dict__.update({self.name: value})
-        except (AttributeError, KeyError, TypeError, FileNotFoundError):
-            super().load(instance)
+                log.debug(f"Loading {file.key} from {file}: ({value})")
+                instance.__dict__.update({self.name: value})
+            except (AttributeError, KeyError, TypeError, FileNotFoundError):
+                super().load(instance, lazy)
