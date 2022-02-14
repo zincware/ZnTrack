@@ -5,6 +5,7 @@ import pathlib
 import znjson
 
 from zntrack import zn
+from zntrack.zn.split_option import combine_values, split_value
 
 
 class ExampleClass:
@@ -53,13 +54,13 @@ class ExampleDataClass:
 def test_split_value():
     serialized_value = json.loads(json.dumps(ExampleDataClass(), cls=znjson.ZnEncoder))
 
-    params_data, zntrack_data = zn.split_value(serialized_value)
+    params_data, zntrack_data = split_value(serialized_value)
     assert zntrack_data == {"_type": "zn.method", "module": "test_zn_options"}
     assert params_data == {"_cls": "ExampleDataClass", "a": 5, "b": 7}
 
     # and now test the same thing but serialize a list
     serialized_value = json.loads(json.dumps([ExampleDataClass()], cls=znjson.ZnEncoder))
-    params_data, zntrack_data = zn.split_value(serialized_value)
+    params_data, zntrack_data = split_value(serialized_value)
     assert zntrack_data == [{"_type": "zn.method", "module": "test_zn_options"}]
     assert params_data == ({"_cls": "ExampleDataClass", "a": 5, "b": 7},)
 
@@ -68,7 +69,7 @@ def test_combine_values():
     zntrack_data = {"_type": "zn.method", "module": "test_zn_options"}
     params_data = {"_cls": "ExampleDataClass", "a": 5, "b": 7}
 
-    assert zn.combine_values(zntrack_data, params_data) == ExampleDataClass()
+    assert combine_values(zntrack_data, params_data) == ExampleDataClass()
 
     # try older data structure
     zntrack_data = {
@@ -77,7 +78,7 @@ def test_combine_values():
         "cls": "ExampleDataClass",
     }
     params_data = {"a": 5, "b": 7}
-    assert zn.combine_values(zntrack_data, params_data) == ExampleDataClass()
+    assert combine_values(zntrack_data, params_data) == ExampleDataClass()
 
     # try older data structure
     zntrack_data = {
@@ -86,18 +87,18 @@ def test_combine_values():
         "name": "ExampleDataClass",
     }
     params_data = {"a": 5, "b": 7}
-    assert zn.combine_values(zntrack_data, params_data) == ExampleDataClass()
+    assert combine_values(zntrack_data, params_data) == ExampleDataClass()
 
 
 def test_split_value_path():
     path = pathlib.Path("my_path")
     serialized_value = json.loads(json.dumps(path, cls=znjson.ZnEncoder))
 
-    params_data, zntrack_data = zn.split_value(serialized_value)
+    params_data, zntrack_data = split_value(serialized_value)
 
     assert params_data == "my_path"
     assert zntrack_data == {"_type": "pathlib.Path"}
 
-    new_path = zn.combine_values(zntrack_data, params_data)
+    new_path = combine_values(zntrack_data, params_data)
     # TODO change order to be consistent with split_values
     assert new_path == path
