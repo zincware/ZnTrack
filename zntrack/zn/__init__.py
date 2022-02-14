@@ -9,7 +9,9 @@ Copyright Contributors to the Zincware Project.
 Description: zn.<option>
 
 The following can be used to store e.g. metrics directly without
-defining and writing to a file
+defining and writing to a file explicitly. For more information on the individual methods
+see https://dvc.org/doc/command-reference/run#options
+
 """
 import json
 import logging
@@ -152,28 +154,63 @@ class SplitZnTrackOption(ZnTrackOption):
 
 
 class outs(ZnTrackOption):
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
     metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.results)
 
 
 class deps(ZnTrackOption):
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
     metadata = Metadata(dvc_option="deps", zntrack_type=utils.ZnTypes.deps)
     file = utils.Files.zntrack
 
 
 class metrics(ZnTrackOption):
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
     metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.results)
 
 
 class params(SplitZnTrackOption):
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
     metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
     file = utils.Files.params
 
 
 class iterable(ZnTrackOption):
+    """Speciel ZnTrack option
+
+    This option defines an iterable parameter for spawning nodes.
+    """
+
     metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.iterable)
 
 
 class metadata(ZnTrackOption):
+    """Speciel ZnTrack option
+
+    This option defines a <metrics_no_cache> output that is used by ZnTracks metadata
+    collectors.
+    """
+
     metadata = Metadata(
         dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.metadata
     )
