@@ -10,7 +10,6 @@ Description: Node parameter
 """
 from __future__ import annotations
 
-import dataclasses
 import logging
 import pathlib
 
@@ -19,24 +18,6 @@ from zntrack.descriptor import Descriptor
 from zntrack.utils.lazy_loader import LazyOption
 
 log = logging.getLogger(__name__)
-
-
-@dataclasses.dataclass
-class File:
-    """Dataclass for adding metadata to files
-
-    Attributes
-    ----------
-    path: pathlib.Path
-        The path to the file
-    # TODO add the rest
-    # TODO or remove this because it is not required
-    """
-
-    path: pathlib.Path
-    key: str = None
-    tracked: bool = False  # the file itself is an affected_file
-    value_tracked: bool = False  # the getattr(instance, self.name) is an affected file
 
 
 class ZnTrackOption(Descriptor):
@@ -52,10 +33,18 @@ class ZnTrackOption(Descriptor):
     ----------
     file: str
         Either the zntrack file or the parameter file
+    value_tracked: bool
+        this is true if the getattr(instance, self.name) is an affected file,
+         e.g. the dvc.<outs> is a file / list of files
+    tracked: bool
+        this is true if the internal file, such as in the case of zn.outs()
+        like nodes/<node_name>/outs.json is an affected file
+
     """
 
     file = None
     value_tracked = False
+    tracked = False
 
     def __init__(self, default_value=None, **kwargs):
         """Instantiate a ZnTrackOption Descriptor
@@ -94,20 +83,13 @@ class ZnTrackOption(Descriptor):
             if hasattr(self.default_value, "_load"):
                 self.default_value._load(lazy=self.lazy)
 
-    def get_filename(self, instance) -> File:
+    def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
         if self.metadata.zntrack_type in [utils.ZnTypes.results, utils.ZnTypes.metadata]:
-            return File(
-                path=pathlib.Path(
-                    "nodes", instance.node_name, f"{self.metadata.dvc_option}.json"
-                ),
-                tracked=True,
+            return pathlib.Path(
+                "nodes", instance.node_name, f"{self.metadata.dvc_option}.json"
             )
-        return File(
-            path=pathlib.Path(self.file),
-            key=instance.node_name,
-            value_tracked=self.value_tracked,
-        )
+        return pathlib.Path(self.file)
 
     def save(self, instance):
         """Save this descriptor for the given instance to file
@@ -119,11 +101,10 @@ class ZnTrackOption(Descriptor):
             Similar to __get__(instance) this requires the instance
             to be passed manually.
         """
-        file = self.get_filename(instance)
 
         utils.file_io.update_config_file(
-            file.path,
-            node_name=file.key,
+            file=self.get_filename(instance),
+            node_name=instance.node_name,
             value_name=self.name,
             value=self.__get__(instance, self.owner),
         )
@@ -136,7 +117,7 @@ class ZnTrackOption(Descriptor):
         for DVC to create a .gitignore file in these directories.
         """
         file = self.get_filename(instance)
-        file.path.parent.mkdir(exist_ok=True, parents=True)
+        file.parent.mkdir(exist_ok=True, parents=True)
 
     def get(self, instance, owner):
         if instance.__dict__.get(self.name) is LazyOption:
@@ -159,19 +140,19 @@ class ZnTrackOption(Descriptor):
         if lazy:
             instance.__dict__.update({self.name: LazyOption})
         else:
-            file = self.get_filename(instance)
             try:
-                file_content = utils.file_io.read_file(file.path)
+                file = self.get_filename(instance)
+                file_content = utils.file_io.read_file(file)
                 # The problem here is, that I can not / don't want to load all Nodes but
                 # only the ones, that are in [self.node_name][self.name] for deserializing
-                if file.key is not None:
+                if instance.node_name is not None:
                     values = utils.decode_dict(
-                        file_content[file.key].get(self.name, None)
+                        file_content[instance.node_name].get(self.name, None)
                     )
                 else:
                     values = utils.decode_dict(file_content.get(self.name, None))
 
-                log.debug(f"Loading {file.key} from {file}: ({values})")
+                log.debug(f"Loading {instance.node_name} from {file}: ({values})")
                 instance.__dict__.update({self.name: values})
             except (FileNotFoundError, KeyError):
                 pass

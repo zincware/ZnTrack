@@ -151,7 +151,7 @@ class SplitZnTrackOption(ZnTrackOption):
                 else:
                     value = combine_values(cls_dict, params_values)
 
-                log.debug(f"Loading {file.key} from {file}: ({value})")
+                log.debug(f"Loading {instance.node_name} from {file}: ({value})")
                 instance.__dict__.update({self.name: value})
             except (AttributeError, KeyError, TypeError, FileNotFoundError):
                 super().update_instance(instance, lazy)

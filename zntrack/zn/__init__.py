@@ -47,6 +47,7 @@ class outs(ZnTrackOption):
     """
 
     metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.results)
+    tracked = True
 
 
 class deps(ZnTrackOption):
@@ -68,6 +69,7 @@ class metrics(ZnTrackOption):
     """
 
     metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.results)
+    tracked = True
 
 
 class params(SplitZnTrackOption):
@@ -100,3 +102,5 @@ class metadata(ZnTrackOption):
     metadata = Metadata(
         dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.metadata
     )
+
+    tracked = True

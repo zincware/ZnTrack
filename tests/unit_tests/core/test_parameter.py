@@ -17,9 +17,7 @@ class ExampleNode:
 
 
 def test_method_filename():
-    assert ExampleNode.method.get_filename(ExampleNode()).path == pathlib.Path(
-        "params.yaml"
-    )
+    assert ExampleNode.method.get_filename(ExampleNode()) == pathlib.Path("params.yaml")
 
 
 def test_method_save(tmp_path):

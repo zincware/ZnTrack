@@ -1,7 +1,7 @@
 import logging
+import pathlib
 
 from zntrack import utils
-from zntrack.core.parameter import File
 from zntrack.descriptor import Metadata
 from zntrack.zn.split_option import SplitZnTrackOption
 
@@ -29,9 +29,9 @@ class Method(SplitZnTrackOption):
 
     metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
 
-    def get_filename(self, instance) -> File:
+    def get_filename(self, instance) -> pathlib.Path:
         """Does not really have a single file but params.yaml and zntrack.json"""
-        return File(path=utils.Files.params)
+        return utils.Files.params
 
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""

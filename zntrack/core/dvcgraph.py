@@ -210,9 +210,9 @@ class GraphWriter:
         files = []
         for option in self._descriptor_list:
             file = option.get_filename(self)
-            if file.tracked:
-                files.append(file.path)
-            elif file.value_tracked:
+            if option.tracked:
+                files.append(file)
+            elif option.value_tracked:
                 value = getattr(self, option.name)
                 if isinstance(value, list):
                     files += value
@@ -331,7 +331,7 @@ class GraphWriter:
                 zn_options_set.add(
                     (
                         f"--{option.metadata.dvc_args}",
-                        option.get_filename(self).path.as_posix(),
+                        option.get_filename(self).as_posix(),
                     )
                 )
             elif option.metadata.zntrack_type == utils.ZnTypes.deps:

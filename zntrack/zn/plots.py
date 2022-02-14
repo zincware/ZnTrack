@@ -4,7 +4,7 @@ import pathlib
 import pandas as pd
 
 from zntrack import utils
-from zntrack.core.parameter import File, ZnTrackOption
+from zntrack.core.parameter import ZnTrackOption
 from zntrack.descriptor import Metadata
 from zntrack.utils.lazy_loader import LazyOption
 
@@ -13,14 +13,12 @@ log = logging.getLogger(__name__)
 
 class plots(ZnTrackOption):
     metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=utils.ZnTypes.results)
+    tracked = True
 
-    def get_filename(self, instance) -> File:
+    def get_filename(self, instance) -> pathlib.Path:
         """Overwrite filename to csv"""
-        return File(
-            path=pathlib.Path(
-                "nodes", instance.node_name, f"{self.metadata.dvc_option}.csv"
-            ),
-            tracked=True,
+        return pathlib.Path(
+            "nodes", instance.node_name, f"{self.metadata.dvc_option}.csv"
         )
 
     def save(self, instance):
@@ -42,8 +40,8 @@ class plots(ZnTrackOption):
             )
 
         file = self.get_filename(instance)
-        file.path.parent.mkdir(exist_ok=True, parents=True)
-        value.to_csv(file.path)
+        file.parent.mkdir(exist_ok=True, parents=True)
+        value.to_csv(file)
 
     def update_instance(self, instance, lazy):
         """Load value with pd.read_csv"""
@@ -52,6 +50,6 @@ class plots(ZnTrackOption):
         else:
             file = self.get_filename(instance)
             try:
-                instance.__dict__.update({self.name: pd.read_csv(file.path, index_col=0)})
+                instance.__dict__.update({self.name: pd.read_csv(file, index_col=0)})
             except (FileNotFoundError, KeyError):
                 pass
