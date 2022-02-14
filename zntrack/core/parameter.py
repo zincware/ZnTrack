@@ -12,12 +12,37 @@ from __future__ import annotations
 
 import logging
 import pathlib
+import typing
 
 from zntrack import utils
 from zntrack.descriptor import Descriptor
 from zntrack.utils.lazy_loader import LazyOption
 
 log = logging.getLogger(__name__)
+
+
+def uses_node_name(metadata, instance) -> typing.Union[str, None]:
+    """Check if the given metadata is associated with using the node_name as dict key
+
+    Everything in nodes/<node_name>/ does not need it as key, because the directory
+    is already named after the node. On the other side, parameters for example
+    require the usage of node_name as a key inside the params.yaml file.
+
+    Parameters
+    ----------
+    metadata: MetaData
+    instance:
+        Any instance object with the node_name attribute
+
+    Returns
+    -------
+    str
+        returns the node_name if it is being used, otherwise returns None
+
+    """
+    if metadata.zntrack_type in [utils.ZnTypes.results, utils.ZnTypes.metadata]:
+        return None
+    return instance.node_name
 
 
 class ZnTrackOption(Descriptor):
@@ -85,7 +110,7 @@ class ZnTrackOption(Descriptor):
 
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
-        if self.metadata.zntrack_type in [utils.ZnTypes.results, utils.ZnTypes.metadata]:
+        if uses_node_name(self.metadata, instance) is None:
             return pathlib.Path(
                 "nodes", instance.node_name, f"{self.metadata.dvc_option}.json"
             )
@@ -101,10 +126,9 @@ class ZnTrackOption(Descriptor):
             Similar to __get__(instance) this requires the instance
             to be passed manually.
         """
-
         utils.file_io.update_config_file(
             file=self.get_filename(instance),
-            node_name=instance.node_name,
+            node_name=uses_node_name(self.metadata, instance),
             value_name=self.name,
             value=self.__get__(instance, self.owner),
         )
@@ -145,7 +169,7 @@ class ZnTrackOption(Descriptor):
                 file_content = utils.file_io.read_file(file)
                 # The problem here is, that I can not / don't want to load all Nodes but
                 # only the ones, that are in [self.node_name][self.name] for deserializing
-                if instance.node_name is not None:
+                if uses_node_name(self.metadata, instance) is not None:
                     values = utils.decode_dict(
                         file_content[instance.node_name].get(self.name, None)
                     )
