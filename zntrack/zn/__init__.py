@@ -82,7 +82,7 @@ class params(SplitZnTrackOption):
 
 
 class iterable(ZnTrackOption):
-    """Speciel ZnTrack option
+    """Special ZnTrack option
 
     This option defines an iterable parameter for spawning nodes.
     """
@@ -91,7 +91,7 @@ class iterable(ZnTrackOption):
 
 
 class metadata(ZnTrackOption):
-    """Speciel ZnTrack option
+    """Special ZnTrack option
 
     This option defines a <metrics_no_cache> output that is used by ZnTracks metadata
     collectors.
