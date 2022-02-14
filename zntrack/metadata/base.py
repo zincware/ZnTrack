@@ -76,6 +76,11 @@ class MetaData(ABC):
         cls: the class that has the cls.metadata ZnTrackOption
         value:
             Any value that should be saved
+
+        Raises
+        ------
+        DescriptorMissing:
+            If the Node does not contain a <zn.metadata> descriptor
         """
 
         try:
