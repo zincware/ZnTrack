@@ -55,18 +55,20 @@ def test_split_value():
     serialized_value = json.loads(json.dumps(ExampleDataClass(), cls=znjson.ZnEncoder))
 
     params_data, zntrack_data = split_value(serialized_value)
-    assert zntrack_data == {"_type": "zn.method", "module": "test_zn_options"}
+    assert zntrack_data == {"_type": "zn.method", "value": {"module": "test_zn_options"}}
     assert params_data == {"_cls": "ExampleDataClass", "a": 5, "b": 7}
 
     # and now test the same thing but serialize a list
     serialized_value = json.loads(json.dumps([ExampleDataClass()], cls=znjson.ZnEncoder))
     params_data, zntrack_data = split_value(serialized_value)
-    assert zntrack_data == [{"_type": "zn.method", "module": "test_zn_options"}]
+    assert zntrack_data == [
+        {"_type": "zn.method", "value": {"module": "test_zn_options"}}
+    ]
     assert params_data == ({"_cls": "ExampleDataClass", "a": 5, "b": 7},)
 
 
 def test_combine_values():
-    zntrack_data = {"_type": "zn.method", "module": "test_zn_options"}
+    zntrack_data = {"_type": "zn.method", "value": {"module": "test_zn_options"}}
     params_data = {"_cls": "ExampleDataClass", "a": 5, "b": 7}
 
     assert combine_values(zntrack_data, params_data) == ExampleDataClass()
@@ -74,8 +76,10 @@ def test_combine_values():
     # try older data structure
     zntrack_data = {
         "_type": "zn.method",
-        "module": "test_zn_options",
-        "cls": "ExampleDataClass",
+        "value": {
+            "module": "test_zn_options",
+            "cls": "ExampleDataClass",
+        },
     }
     params_data = {"a": 5, "b": 7}
     assert combine_values(zntrack_data, params_data) == ExampleDataClass()
@@ -83,8 +87,10 @@ def test_combine_values():
     # try older data structure
     zntrack_data = {
         "_type": "zn.method",
-        "module": "test_zn_options",
-        "name": "ExampleDataClass",
+        "value": {
+            "module": "test_zn_options",
+            "name": "ExampleDataClass",
+        },
     }
     params_data = {"a": 5, "b": 7}
     assert combine_values(zntrack_data, params_data) == ExampleDataClass()

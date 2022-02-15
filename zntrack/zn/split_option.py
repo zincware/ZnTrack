@@ -28,17 +28,15 @@ def split_value(input_val):
         data = [split_value(x) for x in input_val]
         params_data, zntrack_data = zip(*data)
     else:
-        try:
+        if input_val["_type"] in ["zn.method"]:
             # zn.Method
             params_data = input_val["value"].pop("kwargs")
-            params_data["_cls"] = input_val["value"]["cls"]
-            input_val["module"] = input_val["value"]["module"]
+            params_data["_cls"] = input_val["value"].pop("cls")
 
-            _ = input_val.pop("value")
-        except (AttributeError, TypeError):
-            # everything else
+            # _ = input_val.pop("value")
+        else:
+            # things that are not zn.method and do not have kwargs, such as pathlib, ...
             params_data = input_val.pop("value")
-            # TODO what is everything else?
     return params_data, input_val
 
 
@@ -57,10 +55,7 @@ def combine_values(cls_dict: dict, params_val):
     Loaded object of type cls_dict[_type]
 
     """
-    result = {
-        "_type": cls_dict.pop("_type"),
-        "value": cls_dict,
-    }
+    result = cls_dict
     if result["_type"] in ["zn.method"]:
         try:
             result["value"]["cls"] = params_val.pop("_cls")
