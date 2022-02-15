@@ -12,6 +12,7 @@ import copy
 import dataclasses
 import json
 import logging
+import pathlib
 import subprocess
 from pathlib import Path
 from typing import List
@@ -112,17 +113,18 @@ class DVCInterface:
 
         for experiment in exp_list:
             for file in files:
+                file = pathlib.Path(file)
                 out_path = path / experiment.name
                 out_path.mkdir(parents=True, exist_ok=True)
                 cmd = [
                     "dvc",
                     "get",
                     ".",
-                    file,
+                    file.as_posix(),
                     "--rev",
                     experiment.hash,
                     "--out",
-                    out_path,
+                    out_path.as_posix(),
                 ]
                 log.debug(f"DVC command: {cmd}")
                 subprocess.run(cmd)

@@ -23,8 +23,8 @@ class HelloWorld(Node):
     outputs = zn.outs()
     inputs = dvc.params()
 
-    def __init__(self, inputs=None, name=None):
-        super(HelloWorld, self).__init__(name=name)
+    def __init__(self, inputs=None, **kwargs):
+        super(HelloWorld, self).__init__(**kwargs)
         self.inputs = inputs
 
     def run(self):
