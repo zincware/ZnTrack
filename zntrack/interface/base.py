@@ -113,17 +113,18 @@ class DVCInterface:
 
         for experiment in exp_list:
             for file in files:
+                file = pathlib.Path(file)
                 out_path = path / experiment.name
                 out_path.mkdir(parents=True, exist_ok=True)
                 cmd = [
                     "dvc",
                     "get",
                     ".",
-                    pathlib.Path(file).as_posix(),
+                    file.as_posix(),
                     "--rev",
                     experiment.hash,
                     "--out",
-                    out_path,
+                    out_path.as_posix(),
                 ]
                 log.debug(f"DVC command: {cmd}")
                 subprocess.run(cmd)
