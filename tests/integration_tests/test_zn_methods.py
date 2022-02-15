@@ -163,3 +163,66 @@ def test_write_params_no_kwargs(proj_path):
 
     dvc_dict = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
     assert dvc_dict["stages"]["SingleNodeNoParams"]["params"] == ["SingleNodeNoParams"]
+
+
+def test_assert_write_files(proj_path):
+    """Test the written files (without mocking pathlibs write_text)"""
+    SingleNodeNoParams(data_class=ExampleMethod(1, 2)).write_graph()
+
+    zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
+    params_dict = yaml.safe_load(pathlib.Path("params.yaml").read_text())
+
+    assert zntrack_dict == {
+        "SingleNodeNoParams": {
+            "data_class": {"_type": "zn.method", "value": {"module": "test_zn_methods"}}
+        }
+    }
+    assert params_dict == {
+        "SingleNodeNoParams": {
+            "data_class": {"_cls": "ExampleMethod", "param1": 1, "param2": 2}
+        }
+    }
+
+
+def test_assert_read_files(proj_path):
+    """Test the written files (without mocking pathlibs write_text)"""
+    zntrack_dict = {
+        "SingleNodeNoParams": {
+            "data_class": {"_type": "zn.method", "value": {"module": "test_zn_methods"}}
+        }
+    }
+    params_dict = {
+        "SingleNodeNoParams": {
+            "data_class": {"_cls": "ExampleMethod", "param1": 1, "param2": 2}
+        }
+    }
+
+    pathlib.Path("zntrack.json").write_text(json.dumps(zntrack_dict))
+    pathlib.Path("params.yaml").write_text(yaml.safe_dump(params_dict))
+
+    node = SingleNodeNoParams.load()
+    assert node.data_class.param1 == 1
+    assert node.data_class.param2 == 2
+
+
+def test_assert_read_files_old1(proj_path):
+    """Test the written files (without mocking pathlibs write_text)
+
+    Test for versions before https://github.com/zincware/ZnTrack/pull/231
+    """
+    zntrack_dict = {
+        "SingleNodeNoParams": {
+            "data_class": {
+                "_type": "zn.method",
+                "value": {"cls": "ExampleMethod", "module": "test_zn_methods"},
+            }
+        }
+    }
+    params_dict = {"SingleNodeNoParams": {"data_class": {"param1": 1, "param2": 2}}}
+
+    pathlib.Path("zntrack.json").write_text(json.dumps(zntrack_dict))
+    pathlib.Path("params.yaml").write_text(yaml.safe_dump(params_dict))
+
+    node = SingleNodeNoParams.load()
+    assert node.data_class.param1 == 1
+    assert node.data_class.param2 == 2
