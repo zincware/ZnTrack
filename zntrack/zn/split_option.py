@@ -11,10 +11,8 @@ parameters / attributes in one file (params.yaml) and the rest, which is not con
 a parameter in another (zntrack.json)
 
 """
-import json
 import logging
-
-import znjson
+import typing
 
 from zntrack import utils
 from zntrack.core.parameter import ZnTrackOption
@@ -22,18 +20,30 @@ from zntrack.core.parameter import ZnTrackOption
 log = logging.getLogger(__name__)
 
 
-def split_value(input_val):
-    """Split input_val into data for params.yaml and zntrack.json"""
+def split_value(input_val) -> (typing.Union[dict, list], typing.Union[dict, list]):
+    """Split input_val into data for params.yaml and zntrack.json
+
+    Parameters
+    ----------
+    input_val: dict
+        A dictionary of shape {_type: str, value: any} from ZnJSON
+
+    Returns
+    -------
+    params_data: dict|list
+        A dictionary containing the data considered a parameter
+    input_val: dict|list
+        A dictionary containing the constant data which is not considered a parameter
+
+
+    """
     if isinstance(input_val, (list, tuple)):
         data = [split_value(x) for x in input_val]
         params_data, zntrack_data = zip(*data)
     else:
         if input_val["_type"] in ["zn.method"]:
-            # zn.Method
             params_data = input_val["value"].pop("kwargs")
             params_data["_cls"] = input_val["value"].pop("cls")
-
-            # _ = input_val.pop("value")
         else:
             # things that are not zn.method and do not have kwargs, such as pathlib, ...
             params_data = input_val.pop("value")
@@ -84,7 +94,7 @@ class SplitZnTrackOption(ZnTrackOption):
         where the path as string / the dataclass as dict is stored in params.yaml
         """
         value = self.__get__(instance, self.owner)
-        serialized_value = json.loads(json.dumps(value, cls=znjson.ZnEncoder))
+        serialized_value = utils.encode_dict(value)
 
         try:
             # if znjson was used to serialize the data, it will have a _type key
