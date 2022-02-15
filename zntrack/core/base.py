@@ -129,10 +129,11 @@ class Node(GraphWriter):
             super().__init__(**kwargs)
 
         """
-
+        # TODO add a TypeError if parameters are not defaulted to None
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError:
+            # This can also come up, if any of the default parameters are not set to None
             log.warning(
                 "Can not pass <name> to the super.__init__ and trying workaround! This"
                 " can lead to unexpected behaviour and can be avoided by passing ("
