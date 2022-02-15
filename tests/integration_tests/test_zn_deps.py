@@ -42,40 +42,32 @@ def test_base_run(proj_path):
     assert LastNode.load().outs == 21
 
 
-def test_assert_write_file(proj_path):
+@pytest.fixture()
+def zntrack_dict() -> dict:
+    return {
+        "LastNode": {
+            "first_node": {
+                "_type": "ZnTrackType",
+                "value": {
+                    "cls": "FirstNode",
+                    "module": "test_zn_deps",
+                    "name": "FirstNode",
+                },
+            }
+        }
+    }
+
+
+def test_assert_write_file(proj_path, zntrack_dict):
     FirstNode().write_graph()
     LastNode().write_graph()
 
-    zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
+    zntrack_dict_loaded = json.loads(pathlib.Path("zntrack.json").read_text())
 
-    assert zntrack_dict == {
-        "LastNode": {
-            "first_node": {
-                "_type": "ZnTrackType",
-                "value": {
-                    "cls": "FirstNode",
-                    "module": "test_zn_deps",
-                    "name": "FirstNode",
-                },
-            }
-        }
-    }
+    assert zntrack_dict_loaded == zntrack_dict
 
 
-def test_assert_read_file(proj_path):
-    zntrack_dict = {
-        "LastNode": {
-            "first_node": {
-                "_type": "ZnTrackType",
-                "value": {
-                    "cls": "FirstNode",
-                    "module": "test_zn_deps",
-                    "name": "FirstNode",
-                },
-            }
-        }
-    }
-
+def test_assert_read_file(proj_path, zntrack_dict):
     pathlib.Path("zntrack.json").write_text(json.dumps(zntrack_dict))
 
     assert isinstance(LastNode.load().first_node, FirstNode)
