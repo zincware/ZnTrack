@@ -133,11 +133,9 @@ class Node(GraphWriter):
             super().__init__(**kwargs)
 
         """
-        # TODO add a TypeError if parameters are not defaulted to None
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError:
-            # This can also come up, if any of the default parameters are not set to None
             try:
                 instance = cls()
                 if name not in (None, cls.__name__):

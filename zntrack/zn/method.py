@@ -1,5 +1,4 @@
 import logging
-import pathlib
 
 from zntrack import utils
 from zntrack.zn.split_option import SplitZnTrackOption
@@ -29,9 +28,9 @@ class Method(SplitZnTrackOption):
     dvc_option = "params"
     zntrack_type = utils.ZnTypes.params
 
-    def get_filename(self, instance) -> pathlib.Path:
-        """Does not really have a single file but params.yaml and zntrack.json"""
-        return utils.Files.params
+    def get_filename(self, instance):
+        """Does not have a single file but params.yaml and zntrack.json"""
+        return utils.Files.params, utils.Files.zntrack
 
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""

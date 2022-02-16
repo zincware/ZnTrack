@@ -76,7 +76,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     instance = Node
     representation = "ZnTrackType"
 
-    def _encode(self, obj) -> dict:  # TODO type hints
+    def _encode(self, obj: Node) -> dict:
         """Convert Node to serializable dict"""
         return dataclasses.asdict(
             SerializedNode(

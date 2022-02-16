@@ -2,7 +2,7 @@ import os
 import pathlib
 from unittest.mock import mock_open, patch
 
-from zntrack import zn
+from zntrack import utils, zn
 
 
 class ExampleMethod:
@@ -17,7 +17,10 @@ class ExampleNode:
 
 
 def test_method_filename():
-    assert ExampleNode.method.get_filename(ExampleNode()) == pathlib.Path("params.yaml")
+    assert ExampleNode.method.get_filename(ExampleNode()) == (
+        utils.Files.params,
+        utils.Files.zntrack,
+    )
 
 
 def test_method_save(tmp_path):

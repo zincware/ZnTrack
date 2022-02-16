@@ -81,11 +81,6 @@ class ZnTrackOption(descriptor.Descriptor):
     def __str__(self):
         return f"{self.dvc_option} / {self.name}"
 
-    def __get__(self, instance, owner):
-        if instance is None:
-            return self
-        return super().__get__(instance, owner)
-
     def update_default(self):
         """Update default_value
 
@@ -147,7 +142,6 @@ class ZnTrackOption(descriptor.Descriptor):
             Similar to __get__(instance) this requires the instance
             to be passed manually.
         """
-        # TODO hide this somewhere and make load overwritable
         try:
             file = self.get_filename(instance)
             file_content = utils.file_io.read_file(file)
