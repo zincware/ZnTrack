@@ -77,3 +77,4 @@ jobs:
           flags: unittests # optional
           fail_ci_if_error: true # optional (default = false)
           verbose: true # optional (default = false)
+          files: .coverage
