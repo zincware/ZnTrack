@@ -56,7 +56,6 @@ class SerializedNode(SerializedClass):
     """
 
     name: str
-    lazy: bool = True
 
 
 @dataclasses.dataclass
@@ -84,7 +83,6 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
                 module=obj.module,
                 cls=obj.__class__.__name__,
                 name=obj.node_name,
-                lazy=obj.lazy,
             )
         )
 
@@ -92,9 +90,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
         """return serialized Node"""
 
         serialized_node = SerializedNode(**value)
-        return serialized_node.get_cls().load(
-            name=serialized_node.name, lazy=serialized_node.lazy
-        )
+        return serialized_node.get_cls().load(name=serialized_node.name)
 
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""

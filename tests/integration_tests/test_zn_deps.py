@@ -50,7 +50,6 @@ def zntrack_dict() -> dict:
                 "_type": "ZnTrackType",
                 "value": {
                     "cls": "FirstNode",
-                    "lazy": True,
                     "module": "test_zn_deps",
                     "name": "FirstNode",
                 },

@@ -15,7 +15,6 @@ import pathlib
 import typing
 
 from zntrack import descriptor, utils
-from zntrack.utils.lazy_loader import LazyOption
 
 log = logging.getLogger(__name__)
 
@@ -85,8 +84,6 @@ class ZnTrackOption(descriptor.Descriptor):
     def __get__(self, instance, owner):
         if instance is None:
             return self
-        if instance.__dict__.get(self.name) is LazyOption:
-            self.update_instance(instance, lazy=False)
         return super().__get__(instance, owner)
 
     def update_default(self):
@@ -100,10 +97,10 @@ class ZnTrackOption(descriptor.Descriptor):
             for value in self.default_value:
                 # cheap trick because circular imports - TODO find clever fix!
                 if hasattr(value, "_load"):
-                    value._load(lazy=value.lazy)
+                    value._load()
         except TypeError:
             if hasattr(self.default_value, "_load"):
-                self.default_value._load(lazy=self.default_value.lazy)
+                self.default_value._load()
 
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
@@ -138,7 +135,7 @@ class ZnTrackOption(descriptor.Descriptor):
         file = self.get_filename(instance)
         file.parent.mkdir(exist_ok=True, parents=True)
 
-    def update_instance(self, instance, lazy):
+    def update_instance(self, instance):
         """Load this descriptor value into the given instance
 
         Updates the instance.__dict__
@@ -151,22 +148,19 @@ class ZnTrackOption(descriptor.Descriptor):
             to be passed manually.
         """
         # TODO hide this somewhere and make load overwritable
-        if lazy:
-            instance.__dict__.update({self.name: LazyOption})
-        else:
-            try:
-                file = self.get_filename(instance)
-                file_content = utils.file_io.read_file(file)
-                # The problem here is, that I can not / don't want to load all Nodes but
-                # only the ones, that are in [self.node_name][self.name] for deserializing
-                if uses_node_name(self.zntrack_type, instance) is not None:
-                    values = utils.decode_dict(
-                        file_content[instance.node_name].get(self.name, None)
-                    )
-                else:
-                    values = utils.decode_dict(file_content.get(self.name, None))
+        try:
+            file = self.get_filename(instance)
+            file_content = utils.file_io.read_file(file)
+            # The problem here is, that I can not / don't want to load all Nodes but
+            # only the ones, that are in [self.node_name][self.name] for deserializing
+            if uses_node_name(self.zntrack_type, instance) is not None:
+                values = utils.decode_dict(
+                    file_content[instance.node_name].get(self.name, None)
+                )
+            else:
+                values = utils.decode_dict(file_content.get(self.name, None))
 
-                log.debug(f"Loading {instance.node_name} from {file}: ({values})")
-                instance.__dict__.update({self.name: values})
-            except (FileNotFoundError, KeyError):
-                pass
+            log.debug(f"Loading {instance.node_name} from {file}: ({values})")
+            instance.__dict__.update({self.name: values})
+        except (FileNotFoundError, KeyError):
+            pass

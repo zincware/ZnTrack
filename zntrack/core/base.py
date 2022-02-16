@@ -15,7 +15,6 @@ import logging
 
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.config import ZnTypes, config
-from zntrack.utils.lazy_loader import LazyOption
 from zntrack.utils.utils import deprecated, get_auto_init
 from zntrack.zn import params
 
@@ -35,7 +34,6 @@ class Node(GraphWriter):
     """
 
     is_loaded: bool = False
-    lazy: bool = None
 
     def __init__(self, **kwargs):
         self.is_loaded = kwargs.pop("is_loaded", False)
@@ -94,8 +92,6 @@ class Node(GraphWriter):
         """
         # Save dvc.<option>, dvc.deps, zn.Method
         for option in self._descriptor_list:
-            if self.__dict__.get(option.name) is LazyOption:
-                continue
             if results:
                 # Save all
                 option.save(instance=self)
@@ -107,15 +103,14 @@ class Node(GraphWriter):
                 # for the filtered files
                 option.mkdir(instance=self)
 
-    def _load(self, lazy):
+    def _load(self):
         """Load class state from files"""
-        self.lazy = lazy
         for option in self._descriptor_list:
-            option.update_instance(instance=self, lazy=self.lazy)
+            option.update_instance(instance=self)
         self.is_loaded = True
 
     @classmethod
-    def load(cls, name=None, lazy=False) -> Node:
+    def load(cls, name=None) -> Node:
         """classmethod that yield a Node object
 
         This method does
@@ -125,11 +120,6 @@ class Node(GraphWriter):
         Parameters
         ----------
         name: Node name
-        lazy: bool, default = True
-            Use lazy loading, which means that the object is only loaded after the first
-            call to __get__. This prohibits loading data that is not used.
-            Be cautios, if you are using ZnTrack Nodes to compare different revisions.
-            In that case you want to use lazy=False.
 
         Returns
         -------
@@ -144,7 +134,6 @@ class Node(GraphWriter):
 
         """
         # TODO add a TypeError if parameters are not defaulted to None
-        # TODO hide the lazy loading somewhere
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError:
@@ -158,7 +147,7 @@ class Node(GraphWriter):
             if name not in (None, cls.__name__):
                 instance.node_name = name
 
-        instance._load(lazy=lazy)
+        instance._load()
 
         if config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
