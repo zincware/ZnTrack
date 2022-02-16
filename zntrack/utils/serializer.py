@@ -56,6 +56,7 @@ class SerializedNode(SerializedClass):
     """
 
     name: str
+    lazy: bool = False
 
 
 @dataclasses.dataclass
@@ -76,11 +77,14 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     instance = Node
     representation = "ZnTrackType"
 
-    def _encode(self, obj) -> dict:
+    def _encode(self, obj) -> dict:  # TODO type hints
         """Convert Node to serializable dict"""
         return dataclasses.asdict(
             SerializedNode(
-                module=obj.module, cls=obj.__class__.__name__, name=obj.node_name
+                module=obj.module,
+                cls=obj.__class__.__name__,
+                name=obj.node_name,
+                lazy=obj.lazy,
             )
         )
 
@@ -89,7 +93,9 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
         serialized_node = SerializedNode(**value)
         # TODO handle lazy obj loading
-        return serialized_node.get_cls().load(name=serialized_node.name)
+        return serialized_node.get_cls().load(
+            name=serialized_node.name, lazy=serialized_node.lazy
+        )
 
     def __eq__(self, other):
         """Overwrite check, because checking .zntrack equality"""

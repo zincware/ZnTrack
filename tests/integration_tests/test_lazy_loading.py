@@ -33,3 +33,48 @@ def test_lazy_load(proj_path):
     hello_world = HelloWorld.load(lazy=True)
     assert hello_world.__dict__["value"] is LazyOption
     assert hello_world.value == {"Lorem": "Ipsum"}
+
+
+class StartValue(Node):
+    params = zn.params("my param")
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = "start"
+
+
+class MiddleValue(Node):
+    start_value: StartValue = zn.deps(StartValue.load())
+    params = zn.params("middle params")
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = "middle"
+
+
+class StopValue(Node):
+    middle_value: MiddleValue = zn.deps(MiddleValue.load())
+    params = zn.params("stop value")
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = "stop"
+
+
+def test_lazy_load_deps(proj_path):
+    StartValue().write_graph(run=True)
+    MiddleValue().write_graph(run=True)
+    StopValue().write_graph(run=True)
+
+    _ = StartValue.load(lazy=True)
+    _ = MiddleValue.load(lazy=True)
+    stop_val = StopValue.load(lazy=True)
+
+    assert stop_val.__dict__["middle_value"] is LazyOption
+    assert isinstance(stop_val.middle_value, MiddleValue)
+    assert stop_val.middle_value.__dict__["outs"] is LazyOption
+    assert stop_val.middle_value.outs == "middle"
+    assert stop_val.middle_value.__dict__["outs"] == "middle"
+    # one layer more
+    assert stop_val.middle_value.__dict__["start_value"] is LazyOption
+    assert isinstance(stop_val.middle_value.start_value, StartValue)

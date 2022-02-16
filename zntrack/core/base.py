@@ -15,6 +15,7 @@ import logging
 
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.utils.config import ZnTypes, config
+from zntrack.utils.lazy_loader import LazyOption
 from zntrack.utils.utils import deprecated, get_auto_init
 from zntrack.zn import params
 
@@ -34,6 +35,7 @@ class Node(GraphWriter):
     """
 
     is_loaded: bool = False
+    lazy: bool = None
 
     def __init__(self, **kwargs):
         self.is_loaded = kwargs.pop("is_loaded", False)
@@ -92,6 +94,8 @@ class Node(GraphWriter):
         """
         # Save dvc.<option>, dvc.deps, zn.Method
         for option in self._descriptor_list:
+            if self.__dict__.get(option.name) is LazyOption:
+                continue
             if results:
                 # Save all
                 option.save(instance=self)
@@ -105,8 +109,9 @@ class Node(GraphWriter):
 
     def _load(self, lazy):
         """Load class state from files"""
+        self.lazy = lazy
         for option in self._descriptor_list:
-            option.update_instance(instance=self, lazy=lazy)
+            option.update_instance(instance=self, lazy=self.lazy)
         self.is_loaded = True
 
     @classmethod
