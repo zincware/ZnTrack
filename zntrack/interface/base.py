@@ -13,6 +13,7 @@ import dataclasses
 import json
 import logging
 import pathlib
+import re
 import subprocess
 from pathlib import Path
 from typing import List
@@ -54,7 +55,12 @@ class DVCInterface:
             cmd = ["dvc", "exp", "show", "--show-json", "-A"]
             log.debug(f"DVC command: {cmd}")
             out = subprocess.run(cmd, capture_output=True, check=True)
-            self._experiments = json.loads(out.stdout.decode("utf-8").split("\r\n")[0])
+            decodec_out = out.stdout.decode("utf-8")
+            # we match everything before the last }}}} closes the json string and is
+            # followed by some unwanted characters
+            json_string = re.findall(r".*\}\}\}\}", decodec_out)[0]
+
+            self._experiments = json.loads(json_string)
         return self._experiments
 
     @property
