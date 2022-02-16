@@ -3,7 +3,8 @@ from zntrack.utils.lazy_loader import LazyOption
 
 
 class ExampleClass:
-    lazy_option = ZnTrackOption()
+    lazy_option = ZnTrackOption(lazy=True)
+    node_name = ""  # required for ZnTrackOption to work
 
 
 def test_lazy_load():

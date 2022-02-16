@@ -99,7 +99,7 @@ class Node(GraphWriter):
             if results:
                 # Save all
                 option.save(instance=self)
-            elif option.metadata.zntrack_type not in [ZnTypes.results]:
+            elif option.zntrack_type not in [ZnTypes.results]:
                 # Filter out zn.<options>
                 option.save(instance=self)
             else:
@@ -116,11 +116,20 @@ class Node(GraphWriter):
 
     @classmethod
     def load(cls, name=None, lazy=False) -> Node:
-        """
+        """classmethod that yield a Node object
+
+        This method does
+        1. create a new instance of Node
+        2. call Node._load() to update the instance
 
         Parameters
         ----------
         name: Node name
+        lazy: bool, default = True
+            Use lazy loading, which means that the object is only loaded after the first
+            call to __get__. This prohibits loading data that is not used.
+            Be cautios, if you are using ZnTrack Nodes to compare different revisions.
+            In that case you want to use lazy=False.
 
         Returns
         -------
@@ -135,6 +144,7 @@ class Node(GraphWriter):
 
         """
         # TODO add a TypeError if parameters are not defaulted to None
+        # TODO hide the lazy loading somewhere
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError:

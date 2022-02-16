@@ -56,7 +56,7 @@ class SerializedNode(SerializedClass):
     """
 
     name: str
-    lazy: bool = False
+    lazy: bool = True
 
 
 @dataclasses.dataclass
@@ -92,7 +92,6 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
         """return serialized Node"""
 
         serialized_node = SerializedNode(**value)
-        # TODO handle lazy obj loading
         return serialized_node.get_cls().load(
             name=serialized_node.name, lazy=serialized_node.lazy
         )

@@ -66,8 +66,6 @@ def test_lazy_load_deps(proj_path):
     MiddleValue().write_graph(run=True)
     StopValue().write_graph(run=True)
 
-    _ = StartValue.load(lazy=True)
-    _ = MiddleValue.load(lazy=True)
     stop_val = StopValue.load(lazy=True)
 
     assert stop_val.__dict__["middle_value"] is LazyOption
@@ -78,3 +76,15 @@ def test_lazy_load_deps(proj_path):
     # one layer more
     assert stop_val.middle_value.__dict__["start_value"] is LazyOption
     assert isinstance(stop_val.middle_value.start_value, StartValue)
+
+
+def test_not_lazy_load_deps(proj_path):
+    StartValue().write_graph(run=True)
+    MiddleValue().write_graph(run=True)
+    StopValue().write_graph(run=True)
+
+    stop_val = StopValue.load(lazy=False)
+
+    # without lazy loading all values should be set in the __dict__
+    assert isinstance(stop_val.__dict__["middle_value"], MiddleValue)
+    assert isinstance(stop_val.middle_value.__dict__["start_value"], StartValue)

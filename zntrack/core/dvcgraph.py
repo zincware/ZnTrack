@@ -5,7 +5,7 @@ import logging
 import pathlib
 import typing
 
-from zntrack import utils
+from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.parameter import ZnTrackOption
 
@@ -118,7 +118,7 @@ def filter_ZnTrackOption(
     zntrack_type: str
         The zntrack_type of the descriptors to gather
     return_with_type: bool, default=False
-        return a dictionary with the Descriptor.metadata.dvc_option as keys
+        return a dictionary with the Descriptor.dvc_option as keys
 
     Returns
     -------
@@ -130,13 +130,11 @@ def filter_ZnTrackOption(
     """
     if not isinstance(zntrack_type, list):
         zntrack_type = [zntrack_type]
-    data = [x for x in data if x.metadata.zntrack_type in zntrack_type]
+    data = [x for x in data if x.zntrack_type in zntrack_type]
     if return_with_type:
-        types_dict = {x.metadata.dvc_option: {} for x in data}
+        types_dict = {x.dvc_option: {} for x in data}
         for entity in data:
-            types_dict[entity.metadata.dvc_option].update(
-                {entity.name: getattr(cls, entity.name)}
-            )
+            types_dict[entity.dvc_option].update({entity.name: getattr(cls, entity.name)})
         return types_dict
     return {x.name: getattr(cls, x.name) for x in data}
 
@@ -153,17 +151,13 @@ class GraphWriter:
     def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
         for data in self._descriptor_list:
-            if data.metadata.zntrack_type == utils.ZnTypes.deps:
+            if data.zntrack_type == utils.ZnTypes.deps:
                 data.update_default()
 
     @property
     def _descriptor_list(self) -> typing.List[ZnTrackOption]:
         """Get all descriptors of this instance"""
-        descriptor_list = []
-        for option in vars(type(self)).values():
-            if isinstance(option, ZnTrackOption):
-                descriptor_list.append(option)
-        return descriptor_list
+        return descriptor.get_descriptors(self, ZnTrackOption)
 
     @property
     def node_name(self) -> str:
@@ -321,20 +315,20 @@ class GraphWriter:
         zn_options_set = set()
         for option in self._descriptor_list:
             value = getattr(self, option.name)
-            if option.metadata.zntrack_type == utils.ZnTypes.dvc:
-                script += handle_dvc(value, option.metadata.dvc_args)
+            if option.zntrack_type == utils.ZnTypes.dvc:
+                script += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
-            elif option.metadata.zntrack_type in [
+            elif option.zntrack_type in [
                 utils.ZnTypes.results,
                 utils.ZnTypes.metadata,
             ]:
                 zn_options_set.add(
                     (
-                        f"--{option.metadata.dvc_args}",
+                        f"--{option.dvc_args}",
                         option.get_filename(self).as_posix(),
                     )
                 )
-            elif option.metadata.zntrack_type == utils.ZnTypes.deps:
+            elif option.zntrack_type == utils.ZnTypes.deps:
                 script += handle_deps(value)
 
         for pair in zn_options_set:

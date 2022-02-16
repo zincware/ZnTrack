@@ -14,14 +14,13 @@ import logging
 import pathlib
 import typing
 
-from zntrack import utils
-from zntrack.descriptor import Descriptor
+from zntrack import descriptor, utils
 from zntrack.utils.lazy_loader import LazyOption
 
 log = logging.getLogger(__name__)
 
 
-def uses_node_name(metadata, instance) -> typing.Union[str, None]:
+def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
     """Check if the given metadata is associated with using the node_name as dict key
 
     Everything in nodes/<node_name>/ does not need it as key, because the directory
@@ -30,7 +29,7 @@ def uses_node_name(metadata, instance) -> typing.Union[str, None]:
 
     Parameters
     ----------
-    metadata: MetaData
+    zntrack_type: str
     instance:
         Any instance object with the node_name attribute
 
@@ -40,12 +39,12 @@ def uses_node_name(metadata, instance) -> typing.Union[str, None]:
         returns the node_name if it is being used, otherwise returns None
 
     """
-    if metadata.zntrack_type in [utils.ZnTypes.results, utils.ZnTypes.metadata]:
+    if zntrack_type in [utils.ZnTypes.results, utils.ZnTypes.metadata]:
         return None
     return instance.node_name
 
 
-class ZnTrackOption(Descriptor):
+class ZnTrackOption(descriptor.Descriptor):
     """Descriptor for all DVC options
 
     This class handles the __get__ and __set__ for the DVC options.
@@ -70,28 +69,25 @@ class ZnTrackOption(Descriptor):
     file = None
     value_tracked = False
     tracked = False
+    dvc_option = ""
+    zntrack_type = ""
 
-    def __init__(self, default_value=None, **kwargs):
-        """Instantiate a ZnTrackOption Descriptor
-
-        Does only support kwargs and no args!
-
-        Parameters
-        ----------
-        default_value:
-            Any default value to __get__ if the __set__ was never called.
-        """
-
-        super().__init__(default_value)
-        # these are stored inside the serialized object
-        self.name = kwargs.get("name", None)
-        self.lazy = kwargs.get("lazy", True)
+    @property
+    def dvc_args(self):
+        return self.dvc_option.replace("_", "-")
 
     def __repr__(self):
-        return f"{self.__class__}({hex(id(self))}) for <{self.metadata.dvc_option}>"
+        return f"{self.__class__}({hex(id(self))}) for <{self.dvc_option}>"
 
     def __str__(self):
-        return f"{self.metadata.dvc_option} / {self.name}"
+        return f"{self.dvc_option} / {self.name}"
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        if instance.__dict__.get(self.name) is LazyOption:
+            self.update_instance(instance, lazy=False)
+        return super().__get__(instance, owner)
 
     def update_default(self):
         """Update default_value
@@ -104,17 +100,15 @@ class ZnTrackOption(Descriptor):
             for value in self.default_value:
                 # cheap trick because circular imports - TODO find clever fix!
                 if hasattr(value, "_load"):
-                    value._load(lazy=self.lazy)
+                    value._load(lazy=value.lazy)
         except TypeError:
             if hasattr(self.default_value, "_load"):
-                self.default_value._load(lazy=self.lazy)
+                self.default_value._load(lazy=self.default_value.lazy)
 
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
-        if uses_node_name(self.metadata, instance) is None:
-            return pathlib.Path(
-                "nodes", instance.node_name, f"{self.metadata.dvc_option}.json"
-            )
+        if uses_node_name(self.zntrack_type, instance) is None:
+            return pathlib.Path("nodes", instance.node_name, f"{self.dvc_option}.json")
         return pathlib.Path(self.file)
 
     def save(self, instance):
@@ -129,7 +123,7 @@ class ZnTrackOption(Descriptor):
         """
         utils.file_io.update_config_file(
             file=self.get_filename(instance),
-            node_name=uses_node_name(self.metadata, instance),
+            node_name=uses_node_name(self.zntrack_type, instance),
             value_name=self.name,
             value=self.__get__(instance, self.owner),
         )
@@ -143,11 +137,6 @@ class ZnTrackOption(Descriptor):
         """
         file = self.get_filename(instance)
         file.parent.mkdir(exist_ok=True, parents=True)
-
-    def get(self, instance, owner):
-        if instance.__dict__.get(self.name) is LazyOption:
-            self.update_instance(instance, lazy=False)
-        return instance.__dict__.get(self.name, self.default_value)
 
     def update_instance(self, instance, lazy):
         """Load this descriptor value into the given instance
@@ -170,7 +159,7 @@ class ZnTrackOption(Descriptor):
                 file_content = utils.file_io.read_file(file)
                 # The problem here is, that I can not / don't want to load all Nodes but
                 # only the ones, that are in [self.node_name][self.name] for deserializing
-                if uses_node_name(self.metadata, instance) is not None:
+                if uses_node_name(self.zntrack_type, instance) is not None:
                     values = utils.decode_dict(
                         file_content[instance.node_name].get(self.name, None)
                     )

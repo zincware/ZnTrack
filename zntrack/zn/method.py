@@ -2,7 +2,6 @@ import logging
 import pathlib
 
 from zntrack import utils
-from zntrack.descriptor import Metadata
 from zntrack.zn.split_option import SplitZnTrackOption
 
 log = logging.getLogger(__name__)
@@ -27,7 +26,8 @@ class Method(SplitZnTrackOption):
 
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
+    dvc_option = "params"
+    zntrack_type = utils.ZnTypes.params
 
     def get_filename(self, instance) -> pathlib.Path:
         """Does not really have a single file but params.yaml and zntrack.json"""

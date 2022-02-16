@@ -5,21 +5,19 @@ import pandas as pd
 
 from zntrack import utils
 from zntrack.core.parameter import ZnTrackOption
-from zntrack.descriptor import Metadata
 from zntrack.utils.lazy_loader import LazyOption
 
 log = logging.getLogger(__name__)
 
 
 class plots(ZnTrackOption):
-    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=utils.ZnTypes.results)
+    dvc_option = "plots_no_cache"
+    zntrack_type = utils.ZnTypes.results
     tracked = True
 
     def get_filename(self, instance) -> pathlib.Path:
         """Overwrite filename to csv"""
-        return pathlib.Path(
-            "nodes", instance.node_name, f"{self.metadata.dvc_option}.csv"
-        )
+        return pathlib.Path("nodes", instance.node_name, f"{self.dvc_option}.csv")
 
     def save(self, instance):
         """Save value with pd.DataFrame.to_csv"""
