@@ -48,6 +48,12 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           coveralls
+      - uses: codecov/codecov-action@v2
+        with:
+          flags: fulltest # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
+          files: .coverage
 
 
   unittest:
