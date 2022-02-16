@@ -78,6 +78,11 @@ def decode_dict(value):
     return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
 
 
+def encode_dict(value) -> dict:
+    """Encode value into a dict serialized with ZnJson"""
+    return json.loads(json.dumps(value, cls=znjson.ZnEncoder))
+
+
 def get_auto_init(fields: typing.List[str]):
     """Automatically create a __init__ based on fields
     Parameters
