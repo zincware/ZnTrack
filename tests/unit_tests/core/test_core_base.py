@@ -155,3 +155,14 @@ def test_run_and_save():
     assert open_mock().write.mock_calls == [
         call(json.dumps({"outs": 42}, indent=4)),
     ]
+
+
+class WrongInit(Node):
+    def __init__(self, non_default, **kwargs):
+        super().__init__(**kwargs)
+
+
+def test_WrongInit():
+    """Test that a TypeError occurs if any value it not set to default in __init__"""
+    with pytest.raises(TypeError):
+        WrongInit.load()

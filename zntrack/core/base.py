@@ -138,14 +138,22 @@ class Node(GraphWriter):
             instance = cls(name=name, is_loaded=True)
         except TypeError:
             # This can also come up, if any of the default parameters are not set to None
-            log.warning(
-                "Can not pass <name> to the super.__init__ and trying workaround! This"
-                " can lead to unexpected behaviour and can be avoided by passing ("
-                " **kwargs) to the super().__init__(**kwargs)"
-            )
-            instance = cls()
-            if name not in (None, cls.__name__):
-                instance.node_name = name
+            try:
+                instance = cls()
+                if name not in (None, cls.__name__):
+                    instance.node_name = name
+                log.warning(
+                    "Can not pass <name> to the super.__init__ and trying workaround!"
+                    " This can lead to unexpected behaviour and can be avoided by passing"
+                    " ( **kwargs) to the super().__init__(**kwargs)"
+                )
+            except TypeError as err:
+                raise TypeError(
+                    f"Unable to create a new instance of {cls}. Check that all arguments"
+                    " default to None. It must be possible to instantiate the class via"
+                    f" {cls}() without passing any arguments. See the ZnTrack"
+                    " documentation for more information."
+                ) from err
 
         instance._load()
 
