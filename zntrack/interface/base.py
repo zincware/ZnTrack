@@ -33,6 +33,8 @@ class Experiment:
     executor: str
     params: dict
     metrics: dict
+    deps: str = ""
+    outs: str = ""
 
 
 class DVCInterface:
