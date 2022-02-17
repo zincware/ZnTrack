@@ -13,9 +13,8 @@ from __future__ import annotations
 import inspect
 import logging
 
+from zntrack import utils
 from zntrack.core.dvcgraph import GraphWriter
-from zntrack.utils.config import ZnTypes, config
-from zntrack.utils.utils import deprecated, get_auto_init
 from zntrack.zn import params
 
 log = logging.getLogger(__name__)
@@ -39,7 +38,7 @@ class Node(GraphWriter):
         self.is_loaded = kwargs.pop("is_loaded", False)
         super().__init__(**kwargs)
 
-    @deprecated(
+    @utils.deprecated(
         reason=(
             "Please check out https://zntrack.readthedocs.io/en/latest/_tutorials/"
             "migration_guide_v3.html for a migration tutorial from "
@@ -73,7 +72,7 @@ class Node(GraphWriter):
                 )
 
         # Add new __init__ to the sub-class
-        setattr(cls, "__init__", get_auto_init(fields=zn_option_fields))
+        setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_fields))
 
         # Add new __signature__ to the sub-class
         signature = inspect.Signature(parameters=sig_params)
@@ -95,7 +94,7 @@ class Node(GraphWriter):
             if results:
                 # Save all
                 option.save(instance=self)
-            elif option.zntrack_type not in [ZnTypes.results]:
+            elif option.zntrack_type not in [utils.ZnTypes.results]:
                 # Filter out zn.<options>
                 option.save(instance=self)
             else:
@@ -166,10 +165,9 @@ class Node(GraphWriter):
 
         instance.update_options()
 
-        if config.nb_name is not None:
+        if utils.config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
-            instance._module = f"{config.nb_class_path}.{cls.__name__}"
-
+            instance._module = f"{utils.config.nb_class_path}.{cls.__name__}"
         return instance
 
     def run_and_save(self):
