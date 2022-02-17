@@ -17,6 +17,7 @@ from zntrack.utils.utils import (
     decode_dict,
     deprecated,
     encode_dict,
+    get_auto_init,
     get_python_interpreter,
     module_handler,
     module_to_path,
@@ -40,4 +41,5 @@ __all__ = [
     "check_type",
     "get_python_interpreter",
     "run_dvc_cmd",
+    "get_auto_init",
 ]
