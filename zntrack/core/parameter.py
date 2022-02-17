@@ -88,14 +88,14 @@ class ZnTrackOption(descriptor.Descriptor):
         if a new class is created via Instance.load() it does not automatically load
         the default_value Nodes, so we must to this manually here
         """
-        try:
+        if isinstance(self.default_value, (list, tuple)):
             for value in self.default_value:
                 # cheap trick because circular imports - TODO find clever fix!
-                if hasattr(value, "_load"):
-                    value._load()
-        except TypeError:
-            if hasattr(self.default_value, "_load"):
-                self.default_value._load()
+                if hasattr(value, "update_options"):
+                    value.update_options()
+        else:
+            if hasattr(self.default_value, "update_options"):
+                self.default_value.update_options()
 
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""

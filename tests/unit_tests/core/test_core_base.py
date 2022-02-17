@@ -95,7 +95,7 @@ def test__load():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example._load()
+        example.update_options()
         assert example.dvc_outs == "file_.txt"
         assert example.deps == "deps_.inp"
         assert example.params == 42

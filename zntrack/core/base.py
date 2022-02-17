@@ -103,8 +103,8 @@ class Node(GraphWriter):
                 # for the filtered files
                 option.mkdir(instance=self)
 
-    def _load(self):
-        """Load class state from files"""
+    def update_options(self):
+        """Update all ZnTrack options inheriting from ZnTrackOption"""
         for option in self._descriptor_list:
             option.update_instance(instance=self)
         self.is_loaded = True
@@ -153,7 +153,7 @@ class Node(GraphWriter):
                     " documentation for more information."
                 ) from err
 
-        instance._load()
+        instance.update_options()
 
         if config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
