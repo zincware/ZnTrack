@@ -91,11 +91,17 @@ class ZnTrackOption(descriptor.Descriptor):
         if isinstance(self.default_value, (list, tuple)):
             for value in self.default_value:
                 # cheap trick because circular imports - TODO find clever fix!
-                if hasattr(value, "update_options"):
+                try:
                     value.update_options()
+                except AttributeError:
+                    # value is not a Node instance
+                    pass
         else:
-            if hasattr(self.default_value, "update_options"):
+            try:
                 self.default_value.update_options()
+            except AttributeError:
+                # default_value is not a Node instance
+                pass
 
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
