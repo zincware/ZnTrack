@@ -23,9 +23,12 @@ def test_node_module():
 
 class ExampleFullNode(Node):
     params = zn.params(10)
-    zn_outs = zn.outs("outs")
+    zn_outs = zn.outs()
     dvc_outs = dvc.outs("file.txt")
     deps = dvc.deps("deps.inp")
+
+    def run(self):
+        self.zn_outs = "outs"
 
 
 def test_save():
@@ -46,7 +49,7 @@ def test_save():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example.save(results=True)
+        example.run_and_save()
 
         # TODO check that this is really correct and does not overwrite things!
         assert zntrack_mock().write.mock_calls == [
