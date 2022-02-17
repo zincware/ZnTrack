@@ -2,6 +2,7 @@ import dataclasses
 import json
 import pathlib
 
+import pytest
 import znjson
 
 from zntrack import zn
@@ -36,7 +37,8 @@ def test_zn_plots():
     example = ExamplePlots()
     # test save and load if there is nothing to save or load
     assert ExamplePlots.plots.save(example) is None
-    assert ExamplePlots.plots.get_data_from_files(example) is None
+    with pytest.raises(FileNotFoundError):
+        _ = ExamplePlots.plots.get_data_from_files(example)
 
 
 @dataclasses.dataclass

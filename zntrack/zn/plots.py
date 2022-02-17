@@ -44,7 +44,4 @@ class plots(ZnTrackOption):
         """Load value with pd.read_csv"""
 
         file = self.get_filename(instance)
-        try:
-            return pd.read_csv(file, index_col=0)
-        except (FileNotFoundError, KeyError):
-            pass
+        return pd.read_csv(file, index_col=0)

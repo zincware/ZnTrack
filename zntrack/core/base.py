@@ -109,8 +109,15 @@ class Node(GraphWriter):
         This will overwrite the value in __dict__ even it the value was changed
         """
         for option in self._descriptor_list:
-            log.debug(f"Updating {option.name} of {self}")
-            self.__dict__[option.name] = option.get_data_from_files(instance=self)
+            log.debug(f"Updating {option.name} for {self}")
+            try:
+                self.__dict__[option.name] = option.get_data_from_files(instance=self)
+            except (FileNotFoundError, KeyError) as err:
+                # FileNotFound can happen, if a stage is added as a dependency but the
+                #  respective files aren't written yet
+                # KeyError can happen if e.g. params.yaml exists but does not yet contain
+                #  the key for the given stage
+                log.debug(f"Could not load {option.name} for {self} because of {err}")
         self.is_loaded = True
 
     @classmethod
