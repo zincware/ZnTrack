@@ -71,6 +71,13 @@ class ZnTrackOption(descriptor.Descriptor):
     dvc_option = ""
     zntrack_type = ""
 
+    def __init__(self, default_value=None, **kwargs):
+        if default_value is not None and self.tracked:
+            raise ValueError(
+                f"Can not set default to a tracked value ({self.zntrack_type})"
+            )
+        super().__init__(default_value=default_value, **kwargs)
+
     @property
     def dvc_args(self):
         return self.dvc_option.replace("_", "-")
