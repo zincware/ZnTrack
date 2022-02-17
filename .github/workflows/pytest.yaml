@@ -32,7 +32,7 @@ jobs:
       - name: Install dev requirements
         run: |
           pip3 install -r dev-requirements.txt
-          pip3 install coverage coveralls
+          pip3 install coverage
       - name: Install package
         run: |
           pip3 install .
@@ -46,10 +46,9 @@ jobs:
           coverage run -m pytest
           coverage xml
       - name: Coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        run: |
-          coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - uses: codecov/codecov-action@v2
         with:
           flags: fulltest
@@ -68,7 +67,7 @@ jobs:
       - name: Install dev requirements
         run: |
           pip3 install -r dev-requirements.txt
-          pip3 install coverage coveralls
+          pip3 install coverage
       - name: Install package
         run: |
           pip3 install .
@@ -98,7 +97,7 @@ jobs:
       - name: Install dev requirements
         run: |
           pip3 install -r dev-requirements.txt
-          pip3 install nbmake coverage
+          pip3 install nbmake
       - name: Install package
         run: |
           pip3 install .
@@ -109,10 +108,4 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
-          coverage run -m pytest --nbmake ./examples
-          coverage xml
-      - uses: codecov/codecov-action@v2
-        with:
-          flags: nbtest
-          fail_ci_if_error: true
-          verbose: true
+          pytest --nbmake ./examples
