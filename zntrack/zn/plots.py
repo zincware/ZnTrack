@@ -40,11 +40,11 @@ class plots(ZnTrackOption):
         file.parent.mkdir(exist_ok=True, parents=True)
         value.to_csv(file)
 
-    def update_instance(self, instance):
+    def get_data_from_files(self, instance):
         """Load value with pd.read_csv"""
 
         file = self.get_filename(instance)
         try:
-            instance.__dict__.update({self.name: pd.read_csv(file, index_col=0)})
+            return pd.read_csv(file, index_col=0)
         except (FileNotFoundError, KeyError):
             pass

@@ -104,9 +104,13 @@ class Node(GraphWriter):
                 option.mkdir(instance=self)
 
     def update_options(self):
-        """Update all ZnTrack options inheriting from ZnTrackOption"""
+        """Update all ZnTrack options inheriting from ZnTrackOption
+
+        This will overwrite the value in __dict__ even it the value was changed
+        """
         for option in self._descriptor_list:
-            option.update_instance(instance=self)
+            log.debug(f"Updating {option.name} of {self}")
+            self.__dict__[option.name] = option.get_data_from_files(instance=self)
         self.is_loaded = True
 
     @classmethod

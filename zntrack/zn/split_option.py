@@ -121,7 +121,7 @@ class SplitZnTrackOption(ZnTrackOption):
             # TypeError <..>
             super().save(instance)
 
-    def update_instance(self, instance):
+    def get_data_from_files(self, instance):
         """Overwrite the load method
 
         Try to load from zntrack.json / params.yaml in a combined approach first,
@@ -147,6 +147,6 @@ class SplitZnTrackOption(ZnTrackOption):
                 value = combine_values(cls_dict, params_values)
 
             log.debug(f"Loading {instance.node_name} from {file}: ({value})")
-            instance.__dict__.update({self.name: value})
+            return value
         except (AttributeError, KeyError, TypeError, FileNotFoundError):
-            super().update_instance(instance)
+            return super().get_data_from_files(instance)

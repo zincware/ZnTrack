@@ -39,10 +39,6 @@ class SerializedClass:
         """Import the serialized class from the given module"""
         module = importlib.import_module(self.module)
         cls = getattr(module, self.cls)
-        # except ModuleNotFoundError:
-        #     # Try loading from jupyter notebook if otherwise not available
-        #     module = znipy.NotebookLoader(self.module).load_module()
-        #     cls = getattr(module, self.cls)
         return cls
 
 

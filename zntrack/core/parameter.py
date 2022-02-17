@@ -130,10 +130,8 @@ class ZnTrackOption(descriptor.Descriptor):
         file = self.get_filename(instance)
         file.parent.mkdir(exist_ok=True, parents=True)
 
-    def update_instance(self, instance):
-        """Load this descriptor value into the given instance
-
-        Updates the instance.__dict__
+    def get_data_from_files(self, instance):
+        """Load the value/s for the given instance from the file/s
 
         Parameters
         ----------
@@ -141,6 +139,11 @@ class ZnTrackOption(descriptor.Descriptor):
             instance where the Descriptor is attached to.
             Similar to __get__(instance) this requires the instance
             to be passed manually.
+
+        Returns
+        -------
+        any:
+            returns the value loaded from file/s for the given instance.
         """
         try:
             file = self.get_filename(instance)
@@ -155,6 +158,6 @@ class ZnTrackOption(descriptor.Descriptor):
                 values = utils.decode_dict(file_content.get(self.name, None))
 
             log.debug(f"Loading {instance.node_name} from {file}: ({values})")
-            instance.__dict__.update({self.name: values})
+            return values
         except (FileNotFoundError, KeyError):
             pass
