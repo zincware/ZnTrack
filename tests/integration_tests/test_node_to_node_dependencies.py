@@ -90,15 +90,11 @@ def test_dvc_outs(proj_path):
 
 def test_dvc_reversed(proj_path):
     """Create the instances first and at the end call write_graph"""
-
-    DependenciesCollector(dependencies=DVCOuts.load()).write_graph()
-    DVCOuts().write_graph()
-
-    subprocess.check_call(["dvc", "repro"])
-
-    assert (
-        DependenciesCollector.load().dependencies.data_file.read_text() == "Lorem Ipsum"
-    )
+    with pytest.raises(ValueError):
+        # this can not work, because DVCOuts affected files is not know at the stage
+        # where DependenciesCollector writes its DVC stage
+        DependenciesCollector(dependencies=DVCOuts.load()).write_graph()
+        DVCOuts().write_graph()
 
 
 def test_zn_outs(proj_path):

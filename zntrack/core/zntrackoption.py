@@ -88,6 +88,33 @@ class ZnTrackOption(descriptor.Descriptor):
     def __str__(self):
         return f"{self.dvc_option} / {self.name}"
 
+    def __get__(self, instance, owner):
+        self._instance = instance
+        if instance is None:
+            return self
+
+        if not instance.is_loaded:
+            # if the instance is not loaded, there is no LazyOption handling
+            try:
+                return instance.__dict__[self.name]
+            except KeyError:
+                instance.__dict__[self.name] = self.default_value
+
+        is_lazyoption = instance.__dict__.get(self.name) is utils.LazyOption
+        not_in_dict = self.name not in instance.__dict__
+
+        if (is_lazyoption or not_in_dict) and instance.is_loaded:
+            try:
+                # load data and store it in the instance
+                instance.__dict__[self.name] = self.get_data_from_files(instance)
+                log.debug(f"instance {instance} updated from file")
+            except (KeyError, FileNotFoundError) as err:
+                # do not load default value, because a loaded instance should always
+                #  load from files.
+                raise ValueError(f"Could not load {self.name} for {instance}") from err
+
+        return instance.__dict__[self.name]
+
     def update_default(self):
         """Update default_value
 
@@ -126,6 +153,8 @@ class ZnTrackOption(descriptor.Descriptor):
             Similar to __get__(instance) this requires the instance
             to be passed manually.
         """
+        if instance.__dict__.get(self.name) is utils.LazyOption:
+            return
         utils.file_io.update_config_file(
             file=self.get_filename(instance),
             node_name=uses_node_name(self.zntrack_type, instance),

@@ -60,7 +60,6 @@ class Node(GraphWriter):
         zn_option_fields, sig_params = [], []
         for name, item in cls.__dict__.items():
             if isinstance(item, params):
-
                 # For the new __init__
                 zn_option_fields.append(name)
 
@@ -102,25 +101,26 @@ class Node(GraphWriter):
                 # for the filtered files
                 option.mkdir(instance=self)
 
-    def update_options(self):
+    def update_options(self, lazy=utils.config.lazy):
         """Update all ZnTrack options inheriting from ZnTrackOption
 
         This will overwrite the value in __dict__ even it the value was changed
         """
         for option in self._descriptor_list:
-            log.debug(f"Updating {option.name} for {self}")
-            try:
-                self.__dict__[option.name] = option.get_data_from_files(instance=self)
-            except (FileNotFoundError, KeyError) as err:
-                # FileNotFound can happen, if a stage is added as a dependency but the
-                #  respective files aren't written yet
-                # KeyError can happen if e.g. params.yaml exists but does not yet contain
-                #  the key for the given stage
-                log.debug(f"Could not load {option.name} for {self} because of {err}")
+            self.__dict__[option.name] = utils.LazyOption
+            if not lazy:
+                # trigger loading the data into memory
+                value = getattr(self, option.name)
+                try:
+                    value.update_options(lazy=lazy)
+                except AttributeError:
+                    # if lazy=False trigger update_options iteratively on
+                    # all dependency Nodes
+                    pass
         self.is_loaded = True
 
     @classmethod
-    def load(cls, name=None) -> Node:
+    def load(cls, name=None, lazy: bool = True) -> Node:
         """classmethod that yield a Node object
 
         This method does
@@ -163,7 +163,7 @@ class Node(GraphWriter):
                     " documentation for more information."
                 ) from err
 
-        instance.update_options()
+        instance.update_options(lazy=lazy)
 
         if utils.config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?

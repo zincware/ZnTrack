@@ -11,6 +11,7 @@ from zntrack.zn.split_option import combine_values, split_value
 
 class ExampleClass:
     module = None  # must mock the module here
+    is_loaded = False
     method = zn.Method()
 
 
@@ -29,6 +30,7 @@ def test_zn_method_get():
 
 class ExamplePlots:
     module = None
+    is_loaded = False
     node_name = "ExamplePlots"
     plots = zn.plots()
 

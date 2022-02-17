@@ -43,3 +43,7 @@ __all__ = [
     "run_dvc_cmd",
     "get_auto_init",
 ]
+
+
+class LazyOption:
+    pass

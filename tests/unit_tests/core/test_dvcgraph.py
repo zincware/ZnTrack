@@ -13,6 +13,7 @@ from zntrack.core.dvcgraph import (
 
 
 class ExampleDVCOutsNode(GraphWriter):
+    is_loaded = False
     outs = dvc.outs(pathlib.Path("example.dat"))
 
 
@@ -79,6 +80,7 @@ def test_handle_deps_node():
 
 
 class ExampleAffectedFiles(GraphWriter):
+    is_loaded = False
     param = zn.params()
     zn_outs = zn.outs()
     zn_metrics = zn.metrics()
@@ -102,6 +104,7 @@ def test_affected_files():
 
 
 class ExampleClassWithParams(GraphWriter):
+    is_loaded = False
     param1 = zn.params(default_value=1)
     param2 = zn.params(default_value=2)
 
