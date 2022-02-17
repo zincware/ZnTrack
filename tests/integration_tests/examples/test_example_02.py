@@ -145,6 +145,7 @@ def test_stage_addition_named_run(tmp_path):
     ComputeANamed(inp=2).save()
     ComputeB(inp=3).save()
     ComputeAB().save()
+    ComputeABNamed().save()
 
     ComputeANamed.load().run_and_save()
     ComputeB.load().run_and_save()

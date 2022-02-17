@@ -48,3 +48,63 @@ jobs:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
         run: |
           coveralls
+      - uses: codecov/codecov-action@v2
+        with:
+          flags: fulltest # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
+          files: .coverage
+
+
+  unittest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Install dev requirements
+        run: |
+          pip3 install -r dev-requirements.txt
+      - name: Install package
+        run: |
+          pip3 install .
+      - name: Setup git user
+        run: |
+          git config --global user.name "John Doe"
+          git config --global user.email johndoe@example.com
+          git config --global init.defaultBranch "main"
+      - name: Pytest
+        run: |
+          coverage run -m pytest ./tests/unit_tests
+      - uses: codecov/codecov-action@v2
+        with:
+          flags: unittests # optional
+          fail_ci_if_error: true # optional (default = false)
+          verbose: true # optional (default = false)
+          files: .coverage
+
+  nbtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Install dev requirements
+        run: |
+          pip3 install -r dev-requirements.txt
+          pip3 install nbmake
+      - name: Install package
+        run: |
+          pip3 install .
+      - name: Setup git user
+        run: |
+          git config --global user.name "John Doe"
+          git config --global user.email johndoe@example.com
+          git config --global init.defaultBranch "main"
+      - name: Pytest
+        run: |
+          pytest --nbmake ./examples

@@ -23,9 +23,12 @@ def test_node_module():
 
 class ExampleFullNode(Node):
     params = zn.params(10)
-    zn_outs = zn.outs("outs")
+    zn_outs = zn.outs()
     dvc_outs = dvc.outs("file.txt")
     deps = dvc.deps("deps.inp")
+
+    def run(self):
+        self.zn_outs = "outs"
 
 
 def test_save():
@@ -46,7 +49,7 @@ def test_save():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example.save(results=True)
+        example.run_and_save()
 
         # TODO check that this is really correct and does not overwrite things!
         assert zntrack_mock().write.mock_calls == [
@@ -95,7 +98,7 @@ def test__load():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example._load()
+        example.update_options()
         assert example.dvc_outs == "file_.txt"
         assert example.deps == "deps_.inp"
         assert example.params == 42
@@ -155,3 +158,14 @@ def test_run_and_save():
     assert open_mock().write.mock_calls == [
         call(json.dumps({"outs": 42}, indent=4)),
     ]
+
+
+class WrongInit(Node):
+    def __init__(self, non_default, **kwargs):
+        super().__init__(**kwargs)
+
+
+def test_WrongInit():
+    """Test that a TypeError occurs if any value it not set to default in __init__"""
+    with pytest.raises(TypeError):
+        WrongInit.load()

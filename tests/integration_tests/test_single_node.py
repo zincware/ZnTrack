@@ -74,7 +74,11 @@ def proj_path(tmp_path):
 
 def test_run(proj_path):
     test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    assert test_node_1.inputs == "Lorem Ipsum"
     test_node_1.write_graph()
+
+    obj = ExampleNode01.load()
+    assert obj.inputs == "Lorem Ipsum"
 
     subprocess.check_call(["dvc", "repro"])
 

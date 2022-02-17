@@ -15,7 +15,7 @@ import logging
 import typing
 
 from zntrack import utils
-from zntrack.core.parameter import ZnTrackOption
+from zntrack.core.zntrackoption import ZnTrackOption
 
 log = logging.getLogger(__name__)
 
@@ -121,7 +121,7 @@ class SplitZnTrackOption(ZnTrackOption):
             # TypeError <..>
             super().save(instance)
 
-    def load(self, instance):
+    def get_data_from_files(self, instance):
         """Overwrite the load method
 
         Try to load from zntrack.json / params.yaml in a combined approach first,
@@ -129,7 +129,6 @@ class SplitZnTrackOption(ZnTrackOption):
         deserializing.
         """
         file = self.get_filename(instance)
-
         try:
             # Check that we can read it
             _ = utils.file_io.read_file(utils.Files.zntrack)[instance.node_name][
@@ -147,7 +146,7 @@ class SplitZnTrackOption(ZnTrackOption):
             else:
                 value = combine_values(cls_dict, params_values)
 
-            log.debug(f"Loading {file.key} from {file}: ({value})")
-            instance.__dict__.update({self.name: value})
+            log.debug(f"Loading {instance.node_name} from {file}: ({value})")
+            return value
         except (AttributeError, KeyError, TypeError, FileNotFoundError):
-            super().load(instance)
+            return super().get_data_from_files(instance)

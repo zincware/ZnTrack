@@ -16,8 +16,7 @@ see https://dvc.org/doc/command-reference/run#options
 import logging
 
 from zntrack import utils
-from zntrack.core.parameter import ZnTrackOption
-from zntrack.descriptor import Metadata
+from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.zn.method import Method
 from zntrack.zn.split_option import SplitZnTrackOption
 
@@ -46,7 +45,9 @@ class outs(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.results)
+    dvc_option = "outs"
+    zntrack_type = utils.ZnTypes.results
+    tracked = True
 
 
 class deps(ZnTrackOption):
@@ -56,7 +57,8 @@ class deps(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="deps", zntrack_type=utils.ZnTypes.deps)
+    dvc_option = "deps"
+    zntrack_type = utils.ZnTypes.deps
     file = utils.Files.zntrack
 
 
@@ -67,7 +69,9 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.results)
+    dvc_option = "metrics_no_cache"
+    zntrack_type = utils.ZnTypes.results
+    tracked = True
 
 
 class params(SplitZnTrackOption):
@@ -77,7 +81,8 @@ class params(SplitZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
+    dvc_option = "params"
+    zntrack_type = utils.ZnTypes.params
     file = utils.Files.params
 
 
@@ -87,7 +92,8 @@ class iterable(ZnTrackOption):
     This option defines an iterable parameter for spawning nodes.
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.iterable)
+    dvc_option = "params"
+    zntrack_type = utils.ZnTypes.iterable
 
 
 class metadata(ZnTrackOption):
@@ -97,6 +103,7 @@ class metadata(ZnTrackOption):
     collectors.
     """
 
-    metadata = Metadata(
-        dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.metadata
-    )
+    dvc_option = "metrics_no_cache"
+    zntrack_type = utils.ZnTypes.metadata
+
+    tracked = True

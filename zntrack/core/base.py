@@ -13,9 +13,8 @@ from __future__ import annotations
 import inspect
 import logging
 
+from zntrack import utils
 from zntrack.core.dvcgraph import GraphWriter
-from zntrack.utils.config import ZnTypes, config
-from zntrack.utils.utils import deprecated, get_auto_init
 from zntrack.zn import params
 
 log = logging.getLogger(__name__)
@@ -39,7 +38,7 @@ class Node(GraphWriter):
         self.is_loaded = kwargs.pop("is_loaded", False)
         super().__init__(**kwargs)
 
-    @deprecated(
+    @utils.deprecated(
         reason=(
             "Please check out https://zntrack.readthedocs.io/en/latest/_tutorials/"
             "migration_guide_v3.html for a migration tutorial from "
@@ -73,7 +72,7 @@ class Node(GraphWriter):
                 )
 
         # Add new __init__ to the sub-class
-        setattr(cls, "__init__", get_auto_init(fields=zn_option_fields))
+        setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_fields))
 
         # Add new __signature__ to the sub-class
         signature = inspect.Signature(parameters=sig_params)
@@ -95,7 +94,7 @@ class Node(GraphWriter):
             if results:
                 # Save all
                 option.save(instance=self)
-            elif option.metadata.zntrack_type not in [ZnTypes.results]:
+            elif option.zntrack_type not in [utils.ZnTypes.results]:
                 # Filter out zn.<options>
                 option.save(instance=self)
             else:
@@ -103,15 +102,30 @@ class Node(GraphWriter):
                 # for the filtered files
                 option.mkdir(instance=self)
 
-    def _load(self):
-        """Load class state from files"""
+    def update_options(self):
+        """Update all ZnTrack options inheriting from ZnTrackOption
+
+        This will overwrite the value in __dict__ even it the value was changed
+        """
         for option in self._descriptor_list:
-            option.load(instance=self)
+            log.debug(f"Updating {option.name} for {self}")
+            try:
+                self.__dict__[option.name] = option.get_data_from_files(instance=self)
+            except (FileNotFoundError, KeyError) as err:
+                # FileNotFound can happen, if a stage is added as a dependency but the
+                #  respective files aren't written yet
+                # KeyError can happen if e.g. params.yaml exists but does not yet contain
+                #  the key for the given stage
+                log.debug(f"Could not load {option.name} for {self} because of {err}")
         self.is_loaded = True
 
     @classmethod
     def load(cls, name=None) -> Node:
-        """
+        """classmethod that yield a Node object
+
+        This method does
+        1. create a new instance of Node
+        2. call Node._load() to update the instance
 
         Parameters
         ----------
@@ -129,25 +143,31 @@ class Node(GraphWriter):
             super().__init__(**kwargs)
 
         """
-
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError:
-            log.warning(
-                "Can not pass <name> to the super.__init__ and trying workaround! This"
-                " can lead to unexpected behaviour and can be avoided by passing ("
-                " **kwargs) to the super().__init__(**kwargs)"
-            )
-            instance = cls()
-            if name not in (None, cls.__name__):
-                instance.node_name = name
+            try:
+                instance = cls()
+                if name not in (None, cls.__name__):
+                    instance.node_name = name
+                log.warning(
+                    "Can not pass <name> to the super.__init__ and trying workaround!"
+                    " This can lead to unexpected behaviour and can be avoided by passing"
+                    " ( **kwargs) to the super().__init__(**kwargs)"
+                )
+            except TypeError as err:
+                raise TypeError(
+                    f"Unable to create a new instance of {cls}. Check that all arguments"
+                    " default to None. It must be possible to instantiate the class via"
+                    f" {cls}() without passing any arguments. See the ZnTrack"
+                    " documentation for more information."
+                ) from err
 
-        instance._load()
+        instance.update_options()
 
-        if config.nb_name is not None:
+        if utils.config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
-            instance._module = f"{config.nb_class_path}.{cls.__name__}"
-
+            instance._module = f"{utils.config.nb_class_path}.{cls.__name__}"
         return instance
 
     def run_and_save(self):

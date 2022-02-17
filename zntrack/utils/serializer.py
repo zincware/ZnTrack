@@ -20,6 +20,7 @@ import dataclasses
 import importlib
 import inspect
 import logging
+import typing
 
 import znjson
 
@@ -35,14 +36,10 @@ class SerializedClass:
     module: str
     cls: str
 
-    def get_cls(self):
+    def get_cls(self) -> typing.Type[Node]:
         """Import the serialized class from the given module"""
         module = importlib.import_module(self.module)
         cls = getattr(module, self.cls)
-        # except ModuleNotFoundError:
-        #     # Try loading from jupyter notebook if otherwise not available
-        #     module = znipy.NotebookLoader(self.module).load_module()
-        #     cls = getattr(module, self.cls)
         return cls
 
 
@@ -76,11 +73,13 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     instance = Node
     representation = "ZnTrackType"
 
-    def _encode(self, obj) -> dict:
+    def _encode(self, obj: Node) -> dict:
         """Convert Node to serializable dict"""
         return dataclasses.asdict(
             SerializedNode(
-                module=obj.module, cls=obj.__class__.__name__, name=obj.node_name
+                module=obj.module,
+                cls=obj.__class__.__name__,
+                name=obj.node_name,
             )
         )
 

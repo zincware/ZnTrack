@@ -20,8 +20,7 @@ Examples
 import logging
 
 from zntrack import utils
-from zntrack.core.parameter import ZnTrackOption
-from zntrack.descriptor import Metadata
+from zntrack.core.zntrackoption import ZnTrackOption
 
 log = logging.getLogger(__name__)
 
@@ -37,7 +36,8 @@ class params(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
+    dvc_option = "params"
+    zntrack_type = utils.ZnTypes.params
     file = utils.Files.params
 
     @utils.deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
@@ -52,7 +52,8 @@ class deps(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="deps", zntrack_type=utils.ZnTypes.deps)
+    dvc_option = "deps"
+    zntrack_type = utils.ZnTypes.deps
     file = utils.Files.zntrack
 
 
@@ -63,7 +64,8 @@ class outs(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="outs", zntrack_type=utils.ZnTypes.dvc)
+    dvc_option = "outs"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
 
@@ -75,7 +77,8 @@ class checkpoints(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="checkpoints", zntrack_type=utils.ZnTypes.dvc)
+    dvc_option = "checkpoints"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
 
@@ -87,7 +90,8 @@ class outs_no_cache(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="outs_no_cache", zntrack_type=utils.ZnTypes.dvc)
+    dvc_option = "outs_no_cache"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
 
@@ -99,7 +103,8 @@ class outs_persistent(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="outs_persistent", zntrack_type=utils.ZnTypes.dvc)
+    dvc_option = "outs_persistent"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
 
@@ -111,7 +116,8 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="metrics", zntrack_type=utils.ZnTypes.dvc)
+    mdvc_option = "metrics"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
 
@@ -123,7 +129,8 @@ class metrics_no_cache(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type=utils.ZnTypes.dvc)
+    dvc_option = "metrics_no_cache"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
 
@@ -135,7 +142,8 @@ class plots(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="plots", zntrack_type=utils.ZnTypes.dvc)
+    dvc_option = "plots"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
 
@@ -147,6 +155,7 @@ class plots_no_cache(ZnTrackOption):
      on the available options
     """
 
-    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type=utils.ZnTypes.dvc)
+    dvc_option = "plots_no_cache"
+    zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True

@@ -1,8 +1,6 @@
 import logging
 
 from zntrack import utils
-from zntrack.core.parameter import File
-from zntrack.descriptor import Metadata
 from zntrack.zn.split_option import SplitZnTrackOption
 
 log = logging.getLogger(__name__)
@@ -27,18 +25,20 @@ class Method(SplitZnTrackOption):
 
     """
 
-    metadata = Metadata(dvc_option="params", zntrack_type=utils.ZnTypes.params)
+    dvc_option = "params"
+    zntrack_type = utils.ZnTypes.params
 
-    def get_filename(self, instance) -> File:
-        """Does not really have a single file but params.yaml and zntrack.json"""
-        return File(path=utils.Files.params)
+    def get_filename(self, instance):
+        """Does not have a single file but params.yaml and zntrack.json"""
+        return utils.Files.params, utils.Files.zntrack
 
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""
         if instance is None:
+            # this must be here, even though it is in the super call, what follows
+            #  after does not work otherwise
             return self
-        log.debug(f"Get {self} from {instance}")
-        value = instance.__dict__.get(self.name, self.default_value)
+        value = super().__get__(instance, owner)
         if value is None:
             log.warning(
                 "Found NoneType but expected some class instance. Please open an issue on"
