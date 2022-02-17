@@ -35,9 +35,10 @@ class Method(SplitZnTrackOption):
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""
         if instance is None:
+            # this must be here, even though it is in the super call, what follows
+            #  after does not work otherwise
             return self
-        log.debug(f"Get {self} from {instance}")
-        value = instance.__dict__.get(self.name, self.default_value)
+        value = super().__get__(instance, owner)
         if value is None:
             log.warning(
                 "Found NoneType but expected some class instance. Please open an issue on"

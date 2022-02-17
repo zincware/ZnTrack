@@ -314,8 +314,8 @@ class GraphWriter:
             ]
         zn_options_set = set()
         for option in self._descriptor_list:
-            value = getattr(self, option.name)
             if option.zntrack_type == utils.ZnTypes.dvc:
+                value = getattr(self, option.name)
                 script += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
             elif option.zntrack_type in [
@@ -329,6 +329,7 @@ class GraphWriter:
                     )
                 )
             elif option.zntrack_type == utils.ZnTypes.deps:
+                value = getattr(self, option.name)
                 script += handle_deps(value)
 
         for pair in zn_options_set:

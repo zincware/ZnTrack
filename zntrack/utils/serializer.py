@@ -20,6 +20,7 @@ import dataclasses
 import importlib
 import inspect
 import logging
+import typing
 
 import znjson
 
@@ -35,7 +36,7 @@ class SerializedClass:
     module: str
     cls: str
 
-    def get_cls(self):
+    def get_cls(self) -> typing.Type[Node]:
         """Import the serialized class from the given module"""
         module = importlib.import_module(self.module)
         cls = getattr(module, self.cls)
