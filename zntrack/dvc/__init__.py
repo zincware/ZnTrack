@@ -20,7 +20,7 @@ Examples
 import logging
 
 from zntrack import utils
-from zntrack.core.parameter import ZnTrackOption
+from zntrack.core.zntrackoption import ZnTrackOption
 
 log = logging.getLogger(__name__)
 

@@ -7,7 +7,7 @@ import typing
 
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
-from zntrack.core.parameter import ZnTrackOption
+from zntrack.core.zntrackoption import ZnTrackOption
 
 log = logging.getLogger(__name__)
 

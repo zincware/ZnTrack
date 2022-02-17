@@ -16,7 +16,7 @@ see https://dvc.org/doc/command-reference/run#options
 import logging
 
 from zntrack import utils
-from zntrack.core.parameter import ZnTrackOption
+from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.zn.method import Method
 from zntrack.zn.split_option import SplitZnTrackOption
 
