@@ -10,8 +10,4 @@ pandoc
 numpy
 matplotlib
 pandas
-isort
-black
-coverage
-coveralls
 ase
