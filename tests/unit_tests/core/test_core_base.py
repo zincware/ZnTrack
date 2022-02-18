@@ -131,8 +131,7 @@ def test_load():
 
     incorrect_node = InCorrectNode.load(name="Test")
     assert incorrect_node.node_name == "Test"
-    with pytest.raises(AssertionError):
-        assert incorrect_node.test_name == incorrect_node.node_name
+    assert incorrect_node.test_name != incorrect_node.node_name
 
 
 class RunTestNode(Node):

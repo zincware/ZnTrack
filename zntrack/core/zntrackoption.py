@@ -111,7 +111,9 @@ class ZnTrackOption(descriptor.Descriptor):
             except (KeyError, FileNotFoundError) as err:
                 # do not load default value, because a loaded instance should always
                 #  load from files.
-                raise ValueError(f"Could not load {self.name} for {instance}") from err
+                raise AttributeError(
+                    f"Could not load {self.name} for {instance}"
+                ) from err
 
         return instance.__dict__[self.name]
 
