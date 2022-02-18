@@ -1,3 +1,4 @@
+import dataclasses
 import os
 import shutil
 import subprocess
@@ -72,10 +73,17 @@ class MiddleValue(Node):
         self.outs = "middle"
 
 
+@dataclasses.dataclass
+class StopValueParams:
+    a_val: int = 42
+    b_val: int = 17
+
+
 class StopValue(Node):
     middle_value: MiddleValue = zn.deps(MiddleValue.load())
     params = zn.params("stop value")
     outs = zn.outs()
+    method = zn.Method(StopValueParams())
 
     def run(self):
         self.outs = "stop"
@@ -90,6 +98,10 @@ def test_lazy_load_deps(proj_path):
 
     assert stop_val.__dict__["middle_value"] is LazyOption
     assert isinstance(stop_val.middle_value, MiddleValue)
+
+    assert stop_val.__dict__["method"] is LazyOption
+    assert isinstance(stop_val.method, StopValueParams)
+
     assert stop_val.middle_value.__dict__["outs"] is LazyOption
     assert stop_val.middle_value.outs == "middle"
     assert stop_val.middle_value.__dict__["outs"] == "middle"
@@ -108,3 +120,5 @@ def test_not_lazy_load_deps(proj_path):
     # without lazy loading all values should be set in the __dict__
     assert isinstance(stop_val.__dict__["middle_value"], MiddleValue)
     assert isinstance(stop_val.middle_value.__dict__["start_value"], StartValue)
+    assert isinstance(stop_val.__dict__["method"], StopValueParams)
+    assert isinstance(stop_val.method, StopValueParams)
