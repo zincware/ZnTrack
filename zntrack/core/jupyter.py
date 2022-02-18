@@ -59,7 +59,10 @@ def jupyter_class_to_file(silent, nb_name, module_name):
             ):
                 found_node = True
             if found_node and not reading_class:
-                break
+                if re.match(r"#.*zntrack:.*break", line):
+                    # stop converting the file after this line if the Node was already
+                    #  found
+                    break
 
     src = imports + "\n\n" + class_definition
 
