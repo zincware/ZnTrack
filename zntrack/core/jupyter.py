@@ -10,6 +10,7 @@ from zntrack.utils.config import config
 
 def jupyter_class_to_file(silent, nb_name, module_name):
     """Extract the class definition form an ipynb file"""
+    # TOOD is it really module_name and not class name?
 
     if not silent:
         log.warning(
@@ -27,6 +28,7 @@ def jupyter_class_to_file(silent, nb_name, module_name):
     )
 
     reading_class = False
+    found_class = False
 
     imports = ""
 
@@ -52,6 +54,10 @@ def jupyter_class_to_file(silent, nb_name, module_name):
             if line.startswith("@"):  # handle decorators
                 reading_class = True
                 class_definition += line
+            if line.startswith(f"class {module_name}"):
+                found_class = True
+            if found_class and not reading_class:
+                break
 
     src = imports + "\n\n" + class_definition
 
