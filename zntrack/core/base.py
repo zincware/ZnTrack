@@ -20,6 +20,19 @@ from zntrack.zn import params
 log = logging.getLogger(__name__)
 
 
+def update_dependency_options(value):
+    """Handle Node dependencies
+
+    The default value is created upton instantiation of a ZnTrackOption,
+    if a new class is created via Instance.load() it does not automatically load
+    the default_value Nodes, so we must to this manually here and call update_options.
+    """
+    if isinstance(value, (list, tuple)):
+        [update_dependency_options(x) for x in value]
+    if isinstance(value, Node):
+        value.update_options()
+
+
 class Node(GraphWriter):
     """Main parent class for all ZnTrack Node
 
@@ -35,8 +48,11 @@ class Node(GraphWriter):
     is_loaded: bool = False
 
     def __init__(self, **kwargs):
-        self.is_loaded = kwargs.pop("is_loaded", False)
         super().__init__(**kwargs)
+        self.is_loaded = kwargs.pop("is_loaded", False)
+        for data in self._descriptor_list:
+            if data.zntrack_type == utils.ZnTypes.deps:
+                update_dependency_options(data.default_value)
 
     @utils.deprecated(
         reason=(
