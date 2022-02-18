@@ -28,7 +28,7 @@ def jupyter_class_to_file(silent, nb_name, module_name):
     )
 
     reading_class = False
-    found_class = False
+    found_node = False
 
     imports = ""
 
@@ -54,9 +54,11 @@ def jupyter_class_to_file(silent, nb_name, module_name):
             if line.startswith("@"):  # handle decorators
                 reading_class = True
                 class_definition += line
-            if line.startswith(f"class {module_name}"):
-                found_class = True
-            if found_class and not reading_class:
+            if line.startswith(f"class {module_name}") or line.startswith(
+                f"def {module_name}"
+            ):
+                found_node = True
+            if found_node and not reading_class:
                 break
 
     src = imports + "\n\n" + class_definition
