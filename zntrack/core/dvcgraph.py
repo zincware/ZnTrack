@@ -39,7 +39,7 @@ def handle_deps(value) -> list:
         elif value is None:
             pass
         else:
-            raise ValueError(f"Type {type(value)} is not supported!")
+            raise ValueError(f"Type {type(value)} ({value}) is not supported!")
 
     return script
 
@@ -150,9 +150,6 @@ class GraphWriter:
 
     def __init__(self, **kwargs):
         self.node_name = kwargs.get("name", None)
-        for data in self._descriptor_list:
-            if data.zntrack_type == utils.ZnTypes.deps:
-                data.update_default()
 
     @property
     def _descriptor_list(self) -> typing.List[ZnTrackOption]:
