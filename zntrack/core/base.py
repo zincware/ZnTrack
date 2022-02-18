@@ -117,11 +117,13 @@ class Node(GraphWriter):
                 # for the filtered files
                 option.mkdir(instance=self)
 
-    def update_options(self, lazy=utils.config.lazy):
+    def update_options(self, lazy=None):
         """Update all ZnTrack options inheriting from ZnTrackOption
 
         This will overwrite the value in __dict__ even it the value was changed
         """
+        if lazy is None:
+            lazy = utils.config.lazy
         for option in self._descriptor_list:
             self.__dict__[option.name] = utils.LazyOption
             if not lazy:
@@ -136,7 +138,7 @@ class Node(GraphWriter):
         self.is_loaded = True
 
     @classmethod
-    def load(cls, name=None, lazy: bool = True) -> Node:
+    def load(cls, name=None, lazy: bool = None) -> Node:
         """classmethod that yield a Node object
 
         This method does
@@ -145,7 +147,14 @@ class Node(GraphWriter):
 
         Parameters
         ----------
-        name: Node name
+        lazy: bool
+            The default value is defined by config.lazy = True.
+            If false, all instances will be loaded. If true, the value is only
+            read when first accessed.
+        name: str, default = None
+            Name of the Node / stage in dvc.yaml.
+            If not explicitly defined in Node(name=<...>).write_graph()
+            this should remain None.
 
         Returns
         -------
@@ -159,6 +168,8 @@ class Node(GraphWriter):
             super().__init__(**kwargs)
 
         """
+        if lazy is None:
+            lazy = utils.config.lazy
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError:

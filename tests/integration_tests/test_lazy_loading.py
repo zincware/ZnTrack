@@ -35,6 +35,26 @@ def test_lazy_load(proj_path):
     assert hello_world.value == {"Lorem": "Ipsum"}
 
 
+@pytest.mark.parametrize("lazy", (False, True))
+def test_lazy_load_config(proj_path, lazy):
+    """check that the config.lazy setting works"""
+    from zntrack.utils import config
+
+    config.lazy = lazy
+    hello_world = HelloWorld()
+    hello_world.save()
+
+    hello_world = HelloWorld.load()
+    if lazy:
+        assert hello_world.__dict__["value"] is LazyOption
+        assert hello_world.value == {"Lorem": "Ipsum"}
+    else:
+        assert hello_world.__dict__["value"] == {"Lorem": "Ipsum"}
+
+    # always set it back to true after the tests, because it is global
+    config.lazy = True
+
+
 class StartValue(Node):
     params = zn.params("my param")
     outs = zn.outs()
@@ -88,26 +108,3 @@ def test_not_lazy_load_deps(proj_path):
     # without lazy loading all values should be set in the __dict__
     assert isinstance(stop_val.__dict__["middle_value"], MiddleValue)
     assert isinstance(stop_val.middle_value.__dict__["start_value"], StartValue)
-
-
-class SomeData(Node):
-    outs = zn.outs()
-
-    def run(self):
-        self.outs = 42
-
-
-class LazyNotLazy(Node):
-    lazy_deps = zn.deps()
-    not_lazy_deps = zn.deps()
-
-    lst_deps = zn.deps()
-
-    def __init__(self, lazy_deps=None, not_lazy_deps=None, lst_deps=None, **kwargs):
-        super().__init__(**kwargs)
-        self.lazy_deps = lazy_deps
-        self.not_lazy_deps = not_lazy_deps
-        self.lst_deps = lst_deps
-
-    def run(self):
-        pass
