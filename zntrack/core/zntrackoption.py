@@ -108,12 +108,14 @@ class ZnTrackOption(descriptor.Descriptor):
                 # load data and store it in the instance
                 instance.__dict__[self.name] = self.get_data_from_files(instance)
                 log.debug(f"instance {instance} updated from file")
-            except (KeyError, FileNotFoundError) as err:
+            except (KeyError, FileNotFoundError, AttributeError) as err:
                 # do not load default value, because a loaded instance should always
                 #  load from files.
-                raise AttributeError(
-                    f"Could not load {self.name} for {instance}"
-                ) from err
+                if not utils.config.allow_empty_loading:
+                    # allow overwriting this
+                    raise AttributeError(
+                        f"Could not load {self.name} for {instance}"
+                    ) from err
 
         return instance.__dict__[self.name]
 

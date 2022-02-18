@@ -46,4 +46,8 @@ __all__ = [
 
 
 class LazyOption:
-    pass
+    def __init__(self):
+        raise ValueError(
+            "Can not initialize LazyOption. If you expected something else open an "
+            "issue at https://github.com/zincware/ZnTrack and describe how you got here."
+        )
