@@ -130,7 +130,7 @@ class Node(GraphWriter):
                 # trigger loading the data into memory
                 value = getattr(self, option.name)
                 try:
-                    value.update_options(lazy=lazy)
+                    value.update_options(lazy=False)
                 except AttributeError:
                     # if lazy=False trigger update_options iteratively on
                     # all dependency Nodes
