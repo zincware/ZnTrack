@@ -223,3 +223,39 @@ def run_dvc_cmd(script, silent=False):
             f"# failed after stdout: \n{err.stdout.decode()}"
             f"# with stderr: \n{err.stderr.decode()}"
         ) from err
+
+
+def load_node_dependency(value, log_warning=False):
+    """Load a Node dependency if passed only a class
+
+    Parameters
+    ----------
+    value: anything
+        This function creates an instance of value if it is a class of node. Otherwise,
+        it does nothing.
+    log_warning: bool
+        Log a DepreciationWarning when used from dvc.deps()
+
+    Returns
+    -------
+    value:
+        If value was subclass of Node, it returns an instance of value, otherwise
+        it returns value
+
+    """
+    from zntrack.core.base import Node
+
+    if isinstance(value, (list, tuple)):
+        value = [load_node_dependency(x, log_warning) for x in value]
+    try:
+        if issubclass(value, Node):
+            value = value.load()
+    except TypeError:
+        # value is not a class
+        pass
+    if isinstance(value, Node):
+        log.warning(
+            f"DeprecationWarning: Found Node instance ({value}) in dvc.deps(), please use"
+            " zn.deps() instead."
+        )
+    return value

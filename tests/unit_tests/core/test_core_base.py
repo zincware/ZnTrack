@@ -1,12 +1,12 @@
 import json
 import pathlib
-from unittest.mock import call, mock_open, patch
+from unittest.mock import MagicMock, call, mock_open, patch
 
 import pytest
 import yaml
 
 from zntrack import dvc, zn
-from zntrack.core.base import Node
+from zntrack.core.base import Node, update_dependency_options
 
 
 class ExampleDVCOutsNode(Node):
@@ -169,3 +169,20 @@ def test_WrongInit():
     """Test that a TypeError occurs if any value it not set to default in __init__"""
     with pytest.raises(TypeError):
         WrongInit.load()
+
+
+def test_update_dependency_options():
+    """Test update_dependency_options calls
+
+    I'm not sure if this is the supposed way to use patch / MagicMock but it works
+    """
+
+    with patch(f"{__name__}.MagicMock", spec=Node):
+        magic_mock = MagicMock()
+        update_dependency_options(magic_mock)
+        assert magic_mock.update_options.called
+
+    with patch(f"{__name__}.MagicMock", spec=Node):
+        magic_mock = MagicMock()
+        update_dependency_options([magic_mock])
+        assert magic_mock.update_options.called

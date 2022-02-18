@@ -56,6 +56,13 @@ class deps(ZnTrackOption):
     zntrack_type = utils.ZnTypes.deps
     file = utils.Files.zntrack
 
+    def __get__(self, instance, owner):
+        """Use load_node_dependency before returning the value"""
+        value = super(deps, self).__get__(instance, owner)
+        value = utils.utils.load_node_dependency(value, log_warning=True)
+        setattr(instance, self.name, value)
+        return value
+
 
 class outs(ZnTrackOption):
     """Identify DVC option

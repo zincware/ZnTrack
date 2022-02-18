@@ -88,6 +88,18 @@ def test_dvc_outs(proj_path):
     )
 
 
+def test_dvc_outs_no_load(proj_path):
+    DVCOuts().write_graph()
+    assert issubclass(DVCOuts, Node)
+    DependenciesCollector(dependencies=DVCOuts).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert (
+        DependenciesCollector.load().dependencies.data_file.read_text() == "Lorem Ipsum"
+    )
+
+
 def test_dvc_reversed(proj_path):
     """Create the instances first and at the end call write_graph"""
 
