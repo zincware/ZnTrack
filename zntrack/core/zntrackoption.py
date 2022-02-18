@@ -88,28 +88,6 @@ class ZnTrackOption(descriptor.Descriptor):
     def __str__(self):
         return f"{self.dvc_option} / {self.name}"
 
-    def update_default(self):
-        """Update default_value
-
-        The default value is created upton instantiation of this descriptor,
-        if a new class is created via Instance.load() it does not automatically load
-        the default_value Nodes, so we must to this manually here
-        """
-        if isinstance(self.default_value, (list, tuple)):
-            for value in self.default_value:
-                # cheap trick because circular imports - TODO find clever fix!
-                try:
-                    value.update_options()
-                except AttributeError:
-                    # value is not a Node instance
-                    pass
-        else:
-            try:
-                self.default_value.update_options()
-            except AttributeError:
-                # default_value is not a Node instance
-                pass
-
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
         if uses_node_name(self.zntrack_type, instance) is None:
