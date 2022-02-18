@@ -71,9 +71,15 @@ class NodeConfig:
                 continue
             if isinstance(getattr(self, field), (list, tuple)):
                 for element in getattr(self, field):
-                    script += [f"--{field.replace('_', '-')}", str(element)]
+                    script += [
+                        f"--{field.replace('_', '-')}",
+                        pathlib.Path(element).as_posix(),
+                    ]
             elif getattr(self, field) is not None:
-                script += [f"--{field.replace('_', '-')}", str(getattr(self, field))]
+                script += [
+                    f"--{field.replace('_', '-')}",
+                    pathlib.Path(getattr(self, field)).as_posix(),
+                ]
 
         return script
 
