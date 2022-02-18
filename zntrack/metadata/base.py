@@ -90,6 +90,7 @@ class MetaData(ABC):
                         data=cls._descriptor_list,
                         cls=cls,
                         zntrack_type=utils.ZnTypes.metadata,
+                        allow_none=True,
                     ).items()
                 )
             )
