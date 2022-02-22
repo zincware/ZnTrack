@@ -6,9 +6,15 @@ SPDX-License-Identifier: EPL-2.0
 
 Copyright Contributors to the Zincware Project.
 
-Description: Standard python init file for the core directory
+Description: ZnTrack custom exceptions
 """
-from zntrack.core.base import Node
-from zntrack.core.zntrackoption import ZnTrackOption
 
-__all__ = ["Node", "ZnTrackOption"]
+
+class DescriptorMissing(Exception):
+    pass
+
+
+class DVCProcessError(Exception):
+    """DVC specific message for CalledProcessError"""
+
+    pass

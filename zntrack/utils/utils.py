@@ -14,6 +14,7 @@ import logging
 import os
 import pathlib
 import shutil
+import subprocess
 import sys
 import tempfile
 import typing
@@ -21,6 +22,7 @@ import typing
 import znjson
 
 from zntrack.utils.config import config
+from zntrack.utils.exceptions import DVCProcessError
 
 log = logging.getLogger(__name__)
 
@@ -74,6 +76,11 @@ def deprecated(reason, version="v0.0.0"):
 def decode_dict(value):
     """Decode dict that was loaded without znjson"""
     return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
+
+
+def encode_dict(value) -> dict:
+    """Encode value into a dict serialized with ZnJson"""
+    return json.loads(json.dumps(value, cls=znjson.ZnEncoder))
 
 
 def get_auto_init(fields: typing.List[str]):
@@ -148,3 +155,107 @@ def check_type(obj, types, allow_iterable=False, allow_none=False) -> bool:
             return False
 
     return True
+
+
+def update_nb_name(nb_name: str) -> str:
+    """Check the config file for a nb_name if None provided"""
+    if nb_name is None:
+        return config.nb_name
+    return nb_name
+
+
+def module_to_path(module: str, suffix=".py") -> pathlib.Path:
+    """convert module a.b.c to path(a/b/c)"""
+    return pathlib.Path(*module.split(".")).with_suffix(suffix)
+
+
+def get_python_interpreter() -> str:
+    """Find the most suitable python interpreter
+
+    Try to run subprocess check calls to see, which python interpreter
+    should be selected
+
+    Returns
+    -------
+    interpreter: str
+        Name of the python interpreter that works with subprocess calls
+
+    """
+
+    for interpreter in ["python3", "python"]:
+        try:
+            subprocess.check_call(
+                [interpreter, "--version"],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            log.debug(f"Using command {interpreter} for dvc!")
+            return interpreter
+
+        except subprocess.CalledProcessError:
+            log.debug(f"{interpreter} is not working!")
+    raise ValueError(
+        "Could not find a working python interpreter to work with subprocesses!"
+    )
+
+
+def run_dvc_cmd(script, silent=False):
+    """Run the DVC script via subprocess calls
+
+    Parameters
+    ----------
+    script: list[str]
+        A list of strings to pass the subprocess command
+
+    silent: bool,
+        reduce the output to a minimum
+    """
+    try:
+        process = subprocess.run(script, capture_output=True, check=True)
+        if not silent:
+            if len(process.stdout) > 0:
+                log.info(process.stdout.decode())
+            if len(process.stderr) > 0:
+                log.warning(process.stderr.decode())
+    except subprocess.CalledProcessError as err:
+        raise DVCProcessError(
+            f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
+            f"# failed after stdout: \n{err.stdout.decode()}"
+            f"# with stderr: \n{err.stderr.decode()}"
+        ) from err
+
+
+def load_node_dependency(value, log_warning=False):
+    """Load a Node dependency if passed only a class
+
+    Parameters
+    ----------
+    value: anything
+        This function creates an instance of value if it is a class of node. Otherwise,
+        it does nothing.
+    log_warning: bool
+        Log a DepreciationWarning when used from dvc.deps()
+
+    Returns
+    -------
+    value:
+        If value was subclass of Node, it returns an instance of value, otherwise
+        it returns value
+
+    """
+    from zntrack.core.base import Node
+
+    if isinstance(value, (list, tuple)):
+        value = [load_node_dependency(x, log_warning) for x in value]
+    try:
+        if issubclass(value, Node):
+            value = value.load()
+    except TypeError:
+        # value is not a class
+        pass
+    if isinstance(value, Node) and log_warning:
+        log.warning(
+            f"DeprecationWarning: Found Node instance ({value}) in dvc.deps(), please use"
+            " zn.deps() instead."
+        )
+    return value

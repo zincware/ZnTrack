@@ -67,7 +67,7 @@ class DepsCollwOuts(Node):
 
 
 @pytest.fixture()
-def dvc_repo_path(tmp_path):
+def proj_path(tmp_path):
     shutil.copy(__file__, tmp_path)
     os.chdir(tmp_path)
     subprocess.check_call(["git", "init"])
@@ -76,7 +76,7 @@ def dvc_repo_path(tmp_path):
     return tmp_path
 
 
-def test_dvc_outs(dvc_repo_path):
+def test_dvc_outs(proj_path):
     DVCOuts().write_graph()
 
     DependenciesCollector(dependencies=DVCOuts.load()).write_graph()
@@ -88,7 +88,28 @@ def test_dvc_outs(dvc_repo_path):
     )
 
 
-def test_zn_outs(dvc_repo_path):
+def test_dvc_outs_no_load(proj_path):
+    DVCOuts().write_graph()
+    assert issubclass(DVCOuts, Node)
+    DependenciesCollector(dependencies=DVCOuts).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert (
+        DependenciesCollector.load().dependencies.data_file.read_text() == "Lorem Ipsum"
+    )
+
+
+def test_dvc_reversed(proj_path):
+    """Create the instances first and at the end call write_graph"""
+    with pytest.raises(AttributeError):
+        # this can not work, because DVCOuts affected files is not now at the stage
+        # where DependenciesCollector writes its DVC stage
+        DependenciesCollector(dependencies=DVCOuts.load()).write_graph()
+        DVCOuts().write_graph()
+
+
+def test_zn_outs(proj_path):
     ZnOuts().write_graph()
 
     DependenciesCollector(dependencies=ZnOuts.load()).write_graph()
@@ -98,7 +119,7 @@ def test_zn_outs(dvc_repo_path):
     assert DependenciesCollector.load().dependencies.data == "Lorem Ipsum"
 
 
-def test_dvc_zn_outs(dvc_repo_path):
+def test_dvc_zn_outs(proj_path):
     DVCZnOuts().write_graph()
 
     DependenciesCollector(dependencies=DVCZnOuts.load()).write_graph()
@@ -112,7 +133,7 @@ def test_dvc_zn_outs(dvc_repo_path):
     assert DependenciesCollector.load().dependencies.data == "Lorem Ipsum"
 
 
-def test_expand_dependencies(dvc_repo_path):
+def test_expand_dependencies(proj_path):
     DVCZnOuts().write_graph()
 
     DependenciesCollector(name="Collector01", dependencies=DVCZnOuts.load()).write_graph()
@@ -128,7 +149,7 @@ def test_expand_dependencies(dvc_repo_path):
     )
 
 
-def test_exp_deps_w_outs(dvc_repo_path):
+def test_exp_deps_w_outs(proj_path):
     """test_expand_dependencies_with_outs"""
     DVCZnOuts().write_graph()
 
@@ -145,16 +166,25 @@ def test_exp_deps_w_outs(dvc_repo_path):
     )
 
 
-def test_multiple_deps(dvc_repo_path):
+def test_multiple_deps(proj_path):
+    DVCOuts().save()
+    ZnOuts().save()
+
     DependenciesCollector(dependencies=[DVCOuts.load(), ZnOuts.load()]).save()
 
-    assert isinstance(DependenciesCollector.load().dependencies[0], DVCOuts)
-    assert isinstance(DependenciesCollector.load().dependencies[1], ZnOuts)
+    assert DVCOuts.load().data_file == Path("data")
 
-    assert "data" in DependenciesCollector.load().write_graph(dry_run=True)
-    assert "nodes/ZnOuts/outs.json" in DependenciesCollector.load().write_graph(
-        dry_run=True
-    )
+    deps_col = DependenciesCollector.load()
+
+    assert isinstance(deps_col.dependencies[0], DVCOuts)
+    assert isinstance(deps_col.dependencies[1], ZnOuts)
+
+    assert deps_col.dependencies[0].data_file == Path("data")
+
+    # from DVCOuts
+    assert "data" in deps_col.write_graph(dry_run=True)
+    # from ZnOuts
+    assert "nodes/ZnOuts/outs.json" in deps_col.write_graph(dry_run=True)
 
 
 class DefaultDependencyNode(Node):
@@ -165,21 +195,11 @@ class DefaultDependencyNode(Node):
         self.result = self.deps.data
 
 
-def test_default_dependency(dvc_repo_path):
+def test_default_dependency(proj_path):
     """Test that an instance of a dependency is loaded correctly when a new
     instance is created"""
     ZnOuts().write_graph()
     subprocess.check_call(["dvc", "repro"])
     DefaultDependencyNode().run_and_save()
-
-    assert DefaultDependencyNode.load().result == "Lorem Ipsum"
-
-
-def test_default_dependency_load(dvc_repo_path):
-    """Test that an instance of a dependency is loaded correctly when a new
-    instance is created"""
-    ZnOuts().write_graph()
-    subprocess.check_call(["dvc", "repro"])
-    DefaultDependencyNode.load().run_and_save()
 
     assert DefaultDependencyNode.load().result == "Lorem Ipsum"

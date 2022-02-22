@@ -13,16 +13,14 @@ to define e.g. dependencies
 
 Examples
 --------
-
->>> @Node()
->>> class HelloWorld
+>>> from zntrack import Node, dvc
+>>> class HelloWorld(Node)
 >>>     vars = dvc.params()
 """
 import logging
 
-from zntrack.core.parameter import ZnTrackOption
-from zntrack.descriptor import Metadata
-from zntrack.utils.utils import deprecated
+from zntrack import utils
+from zntrack.core.zntrackoption import ZnTrackOption
 
 log = logging.getLogger(__name__)
 
@@ -32,40 +30,139 @@ log = logging.getLogger(__name__)
 
 
 class params(ZnTrackOption):
-    metadata = Metadata(dvc_option="params", zntrack_type="params")
+    """Identify DVC option
 
-    @deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "params"
+    zntrack_type = utils.ZnTypes.params
+    file = utils.Files.params
+
+    @utils.deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
     def __init__(self, default_value=None):
         super().__init__(default_value)
 
 
 class deps(ZnTrackOption):
-    metadata = Metadata(dvc_option="deps", zntrack_type="deps")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "deps"
+    zntrack_type = utils.ZnTypes.deps
+    file = utils.Files.zntrack
+
+    def __get__(self, instance, owner):
+        """Use load_node_dependency before returning the value"""
+        value = super(deps, self).__get__(instance, owner)
+        value = utils.utils.load_node_dependency(value, log_warning=True)
+        setattr(instance, self.name, value)
+        return value
 
 
 class outs(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs", zntrack_type="dvc")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "outs"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True
+
+
+class checkpoints(ZnTrackOption):
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "checkpoints"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True
 
 
 class outs_no_cache(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs_no_cache", zntrack_type="dvc")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "outs_no_cache"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True
 
 
 class outs_persistent(ZnTrackOption):
-    metadata = Metadata(dvc_option="outs_persistent", zntrack_type="dvc")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "outs_persistent"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True
 
 
 class metrics(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics", zntrack_type="dvc")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "metrics"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True
 
 
 class metrics_no_cache(ZnTrackOption):
-    metadata = Metadata(dvc_option="metrics_no_cache", zntrack_type="dvc")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "metrics_no_cache"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True
 
 
 class plots(ZnTrackOption):
-    metadata = Metadata(dvc_option="plots", zntrack_type="dvc")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "plots"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True
 
 
 class plots_no_cache(ZnTrackOption):
-    metadata = Metadata(dvc_option="plots_no_cache", zntrack_type="dvc")
+    """Identify DVC option
+
+    See https://dvc.org/doc/command-reference/run#options for more information
+     on the available options
+    """
+
+    dvc_option = "plots_no_cache"
+    zntrack_type = utils.ZnTypes.dvc
+    file = utils.Files.zntrack
+    value_tracked = True

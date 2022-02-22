@@ -18,6 +18,7 @@ jobs:
           - "3.10"
           - 3.9
           - 3.8
+          - 3.7
         os:
           - ubuntu-latest
           - windows-latest
@@ -31,6 +32,7 @@ jobs:
       - name: Install dev requirements
         run: |
           pip3 install -r dev-requirements.txt
+          pip3 install coverage
       - name: Install package
         run: |
           pip3 install .
@@ -42,8 +44,70 @@ jobs:
       - name: Pytest
         run: |
           coverage run -m pytest
+          coverage xml
+          coverage lcov
       - name: Coveralls
-        env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path-to-lcov: coverage.lcov
+      - uses: codecov/codecov-action@v2
+        with:
+          flags: fulltest
+          fail_ci_if_error: true
+          verbose: true
+
+
+  unittest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Install dev requirements
         run: |
-          coveralls
+          pip3 install -r dev-requirements.txt
+          pip3 install coverage
+      - name: Install package
+        run: |
+          pip3 install .
+      - name: Setup git user
+        run: |
+          git config --global user.name "John Doe"
+          git config --global user.email johndoe@example.com
+          git config --global init.defaultBranch "main"
+      - name: Pytest
+        run: |
+          coverage run -m pytest ./tests/unit_tests
+          coverage xml
+      - uses: codecov/codecov-action@v2
+        with:
+          flags: unittests
+          fail_ci_if_error: true
+          verbose: true
+
+  nbtest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+      - name: Install dev requirements
+        run: |
+          pip3 install -r dev-requirements.txt
+          pip3 install nbmake
+      - name: Install package
+        run: |
+          pip3 install .
+      - name: Setup git user
+        run: |
+          git config --global user.name "John Doe"
+          git config --global user.email johndoe@example.com
+          git config --global init.defaultBranch "main"
+      - name: Pytest
+        run: |
+          pytest --nbmake ./examples

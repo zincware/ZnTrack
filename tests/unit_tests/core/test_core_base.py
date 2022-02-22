@@ -1,12 +1,12 @@
 import json
 import pathlib
-from unittest.mock import call, mock_open, patch
+from unittest.mock import MagicMock, call, mock_open, patch
 
 import pytest
 import yaml
 
 from zntrack import dvc, zn
-from zntrack.core.base import Node
+from zntrack.core.base import Node, update_dependency_options
 
 
 class ExampleDVCOutsNode(Node):
@@ -21,16 +21,14 @@ def test_node_module():
     assert example.module == "src.base"
 
 
-def test_python_interpreter():
-    example = ExampleDVCOutsNode()
-    assert example.python_interpreter in ["python", "python3"]
-
-
 class ExampleFullNode(Node):
     params = zn.params(10)
-    zn_outs = zn.outs("outs")
+    zn_outs = zn.outs()
     dvc_outs = dvc.outs("file.txt")
     deps = dvc.deps("deps.inp")
+
+    def run(self):
+        self.zn_outs = "outs"
 
 
 def test_save():
@@ -51,7 +49,7 @@ def test_save():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example.save(results=True)
+        example.run_and_save()
 
         # TODO check that this is really correct and does not overwrite things!
         assert zntrack_mock().write.mock_calls == [
@@ -100,7 +98,7 @@ def test__load():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example._load()
+        example.update_options()
         assert example.dvc_outs == "file_.txt"
         assert example.deps == "deps_.inp"
         assert example.params == 42
@@ -133,8 +131,7 @@ def test_load():
 
     incorrect_node = InCorrectNode.load(name="Test")
     assert incorrect_node.node_name == "Test"
-    with pytest.raises(AssertionError):
-        assert incorrect_node.test_name == incorrect_node.node_name
+    assert incorrect_node.test_name != incorrect_node.node_name
 
 
 class RunTestNode(Node):
@@ -160,3 +157,31 @@ def test_run_and_save():
     assert open_mock().write.mock_calls == [
         call(json.dumps({"outs": 42}, indent=4)),
     ]
+
+
+class WrongInit(Node):
+    def __init__(self, non_default, **kwargs):
+        super().__init__(**kwargs)
+
+
+def test_WrongInit():
+    """Test that a TypeError occurs if any value it not set to default in __init__"""
+    with pytest.raises(TypeError):
+        WrongInit.load()
+
+
+def test_update_dependency_options():
+    """Test update_dependency_options calls
+
+    I'm not sure if this is the supposed way to use patch / MagicMock but it works
+    """
+
+    with patch(f"{__name__}.MagicMock", spec=Node):
+        magic_mock = MagicMock()
+        update_dependency_options(magic_mock)
+        assert magic_mock.update_options.called
+
+    with patch(f"{__name__}.MagicMock", spec=Node):
+        magic_mock = MagicMock()
+        update_dependency_options([magic_mock])
+        assert magic_mock.update_options.called

@@ -7,8 +7,9 @@ import subprocess
 
 import pytest
 
-from zntrack import zn
+from zntrack import dvc, zn
 from zntrack.core.base import Node
+from zntrack.utils.exceptions import DVCProcessError
 
 
 @pytest.fixture
@@ -73,7 +74,11 @@ class ExampleNodeWithCompMethod(Node):
 
 def test_run(proj_path):
     test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
+    assert test_node_1.inputs == "Lorem Ipsum"
     test_node_1.write_graph()
+
+    obj = ExampleNode01.load()
+    assert obj.inputs == "Lorem Ipsum"
 
     subprocess.check_call(["dvc", "repro"])
 
@@ -277,6 +282,20 @@ def test_auto_init(proj_path):
     assert SingleNodeNoInit.load().param1 == 25
     assert SingleNodeNoInit.load().param2 == 42
     assert SingleNodeNoInit.load().result == 25 + 42
+
+
+class OutsNotWritten(Node):
+    """Define an outs file that is not being created"""
+
+    outs = dvc.outs("does_not_exist.txt")
+
+    def run(self):
+        pass
+
+
+def test_OutsNotWritten(proj_path):
+    with pytest.raises(DVCProcessError):
+        OutsNotWritten().write_graph(run=True)
 
 
 class PathAsParams(Node):

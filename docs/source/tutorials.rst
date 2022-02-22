@@ -18,5 +18,7 @@ The notebooks can be found in :code:`/examples/docs`.
    _overview/05_metadata.ipynb
    _overview/06_named_nodes.ipynb
    _overview/07_functions.ipynb
+   _overview/08_custom_zntrackoptions.ipynb
+   _overview/09_lazy.ipynb
    _overview/OptionalDVC.ipynb
    jupyter.rst
