@@ -105,7 +105,11 @@ def handle_dvc(value, dvc_args) -> list:
 
 
 def filter_ZnTrackOption(
-    data, cls, zntrack_type: typing.Union[str, list], return_with_type=False
+    data,
+    cls,
+    zntrack_type: typing.Union[str, list],
+    return_with_type=False,
+    allow_none: bool = False,
 ) -> dict:
     """Filter the descriptor instances by zntrack_type
 
@@ -119,6 +123,9 @@ def filter_ZnTrackOption(
         The zntrack_type of the descriptors to gather
     return_with_type: bool, default=False
         return a dictionary with the Descriptor.dvc_option as keys
+    allow_none: bool, default=False
+        Use getattr(obj, name, None) instead of getattr(obj, name) to yield
+        None when an AttributeError occurs.
 
     Returns
     -------
@@ -134,8 +141,16 @@ def filter_ZnTrackOption(
     if return_with_type:
         types_dict = {x.dvc_option: {} for x in data}
         for entity in data:
-            types_dict[entity.dvc_option].update({entity.name: getattr(cls, entity.name)})
+            if allow_none:
+                # avoid AttributeError
+                value = getattr(cls, entity.name, None)
+            else:
+                value = getattr(cls, entity.name)
+            types_dict[entity.dvc_option].update({entity.name: value})
         return types_dict
+    if allow_none:
+        return {x.name: getattr(cls, x.name, None) for x in data}
+    # avoid AttributeError
     return {x.name: getattr(cls, x.name) for x in data}
 
 

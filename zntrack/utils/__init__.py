@@ -43,3 +43,11 @@ __all__ = [
     "run_dvc_cmd",
     "get_auto_init",
 ]
+
+
+class LazyOption:
+    def __init__(self):
+        raise ValueError(
+            "Can not initialize LazyOption. If you expected something else open an "
+            "issue at https://github.com/zincware/ZnTrack and describe how you got here."
+        )

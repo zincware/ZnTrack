@@ -253,7 +253,7 @@ def load_node_dependency(value, log_warning=False):
     except TypeError:
         # value is not a class
         pass
-    if isinstance(value, Node):
+    if isinstance(value, Node) and log_warning:
         log.warning(
             f"DeprecationWarning: Found Node instance ({value}) in dvc.deps(), please use"
             " zn.deps() instead."

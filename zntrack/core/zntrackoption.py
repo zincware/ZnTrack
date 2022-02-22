@@ -10,6 +10,7 @@ Description: Node parameter
 """
 from __future__ import annotations
 
+import copy
 import logging
 import pathlib
 import typing
@@ -88,6 +89,41 @@ class ZnTrackOption(descriptor.Descriptor):
     def __str__(self):
         return f"{self.dvc_option} / {self.name}"
 
+    def __get__(self, instance, owner):
+        self._instance = instance
+
+        if instance is None:
+            return self
+        elif instance.is_loaded:
+            is_lazy_option = instance.__dict__.get(self.name) is utils.LazyOption
+            is_not_in_dict = self.name not in instance.__dict__
+
+            if is_lazy_option or is_not_in_dict:
+                # the __dict__ only needs to be updated if __dict__ does
+                # not contain self.name or self.name is LazyOption
+                try:
+                    # load data and store it in the instance
+                    instance.__dict__[self.name] = self.get_data_from_files(instance)
+                    log.debug(f"instance {instance} updated from file")
+                except (KeyError, FileNotFoundError, AttributeError) as err:
+                    # do not load default value, because a loaded instance should always
+                    #  load from files.
+                    if not utils.config.allow_empty_loading:
+                        # allow overwriting this
+                        raise AttributeError(
+                            f"Could not load {self.name} for {instance}"
+                        ) from err
+        else:
+            # if the instance is not loaded, there is no LazyOption handling
+            try:
+                return instance.__dict__[self.name]
+            except KeyError:
+                # instead of .get(name, default_value) we make a copy of the default value
+                #  because it could be changed.
+                instance.__dict__[self.name] = copy.deepcopy(self.default_value)
+
+        return instance.__dict__[self.name]
+
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
         if uses_node_name(self.zntrack_type, instance) is None:
@@ -104,6 +140,9 @@ class ZnTrackOption(descriptor.Descriptor):
             Similar to __get__(instance) this requires the instance
             to be passed manually.
         """
+        if instance.__dict__.get(self.name) is utils.LazyOption:
+            # do not save anything if __get__/__set__ was never used
+            return
         utils.file_io.update_config_file(
             file=self.get_filename(instance),
             node_name=uses_node_name(self.zntrack_type, instance),

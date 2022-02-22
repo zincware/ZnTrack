@@ -22,10 +22,19 @@ class Config:
         Name of the JupyterNotebook, if the Nodes are defined in a Notebook
     nb_class_path: Path
         The path where jupyter notebooks should write the *.py
+    lazy: bool, default = True
+        Use lazy loading for Node.load(). This means that all ZnTrackOptions are only
+        loaded from files when they are first accessed.
+    allow_empty_loading: bool
+        Allow "Node.load(lazy=False)" even if nothing can be loaded, e.g.
+        zntrack.json / params.yaml does not exist or does not contain data
+        for the respective Node.
     """
 
     nb_name: str = None
     nb_class_path: Path = Path("src")
+    lazy: bool = True
+    allow_empty_loading: bool = False
 
 
 @dataclass(frozen=True)

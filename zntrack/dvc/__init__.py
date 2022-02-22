@@ -123,7 +123,7 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    mdvc_option = "metrics"
+    dvc_option = "metrics"
     zntrack_type = utils.ZnTypes.dvc
     file = utils.Files.zntrack
     value_tracked = True
