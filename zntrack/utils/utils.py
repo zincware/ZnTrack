@@ -199,7 +199,7 @@ def get_python_interpreter() -> str:
     )
 
 
-def run_dvc_cmd(script, silent=False):
+def run_dvc_cmd(script):
     """Run the DVC script via subprocess calls
 
     Parameters
@@ -207,16 +207,14 @@ def run_dvc_cmd(script, silent=False):
     script: list[str]
         A list of strings to pass the subprocess command
 
-    silent: bool,
-        reduce the output to a minimum
     """
+    dvc_short_string = " ".join(script[:4])
+    if len(script) > 4:
+        dvc_short_string += " ..."
+    log.warning(f"Running DVC command: '{dvc_short_string}'")
     try:
-        process = subprocess.run(script, capture_output=True, check=True)
-        if not silent:
-            if len(process.stdout) > 0:
-                log.info(process.stdout.decode())
-            if len(process.stderr) > 0:
-                log.warning(process.stderr.decode())
+        # do not display the output if log.log_level > logging.INFO
+        subprocess.run(script, check=True, capture_output=config.log_level > logging.INFO)
     except subprocess.CalledProcessError as err:
         raise DVCProcessError(
             f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"

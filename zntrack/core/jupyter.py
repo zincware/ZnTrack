@@ -4,27 +4,32 @@ log = logging.getLogger(__name__)
 import pathlib
 import re
 import subprocess
+from functools import lru_cache
 
 from zntrack.utils.config import config
 
 
-def jupyter_class_to_file(silent, nb_name, module_name):
+@lru_cache(None)
+def log_jupyter_warning():
+    """Use lru_cache to only print this once"""
+    log.warning(
+        "Jupyter support is an experimental feature! Please save your "
+        "notebook before running this command!\n"
+        "Submit issues to https://github.com/zincware/ZnTrack."
+    )
+
+
+def jupyter_class_to_file(nb_name, module_name):
     """Extract the class definition form an ipynb file"""
-    # TOOD is it really module_name and not class name?
+    # TODO is it really module_name and not class name?
 
-    if not silent:
-        log.warning(
-            "Jupyter support is an experimental feature! Please save your "
-            "notebook before running this command!\n"
-            "Submit issues to https://github.com/zincware/ZnTrack."
-        )
-        log.warning(f"Converting {nb_name} to file {module_name}.py")
-
+    log_jupyter_warning()
+    log.debug(f"Converting {nb_name} to file {module_name}.py")
     nb_name = pathlib.Path(nb_name)
 
     subprocess.run(
         ["jupyter", "nbconvert", "--to", "script", nb_name],
-        capture_output=not silent,
+        capture_output=config.log_level > logging.INFO,
     )
 
     reading_class = False

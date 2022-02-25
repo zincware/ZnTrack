@@ -8,7 +8,8 @@ Copyright Contributors to the Zincware Project.
 
 Description: Configuration File for ZnTrack
 """
-from dataclasses import dataclass
+import logging
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -29,12 +30,30 @@ class Config:
         Allow "Node.load(lazy=False)" even if nothing can be loaded, e.g.
         zntrack.json / params.yaml does not exist or does not contain data
         for the respective Node.
+    log_level: int, default = logging.WARNING
+        The log level to be used in the ZnTrack stdout logger.
+        The default log level (WARNING) will provide sufficient information for most
+        runs. If you encounter any issues you can set it to logging.INFO for more in-depth
+        information. DEBUG level can produce a lot of useful information for more complex
+        issues.
     """
 
     nb_name: str = None
     nb_class_path: Path = Path("src")
     lazy: bool = True
     allow_empty_loading: bool = False
+    _log_level: int = field(default=logging.WARNING, init=False, repr=True)
+
+    @property
+    def log_level(self):
+        return self._log_level
+
+    @log_level.setter
+    def log_level(self, value):
+        """Update the loglevel of the ZnTrack logger"""
+        self._log_level = value
+        logger = logging.getLogger("zntrack")
+        logger.setLevel(self._log_level)
 
 
 @dataclass(frozen=True)

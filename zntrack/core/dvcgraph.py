@@ -77,12 +77,6 @@ class DVCRunOptions:
             value = getattr(self, field_name)
             if value:
                 out.append(f"--{field_name.replace('_', '-')}")
-            else:
-                if field_name == "no_exec":
-                    log.warning(
-                        "You will not be able to see the stdout/stderr "
-                        "of the process in real time!"
-                    )
         return out
 
 
@@ -229,19 +223,15 @@ class GraphWriter:
         return set(files)
 
     @classmethod
-    def convert_notebook(cls, nb_name: str = None, silent: bool = False):
+    def convert_notebook(cls, nb_name: str = None):
         """Use jupyter_class_to_file to convert ipynb to py
 
         Parameters
         ----------
         nb_name: str
             Notebook name when not using config.nb_name (this is not recommended)
-        silent: bool, default = False
-            Reduce the amount of logging
         """
-        nb_name = utils.update_nb_name(nb_name)
-
-        jupyter_class_to_file(silent=silent, nb_name=nb_name, module_name=cls.__name__)
+        jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
 
     def write_graph(
         self,
@@ -287,11 +277,16 @@ class GraphWriter:
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+
+        if silent:
+            log.warning(
+                "DeprecationWarning: silent was replaced by 'zntrack.config.log_level ="
+                " logging.ERROR'"
+            )
         if run is not None:
             no_exec = not run
 
-        if not silent:
-            log.warning("--- Writing new DVC file! ---")
+        log.debug("--- Writing new DVC file ---")
 
         script = ["dvc", "run", "-n", self.node_name]
 
@@ -310,7 +305,7 @@ class GraphWriter:
         if nb_name is not None:
             self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
             if notebook:
-                self.convert_notebook(nb_name, silent)
+                self.convert_notebook(nb_name)
                 script += ["--deps", utils.module_to_path(self.module).as_posix()]
 
         # Handle Parameter
@@ -365,4 +360,4 @@ class GraphWriter:
 
         if dry_run:
             return script
-        utils.run_dvc_cmd(script, silent)
+        utils.run_dvc_cmd(script)
