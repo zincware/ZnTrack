@@ -22,5 +22,4 @@ def test_not_supported_params():
 
 
 def test_supported_params():
-    assert NodeConfig(params={"name": "John"}).params.name == "John"
     assert NodeConfig(params={"name": "John"}).params["name"] == "John"
