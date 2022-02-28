@@ -149,8 +149,39 @@ def filter_ZnTrackOption(
 
 
 def prepare_dvc_script(
-    node_name, dvc_run_option, custom_args: list, nb_name, module, func_or_cls, call_args
+    node_name,
+    dvc_run_option: DVCRunOptions,
+    custom_args: list,
+    nb_name,
+    module,
+    func_or_cls,
+    call_args,
 ) -> list:
+    """Prepate the dvc cmd to be called by subprocess
+
+    Parameters
+    ----------
+    node_name: str
+        Name of the Node
+    dvc_run_option: DVCRunOptions
+        dataclass to collect special DVC run options
+    custom_args: list[str]
+        all the params / deps / ... to be added to the script
+    nb_name: str|None
+        Notebook name for jupyter support
+    module: str like "src.my_module"
+    func_or_cls: str
+        The name of the Node class or function to be imported and run
+    call_args: str
+        Additional str like "(run_func=True)" or ".load().run_and_save"
+
+    Returns
+    -------
+
+    list[str]
+        The list to be passed to the subprocess call
+
+    """
     script = ["dvc", "run", "-n", node_name]
     script += dvc_run_option.dvc_args
     script += custom_args
