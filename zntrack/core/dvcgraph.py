@@ -148,6 +148,23 @@ def filter_ZnTrackOption(
     return {x.name: getattr(cls, x.name) for x in data}
 
 
+def prepare_dvc_script(
+    node_name, dvc_run_option, custom_args: list, nb_name, module, func_or_cls, call_args
+) -> list:
+    script = ["dvc", "run", "-n", node_name]
+    script += dvc_run_option.dvc_args
+    script += custom_args
+
+    if nb_name is not None:
+        script += ["--deps", utils.module_to_path(module).as_posix()]
+
+    import_str = f"""{utils.get_python_interpreter()} -c "from {module} import """
+    import_str += f"""{func_or_cls}; {func_or_cls}{call_args}" """
+    script += [import_str]
+    log.debug(f"dvc script: {' '.join([str(x) for x in script])}")
+    return script
+
+
 class GraphWriter:
     """Write the DVC Graph
 
@@ -288,26 +305,23 @@ class GraphWriter:
 
         log.debug("--- Writing new DVC file ---")
 
-        script = ["dvc", "run", "-n", self.node_name]
-
-        script += DVCRunOptions(
+        dvc_run_option = DVCRunOptions(
             no_commit=no_commit,
             external=external,
             always_changed=always_changed,
             no_run_cache=no_run_cache,
             no_exec=no_exec,
             force=force,
-        ).dvc_args
+        )
 
         # Jupyter Notebook
         nb_name = utils.update_nb_name(nb_name)
-
         if nb_name is not None:
             self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
             if notebook:
                 self.convert_notebook(nb_name)
-                script += ["--deps", utils.module_to_path(self.module).as_posix()]
 
+        custom_args = []
         # Handle Parameter
         params_list = filter_ZnTrackOption(
             data=self._descriptor_list,
@@ -315,7 +329,7 @@ class GraphWriter:
             zntrack_type=[utils.ZnTypes.params],
         )
         if len(params_list) > 0:
-            script += [
+            custom_args += [
                 "--params",
                 f"{utils.Files.params}:{self.node_name}",
             ]
@@ -323,7 +337,7 @@ class GraphWriter:
         for option in self._descriptor_list:
             if option.zntrack_type == utils.ZnTypes.dvc:
                 value = getattr(self, option.name)
-                script += handle_dvc(value, option.dvc_args)
+                custom_args += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
             elif option.zntrack_type in [
                 utils.ZnTypes.results,
@@ -337,21 +351,24 @@ class GraphWriter:
                 )
             elif option.zntrack_type == utils.ZnTypes.deps:
                 value = getattr(self, option.name)
-                script += handle_deps(value)
+                custom_args += handle_deps(value)
 
         for pair in zn_options_set:
-            script += pair
+            custom_args += pair
 
-        # Add command to run the script
-        cls_name = self.__class__.__name__
-        script.append(
-            f"""{utils.get_python_interpreter()} -c "from {self.module} import """
-            f"""{cls_name}; {cls_name}.load(name='{self.node_name}').run_and_save()" """
+        script = prepare_dvc_script(
+            node_name=self.node_name,
+            dvc_run_option=dvc_run_option,
+            custom_args=custom_args,
+            nb_name=nb_name,
+            module=self.module,
+            func_or_cls=self.__class__.__name__,
+            call_args=f".load(name='{self.node_name}').run_and_save()",
         )
 
-        self.save()
+        # Add command to run the script
 
-        log.debug(f"running script: {' '.join([str(x) for x in script])}")
+        self.save()
 
         log.debug(
             "If you are using a jupyter notebook, you may not be able to see the "
