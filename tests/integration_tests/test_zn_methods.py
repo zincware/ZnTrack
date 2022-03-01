@@ -224,3 +224,36 @@ def test_assert_read_files_old1(proj_path):
     node = SingleNodeNoParams.load()
     assert node.data_class.param1 == 1
     assert node.data_class.param2 == 2
+
+
+@dataclasses.dataclass
+class MethodConfig:
+    param_a: str = "Lorem Ipsum"
+
+
+class MyMethod:
+    def __init__(self, method_config: MethodConfig):
+        self.method_config = method_config
+        if isinstance(self.method_config, dict):
+            self.method_config = MethodConfig(**self.method_config)
+
+
+class NodeMethodWithConfig(Node):
+    method: MyMethod = zn.Method()
+
+    def __init__(self, method=None, **kwargs):
+        super().__init__(**kwargs)
+        self.method = method
+
+    def run(self):
+        pass
+
+
+def test_NodeMethodWithConfig(proj_path):
+    NodeMethodWithConfig(method=MyMethod(method_config=MethodConfig())).write_graph()
+    assert NodeMethodWithConfig.load().method.method_config.param_a == "Lorem Ipsum"
+
+    NodeMethodWithConfig(
+        method=MyMethod(method_config=MethodConfig(param_a="Hello World"))
+    ).write_graph()
+    assert NodeMethodWithConfig.load().method.method_config == {"param_a": "Hello World"}
