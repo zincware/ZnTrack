@@ -51,7 +51,7 @@ class Node(GraphWriter):
         super().__init__(**kwargs)
         self.is_loaded = kwargs.pop("is_loaded", False)
         for data in self._descriptor_list:
-            if data.zntrack_type == utils.ZnTypes.deps:
+            if data.zntrack_type == utils.ZnTypes.DEPS:
                 update_dependency_options(data.default_value)
 
     @utils.deprecated(
@@ -109,7 +109,7 @@ class Node(GraphWriter):
             if results:
                 # Save all
                 option.save(instance=self)
-            elif option.zntrack_type not in [utils.ZnTypes.results]:
+            elif option.zntrack_type not in [utils.ZnTypes.RESULTS]:
                 # Filter out zn.<options>
                 option.save(instance=self)
             else:

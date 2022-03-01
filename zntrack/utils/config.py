@@ -8,6 +8,7 @@ Copyright Contributors to the Zincware Project.
 
 Description: Configuration File for ZnTrack
 """
+import enum
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -69,8 +70,7 @@ class Files:
     params: Path = Path("params.yaml")
 
 
-@dataclass(frozen=True)
-class ZnTypes:
+class ZnTypes(enum.Enum):
     """Collection of ZnTrack Types to identify descriptors beyond their dvc option
 
     Attributes
@@ -78,13 +78,13 @@ class ZnTypes:
     results: most zn.<options> like zn.outs() / zn.metrics() use this one
     """
 
-    deps: str = "deps"
-    dvc: str = "dvc"
-    metadata: str = "metadata"
-    method: str = "method"
-    params: str = "params"
-    iterable: str = "iterable"
-    results: str = "results"
+    DEPS = enum.auto()
+    DVC = enum.auto()
+    METADATA = enum.auto()
+    # method = enum.auto()
+    PARAMS = enum.auto()
+    ITERABLE = enum.auto()
+    RESULTS = enum.auto()
 
 
 config = Config()
