@@ -89,7 +89,7 @@ class MetaData(ABC):
                     filter_ZnTrackOption(
                         data=cls._descriptor_list,
                         cls=cls,
-                        zntrack_type=utils.ZnTypes.metadata,
+                        zntrack_type=utils.ZnTypes.METADATA,
                         allow_none=True,
                     ).items()
                 )

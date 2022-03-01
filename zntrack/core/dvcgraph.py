@@ -77,12 +77,6 @@ class DVCRunOptions:
             value = getattr(self, field_name)
             if value:
                 out.append(f"--{field_name.replace('_', '-')}")
-            else:
-                if field_name == "no_exec":
-                    log.warning(
-                        "You will not be able to see the stdout/stderr "
-                        "of the process in real time!"
-                    )
         return out
 
 
@@ -107,7 +101,7 @@ def handle_dvc(value, dvc_args) -> list:
 def filter_ZnTrackOption(
     data,
     cls,
-    zntrack_type: typing.Union[str, list],
+    zntrack_type: typing.Union[utils.ZnTypes, typing.List[utils.ZnTypes]],
     return_with_type=False,
     allow_none: bool = False,
 ) -> dict:
@@ -229,19 +223,15 @@ class GraphWriter:
         return set(files)
 
     @classmethod
-    def convert_notebook(cls, nb_name: str = None, silent: bool = False):
+    def convert_notebook(cls, nb_name: str = None):
         """Use jupyter_class_to_file to convert ipynb to py
 
         Parameters
         ----------
         nb_name: str
             Notebook name when not using config.nb_name (this is not recommended)
-        silent: bool, default = False
-            Reduce the amount of logging
         """
-        nb_name = utils.update_nb_name(nb_name)
-
-        jupyter_class_to_file(silent=silent, nb_name=nb_name, module_name=cls.__name__)
+        jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
 
     def write_graph(
         self,
@@ -287,11 +277,16 @@ class GraphWriter:
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+
+        if silent:
+            log.warning(
+                "DeprecationWarning: silent was replaced by 'zntrack.config.log_level ="
+                " logging.ERROR'"
+            )
         if run is not None:
             no_exec = not run
 
-        if not silent:
-            log.warning("--- Writing new DVC file! ---")
+        log.debug("--- Writing new DVC file ---")
 
         script = ["dvc", "run", "-n", self.node_name]
 
@@ -310,14 +305,14 @@ class GraphWriter:
         if nb_name is not None:
             self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
             if notebook:
-                self.convert_notebook(nb_name, silent)
+                self.convert_notebook(nb_name)
                 script += ["--deps", utils.module_to_path(self.module).as_posix()]
 
         # Handle Parameter
         params_list = filter_ZnTrackOption(
             data=self._descriptor_list,
             cls=self,
-            zntrack_type=[utils.ZnTypes.params],
+            zntrack_type=[utils.ZnTypes.PARAMS],
         )
         if len(params_list) > 0:
             script += [
@@ -326,13 +321,13 @@ class GraphWriter:
             ]
         zn_options_set = set()
         for option in self._descriptor_list:
-            if option.zntrack_type == utils.ZnTypes.dvc:
+            if option.zntrack_type == utils.ZnTypes.DVC:
                 value = getattr(self, option.name)
                 script += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
             elif option.zntrack_type in [
-                utils.ZnTypes.results,
-                utils.ZnTypes.metadata,
+                utils.ZnTypes.RESULTS,
+                utils.ZnTypes.METADATA,
             ]:
                 zn_options_set.add(
                     (
@@ -340,7 +335,7 @@ class GraphWriter:
                         option.get_filename(self).as_posix(),
                     )
                 )
-            elif option.zntrack_type == utils.ZnTypes.deps:
+            elif option.zntrack_type == utils.ZnTypes.DEPS:
                 value = getattr(self, option.name)
                 script += handle_deps(value)
 
@@ -365,4 +360,4 @@ class GraphWriter:
 
         if dry_run:
             return script
-        utils.run_dvc_cmd(script, silent)
+        utils.run_dvc_cmd(script)

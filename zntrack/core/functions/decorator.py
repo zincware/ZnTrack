@@ -188,13 +188,17 @@ def nodify(
 
             nb_name = utils.update_nb_name(nb_name)
 
+            if silent:
+                log.warning(
+                    "DeprecationWarning: silent was replaced by 'zntrack.config.log_level"
+                    " = logging.ERROR'"
+                )
+
             # Jupyter Notebook
             if nb_name is not None:
                 module = f"{utils.config.nb_class_path}.{func.__name__}"
 
-                jupyter_class_to_file(
-                    silent=silent, nb_name=nb_name, module_name=func.__name__
-                )
+                jupyter_class_to_file(nb_name=nb_name, module_name=func.__name__)
             else:
                 module = utils.module_handler(func)
 
@@ -266,7 +270,7 @@ def nodify(
             log.debug(f"Running script: {script}")
             if dry_run:
                 return script
-            utils.run_dvc_cmd(script, silent)
+            utils.run_dvc_cmd(script)
 
             cfg.params = dot4dict.dotdict(cfg.params)
             return cfg

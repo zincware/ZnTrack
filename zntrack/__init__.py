@@ -45,11 +45,11 @@ __all__ = [
 __version__ = "0.3.5"
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(config.log_level)
 
 # Formatter for advanced logging
-# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-formatter = logging.Formatter("%(asctime)s %(module)s (%(levelname)s): %(message)s")
+# formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s : %(message)s')
+formatter = logging.Formatter("%(asctime)s (%(levelname)s): %(message)s")
 
 channel = logging.StreamHandler(sys.stdout)
 channel.setLevel(logging.DEBUG)

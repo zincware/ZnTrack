@@ -72,6 +72,7 @@ class ZnTrackProject(DVCInterface):
         for trial in range(3):
             try:
                 subprocess.check_call(["dvc", "exp", "apply", self.name])
+                break
             except subprocess.CalledProcessError as error:
                 # sometimes it takes more than one trial (windows)
                 if trial == 2:

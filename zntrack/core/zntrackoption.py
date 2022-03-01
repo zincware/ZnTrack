@@ -39,7 +39,7 @@ def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
         returns the node_name if it is being used, otherwise returns None
 
     """
-    if zntrack_type in [utils.ZnTypes.results, utils.ZnTypes.metadata]:
+    if zntrack_type in [utils.ZnTypes.RESULTS, utils.ZnTypes.METADATA]:
         return None
     return instance.node_name
 
