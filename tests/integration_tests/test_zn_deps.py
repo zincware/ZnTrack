@@ -35,6 +35,41 @@ class LastNode(Node):
         self.outs = self.first_node.outs / 2
 
 
+class LastNodeNoLoad(Node):
+    first_node: FirstNode = zn.deps(FirstNode)
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = self.first_node.outs / 2
+
+
+class LastNodeNoDefault(Node):
+    first_node: FirstNode = zn.deps()
+    outs = zn.outs()
+
+    def __init__(self, first_node=None, **kwargs):
+        super(LastNodeNoDefault, self).__init__(**kwargs)
+
+    def run(self):
+        self.outs = self.first_node.outs / 2
+
+
+def test_LastNodeNoLoad(proj_path):
+    FirstNode().write_graph(run=True)
+    LastNodeNoLoad().write_graph(run=True)
+
+    assert LastNodeNoLoad.load().outs == 21
+
+
+@pytest.mark.parametrize("load_node", (False, True))
+def test_LastNodeNoDefault(proj_path, load_node):
+    FirstNode().write_graph(run=True)
+    first_node = FirstNode.load() if load_node else FirstNode
+    LastNodeNoDefault(first_node=first_node).write_graph(run=True)
+
+    assert LastNodeNoDefault.load().outs == 21
+
+
 def test_base_run(proj_path):
     FirstNode().write_graph(run=True)
     LastNode().write_graph(run=True)
