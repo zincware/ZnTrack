@@ -2,7 +2,7 @@ import pathlib
 
 import pytest
 
-from zntrack import dvc, zn
+from zntrack import dvc, utils, zn
 from zntrack.core.dvcgraph import (
     DVCRunOptions,
     GraphWriter,
@@ -119,7 +119,7 @@ def test_descriptor_list_filter():
     example = ExampleClassWithParams()
 
     assert filter_ZnTrackOption(
-        data=example._descriptor_list, cls=example, zntrack_type="params"
+        data=example._descriptor_list, cls=example, zntrack_type=utils.ZnTypes.PARAMS
     ) == {
         "param1": 1,
         "param2": 2,
@@ -128,6 +128,6 @@ def test_descriptor_list_filter():
     assert filter_ZnTrackOption(
         data=example._descriptor_list,
         cls=example,
-        zntrack_type="params",
+        zntrack_type=utils.ZnTypes.PARAMS,
         return_with_type=True,
     ) == {"params": {"param1": 1, "param2": 2}}
