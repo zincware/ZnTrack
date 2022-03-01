@@ -101,7 +101,7 @@ def handle_dvc(value, dvc_args) -> list:
 def filter_ZnTrackOption(
     data,
     cls,
-    zntrack_type: typing.Union[str, list],
+    zntrack_type: typing.Union[utils.ZnTypes, typing.List[utils.ZnTypes]],
     return_with_type=False,
     allow_none: bool = False,
 ) -> dict:
