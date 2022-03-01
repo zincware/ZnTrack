@@ -312,7 +312,7 @@ class GraphWriter:
         params_list = filter_ZnTrackOption(
             data=self._descriptor_list,
             cls=self,
-            zntrack_type=[utils.ZnTypes.params],
+            zntrack_type=[utils.ZnTypes.PARAMS],
         )
         if len(params_list) > 0:
             script += [
@@ -321,13 +321,13 @@ class GraphWriter:
             ]
         zn_options_set = set()
         for option in self._descriptor_list:
-            if option.zntrack_type == utils.ZnTypes.dvc:
+            if option.zntrack_type == utils.ZnTypes.DVC:
                 value = getattr(self, option.name)
                 script += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
             elif option.zntrack_type in [
-                utils.ZnTypes.results,
-                utils.ZnTypes.metadata,
+                utils.ZnTypes.RESULTS,
+                utils.ZnTypes.METADATA,
             ]:
                 zn_options_set.add(
                     (
@@ -335,7 +335,7 @@ class GraphWriter:
                         option.get_filename(self).as_posix(),
                     )
                 )
-            elif option.zntrack_type == utils.ZnTypes.deps:
+            elif option.zntrack_type == utils.ZnTypes.DEPS:
                 value = getattr(self, option.name)
                 script += handle_deps(value)
 

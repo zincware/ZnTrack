@@ -78,13 +78,13 @@ class ZnTypes(enum.Enum):
     results: most zn.<options> like zn.outs() / zn.metrics() use this one
     """
 
-    deps = enum.auto()
-    dvc = enum.auto()
-    metadata = enum.auto()
-    method = enum.auto()
-    params = enum.auto()
-    iterable = enum.auto()
-    results = enum.auto()
+    DEPS = enum.auto()
+    DVC = enum.auto()
+    METADATA = enum.auto()
+    # method = enum.auto()
+    PARAMS = enum.auto()
+    ITERABLE = enum.auto()
+    RESULTS = enum.auto()
 
 
 config = Config()
