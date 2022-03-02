@@ -49,6 +49,7 @@ class LastNodeNoDefault(Node):
 
     def __init__(self, first_node=None, **kwargs):
         super(LastNodeNoDefault, self).__init__(**kwargs)
+        self.first_node = first_node
 
     def run(self):
         self.outs = self.first_node.outs / 2
@@ -61,11 +62,15 @@ def test_LastNodeNoLoad(proj_path):
     assert LastNodeNoLoad.load().outs == 21
 
 
-@pytest.mark.parametrize("load_node", (False, True))
-def test_LastNodeNoDefault(proj_path, load_node):
-    FirstNode().write_graph(run=True)
+@pytest.mark.parametrize(
+    ("load_node", "run"), ((False, False), (True, True), (True, False), (False, True))
+)
+def test_LastNodeNoDefault(proj_path, load_node, run):
+    FirstNode().write_graph(run=run)
     first_node = FirstNode.load() if load_node else FirstNode
-    LastNodeNoDefault(first_node=first_node).write_graph(run=True)
+    LastNodeNoDefault(first_node=first_node).write_graph(run=run)
+    if not run:
+        subprocess.check_call(["dvc", "repro"])
 
     assert LastNodeNoDefault.load().outs == 21
 
