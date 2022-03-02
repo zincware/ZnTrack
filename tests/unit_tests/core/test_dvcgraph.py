@@ -9,6 +9,7 @@ from zntrack.core.dvcgraph import (
     filter_ZnTrackOption,
     handle_deps,
     handle_dvc,
+    prepare_dvc_script,
 )
 
 
@@ -131,3 +132,66 @@ def test_descriptor_list_filter():
         zntrack_type=utils.ZnTypes.PARAMS,
         return_with_type=True,
     ) == {"params": {"param1": 1, "param2": 2}}
+
+
+def test_prepare_dvc_script():
+    dvc_run_option = DVCRunOptions(
+        no_commit=False,
+        external=True,
+        always_changed=True,
+        no_run_cache=False,
+        no_exec=True,
+        force=True,
+    )
+
+    script = prepare_dvc_script(
+        node_name="node01",
+        dvc_run_option=dvc_run_option,
+        custom_args=["--deps", "file.txt"],
+        nb_name=None,
+        module="src.file",
+        func_or_cls="MyNode",
+        call_args=".load().run_and_save()",
+    )
+
+    assert script == [
+        "dvc",
+        "run",
+        "-n",
+        "node01",
+        "--external",
+        "--always-changed",
+        "--no-exec",
+        "--force",
+        "--deps",
+        "file.txt",
+        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+        ' MyNode.load().run_and_save()" ',
+    ]
+
+    script = prepare_dvc_script(
+        node_name="node01",
+        dvc_run_option=dvc_run_option,
+        custom_args=["--deps", "file.txt"],
+        nb_name="notebook.ipynb",
+        module="src.file",
+        func_or_cls="MyNode",
+        call_args=".load().run_and_save()",
+    )
+
+    assert script == [
+        "dvc",
+        "run",
+        "-n",
+        "node01",
+        "--external",
+        "--always-changed",
+        "--no-exec",
+        "--force",
+        "--deps",
+        "file.txt",
+        "--deps",
+        "src/file.py",
+        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+        ' MyNode.load().run_and_save()" ',
+    ]
