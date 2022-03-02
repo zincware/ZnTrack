@@ -136,19 +136,28 @@ def execute_function_call(func):
     return func(loaded_cfg)
 
 
-def save_node_config_to_files(cfg, func):
+def save_node_config_to_files(cfg: NodeConfig, node_name: str):
+    """Save the values from cfg to zntrack.json / params.yaml
+
+    Parameters
+    ----------
+    cfg: NodeConfig
+        The NodeConfig object which should be serialized to zntrack.json / params.yaml
+    node_name: str
+        The name of the node, usually func.__name__
+    """
     for value_name, value in dataclasses.asdict(cfg).items():
         if value_name == "params":
             utils.file_io.update_config_file(
                 file=utils.Files.params,
-                node_name=func.__name__,
+                node_name=node_name,
                 value_name=None,
                 value=value,
             )
         else:
             utils.file_io.update_config_file(
                 file=utils.Files.zntrack,
-                node_name=func.__name__,
+                node_name=node_name,
                 value_name=value_name,
                 value=value,
             )
@@ -262,7 +271,7 @@ def nodify(
 
             else:
                 cfg = copy.deepcopy(cfg_)
-                save_node_config_to_files(cfg=cfg, func=func)
+                save_node_config_to_files(cfg=cfg, node_name=func.__name__)
                 dvc_run_option = DVCRunOptions(
                     no_commit=no_commit,
                     external=external,
@@ -292,14 +301,3 @@ def nodify(
         return wrapper
 
     return func_collector
-
-
-if __name__ == "__main__":
-
-    @nodify(outs="test.txt", params={"text": "Lorem Ipsum"})
-    def example_func(cfg: NodeConfig) -> NodeConfig:
-        out_file = pathlib.Path(cfg.outs)
-        out_file.write_text(cfg.params.text)
-        return cfg
-
-    example_func(dry_run=True)
