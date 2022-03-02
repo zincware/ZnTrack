@@ -8,7 +8,7 @@ Copyright Contributors to the Zincware Project.
 
 Description: Function decorator for ZnTrack
 """
-
+import copy
 import dataclasses
 import logging
 import pathlib
@@ -17,7 +17,7 @@ import typing
 import dot4dict
 
 from zntrack import utils
-from zntrack.core.dvcgraph import DVCRunOptions
+from zntrack.core.dvcgraph import DVCRunOptions, prepare_dvc_script
 from zntrack.core.jupyter import jupyter_class_to_file
 
 StrOrPath = typing.Union[str, pathlib.Path]
@@ -35,17 +35,44 @@ class NodeConfig:
 
     """
 
-    deps: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    params: typing.Union[dot4dict.dotdict, dict] = dataclasses.field(default_factory=dict)
     outs: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
     outs_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
     outs_persist: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
     outs_persist_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
     metrics: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
     metrics_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    deps: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
     plots: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
     plots_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
 
-    params: typing.Union[dot4dict.dotdict, dict] = dataclasses.field(default_factory=dict)
+    def __post_init__(self):
+        for option_name in self.__dataclass_fields__:
+            # type checking
+            option_value = getattr(self, option_name)
+            if option_name == "params":
+                # params does not have to be a string
+                if not isinstance(option_value, dict) and option_value is not None:
+                    raise ValueError("Parameter must be dict or dot4dict.dotdict.")
+            else:
+                if not utils.check_type(
+                    option_value,
+                    (str, pathlib.Path),
+                    allow_iterable=True,
+                    allow_none=True,
+                    allow_dict=True,
+                ):
+                    raise ValueError(
+                        f"{option_value} is not a supported type. "
+                        "Please use single values or lists of <str> and <pathlib.Path>."
+                    )
+
+    def convert_fields_to_dotdict(self):
+        """Update all fields to dotdict, if they are of type dict"""
+        for option_name in self.__dataclass_fields__:
+            option_value = getattr(self, option_name)
+            if isinstance(option_value, dict):
+                setattr(self, option_name, dot4dict.dotdict(option_value))
 
     def write_dvc_command(self, node_name: str) -> list:
         """Collect dvc commands
@@ -75,6 +102,12 @@ class NodeConfig:
                         f"--{field.replace('_', '-')}",
                         pathlib.Path(element).as_posix(),
                     ]
+            elif isinstance(getattr(self, field), dict):
+                for element in getattr(self, field).values():
+                    script += [
+                        f"--{field.replace('_', '-')}",
+                        pathlib.Path(element).as_posix(),
+                    ]
             elif getattr(self, field) is not None:
                 script += [
                     f"--{field.replace('_', '-')}",
@@ -86,6 +119,62 @@ class NodeConfig:
 
 AnyOrNodeConfig = typing.Union[typing.Any, NodeConfig]
 UnionListOrStrAndPath = typing.Union[typing.List[StrOrPath], StrOrPath]
+
+
+def execute_function_call(func):
+    """Run the function call
+
+    1. Load the parameters from the Files.zntrack / Files.params
+    2. Deserialize them
+    3. Update the cfg: NodeConfig
+    4. return the func(cfg)
+
+    Parameters
+    ----------
+    func: decorated function
+
+    Returns
+    -------
+    not used - return function return value
+
+    """
+    # TODO should exec_func always load from file or check if values
+    #  are passed and then update the files?
+    cfg_file_content = utils.file_io.read_file(utils.Files.zntrack)[func.__name__]
+    cfg_file_content = utils.decode_dict(cfg_file_content)
+    params_file_content = utils.file_io.read_file(utils.Files.params)[func.__name__]
+    cfg_file_content["params"] = params_file_content
+
+    loaded_cfg = NodeConfig(**cfg_file_content)
+    loaded_cfg.convert_fields_to_dotdict()
+    return func(loaded_cfg)
+
+
+def save_node_config_to_files(cfg: NodeConfig, node_name: str):
+    """Save the values from cfg to zntrack.json / params.yaml
+
+    Parameters
+    ----------
+    cfg: NodeConfig
+        The NodeConfig object which should be serialized to zntrack.json / params.yaml
+    node_name: str
+        The name of the node, usually func.__name__
+    """
+    for value_name, value in dataclasses.asdict(cfg).items():
+        if value_name == "params":
+            utils.file_io.update_config_file(
+                file=utils.Files.params,
+                node_name=node_name,
+                value_name=None,
+                value=value,
+            )
+        else:
+            utils.file_io.update_config_file(
+                file=utils.Files.zntrack,
+                node_name=node_name,
+                value_name=value_name,
+                value=value,
+            )
 
 
 def nodify(
@@ -115,29 +204,18 @@ def nodify(
     ----------
     https://dvc.org/doc/command-reference/run#options
     """
-    if not isinstance(params, dict) and params is not None:
-        raise ValueError("Parameter must be dict or dot4dict.dotdict.")
-
-    # Check that the given type is correct
-    # TODO consider adding this to NodeConfig in the future
-    for option in [
-        outs,
-        outs_no_cache,
-        outs_persist,
-        outs_persist_no_cache,
-        metrics,
-        metrics_no_cache,
-        deps,
-        plots,
-        plots_no_cache,
-    ]:
-        if not utils.check_type(
-            option, (str, pathlib.Path), allow_iterable=True, allow_none=True
-        ):
-            raise ValueError(
-                f"{option} is not a supported type. "
-                "Please use single values or lists of <str> and <pathlib.Path>."
-            )
+    cfg_ = NodeConfig(
+        outs=outs,
+        params=params,
+        deps=deps,
+        outs_no_cache=outs_no_cache,
+        outs_persist=outs_persist,
+        outs_persist_no_cache=outs_persist_no_cache,
+        metrics=metrics,
+        metrics_no_cache=metrics_no_cache,
+        plots=plots,
+        plots_no_cache=plots_no_cache,
+    )
 
     def func_collector(func):
         """Required for decorator to work"""
@@ -203,77 +281,35 @@ def nodify(
                 module = utils.module_handler(func)
 
             if exec_func:
-                # TODO should exec_func always load from file or check if values
-                #  are passed and then update the files?
-                cfg_file_content = utils.file_io.read_file(utils.Files.zntrack)[
-                    func.__name__
-                ]
-                cfg_file_content = utils.decode_dict(cfg_file_content)
-                params_file_content = utils.file_io.read_file(utils.Files.params)[
-                    func.__name__
-                ]
-                cfg_file_content["params"] = params_file_content
+                return execute_function_call(func)
 
-                cfg = NodeConfig(**cfg_file_content)
-                cfg.params = dot4dict.dotdict(cfg.params)
-                return func(cfg)
             else:
-                cfg = NodeConfig(
-                    outs=outs,
-                    params=params,
-                    deps=deps,
-                    outs_no_cache=outs_no_cache,
-                    outs_persist=outs_persist,
-                    outs_persist_no_cache=outs_persist_no_cache,
-                    metrics=metrics,
-                    metrics_no_cache=metrics_no_cache,
-                    plots=plots,
-                    plots_no_cache=plots_no_cache,
+                cfg = copy.deepcopy(cfg_)
+                save_node_config_to_files(cfg=cfg, node_name=func.__name__)
+                dvc_run_option = DVCRunOptions(
+                    no_commit=no_commit,
+                    external=external,
+                    always_changed=always_changed,
+                    no_run_cache=no_run_cache,
+                    no_exec=no_exec,
+                    force=force,
                 )
-                for value_name, value in dataclasses.asdict(cfg).items():
-                    if value_name == "params":
-                        utils.file_io.update_config_file(
-                            file=utils.Files.params,
-                            node_name=func.__name__,
-                            value_name=None,
-                            value=value,
-                        )
-                    else:
-                        utils.file_io.update_config_file(
-                            file=utils.Files.zntrack,
-                            node_name=func.__name__,
-                            value_name=value_name,
-                            value=value,
-                        )
 
-            script = ["dvc", "run", "-n", func.__name__]
-            script += DVCRunOptions(
-                no_commit=no_commit,
-                external=external,
-                always_changed=always_changed,
-                no_run_cache=no_run_cache,
-                no_exec=no_exec,
-                force=force,
-            ).dvc_args
+                script = prepare_dvc_script(
+                    node_name=func.__name__,
+                    dvc_run_option=dvc_run_option,
+                    custom_args=cfg.write_dvc_command(func.__name__),
+                    nb_name=nb_name,
+                    module=module,
+                    func_or_cls=func.__name__,
+                    call_args="(exec_func=True)",
+                )
 
-            script += cfg.write_dvc_command(func.__name__)
-
-            if nb_name is not None:
-                script += [
-                    "--deps",
-                    pathlib.Path(*module.split(".")).with_suffix(".py").as_posix(),
-                ]
-
-            import_str = f"""{utils.get_python_interpreter()} -c "from {module} import """
-            import_str += f"""{func.__name__}; {func.__name__}(exec_func=True)" """
-            script += [import_str]
-            log.debug(f"Running script: {script}")
-            if dry_run:
-                return script
-            utils.run_dvc_cmd(script)
-
-            cfg.params = dot4dict.dotdict(cfg.params)
-            return cfg
+                if dry_run:
+                    return script
+                utils.run_dvc_cmd(script)
+                cfg.convert_fields_to_dotdict()
+                return cfg
 
         return wrapper
 
