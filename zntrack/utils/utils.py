@@ -128,8 +128,13 @@ def module_handler(obj) -> str:
         return obj.__module__
 
 
-def check_type(obj, types, allow_iterable=False, allow_none=False) -> bool:
+def check_type(
+    obj, types, allow_iterable=False, allow_none=False, allow_dict=False
+) -> bool:
     """Check if the obj is of any of the given types
+
+    This includes recursive search for nested lists / dicts and fails
+    if any of the values is not in types
 
     Parameters
     ----------
@@ -137,16 +142,19 @@ def check_type(obj, types, allow_iterable=False, allow_none=False) -> bool:
     types: single class or tuple of classes to check against
     allow_iterable: check list entries if a list is provided
     allow_none: accept None even if not in types.
-
-    Returns
-    -------
-
+    allow_dict: allow for {key: types}
     """
     if isinstance(obj, (list, tuple, set)) and allow_iterable:
         for value in obj:
-            if allow_none and value is None:
+            if check_type(value, types, allow_iterable, allow_none, allow_dict):
                 continue
-            if not isinstance(value, types):
+            else:
+                return False
+    elif isinstance(obj, dict) and allow_dict:
+        for value in obj.values():
+            if check_type(value, types, allow_iterable, allow_none, allow_dict):
+                continue
+            else:
                 return False
     else:
         if allow_none and obj is None:

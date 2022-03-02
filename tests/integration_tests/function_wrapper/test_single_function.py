@@ -105,3 +105,13 @@ def test_wrong_outs():
         @nodify(outs=[25, "str"])
         def nodeb():
             pass
+
+
+@nodify(outs={"data": pathlib.Path("data.txt")})
+def example_func_with_outs_dict(cfg: NodeConfig):
+    cfg.outs.data.write_text("Hello World")
+
+
+def test_example_func_with_outs_dict(proj_path):
+    example_func_with_outs_dict(run=True)
+    assert pathlib.Path("data.txt").read_text() == "Hello World"

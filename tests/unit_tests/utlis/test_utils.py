@@ -80,6 +80,10 @@ def test_check_type():
     assert not utils.check_type([None], str, allow_none=True)
     assert utils.check_type([None], str, allow_none=True, allow_iterable=True)
 
+    assert utils.check_type({"key": "val"}, str, allow_dict=True)
+    assert not utils.check_type({"key": "val"}, str)
+    assert utils.check_type({"a": {"b": "c"}}, str, allow_dict=True)
+
 
 def test_python_interpreter():
     assert utils.get_python_interpreter() in ["python", "python3"]

@@ -60,11 +60,19 @@ class NodeConfig:
                     (str, pathlib.Path),
                     allow_iterable=True,
                     allow_none=True,
+                    allow_dict=True,
                 ):
                     raise ValueError(
                         f"{option_value} is not a supported type. "
                         "Please use single values or lists of <str> and <pathlib.Path>."
                     )
+
+    def convert_fields_to_dotdict(self):
+        """Update all fields to dotdict, if they are of type dict"""
+        for option_name in self.__dataclass_fields__:
+            option_value = getattr(self, option_name)
+            if isinstance(option_value, dict):
+                setattr(self, option_name, dot4dict.dotdict(option_value))
 
     def write_dvc_command(self, node_name: str) -> list:
         """Collect dvc commands
@@ -90,6 +98,12 @@ class NodeConfig:
                 continue
             if isinstance(getattr(self, field), (list, tuple)):
                 for element in getattr(self, field):
+                    script += [
+                        f"--{field.replace('_', '-')}",
+                        pathlib.Path(element).as_posix(),
+                    ]
+            elif isinstance(getattr(self, field), dict):
+                for element in getattr(self, field).values():
                     script += [
                         f"--{field.replace('_', '-')}",
                         pathlib.Path(element).as_posix(),
@@ -132,7 +146,7 @@ def execute_function_call(func):
     cfg_file_content["params"] = params_file_content
 
     loaded_cfg = NodeConfig(**cfg_file_content)
-    loaded_cfg.params = dot4dict.dotdict(loaded_cfg.params)
+    loaded_cfg.convert_fields_to_dotdict()
     return func(loaded_cfg)
 
 
@@ -294,8 +308,7 @@ def nodify(
                 if dry_run:
                     return script
                 utils.run_dvc_cmd(script)
-
-                cfg.params = dot4dict.dotdict(cfg.params)
+                cfg.convert_fields_to_dotdict()
                 return cfg
 
         return wrapper
