@@ -15,7 +15,7 @@ import logging
 
 from zntrack import utils
 from zntrack.core.dvcgraph import GraphWriter
-from zntrack.zn import params
+from zntrack.core.zntrackoption import ZnTrackOption
 
 log = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ class Node(GraphWriter):
         # attach an automatically generated __init__ if None is provided
         zn_option_fields, sig_params = [], []
         for name, item in cls.__dict__.items():
-            if isinstance(item, params):
+            if isinstance(item, ZnTrackOption):
                 # For the new __init__
                 zn_option_fields.append(name)
 
