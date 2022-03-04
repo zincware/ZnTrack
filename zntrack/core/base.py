@@ -20,6 +20,26 @@ from zntrack.core.zntrackoption import ZnTrackOption
 log = logging.getLogger(__name__)
 
 
+def get_auto_init_signature(cls) -> (list, list):
+    """Iterate over ZnTrackOptions in the __dict__ and save the option name
+    and create a signature Parameter"""
+    zn_option_names, signature_params = [], []
+    for name, item in cls.__dict__.items():
+        if isinstance(item, ZnTrackOption):
+            # For the new __init__
+            zn_option_names.append(name)
+
+            # For the new __signature__
+            signature_params.append(
+                inspect.Parameter(
+                    name=name,
+                    kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                    annotation=cls.__annotations__.get(name),
+                )
+            )
+    return zn_option_names, signature_params
+
+
 def update_dependency_options(value):
     """Handle Node dependencies
 
@@ -73,24 +93,13 @@ class Node(GraphWriter):
             return cls
 
         # attach an automatically generated __init__ if None is provided
-        zn_option_fields, sig_params = [], []
-        for name, item in cls.__dict__.items():
-            if isinstance(item, ZnTrackOption):
-                # For the new __init__
-                zn_option_fields.append(name)
-
-                # For the new __signature__
-                sig_params.append(
-                    inspect.Parameter(
-                        name=name, kind=inspect.Parameter.POSITIONAL_OR_KEYWORD
-                    )
-                )
+        zn_option_names, signature_params = get_auto_init_signature(cls)
 
         # Add new __init__ to the sub-class
-        setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_fields))
+        setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_names))
 
         # Add new __signature__ to the sub-class
-        signature = inspect.Signature(parameters=sig_params)
+        signature = inspect.Signature(parameters=signature_params)
         setattr(cls, "__signature__", signature)
 
     def save(self, results: bool = False):
