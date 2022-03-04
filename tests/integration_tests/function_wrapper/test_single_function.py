@@ -115,3 +115,13 @@ def example_func_with_outs_dict(cfg: NodeConfig):
 def test_example_func_with_outs_dict(proj_path):
     example_func_with_outs_dict(run=True)
     assert pathlib.Path("data.txt").read_text() == "Hello World"
+
+
+@nodify()
+def function_no_args(cfg: NodeConfig):
+    # not sure why this would ever be used, but it is possible
+    pass
+
+
+def test_function_no_args(proj_path):
+    function_no_args(run=True)
