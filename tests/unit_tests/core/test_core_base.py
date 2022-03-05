@@ -213,8 +213,6 @@ def test_get_auto_init_signature():
         "out1",
         "out2",
         "out3",
-        "result",
-        "result2",
     ]
 
     assert signature_params[0].name == "param1"
@@ -223,4 +221,4 @@ def test_get_auto_init_signature():
     assert signature_params[2].name == "param3"
     assert signature_params[2].annotation is None
 
-    assert signature_params[-1].name == "result2"
+    assert signature_params[-1].name == "out3"

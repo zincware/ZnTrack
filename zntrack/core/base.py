@@ -27,6 +27,8 @@ def get_auto_init_signature(cls) -> (list, list):
     _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
     for name, item in cls.__dict__.items():
         if isinstance(item, ZnTrackOption):
+            if item.tracked:  # exclude zn.outs / metrics / plots / ... options
+                continue
             # For the new __init__
             zn_option_names.append(name)
 
