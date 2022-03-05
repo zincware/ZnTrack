@@ -36,7 +36,6 @@ class params(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "params"
     zn_type = utils.ZnTypes.PARAMS
     file = utils.Files.params
 
@@ -52,7 +51,6 @@ class deps(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "deps"
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
@@ -71,7 +69,6 @@ class outs(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
@@ -83,7 +80,6 @@ class checkpoints(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "checkpoints"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
@@ -95,7 +91,6 @@ class outs_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs_no_cache"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
@@ -107,7 +102,6 @@ class outs_persistent(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs_persistent"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
@@ -119,7 +113,6 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
@@ -131,7 +124,6 @@ class metrics_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics_no_cache"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
@@ -143,7 +135,6 @@ class plots(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "plots"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
@@ -155,6 +146,5 @@ class plots_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "plots_no_cache"
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack

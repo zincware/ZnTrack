@@ -57,19 +57,28 @@ class ZnTrackOption(descriptor.Descriptor):
     ----------
     file: str
         Either the zntrack file or the parameter file
-    dvc_option: str
+    dvc_option: str|utils.DVCOptions
         The cmd to use with DVC, e.g. dvc --outs ... would be "outs"
     zn_type: utils.ZnTypes
         The internal ZnType to select the correct ZnTrack behaviour
     """
 
     file = None
-    dvc_option = ""
+    dvc_option: str = None
     zn_type: utils.ZnTypes = None
 
     def __init__(self, default_value=None, **kwargs):
+        """Constructor for ZnTrackOptions
+        Raises
+        ------
+        ValueError: If dvc_option is None and the class name is not in utils.DVCOptions
+
+        """
         if default_value is not None and self.zn_type in utils.VALUE_DVC_TRACKED:
             raise ValueError(f"Can not set default to a tracked value ({self.zn_type})")
+        if self.dvc_option is None:
+            # use the name of the class as DVCOption if registered in DVCOptions
+            self.dvc_option = utils.DVCOptions(self.__class__.__name__).value
         super().__init__(default_value=default_value, **kwargs)
 
     @property

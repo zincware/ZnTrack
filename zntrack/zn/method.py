@@ -25,7 +25,7 @@ class Method(SplitZnTrackOption):
 
     """
 
-    dvc_option = "params"
+    dvc_option = utils.DVCOptions.PARAMS.value
     zn_type = utils.ZnTypes.PARAMS
 
     def get_filename(self, instance):

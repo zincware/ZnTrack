@@ -8,13 +8,13 @@ Copyright Contributors to the Zincware Project.
 
 Description: Configuration File for ZnTrack
 """
+import dataclasses
 import enum
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
 
 
-@dataclass
+@dataclasses.dataclass
 class Config:
     """Collection of Node configurations
 
@@ -43,7 +43,7 @@ class Config:
     nb_class_path: Path = Path("src")
     lazy: bool = True
     allow_empty_loading: bool = False
-    _log_level: int = field(default=logging.WARNING, init=False, repr=True)
+    _log_level: int = dataclasses.field(default=logging.WARNING, init=False, repr=True)
 
     @property
     def log_level(self):
@@ -57,7 +57,7 @@ class Config:
         logger.setLevel(self._log_level)
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Files:
     """Important File paths for ZnTrack to work
 
@@ -91,8 +91,24 @@ FILE_DVC_TRACKED = [ZnTypes.DVC]
 # if the getattr(instance, self.name) is an affected file,
 # e.g. the dvc.<outs> is a file / list of files
 VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA]
+
+
 # if the internal file,
 # e.g. in the case of zn.outs() like nodes/<node_name>/outs.json is an affected file
+
+
+class DVCOptions(enum.Enum):
+    # Use enum over dataclass because it is iterable
+    PARAMS = "params"
+    DEPS = "deps"
+    OUTS = "outs"
+    CHECKPOINTS = "checkpoints"
+    OUTS_NO_CACHE = "outs_no_cache"
+    OUTS_PERSISTENT = "outs_persistent"
+    METRICS = "metrics"
+    METRICS_NO_CACHE = "metrics_no_cache"
+    PLOTS = "plots"
+    PLOTS_NO_CACHE = "plots_no_cache"
 
 
 config = Config()

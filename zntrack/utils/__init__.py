@@ -13,6 +13,7 @@ from zntrack.utils import exceptions, file_io
 from zntrack.utils.config import (
     FILE_DVC_TRACKED,
     VALUE_DVC_TRACKED,
+    DVCOptions,
     Files,
     ZnTypes,
     config,
@@ -50,6 +51,7 @@ __all__ = [
     "get_auto_init",
     "FILE_DVC_TRACKED",
     "VALUE_DVC_TRACKED",
+    "DVCOptions",
 ]
 
 
