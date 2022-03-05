@@ -24,6 +24,11 @@ StrOrPath = typing.Union[str, pathlib.Path]
 
 log = logging.getLogger(__name__)
 
+UnionListOrStrAndPath = typing.Union[typing.List[StrOrPath], StrOrPath]
+UnionDictListOfStrPath = typing.Union[
+    typing.List[StrOrPath], typing.Dict[str, StrOrPath], StrOrPath
+]
+
 
 @dataclasses.dataclass
 class NodeConfig:
@@ -36,15 +41,15 @@ class NodeConfig:
     """
 
     params: typing.Union[dot4dict.dotdict, dict] = dataclasses.field(default_factory=dict)
-    outs: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    outs_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    outs_persist: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    outs_persist_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    metrics: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    metrics_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    deps: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    plots: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    plots_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    outs: UnionDictListOfStrPath = None
+    outs_no_cache: UnionDictListOfStrPath = None
+    outs_persist: UnionDictListOfStrPath = None
+    outs_persist_no_cache: UnionDictListOfStrPath = None
+    metrics: UnionDictListOfStrPath = None
+    metrics_no_cache: UnionDictListOfStrPath = None
+    deps: UnionDictListOfStrPath = None
+    plots: UnionDictListOfStrPath = None
+    plots_no_cache: UnionDictListOfStrPath = None
 
     def __post_init__(self):
         for option_name in self.__dataclass_fields__:
@@ -118,7 +123,6 @@ class NodeConfig:
 
 
 AnyOrNodeConfig = typing.Union[typing.Any, NodeConfig]
-UnionListOrStrAndPath = typing.Union[typing.List[StrOrPath], StrOrPath]
 
 
 def execute_function_call(func):
@@ -180,15 +184,15 @@ def save_node_config_to_files(cfg: NodeConfig, node_name: str):
 def nodify(
     *,
     params: dict = None,
-    outs: UnionListOrStrAndPath = None,
-    outs_no_cache: UnionListOrStrAndPath = None,
-    outs_persist: UnionListOrStrAndPath = None,
-    outs_persist_no_cache: UnionListOrStrAndPath = None,
-    metrics: UnionListOrStrAndPath = None,
-    metrics_no_cache: UnionListOrStrAndPath = None,
-    deps: UnionListOrStrAndPath = None,
-    plots: UnionListOrStrAndPath = None,
-    plots_no_cache: UnionListOrStrAndPath = None,
+    outs: UnionDictListOfStrPath = None,
+    outs_no_cache: UnionDictListOfStrPath = None,
+    outs_persist: UnionDictListOfStrPath = None,
+    outs_persist_no_cache: UnionDictListOfStrPath = None,
+    metrics: UnionDictListOfStrPath = None,
+    metrics_no_cache: UnionDictListOfStrPath = None,
+    deps: UnionDictListOfStrPath = None,
+    plots: UnionDictListOfStrPath = None,
+    plots_no_cache: UnionDictListOfStrPath = None,
 ):
     """Main wrapper Function to convert a function into a DVC Stage
 
