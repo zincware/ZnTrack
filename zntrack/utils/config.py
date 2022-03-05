@@ -70,9 +70,7 @@ class Files:
     params: Path = Path("params.yaml")
 
 
-class ZnTypes(
-    enum.Enum
-):  # TODO either name this ZnTrackTypes or rename zntrack_types to zn_types
+class ZnTypes(enum.Enum):
     """Collection of ZnTrack Types to identify descriptors beyond their dvc option
 
     Attributes

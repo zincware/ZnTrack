@@ -20,7 +20,7 @@ from zntrack import descriptor, utils
 log = logging.getLogger(__name__)
 
 
-def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
+def uses_node_name(zn_type, instance) -> typing.Union[str, None]:
     """Check if the given metadata is associated with using the node_name as dict key
 
     Everything in nodes/<node_name>/ does not need it as key, because the directory
@@ -29,7 +29,7 @@ def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
 
     Parameters
     ----------
-    zntrack_type: str
+    zn_type: utils.ZnTypes
     instance:
         Any instance object with the node_name attribute
 
@@ -39,7 +39,7 @@ def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
         returns the node_name if it is being used, otherwise returns None
 
     """
-    if zntrack_type in utils.VALUE_DVC_TRACKED:
+    if zn_type in utils.VALUE_DVC_TRACKED:
         return None
     return instance.node_name
 
@@ -57,6 +57,10 @@ class ZnTrackOption(descriptor.Descriptor):
     ----------
     file: str
         Either the zntrack file or the parameter file
+    dvc_option: str
+        The cmd to use with DVC, e.g. dvc --outs ... would be "outs"
+    zn_type: utils.ZnTypes
+        The internal ZnType to select the correct ZnTrack behaviour
     """
 
     file = None

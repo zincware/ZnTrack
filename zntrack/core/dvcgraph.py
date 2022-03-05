@@ -101,7 +101,7 @@ def handle_dvc(value, dvc_args) -> list:
 def filter_ZnTrackOption(
     data,
     cls,
-    zntrack_type: typing.Union[utils.ZnTypes, typing.List[utils.ZnTypes]],
+    zn_type: typing.Union[utils.ZnTypes, typing.List[utils.ZnTypes]],
     return_with_type=False,
     allow_none: bool = False,
 ) -> dict:
@@ -113,7 +113,7 @@ def filter_ZnTrackOption(
         The ZnTrack options to query through
     cls:
         The instance the ZnTrack options are attached to
-    zntrack_type: str
+    zn_type: str
         The zn_type of the descriptors to gather
     return_with_type: bool, default=False
         return a dictionary with the Descriptor.dvc_option as keys
@@ -129,9 +129,9 @@ def filter_ZnTrackOption(
         {descriptor.dvc_option: {attr_name: attr_value}}
 
     """
-    if not isinstance(zntrack_type, list):
-        zntrack_type = [zntrack_type]
-    data = [x for x in data if x.zn_type in zntrack_type]
+    if not isinstance(zn_type, list):
+        zn_type = [zn_type]
+    data = [x for x in data if x.zn_type in zn_type]
     if return_with_type:
         types_dict = {x.dvc_option: {} for x in data}
         for entity in data:
@@ -356,9 +356,7 @@ class GraphWriter:
         custom_args = []
         # Handle Parameter
         params_list = filter_ZnTrackOption(
-            data=self._descriptor_list,
-            cls=self,
-            zntrack_type=[utils.ZnTypes.PARAMS],
+            data=self._descriptor_list, cls=self, zn_type=[utils.ZnTypes.PARAMS]
         )
         if len(params_list) > 0:
             custom_args += [
