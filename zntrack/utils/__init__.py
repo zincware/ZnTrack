@@ -10,7 +10,13 @@ Description: Standard python init file for the utils directory
 """
 
 from zntrack.utils import exceptions, file_io
-from zntrack.utils.config import Files, ZnTypes, config
+from zntrack.utils.config import (
+    FILE_DVC_TRACKED,
+    VALUE_DVC_TRACKED,
+    Files,
+    ZnTypes,
+    config,
+)
 from zntrack.utils.utils import (
     check_type,
     cwd_temp_dir,
@@ -42,6 +48,8 @@ __all__ = [
     "get_python_interpreter",
     "run_dvc_cmd",
     "get_auto_init",
+    "FILE_DVC_TRACKED",
+    "VALUE_DVC_TRACKED",
 ]
 
 

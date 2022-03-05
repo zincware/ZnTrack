@@ -39,7 +39,7 @@ def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
         returns the node_name if it is being used, otherwise returns None
 
     """
-    if zntrack_type in [utils.ZnTypes.RESULTS, utils.ZnTypes.METADATA]:
+    if zntrack_type in utils.VALUE_DVC_TRACKED:
         return None
     return instance.node_name
 
@@ -57,24 +57,14 @@ class ZnTrackOption(descriptor.Descriptor):
     ----------
     file: str
         Either the zntrack file or the parameter file
-    value_tracked: bool
-        this is true if the getattr(instance, self.name) is an affected file,
-         e.g. the dvc.<outs> is a file / list of files
-    tracked: bool
-        this is true if the internal file, such as in the case of zn.outs()
-        like nodes/<node_name>/outs.json is an affected file
-    # TODO value_tracked / tracked are exclusives and should be replaced by a single bool
-
     """
 
     file = None
-    value_tracked = False
-    tracked = False
     dvc_option = ""
-    zntrack_type = ""
+    zntrack_type: utils.ZnTypes = None
 
     def __init__(self, default_value=None, **kwargs):
-        if default_value is not None and self.tracked:
+        if default_value is not None and self.zntrack_type in utils.VALUE_DVC_TRACKED:
             raise ValueError(
                 f"Can not set default to a tracked value ({self.zntrack_type})"
             )

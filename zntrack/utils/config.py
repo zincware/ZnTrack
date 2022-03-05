@@ -70,7 +70,9 @@ class Files:
     params: Path = Path("params.yaml")
 
 
-class ZnTypes(enum.Enum):
+class ZnTypes(
+    enum.Enum
+):  # TODO either name this ZnTrackTypes or rename zntrack_types to zn_types
     """Collection of ZnTrack Types to identify descriptors beyond their dvc option
 
     Attributes
@@ -85,6 +87,14 @@ class ZnTypes(enum.Enum):
     PARAMS = enum.auto()
     ITERABLE = enum.auto()
     RESULTS = enum.auto()
+
+
+FILE_DVC_TRACKED = [ZnTypes.DVC]
+# if the getattr(instance, self.name) is an affected file,
+# e.g. the dvc.<outs> is a file / list of files
+VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA]
+# if the internal file,
+# e.g. in the case of zn.outs() like nodes/<node_name>/outs.json is an affected file
 
 
 config = Config()

@@ -47,7 +47,6 @@ class outs(ZnTrackOption):
 
     dvc_option = "outs"
     zntrack_type = utils.ZnTypes.RESULTS
-    tracked = True
 
 
 class deps(ZnTrackOption):
@@ -78,7 +77,6 @@ class metrics(ZnTrackOption):
 
     dvc_option = "metrics_no_cache"
     zntrack_type = utils.ZnTypes.RESULTS
-    tracked = True
 
 
 class params(SplitZnTrackOption):
@@ -112,5 +110,3 @@ class metadata(ZnTrackOption):
 
     dvc_option = "metrics_no_cache"
     zntrack_type = utils.ZnTypes.METADATA
-
-    tracked = True

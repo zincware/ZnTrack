@@ -258,14 +258,15 @@ class GraphWriter:
         files = []
         for option in self._descriptor_list:
             file = option.get_filename(self)
-            if option.tracked:
+            if option.zntrack_type in utils.VALUE_DVC_TRACKED:
                 files.append(file)
-            elif option.value_tracked:
+            elif option.zntrack_type in utils.FILE_DVC_TRACKED:
                 value = getattr(self, option.name)
-                if isinstance(value, list):
+                if isinstance(value, (list, tuple)):
                     files += value
                 else:
                     files.append(value)
+            # deps or params are not affected files
 
         files = [x for x in files if x is not None]
         return set(files)

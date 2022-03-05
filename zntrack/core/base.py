@@ -27,7 +27,8 @@ def get_auto_init_signature(cls) -> (list, list):
     _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
     for name, item in cls.__dict__.items():
         if isinstance(item, ZnTrackOption):
-            if item.tracked:  # exclude zn.outs / metrics / plots / ... options
+            if item.zntrack_type in utils.VALUE_DVC_TRACKED:
+                # exclude zn.outs / metrics / plots / ... options
                 continue
             # For the new __init__
             zn_option_names.append(name)
@@ -118,11 +119,8 @@ class Node(GraphWriter):
         """
         # Save dvc.<option>, dvc.deps, zn.Method
         for option in self._descriptor_list:
-            if results:
-                # Save all
-                option.save(instance=self)
-            elif option.zntrack_type not in [utils.ZnTypes.RESULTS]:
-                # Filter out zn.<options>
+            if results or option.zntrack_type not in utils.VALUE_DVC_TRACKED:
+                # results: Save all; otherwise save all except zn.<options>
                 option.save(instance=self)
             else:
                 # Create the path for DVC to write a .gitignore file
