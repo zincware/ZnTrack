@@ -46,7 +46,7 @@ class outs(ZnTrackOption):
     """
 
     dvc_option = "outs"
-    zntrack_type = utils.ZnTypes.RESULTS
+    zn_type = utils.ZnTypes.RESULTS
 
 
 class deps(ZnTrackOption):
@@ -57,7 +57,7 @@ class deps(ZnTrackOption):
     """
 
     dvc_option = "deps"
-    zntrack_type = utils.ZnTypes.DEPS
+    zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
     def __get__(self, instance, owner):
@@ -76,7 +76,7 @@ class metrics(ZnTrackOption):
     """
 
     dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.RESULTS
+    zn_type = utils.ZnTypes.RESULTS
 
 
 class params(SplitZnTrackOption):
@@ -87,7 +87,7 @@ class params(SplitZnTrackOption):
     """
 
     dvc_option = "params"
-    zntrack_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.PARAMS
     file = utils.Files.params
 
 
@@ -98,7 +98,7 @@ class iterable(ZnTrackOption):
     """
 
     dvc_option = "params"
-    zntrack_type = utils.ZnTypes.ITERABLE
+    zn_type = utils.ZnTypes.ITERABLE
 
 
 class metadata(ZnTrackOption):
@@ -109,4 +109,4 @@ class metadata(ZnTrackOption):
     """
 
     dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.METADATA
+    zn_type = utils.ZnTypes.METADATA

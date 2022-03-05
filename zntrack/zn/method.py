@@ -26,7 +26,7 @@ class Method(SplitZnTrackOption):
     """
 
     dvc_option = "params"
-    zntrack_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.PARAMS
 
     def get_filename(self, instance):
         """Does not have a single file but params.yaml and zntrack.json"""

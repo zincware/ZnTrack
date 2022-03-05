@@ -37,7 +37,7 @@ class params(ZnTrackOption):
     """
 
     dvc_option = "params"
-    zntrack_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.PARAMS
     file = utils.Files.params
 
     @utils.deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
@@ -53,7 +53,7 @@ class deps(ZnTrackOption):
     """
 
     dvc_option = "deps"
-    zntrack_type = utils.ZnTypes.DEPS
+    zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
     def __get__(self, instance, owner):
@@ -72,7 +72,7 @@ class outs(ZnTrackOption):
     """
 
     dvc_option = "outs"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
 
@@ -84,7 +84,7 @@ class checkpoints(ZnTrackOption):
     """
 
     dvc_option = "checkpoints"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
 
@@ -96,7 +96,7 @@ class outs_no_cache(ZnTrackOption):
     """
 
     dvc_option = "outs_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
 
@@ -108,7 +108,7 @@ class outs_persistent(ZnTrackOption):
     """
 
     dvc_option = "outs_persistent"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
 
@@ -120,7 +120,7 @@ class metrics(ZnTrackOption):
     """
 
     dvc_option = "metrics"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
 
@@ -132,7 +132,7 @@ class metrics_no_cache(ZnTrackOption):
     """
 
     dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
 
@@ -144,7 +144,7 @@ class plots(ZnTrackOption):
     """
 
     dvc_option = "plots"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
 
 
@@ -156,5 +156,5 @@ class plots_no_cache(ZnTrackOption):
     """
 
     dvc_option = "plots_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack

@@ -105,7 +105,7 @@ def filter_ZnTrackOption(
     return_with_type=False,
     allow_none: bool = False,
 ) -> dict:
-    """Filter the descriptor instances by zntrack_type
+    """Filter the descriptor instances by zn_type
 
     Parameters
     ----------
@@ -114,7 +114,7 @@ def filter_ZnTrackOption(
     cls:
         The instance the ZnTrack options are attached to
     zntrack_type: str
-        The zntrack_type of the descriptors to gather
+        The zn_type of the descriptors to gather
     return_with_type: bool, default=False
         return a dictionary with the Descriptor.dvc_option as keys
     allow_none: bool, default=False
@@ -131,7 +131,7 @@ def filter_ZnTrackOption(
     """
     if not isinstance(zntrack_type, list):
         zntrack_type = [zntrack_type]
-    data = [x for x in data if x.zntrack_type in zntrack_type]
+    data = [x for x in data if x.zn_type in zntrack_type]
     if return_with_type:
         types_dict = {x.dvc_option: {} for x in data}
         for entity in data:
@@ -258,9 +258,9 @@ class GraphWriter:
         files = []
         for option in self._descriptor_list:
             file = option.get_filename(self)
-            if option.zntrack_type in utils.VALUE_DVC_TRACKED:
+            if option.zn_type in utils.VALUE_DVC_TRACKED:
                 files.append(file)
-            elif option.zntrack_type in utils.FILE_DVC_TRACKED:
+            elif option.zn_type in utils.FILE_DVC_TRACKED:
                 value = getattr(self, option.name)
                 if isinstance(value, (list, tuple)):
                     files += value
@@ -367,11 +367,11 @@ class GraphWriter:
             ]
         zn_options_set = set()
         for option in self._descriptor_list:
-            if option.zntrack_type == utils.ZnTypes.DVC:
+            if option.zn_type == utils.ZnTypes.DVC:
                 value = getattr(self, option.name)
                 custom_args += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
-            elif option.zntrack_type in [
+            elif option.zn_type in [
                 utils.ZnTypes.RESULTS,
                 utils.ZnTypes.METADATA,
             ]:
@@ -381,7 +381,7 @@ class GraphWriter:
                         option.get_filename(self).as_posix(),
                     )
                 )
-            elif option.zntrack_type == utils.ZnTypes.DEPS:
+            elif option.zn_type == utils.ZnTypes.DEPS:
                 value = getattr(self, option.name)
                 custom_args += handle_deps(value)
 

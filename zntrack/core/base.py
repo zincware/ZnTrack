@@ -27,7 +27,7 @@ def get_auto_init_signature(cls) -> (list, list):
     _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
     for name, item in cls.__dict__.items():
         if isinstance(item, ZnTrackOption):
-            if item.zntrack_type in utils.VALUE_DVC_TRACKED:
+            if item.zn_type in utils.VALUE_DVC_TRACKED:
                 # exclude zn.outs / metrics / plots / ... options
                 continue
             # For the new __init__
@@ -75,7 +75,7 @@ class Node(GraphWriter):
         super().__init__(**kwargs)
         self.is_loaded = kwargs.pop("is_loaded", False)
         for data in self._descriptor_list:
-            if data.zntrack_type == utils.ZnTypes.DEPS:
+            if data.zn_type == utils.ZnTypes.DEPS:
                 update_dependency_options(data.default_value)
 
     @utils.deprecated(
@@ -119,7 +119,7 @@ class Node(GraphWriter):
         """
         # Save dvc.<option>, dvc.deps, zn.Method
         for option in self._descriptor_list:
-            if results or option.zntrack_type not in utils.VALUE_DVC_TRACKED:
+            if results or option.zn_type not in utils.VALUE_DVC_TRACKED:
                 # results: Save all; otherwise save all except zn.<options>
                 option.save(instance=self)
             else:

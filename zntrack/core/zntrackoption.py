@@ -61,13 +61,11 @@ class ZnTrackOption(descriptor.Descriptor):
 
     file = None
     dvc_option = ""
-    zntrack_type: utils.ZnTypes = None
+    zn_type: utils.ZnTypes = None
 
     def __init__(self, default_value=None, **kwargs):
-        if default_value is not None and self.zntrack_type in utils.VALUE_DVC_TRACKED:
-            raise ValueError(
-                f"Can not set default to a tracked value ({self.zntrack_type})"
-            )
+        if default_value is not None and self.zn_type in utils.VALUE_DVC_TRACKED:
+            raise ValueError(f"Can not set default to a tracked value ({self.zn_type})")
         super().__init__(default_value=default_value, **kwargs)
 
     @property
@@ -117,7 +115,7 @@ class ZnTrackOption(descriptor.Descriptor):
 
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
-        if uses_node_name(self.zntrack_type, instance) is None:
+        if uses_node_name(self.zn_type, instance) is None:
             return pathlib.Path("nodes", instance.node_name, f"{self.dvc_option}.json")
         return pathlib.Path(self.file)
 
@@ -136,7 +134,7 @@ class ZnTrackOption(descriptor.Descriptor):
             return
         utils.file_io.update_config_file(
             file=self.get_filename(instance),
-            node_name=uses_node_name(self.zntrack_type, instance),
+            node_name=uses_node_name(self.zn_type, instance),
             value_name=self.name,
             value=self.__get__(instance, self.owner),
         )
@@ -170,7 +168,7 @@ class ZnTrackOption(descriptor.Descriptor):
         file_content = utils.file_io.read_file(file)
         # The problem here is, that I can not / don't want to load all Nodes but
         # only the ones, that are in [self.node_name][self.name] for deserializing
-        if uses_node_name(self.zntrack_type, instance) is not None:
+        if uses_node_name(self.zn_type, instance) is not None:
             values = utils.decode_dict(
                 file_content[instance.node_name].get(self.name, None)
             )
