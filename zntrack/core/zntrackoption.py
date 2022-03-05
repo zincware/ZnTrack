@@ -63,6 +63,7 @@ class ZnTrackOption(descriptor.Descriptor):
     tracked: bool
         this is true if the internal file, such as in the case of zn.outs()
         like nodes/<node_name>/outs.json is an affected file
+    # TODO value_tracked / tracked are exclusives and should be replaced by a single bool
 
     """
 

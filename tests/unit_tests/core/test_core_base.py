@@ -6,7 +6,7 @@ import pytest
 import yaml
 
 from zntrack import dvc, zn
-from zntrack.core.base import Node, update_dependency_options
+from zntrack.core.base import Node, get_auto_init_signature, update_dependency_options
 
 
 class ExampleDVCOutsNode(Node):
@@ -185,3 +185,40 @@ def test_update_dependency_options():
         magic_mock = MagicMock()
         update_dependency_options([magic_mock])
         assert magic_mock.update_options.called
+
+
+class ZnTrackOptionCollection:
+    param1: dict = zn.params()
+    param2: list = zn.params([1, 2])
+    param3 = zn.params()
+
+    out1: str = dvc.outs()
+    out2: pathlib.Path = dvc.outs()
+    out3 = dvc.outs()
+
+    result: int = zn.outs()
+    result2 = zn.outs()
+
+    no_option: int = 5
+    no_option2 = 42
+
+
+def test_get_auto_init_signature():
+    zn_option_names, signature_params = get_auto_init_signature(ZnTrackOptionCollection)
+
+    assert zn_option_names == [
+        "param1",
+        "param2",
+        "param3",
+        "out1",
+        "out2",
+        "out3",
+    ]
+
+    assert signature_params[0].name == "param1"
+    assert signature_params[0].annotation == dict
+
+    assert signature_params[2].name == "param3"
+    assert signature_params[2].annotation is None
+
+    assert signature_params[-1].name == "out3"
