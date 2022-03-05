@@ -10,13 +10,13 @@ Description: Standard python init file for the utils directory
 """
 
 from zntrack.utils import exceptions, file_io
-from zntrack.utils.config import (
+from zntrack.utils.config import Files, config
+from zntrack.utils.structs import (
     FILE_DVC_TRACKED,
     VALUE_DVC_TRACKED,
     DVCOptions,
-    Files,
+    LazyOption,
     ZnTypes,
-    config,
 )
 from zntrack.utils.utils import (
     check_type,
@@ -52,12 +52,5 @@ __all__ = [
     "FILE_DVC_TRACKED",
     "VALUE_DVC_TRACKED",
     "DVCOptions",
+    "LazyOption",
 ]
-
-
-class LazyOption:
-    def __init__(self):
-        raise ValueError(
-            "Can not initialize LazyOption. If you expected something else open an "
-            "issue at https://github.com/zincware/ZnTrack and describe how you got here."
-        )
