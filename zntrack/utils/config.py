@@ -8,13 +8,12 @@ Copyright Contributors to the Zincware Project.
 
 Description: Configuration File for ZnTrack
 """
-import enum
+import dataclasses
 import logging
-from dataclasses import dataclass, field
 from pathlib import Path
 
 
-@dataclass
+@dataclasses.dataclass
 class Config:
     """Collection of Node configurations
 
@@ -43,7 +42,7 @@ class Config:
     nb_class_path: Path = Path("src")
     lazy: bool = True
     allow_empty_loading: bool = False
-    _log_level: int = field(default=logging.WARNING, init=False, repr=True)
+    _log_level: int = dataclasses.field(default=logging.WARNING, init=False, repr=True)
 
     @property
     def log_level(self):
@@ -57,7 +56,7 @@ class Config:
         logger.setLevel(self._log_level)
 
 
-@dataclass(frozen=True)
+@dataclasses.dataclass(frozen=True)
 class Files:
     """Important File paths for ZnTrack to work
 
@@ -68,23 +67,6 @@ class Files:
 
     zntrack: Path = Path("zntrack.json")
     params: Path = Path("params.yaml")
-
-
-class ZnTypes(enum.Enum):
-    """Collection of ZnTrack Types to identify descriptors beyond their dvc option
-
-    Attributes
-    ----------
-    results: most zn.<options> like zn.outs() / zn.metrics() use this one
-    """
-
-    DEPS = enum.auto()
-    DVC = enum.auto()
-    METADATA = enum.auto()
-    # method = enum.auto()
-    PARAMS = enum.auto()
-    ITERABLE = enum.auto()
-    RESULTS = enum.auto()
 
 
 config = Config()

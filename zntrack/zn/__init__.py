@@ -45,9 +45,7 @@ class outs(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs"
-    zntrack_type = utils.ZnTypes.RESULTS
-    tracked = True
+    zn_type = utils.ZnTypes.RESULTS
 
 
 class deps(ZnTrackOption):
@@ -57,8 +55,7 @@ class deps(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "deps"
-    zntrack_type = utils.ZnTypes.DEPS
+    zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
     def __get__(self, instance, owner):
@@ -76,9 +73,8 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.RESULTS
-    tracked = True
+    dvc_option = utils.DVCOptions.METRICS_NO_CACHE.value
+    zn_type = utils.ZnTypes.RESULTS
 
 
 class params(SplitZnTrackOption):
@@ -88,8 +84,7 @@ class params(SplitZnTrackOption):
      on the available options
     """
 
-    dvc_option = "params"
-    zntrack_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.PARAMS
     file = utils.Files.params
 
 
@@ -99,8 +94,8 @@ class iterable(ZnTrackOption):
     This option defines an iterable parameter for spawning nodes.
     """
 
-    dvc_option = "params"
-    zntrack_type = utils.ZnTypes.ITERABLE
+    dvc_option = utils.DVCOptions.PARAMS.value
+    zn_type = utils.ZnTypes.ITERABLE
 
 
 class metadata(ZnTrackOption):
@@ -110,7 +105,5 @@ class metadata(ZnTrackOption):
     collectors.
     """
 
-    dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.METADATA
-
-    tracked = True
+    dvc_option = utils.DVCOptions.METRICS_NO_CACHE.value
+    zn_type = utils.ZnTypes.METADATA

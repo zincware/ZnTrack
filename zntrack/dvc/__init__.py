@@ -36,8 +36,7 @@ class params(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "params"
-    zntrack_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.PARAMS
     file = utils.Files.params
 
     @utils.deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
@@ -52,8 +51,7 @@ class deps(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "deps"
-    zntrack_type = utils.ZnTypes.DEPS
+    zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
     def __get__(self, instance, owner):
@@ -71,10 +69,8 @@ class outs(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class checkpoints(ZnTrackOption):
@@ -84,10 +80,8 @@ class checkpoints(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "checkpoints"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class outs_no_cache(ZnTrackOption):
@@ -97,10 +91,8 @@ class outs_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class outs_persistent(ZnTrackOption):
@@ -110,10 +102,8 @@ class outs_persistent(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs_persistent"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class metrics(ZnTrackOption):
@@ -123,10 +113,8 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class metrics_no_cache(ZnTrackOption):
@@ -136,10 +124,8 @@ class metrics_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class plots(ZnTrackOption):
@@ -149,10 +135,8 @@ class plots(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "plots"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class plots_no_cache(ZnTrackOption):
@@ -162,7 +146,5 @@ class plots_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "plots_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True

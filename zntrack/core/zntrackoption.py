@@ -20,7 +20,7 @@ from zntrack import descriptor, utils
 log = logging.getLogger(__name__)
 
 
-def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
+def uses_node_name(zn_type, instance) -> typing.Union[str, None]:
     """Check if the given metadata is associated with using the node_name as dict key
 
     Everything in nodes/<node_name>/ does not need it as key, because the directory
@@ -29,7 +29,7 @@ def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
 
     Parameters
     ----------
-    zntrack_type: str
+    zn_type: utils.ZnTypes
     instance:
         Any instance object with the node_name attribute
 
@@ -39,7 +39,7 @@ def uses_node_name(zntrack_type, instance) -> typing.Union[str, None]:
         returns the node_name if it is being used, otherwise returns None
 
     """
-    if zntrack_type in [utils.ZnTypes.RESULTS, utils.ZnTypes.METADATA]:
+    if zn_type in utils.VALUE_DVC_TRACKED:
         return None
     return instance.node_name
 
@@ -57,27 +57,28 @@ class ZnTrackOption(descriptor.Descriptor):
     ----------
     file: str
         Either the zntrack file or the parameter file
-    value_tracked: bool
-        this is true if the getattr(instance, self.name) is an affected file,
-         e.g. the dvc.<outs> is a file / list of files
-    tracked: bool
-        this is true if the internal file, such as in the case of zn.outs()
-        like nodes/<node_name>/outs.json is an affected file
-    # TODO value_tracked / tracked are exclusives and should be replaced by a single bool
-
+    dvc_option: str|utils.DVCOptions
+        The cmd to use with DVC, e.g. dvc --outs ... would be "outs"
+    zn_type: utils.ZnTypes
+        The internal ZnType to select the correct ZnTrack behaviour
     """
 
     file = None
-    value_tracked = False
-    tracked = False
-    dvc_option = ""
-    zntrack_type = ""
+    dvc_option: str = None
+    zn_type: utils.ZnTypes = None
 
     def __init__(self, default_value=None, **kwargs):
-        if default_value is not None and self.tracked:
-            raise ValueError(
-                f"Can not set default to a tracked value ({self.zntrack_type})"
-            )
+        """Constructor for ZnTrackOptions
+        Raises
+        ------
+        ValueError: If dvc_option is None and the class name is not in utils.DVCOptions
+
+        """
+        if default_value is not None and self.zn_type in utils.VALUE_DVC_TRACKED:
+            raise ValueError(f"Can not set default to a tracked value ({self.zn_type})")
+        if self.dvc_option is None:
+            # use the name of the class as DVCOption if registered in DVCOptions
+            self.dvc_option = utils.DVCOptions(self.__class__.__name__).value
         super().__init__(default_value=default_value, **kwargs)
 
     @property
@@ -127,7 +128,7 @@ class ZnTrackOption(descriptor.Descriptor):
 
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
-        if uses_node_name(self.zntrack_type, instance) is None:
+        if uses_node_name(self.zn_type, instance) is None:
             return pathlib.Path("nodes", instance.node_name, f"{self.dvc_option}.json")
         return pathlib.Path(self.file)
 
@@ -146,7 +147,7 @@ class ZnTrackOption(descriptor.Descriptor):
             return
         utils.file_io.update_config_file(
             file=self.get_filename(instance),
-            node_name=uses_node_name(self.zntrack_type, instance),
+            node_name=uses_node_name(self.zn_type, instance),
             value_name=self.name,
             value=self.__get__(instance, self.owner),
         )
@@ -180,7 +181,7 @@ class ZnTrackOption(descriptor.Descriptor):
         file_content = utils.file_io.read_file(file)
         # The problem here is, that I can not / don't want to load all Nodes but
         # only the ones, that are in [self.node_name][self.name] for deserializing
-        if uses_node_name(self.zntrack_type, instance) is not None:
+        if uses_node_name(self.zn_type, instance) is not None:
             values = utils.decode_dict(
                 file_content[instance.node_name].get(self.name, None)
             )
