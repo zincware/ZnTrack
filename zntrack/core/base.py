@@ -57,7 +57,28 @@ def update_dependency_options(value):
         value.update_options()
 
 
-class Node(GraphWriter):
+class LoadViaGetItem(type):
+    """Metaclass for adding getitem support to load"""
+
+    def __getitem__(self: Node, item) -> Node:
+        """Allow Node[<nodename>] to access an instance of the Node
+
+        Attributes
+        ----------
+        item: str|tuple|dict
+            Can be a string, for load(name=item)
+            Can be a tuple for load(*item) | e.g. ("nodename", True)
+            Can be a dict for load(**item) | e.g. {name:"nodename", lazy:True}
+
+        """
+        if isinstance(item, tuple):
+            return self.load(*item)
+        elif isinstance(item, dict):
+            return self.load(**item)
+        return self.load(name=item)
+
+
+class Node(GraphWriter, metaclass=LoadViaGetItem):
     """Main parent class for all ZnTrack Node
 
     The methods implemented in this class are primarily loading and saving parameters.
