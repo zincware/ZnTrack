@@ -19,13 +19,19 @@ from zntrack.core.functions.decorator import NodeConfig, nodify
 from zntrack.interface.base import DVCInterface
 from zntrack.project.zntrack_project import ZnTrackProject
 from zntrack.utils.config import config
-from zntrack.utils.serializer import MethodConverter, ZnTrackTypeConverter
+from zntrack.utils.serializer import (
+    MethodConverter,
+    NodeAttributeConverter,
+    ZnTrackTypeConverter,
+)
+from zntrack.zn.dependencies import getdeps
 
 # register converters
 znjson.config.ACTIVE_CONVERTER = [
     ZnTrackTypeConverter,
     znjson.PathlibConverter,
     MethodConverter,
+    NodeAttributeConverter,
 ]
 try:
     znjson.register([znjson.NumpyConverter, znjson.SmallNumpyConverter])
@@ -40,6 +46,7 @@ __all__ = [
     "config",
     nodify.__name__,
     NodeConfig.__name__,
+    "getdeps",
 ]
 
 __version__ = "0.3.5"

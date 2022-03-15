@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from zntrack import dvc, zn
+from zntrack import dvc, getdeps, zn
 from zntrack.core.base import Node
 
 
@@ -203,3 +203,48 @@ def test_default_dependency(proj_path):
     DefaultDependencyNode().run_and_save()
 
     assert DefaultDependencyNode.load().result == "Lorem Ipsum"
+
+
+@pytest.mark.parametrize("load", (True, False))
+def test_getdeps(proj_path, load):
+    DVCOuts().write_graph()
+
+    if load:
+        deps = getdeps(DVCOuts.load(), "data_file")
+    else:
+        deps = getdeps(DVCOuts, "data_file")
+
+    DependenciesCollector(dependencies=deps).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert DependenciesCollector.load().dependencies.read_text() == "Lorem Ipsum"
+
+
+def test_getdeps_named(proj_path):
+    DVCOuts(name="node01").write_graph()
+
+    DependenciesCollector(
+        dependencies=getdeps(DVCOuts.load("node01"), "data_file")
+    ).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert DependenciesCollector.load().dependencies.read_text() == "Lorem Ipsum"
+
+
+def test_getdeps_named_multi(proj_path):
+    DVCOuts(name="node01").write_graph()
+    ZnOuts(name="node02").write_graph()
+
+    DependenciesCollector(
+        dependencies=[
+            getdeps(DVCOuts.load("node01"), "data_file"),
+            getdeps(ZnOuts.load("node02"), "data"),
+        ]
+    ).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert DependenciesCollector.load().dependencies[0].read_text() == "Lorem Ipsum"
+    assert DependenciesCollector.load().dependencies[1] == "Lorem Ipsum"

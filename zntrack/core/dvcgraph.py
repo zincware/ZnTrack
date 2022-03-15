@@ -8,6 +8,7 @@ import typing
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
 
@@ -36,6 +37,11 @@ def handle_deps(value) -> list:
                 script += ["--deps", pathlib.Path(file).as_posix()]
         elif isinstance(value, (str, pathlib.Path)):
             script += ["--deps", pathlib.Path(value).as_posix()]
+        elif isinstance(value, NodeAttribute):
+            # TODO this will not define the correct dependencies,
+            #  it will define all dependencies of the Node.
+            for file in value.affected_files:
+                script += ["--deps", pathlib.Path(file).as_posix()]
         elif value is None:
             pass
         else:

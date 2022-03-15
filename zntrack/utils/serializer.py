@@ -25,6 +25,7 @@ import typing
 import znjson
 
 from zntrack.core.base import Node
+from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
 
@@ -89,9 +90,29 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
         serialized_node = SerializedNode(**value)
         return serialized_node.get_cls().load(name=serialized_node.name)
 
-    def __eq__(self, other):
-        """Overwrite check, because checking .zntrack equality"""
-        return isinstance(other, Node)
+
+class NodeAttributeConverter(znjson.ConverterBase):
+    """Serializer for Node Attributes
+
+    This allows to use getdeps(Node, "attr") as dvc/zn.deps() directly.
+    """
+
+    instance = NodeAttribute
+    representation = "NodeAttribute"
+
+    def _encode(self, obj: NodeAttribute) -> dict:
+        """Convert NodeAttribute to serializable dict"""
+        return dataclasses.asdict(obj)
+
+    def _decode(self, value: dict):
+        """return serialized Node attribute"""
+
+        node_attribute = NodeAttribute(**value)
+        serialized_node = SerializedNode(
+            module=node_attribute.module, cls=node_attribute.cls, name=node_attribute.name
+        )
+        node = serialized_node.get_cls().load(name=node_attribute.name)
+        return getattr(node, node_attribute.attribute)
 
 
 class MethodConverter(znjson.ConverterBase):
