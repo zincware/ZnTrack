@@ -52,7 +52,8 @@ def update_dependency_options(value):
     the default_value Nodes, so we must to this manually here and call update_options.
     """
     if isinstance(value, (list, tuple)):
-        [update_dependency_options(x) for x in value]
+        for item in value:
+            update_dependency_options(item)
     if isinstance(value, Node):
         value.update_options()
 
@@ -60,7 +61,7 @@ def update_dependency_options(value):
 class LoadViaGetItem(type):
     """Metaclass for adding getitem support to load"""
 
-    def __getitem__(self: Node, item) -> Node:
+    def __getitem__(cls: Node, item) -> Node:
         """Allow Node[<nodename>] to access an instance of the Node
 
         Attributes
@@ -72,10 +73,10 @@ class LoadViaGetItem(type):
 
         """
         if isinstance(item, tuple):
-            return self.load(*item)
+            return cls.load(*item)
         elif isinstance(item, dict):
-            return self.load(**item)
-        return self.load(name=item)
+            return cls.load(**item)
+        return cls.load(name=item)
 
 
 class Node(GraphWriter, metaclass=LoadViaGetItem):

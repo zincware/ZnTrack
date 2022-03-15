@@ -16,5 +16,3 @@ class DescriptorMissing(Exception):
 
 class DVCProcessError(Exception):
     """DVC specific message for CalledProcessError"""
-
-    pass

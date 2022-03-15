@@ -11,6 +11,7 @@ Description:
 
 import re
 from abc import ABC, abstractmethod
+from functools import partial
 from typing import Callable
 
 from zntrack import utils
@@ -59,8 +60,6 @@ class MetaData(ABC):
         See the following answer for a full explanation why this is required
         https://stackoverflow.com/questions/30104047/how-can-i-decorate-an-instance-method-with-a-decorator-class
         """
-
-        from functools import partial
 
         return partial(self.__call__, instance)
 
