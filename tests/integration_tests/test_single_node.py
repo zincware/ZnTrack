@@ -296,3 +296,15 @@ class OutsNotWritten(Node):
 def test_OutsNotWritten(proj_path):
     with pytest.raises(DVCProcessError):
         OutsNotWritten().write_graph(run=True)
+
+
+def test_load_named_nodes(proj_path):
+    ExampleNode01(name="Node01", inputs=42).write_graph(run=True)
+    ExampleNode01(name="Node02", inputs=3.1415).write_graph(run=True)
+
+    assert ExampleNode01["Node01"].outputs == 42
+    assert ExampleNode01["Node02"].outputs == 3.1415
+
+    # this will run load with name=Node01, lazy=True/False
+    assert ExampleNode01[("Node01", True)].outputs == 42
+    assert ExampleNode01[("Node01", False)].outputs == 42

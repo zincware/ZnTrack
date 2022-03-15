@@ -202,6 +202,8 @@ def get_python_interpreter() -> str:
 
         except subprocess.CalledProcessError:
             log.debug(f"{interpreter} is not working!")
+        except FileNotFoundError as err:
+            log.debug(err)
     raise ValueError(
         "Could not find a working python interpreter to work with subprocesses!"
     )
