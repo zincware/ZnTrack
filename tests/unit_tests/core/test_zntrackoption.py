@@ -12,7 +12,32 @@ def test_zn_outs_error():
             parameter = zn.outs(default_value="Lorem Ipsum")
 
 
+def test_dvc_option_from_cls_name():
+    with pytest.raises(ValueError):
+
+        class CustomOption(ZnTrackOption):
+            # CustomOption is not available in utils.DVCOption, therefore it does not work
+            pass
+
+        CustomOption()
+
+    class params(ZnTrackOption):
+        # Params is available
+        pass
+
+    params()
+
+    class CustomOptions(ZnTrackOption):
+        dvc_option = ""
+        # defining a custom dvc_option works as well
+        pass
+
+    CustomOptions()
+
+
 class CustomZnTrackOption(ZnTrackOption):
+    dvc_option = ""
+
     def get_data_from_files(self, instance):
         return "Lorem Ipsum"
 

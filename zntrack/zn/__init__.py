@@ -1,12 +1,4 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description: zn.<option>
+"""Description: zn.<option>
 
 The following can be used to store e.g. metrics directly without
 defining and writing to a file explicitly. For more information on the individual methods
@@ -45,9 +37,7 @@ class outs(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs"
-    zntrack_type = utils.ZnTypes.RESULTS
-    tracked = True
+    zn_type = utils.ZnTypes.RESULTS
 
 
 class deps(ZnTrackOption):
@@ -57,14 +47,13 @@ class deps(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "deps"
-    zntrack_type = utils.ZnTypes.DEPS
+    zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
     def __get__(self, instance, owner):
         """Use load_node_dependency before returning the value"""
-        value = super(deps, self).__get__(instance, owner)
-        value = utils.utils.load_node_dependency(value)
+        value = super().__get__(instance, owner)
+        value = utils.utils.load_node_dependency(value)  # use value = Cls.load()
         setattr(instance, self.name, value)
         return value
 
@@ -76,9 +65,8 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.RESULTS
-    tracked = True
+    dvc_option = utils.DVCOptions.METRICS_NO_CACHE.value
+    zn_type = utils.ZnTypes.RESULTS
 
 
 class params(SplitZnTrackOption):
@@ -88,8 +76,7 @@ class params(SplitZnTrackOption):
      on the available options
     """
 
-    dvc_option = "params"
-    zntrack_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.PARAMS
     file = utils.Files.params
 
 
@@ -99,8 +86,8 @@ class iterable(ZnTrackOption):
     This option defines an iterable parameter for spawning nodes.
     """
 
-    dvc_option = "params"
-    zntrack_type = utils.ZnTypes.ITERABLE
+    dvc_option = utils.DVCOptions.PARAMS.value
+    zn_type = utils.ZnTypes.ITERABLE
 
 
 class metadata(ZnTrackOption):
@@ -110,7 +97,5 @@ class metadata(ZnTrackOption):
     collectors.
     """
 
-    dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.METADATA
-
-    tracked = True
+    dvc_option = utils.DVCOptions.METRICS_NO_CACHE.value
+    zn_type = utils.ZnTypes.METADATA

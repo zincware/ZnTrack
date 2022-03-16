@@ -1,13 +1,4 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description: Function decorator for ZnTrack
-"""
+"""Function decorator for ZnTrack"""
 import copy
 import dataclasses
 import logging
@@ -24,6 +15,11 @@ StrOrPath = typing.Union[str, pathlib.Path]
 
 log = logging.getLogger(__name__)
 
+UnionListOrStrAndPath = typing.Union[typing.List[StrOrPath], StrOrPath]
+UnionDictListOfStrPath = typing.Union[
+    typing.List[StrOrPath], typing.Dict[str, StrOrPath], StrOrPath
+]
+
 
 @dataclasses.dataclass
 class NodeConfig:
@@ -36,15 +32,15 @@ class NodeConfig:
     """
 
     params: typing.Union[dot4dict.dotdict, dict] = dataclasses.field(default_factory=dict)
-    outs: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    outs_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    outs_persist: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    outs_persist_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    metrics: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    metrics_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    deps: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    plots: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
-    plots_no_cache: typing.Union[StrOrPath, typing.List[StrOrPath]] = None
+    outs: UnionDictListOfStrPath = None
+    outs_no_cache: UnionDictListOfStrPath = None
+    outs_persist: UnionDictListOfStrPath = None
+    outs_persist_no_cache: UnionDictListOfStrPath = None
+    metrics: UnionDictListOfStrPath = None
+    metrics_no_cache: UnionDictListOfStrPath = None
+    deps: UnionDictListOfStrPath = None
+    plots: UnionDictListOfStrPath = None
+    plots_no_cache: UnionDictListOfStrPath = None
 
     def __post_init__(self):
         for option_name in self.__dataclass_fields__:
@@ -118,7 +114,6 @@ class NodeConfig:
 
 
 AnyOrNodeConfig = typing.Union[typing.Any, NodeConfig]
-UnionListOrStrAndPath = typing.Union[typing.List[StrOrPath], StrOrPath]
 
 
 def execute_function_call(func):
@@ -180,15 +175,15 @@ def save_node_config_to_files(cfg: NodeConfig, node_name: str):
 def nodify(
     *,
     params: dict = None,
-    outs: UnionListOrStrAndPath = None,
-    outs_no_cache: UnionListOrStrAndPath = None,
-    outs_persist: UnionListOrStrAndPath = None,
-    outs_persist_no_cache: UnionListOrStrAndPath = None,
-    metrics: UnionListOrStrAndPath = None,
-    metrics_no_cache: UnionListOrStrAndPath = None,
-    deps: UnionListOrStrAndPath = None,
-    plots: UnionListOrStrAndPath = None,
-    plots_no_cache: UnionListOrStrAndPath = None,
+    outs: UnionDictListOfStrPath = None,
+    outs_no_cache: UnionDictListOfStrPath = None,
+    outs_persist: UnionDictListOfStrPath = None,
+    outs_persist_no_cache: UnionDictListOfStrPath = None,
+    metrics: UnionDictListOfStrPath = None,
+    metrics_no_cache: UnionDictListOfStrPath = None,
+    deps: UnionDictListOfStrPath = None,
+    plots: UnionDictListOfStrPath = None,
+    plots_no_cache: UnionDictListOfStrPath = None,
 ):
     """Main wrapper Function to convert a function into a DVC Stage
 

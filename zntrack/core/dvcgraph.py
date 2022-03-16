@@ -8,6 +8,7 @@ import typing
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ def handle_deps(value) -> list:
         for lst_val in value:
             script += handle_deps(lst_val)
     else:
-        if isinstance(value, GraphWriter):
+        if isinstance(value, (GraphWriter, NodeAttribute)):
             for file in value.affected_files:
                 script += ["--deps", pathlib.Path(file).as_posix()]
         elif isinstance(value, (str, pathlib.Path)):
@@ -101,11 +102,11 @@ def handle_dvc(value, dvc_args) -> list:
 def filter_ZnTrackOption(
     data,
     cls,
-    zntrack_type: typing.Union[utils.ZnTypes, typing.List[utils.ZnTypes]],
+    zn_type: typing.Union[utils.ZnTypes, typing.List[utils.ZnTypes]],
     return_with_type=False,
     allow_none: bool = False,
 ) -> dict:
-    """Filter the descriptor instances by zntrack_type
+    """Filter the descriptor instances by zn_type
 
     Parameters
     ----------
@@ -113,8 +114,8 @@ def filter_ZnTrackOption(
         The ZnTrack options to query through
     cls:
         The instance the ZnTrack options are attached to
-    zntrack_type: str
-        The zntrack_type of the descriptors to gather
+    zn_type: str
+        The zn_type of the descriptors to gather
     return_with_type: bool, default=False
         return a dictionary with the Descriptor.dvc_option as keys
     allow_none: bool, default=False
@@ -129,9 +130,9 @@ def filter_ZnTrackOption(
         {descriptor.dvc_option: {attr_name: attr_value}}
 
     """
-    if not isinstance(zntrack_type, list):
-        zntrack_type = [zntrack_type]
-    data = [x for x in data if x.zntrack_type in zntrack_type]
+    if not isinstance(zn_type, list):
+        zn_type = [zn_type]
+    data = [x for x in data if x.zn_type in zn_type]
     if return_with_type:
         types_dict = {x.dvc_option: {} for x in data}
         for entity in data:
@@ -258,14 +259,15 @@ class GraphWriter:
         files = []
         for option in self._descriptor_list:
             file = option.get_filename(self)
-            if option.tracked:
+            if option.zn_type in utils.VALUE_DVC_TRACKED:
                 files.append(file)
-            elif option.value_tracked:
+            elif option.zn_type in utils.FILE_DVC_TRACKED:
                 value = getattr(self, option.name)
-                if isinstance(value, list):
+                if isinstance(value, (list, tuple)):
                     files += value
                 else:
                     files.append(value)
+            # deps or params are not affected files
 
         files = [x for x in files if x is not None]
         return set(files)
@@ -355,9 +357,7 @@ class GraphWriter:
         custom_args = []
         # Handle Parameter
         params_list = filter_ZnTrackOption(
-            data=self._descriptor_list,
-            cls=self,
-            zntrack_type=[utils.ZnTypes.PARAMS],
+            data=self._descriptor_list, cls=self, zn_type=[utils.ZnTypes.PARAMS]
         )
         if len(params_list) > 0:
             custom_args += [
@@ -366,11 +366,11 @@ class GraphWriter:
             ]
         zn_options_set = set()
         for option in self._descriptor_list:
-            if option.zntrack_type == utils.ZnTypes.DVC:
+            if option.zn_type == utils.ZnTypes.DVC:
                 value = getattr(self, option.name)
                 custom_args += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
-            elif option.zntrack_type in [
+            elif option.zn_type in [
                 utils.ZnTypes.RESULTS,
                 utils.ZnTypes.METADATA,
             ]:
@@ -380,7 +380,7 @@ class GraphWriter:
                         option.get_filename(self).as_posix(),
                     )
                 )
-            elif option.zntrack_type == utils.ZnTypes.DEPS:
+            elif option.zn_type == utils.ZnTypes.DEPS:
                 value = getattr(self, option.name)
                 custom_args += handle_deps(value)
 

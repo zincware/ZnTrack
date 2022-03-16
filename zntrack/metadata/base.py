@@ -1,16 +1,6 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description:
-"""
-
 import re
 from abc import ABC, abstractmethod
+from functools import partial
 from typing import Callable
 
 from zntrack import utils
@@ -60,8 +50,6 @@ class MetaData(ABC):
         https://stackoverflow.com/questions/30104047/how-can-i-decorate-an-instance-method-with-a-decorator-class
         """
 
-        from functools import partial
-
         return partial(self.__call__, instance)
 
     def save_metadata(self, cls, value):
@@ -89,7 +77,7 @@ class MetaData(ABC):
                     filter_ZnTrackOption(
                         data=cls._descriptor_list,
                         cls=cls,
-                        zntrack_type=utils.ZnTypes.METADATA,
+                        zn_type=utils.ZnTypes.METADATA,
                         allow_none=True,
                     ).items()
                 )

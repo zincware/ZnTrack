@@ -1,14 +1,3 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description:
-"""
-
 import json
 import logging
 import os
@@ -148,14 +137,12 @@ def check_type(
         for value in obj:
             if check_type(value, types, allow_iterable, allow_none, allow_dict):
                 continue
-            else:
-                return False
+            return False
     elif isinstance(obj, dict) and allow_dict:
         for value in obj.values():
             if check_type(value, types, allow_iterable, allow_none, allow_dict):
                 continue
-            else:
-                return False
+            return False
     else:
         if allow_none and obj is None:
             return True
@@ -202,6 +189,8 @@ def get_python_interpreter() -> str:
 
         except subprocess.CalledProcessError:
             log.debug(f"{interpreter} is not working!")
+        except FileNotFoundError as err:
+            log.debug(err)
     raise ValueError(
         "Could not find a working python interpreter to work with subprocesses!"
     )

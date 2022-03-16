@@ -1,12 +1,4 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description: List of functions that are used to serialize and deserialize Python Objects
+"""List of functions that are used to serialize and deserialize Python Objects
 
 Notes
 -----
@@ -25,6 +17,7 @@ import typing
 import znjson
 
 from zntrack.core.base import Node
+from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
 
@@ -72,6 +65,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
     instance = Node
     representation = "ZnTrackType"
+    level = 10
 
     def _encode(self, obj: Node) -> dict:
         """Convert Node to serializable dict"""
@@ -89,15 +83,37 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
         serialized_node = SerializedNode(**value)
         return serialized_node.get_cls().load(name=serialized_node.name)
 
-    def __eq__(self, other):
-        """Overwrite check, because checking .zntrack equality"""
-        return isinstance(other, Node)
+
+class NodeAttributeConverter(znjson.ConverterBase):
+    """Serializer for Node Attributes
+
+    This allows to use getdeps(Node, "attr") as dvc/zn.deps() directly.
+    """
+
+    instance = NodeAttribute
+    representation = "NodeAttribute"
+    level = 10
+
+    def _encode(self, obj: NodeAttribute) -> dict:
+        """Convert NodeAttribute to serializable dict"""
+        return dataclasses.asdict(obj)
+
+    def _decode(self, value: dict):
+        """return serialized Node attribute"""
+
+        node_attribute = NodeAttribute(**value)
+        serialized_node = SerializedNode(
+            module=node_attribute.module, cls=node_attribute.cls, name=node_attribute.name
+        )
+        node = serialized_node.get_cls().load(name=node_attribute.name)
+        return getattr(node, node_attribute.attribute)
 
 
 class MethodConverter(znjson.ConverterBase):
     """ZnJSON Converter for zn.method attributes"""
 
     representation = "zn.method"
+    level = 10
 
     def _encode(self, obj):
         """Serialize the object"""
