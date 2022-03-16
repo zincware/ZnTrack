@@ -38,9 +38,9 @@ from random import randrange
 class HelloWorld(Node):
     """Define a ZnTrack Node"""
     # parameter to be tracked
-    max_number = zn.params()
+    max_number: int = zn.params()
     # parameter to store as output
-    random_number = zn.outs()
+    random_number: int = zn.outs()
     
     def run(self):
         """Command to be run by DVC"""
