@@ -1,8 +1,13 @@
+from __future__ import annotations
+
 import dataclasses
 import pathlib
-from typing import List, Protocol, Set
+from typing import TYPE_CHECKING, Set
 
 from zntrack.utils import utils
+
+if TYPE_CHECKING:
+    from zntrack import Node
 
 
 @dataclasses.dataclass
@@ -14,23 +19,7 @@ class NodeAttribute:
     affected_files: Set[pathlib.Path]
 
 
-class TypeNode(Protocol):
-    """Duck type typehints for Node"""
-
-    @property
-    def module(self) -> str:
-        ...
-
-    @property
-    def node_name(self) -> str:
-        ...
-
-    @property
-    def affected_files(self) -> List[pathlib.Path]:
-        ...
-
-
-def getdeps(node: TypeNode, attribute: str) -> NodeAttribute:
+def getdeps(node: Node, attribute: str) -> NodeAttribute:
     """Allow for Node attributes as dependencies
 
     Parameters
