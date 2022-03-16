@@ -11,7 +11,7 @@
 
 # Parameter Tracking for Python
 
-ZnTrack [zɪŋk træk] is an easy-to-use package for tracking parameters in your Python
+ZnTrack [zɪŋk træk] is an easy-to-use package for tracking parameters and creating computational graphs for your Python
 projects.
 What is a parameter? Anything set by a user in your code, for example, the number of
 layers in a neural network layer or the window size of a moving average.
@@ -25,9 +25,11 @@ where parameters have not changed, and to identify computational bottlenecks in 
 code.
 
 ## Example
-
+ZnTrack is based on [DVC](https://dvc.org).
 With ZnTrack a DVC Node on the computational graph can be written as a Python class.
-DVC Options, such as parameters, input dependencies and output files are class attributes.
+DVC Options, such as parameters, input dependencies and output files are defined as class attributes.
+
+The following example shows a Node to compute a Random number between 0 and a user defined maximum.
 
 ````python
 from zntrack import Node, zn
@@ -40,17 +42,11 @@ class HelloWorld(Node):
     max_number = zn.params()
     # parameter to store as output
     random_number = zn.outs()
-
-    def __init__(self, max_number=None, **kwargs):
-        """Pass tracked arguments"""
-        super().__init__(**kwargs)
-        self.max_number = max_number
-
+    
     def run(self):
         """Command to be run by DVC"""
         self.random_number = randrange(self.max_number)
 ````
-
 
 This Node can then be saved as a DVC stage
 
@@ -59,9 +55,13 @@ HelloWorld(max_number=512).write_graph()
 ````    
 
 which builds the DVC stage and can be used e.g., through `dvc repro`.
-The results can then be accessed easily via `HelloWorld.load().random_number`.
 
-More detailed examples and further information can be found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).
+Once `dvc repro` is called, the results, i.e. the random number can be accessed:
+```python
+hello_world = HelloWorld.load()
+print(hello_world.random_numer)
+```
+An overview of all the ZnTrack features as well as more detailed examples can be found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).
 
 ## Wrap Python Functions
 ZnTrack also provides tools to convert a Python function into a DVC stage.
@@ -77,6 +77,8 @@ def write_text(cfg: NodeConfig):
     cfg.outs.write_text(
         cfg.params.text
     )
+# build the DVC graph
+write_text()
 ````
 
 The ``cfg`` dataclass passed to the function provides access to all configured files
