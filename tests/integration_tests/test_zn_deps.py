@@ -111,3 +111,26 @@ def test_assert_read_file(proj_path, zntrack_dict):
     pathlib.Path("zntrack.json").write_text(json.dumps(zntrack_dict))
 
     assert isinstance(LastNode.load().first_node, FirstNode)
+
+
+class FirstNodeParams(Node):
+    number: int = zn.params()
+
+
+class SecondNodeParams(Node):
+    first_node_params: FirstNodeParams = zn.deps(FirstNodeParams)
+
+    negative_number: int = zn.params()
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.negative_number = -1 * self.first_node_params.number
+
+
+@pytest.mark.parametrize("number", (5, -5))
+def test_ParamsFromNodeNoLoad(proj_path, number):
+    FirstNodeParams(number=number).write_graph()
+    SecondNodeParams().write_graph()
+
+    assert FirstNodeParams.load().number == number
+    assert SecondNodeParams.load().negative_number == -1 * number

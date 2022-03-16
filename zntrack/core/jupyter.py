@@ -1,12 +1,12 @@
 import logging
-
-log = logging.getLogger(__name__)
 import pathlib
 import re
 import subprocess
 from functools import lru_cache
 
 from zntrack.utils.config import config
+
+log = logging.getLogger(__name__)
 
 
 @lru_cache(None)
@@ -30,6 +30,7 @@ def jupyter_class_to_file(nb_name, module_name):
     subprocess.run(
         ["jupyter", "nbconvert", "--to", "script", nb_name],
         capture_output=config.log_level > logging.INFO,
+        check=True,
     )
 
     reading_class = False

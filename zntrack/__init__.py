@@ -22,17 +22,8 @@ from zntrack.utils.config import config
 from zntrack.utils.serializer import MethodConverter, ZnTrackTypeConverter
 
 # register converters
-znjson.config.ACTIVE_CONVERTER = [
-    ZnTrackTypeConverter,
-    znjson.PathlibConverter,
-    MethodConverter,
-]
-try:
-    znjson.register([znjson.NumpyConverter, znjson.SmallNumpyConverter])
-except AttributeError:
-    pass
+znjson.register([ZnTrackTypeConverter, MethodConverter])
 
-#
 __all__ = [
     Node.__name__,
     ZnTrackProject.__name__,

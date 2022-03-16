@@ -82,7 +82,8 @@ class ZnTrackOption(descriptor.Descriptor):
         super().__init__(default_value=default_value, **kwargs)
 
     @property
-    def dvc_args(self):
+    def dvc_args(self) -> str:
+        """replace python variables '_' with '-' for dvc"""
         return self.dvc_option.replace("_", "-")
 
     def __repr__(self):

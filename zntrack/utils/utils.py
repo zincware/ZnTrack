@@ -148,14 +148,12 @@ def check_type(
         for value in obj:
             if check_type(value, types, allow_iterable, allow_none, allow_dict):
                 continue
-            else:
-                return False
+            return False
     elif isinstance(obj, dict) and allow_dict:
         for value in obj.values():
             if check_type(value, types, allow_iterable, allow_none, allow_dict):
                 continue
-            else:
-                return False
+            return False
     else:
         if allow_none and obj is None:
             return True

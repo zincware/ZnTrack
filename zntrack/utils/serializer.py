@@ -72,6 +72,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
 
     instance = Node
     representation = "ZnTrackType"
+    level = 10
 
     def _encode(self, obj: Node) -> dict:
         """Convert Node to serializable dict"""
@@ -98,6 +99,7 @@ class MethodConverter(znjson.ConverterBase):
     """ZnJSON Converter for zn.method attributes"""
 
     representation = "zn.method"
+    level = 10
 
     def _encode(self, obj):
         """Serialize the object"""
