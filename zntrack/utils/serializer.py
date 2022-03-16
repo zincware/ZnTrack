@@ -100,6 +100,7 @@ class NodeAttributeConverter(znjson.ConverterBase):
 
     instance = NodeAttribute
     representation = "NodeAttribute"
+    level = 10
 
     def _encode(self, obj: NodeAttribute) -> dict:
         """Convert NodeAttribute to serializable dict"""
