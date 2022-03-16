@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import pathlib
-from typing import TYPE_CHECKING, Set
+from typing import TYPE_CHECKING, List
 
 from zntrack.utils import utils
 
@@ -16,7 +16,7 @@ class NodeAttribute:
     cls: str
     name: str
     attribute: str
-    affected_files: Set[pathlib.Path]
+    affected_files: List[pathlib.Path]
 
 
 def getdeps(node: Node, attribute: str) -> NodeAttribute:
