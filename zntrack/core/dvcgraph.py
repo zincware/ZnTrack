@@ -8,6 +8,7 @@ import typing
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ def handle_deps(value) -> list:
         for lst_val in value:
             script += handle_deps(lst_val)
     else:
-        if isinstance(value, GraphWriter):
+        if isinstance(value, (GraphWriter, NodeAttribute)):
             for file in value.affected_files:
                 script += ["--deps", pathlib.Path(file).as_posix()]
         elif isinstance(value, (str, pathlib.Path)):

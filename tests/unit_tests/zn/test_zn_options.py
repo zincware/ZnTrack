@@ -6,6 +6,7 @@ import pytest
 import znjson
 
 from zntrack import zn
+from zntrack.zn.dependencies import NodeAttribute, getdeps
 from zntrack.zn.split_option import combine_values, split_value
 
 
@@ -112,3 +113,19 @@ def test_split_value_path():
     new_path = combine_values(zntrack_data, params_data)
     # TODO change order to be consistent with split_values
     assert new_path == path
+
+
+class ExampleNode:
+    module = "module"
+    node_name = "node01"
+    affected_files = ["a", "b"]
+
+
+def test_getdeps():
+    assert getdeps(ExampleNode(), "my_attr") == NodeAttribute(
+        module="module",
+        cls="ExampleNode",
+        name="node01",
+        attribute="my_attr",
+        affected_files=["a", "b"],
+    )
