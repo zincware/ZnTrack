@@ -39,7 +39,7 @@ def split_value(input_val) -> (typing.Union[dict, list], typing.Union[dict, list
     """
     if isinstance(input_val, (list, tuple)):
         data = [split_value(x) for x in input_val]
-        params_data, zntrack_data = zip(*data)
+        params_data, _ = zip(*data)
     else:
         if input_val["_type"] in ["zn.method"]:
             params_data = input_val["value"].pop("kwargs")

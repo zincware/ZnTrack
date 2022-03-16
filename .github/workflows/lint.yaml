@@ -52,8 +52,8 @@ jobs:
           pip install .
       - name: Install pylint
         run: |
-          pip install pylint
+          pip install pylint perflint
       - name: run pylint
         continue-on-error: true
         run: |
-          pylint zntrack
+          pylint zntrack --load-plugins=perflint

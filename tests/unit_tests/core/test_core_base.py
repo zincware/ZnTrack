@@ -6,7 +6,12 @@ import pytest
 import yaml
 
 from zntrack import dvc, zn
-from zntrack.core.base import Node, get_auto_init_signature, update_dependency_options
+from zntrack.core.base import (
+    LoadViaGetItem,
+    Node,
+    get_auto_init_signature,
+    update_dependency_options,
+)
 
 
 class ExampleDVCOutsNode(Node):
@@ -222,3 +227,23 @@ def test_get_auto_init_signature():
     assert signature_params[2].annotation is None
 
     assert signature_params[-1].name == "out3"
+
+
+class NodeMock(metaclass=LoadViaGetItem):
+    def load(self):
+        pass
+
+
+@pytest.mark.parametrize(
+    ("key", "called"),
+    [
+        ("node", {"name": "node"}),
+        ({"name": "node"}, {"name": "node"}),
+        ({"name": "node", "lazy": True}, {"name": "node", "lazy": True}),
+    ],
+)
+def test_LoadViaGetItem(key, called):
+    with patch.object(NodeMock, "load") as mock:
+        NodeMock[key]
+
+    mock.assert_called_with(**called)
