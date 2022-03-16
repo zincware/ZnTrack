@@ -32,16 +32,11 @@ def handle_deps(value) -> list:
         for lst_val in value:
             script += handle_deps(lst_val)
     else:
-        if isinstance(value, GraphWriter):
+        if isinstance(value, (GraphWriter, NodeAttribute)):
             for file in value.affected_files:
                 script += ["--deps", pathlib.Path(file).as_posix()]
         elif isinstance(value, (str, pathlib.Path)):
             script += ["--deps", pathlib.Path(value).as_posix()]
-        elif isinstance(value, NodeAttribute):
-            # TODO this will not define the correct dependencies,
-            #  it will define all dependencies of the Node.
-            for file in value.affected_files:
-                script += ["--deps", pathlib.Path(file).as_posix()]
         elif value is None:
             pass
         else:
