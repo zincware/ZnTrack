@@ -20,7 +20,7 @@ setuptools.setup(
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+        "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.7",
