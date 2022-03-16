@@ -26,6 +26,10 @@ class ZnOuts(Node):
     def run(self):
         self.data = "Lorem Ipsum"
 
+    @property
+    def reverse(self):
+        return self.data[::-1]
+
 
 class DVCZnOuts(Node):
     data_file: Path = dvc.outs()
@@ -248,3 +252,18 @@ def test_getdeps_named_multi(proj_path):
 
     assert DependenciesCollector.load().dependencies[0].read_text() == "Lorem Ipsum"
     assert DependenciesCollector.load().dependencies[1] == "Lorem Ipsum"
+
+
+@pytest.mark.parametrize("load", (True, False))
+def test_getdeps_property(proj_path, load):
+    ZnOuts().write_graph()
+    if load:
+        deps = getdeps(ZnOuts.load(), "reverse")
+    else:
+        deps = getdeps(ZnOuts, "reverse")
+
+    DependenciesCollector(dependencies=deps).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert DependenciesCollector.load().dependencies == "muspI meroL"
