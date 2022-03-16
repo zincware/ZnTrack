@@ -14,22 +14,21 @@
 ZnTrack [zɪŋk træk] is an easy-to-use package for tracking parameters and creating computational graphs for your Python
 projects.
 What is a parameter? Anything set by a user in your code, for example, the number of
-layers in a neural network layer or the window size of a moving average.
+layers in a neural network or the window size of a moving average.
 ZnTrack works by storing the values of parameters in Python classes and functions and
 monitoring how they change for several different runs.
 These changes can then be compared graphically to see what effect they had on your
 workflow.
 Beyond the standard tracking of parameters in a project, ZnTrack can be used to deploy
-jobs with a set of different parameter values, avoid the re-running of components of code
-where parameters have not changed, and to identify computational bottlenecks in your
-code.
+jobs with a set of different parameter values, avoid the re-running of code components
+where parameters have not changed, and to identify computational bottlenecks.
 
 ## Example
 ZnTrack is based on [DVC](https://dvc.org).
 With ZnTrack a DVC Node on the computational graph can be written as a Python class.
 DVC Options, such as parameters, input dependencies and output files are defined as class attributes.
 
-The following example shows a Node to compute a Random number between 0 and a user defined maximum.
+The following example shows a Node to compute a random number between 0 and a user defined maximum.
 
 ````python
 from zntrack import Node, zn
@@ -48,15 +47,14 @@ class HelloWorld(Node):
         self.random_number = randrange(self.max_number)
 ````
 
-This Node can then be saved as a DVC stage
+This Node can then be put on the computational graph (writing the `dvc.yaml` and `params.yaml` files) by calling `write_graph()`. 
+The graph can then be executed e.g., through `dvc repro`.
 
 ````python
 HelloWorld(max_number=512).write_graph()
 ````    
 
-which builds the DVC stage and can be used e.g., through `dvc repro`.
-
-Once `dvc repro` is called, the results, i.e. the random number can be accessed:
+Once `dvc repro` is called, the results, i.e. the random number can be accessed directly by the Node object.
 ```python
 hello_world = HelloWorld.load()
 print(hello_world.random_numer)
@@ -64,8 +62,8 @@ print(hello_world.random_numer)
 An overview of all the ZnTrack features as well as more detailed examples can be found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).
 
 ## Wrap Python Functions
-ZnTrack also provides tools to convert a Python function into a DVC stage.
-This approach is much more lightweight than the class-based approach with only a reduced set of functionality.
+ZnTrack also provides tools to convert a Python function into a DVC Node.
+This approach is much more lightweight compared to the class-based approach with only a reduced set of functionality.
 Therefore, it is recommended for smaller nodes that do not need the additional toolset that the class-based approach provides.
 
 ````python
