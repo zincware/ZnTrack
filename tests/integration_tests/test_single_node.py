@@ -306,9 +306,5 @@ def test_load_named_nodes(proj_path):
     assert ExampleNode01["Node02"].outputs == 3.1415
 
     # this will run load with name=Node01, lazy=True/False
-    assert ExampleNode01[("Node01", True)].outputs == 42
-    assert ExampleNode01[("Node01", False)].outputs == 42
-
-    # this will run load with name=Node01, lazy=True/False
     assert ExampleNode01[{"name": "Node01", "lazy": True}].outputs == 42
     assert ExampleNode01[{"name": "Node01", "lazy": False}].outputs == 42

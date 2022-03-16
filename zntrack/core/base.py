@@ -66,15 +66,12 @@ class LoadViaGetItem(type):
 
         Attributes
         ----------
-        item: str|tuple|dict
+        item: str|dict
             Can be a string, for load(name=item)
-            Can be a tuple for load(*item) | e.g. ("nodename", True)
             Can be a dict for load(**item) | e.g. {name:"nodename", lazy:True}
 
         """
-        if isinstance(item, tuple):
-            return cls.load(*item)
-        elif isinstance(item, dict):
+        if isinstance(item, dict):
             return cls.load(**item)
         return cls.load(name=item)
 
