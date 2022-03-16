@@ -1,6 +1,7 @@
 import logging
 
-from zntrack import Node, utils
+from zntrack import utils
+from zntrack.utils import helpers
 from zntrack.zn.split_option import SplitZnTrackOption
 
 log = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class Method(SplitZnTrackOption):
         """Include type check for better error reporting"""
         # TODO raise error on default values,
         #  make compatible types an attribute of descriptor
-        if isinstance(instance, Node) or issubclass(instance, None):
+        if helpers.isnode(instance):
             raise ValueError(
                 "zn.Method() does not support type <Node>."
                 " Consider using zn.deps() instead"
