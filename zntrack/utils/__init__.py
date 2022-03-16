@@ -1,16 +1,14 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description: Standard python init file for the utils directory
-"""
+"""Standard python init file for the utils directory"""
 
 from zntrack.utils import exceptions, file_io
-from zntrack.utils.config import Files, ZnTypes, config
+from zntrack.utils.config import Files, config
+from zntrack.utils.structs import (
+    FILE_DVC_TRACKED,
+    VALUE_DVC_TRACKED,
+    DVCOptions,
+    LazyOption,
+    ZnTypes,
+)
 from zntrack.utils.utils import (
     check_type,
     cwd_temp_dir,
@@ -42,12 +40,8 @@ __all__ = [
     "get_python_interpreter",
     "run_dvc_cmd",
     "get_auto_init",
+    "FILE_DVC_TRACKED",
+    "VALUE_DVC_TRACKED",
+    "DVCOptions",
+    "LazyOption",
 ]
-
-
-class LazyOption:
-    def __init__(self):
-        raise ValueError(
-            "Can not initialize LazyOption. If you expected something else open an "
-            "issue at https://github.com/zincware/ZnTrack and describe how you got here."
-        )

@@ -1,13 +1,3 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description:
-"""
 from __future__ import annotations
 
 import inspect
@@ -15,9 +5,33 @@ import logging
 
 from zntrack import utils
 from zntrack.core.dvcgraph import GraphWriter
-from zntrack.zn import params
+from zntrack.core.zntrackoption import ZnTrackOption
 
 log = logging.getLogger(__name__)
+
+
+def get_auto_init_signature(cls) -> (list, list):
+    """Iterate over ZnTrackOptions in the __dict__ and save the option name
+    and create a signature Parameter"""
+    zn_option_names, signature_params = [], []
+    _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
+    for name, item in cls.__dict__.items():
+        if isinstance(item, ZnTrackOption):
+            if item.zn_type in utils.VALUE_DVC_TRACKED:
+                # exclude zn.outs / metrics / plots / ... options
+                continue
+            # For the new __init__
+            zn_option_names.append(name)
+
+            # For the new __signature__
+            signature_params.append(
+                inspect.Parameter(
+                    name=name,
+                    kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                    annotation=cls.__annotations__.get(name),
+                )
+            )
+    return zn_option_names, signature_params
 
 
 def update_dependency_options(value):
@@ -28,12 +42,31 @@ def update_dependency_options(value):
     the default_value Nodes, so we must to this manually here and call update_options.
     """
     if isinstance(value, (list, tuple)):
-        [update_dependency_options(x) for x in value]
+        for item in value:
+            update_dependency_options(item)
     if isinstance(value, Node):
         value.update_options()
 
 
-class Node(GraphWriter):
+class LoadViaGetItem(type):
+    """Metaclass for adding getitem support to load"""
+
+    def __getitem__(cls: Node, item) -> Node:
+        """Allow Node[<nodename>] to access an instance of the Node
+
+        Attributes
+        ----------
+        item: str|dict
+            Can be a string, for load(name=item)
+            Can be a dict for load(**item) | e.g. {name:"nodename", lazy:True}
+
+        """
+        if isinstance(item, dict):
+            return cls.load(**item)
+        return cls.load(name=item)
+
+
+class Node(GraphWriter, metaclass=LoadViaGetItem):
     """Main parent class for all ZnTrack Node
 
     The methods implemented in this class are primarily loading and saving parameters.
@@ -51,7 +84,7 @@ class Node(GraphWriter):
         super().__init__(**kwargs)
         self.is_loaded = kwargs.pop("is_loaded", False)
         for data in self._descriptor_list:
-            if data.zntrack_type == utils.ZnTypes.DEPS:
+            if data.zn_type == utils.ZnTypes.DEPS:
                 update_dependency_options(data.default_value)
 
     @utils.deprecated(
@@ -73,24 +106,13 @@ class Node(GraphWriter):
             return cls
 
         # attach an automatically generated __init__ if None is provided
-        zn_option_fields, sig_params = [], []
-        for name, item in cls.__dict__.items():
-            if isinstance(item, params):
-                # For the new __init__
-                zn_option_fields.append(name)
-
-                # For the new __signature__
-                sig_params.append(
-                    inspect.Parameter(
-                        name=name, kind=inspect.Parameter.POSITIONAL_OR_KEYWORD
-                    )
-                )
+        zn_option_names, signature_params = get_auto_init_signature(cls)
 
         # Add new __init__ to the sub-class
-        setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_fields))
+        setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_names))
 
         # Add new __signature__ to the sub-class
-        signature = inspect.Signature(parameters=sig_params)
+        signature = inspect.Signature(parameters=signature_params)
         setattr(cls, "__signature__", signature)
 
     def save(self, results: bool = False):
@@ -106,11 +128,8 @@ class Node(GraphWriter):
         """
         # Save dvc.<option>, dvc.deps, zn.Method
         for option in self._descriptor_list:
-            if results:
-                # Save all
-                option.save(instance=self)
-            elif option.zntrack_type not in [utils.ZnTypes.RESULTS]:
-                # Filter out zn.<options>
+            if results or option.zn_type not in utils.VALUE_DVC_TRACKED:
+                # results: Save all; otherwise save all except zn.<options>
                 option.save(instance=self)
             else:
                 # Create the path for DVC to write a .gitignore file

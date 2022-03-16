@@ -48,6 +48,13 @@ class SingleNode(Node):
         self.result = self.data_class.param1 + self.data_class.param2
 
 
+class HelloWorld(Node):
+    param = zn.params(42)
+
+    def run(self):
+        pass
+
+
 def test_run_twice_diff_params(proj_path):
     SingleNode(data_class=ExampleMethod(1, 1)).write_graph(no_exec=False)
     assert SingleNode.load().result == 2
@@ -257,3 +264,19 @@ def test_NodeMethodWithConfig(proj_path):
         method=MyMethod(method_config=MethodConfig(param_a="Hello World"))
     ).write_graph()
     assert NodeMethodWithConfig.load().method.method_config == {"param_a": "Hello World"}
+
+
+def test_err_node_as_method(proj_path):
+    HelloWorld().write_graph()
+
+    with pytest.raises(ValueError):
+        SingleNode(data_class=HelloWorld.load())
+
+    with pytest.raises(ValueError):
+        SingleNode(data_class=[HelloWorld.load(), HelloWorld.load()])
+
+    with pytest.raises(ValueError):
+        SingleNode(data_class=HelloWorld)
+
+    with pytest.raises(ValueError):
+        SingleNode(data_class=[HelloWorld, HelloWorld])

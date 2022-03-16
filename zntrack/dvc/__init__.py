@@ -1,12 +1,4 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description: Collection of DVC options
+"""Collection of DVC options
 
 Based on ZnTrackOption python descriptors this gives access to them being used
 to define e.g. dependencies
@@ -36,8 +28,7 @@ class params(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "params"
-    zntrack_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.PARAMS
     file = utils.Files.params
 
     @utils.deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
@@ -52,13 +43,12 @@ class deps(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "deps"
-    zntrack_type = utils.ZnTypes.DEPS
+    zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
     def __get__(self, instance, owner):
         """Use load_node_dependency before returning the value"""
-        value = super(deps, self).__get__(instance, owner)
+        value = super().__get__(instance, owner)
         value = utils.utils.load_node_dependency(value, log_warning=True)
         setattr(instance, self.name, value)
         return value
@@ -71,10 +61,8 @@ class outs(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class checkpoints(ZnTrackOption):
@@ -84,10 +72,8 @@ class checkpoints(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "checkpoints"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class outs_no_cache(ZnTrackOption):
@@ -97,10 +83,8 @@ class outs_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class outs_persistent(ZnTrackOption):
@@ -110,10 +94,8 @@ class outs_persistent(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "outs_persistent"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class metrics(ZnTrackOption):
@@ -123,10 +105,8 @@ class metrics(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class metrics_no_cache(ZnTrackOption):
@@ -136,10 +116,8 @@ class metrics_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "metrics_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class plots(ZnTrackOption):
@@ -149,10 +127,8 @@ class plots(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "plots"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
 
 
 class plots_no_cache(ZnTrackOption):
@@ -162,7 +138,5 @@ class plots_no_cache(ZnTrackOption):
      on the available options
     """
 
-    dvc_option = "plots_no_cache"
-    zntrack_type = utils.ZnTypes.DVC
+    zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
-    value_tracked = True
