@@ -100,13 +100,13 @@ For more information on DVC visit their [homepage](https://dvc.org/doc).
 Installation
 ============
 
-Simply run:
+Install the stable version from PyPi via
 
 ````shell
 pip install zntrack
 ```` 
 
-Or you can install from source with:
+or install the latest development version from source with:
 
 ````shell
 git clone https://github.com/zincware/ZnTrack.git
