@@ -1,8 +1,7 @@
-from zntrack.core.base import Node
-
-
 def isnode(node) -> bool:
     """Check if node contains a Node instance or class"""
+    from zntrack.core.base import Node
+
     if isinstance(node, (list, tuple)):
         return any([isnode(x) for x in node])
     else:

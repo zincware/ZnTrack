@@ -8,10 +8,15 @@ from zntrack.core.functions.decorator import NodeConfig, nodify
 from zntrack.interface.base import DVCInterface
 from zntrack.project.zntrack_project import ZnTrackProject
 from zntrack.utils.config import config
-from zntrack.utils.serializer import MethodConverter, ZnTrackTypeConverter
+from zntrack.utils.serializer import (
+    MethodConverter,
+    NodeAttributeConverter,
+    ZnTrackTypeConverter,
+)
+from zntrack.zn.dependencies import getdeps
 
 # register converters
-znjson.register([ZnTrackTypeConverter, MethodConverter])
+znjson.register([ZnTrackTypeConverter, MethodConverter, NodeAttributeConverter])
 
 __all__ = [
     Node.__name__,
@@ -20,6 +25,7 @@ __all__ = [
     "config",
     nodify.__name__,
     NodeConfig.__name__,
+    "getdeps",
 ]
 
 __version__ = "0.4.0"
