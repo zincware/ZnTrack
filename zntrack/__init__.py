@@ -25,7 +25,6 @@ from zntrack.utils.serializer import MethodConverter, ZnTrackTypeConverter
 znjson.register(
     [
         ZnTrackTypeConverter,
-        znjson.PathlibConverter,
         MethodConverter,
     ]
 )
