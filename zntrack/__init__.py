@@ -22,12 +22,7 @@ from zntrack.utils.config import config
 from zntrack.utils.serializer import MethodConverter, ZnTrackTypeConverter
 
 # register converters
-znjson.register(
-    [
-        ZnTrackTypeConverter,
-        MethodConverter,
-    ]
-)
+znjson.register([ZnTrackTypeConverter, MethodConverter])
 
 __all__ = [
     Node.__name__,
