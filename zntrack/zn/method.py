@@ -1,6 +1,6 @@
 import logging
 
-from zntrack import utils
+from zntrack import Node, utils
 from zntrack.zn.split_option import SplitZnTrackOption
 
 log = logging.getLogger(__name__)
@@ -31,6 +31,17 @@ class Method(SplitZnTrackOption):
     def get_filename(self, instance):
         """Does not have a single file but params.yaml and zntrack.json"""
         return utils.Files.params, utils.Files.zntrack
+
+    def __set__(self, instance, value):
+        """Include type check for better error reporting"""
+        # TODO raise error on default values,
+        #  make compatible types an attribute of descriptor
+        if isinstance(instance, Node) or issubclass(instance, None):
+            raise ValueError(
+                "zn.Method() does not support type <Node>."
+                " Consider using zn.deps() instead"
+            )
+        super().__set__(instance, value)
 
     def __get__(self, instance, owner):
         """Add some custom attributes to the instance to identify it in znjson"""
