@@ -308,7 +308,7 @@ class PathAsParams(Node):
 def test_PathAsParams(proj_path):
     PathAsParams(path=pathlib.Path("file.txt").resolve()).save()
 
-    assert PathAsParams.load().path == pathlib.Path("file.txt")
+    assert PathAsParams.load().path == pathlib.Path("file.txt").resolve()
 
 
 def test_load_named_nodes(proj_path):
