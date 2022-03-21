@@ -32,12 +32,11 @@ def handle_deps(value) -> typing.List[str]:
         for lst_val in value:
             deps_files += handle_deps(lst_val)
     else:
-        deps_files: typing.List[str] = []  # collect the files first
         if isinstance(value, (GraphWriter, NodeAttribute)):
             for file in value.affected_files:
-                deps_files += [pathlib.Path(file).as_posix()]
+                deps_files.append(pathlib.Path(file).as_posix())
         elif isinstance(value, (str, pathlib.Path)):
-            deps_files += [pathlib.Path(value).as_posix()]
+            deps_files.append(pathlib.Path(value).as_posix())
         elif value is None:
             pass
         else:
