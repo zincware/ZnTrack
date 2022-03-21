@@ -13,7 +13,7 @@ from zntrack.zn.dependencies import NodeAttribute
 log = logging.getLogger(__name__)
 
 
-def handle_deps(value) -> list:
+def handle_deps(value) -> typing.List[str]:
     """Find all dependencies of value
 
     Parameters
@@ -24,25 +24,26 @@ def handle_deps(value) -> list:
     Returns
     -------
     list:
-        A list of strings like ["--deps", "<path>", --deps, "<path>", ...]
+        A list dependency files
 
     """
-    script = []
+    deps_files: typing.List[str] = []
     if isinstance(value, (list, tuple)):
         for lst_val in value:
-            script += handle_deps(lst_val)
+            deps_files += handle_deps(lst_val)
     else:
+        deps_files: typing.List[str] = []  # collect the files first
         if isinstance(value, (GraphWriter, NodeAttribute)):
             for file in value.affected_files:
-                script += ["--deps", pathlib.Path(file).as_posix()]
+                deps_files += [pathlib.Path(file).as_posix()]
         elif isinstance(value, (str, pathlib.Path)):
-            script += ["--deps", pathlib.Path(value).as_posix()]
+            deps_files += [pathlib.Path(value).as_posix()]
         elif value is None:
             pass
         else:
             raise ValueError(f"Type {type(value)} ({value}) is not supported!")
 
-    return script
+    return deps_files
 
 
 @dataclasses.dataclass
@@ -355,6 +356,7 @@ class GraphWriter:
                 self.convert_notebook(nb_name)
 
         custom_args = []
+        dependencies = []
         # Handle Parameter
         params_list = filter_ZnTrackOption(
             data=self._descriptor_list, cls=self, zn_type=[utils.ZnTypes.PARAMS]
@@ -382,7 +384,10 @@ class GraphWriter:
                 )
             elif option.zn_type == utils.ZnTypes.DEPS:
                 value = getattr(self, option.name)
-                custom_args += handle_deps(value)
+                dependencies += handle_deps(value)
+
+        for dependency in set(dependencies):
+            custom_args += ["--deps", dependency]
 
         for pair in zn_options_set:
             custom_args += pair
