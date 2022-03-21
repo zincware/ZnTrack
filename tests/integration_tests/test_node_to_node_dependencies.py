@@ -289,3 +289,18 @@ def test_getdeps_double(proj_path):
     subprocess.check_call(["dvc", "repro"])
 
     assert DefaultDependencyNodeTwo.load().result == ["Lorem Ipsum", "Lorem Ipsum"]
+
+
+def test_getdeps_double_named(proj_path):
+    """Test that getdeps twice in a single node to the same dependency does work"""
+    ZnOuts(name="outs1").write_graph()
+    ZnOuts(name="outs2").write_graph()
+
+    deps1 = getdeps(ZnOuts.load(name="outs1"), "data")
+    deps2 = getdeps(ZnOuts.load(name="outs2"), "data")
+
+    DefaultDependencyNodeTwo(deps1=deps1, deps2=deps2).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    assert DefaultDependencyNodeTwo.load().result == ["Lorem Ipsum", "Lorem Ipsum"]
