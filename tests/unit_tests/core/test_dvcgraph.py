@@ -39,7 +39,7 @@ def test_get_dvc_arguments():
 
 
 def test_handle_deps():
-    assert handle_deps(["a.dat", "b.dat"]) == ["--deps", "a.dat", "--deps", "b.dat"]
+    assert handle_deps(["a.dat", "b.dat"]) == ["a.dat", "b.dat"]
 
 
 def test_handle_deps_posix():
@@ -47,8 +47,8 @@ def test_handle_deps_posix():
     # TODO this does not really test anything, but I don't know how to fix that,
     #  because converting windows path to posix under linux does not work natively
     assert handle_deps(r"src\file.txt") in [
-        ["--deps", "src/file.txt"],
-        ["--deps", r"src\file.txt"],
+        ["src/file.txt"],
+        [r"src\file.txt"],
     ]
 
 
@@ -77,7 +77,7 @@ def test_handle_deps_unknown():
 
 
 def test_handle_deps_node():
-    assert handle_deps(ExampleDVCOutsNode()) == ["--deps", "example.dat"]
+    assert handle_deps(ExampleDVCOutsNode()) == ["example.dat"]
 
 
 class ExampleAffectedFiles(GraphWriter):
