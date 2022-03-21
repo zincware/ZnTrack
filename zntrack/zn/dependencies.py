@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import pathlib
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, List, Union
 
 from zntrack.utils import utils
 
@@ -19,7 +19,7 @@ class NodeAttribute:
     affected_files: List[pathlib.Path]
 
 
-def getdeps(node: Node, attribute: str) -> NodeAttribute:
+def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
     """Allow for Node attributes as dependencies
 
     Parameters
