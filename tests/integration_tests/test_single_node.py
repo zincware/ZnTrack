@@ -12,6 +12,16 @@ from zntrack.core.base import Node
 from zntrack.utils.exceptions import DVCProcessError
 
 
+@pytest.fixture
+def proj_path(tmp_path):
+    shutil.copy(__file__, tmp_path)
+    os.chdir(tmp_path)
+    subprocess.check_call(["git", "init"])
+    subprocess.check_call(["dvc", "init"])
+
+    return tmp_path
+
+
 class ExampleNode01(Node):
     inputs = zn.params()
     outputs = zn.outs()
@@ -60,16 +70,6 @@ class ExampleNodeWithCompMethod(Node):
 
     def run(self):
         self.result = self.my_method.compute()
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 def test_run(proj_path):
@@ -296,6 +296,19 @@ class OutsNotWritten(Node):
 def test_OutsNotWritten(proj_path):
     with pytest.raises(DVCProcessError):
         OutsNotWritten().write_graph(run=True)
+
+
+class PathAsParams(Node):
+    path = zn.params()
+
+    def run(self):
+        pass
+
+
+def test_PathAsParams(proj_path):
+    PathAsParams(path=pathlib.Path("file.txt").resolve()).save()
+
+    assert PathAsParams.load().path == pathlib.Path("file.txt").resolve()
 
 
 def test_load_named_nodes(proj_path):

@@ -304,3 +304,38 @@ def test_getdeps_double_named(proj_path):
     subprocess.check_call(["dvc", "repro"])
 
     assert DefaultDependencyNodeTwo.load().result == ["Lorem Ipsum", "Lorem Ipsum"]
+
+
+class SeedNumber(Node):
+    number = zn.params()
+    number_out = zn.outs()
+
+    def run(self):
+        self.number_out = self.number
+
+
+class AddOne(Node):
+    inputs = zn.deps()
+    output = zn.outs()
+
+    def run(self):
+        self.output = self.inputs + 1
+
+
+@pytest.mark.parametrize("steps", (1, 5))
+def test_stacked_name_getdeps(proj_path, steps):
+    sd = SeedNumber(number=0)
+    sd.write_graph()
+
+    for step in range(steps):
+        if step == 0:
+            AddOne(inputs=getdeps(SeedNumber, "number"), name=f"add_{step}").write_graph()
+        else:
+            AddOne(
+                inputs=getdeps(AddOne[f"add_{step - 1}"], "output"), name=f"add_{step}"
+            ).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    for step in range(steps):
+        assert AddOne[f"add_{step}"].output == step + 1

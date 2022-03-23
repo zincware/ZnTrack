@@ -36,7 +36,8 @@ class ExampleFullNode(Node):
         self.zn_outs = "outs"
 
 
-def test_save():
+@pytest.mark.parametrize("run", (True, False))
+def test_save(run):
     zntrack_mock = mock_open(read_data="{}")
     params_mock = mock_open(read_data="{}")
     zn_outs_mock = mock_open(read_data="{}")
@@ -54,30 +55,31 @@ def test_save():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example.run_and_save()
-
-        # TODO check that this is really correct and does not overwrite things!
-        assert zntrack_mock().write.mock_calls == [
-            call(
-                json.dumps(
-                    {"ExampleFullNode": {"dvc_outs": "file.txt"}},
-                    indent=4,
-                )
-            ),
-            call(
-                json.dumps(
-                    {"ExampleFullNode": {"deps": "deps.inp"}},
-                    indent=4,
-                )
-            ),
-        ]
-        assert params_mock().write.mock_calls == [
-            call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4))
-        ]
-
-        assert zn_outs_mock().write.mock_calls == [
-            call(json.dumps({"zn_outs": "outs"}, indent=4))
-        ]
+        if run:
+            example.run()
+            example.save(results=True)
+            assert zn_outs_mock().write.mock_calls == [
+                call(json.dumps({"zn_outs": "outs"}, indent=4))
+            ]
+        else:
+            example.save()
+            assert zntrack_mock().write.mock_calls == [
+                call(
+                    json.dumps(
+                        {"ExampleFullNode": {"dvc_outs": "file.txt"}},
+                        indent=4,
+                    )
+                ),
+                call(
+                    json.dumps(
+                        {"ExampleFullNode": {"deps": "deps.inp"}},
+                        indent=4,
+                    )
+                ),
+            ]
+            assert params_mock().write.mock_calls == [
+                call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4))
+            ]
 
 
 def test__load():
