@@ -98,6 +98,10 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
     def __call__(self, *args, **kwargs):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
 
+    def __repr__(self):
+        origin = super().__repr__()
+        return f"{origin}(name={self.node_name})"
+
     def __init_subclass__(cls, **kwargs):
         """Add a dataclass-like init if None is provided"""
 
