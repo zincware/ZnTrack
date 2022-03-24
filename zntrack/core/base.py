@@ -6,6 +6,7 @@ import logging
 from zntrack import utils
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.zn.dependencies import NodeAttribute, getdeps
 
 log = logging.getLogger(__name__)
 
@@ -65,6 +66,24 @@ class LoadViaGetItem(type):
             return cls.load(**item)
         return cls.load(name=item)
 
+    def __matmul__(self, other: str) -> NodeAttribute:
+        """Shorthand for: getdeps(Node, other)
+
+        Parameters
+        ----------
+        other: str
+            Name of the class attribute
+
+        Returns
+        -------
+        NodeAttribute
+        """
+        if not isinstance(other, str):
+            raise ValueError(
+                f"Can not compute 'Node @ {type(other)}'. Expected 'Node @ str'."
+            )
+        return getdeps(self, other)
+
 
 class Node(GraphWriter, metaclass=LoadViaGetItem):
     """Main parent class for all ZnTrack Node
@@ -101,6 +120,24 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
     def __repr__(self):
         origin = super().__repr__()
         return f"{origin}(name={self.node_name})"
+
+    def __matmul__(self, other: str) -> NodeAttribute:
+        """Shorthand for: getdeps(Node, other)
+
+        Parameters
+        ----------
+        other: str
+            Name of the class attribute
+
+        Returns
+        -------
+        NodeAttribute
+        """
+        if not isinstance(other, str):
+            raise ValueError(
+                f"Can not compute 'Node @ {type(other)}'. Expected 'Node @ str'."
+            )
+        return getdeps(self, other)
 
     def __init_subclass__(cls, **kwargs):
         """Add a dataclass-like init if None is provided"""

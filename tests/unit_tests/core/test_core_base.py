@@ -249,3 +249,12 @@ def test_LoadViaGetItem(key, called):
         NodeMock[key]
 
     mock.assert_called_with(**called)
+
+
+def test_matmul_not_supported():
+    with pytest.raises(ValueError):
+        # must be str
+        RunTestNode @ 25
+
+    with pytest.raises(ValueError):
+        RunTestNode() @ 25

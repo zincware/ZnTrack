@@ -31,6 +31,8 @@ def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
     -------
 
     """
+    # TODO add check if the attribute exists in the given Node
+    # _ = getattr(node, attribute)
     node = utils.load_node_dependency(node)  # run node = Node.load() if required
     return NodeAttribute(
         module=node.module,
