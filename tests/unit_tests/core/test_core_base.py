@@ -249,3 +249,21 @@ def test_LoadViaGetItem(key, called):
         NodeMock[key]
 
     mock.assert_called_with(**called)
+
+
+def test_matmul_not_supported():
+    with pytest.raises(ValueError):
+        # must be str
+        RunTestNode @ 25
+
+    with pytest.raises(ValueError):
+        RunTestNode() @ 25
+
+    with patch("zntrack.core.base.getdeps") as mock:
+        # must patch the correct namespace
+        # https://stackoverflow.com/a/16134754/10504481
+        NodeMock @ "string"
+        RunTestNode @ "outs"
+        RunTestNode() @ "outs"
+
+    assert mock.call_count == 3

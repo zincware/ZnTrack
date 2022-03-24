@@ -38,6 +38,28 @@ class RandomLikeDeps(Node):
         self.number = np.random.random(size=self.inputs.shape)
 
 
+def test_getdeps_via_matmul(proj_path):
+    steps = 3
+    sd = SeedNumbers(shape=(5, 5))
+    sd.write_graph()
+
+    for step in range(steps):
+        if step == 0:
+            RandomLikeDeps(
+                inputs=SeedNumbers @ "number", name=f"rld_{step}"
+            ).write_graph()
+        else:
+            RandomLikeDeps(
+                inputs=RandomLikeDeps[f"rld_{step - 1}"] @ "number",
+                name=f"rld_{step}",
+            ).write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+
+    for step in range(steps):
+        assert RandomLikeDeps[f"rld_{step}"].number.shape == (5, 5)
+
+
 @pytest.mark.parametrize("steps", (1, 5))
 def test_stacked_name_getdeps(proj_path, steps):
     sd = SeedNumbers(shape=(5, 5))
