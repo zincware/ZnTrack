@@ -283,6 +283,14 @@ class GraphWriter:
         """
         jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
 
+    def remove_from_graph(self):
+        """Remove the Node from the DAG
+
+        Remove the configuration from dvc.yaml, zntrack.json and params.yaml
+        """
+        utils.run_dvc_cmd(["dvc", "remove", self.node_name])
+        # TODO remove from zntrack.json + params.yaml
+
     def write_graph(
         self,
         silent: bool = False,

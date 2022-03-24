@@ -321,3 +321,11 @@ def test_load_named_nodes(proj_path):
     # this will run load with name=Node01, lazy=True/False
     assert ExampleNode01[{"name": "Node01", "lazy": True}].outputs == 42
     assert ExampleNode01[{"name": "Node01", "lazy": False}].outputs == 42
+
+
+def test_remove_from_graph(proj_path):
+    dvc_yaml = pathlib.Path("dvc.yaml")
+    ExampleNode01().write_graph()
+    assert dvc_yaml.exists()
+    ExampleNode01().remove_from_graph()
+    assert not dvc_yaml.exists()
