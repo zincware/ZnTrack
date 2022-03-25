@@ -1,10 +1,14 @@
 import pytest
 
-from zntrack.descriptor import Descriptor
+from zntrack.descriptor import Descriptor, get_descriptors
 
 
 class ExampleCls:
     desc = Descriptor()
+
+
+class ExampleChild(ExampleCls):
+    pass
 
 
 def test_get_descriptor():
@@ -46,3 +50,9 @@ def test_descriptor_get():
     cls = ExampleCls()
     cls.__dict__[desc.name] = 42
     assert cls.desc == 42
+
+
+@pytest.mark.parametrize("cls", (ExampleCls, ExampleChild))
+def test_get_descriptors(cls):
+    instance = cls()
+    assert get_descriptors(instance, Descriptor) == [cls.desc]

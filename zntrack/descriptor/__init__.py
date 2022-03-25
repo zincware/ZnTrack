@@ -88,7 +88,8 @@ def get_descriptors(cls, descriptor) -> list:
 
     """
     lst = []
-    for option in vars(type(cls)).values():
-        if isinstance(option, descriptor):
-            lst.append(option)
+    for option in dir(cls):
+        value = getattr(type(cls), option)
+        if isinstance(value, descriptor):
+            lst.append(value)
     return lst
