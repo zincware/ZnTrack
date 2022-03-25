@@ -142,7 +142,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
 
     def __init_subclass__(cls, **kwargs):
         """Add a dataclass-like init if None is provided"""
-
+        super().__init_subclass__(**kwargs)
         # User provides an __init__
         for inherited in cls.__mro__:
             # Go through the mro until you find the Node class.
@@ -152,7 +152,8 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
                 log.debug("Found Node instance - adding dataclass-like __init__")
                 break
             elif inherited.__dict__.get("__init__") is not None:
-                return cls
+                if not getattr(inherited.__init__, "_uses_auto_init", False):
+                    return cls
 
         # attach an automatically generated __init__ if None is provided
         zn_option_names, signature_params = get_auto_init_signature(cls)

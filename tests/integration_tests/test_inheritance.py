@@ -66,3 +66,15 @@ class WriteDataParentInitWithInit(InOutsWInit):
 def test_simple_inheritance(proj_path, MyNode):
     MyNode(inputs="HelloWorld").write_graph(run=True)
     assert MyNode.load().outputs == "HelloWorld"
+
+
+class WriteCustomData(InOuts):
+    custom = zn.params()
+
+    def run(self):
+        self.outputs = f"{self.inputs} {self.custom}"
+
+
+def test_WriteCustomData(proj_path):
+    WriteCustomData(inputs="Hello", custom="World").write_graph(run=True)
+    assert WriteCustomData.load().outputs == "Hello World"
