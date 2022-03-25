@@ -73,7 +73,7 @@ class Descriptor:
         instance.__dict__[self.name] = value
 
 
-def get_descriptors(descriptor=None, /, *, self=None, cls=None) -> list:
+def get_descriptors(descriptor=None, *, self=None, cls=None) -> list:
     """Get a list of all descriptors inheriting from "descriptor"
 
     Parameters

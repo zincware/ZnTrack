@@ -16,7 +16,7 @@ def get_auto_init_signature(cls) -> (list, list):
     """Iterate over ZnTrackOptions in the __dict__ and save the option name
     and create a signature Parameter"""
     zn_option_names, signature_params = [], []
-    # _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
+    _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
     descriptors = get_descriptors(ZnTrackOption, cls=cls)
     for descriptor in descriptors:
         if descriptor.zn_type in utils.VALUE_DVC_TRACKED:
