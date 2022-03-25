@@ -83,12 +83,14 @@ def get_auto_init(fields: typing.List[str]):
 
     def auto_init(self, **kwargs):
         """Wrapper for the __init__"""
+        from zntrack import Node
+
         for field in fields:
             try:
                 setattr(self, field, kwargs.pop(field))
             except KeyError:
                 pass
-        super(type(self), self).__init__(**kwargs)
+        Node.__init__(self, **kwargs)  # call the Node init explicitly instead of super
 
     return auto_init
 
