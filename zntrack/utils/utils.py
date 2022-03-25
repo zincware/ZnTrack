@@ -72,25 +72,26 @@ def encode_dict(value) -> dict:
     return json.loads(json.dumps(value, cls=znjson.ZnEncoder))
 
 
-def get_auto_init(fields: typing.List[str]):
-    """Automatically create a __init__ based on fields
+def get_auto_init(fields: typing.List[str], super_init: typing.Callable):
+    """Automatically create an __init__ based on fields
+
     Parameters
     ----------
     fields: list[str]
         A list of strings that will be used in the __init__, e.g. for [foo, bar]
         it will create __init__(self, foo=None, bar=None) using **kwargs
+    super_init: Callable
+        typically this is Node.__init__
     """
 
     def auto_init(self, **kwargs):
         """Wrapper for the __init__"""
-        from zntrack import Node
-
         for field in fields:
             try:
                 setattr(self, field, kwargs.pop(field))
             except KeyError:
                 pass
-        Node.__init__(self, **kwargs)  # call the Node init explicitly instead of super
+        super_init(self, **kwargs)  # call the super_init explicitly instead of super
 
     return auto_init
 

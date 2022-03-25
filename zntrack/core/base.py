@@ -158,7 +158,11 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         zn_option_names, signature_params = get_auto_init_signature(cls)
 
         # Add new __init__ to the subclass
-        setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_names))
+        setattr(
+            cls,
+            "__init__",
+            utils.get_auto_init(fields=zn_option_names, super_init=Node.__init__),
+        )
 
         # Add new __signature__ to the subclass
         signature = inspect.Signature(parameters=signature_params)

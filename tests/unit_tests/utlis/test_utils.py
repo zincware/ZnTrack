@@ -1,13 +1,3 @@
-"""
-This program and the accompanying materials are made available under the terms of the
-Eclipse Public License v2.0 which accompanies this distribution, and is available at
-https://www.eclipse.org/legal/epl-v20.html
-SPDX-License-Identifier: EPL-2.0
-
-Copyright Contributors to the Zincware Project.
-
-Description: Test class for testing utils
-"""
 import json
 import os
 import pathlib
@@ -45,12 +35,14 @@ def test_get_auto_init():
     with pytest.raises(TypeError):
         Test(foo="foo")
 
-    setattr(Test, "__init__", utils.get_auto_init(fields=["foo", "bar"]))
-
+    mock = MagicMock()
+    setattr(Test, "__init__", utils.get_auto_init(fields=["foo", "bar"], super_init=mock))
     test = Test(foo="foo", bar="bar")
 
     assert test.foo == "foo"
     assert test.bar == "bar"
+
+    mock.assert_called()
 
 
 def test_module_handler():
