@@ -201,30 +201,26 @@ class GraphWriter:
     """Write the DVC Graph
 
     Main method that handles writing the Graph / dvc.yaml file
+
+    node_name: str
+        first priority is by passing it through kwargs
+        second is having the class attribute set in the class definition
+        last if both above are None it will be set to __class__.__name__
     """
 
-    _node_name = None
+    node_name = None
     _module = None
 
     def __init__(self, **kwargs):
-        self.node_name = kwargs.get("name", None)
+        if kwargs.get("name") is not None:
+            self.node_name = kwargs.pop("name")
+        if self.node_name is None:
+            self.node_name = self.__class__.__name__
 
     @property
     def _descriptor_list(self) -> typing.List[ZnTrackOption]:
         """Get all descriptors of this instance"""
         return descriptor.get_descriptors(ZnTrackOption, self=self)
-
-    @property
-    def node_name(self) -> str:
-        """Name of this node"""
-        if self._node_name is None:
-            return self.__class__.__name__
-        return self._node_name
-
-    @node_name.setter
-    def node_name(self, value):
-        """Overwrite the default node name based on the class name"""
-        self._node_name = value
 
     @property
     def module(self) -> str:
