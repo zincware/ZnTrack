@@ -100,8 +100,10 @@ def get_descriptors(descriptor=None, /, *, self=None, cls=None) -> list:
             value = getattr(cls, option)
             if isinstance(value, descriptor):
                 lst.append(value)
-        except AttributeError:
-            # This is a strange issue with cls.__annotations__
-            # not existing but being listed in dir
-            pass
+        except AttributeError as err:
+            raise AttributeError(
+                "Trying to call ZnTrackOption.__get__(instance=None) to retreive the"
+                " <ZnTrackOption>. Make sure you implemented that case in the __get__"
+                " method."
+            ) from err
     return lst

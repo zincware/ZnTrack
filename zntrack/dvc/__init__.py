@@ -48,6 +48,8 @@ class deps(ZnTrackOption):
 
     def __get__(self, instance, owner):
         """Use load_node_dependency before returning the value"""
+        if instance is None:
+            return self
         value = super().__get__(instance, owner)
         value = utils.utils.load_node_dependency(value, log_warning=True)
         setattr(instance, self.name, value)
