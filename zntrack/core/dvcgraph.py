@@ -212,7 +212,7 @@ class GraphWriter:
     @property
     def _descriptor_list(self) -> typing.List[ZnTrackOption]:
         """Get all descriptors of this instance"""
-        return descriptor.get_descriptors(self, ZnTrackOption)
+        return descriptor.get_descriptors(ZnTrackOption, self=self)
 
     @property
     def node_name(self) -> str:

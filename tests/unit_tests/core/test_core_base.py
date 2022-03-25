@@ -210,8 +210,13 @@ class ZnTrackOptionCollection:
     no_option2 = 42
 
 
-def test_get_auto_init_signature():
-    zn_option_names, signature_params = get_auto_init_signature(ZnTrackOptionCollection)
+class CollectionChild(ZnTrackOptionCollection):
+    pass
+
+
+@pytest.mark.parametrize("cls", (ZnTrackOptionCollection, CollectionChild))
+def test_get_auto_init_signature(cls):
+    zn_option_names, signature_params = get_auto_init_signature(cls)
 
     assert zn_option_names == [
         "param1",

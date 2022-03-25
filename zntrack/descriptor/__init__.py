@@ -73,23 +73,35 @@ class Descriptor:
         instance.__dict__[self.name] = value
 
 
-def get_descriptors(cls, descriptor) -> list:
+def get_descriptors(descriptor=None, /, *, self=None, cls=None) -> list:
     """Get a list of all descriptors inheriting from "descriptor"
 
     Parameters
     ----------
     cls: any python class
+    self: any python class instance
     descriptor: any object inheriting from descriptor
 
     Returns
     -------
-    list[Descriptor]
+    list
         a list of the found descriptor objects
 
     """
+    if self is None and cls is None:
+        raise ValueError(f"Either {self = } or {cls = } must not be None")
+    if self is not None and cls is not None:
+        raise ValueError(f"Either {self = } or {cls = } must be None")
+    if self is not None:
+        cls = type(self)
     lst = []
     for option in dir(cls):
-        value = getattr(type(cls), option)
-        if isinstance(value, descriptor):
-            lst.append(value)
+        try:
+            value = getattr(cls, option)
+            if isinstance(value, descriptor):
+                lst.append(value)
+        except AttributeError:
+            # This is a strange issue with cls.__annotations__
+            # not existing but being listed in dir
+            pass
     return lst

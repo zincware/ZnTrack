@@ -6,6 +6,7 @@ import logging
 from zntrack import utils
 from zntrack.core.dvcgraph import GraphWriter
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.descriptor import get_descriptors
 from zntrack.zn.dependencies import NodeAttribute, getdeps
 
 log = logging.getLogger(__name__)
@@ -15,23 +16,23 @@ def get_auto_init_signature(cls) -> (list, list):
     """Iterate over ZnTrackOptions in the __dict__ and save the option name
     and create a signature Parameter"""
     zn_option_names, signature_params = [], []
-    _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
-    for name, item in cls.__dict__.items():
-        if isinstance(item, ZnTrackOption):
-            if item.zn_type in utils.VALUE_DVC_TRACKED:
-                # exclude zn.outs / metrics / plots / ... options
-                continue
-            # For the new __init__
-            zn_option_names.append(name)
+    # _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
+    descriptors = get_descriptors(ZnTrackOption, cls=cls)
+    for descriptor in descriptors:
+        if descriptor.zn_type in utils.VALUE_DVC_TRACKED:
+            # exclude zn.outs / metrics / plots / ... options
+            continue
+        # For the new __init__
+        zn_option_names.append(descriptor.name)
 
-            # For the new __signature__
-            signature_params.append(
-                inspect.Parameter(
-                    name=name,
-                    kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                    annotation=cls.__annotations__.get(name),
-                )
+        # For the new __signature__
+        signature_params.append(
+            inspect.Parameter(
+                name=descriptor.name,
+                kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                annotation=cls.__annotations__.get(descriptor.name),
             )
+        )
     return zn_option_names, signature_params
 
 
@@ -149,10 +150,10 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         # attach an automatically generated __init__ if None is provided
         zn_option_names, signature_params = get_auto_init_signature(cls)
 
-        # Add new __init__ to the sub-class
+        # Add new __init__ to the subclass
         setattr(cls, "__init__", utils.get_auto_init(fields=zn_option_names))
 
-        # Add new __signature__ to the sub-class
+        # Add new __signature__ to the subclass
         signature = inspect.Signature(parameters=signature_params)
         setattr(cls, "__signature__", signature)
 
