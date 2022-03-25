@@ -144,8 +144,15 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         """Add a dataclass-like init if None is provided"""
 
         # User provides an __init__
-        if cls.__dict__.get("__init__") is not None:
-            return cls
+        for inherited in cls.__mro__:
+            # Go through the mro until you find the Node class.
+            # If found an init before that class it will implement super
+            # if not add the fields to the __init__ automatically.
+            if inherited == Node:
+                log.debug("Found Node instance - adding dataclass-like __init__")
+                break
+            elif inherited.__dict__.get("__init__") is not None:
+                return cls
 
         # attach an automatically generated __init__ if None is provided
         zn_option_names, signature_params = get_auto_init_signature(cls)
