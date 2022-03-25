@@ -66,13 +66,13 @@ def test_save(run):
             assert zntrack_mock().write.mock_calls == [
                 call(
                     json.dumps(
-                        {"ExampleFullNode": {"dvc_outs": "file.txt"}},
+                        {"ExampleFullNode": {"deps": "deps.inp"}},
                         indent=4,
                     )
                 ),
                 call(
                     json.dumps(
-                        {"ExampleFullNode": {"deps": "deps.inp"}},
+                        {"ExampleFullNode": {"dvc_outs": "file.txt"}},
                         indent=4,
                     )
                 ),
