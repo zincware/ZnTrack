@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 import logging
+import typing
 
 from zntrack import utils
 from zntrack.core.dvcgraph import GraphWriter
@@ -67,7 +68,7 @@ class LoadViaGetItem(type):
             return cls.load(**item)
         return cls.load(name=item)
 
-    def __matmul__(self, other: str) -> NodeAttribute:
+    def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other)
 
         Parameters
@@ -122,7 +123,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         origin = super().__repr__()
         return f"{origin}(name={self.node_name})"
 
-    def __matmul__(self, other: str) -> NodeAttribute:
+    def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other)
 
         Parameters
