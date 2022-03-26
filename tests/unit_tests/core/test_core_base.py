@@ -64,7 +64,7 @@ def test_save(run):
         else:
             example.save()
             assert zntrack_mock().write.mock_calls == [
-                call({}),  # clear everything first
+                call(json.dumps({})),  # clear everything first
                 call(
                     json.dumps(
                         {"ExampleFullNode": {"deps": "deps.inp"}},
@@ -79,7 +79,8 @@ def test_save(run):
                 ),
             ]
             assert params_mock().write.mock_calls == [
-                call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4))
+                call(yaml.safe_dump({})),  # clear everything first
+                call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4)),
             ]
 
 
