@@ -212,10 +212,15 @@ class GraphWriter:
     _module = None
 
     def __init__(self, **kwargs):
-        if kwargs.get("name") is not None:
-            self.node_name = kwargs.pop("name")
+        name = kwargs.pop("name", None)
+        if name is not None:
+            # overwrite node_name attribute
+            self.node_name = name
         if self.node_name is None:
+            # set default value of node_name attribute
             self.node_name = self.__class__.__name__
+        if len(kwargs) > 0:
+            raise TypeError(f"'{kwargs}' are an invalid keyword argument")
 
     @property
     def _descriptor_list(self) -> typing.List[ZnTrackOption]:

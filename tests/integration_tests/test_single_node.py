@@ -282,6 +282,10 @@ def test_auto_init(proj_path):
     assert SingleNodeNoInit.load().param1 == 25
     assert SingleNodeNoInit.load().param2 == 42
     assert SingleNodeNoInit.load().result == 25 + 42
+    # TODO add a check for parameters in the auto init
+    #  if they are not set and don't have a default
+    with pytest.raises(TypeError):
+        SingleNodeNoInit(unknown_param=15)
 
 
 class OutsNotWritten(Node):

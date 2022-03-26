@@ -101,8 +101,8 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
     is_loaded: bool = False
 
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
         self.is_loaded = kwargs.pop("is_loaded", False)
+        super().__init__(**kwargs)
         for data in self._descriptor_list:
             if data.zn_type == utils.ZnTypes.DEPS:
                 update_dependency_options(data.default_value)
@@ -251,15 +251,16 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
             lazy = utils.config.lazy
         try:
             instance = cls(name=name, is_loaded=True)
-        except TypeError:
+        except TypeError as type_error:
             try:
                 instance = cls()
                 if name not in (None, cls.__name__):
                     instance.node_name = name
                 log.warning(
                     "Can not pass <name> to the super.__init__ and trying workaround!"
-                    " This can lead to unexpected behaviour and can be avoided by passing"
-                    " ( **kwargs) to the super().__init__(**kwargs)"
+                    " This can lead to unexpected behaviour and can be avoided by"
+                    " passing ( **kwargs) to the super().__init__(**kwargs) - Received"
+                    f" '{type_error}'"
                 )
             except TypeError as err:
                 raise TypeError(
