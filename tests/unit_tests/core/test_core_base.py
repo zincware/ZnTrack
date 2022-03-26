@@ -64,6 +64,7 @@ def test_save(run):
         else:
             example.save()
             assert zntrack_mock().write.mock_calls == [
+                call({}),  # clear everything first
                 call(
                     json.dumps(
                         {"ExampleFullNode": {"deps": "deps.inp"}},

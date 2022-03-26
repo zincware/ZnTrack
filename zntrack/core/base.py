@@ -181,6 +181,10 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
             Set this option to True if they should be saved, e.g. in run_and_save
             If true changes in e.g. zn.params will not be saved.
         """
+        if not results:
+            # Reset everything in params.yaml and zntrack.json before saving
+            utils.file_io.clear_config_file(utils.Files.params, node_name=self.node_name)
+            utils.file_io.clear_config_file(utils.Files.zntrack, node_name=self.node_name)
         # Save dvc.<option>, dvc.deps, zn.Method
         for option in self._descriptor_list:
             if results:
