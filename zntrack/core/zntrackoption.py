@@ -173,12 +173,13 @@ class ZnTrackOption(descriptor.Descriptor):
         file_content = utils.file_io.read_file(file)
         # The problem here is, that I can not / don't want to load all Nodes but
         # only the ones, that are in [self.node_name][self.name] for deserializing
-        if uses_node_name(self.zn_type, instance) is not None:
-            values = utils.decode_dict(
-                file_content[instance.node_name].get(self.name, None)
-            )
-        else:
-            values = utils.decode_dict(file_content.get(self.name, None))
+        try:
+            if uses_node_name(self.zn_type, instance) is not None:
+                values = utils.decode_dict(file_content[instance.node_name][self.name])
+            else:
+                values = utils.decode_dict(file_content[self.name])
+        except KeyError as err:
+            raise KeyError(f"Could not load {self.name} for {self}") from err
 
         log.debug(f"Loading {instance.node_name} from {file}: ({values})")
         return values
