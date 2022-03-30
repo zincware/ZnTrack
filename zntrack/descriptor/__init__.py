@@ -73,22 +73,37 @@ class Descriptor:
         instance.__dict__[self.name] = value
 
 
-def get_descriptors(cls, descriptor) -> list:
+def get_descriptors(descriptor=None, *, self=None, cls=None) -> list:
     """Get a list of all descriptors inheriting from "descriptor"
 
     Parameters
     ----------
     cls: any python class
+    self: any python class instance
     descriptor: any object inheriting from descriptor
 
     Returns
     -------
-    list[Descriptor]
+    list
         a list of the found descriptor objects
 
     """
+    if self is None and cls is None:
+        raise ValueError("Either self or cls must not be None")
+    if self is not None and cls is not None:
+        raise ValueError("Either self or cls must be None")
+    if self is not None:
+        cls = type(self)
     lst = []
-    for option in vars(type(cls)).values():
-        if isinstance(option, descriptor):
-            lst.append(option)
+    for option in dir(cls):
+        try:
+            value = getattr(cls, option)
+            if isinstance(value, descriptor):
+                lst.append(value)
+        except AttributeError as err:
+            raise AttributeError(
+                "Trying to call ZnTrackOption.__get__(instance=None) to retreive the"
+                " <ZnTrackOption>. Make sure you implemented that case in the __get__"
+                " method."
+            ) from err
     return lst
