@@ -170,6 +170,16 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         signature = inspect.Signature(parameters=signature_params)
         setattr(cls, "__signature__", signature)
 
+    def save_plots(self):
+        """Save the zn.plots
+
+        Similar to DVC Live this  can be used to save the plots during a run
+        for live output.
+        """
+        for option in self._descriptor_list:
+            if option.zn_type is utils.ZnTypes.PLOTS:
+                option.save(instance=self)
+
     def save(self, results: bool = False):
         """Save Class state to files
 

@@ -24,12 +24,13 @@ class ZnTypes(enum.Enum):
     PARAMS = enum.auto()
     ITERABLE = enum.auto()
     RESULTS = enum.auto()
+    PLOTS = enum.auto()
 
 
 FILE_DVC_TRACKED = [ZnTypes.DVC]
 # if the getattr(instance, self.name) is an affected file,
 # e.g. the dvc.<outs> is a file / list of files
-VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA]
+VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA, ZnTypes.PLOTS]
 
 
 # if the internal file,

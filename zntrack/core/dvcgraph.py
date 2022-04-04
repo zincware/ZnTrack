@@ -372,10 +372,7 @@ class GraphWriter:
                 value = getattr(self, option.name)
                 custom_args += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
-            elif option.zn_type in [
-                utils.ZnTypes.RESULTS,
-                utils.ZnTypes.METADATA,
-            ]:
+            elif option.zn_type in utils.VALUE_DVC_TRACKED:
                 zn_options_set.add(
                     (
                         f"--{option.dvc_args}",

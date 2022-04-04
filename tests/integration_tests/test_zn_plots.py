@@ -1,4 +1,5 @@
 import os
+import pathlib
 import shutil
 import subprocess
 
@@ -62,3 +63,11 @@ def test_write_plots_value_error(proj_path):
 def test_write_plots_type_error(proj_path):
     with pytest.raises(TypeError):
         WritePlotsWrongData().run_and_save()
+
+
+def test_save_plots(proj_path):
+    write_plots = WritePlots()
+    write_plots.run()
+    write_plots.save_plots()
+
+    assert pathlib.Path("nodes/WritePlots/plots_no_cache.csv").exists()
