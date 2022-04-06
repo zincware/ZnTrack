@@ -30,10 +30,7 @@ class plots(ZnTrackOption):
             )
 
         if value.index.name is None:
-            raise ValueError(
-                "pd.DataFrame must have an index name! You can set the name via"
-                " DataFrame.index.name = <index name>."
-            )
+            value.index.name = "index"
 
         file = self.get_filename(instance)
         file.parent.mkdir(exist_ok=True, parents=True)

@@ -55,8 +55,9 @@ def test_load_plots(proj_path):
 
 
 def test_write_plots_value_error(proj_path):
-    with pytest.raises(ValueError):
-        WritePlotsNoIndex().run_and_save()
+    WritePlotsNoIndex().run_and_save()
+    wpni = WritePlotsNoIndex.load()
+    assert wpni.plots.index.name == "index"
 
 
 def test_write_plots_type_error(proj_path):
