@@ -23,7 +23,7 @@ class WritePlots(Node):
 
     def run(self):
         self.plots = pd.DataFrame({"value": [x for x in range(100)]})
-        self.plots.index.name = "index"
+        self.plots.index.name = "my_index"
 
 
 class WritePlotsNoIndex(Node):
@@ -43,6 +43,9 @@ class WritePlotsWrongData(Node):
 def test_write_plots(proj_path):
     WritePlots().write_graph(no_exec=False)
     subprocess.check_call(["dvc", "plots", "show"])
+
+    wp = WritePlots.load()
+    assert wp.plots.index.name == "my_index"
 
 
 def test_load_plots(proj_path):
