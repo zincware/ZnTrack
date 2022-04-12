@@ -15,7 +15,7 @@ class plots(ZnTrackOption):
 
     def get_filename(self, instance) -> pathlib.Path:
         """Overwrite filename to csv"""
-        return pathlib.Path("nodes", instance.node_name, f"{self.dvc_option}.csv")
+        return pathlib.Path("nodes", instance.node_name, f"{self.name}.csv")
 
     def save(self, instance):
         """Save value with pd.DataFrame.to_csv"""
