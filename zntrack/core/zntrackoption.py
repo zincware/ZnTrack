@@ -77,6 +77,17 @@ class ZnTrackOption(descriptor.Descriptor):
         """replace python variables '_' with '-' for dvc"""
         return self.dvc_option.replace("_", "-")
 
+    def modify(self, instance) -> typing.List[str]:
+        """Optional DVC cmd to run at the end
+
+        Returns
+        -------
+        cmd: list[str]
+            Get a list for subprocess call to run after the main dvc cmd was executed.
+            E.g. ["plots", "modify", ...]
+        """
+        return None
+
     def __repr__(self):
         return f"{self.__class__}({hex(id(self))}) for <{self.dvc_option}>"
 

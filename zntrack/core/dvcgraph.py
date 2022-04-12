@@ -158,7 +158,7 @@ def prepare_dvc_script(
     func_or_cls,
     call_args,
 ) -> list:
-    """Prepate the dvc cmd to be called by subprocess
+    """Prepare the dvc cmd to be called by subprocess
 
     Parameters
     ----------
@@ -414,3 +414,7 @@ class GraphWriter:
         if dry_run:
             return script
         utils.run_dvc_cmd(script)
+
+        for desc in self._descriptor_list:
+            if desc.modify(self) is not None:
+                utils.run_dvc_cmd(desc.modify(self))

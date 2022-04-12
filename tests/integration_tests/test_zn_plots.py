@@ -91,3 +91,17 @@ def test_write_two_plots(proj_path):
 
     assert pathlib.Path("nodes", "WriteTwoPlots", "plots_a.csv").exists()
     assert pathlib.Path("nodes", "WriteTwoPlots", "plots_b.csv").exists()
+
+
+class WritePlotsModify(Node):
+    plots = zn.plots(x_label="test_label", title="My Plot")
+
+    def run(self):
+        self.plots = pd.DataFrame({"value": [x for x in range(100)]})
+
+
+def test_write_plots_modify(proj_path):
+    WritePlotsModify().write_graph()
+
+    assert "x_label: test_label" in pathlib.Path("dvc.yaml").read_text()
+    assert "title: My Plot" in pathlib.Path("dvc.yaml").read_text()
