@@ -1,6 +1,7 @@
 """Custom base classes for e.g. plots to account for plots modify"""
 import typing
 
+from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
 
 
@@ -30,12 +31,20 @@ class PlotsModifyOption(ZnTrackOption):
 
     def modify(self, instance) -> typing.List[str]:
         """Get a dvc cmd to run plots modify"""
-        script = [
-            "dvc",
-            "plots",
-            "modify",
-            self.get_filename(instance).as_posix(),
-        ]
+        if not any(
+            [self.x, self.y, self.x_label, self.y_label, self.title, self.no_header]
+        ):
+            # don't run plots modify if no parameters are given.
+            return None
+        if self.zn_type in utils.FILE_DVC_TRACKED:
+            # TODO this only works for a single file and not for a list of files
+            filename = getattr(instance, self.name)
+            if isinstance(filename, list):
+                raise ValueError("Plots modify is currently not supported for lists")
+        else:
+            filename = self.get_filename(instance).as_posix()
+
+        script = ["dvc", "plots", "modify", filename]
         for key, value in [
             ("-x", self.x),
             ("-y", self.y),
