@@ -1,4 +1,5 @@
 import os
+import pathlib
 import shutil
 import subprocess
 
@@ -66,3 +67,27 @@ def test_write_plots_value_error(proj_path):
 def test_write_plots_type_error(proj_path):
     with pytest.raises(TypeError):
         WritePlotsWrongData().run_and_save()
+
+
+class WriteTwoPlots(Node):
+    plots_a: pd.DataFrame = zn.plots()
+    plots_b: pd.DataFrame = zn.plots()
+
+    def run(self):
+        self.plots_a = pd.DataFrame({"value": [x for x in range(100)]})
+        self.plots_a.index.name = "my_index_a"
+
+        self.plots_b = pd.DataFrame({"value": [-x for x in range(100)]})
+        self.plots_b.index.name = "my_index_b"
+
+
+def test_write_two_plots(proj_path):
+    WriteTwoPlots().write_graph(no_exec=False)
+    subprocess.check_call(["dvc", "plots", "show"])
+
+    wp = WriteTwoPlots.load()
+    assert wp.plots_a.index.name == "my_index_a"
+    assert wp.plots_b.index.name == "my_index_b"
+
+    assert pathlib.Path("nodes", "WriteTwoPlots", "plots_a.csv").exists()
+    assert pathlib.Path("nodes", "WriteTwoPlots", "plots_b.csv").exists()
