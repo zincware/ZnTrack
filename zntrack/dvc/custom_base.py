@@ -29,7 +29,7 @@ class PlotsModifyOption(ZnTrackOption):
         self.title = title
         self.no_header = no_header
 
-    def modify(self, instance) -> typing.List[str]:
+    def post_dvc_cmd(self, instance) -> typing.List[str]:
         """Get a dvc cmd to run plots modify"""
         if not any(
             [self.x, self.y, self.x_label, self.y_label, self.title, self.no_header]

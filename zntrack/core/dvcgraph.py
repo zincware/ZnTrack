@@ -415,6 +415,11 @@ class GraphWriter:
             return script
         utils.run_dvc_cmd(script)
 
-        for desc in self._descriptor_list:
-            if desc.modify(self) is not None:
-                utils.run_dvc_cmd(desc.modify(self))
+        run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+
+def run_post_dvc_cmd(descriptor_list, instance):
+    """Run all post-dvc-cmds like plots modify"""
+    for desc in descriptor_list:
+        if desc.post_dvc_cmd(instance) is not None:
+            utils.run_dvc_cmd(desc.post_dvc_cmd(instance))
