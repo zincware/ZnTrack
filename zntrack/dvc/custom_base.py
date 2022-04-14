@@ -1,4 +1,5 @@
 """Custom base classes for e.g. plots to account for plots modify"""
+import pathlib
 import typing
 
 from zntrack import utils
@@ -41,6 +42,7 @@ class PlotsModifyOption(ZnTrackOption):
             filename = getattr(instance, self.name)
             if isinstance(filename, list):
                 raise ValueError("Plots modify is currently not supported for lists")
+            filename = pathlib.Path(filename).as_posix()  # only supports str
         else:
             filename = self.get_filename(instance).as_posix()
 
