@@ -40,7 +40,7 @@ class PlotsModifyOption(ZnTrackOption):
         if self.zn_type in utils.FILE_DVC_TRACKED:
             # TODO this only works for a single file and not for a list of files
             filename = getattr(instance, self.name)
-            if isinstance(filename, list):
+            if isinstance(filename, (list, tuple)):
                 raise ValueError("Plots modify is currently not supported for lists")
             filename = pathlib.Path(filename).as_posix()  # only supports str
         else:
