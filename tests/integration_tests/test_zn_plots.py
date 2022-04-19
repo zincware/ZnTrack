@@ -129,4 +129,4 @@ def test_WritePlotsModifyDVC(proj_path):
 
 def test_write_plots_modify_lists(proj_path):
     with pytest.raises(ValueError):
-        WritePlotsModifyDVC(plots=["a.csv", "b.csv"]).write_graph()\
+        WritePlotsModifyDVC(plots=["a.csv", "b.csv"]).write_graph()
