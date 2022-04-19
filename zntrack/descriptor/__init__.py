@@ -26,7 +26,7 @@ class Descriptor:
 
     """
 
-    def __init__(self, default_value=None, **kwargs):
+    def __init__(self, default_value=None, owner=None, instance=None, name=""):
         """Define a Descriptor object
 
         Parameters
@@ -35,9 +35,9 @@ class Descriptor:
             Any default value to __get__ if the __set__ was never called.
         """
         self._default_value = default_value
-        self._owner = kwargs.get("owner")
-        self._instance = kwargs.get("instance")
-        self._name = kwargs.get("name", "")
+        self._owner = owner
+        self._instance = instance
+        self._name = name
 
     @property
     def name(self):

@@ -13,6 +13,7 @@ import logging
 
 from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.dvc.custom_base import PlotsModifyOption
 
 log = logging.getLogger(__name__)
 
@@ -122,7 +123,7 @@ class metrics_no_cache(ZnTrackOption):
     file = utils.Files.zntrack
 
 
-class plots(ZnTrackOption):
+class plots(PlotsModifyOption):
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information

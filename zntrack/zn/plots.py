@@ -4,18 +4,18 @@ import pathlib
 import pandas as pd
 
 from zntrack import utils
-from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.dvc.custom_base import PlotsModifyOption
 
 log = logging.getLogger(__name__)
 
 
-class plots(ZnTrackOption):
+class plots(PlotsModifyOption):
     dvc_option = utils.DVCOptions.PLOTS_NO_CACHE.value
     zn_type = utils.ZnTypes.PLOTS
 
     def get_filename(self, instance) -> pathlib.Path:
         """Overwrite filename to csv"""
-        return pathlib.Path("nodes", instance.node_name, f"{self.dvc_option}.csv")
+        return pathlib.Path("nodes", instance.node_name, f"{self.name}.csv")
 
     def save(self, instance):
         """Save value with pd.DataFrame.to_csv"""
