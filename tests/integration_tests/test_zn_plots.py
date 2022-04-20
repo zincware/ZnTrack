@@ -69,6 +69,14 @@ def test_write_plots_type_error(proj_path):
         WritePlotsWrongData().run_and_save()
 
 
+def test_save_plots(proj_path):
+    write_plots = WritePlots()
+    write_plots.run()
+    write_plots.save_plots()
+
+    assert pathlib.Path("nodes/WritePlots/plots.csv").exists()
+
+
 class WriteTwoPlots(Node):
     plots_a: pd.DataFrame = zn.plots()
     plots_b: pd.DataFrame = zn.plots()

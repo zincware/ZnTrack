@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 
 class plots(PlotsModifyOption):
     dvc_option = utils.DVCOptions.PLOTS_NO_CACHE.value
-    zn_type = utils.ZnTypes.RESULTS
+    zn_type = utils.ZnTypes.PLOTS
 
     def get_filename(self, instance) -> pathlib.Path:
         """Overwrite filename to csv"""
