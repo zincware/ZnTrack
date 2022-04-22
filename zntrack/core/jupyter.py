@@ -28,7 +28,7 @@ def jupyter_class_to_file(nb_name, module_name):
     nb_name = pathlib.Path(nb_name)
 
     subprocess.run(
-        ["jupyter", "nbconvert", "--to", "script", nb_name],
+        ["jupyter", "nbconvert", "--to", "script", nb_name.as_posix()],
         capture_output=config.log_level > logging.INFO,
         check=True,
     )

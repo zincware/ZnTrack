@@ -93,6 +93,14 @@ def handle_dvc(value, dvc_args) -> list:
         return f"--{dvc_args}"
 
     def posix_func(dvc_path):
+        if dvc_args == "params":
+            # add :to the end to indicate that it actually is a file.
+            try:
+                return f"{pathlib.Path(dvc_path).as_posix()}:"
+            except TypeError as err:
+                raise ValueError(
+                    f"dvc.params does not support type {type(dvc_path)}"
+                ) from err
         return pathlib.Path(dvc_path).as_posix()
 
     # double list comprehension https://stackoverflow.com/a/11869360/10504481
