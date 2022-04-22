@@ -15,13 +15,13 @@ import subprocess
 
 import pytest
 
-from zntrack import Node, dvc, zn
+from zntrack import Node, zn
 from zntrack.interface import DVCInterface
 
 
 class HelloWorld(Node):
     outputs = zn.outs()
-    inputs = dvc.params()
+    inputs = zn.params()
 
     def __init__(self, inputs=None, **kwargs):
         super(HelloWorld, self).__init__(**kwargs)

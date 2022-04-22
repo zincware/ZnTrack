@@ -29,12 +29,8 @@ class params(ZnTrackOption):
      on the available options
     """
 
-    zn_type = utils.ZnTypes.PARAMS
-    file = utils.Files.params
-
-    @utils.deprecated(reason="This Option was moved to zntrack.zn.params", version="v0.3")
-    def __init__(self, default_value=None):
-        super().__init__(default_value)
+    zn_type = utils.ZnTypes.DVC
+    file = utils.Files.zntrack
 
 
 class deps(ZnTrackOption):
