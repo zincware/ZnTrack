@@ -62,6 +62,10 @@ def test_handle_dvc():
         "--outs",
         "outs.txt",
     ]
+    assert handle_dvc(("myparams.yaml",), "params") == ["--params", "myparams.yaml:"]
+
+    with pytest.raises(ValueError):
+        handle_dvc(({"a": 100}), "params")
 
 
 def test_handle_deps_unknown():
