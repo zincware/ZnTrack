@@ -5,6 +5,7 @@ import subprocess
 
 import pandas as pd
 import pytest
+import yaml
 
 from zntrack import Node, dvc, zn
 
@@ -102,7 +103,7 @@ def test_write_two_plots(proj_path):
 
 
 class WritePlotsModify(Node):
-    plots = zn.plots(x_label="test_label", title="My Plot")
+    plots = zn.plots(x_label="test_label", title="My Plot", template="smooth")
 
     def run(self):
         self.plots = pd.DataFrame({"value": [x for x in range(100)]})
@@ -118,8 +119,27 @@ class WritePlotsModifyDVC(Node):
 def test_write_plots_modify(proj_path):
     WritePlotsModify().write_graph()
 
-    assert "x_label: test_label" in pathlib.Path("dvc.yaml").read_text()
-    assert "title: My Plot" in pathlib.Path("dvc.yaml").read_text()
+    dvc_config = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+
+    assert (
+        dvc_config["stages"]["WritePlotsModify"]["plots"][0][
+            "nodes/WritePlotsModify/plots.csv"
+        ]["x_label"]
+        == "test_label"
+    )
+    assert (
+        dvc_config["stages"]["WritePlotsModify"]["plots"][0][
+            "nodes/WritePlotsModify/plots.csv"
+        ]["title"]
+        == "My Plot"
+    )
+
+    assert (
+        dvc_config["stages"]["WritePlotsModify"]["plots"][0][
+            "nodes/WritePlotsModify/plots.csv"
+        ]["template"]
+        == "smooth"
+    )
 
 
 def test_WritePlotsModifyDVC(proj_path):
