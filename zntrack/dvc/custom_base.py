@@ -11,6 +11,7 @@ class PlotsModifyOption(ZnTrackOption):
         self,
         default_value=None,
         *,
+        template=None,
         x=None,
         y=None,
         x_label=None,
@@ -23,6 +24,7 @@ class PlotsModifyOption(ZnTrackOption):
         See https://dvc.org/doc/command-reference/plots/modify for parameter information.
         """
         super().__init__(default_value=default_value, **kwargs)
+        self.template = template
         self.x = x
         self.y = y
         self.x_label = x_label
@@ -33,7 +35,15 @@ class PlotsModifyOption(ZnTrackOption):
     def post_dvc_cmd(self, instance) -> typing.List[str]:
         """Get a dvc cmd to run plots modify"""
         if not any(
-            [self.x, self.y, self.x_label, self.y_label, self.title, self.no_header]
+            [
+                self.template,
+                self.x,
+                self.y,
+                self.x_label,
+                self.y_label,
+                self.title,
+                self.no_header,
+            ]
         ):
             # don't run plots modify if no parameters are given.
             return None
@@ -48,6 +58,7 @@ class PlotsModifyOption(ZnTrackOption):
 
         script = ["dvc", "plots", "modify", filename]
         for key, value in [
+            ("--template", self.template),
             ("-x", self.x),
             ("-y", self.y),
             ("--x-label", self.x_label),
