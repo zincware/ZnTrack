@@ -7,11 +7,14 @@ from zntrack.metadata.base import MetaData
 
 @dataclasses.dataclass
 class AggregateData:
+    """Dataclass to collect the values together with their mean and std"""
+
     values: list = dataclasses.field(default_factory=list)
     mean: float = None
     std: float = None
 
     def update(self):
+        """Recompute mean and standard deviation"""
         try:
             self.mean = statistics.mean(self.values)
             self.std = statistics.stdev(self.values)

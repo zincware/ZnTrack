@@ -39,10 +39,15 @@ class MetaData(ABC):
 
     @property
     def name(self) -> str:
+        """Get the name of the metric this decorator will use"""
         return f"{self.func_name}:{self.name_of_metric}"
 
     @staticmethod
-    def get_history(cls) -> (dict,):
+    def get_history(cls) -> (dict, str):
+        """Get the values of the zn.metadata descriptor
+
+        Get a full metadata dict containing all previously collected metadata.
+        """
         try:
             metadata_attr, metadata = next(
                 iter(
