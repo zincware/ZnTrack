@@ -38,9 +38,16 @@ class TimeIt(MetaData):
         history = metadata.get(self.name, AggregateData())
         if isinstance(history, dict):
             history = AggregateData(**history)
+        elif isinstance(history, float):
+            history = AggregateData(values=[history])
+        # add new value and update mean / std
         history.values.append(value)
         history.update()
-        history = dataclasses.asdict(history)
+        # convert back to either float for single value or dict for multiple values.
+        if len(history.values) > 1:
+            history = dataclasses.asdict(history)
+        else:
+            history = history.values[0]
 
         self.save_metadata(cls, value=history)
 

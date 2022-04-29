@@ -58,14 +58,15 @@ def test_timeit_no_metadata_err(proj_path):
 
 def test_timeit(proj_path):
     SleepClass().run_and_save()
-    assert pytest.approx(SleepClass.load().timeit_metrics["run:timeit"], 1.0)
+    assert pytest.approx(SleepClass.load().timeit_metrics["run:timeit"], 0.1) == 1.0
 
 
 def test_timeit_loop(proj_path):
     sleep_class = SleepClassLoop()
     sleep_class.run_and_save()
-    assert pytest.approx(
-        SleepClassLoop.load().timeit_metrics["sleep:timeit"]["mean"], 0.1
+    assert (
+        pytest.approx(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["mean"], 0.01)
+        == 0.1
     )
     assert SleepClassLoop.load().timeit_metrics["sleep:timeit"]["std"] < 1e-3
     assert len(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["values"]) == 30
