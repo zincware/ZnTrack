@@ -247,3 +247,40 @@ def test_err_node_as_method(proj_path):
 
     with pytest.raises(ValueError):
         SingleNode(data_class=[HelloWorld, HelloWorld])
+
+
+# Node as Method
+
+
+class NodeOrMethod(Node):
+    input = zn.params()
+    output = zn.outs()
+
+    def run(self):
+        self.output = self.input
+
+
+class NodeCollector(Node):
+    output = zn.outs()
+
+    method: NodeOrMethod = zn.Method()
+
+    def run(self):
+        self.method.run()
+        self.output = self.method.output
+
+
+def test_NodeCollector(proj_path):
+    node_collector = NodeCollector(method=NodeOrMethod(input="Hello World"))
+    node_collector.run()
+
+    assert node_collector.output == "Hello World"
+
+
+def test_NodeCollector_repro(proj_path):
+    # TODO the NodeOrMethod parameter must be saved as parameters of NodeCollector
+    #  and not of NodeOrMethod.
+    node_collector = NodeCollector(method=NodeOrMethod(input="Hello World"))
+    node_collector.write_graph(run=True)
+
+    assert NodeCollector.load().output == "Hello World"
