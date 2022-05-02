@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 import logging
 import pathlib
 import typing
@@ -8,6 +9,7 @@ import typing
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.zn import params as zntrack_params
 from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
@@ -211,7 +213,7 @@ class ZnTrackInfo:
     def __init__(self, parent):
         self._parent = parent
 
-    def collect(self, zntrackoption: descriptor.BaseDescriptorType) -> dict:
+    def collect(self, zntrackoption: typing.Type[descriptor.BaseDescriptorType]) -> dict:
         """Collect the values of all ZnTrackOptions of the passed type
 
         Parameters
@@ -258,6 +260,13 @@ class GraphWriter:
             self.node_name = self.__class__.__name__
         if len(kwargs) > 0:
             raise TypeError(f"'{kwargs}' are an invalid keyword argument")
+
+    def __hash__(self):
+        """compute the hash based on the parameters and node_name"""
+        params_dict = self.zntrack.collect(zntrack_params)
+        params_dict["node_name"] = self.node_name
+
+        return hash(json.dumps(params_dict, sort_keys=True))
 
     @property
     def _descriptor_list(self) -> typing.List[ZnTrackOption]:
