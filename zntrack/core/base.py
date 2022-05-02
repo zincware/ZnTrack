@@ -48,7 +48,7 @@ def update_dependency_options(value):
         for item in value:
             update_dependency_options(item)
     if isinstance(value, Node):
-        value.update_options()
+        value._update_options()
 
 
 class LoadViaGetItem(type):
@@ -211,7 +211,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
                     # for the filtered files
                     option.mkdir(instance=self)
 
-    def update_options(self, lazy=None):
+    def _update_options(self, lazy=None):
         """Update all ZnTrack options inheriting from ZnTrackOption
 
         This will overwrite the value in __dict__ even it the value was changed
@@ -224,7 +224,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
                 # trigger loading the data into memory
                 value = getattr(self, option.name)
                 try:
-                    value.update_options(lazy=False)
+                    value._update_options(lazy=False)
                 except AttributeError:
                     # if lazy=False trigger update_options iteratively on
                     # all dependency Nodes
@@ -285,7 +285,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
                     " documentation for more information."
                 ) from err
 
-        instance.update_options(lazy=lazy)
+        instance._update_options(lazy=lazy)
 
         if utils.config.nb_name is not None:
             # TODO maybe check if it exists and otherwise keep default?
