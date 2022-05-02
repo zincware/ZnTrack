@@ -263,7 +263,7 @@ class NodeOrMethod(Node):
 class NodeCollector(Node):
     output = zn.outs()
 
-    method: NodeOrMethod = zn.Method()
+    method: NodeOrMethod = zn.deps()
 
     def run(self):
         self.method.run()
@@ -280,7 +280,10 @@ def test_NodeCollector(proj_path):
 def test_NodeCollector_repro(proj_path):
     # TODO the NodeOrMethod parameter must be saved as parameters of NodeCollector
     #  and not of NodeOrMethod.
-    node_collector = NodeCollector(method=NodeOrMethod(input="Hello World"))
+    method = NodeOrMethod(input="Hello World")
+    method.write_graph(run=True)
+
+    node_collector = NodeCollector(method=method)
     node_collector.write_graph(run=True)
 
     assert NodeCollector.load().output == "Hello World"

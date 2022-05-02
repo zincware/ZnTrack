@@ -6,7 +6,7 @@ from zntrack.zn.split_option import SplitZnTrackOption
 log = logging.getLogger(__name__)
 
 
-class Method(SplitZnTrackOption):
+class Nodes(SplitZnTrackOption):
     """ZnTrack methods passing descriptor
 
     This descriptor allows to pass a class instance that is not a ZnTrack Node as a
