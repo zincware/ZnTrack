@@ -43,7 +43,7 @@ class deps(ZnTrackOption):
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         """Use load_node_dependency before returning the value"""
         if instance is None:
             return self

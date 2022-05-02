@@ -94,7 +94,7 @@ class ZnTrackOption(descriptor.Descriptor):
     def __str__(self):
         return f"{self.dvc_option} / {self.name}"
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         self._instance = instance
 
         if instance is None:

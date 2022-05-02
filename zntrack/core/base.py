@@ -51,10 +51,13 @@ def update_dependency_options(value):
         value.update_options()
 
 
+BaseNodeType = typing.TypeVar("BaseNodeType", bound="Node")
+
+
 class LoadViaGetItem(type):
     """Metaclass for adding getitem support to load"""
 
-    def __getitem__(cls: Node, item) -> Node:
+    def __getitem__(cls: Node, item) -> BaseNodeType:
         """Allow Node[<nodename>] to access an instance of the Node
 
         Attributes

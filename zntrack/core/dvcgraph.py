@@ -205,6 +205,35 @@ def prepare_dvc_script(
     return script
 
 
+class ZnTrackInfo:
+    """Helping class for access to ZnTrack information"""
+
+    def __init__(self, parent):
+        self.parent = parent
+
+    def collect(self, zntrackoption: descriptor.BaseDescriptorType) -> dict:
+        """Collect the values of all ZnTrackOptions of the passed type
+
+        Parameters
+        ----------
+        zntrackoption:
+            Any cls of a ZnTrackOption such as zn.params
+
+        Returns
+        -------
+        dict:
+            A dictionary of {option_name: option_value} for all found options of
+            the given type zntrackoption.
+        """
+        if isinstance(zntrackoption, (list, tuple)):
+            raise ValueError(
+                "collect only supports single ZnTrackOptions. Found"
+                f" {zntrackoption} instead."
+            )
+        options = descriptor.get_descriptors(zntrackoption, self=self.parent)
+        return {x.name: x.__get__(self.parent) for x in options}
+
+
 class GraphWriter:
     """Write the DVC Graph
 
@@ -421,6 +450,10 @@ class GraphWriter:
         utils.run_dvc_cmd(script)
 
         run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+    @property
+    def zntrack(self) -> ZnTrackInfo:
+        return ZnTrackInfo(parent=self)
 
 
 def run_post_dvc_cmd(descriptor_list, instance):
