@@ -339,3 +339,35 @@ def test_stacked_name_getdeps(proj_path, steps):
 
     for step in range(steps):
         assert AddOne[f"add_{step}"].output == step + 1
+
+
+class ParameterNodeWithHash(Node):
+    param1 = zn.params()
+    param2 = zn.params()
+
+    _hash = zn.Hash()
+
+    def run(self):
+        pass
+
+
+class ParamDeps(Node):
+    deps: ParameterNodeWithHash = zn.deps(ParameterNodeWithHash)
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = self.deps.param1 + self.deps.param2
+
+
+def test_ParameterNodeWithHash(proj_path):
+    ParameterNodeWithHash(param1=2, param2=40).write_graph()
+    ParamDeps().write_graph()
+
+    subprocess.check_call(["dvc", "repro"])
+    assert ParamDeps.load().outs == 42
+
+    # Change parameters and thereby check if the dependencies are executed
+    ParameterNodeWithHash(param1=10, param2=7).save()
+    subprocess.check_call(["dvc", "dag"])
+    subprocess.check_call(["dvc", "repro"])
+    assert ParamDeps.load().outs == 17

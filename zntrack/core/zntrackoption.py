@@ -52,14 +52,25 @@ class ZnTrackOption(descriptor.Descriptor):
         The cmd to use with DVC, e.g. dvc --outs ... would be "outs"
     zn_type: utils.ZnTypes
         The internal ZnType to select the correct ZnTrack behaviour
+    allow_lazy: bool, default=True
+        Allow this option to be lazy loaded.
     """
 
     file = None
     dvc_option: str = None
     zn_type: utils.ZnTypes = None
+    allow_lazy: bool = True
 
     def __init__(self, default_value=None, **kwargs):
         """Constructor for ZnTrackOptions
+
+        Attributes
+        ----------
+        default_value: Any
+            The default value of the descriptor
+        filename:
+            part of the kwargs, optional filename overwrite.
+
         Raises
         ------
         ValueError: If dvc_option is None and the class name is not in utils.DVCOptions
@@ -70,6 +81,8 @@ class ZnTrackOption(descriptor.Descriptor):
         if self.dvc_option is None:
             # use the name of the class as DVCOption if registered in DVCOptions
             self.dvc_option = utils.DVCOptions(self.__class__.__name__).value
+
+        self.filename = kwargs.pop("filename", self.dvc_option)
         super().__init__(default_value=default_value, **kwargs)
 
     @property
@@ -94,7 +107,7 @@ class ZnTrackOption(descriptor.Descriptor):
     def __str__(self):
         return f"{self.dvc_option} / {self.name}"
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         self._instance = instance
 
         if instance is None:
@@ -132,7 +145,7 @@ class ZnTrackOption(descriptor.Descriptor):
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to"""
         if uses_node_name(self.zn_type, instance) is None:
-            return pathlib.Path("nodes", instance.node_name, f"{self.dvc_option}.json")
+            return pathlib.Path("nodes", instance.node_name, f"{self.filename}.json")
         return pathlib.Path(self.file)
 
     def save(self, instance):

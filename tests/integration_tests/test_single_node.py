@@ -325,3 +325,49 @@ def test_load_named_nodes(proj_path):
     # this will run load with name=Node01, lazy=True/False
     assert ExampleNode01[{"name": "Node01", "lazy": True}].outputs == 42
     assert ExampleNode01[{"name": "Node01", "lazy": False}].outputs == 42
+
+
+class NodeCustomFileName(Node):
+    output_std = zn.outs()
+    output_custom = zn.outs(filename="custom_data")
+
+    def run(self):
+        self.output_std = "Hello World"
+        self.output_custom = "Lorem Ipsum"
+
+
+def test_NodeCustomFileName(proj_path):
+    NodeCustomFileName().write_graph(run=True)
+
+    assert NodeCustomFileName.load().output_std == "Hello World"
+    assert NodeCustomFileName.load().output_custom == "Lorem Ipsum"
+
+    output_std = pathlib.Path("nodes", "NodeCustomFileName", "outs.json")
+    output_custom = pathlib.Path("nodes", "NodeCustomFileName", "custom_data.json")
+
+    assert output_std.exists()
+    assert output_custom.exists()
+    #
+    assert json.loads(output_std.read_text())["output_std"] == "Hello World"
+    assert json.loads(output_custom.read_text())["output_custom"] == "Lorem Ipsum"
+
+
+def test_collect(proj_path):
+    ExampleNode01(inputs="Hello World").write_graph(run=True)
+    assert ExampleNode01.load().zntrack.collect(zn.params) == {"inputs": "Hello World"}
+    assert ExampleNode01.load().zntrack.collect(zn.outs) == {"outputs": "Hello World"}
+
+    SingleNodeNoInit(param1=25, param2=42).write_graph(run=True)
+    assert SingleNodeNoInit.load().zntrack.collect(zn.params) == {
+        "param1": 25,
+        "param2": 42,
+    }
+    assert SingleNodeNoInit.load().zntrack.collect(zn.outs) == {"result": 67}
+
+    ExampleNode01(inputs={"Hello": "World"}, name="TestNode").write_graph(run=True)
+    assert ExampleNode01["TestNode"].zntrack.collect(zn.params) == {
+        "inputs": {"Hello": "World"}
+    }
+
+    with pytest.raises(ValueError):
+        ExampleNode01["TestNode"].zntrack.collect((zn.params, zn.outs))
