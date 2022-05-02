@@ -350,3 +350,24 @@ def test_NodeCustomFileName(proj_path):
     #
     assert json.loads(output_std.read_text())["output_std"] == "Hello World"
     assert json.loads(output_custom.read_text())["output_custom"] == "Lorem Ipsum"
+
+
+def test_collect(proj_path):
+    ExampleNode01(inputs="Hello World").write_graph(run=True)
+    assert ExampleNode01.load().zntrack.collect(zn.params) == {"inputs": "Hello World"}
+    assert ExampleNode01.load().zntrack.collect(zn.outs) == {"outputs": "Hello World"}
+
+    SingleNodeNoInit(param1=25, param2=42).write_graph(run=True)
+    assert SingleNodeNoInit.load().zntrack.collect(zn.params) == {
+        "param1": 25,
+        "param2": 42,
+    }
+    assert SingleNodeNoInit.load().zntrack.collect(zn.outs) == {"result": 67}
+
+    ExampleNode01(inputs={"Hello": "World"}, name="TestNode").write_graph(run=True)
+    assert ExampleNode01["TestNode"].zntrack.collect(zn.params) == {
+        "inputs": {"Hello": "World"}
+    }
+
+    with pytest.raises(ValueError):
+        ExampleNode01["TestNode"].zntrack.collect((zn.params, zn.outs))
