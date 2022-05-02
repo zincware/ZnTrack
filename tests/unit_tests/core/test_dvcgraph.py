@@ -6,6 +6,7 @@ from zntrack import dvc, utils, zn
 from zntrack.core.dvcgraph import (
     DVCRunOptions,
     GraphWriter,
+    ZnTrackInfo,
     filter_ZnTrackOption,
     handle_deps,
     handle_dvc,
@@ -192,3 +193,20 @@ def test_prepare_dvc_script():
         f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
         ' MyNode.load().run_and_save()" ',
     ]
+
+
+def test_ZnTrackInfo():
+    node = GraphWriter()
+    assert isinstance(node.zntrack, ZnTrackInfo)
+    assert node.zntrack._parent == node
+
+
+def test_ZnTrackInfo_collect():
+    node = GraphWriter()
+
+    with pytest.raises(ValueError):
+        node.zntrack.collect([zn.params, zn.outs])
+
+    example = ExampleClassWithParams()
+
+    assert example.zntrack.collect(zn.params) == {"param1": 1, "param2": 2}

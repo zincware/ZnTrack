@@ -209,7 +209,7 @@ class ZnTrackInfo:
     """Helping class for access to ZnTrack information"""
 
     def __init__(self, parent):
-        self.parent = parent
+        self._parent = parent
 
     def collect(self, zntrackoption: descriptor.BaseDescriptorType) -> dict:
         """Collect the values of all ZnTrackOptions of the passed type
@@ -230,8 +230,8 @@ class ZnTrackInfo:
                 "collect only supports single ZnTrackOptions. Found"
                 f" {zntrackoption} instead."
             )
-        options = descriptor.get_descriptors(zntrackoption, self=self.parent)
-        return {x.name: x.__get__(self.parent) for x in options}
+        options = descriptor.get_descriptors(zntrackoption, self=self._parent)
+        return {x.name: x.__get__(self._parent) for x in options}
 
 
 class GraphWriter:
