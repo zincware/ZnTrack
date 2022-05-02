@@ -52,11 +52,14 @@ class ZnTrackOption(descriptor.Descriptor):
         The cmd to use with DVC, e.g. dvc --outs ... would be "outs"
     zn_type: utils.ZnTypes
         The internal ZnType to select the correct ZnTrack behaviour
+    allow_lazy: bool, default=True
+        Allow this option to be lazy loaded.
     """
 
     file = None
     dvc_option: str = None
     zn_type: utils.ZnTypes = None
+    allow_lazy: bool = True
 
     def __init__(self, default_value=None, **kwargs):
         """Constructor for ZnTrackOptions
