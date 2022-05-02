@@ -3,6 +3,7 @@ import logging
 from zntrack import utils
 from zntrack.utils import helpers
 from zntrack.zn.split_option import SplitZnTrackOption
+from zntrack.zn.zn_hash import Hash as ZnHash
 
 log = logging.getLogger(__name__)
 
@@ -26,8 +27,8 @@ class Nodes(SplitZnTrackOption):
 
     """
 
-    dvc_option = utils.DVCOptions.PARAMS.value
-    zn_type = utils.ZnTypes.PARAMS
+    zn_type = utils.ZnTypes.DEPS
+    file = utils.Files.zntrack
 
     def get_filename(self, instance):
         """Does not have a single file but params.yaml and zntrack.json"""
@@ -39,28 +40,19 @@ class Nodes(SplitZnTrackOption):
             raise ValueError(
                 f"zn.Nodes() only supports type <Node>. Found {type(value)} instead."
             )
+        if len(instance.zntrack.collect(ZnHash)) < 1:
+            raise ValueError(
+                "To use zn.Nodes the passed Node must have a zn.Hash "
+                "attribute. This is required for generating an output even "
+                "though the run method is not in use."
+            )
         super().__set__(instance, value)
 
-    def __get__(self, instance, owner):
-        """Add some custom attributes to the instance to identify it in znjson"""
+    def __get__(self, instance, owner=None):
+        """Use load_node_dependency before returning the value"""
         if instance is None:
-            # this must be here, even though it is in the super call, what follows
-            #  after does not work otherwise
             return self
         value = super().__get__(instance, owner)
-        if value is None:
-            log.warning(
-                "Found NoneType but expected some class instance. Please open an issue on"
-                " github.com/zincware/ZnTrack if this causes unexpected behaviour."
-            )
-            return
-        try:
-            # Set some attribute for the serializer
-            value.znjson_zn_method = True
-            value.znjson_module = instance.module
-        except AttributeError:
-            # could be list / tuple
-            for element in value:
-                element.znjson_zn_method = True
-                element.znjson_module = instance.module
+        value = utils.utils.load_node_dependency(value)  # use value = Cls.load()
+        setattr(instance, self.name, value)
         return value
