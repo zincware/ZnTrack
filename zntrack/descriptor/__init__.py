@@ -1,3 +1,6 @@
+import typing
+
+
 class Descriptor:
     """Simple Python Descriptor that allows adding
 
@@ -60,7 +63,7 @@ class Descriptor:
         self._owner = owner
         self._name = name
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         """Get from instance.__dict__"""
         self._instance = instance
         if instance is None:
@@ -73,7 +76,12 @@ class Descriptor:
         instance.__dict__[self.name] = value
 
 
-def get_descriptors(descriptor=None, *, self=None, cls=None) -> list:
+BaseDescriptorType = typing.TypeVar("BaseDescriptorType", bound=Descriptor)
+
+
+def get_descriptors(
+    descriptor=None, *, self=None, cls=None
+) -> typing.List[BaseDescriptorType]:
     """Get a list of all descriptors inheriting from "descriptor"
 
     Parameters
@@ -102,7 +110,7 @@ def get_descriptors(descriptor=None, *, self=None, cls=None) -> list:
                 lst.append(value)
         except AttributeError as err:
             raise AttributeError(
-                "Trying to call ZnTrackOption.__get__(instance=None) to retreive the"
+                "Trying to call ZnTrackOption.__get__(instance=None) to retrieve the"
                 " <ZnTrackOption>. Make sure you implemented that case in the __get__"
                 " method."
             ) from err

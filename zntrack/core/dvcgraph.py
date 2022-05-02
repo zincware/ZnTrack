@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 import logging
 import pathlib
 import typing
@@ -8,6 +9,8 @@ import typing
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.descriptor import BaseDescriptorType
+from zntrack.zn import params as zntrack_params
 from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
@@ -205,6 +208,35 @@ def prepare_dvc_script(
     return script
 
 
+class ZnTrackInfo:
+    """Helping class for access to ZnTrack information"""
+
+    def __init__(self, parent):
+        self._parent = parent
+
+    def collect(self, zntrackoption: typing.Type[descriptor.BaseDescriptorType]) -> dict:
+        """Collect the values of all ZnTrackOptions of the passed type
+
+        Parameters
+        ----------
+        zntrackoption:
+            Any cls of a ZnTrackOption such as zn.params
+
+        Returns
+        -------
+        dict:
+            A dictionary of {option_name: option_value} for all found options of
+            the given type zntrackoption.
+        """
+        if isinstance(zntrackoption, (list, tuple)):
+            raise ValueError(
+                "collect only supports single ZnTrackOptions. Found"
+                f" {zntrackoption} instead."
+            )
+        options = descriptor.get_descriptors(zntrackoption, self=self._parent)
+        return {x.name: x.__get__(self._parent) for x in options}
+
+
 class GraphWriter:
     """Write the DVC Graph
 
@@ -230,8 +262,15 @@ class GraphWriter:
         if len(kwargs) > 0:
             raise TypeError(f"'{kwargs}' are an invalid keyword argument")
 
+    def __hash__(self):
+        """compute the hash based on the parameters and node_name"""
+        params_dict = self.zntrack.collect(zntrack_params)
+        params_dict["node_name"] = self.node_name
+
+        return hash(json.dumps(params_dict, sort_keys=True))
+
     @property
-    def _descriptor_list(self) -> typing.List[ZnTrackOption]:
+    def _descriptor_list(self) -> typing.List[BaseDescriptorType]:
         """Get all descriptors of this instance"""
         return descriptor.get_descriptors(ZnTrackOption, self=self)
 
@@ -428,6 +467,10 @@ class GraphWriter:
         utils.run_dvc_cmd(script)
 
         run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+    @property
+    def zntrack(self) -> ZnTrackInfo:
+        return ZnTrackInfo(parent=self)
 
 
 def run_post_dvc_cmd(descriptor_list, instance):

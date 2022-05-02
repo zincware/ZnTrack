@@ -51,10 +51,13 @@ def update_dependency_options(value):
         value._update_options()
 
 
+BaseNodeType = typing.TypeVar("BaseNodeType", bound="Node")
+
+
 class LoadViaGetItem(type):
     """Metaclass for adding getitem support to load"""
 
-    def __getitem__(cls: Node, item) -> Node:
+    def __getitem__(cls: Node, item) -> BaseNodeType:
         """Allow Node[<nodename>] to access an instance of the Node
 
         Attributes
@@ -219,7 +222,8 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         if lazy is None:
             lazy = utils.config.lazy
         for option in self._descriptor_list:
-            self.__dict__[option.name] = utils.LazyOption
+            if option.allow_lazy:
+                self.__dict__[option.name] = utils.LazyOption
             if not lazy:
                 # trigger loading the data into memory
                 value = getattr(self, option.name)
