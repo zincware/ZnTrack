@@ -222,7 +222,8 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         if lazy is None:
             lazy = utils.config.lazy
         for option in self._descriptor_list:
-            self.__dict__[option.name] = utils.LazyOption
+            if option.allow_lazy:
+                self.__dict__[option.name] = utils.LazyOption
             if not lazy:
                 # trigger loading the data into memory
                 value = getattr(self, option.name)

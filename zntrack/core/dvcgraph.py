@@ -9,6 +9,7 @@ import typing
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.descriptor import BaseDescriptorType
 from zntrack.zn import params as zntrack_params
 from zntrack.zn.dependencies import NodeAttribute
 
@@ -269,7 +270,7 @@ class GraphWriter:
         return hash(json.dumps(params_dict, sort_keys=True))
 
     @property
-    def _descriptor_list(self) -> typing.List[ZnTrackOption]:
+    def _descriptor_list(self) -> typing.List[BaseDescriptorType]:
         """Get all descriptors of this instance"""
         return descriptor.get_descriptors(ZnTrackOption, self=self)
 
