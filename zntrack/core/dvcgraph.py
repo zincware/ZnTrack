@@ -305,6 +305,8 @@ class GraphWriter:
         no_run_cache: bool = False,
         dry_run: bool = False,
         run: bool = None,
+        *,
+        call_args: str = None,
     ):
         """Write the DVC file using run.
 
@@ -329,6 +331,8 @@ class GraphWriter:
         no_run_cache: dvc parameter
         dry_run: bool, default = False
             Only return the script but don't actually run anything
+        call_args: str, default = None
+            Custom call args. Defaults to '.load(name='{self.node_name}').run_and_save()'
 
         Notes
         -----
@@ -397,6 +401,9 @@ class GraphWriter:
         for pair in zn_options_set:
             custom_args += pair
 
+        if call_args is None:
+            call_args = f".load(name='{self.node_name}').run_and_save()"
+
         script = prepare_dvc_script(
             node_name=self.node_name,
             dvc_run_option=dvc_run_option,
@@ -404,7 +411,7 @@ class GraphWriter:
             nb_name=nb_name,
             module=self.module,
             func_or_cls=self.__class__.__name__,
-            call_args=f".load(name='{self.node_name}').run_and_save()",
+            call_args=call_args,
         )
 
         # Add command to run the script
