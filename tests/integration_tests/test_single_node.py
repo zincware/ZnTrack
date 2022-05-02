@@ -327,6 +327,31 @@ def test_load_named_nodes(proj_path):
     assert ExampleNode01[{"name": "Node01", "lazy": False}].outputs == 42
 
 
+class NodeCustomFileName(Node):
+    output_std = zn.outs()
+    output_custom = zn.outs(filename="custom_data")
+
+    def run(self):
+        self.output_std = "Hello World"
+        self.output_custom = "Lorem Ipsum"
+
+
+def test_NodeCustomFileName(proj_path):
+    NodeCustomFileName().write_graph(run=True)
+
+    assert NodeCustomFileName.load().output_std == "Hello World"
+    assert NodeCustomFileName.load().output_custom == "Lorem Ipsum"
+
+    output_std = pathlib.Path("nodes", "NodeCustomFileName", "outs.json")
+    output_custom = pathlib.Path("nodes", "NodeCustomFileName", "custom_data.json")
+
+    assert output_std.exists()
+    assert output_custom.exists()
+    #
+    assert json.loads(output_std.read_text())["output_std"] == "Hello World"
+    assert json.loads(output_custom.read_text())["output_custom"] == "Lorem Ipsum"
+
+
 def test_collect(proj_path):
     ExampleNode01(inputs="Hello World").write_graph(run=True)
     assert ExampleNode01.load().zntrack.collect(zn.params) == {"inputs": "Hello World"}
