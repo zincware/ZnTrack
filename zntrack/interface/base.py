@@ -8,6 +8,10 @@ import subprocess
 from pathlib import Path
 from typing import List
 
+import tqdm
+
+from zntrack import utils
+
 log = logging.getLogger(__name__)
 
 
@@ -105,11 +109,14 @@ class DVCInterface:
         path = Path(path)
         path.mkdir(exist_ok=True, parents=True)
         if experiments is None:
-            exp_list = self.exp_list
+            exp_list = [x for x in self.exp_list if x.name not in ("master", "main")]
         else:
             exp_list = [x for x in self.exp_list if x.name in experiments]
 
-        for experiment in exp_list:
+        progress_bar = tqdm.tqdm(exp_list)
+
+        for experiment in progress_bar:
+            progress_bar.set_description(f"Processing {experiment.name}")
             for file in files:
                 file = pathlib.Path(file)
                 out_path = path / experiment.name
@@ -125,4 +132,4 @@ class DVCInterface:
                     out_path.as_posix(),
                 ]
                 log.debug(f"DVC command: {cmd}")
-                subprocess.run(cmd)
+                utils.run_dvc_cmd(cmd)
