@@ -1,14 +1,14 @@
 import logging
 
 from zntrack import utils
+from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.utils import helpers
-from zntrack.zn.split_option import SplitZnTrackOption
 from zntrack.zn.zn_hash import Hash as ZnHash
 
 log = logging.getLogger(__name__)
 
 
-class Nodes(SplitZnTrackOption):
+class Nodes(ZnTrackOption):
     """ZnTrack methods passing descriptor
 
     This descriptor allows to pass a class instance that is not a ZnTrack Node as a
@@ -27,12 +27,9 @@ class Nodes(SplitZnTrackOption):
 
     """
 
+    dvc_option = utils.DVCOptions.DEPS
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
-
-    def get_filename(self, instance):
-        """Does not have a single file but params.yaml and zntrack.json"""
-        return None
 
     def __set__(self, instance, value):
         """Include type check for better error reporting"""
@@ -40,7 +37,7 @@ class Nodes(SplitZnTrackOption):
             raise ValueError(
                 f"zn.Nodes() only supports type <Node>. Found {type(value)} instead."
             )
-        if len(instance.zntrack.collect(ZnHash)) < 1:
+        if len(value.zntrack.collect(ZnHash)) < 1:
             raise ValueError(
                 "To use zn.Nodes the passed Node must have a zn.Hash "
                 "attribute. This is required for generating an output even "

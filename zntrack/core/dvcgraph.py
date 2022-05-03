@@ -380,6 +380,8 @@ class GraphWriter:
 
         """
 
+        # TODO write graphs of all zn.Nodes here as well!
+
         if silent:
             log.warning(
                 "DeprecationWarning: silent was replaced by 'zntrack.config.log_level ="
@@ -402,6 +404,7 @@ class GraphWriter:
         # Jupyter Notebook
         nb_name = utils.update_nb_name(nb_name)
         if nb_name is not None:
+            # TODO why is this updated here and not in the module property?!
             self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
             if notebook:
                 self.convert_notebook(nb_name)
