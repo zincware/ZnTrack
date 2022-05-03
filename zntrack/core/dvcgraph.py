@@ -285,6 +285,8 @@ class GraphWriter:
         this can be changed when using nb_mode
         """
         if self._module is None:
+            if utils.config.nb_name is not None:
+                return f"{utils.config.nb_class_path}.{self.__class__.__name__}"
             return utils.module_handler(self.__class__)
         return self._module
 
@@ -403,11 +405,8 @@ class GraphWriter:
 
         # Jupyter Notebook
         nb_name = utils.update_nb_name(nb_name)
-        if nb_name is not None:
-            # TODO why is this updated here and not in the module property?!
-            self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
-            if notebook:
-                self.convert_notebook(nb_name)
+        if nb_name is not None and notebook:
+            self.convert_notebook(nb_name)
 
         custom_args = []
         dependencies = []
