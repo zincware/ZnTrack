@@ -31,29 +31,25 @@ class HelloWorld(Node):
         self.outputs = self.inputs
 
 
-@pytest.fixture()
-def single_experiment_path(tmp_path):
+@pytest.fixture
+def proj_path(tmp_path):
     shutil.copy(__file__, tmp_path)
     os.chdir(tmp_path)
     subprocess.run(["git", "init"])
     subprocess.run(["dvc", "init"])
 
+
+@pytest.fixture()
+def single_experiment_path(proj_path):
     HelloWorld(inputs=1).write_graph()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
 
     subprocess.run(["dvc", "repro"])
 
-    return tmp_path
-
 
 @pytest.fixture()
-def multi_experiment_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.run(["git", "init"])
-    subprocess.run(["dvc", "init"])
-
+def multi_experiment_path(proj_path):
     HelloWorld(inputs=1).write_graph()
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
@@ -65,12 +61,9 @@ def multi_experiment_path(tmp_path):
     HelloWorld(inputs=3).write_graph()
     subprocess.run(["dvc", "exp", "run", "-n", "Test03"])
 
-    return tmp_path
-
 
 @pytest.fixture()
 def loaded_dvc_interface(single_experiment_path) -> DVCInterface:
-    os.chdir(single_experiment_path)
     return DVCInterface()
 
 
@@ -97,7 +90,6 @@ def test__reset(loaded_dvc_interface):
 
 def test_load_files_into_directory(multi_experiment_path):
     """Test for specific experiments"""
-    os.chdir(multi_experiment_path)
     interface = DVCInterface()
     interface.load_files_into_directory(
         files=["nodes/HelloWorld/outs.json"], experiments=["Test02", "Test03"]
@@ -108,7 +100,6 @@ def test_load_files_into_directory(multi_experiment_path):
 
 def test_load_files_into_directory_all_exp(multi_experiment_path):
     """Test for all experiments"""
-    os.chdir(multi_experiment_path)
     interface = DVCInterface()
     interface.load_files_into_directory(files=["nodes/HelloWorld/outs.json"])
     assert pathlib.Path("experiments/Test02/outs.json").exists()
