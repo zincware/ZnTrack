@@ -1,6 +1,6 @@
 import pytest
 
-from zntrack import utils, zn
+from zntrack import zn
 from zntrack.core import ZnTrackOption
 
 
@@ -63,19 +63,9 @@ def test_ExampleParamsDefault(cls):
     assert obj.__dict__["parameter"] == "Lorem Ipsum"
 
 
-class ExampleMethod:
-    def run(self):
-        return 42
-
-
 class ExampleNode:
-    node_name = None
-    module = "module"
-    method = zn.Method(ExampleMethod())
+    method = zn.Method()
 
 
 def test_method_filename():
-    assert ExampleNode.method.get_filename(ExampleNode()) == (
-        utils.Files.params,
-        utils.Files.zntrack,
-    )
+    assert ExampleNode.method.get_filename(ExampleNode()) is None
