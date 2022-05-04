@@ -10,7 +10,8 @@ from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.descriptor import BaseDescriptorType
-from zntrack.zn import params as zntrack_params
+from zntrack.zn import Nodes as zn_nodes
+from zntrack.zn import params as zn_params
 from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
@@ -264,7 +265,7 @@ class GraphWriter:
 
     def __hash__(self):
         """compute the hash based on the parameters and node_name"""
-        params_dict = self.zntrack.collect(zntrack_params)
+        params_dict = self.zntrack.collect(zn_params)
         params_dict["node_name"] = self.node_name
 
         return hash(json.dumps(params_dict, sort_keys=True))
@@ -333,6 +334,20 @@ class GraphWriter:
         """
         jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
 
+    def _handle_nodes_as_methods(self):
+        """Write the graph for all zn.Nodes ZnTrackOptions
+
+        zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
+        They are shown in the dvc dag and have their own parameter section.
+        The name is <nodename>-<attributename> for these Nodes and they only
+        have a single hash output to be available for DVC dependencies.
+        """
+        for attribute, node in self.zntrack.collect(zn_nodes).items():
+            node.node_name = f"{self.node_name}-{attribute}"
+            node.write_graph(
+                call_args=f".load(name='{node.node_name}').save(results=True)"
+            )
+
     def write_graph(
         self,
         silent: bool = False,
@@ -382,7 +397,7 @@ class GraphWriter:
 
         """
 
-        # TODO write graphs of all zn.Nodes here as well!
+        self._handle_nodes_as_methods()
 
         if silent:
             log.warning(
