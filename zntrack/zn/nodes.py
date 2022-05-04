@@ -31,6 +31,15 @@ class Nodes(ZnTrackOption):
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
+    def __init__(self, default_value=None, **kwargs):
+        if default_value is not None:
+            raise ValueError(
+                "zn.Nodes does not support default values because they can be mutable."
+                " Please set the default value in the __init__"
+            )
+
+        super().__init__(**kwargs)
+
     def __set__(self, instance, value):
         """Include type check for better error reporting"""
         if not helpers.isnode(value):

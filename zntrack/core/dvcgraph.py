@@ -345,7 +345,8 @@ class GraphWriter:
         for attribute, node in self.zntrack.collect(zn_nodes).items():
             node.node_name = f"{self.node_name}-{attribute}"
             node.write_graph(
-                call_args=f".load(name='{node.node_name}').save(results=True)"
+                run=True,
+                call_args=f".load(name='{node.node_name}').save(results=True)",
             )
 
     def write_graph(
