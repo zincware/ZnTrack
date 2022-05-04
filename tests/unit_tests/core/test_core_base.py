@@ -188,12 +188,12 @@ def test_update_dependency_options():
     with patch(f"{__name__}.MagicMock", spec=Node):
         magic_mock = MagicMock()
         update_dependency_options(magic_mock)
-        assert magic_mock.update_options.called
+        assert magic_mock._update_options.called
 
     with patch(f"{__name__}.MagicMock", spec=Node):
         magic_mock = MagicMock()
         update_dependency_options([magic_mock])
-        assert magic_mock.update_options.called
+        assert magic_mock._update_options.called
 
 
 class ZnTrackOptionCollection:
