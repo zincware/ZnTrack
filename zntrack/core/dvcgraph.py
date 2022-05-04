@@ -343,6 +343,8 @@ class GraphWriter:
         have a single hash output to be available for DVC dependencies.
         """
         for attribute, node in self.zntrack.collect(zn_nodes).items():
+            if node is None:
+                continue
             node.node_name = f"{self.node_name}-{attribute}"
             node.write_graph(
                 run=True,

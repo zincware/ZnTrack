@@ -42,6 +42,16 @@ class Nodes(ZnTrackOption):
 
     def __set__(self, instance, value):
         """Include type check for better error reporting"""
+        if value is None:
+            return
+
+        if isinstance(value, (list, tuple)):
+            raise ValueError(
+                "zn.Nodes only supports single Node instances. Found"
+                f" {type(value)} instead. Consider using a zn.Node Option for each"
+                " instead."
+            )
+
         if not helpers.isnode(value):
             raise ValueError(
                 f"zn.Nodes() only supports type <Node>. Found {type(value)} instead."

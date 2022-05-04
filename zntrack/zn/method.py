@@ -39,7 +39,7 @@ class Method(SplitZnTrackOption):
         if utils.helpers.isnode(value):
             raise ValueError(
                 f"zn.Method() does not support type <Node> ({value})."
-                " Consider using zn.deps() / zn.Nodes instead"
+                " Consider using zn.deps() / zn.Nodes() instead"
             )
         super().__set__(instance, value)
 

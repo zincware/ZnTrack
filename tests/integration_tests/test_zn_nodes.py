@@ -23,6 +23,9 @@ class NodeViaParams(Node):
     param1 = zn.params()
     param2 = zn.params()
 
+    def run(self):
+        pass
+
 
 class ExampleNode(Node):
     params1: NodeViaParams = zn.Nodes()
@@ -49,7 +52,54 @@ def test_ExampleNode(proj_path):
     assert example_node.outs == "HelloIpsum"
 
 
-def test_ExampleNodeWithDefaults(proj_path):
-    with pytest.raises(ValueError):
-        # zn.Nodes does not support default values because they can be mutable
-        _ = zn.Nodes(NodeViaParams())
+class SingleExampleNode(Node):
+    params1 = zn.Nodes()
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = "Lorem Ipsum"
+
+
+def test_SingleExampleNode(proj_path):
+    SingleExampleNode().write_graph(run=True)
+
+    assert SingleExampleNode.load().outs == "Lorem Ipsum"
+
+
+class NodeNodeParams(Node):
+    deps: NodeViaParams = zn.deps()
+    node: NodeViaParams = zn.Nodes()
+    _hash = zn.Hash()
+
+    def run(self):
+        pass
+
+
+class ExampleNode2(Node):
+    params1: NodeNodeParams = zn.Nodes()
+    params2 = zn.Nodes()
+
+    def run(self):
+        pass
+
+
+def test_depth_graph(proj_path):
+    node_1 = NodeViaParams(param1="Lorem", param2="Ipsum", name="Node1")
+    node_1.write_graph(run=True)  # defined as dependency, so it must run first.
+
+    node_2 = NodeViaParams(param1="Lorem", param2="Ipsum")
+
+    node_3 = NodeNodeParams(deps=node_1, node=node_2, name="Node3")
+
+    node_4 = ExampleNode2(params1=node_3)
+
+    node_4.write_graph(run=True)
+
+    node_4 = ExampleNode2.load()
+
+    assert node_4.params1.deps.param1 == "Lorem"
+    assert node_4.params1.node.param2 == "Ipsum"
+
+    assert node_4.params1.node_name == "ExampleNode2-params1"
+    assert node_4.params1.deps.node_name == "Node1"
+    assert node_4.params1.node.node_name == "ExampleNode2-params1-node"
