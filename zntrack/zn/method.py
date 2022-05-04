@@ -34,13 +34,13 @@ class Method(SplitZnTrackOption):
 
     def __set__(self, instance, value):
         """Include type check for better error reporting"""
-        # # TODO raise error on default values,
-        # #  make compatible types an attribute of descriptor
-        # if helpers.isnode(value):
-        #     raise ValueError(
-        #         f"zn.Method() does not support type <Node> ({value})."
-        #         " Consider using zn.deps() instead"
-        #     )
+        # TODO raise error on default values,
+        #  make compatible types an attribute of descriptor
+        if utils.helpers.isnode(value):
+            raise ValueError(
+                f"zn.Method() does not support type <Node> ({value})."
+                " Consider using zn.deps() / zn.Nodes instead"
+            )
         super().__set__(instance, value)
 
     def __get__(self, instance, owner=None):
