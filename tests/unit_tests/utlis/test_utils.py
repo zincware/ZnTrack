@@ -32,7 +32,7 @@ class Test:
 
 
 class TestWithPostInit:
-    def __post_init__(self):
+    def post_init(self):
         self.post_init = True
         self.text = f"{self.foo} {self.bar}"
 

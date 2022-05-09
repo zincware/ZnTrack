@@ -94,7 +94,7 @@ def get_auto_init(fields: typing.List[str], super_init: typing.Callable):
         super_init(self, **kwargs)  # call the super_init explicitly instead of super
 
         try:
-            self.__post_init__()
+            self.post_init()
         except AttributeError:
             pass
 
