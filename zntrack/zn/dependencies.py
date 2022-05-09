@@ -64,7 +64,9 @@ def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
     )
 
 
-def get_origin(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
+def get_origin(
+    node: Union[Node, type(Node)], attribute: str
+) -> Union[NodeAttribute, List[NodeAttribute]]:
     """Get the NodeAttribute from a zn.deps
 
     Typically, when using zn.deps there is no way to access the original Node where
@@ -78,6 +80,10 @@ def get_origin(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
     except AttributeError as err:
         raise AttributeError("Can only use get_origin with zn.deps") from err
     znjson.deregister(RawNodeAttributeConverter)
-    if not isinstance(value, NodeAttribute):
+
+    if isinstance(value, (list, tuple)):
+        if any([not isinstance(x, NodeAttribute) for x in value]):
+            raise AttributeError("Can only use get_origin with zn.deps using getdeps.")
+    elif not isinstance(value, NodeAttribute):
         raise AttributeError("Can only use get_origin with zn.deps using getdeps.")
     return value
