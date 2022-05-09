@@ -4,6 +4,8 @@ import dataclasses
 import pathlib
 from typing import TYPE_CHECKING, List, Union
 
+import znjson
+
 from zntrack.utils import utils
 
 if TYPE_CHECKING:
@@ -17,6 +19,25 @@ class NodeAttribute:
     name: str
     attribute: str
     affected_files: List[pathlib.Path]
+
+
+class RawNodeAttributeConverter(znjson.ConverterBase):
+    """Serializer for Node Attributes
+
+    Instead of returning the actual attribute this returns the NodeAttribute cls.
+    """
+
+    instance = NodeAttribute
+    representation = "NodeAttribute"
+    level = 999
+
+    def _encode(self, obj: NodeAttribute) -> dict:
+        """Convert NodeAttribute to serializable dict"""
+        return dataclasses.asdict(obj)
+
+    def _decode(self, value: dict) -> NodeAttribute:
+        """return serialized Node attribute"""
+        return NodeAttribute(**value)
 
 
 def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
@@ -41,3 +62,22 @@ def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
         attribute=attribute,
         affected_files=list(node.affected_files),
     )
+
+
+def get_origin(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
+    """Get the NodeAttribute from a zn.deps
+
+    Typically, when using zn.deps there is no way to access the original Node where
+    the data comes from. This function allows you to get the underlying
+    NodeAttribute object to access e.g. the name of the original Node.
+    """
+    znjson.register(RawNodeAttributeConverter)
+    new_node = node.load(name=node.node_name)
+    try:
+        value = getattr(new_node, attribute)
+    except AttributeError as err:
+        raise AttributeError("Can only use get_origin with zn.deps") from err
+    znjson.deregister(RawNodeAttributeConverter)
+    if not isinstance(value, NodeAttribute):
+        raise AttributeError("Can only use get_origin with zn.deps using getdeps.")
+    return value
