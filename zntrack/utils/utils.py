@@ -93,6 +93,11 @@ def get_auto_init(fields: typing.List[str], super_init: typing.Callable):
                 pass
         super_init(self, **kwargs)  # call the super_init explicitly instead of super
 
+        try:
+            self.__post_init__()
+        except AttributeError:
+            pass
+
     # we add this attribute to the __init__ to make it identifiable
     auto_init._uses_auto_init = True
 

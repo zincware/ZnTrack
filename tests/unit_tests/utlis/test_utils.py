@@ -31,6 +31,12 @@ class Test:
     pass
 
 
+class TestWithPostInit:
+    def __post_init__(self):
+        self.post_init = True
+        self.text = f"{self.foo} {self.bar}"
+
+
 def test_get_auto_init():
     with pytest.raises(TypeError):
         Test(foo="foo")
@@ -41,6 +47,26 @@ def test_get_auto_init():
 
     assert test.foo == "foo"
     assert test.bar == "bar"
+
+    mock.assert_called()
+
+
+def test_get_post_init():
+    with pytest.raises(TypeError):
+        TestWithPostInit(foo="foo")
+
+    mock = MagicMock()
+    setattr(
+        TestWithPostInit,
+        "__init__",
+        utils.get_auto_init(fields=["foo", "bar"], super_init=mock),
+    )
+    test = TestWithPostInit(foo="foo", bar="bar")
+
+    assert test.foo == "foo"
+    assert test.bar == "bar"
+    assert test.post_init
+    assert test.text == "foo bar"
 
     mock.assert_called()
 
