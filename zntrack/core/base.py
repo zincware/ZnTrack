@@ -173,6 +173,14 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         signature = inspect.Signature(parameters=signature_params)
         setattr(cls, "__signature__", signature)
 
+    def post_init(self):
+        """Implement if cmds after the automatically generated __init__ should be run
+
+        This only works if no __init__ is defined and the automatically generated
+        __init__ from ZnTrack is used.
+        """
+        raise AttributeError(f"'{self.node_name}' object has no attribute 'post_init'")
+
     def save_plots(self):
         """Save the zn.plots
 

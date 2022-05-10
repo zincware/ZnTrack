@@ -10,6 +10,7 @@ import pytest
 from zntrack import getdeps, utils, zn
 from zntrack.core import ZnTrackOption
 from zntrack.core.base import Node
+from zntrack.zn.dependencies import NodeAttribute, get_origin
 
 
 @pytest.fixture()
@@ -161,3 +162,48 @@ def test_stacked_name_getdeps_2(proj_path, steps):
 
     for step in range(1, steps):
         assert ModifyNumber[f"rld_{step}"].outputs == 1
+
+        node_attr = get_origin(ModifyNumber[f"rld_{step}"], "inputs")
+        assert isinstance(node_attr, NodeAttribute)
+        assert node_attr.name == f"rld_{step - 1}"
+
+
+def test_get_origin(proj_path):
+    sd = SeedNumber(inputs=20)
+    sd.write_graph()
+    ModifyNumber(inputs=getdeps(sd, "number")).write_graph()
+
+    node_attr = get_origin(ModifyNumber.load(), "inputs")
+    assert isinstance(node_attr, NodeAttribute)
+    assert node_attr.name == "SeedNumber"
+
+
+def test_get_origin_lst(proj_path):
+    sd = SeedNumber(inputs=20)
+    sd.write_graph()
+    sd2 = SeedNumber(inputs=10, name="sd2")
+    sd2.write_graph()
+    ModifyNumber(inputs=[getdeps(sd, "number"), getdeps(sd2, "number")]).write_graph()
+
+    node_attr = get_origin(ModifyNumber.load(), "inputs")
+    assert isinstance(node_attr[0], NodeAttribute)
+    assert isinstance(node_attr[1], NodeAttribute)
+    assert node_attr[0].name == "SeedNumber"
+    assert node_attr[1].name == "sd2"
+
+
+def test_err_get_origin(proj_path):
+    sd = SeedNumber(inputs=20)
+    sd.write_graph()
+    ModifyNumber(inputs=getdeps(sd, "number")).write_graph()
+
+    with pytest.raises(AttributeError):
+        get_origin(ModifyNumber.load(), "outputs")
+
+    with pytest.raises(AttributeError):
+        get_origin(SeedNumber, "inputs")
+
+    ModifyNumber(inputs=[getdeps(sd, "number"), sd]).write_graph()
+
+    with pytest.raises(AttributeError):
+        get_origin(ModifyNumber.load(), "inputs")
