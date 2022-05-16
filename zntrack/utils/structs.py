@@ -15,6 +15,7 @@ class ZnTypes(enum.Enum):
     Attributes
     ----------
     results: most zn.<options> like zn.outs() / zn.metrics() use this one
+    HASH: special type which will always be saved even if _is_attribute = True
     """
 
     DEPS = enum.auto()
@@ -25,12 +26,13 @@ class ZnTypes(enum.Enum):
     ITERABLE = enum.auto()
     RESULTS = enum.auto()
     PLOTS = enum.auto()
+    HASH = enum.auto()
 
 
 FILE_DVC_TRACKED = [ZnTypes.DVC]
 # if the getattr(instance, self.name) is an affected file,
 # e.g. the dvc.<outs> is a file / list of files
-VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA, ZnTypes.PLOTS]
+VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA, ZnTypes.PLOTS, ZnTypes.HASH]
 
 
 # if the internal file,

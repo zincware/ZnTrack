@@ -247,10 +247,15 @@ class GraphWriter:
         first priority is by passing it through kwargs
         second is having the class attribute set in the class definition
         last if both above are None it will be set to __class__.__name__
+    is_attribute: bool, default = False
+        If the Node is not used directly but through e.g. zn.Nodes() as a dependency
+        this can be set to True. It will disable all outputs in the params.yaml file
+        except for the zn.Hash().
     """
 
     node_name = None
     _module = None
+    _is_attribute = False
 
     def __init__(self, **kwargs):
         name = kwargs.pop("name", None)
@@ -273,7 +278,11 @@ class GraphWriter:
     @property
     def _descriptor_list(self) -> typing.List[BaseDescriptorType]:
         """Get all descriptors of this instance"""
-        return descriptor.get_descriptors(ZnTrackOption, self=self)
+        descriptors = descriptor.get_descriptors(ZnTrackOption, self=self)
+        if self._is_attribute:
+            allowed_types = [utils.ZnTypes.PARAMS, utils.ZnTypes.HASH, utils.ZnTypes.DEPS]
+            return [x for x in descriptors if x.zn_type in allowed_types]
+        return descriptors
 
     @property
     def module(self) -> str:
@@ -346,6 +355,7 @@ class GraphWriter:
             if node is None:
                 continue
             node.node_name = f"{self.node_name}-{attribute}"
+            node._is_attribute = True
             node.write_graph(
                 run=True,
                 call_args=f".load(name='{node.node_name}').save(results=True)",
