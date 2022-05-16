@@ -103,3 +103,20 @@ def test_depth_graph(proj_path):
     assert node_4.params1.node_name == "ExampleNode2-params1"
     assert node_4.params1.deps.node_name == "Node1"
     assert node_4.params1.node.node_name == "ExampleNode2-params1-node"
+
+
+class NodeWithOuts(Node):
+    input = zn.params()
+    factor = zn.params()
+    output = zn.outs()
+    _hash = zn.Hash()
+
+    def run(self):
+        self.output = self.input * self.factor
+
+
+def test_NodeWithOuts(proj_path):
+    node_1 = SingleExampleNode(params1=NodeWithOuts(factor=2))
+    node_1.write_graph(run=True)
+
+    assert SingleExampleNode.load().params1.factor == 2
