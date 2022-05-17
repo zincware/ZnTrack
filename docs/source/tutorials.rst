@@ -12,7 +12,7 @@ The notebooks can be found in :code:`/examples/docs`.
    :maxdepth: 1
 
    _overview/01_Intro.ipynb
-   _overview/02_PassingClasses.ipynb
+   _overview/02_Inheritance.ipynb
    _overview/03_dependencies.ipynb
    _overview/04_metrics_and_plots.ipynb
    _overview/05_metadata.ipynb
