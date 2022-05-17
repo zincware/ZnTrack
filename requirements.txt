@@ -1,5 +1,0 @@
-dvc
-PyYAML
-znjson>=0.1.2
-dot4dict
-tqdm

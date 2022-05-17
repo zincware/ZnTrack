@@ -1,3 +1,4 @@
+import importlib.metadata
 import logging
 import sys
 
@@ -28,7 +29,7 @@ __all__ = [
     "getdeps",
 ]
 
-__version__ = "0.4.2"
+__version__ = importlib.metadata.version("zntrack")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(config.log_level)
