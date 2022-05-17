@@ -46,6 +46,7 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
+          source .venv/bin/activate
           coverage run -m pytest
           coverage xml
           coverage lcov
@@ -84,6 +85,7 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
+          source .venv/bin/activate
           coverage run -m pytest ./tests/unit_tests
           coverage xml
       - uses: codecov/codecov-action@v2
@@ -116,4 +118,5 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
+          source .venv/bin/activate
           pytest --nbmake ./examples
