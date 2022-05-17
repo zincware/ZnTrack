@@ -36,15 +36,9 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install package
         run: |
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
@@ -80,15 +74,9 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install package
         run: |
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
@@ -118,15 +106,9 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
           installer-parallel: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-${{ runner.os }}-${{ steps.setup-python.outputs.python-version }}-${{ hashFiles('**/poetry.lock') }}
       - name: Install package
         run: |
-          poetry install --no-interaction --no-root
+          poetry install --no-interaction
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
