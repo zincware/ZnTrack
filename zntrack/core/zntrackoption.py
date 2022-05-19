@@ -201,6 +201,8 @@ class ZnTrackOption(descriptor.Descriptor):
             values = utils.decode_dict(file_content[instance.node_name][self.name])
         else:
             values = utils.decode_dict(file_content[self.name])
-
-        log.debug(f"Loading {instance.node_name} from {file}: ({values})")
+        if isinstance(values, (list, tuple)):
+            log.debug(f"Loading {instance.node_name} from {file}: ({values[:3]} ...)")
+        else:
+            log.debug(f"Loading {instance.node_name} from {file}: ({values})")
         return values

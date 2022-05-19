@@ -227,6 +227,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
 
         This will overwrite the value in __dict__ even it the value was changed
         """
+        log.debug(f"Updating options for {self}")
         if lazy is None:
             lazy = utils.config.lazy
         for option in self._descriptor_list:
