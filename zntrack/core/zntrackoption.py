@@ -102,7 +102,7 @@ class ZnTrackOption(descriptor.Descriptor):
         return None
 
     def __repr__(self):
-        return f"{self.__class__}({hex(id(self))}) for <{self.dvc_option}>"
+        return f"{super().__repr__()} for <{self.__str__()}>"
 
     def __str__(self):
         return f"{self.dvc_option} / {self.name}"
