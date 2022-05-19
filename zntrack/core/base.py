@@ -109,6 +109,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         super().__init__(**kwargs)
         for data in self._descriptor_list:
             if data.zn_type == utils.ZnTypes.DEPS:
+                log.debug(f"Updating dependencies for {data} in {self}")
                 update_dependency_options(data.default_value)
 
     @utils.deprecated(
@@ -232,6 +233,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
             lazy = utils.config.lazy
         for option in self._descriptor_list:
             if option.allow_lazy:
+                log.debug(f"Setting {option.name} to {utils.LazyOption}")
                 self.__dict__[option.name] = utils.LazyOption
             if not lazy:
                 # trigger loading the data into memory
