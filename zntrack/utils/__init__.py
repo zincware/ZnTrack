@@ -1,6 +1,6 @@
 """Standard python init file for the utils directory"""
 
-from zntrack.utils import exceptions, file_io
+from zntrack.utils import exceptions, file_io, helpers
 from zntrack.utils.config import Files, config
 from zntrack.utils.structs import (
     FILE_DVC_TRACKED,
@@ -44,4 +44,5 @@ __all__ = [
     "VALUE_DVC_TRACKED",
     "DVCOptions",
     "LazyOption",
+    "helpers",
 ]

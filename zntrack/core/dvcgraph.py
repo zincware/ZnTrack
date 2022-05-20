@@ -10,7 +10,8 @@ from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.descriptor import BaseDescriptorType
-from zntrack.zn import params as zntrack_params
+from zntrack.zn import Nodes as zn_nodes
+from zntrack.zn import params as zn_params
 from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
@@ -246,10 +247,15 @@ class GraphWriter:
         first priority is by passing it through kwargs
         second is having the class attribute set in the class definition
         last if both above are None it will be set to __class__.__name__
+    is_attribute: bool, default = False
+        If the Node is not used directly but through e.g. zn.Nodes() as a dependency
+        this can be set to True. It will disable all outputs in the params.yaml file
+        except for the zn.Hash().
     """
 
     node_name = None
     _module = None
+    _is_attribute = False
 
     def __init__(self, **kwargs):
         name = kwargs.pop("name", None)
@@ -264,7 +270,7 @@ class GraphWriter:
 
     def __hash__(self):
         """compute the hash based on the parameters and node_name"""
-        params_dict = self.zntrack.collect(zntrack_params)
+        params_dict = self.zntrack.collect(zn_params)
         params_dict["node_name"] = self.node_name
 
         return hash(json.dumps(params_dict, sort_keys=True))
@@ -272,7 +278,11 @@ class GraphWriter:
     @property
     def _descriptor_list(self) -> typing.List[BaseDescriptorType]:
         """Get all descriptors of this instance"""
-        return descriptor.get_descriptors(ZnTrackOption, self=self)
+        descriptors = descriptor.get_descriptors(ZnTrackOption, self=self)
+        if self._is_attribute:
+            allowed_types = [utils.ZnTypes.PARAMS, utils.ZnTypes.HASH, utils.ZnTypes.DEPS]
+            return [x for x in descriptors if x.zn_type in allowed_types]
+        return descriptors
 
     @property
     def module(self) -> str:
@@ -333,6 +343,24 @@ class GraphWriter:
         """
         jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
 
+    def _handle_nodes_as_methods(self):
+        """Write the graph for all zn.Nodes ZnTrackOptions
+
+        zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
+        They are shown in the dvc dag and have their own parameter section.
+        The name is <nodename>-<attributename> for these Nodes and they only
+        have a single hash output to be available for DVC dependencies.
+        """
+        for attribute, node in self.zntrack.collect(zn_nodes).items():
+            if node is None:
+                continue
+            node.node_name = f"{self.node_name}-{attribute}"
+            node._is_attribute = True
+            node.write_graph(
+                run=True,
+                call_args=f".load(name='{node.node_name}').save(results=True)",
+            )
+
     def write_graph(
         self,
         silent: bool = False,
@@ -346,6 +374,8 @@ class GraphWriter:
         no_run_cache: bool = False,
         dry_run: bool = False,
         run: bool = None,
+        *,
+        call_args: str = None,
     ):
         """Write the DVC file using run.
 
@@ -370,6 +400,8 @@ class GraphWriter:
         no_run_cache: dvc parameter
         dry_run: bool, default = False
             Only return the script but don't actually run anything
+        call_args: str, default = None
+            Custom call args. Defaults to '.load(name='{self.node_name}').run_and_save()'
 
         Notes
         -----
@@ -377,6 +409,8 @@ class GraphWriter:
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+
+        self._handle_nodes_as_methods()
 
         if silent:
             log.warning(
@@ -436,6 +470,9 @@ class GraphWriter:
         for pair in zn_options_set:
             custom_args += pair
 
+        if call_args is None:
+            call_args = f".load(name='{self.node_name}').run_and_save()"
+
         script = prepare_dvc_script(
             node_name=self.node_name,
             dvc_run_option=dvc_run_option,
@@ -443,7 +480,7 @@ class GraphWriter:
             nb_name=nb_name,
             module=self.module,
             func_or_cls=self.__class__.__name__,
-            call_args=f".load(name='{self.node_name}').run_and_save()",
+            call_args=call_args,
         )
 
         # Add command to run the script

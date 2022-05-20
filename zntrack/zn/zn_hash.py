@@ -16,7 +16,7 @@ class Hash(ZnTrackOption):
      of using this trick.
     """
 
-    zn_type = utils.ZnTypes.RESULTS
+    zn_type = utils.ZnTypes.HASH
     dvc_option = utils.DVCOptions.OUTS_NO_CACHE.value
     allow_lazy: bool = False
 

@@ -107,7 +107,7 @@ def test__load():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example.update_options()
+        example._update_options()
         assert example.dvc_outs == "file_.txt"
         assert example.deps == "deps_.inp"
         assert example.params == 42
@@ -188,12 +188,12 @@ def test_update_dependency_options():
     with patch(f"{__name__}.MagicMock", spec=Node):
         magic_mock = MagicMock()
         update_dependency_options(magic_mock)
-        assert magic_mock.update_options.called
+        assert magic_mock._update_options.called
 
     with patch(f"{__name__}.MagicMock", spec=Node):
         magic_mock = MagicMock()
         update_dependency_options([magic_mock])
-        assert magic_mock.update_options.called
+        assert magic_mock._update_options.called
 
 
 class ZnTrackOptionCollection:
