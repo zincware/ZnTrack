@@ -10,11 +10,13 @@ import logging
 from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.zn.method import Method
+from zntrack.zn.nodes import Nodes
 from zntrack.zn.split_option import SplitZnTrackOption
+from zntrack.zn.zn_hash import Hash
 
 log = logging.getLogger(__name__)
 
-__all__ = [Method.__name__]
+__all__ = [Method.__name__, Hash.__name__, Nodes.__name__]
 
 try:
     from .plots import plots
@@ -50,8 +52,10 @@ class deps(ZnTrackOption):
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         """Use load_node_dependency before returning the value"""
+        if instance is None:
+            return self
         value = super().__get__(instance, owner)
         value = utils.utils.load_node_dependency(value)  # use value = Cls.load()
         setattr(instance, self.name, value)

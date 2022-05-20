@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import json
 import logging
 import pathlib
 import typing
@@ -8,6 +9,9 @@ import typing
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.descriptor import BaseDescriptorType
+from zntrack.zn import Nodes as zn_nodes
+from zntrack.zn import params as zn_params
 from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
@@ -93,6 +97,14 @@ def handle_dvc(value, dvc_args) -> list:
         return f"--{dvc_args}"
 
     def posix_func(dvc_path):
+        if dvc_args == "params":
+            # add :to the end to indicate that it actually is a file.
+            try:
+                return f"{pathlib.Path(dvc_path).as_posix()}:"
+            except TypeError as err:
+                raise ValueError(
+                    f"dvc.params does not support type {type(dvc_path)}"
+                ) from err
         return pathlib.Path(dvc_path).as_posix()
 
     # double list comprehension https://stackoverflow.com/a/11869360/10504481
@@ -158,7 +170,7 @@ def prepare_dvc_script(
     func_or_cls,
     call_args,
 ) -> list:
-    """Prepate the dvc cmd to be called by subprocess
+    """Prepare the dvc cmd to be called by subprocess
 
     Parameters
     ----------
@@ -197,34 +209,80 @@ def prepare_dvc_script(
     return script
 
 
+class ZnTrackInfo:
+    """Helping class for access to ZnTrack information"""
+
+    def __init__(self, parent):
+        self._parent = parent
+
+    def collect(self, zntrackoption: typing.Type[descriptor.BaseDescriptorType]) -> dict:
+        """Collect the values of all ZnTrackOptions of the passed type
+
+        Parameters
+        ----------
+        zntrackoption:
+            Any cls of a ZnTrackOption such as zn.params
+
+        Returns
+        -------
+        dict:
+            A dictionary of {option_name: option_value} for all found options of
+            the given type zntrackoption.
+        """
+        if isinstance(zntrackoption, (list, tuple)):
+            raise ValueError(
+                "collect only supports single ZnTrackOptions. Found"
+                f" {zntrackoption} instead."
+            )
+        options = descriptor.get_descriptors(zntrackoption, self=self._parent)
+        return {x.name: x.__get__(self._parent) for x in options}
+
+
 class GraphWriter:
     """Write the DVC Graph
 
     Main method that handles writing the Graph / dvc.yaml file
+
+    node_name: str
+        first priority is by passing it through kwargs
+        second is having the class attribute set in the class definition
+        last if both above are None it will be set to __class__.__name__
+    is_attribute: bool, default = False
+        If the Node is not used directly but through e.g. zn.Nodes() as a dependency
+        this can be set to True. It will disable all outputs in the params.yaml file
+        except for the zn.Hash().
     """
 
-    _node_name = None
+    node_name = None
     _module = None
+    _is_attribute = False
 
     def __init__(self, **kwargs):
-        self.node_name = kwargs.get("name", None)
+        name = kwargs.pop("name", None)
+        if name is not None:
+            # overwrite node_name attribute
+            self.node_name = name
+        if self.node_name is None:
+            # set default value of node_name attribute
+            self.node_name = self.__class__.__name__
+        if len(kwargs) > 0:
+            raise TypeError(f"'{kwargs}' are an invalid keyword argument")
+
+    def __hash__(self):
+        """compute the hash based on the parameters and node_name"""
+        params_dict = self.zntrack.collect(zn_params)
+        params_dict["node_name"] = self.node_name
+
+        return hash(json.dumps(params_dict, sort_keys=True))
 
     @property
-    def _descriptor_list(self) -> typing.List[ZnTrackOption]:
+    def _descriptor_list(self) -> typing.List[BaseDescriptorType]:
         """Get all descriptors of this instance"""
-        return descriptor.get_descriptors(self, ZnTrackOption)
-
-    @property
-    def node_name(self) -> str:
-        """Name of this node"""
-        if self._node_name is None:
-            return self.__class__.__name__
-        return self._node_name
-
-    @node_name.setter
-    def node_name(self, value):
-        """Overwrite the default node name based on the class name"""
-        self._node_name = value
+        descriptors = descriptor.get_descriptors(ZnTrackOption, self=self)
+        if self._is_attribute:
+            allowed_types = [utils.ZnTypes.PARAMS, utils.ZnTypes.HASH, utils.ZnTypes.DEPS]
+            return [x for x in descriptors if x.zn_type in allowed_types]
+        return descriptors
 
     @property
     def module(self) -> str:
@@ -237,6 +295,8 @@ class GraphWriter:
         this can be changed when using nb_mode
         """
         if self._module is None:
+            if utils.config.nb_name is not None:
+                return f"{utils.config.nb_class_path}.{self.__class__.__name__}"
             return utils.module_handler(self.__class__)
         return self._module
 
@@ -290,6 +350,24 @@ class GraphWriter:
         """
         utils.run_dvc_cmd(["dvc", "remove", self.node_name])
         # TODO remove from zntrack.json + params.yaml
+        
+    def _handle_nodes_as_methods(self):
+        """Write the graph for all zn.Nodes ZnTrackOptions
+
+        zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
+        They are shown in the dvc dag and have their own parameter section.
+        The name is <nodename>-<attributename> for these Nodes and they only
+        have a single hash output to be available for DVC dependencies.
+        """
+        for attribute, node in self.zntrack.collect(zn_nodes).items():
+            if node is None:
+                continue
+            node.node_name = f"{self.node_name}-{attribute}"
+            node._is_attribute = True
+            node.write_graph(
+                run=True,
+                call_args=f".load(name='{node.node_name}').save(results=True)",
+            )
 
     def write_graph(
         self,
@@ -304,6 +382,8 @@ class GraphWriter:
         no_run_cache: bool = False,
         dry_run: bool = False,
         run: bool = None,
+        *,
+        call_args: str = None,
     ):
         """Write the DVC file using run.
 
@@ -328,6 +408,8 @@ class GraphWriter:
         no_run_cache: dvc parameter
         dry_run: bool, default = False
             Only return the script but don't actually run anything
+        call_args: str, default = None
+            Custom call args. Defaults to '.load(name='{self.node_name}').run_and_save()'
 
         Notes
         -----
@@ -335,6 +417,8 @@ class GraphWriter:
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+
+        self._handle_nodes_as_methods()
 
         if silent:
             log.warning(
@@ -357,10 +441,8 @@ class GraphWriter:
 
         # Jupyter Notebook
         nb_name = utils.update_nb_name(nb_name)
-        if nb_name is not None:
-            self._module = f"{utils.config.nb_class_path}.{self.__class__.__name__}"
-            if notebook:
-                self.convert_notebook(nb_name)
+        if nb_name is not None and notebook:
+            self.convert_notebook(nb_name)
 
         custom_args = []
         dependencies = []
@@ -379,10 +461,7 @@ class GraphWriter:
                 value = getattr(self, option.name)
                 custom_args += handle_dvc(value, option.dvc_args)
             # Handle Zn Options
-            elif option.zn_type in [
-                utils.ZnTypes.RESULTS,
-                utils.ZnTypes.METADATA,
-            ]:
+            elif option.zn_type in utils.VALUE_DVC_TRACKED:
                 zn_options_set.add(
                     (
                         f"--{option.dvc_args}",
@@ -399,6 +478,9 @@ class GraphWriter:
         for pair in zn_options_set:
             custom_args += pair
 
+        if call_args is None:
+            call_args = f".load(name='{self.node_name}').run_and_save()"
+
         script = prepare_dvc_script(
             node_name=self.node_name,
             dvc_run_option=dvc_run_option,
@@ -406,7 +488,7 @@ class GraphWriter:
             nb_name=nb_name,
             module=self.module,
             func_or_cls=self.__class__.__name__,
-            call_args=f".load(name='{self.node_name}').run_and_save()",
+            call_args=call_args,
         )
 
         # Add command to run the script
@@ -421,3 +503,16 @@ class GraphWriter:
         if dry_run:
             return script
         utils.run_dvc_cmd(script)
+
+        run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+    @property
+    def zntrack(self) -> ZnTrackInfo:
+        return ZnTrackInfo(parent=self)
+
+
+def run_post_dvc_cmd(descriptor_list, instance):
+    """Run all post-dvc-cmds like plots modify"""
+    for desc in descriptor_list:
+        if desc.post_dvc_cmd(instance) is not None:
+            utils.run_dvc_cmd(desc.post_dvc_cmd(instance))

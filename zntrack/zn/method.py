@@ -1,7 +1,6 @@
 import logging
 
 from zntrack import utils
-from zntrack.utils import helpers
 from zntrack.zn.split_option import SplitZnTrackOption
 
 log = logging.getLogger(__name__)
@@ -31,20 +30,20 @@ class Method(SplitZnTrackOption):
 
     def get_filename(self, instance):
         """Does not have a single file but params.yaml and zntrack.json"""
-        return utils.Files.params, utils.Files.zntrack
+        return None
 
     def __set__(self, instance, value):
         """Include type check for better error reporting"""
         # TODO raise error on default values,
         #  make compatible types an attribute of descriptor
-        if helpers.isnode(value):
+        if utils.helpers.isnode(value):
             raise ValueError(
                 f"zn.Method() does not support type <Node> ({value})."
-                " Consider using zn.deps() instead"
+                " Consider using zn.deps() / zn.Nodes() instead"
             )
         super().__set__(instance, value)
 
-    def __get__(self, instance, owner):
+    def __get__(self, instance, owner=None):
         """Add some custom attributes to the instance to identify it in znjson"""
         if instance is None:
             # this must be here, even though it is in the super call, what follows

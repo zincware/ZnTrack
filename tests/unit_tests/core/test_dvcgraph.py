@@ -6,6 +6,7 @@ from zntrack import dvc, utils, zn
 from zntrack.core.dvcgraph import (
     DVCRunOptions,
     GraphWriter,
+    ZnTrackInfo,
     filter_ZnTrackOption,
     handle_deps,
     handle_dvc,
@@ -16,13 +17,6 @@ from zntrack.core.dvcgraph import (
 class ExampleDVCOutsNode(GraphWriter):
     is_loaded = False
     outs = dvc.outs(pathlib.Path("example.dat"))
-
-
-def test_node_name_get():
-    example = ExampleDVCOutsNode()
-    assert example.node_name == "ExampleDVCOutsNode"
-    example._node_name = "NamedExample"
-    assert example.node_name == "NamedExample"
 
 
 def test_get_dvc_arguments():
@@ -69,6 +63,10 @@ def test_handle_dvc():
         "--outs",
         "outs.txt",
     ]
+    assert handle_dvc(("myparams.yaml",), "params") == ["--params", "myparams.yaml:"]
+
+    with pytest.raises(ValueError):
+        handle_dvc(({"a": 100}), "params")
 
 
 def test_handle_deps_unknown():
@@ -195,3 +193,42 @@ def test_prepare_dvc_script():
         f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
         ' MyNode.load().run_and_save()" ',
     ]
+
+
+def test_ZnTrackInfo():
+    node = GraphWriter()
+    assert isinstance(node.zntrack, ZnTrackInfo)
+    assert node.zntrack._parent == node
+
+
+def test_ZnTrackInfo_collect():
+    node = GraphWriter()
+
+    with pytest.raises(ValueError):
+        node.zntrack.collect([zn.params, zn.outs])
+
+    example = ExampleClassWithParams()
+
+    assert example.zntrack.collect(zn.params) == {"param1": 1, "param2": 2}
+
+
+@pytest.mark.parametrize(
+    ("param1", "param2"),
+    ((5, 10), ("a", "b"), ([1, 2, 3], [1, 2, 3]), ({"a": [1, 2, 3], "b": [4, 5, 6]})),
+)
+def test_params_hash(param1, param2):
+    self_1 = ExampleClassWithParams()
+    self_1.param1 = param1
+    self_1.param2 = param2
+
+    self_2 = ExampleClassWithParams()
+    self_2.param1 = param1
+    self_2.param2 = param2
+
+    assert hash(self_1) == hash(self_2)
+
+    self_3 = ExampleClassWithParams(name="CustomCls")
+    self_3.param1 = param1
+    self_3.param2 = param2
+
+    assert hash(self_1) != hash(self_3)

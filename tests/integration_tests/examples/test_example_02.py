@@ -68,7 +68,7 @@ class ComputeABNamed(Node):
     b: ComputeB = dvc.deps(ComputeB.load())
     out = zn.outs()
 
-    param = dvc.params()
+    param = zn.params()
 
     def __init__(self, **kwargs):
         kwargs["name"] = "Stage_AB"

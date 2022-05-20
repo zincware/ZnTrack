@@ -64,21 +64,23 @@ def test_save(run):
         else:
             example.save()
             assert zntrack_mock().write.mock_calls == [
-                call(
-                    json.dumps(
-                        {"ExampleFullNode": {"dvc_outs": "file.txt"}},
-                        indent=4,
-                    )
-                ),
+                call(json.dumps({})),  # clear everything first
                 call(
                     json.dumps(
                         {"ExampleFullNode": {"deps": "deps.inp"}},
                         indent=4,
                     )
                 ),
+                call(
+                    json.dumps(
+                        {"ExampleFullNode": {"dvc_outs": "file.txt"}},
+                        indent=4,
+                    )
+                ),
             ]
             assert params_mock().write.mock_calls == [
-                call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4))
+                call(yaml.safe_dump({})),  # clear everything first
+                call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4)),
             ]
 
 
@@ -105,7 +107,7 @@ def test__load():
             raise ValueError(args)
 
     with patch.object(pathlib.Path, "open", pathlib_open):
-        example.update_options()
+        example._update_options()
         assert example.dvc_outs == "file_.txt"
         assert example.deps == "deps_.inp"
         assert example.params == 42
@@ -186,12 +188,12 @@ def test_update_dependency_options():
     with patch(f"{__name__}.MagicMock", spec=Node):
         magic_mock = MagicMock()
         update_dependency_options(magic_mock)
-        assert magic_mock.update_options.called
+        assert magic_mock._update_options.called
 
     with patch(f"{__name__}.MagicMock", spec=Node):
         magic_mock = MagicMock()
         update_dependency_options([magic_mock])
-        assert magic_mock.update_options.called
+        assert magic_mock._update_options.called
 
 
 class ZnTrackOptionCollection:
@@ -210,25 +212,23 @@ class ZnTrackOptionCollection:
     no_option2 = 42
 
 
-def test_get_auto_init_signature():
-    zn_option_names, signature_params = get_auto_init_signature(ZnTrackOptionCollection)
+class CollectionChild(ZnTrackOptionCollection):
+    pass
 
-    assert zn_option_names == [
-        "param1",
-        "param2",
-        "param3",
-        "out1",
-        "out2",
-        "out3",
-    ]
 
-    assert signature_params[0].name == "param1"
-    assert signature_params[0].annotation == dict
+@pytest.mark.parametrize("cls", (ZnTrackOptionCollection, CollectionChild))
+def test_get_auto_init_signature(cls):
+    zn_option_names, signature_params = get_auto_init_signature(cls)
 
-    assert signature_params[2].name == "param3"
-    assert signature_params[2].annotation is None
+    assert zn_option_names == ["out1", "out2", "out3", "param1", "param2", "param3"]
 
-    assert signature_params[-1].name == "out3"
+    # assert signature_params[0].name == "out1"
+    #
+    # assert signature_params[3].name == "param1"
+    # assert signature_params[3].annotation == dict
+    #
+    # assert signature_params[5].name == "param3"
+    # assert signature_params[5].annotation is None
 
 
 class NodeMock(metaclass=LoadViaGetItem):

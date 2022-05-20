@@ -1,4 +1,3 @@
-import re
 from abc import ABC, abstractmethod
 from functools import partial
 from typing import Callable
@@ -38,6 +37,37 @@ class MetaData(ABC):
         """Actual decorator"""
         raise NotImplementedError
 
+    @property
+    def name(self) -> str:
+        """Get the name of the metric this decorator will use"""
+        return f"{self.func_name}:{self.name_of_metric}"
+
+    @staticmethod
+    def get_history(cls) -> (dict, str):
+        """Get the values of the zn.metadata descriptor
+
+        Get a full metadata dict containing all previously collected metadata.
+        """
+        try:
+            metadata_attr, metadata = next(
+                iter(
+                    filter_ZnTrackOption(
+                        data=cls._descriptor_list,
+                        cls=cls,
+                        zn_type=utils.ZnTypes.METADATA,
+                        allow_none=True,
+                    ).items()
+                )
+            )
+        except StopIteration as error:
+            raise utils.exceptions.DescriptorMissing(
+                "Could not find a metadata descriptor. Please add zn.metadata()!"
+            ) from error
+        if metadata is None:
+            metadata = {}
+
+        return metadata, metadata_attr
+
     def __get__(self, instance, owner):
         """Converting decorator into descriptor
 
@@ -71,33 +101,7 @@ class MetaData(ABC):
             If the Node does not contain a <zn.metadata> descriptor
         """
 
-        try:
-            metadata_attr, metadata = next(
-                iter(
-                    filter_ZnTrackOption(
-                        data=cls._descriptor_list,
-                        cls=cls,
-                        zn_type=utils.ZnTypes.METADATA,
-                        allow_none=True,
-                    ).items()
-                )
-            )
-        except StopIteration as error:
-            raise utils.exceptions.DescriptorMissing(
-                "Could not find a metadata descriptor. Please add zn.metadata()!"
-            ) from error
-        if metadata is None:
-            metadata = {}
+        metadata, metadata_attr = self.get_history(cls)
+        metadata[self.name] = value
 
-        pattern = re.compile(rf"{self.func_name}(_[1-9]+)?:{self.name_of_metric}")
-
-        number_already_collected = len(list(filter(pattern.match, metadata)))
-
-        if number_already_collected == 0:
-            metadata_name = f"{self.func_name}:{self.name_of_metric}"
-        else:
-            metadata_name = (
-                f"{self.func_name}_{number_already_collected}:{self.name_of_metric}"
-            )
-        metadata[metadata_name] = value
         setattr(cls, metadata_attr, metadata)

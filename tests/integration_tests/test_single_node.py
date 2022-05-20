@@ -282,6 +282,10 @@ def test_auto_init(proj_path):
     assert SingleNodeNoInit.load().param1 == 25
     assert SingleNodeNoInit.load().param2 == 42
     assert SingleNodeNoInit.load().result == 25 + 42
+    # TODO add a check for parameters in the auto init
+    #  if they are not set and don't have a default
+    with pytest.raises(TypeError):
+        SingleNodeNoInit(unknown_param=15)
 
 
 class OutsNotWritten(Node):
@@ -329,3 +333,49 @@ def test_remove_from_graph(proj_path):
     assert dvc_yaml.exists()
     ExampleNode01().remove_from_graph()
     assert not dvc_yaml.exists()
+
+    
+class NodeCustomFileName(Node):
+    output_std = zn.outs()
+    output_custom = zn.outs(filename="custom_data")
+
+    def run(self):
+        self.output_std = "Hello World"
+        self.output_custom = "Lorem Ipsum"
+
+
+def test_NodeCustomFileName(proj_path):
+    NodeCustomFileName().write_graph(run=True)
+
+    assert NodeCustomFileName.load().output_std == "Hello World"
+    assert NodeCustomFileName.load().output_custom == "Lorem Ipsum"
+
+    output_std = pathlib.Path("nodes", "NodeCustomFileName", "outs.json")
+    output_custom = pathlib.Path("nodes", "NodeCustomFileName", "custom_data.json")
+
+    assert output_std.exists()
+    assert output_custom.exists()
+    #
+    assert json.loads(output_std.read_text())["output_std"] == "Hello World"
+    assert json.loads(output_custom.read_text())["output_custom"] == "Lorem Ipsum"
+
+
+def test_collect(proj_path):
+    ExampleNode01(inputs="Hello World").write_graph(run=True)
+    assert ExampleNode01.load().zntrack.collect(zn.params) == {"inputs": "Hello World"}
+    assert ExampleNode01.load().zntrack.collect(zn.outs) == {"outputs": "Hello World"}
+
+    SingleNodeNoInit(param1=25, param2=42).write_graph(run=True)
+    assert SingleNodeNoInit.load().zntrack.collect(zn.params) == {
+        "param1": 25,
+        "param2": 42,
+    }
+    assert SingleNodeNoInit.load().zntrack.collect(zn.outs) == {"result": 67}
+
+    ExampleNode01(inputs={"Hello": "World"}, name="TestNode").write_graph(run=True)
+    assert ExampleNode01["TestNode"].zntrack.collect(zn.params) == {
+        "inputs": {"Hello": "World"}
+    }
+
+    with pytest.raises(ValueError):
+        ExampleNode01["TestNode"].zntrack.collect((zn.params, zn.outs))
