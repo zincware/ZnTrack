@@ -8,7 +8,7 @@ keywords=["data-science", "data-version-control", "machine-learning", "reproduci
 
 
 [tool.poetry.dependencies]
-python = "^>=3.8,<3.11"
+python = ">=3.8,<3.11"
 dvc = "^2.10.2"
 pyyaml = "^6.0"
 znjson = "^0.1.2"
