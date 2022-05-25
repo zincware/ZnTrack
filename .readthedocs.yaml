@@ -7,7 +7,9 @@ build:
   tools: { python: "3.10" }
   jobs:
     pre_create_environment:
-      - pip install --pre poetry
+      - asdf plugin add poetry
+      - asdf install poetry 1.2.0b1
+      - asdf global poetry 1.2.0b1
       - poetry config virtualenvs.create false
     post_install:
       - poetry install
