@@ -7,13 +7,9 @@ build:
   tools: { python: "3.10" }
   jobs:
     pre_create_environment:
-      - asdf plugin add poetry
-      - asdf install poetry latest
-      - asdf global poetry latest
+      - pip install --pre poetry
       - poetry config virtualenvs.create false
     post_install:
-      - poetry run pip install numpy scikit-learn
-      - poetry add numpy scikit-learn
       - poetry install
 
 # Build documentation in the docs/ directory with Sphinx
