@@ -497,21 +497,20 @@ pgp = ["gpg"]
 
 [[package]]
 name = "dvc"
-version = "2.10.2"
+version = "2.11.0"
 description = "Git for data scientists - manage your code and data together"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
 aiohttp-retry = ">=2.4.5"
 appdirs = ">=1.4.3"
 colorama = ">=0.3.9"
 configobj = ">=5.0.6"
-dictdiffer = ">=0.8.1"
-diskcache = ">=5.2.1"
 distro = ">=1.3.0"
 dpath = ">=2.0.2,<3"
+dvc-data = "0.0.2"
 dvc-render = "0.0.5"
 dvclive = ">=0.7.3"
 flatten-dict = ">=0.4.1,<1"
@@ -520,8 +519,7 @@ fsspec = {version = ">=2021.10.1", extras = ["http"]}
 funcy = ">=1.14"
 grandalf = "0.6"
 importlib-resources = {version = ">=5.2.2", markers = "python_version < \"3.9\""}
-nanotime = ">=0.5.2"
-networkx = ">=2.5"
+networkx = ">=2.5,<2.8.3"
 packaging = ">=19.0"
 pathspec = ">=0.9.0,<0.10.0"
 psutil = ">=5.8.0"
@@ -532,7 +530,7 @@ python-benedict = ">=0.24.2"
 requests = ">=2.22.0"
 rich = ">=10.13.0"
 "ruamel.yaml" = ">=0.17.11"
-scmrepo = "0.0.19"
+scmrepo = "0.0.24"
 shortuuid = ">=0.5.0"
 shtab = ">=1.3.4,<2"
 tabulate = ">=0.8.7"
@@ -543,20 +541,71 @@ voluptuous = ">=0.11.7"
 "zc.lockfile" = ">=1.2.1"
 
 [package.extras]
-all = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2021.11.1)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)"]
+all = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2022.6.0)", "webdav4 (>=0.9.3)"]
 azure = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack"]
-dev = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2021.11.1)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)", "tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.1)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.7.0)", "pytest-lazy-fixture (==0.6.3)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.6.0)", "pylint (==2.13.7)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.942)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
+dev = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2022.6.0)", "webdav4 (>=0.9.3)", "tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.2)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.7.0)", "pytest-lazy-fixture (==0.6.3)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.7.0)", "pylint (==2.13.9)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.942)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
 gdrive = ["pydrive2[fsspec] (>=1.10.1)"]
 gs = ["gcsfs (>=2021.11.1)"]
 hdfs = ["pyarrow (>=1)", "fsspec"]
 oss = ["ossfs (>=2021.8.0)"]
-s3 = ["s3fs[boto3] (>=2021.11.1)", "aiobotocore[boto3] (>2)"]
-ssh = ["bcrypt", "sshfs[bcrypt] (>=2021.11.2)"]
-ssh_gssapi = ["sshfs[gssapi] (>=2021.11.2)"]
+s3 = ["s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)"]
+ssh = ["bcrypt", "sshfs[bcrypt] (>=2022.6.0)"]
+ssh_gssapi = ["sshfs[gssapi] (>=2022.6.0)"]
 terraform = ["tpi[ssh] (>=2.1.0)"]
-tests = ["tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.1)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.7.0)", "pytest-lazy-fixture (==0.6.3)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.6.0)", "pylint (==2.13.7)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.942)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
+tests = ["tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.2)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.7.0)", "pytest-lazy-fixture (==0.6.3)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.7.0)", "pylint (==2.13.9)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.942)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
 webdav = ["webdav4 (>=0.9.3)"]
 webdhfs_kerberos = ["requests-kerberos (==0.14.0)"]
+
+[[package]]
+name = "dvc-data"
+version = "0.0.2"
+description = "dvc data"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+dictdiffer = ">=0.8.1"
+dvc-objects = "0.0.2"
+funcy = ">=1.14"
+pygtrie = ">=2.3.2"
+shortuuid = ">=0.5.0"
+
+[package.extras]
+dev = ["pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.7.0)", "pylint (==2.13.9)", "mypy (==0.950)"]
+tests = ["pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.7.0)", "pylint (==2.13.9)", "mypy (==0.950)"]
+
+[[package]]
+name = "dvc-objects"
+version = "0.0.2"
+description = "dvc objects"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+diskcache = ">=5.2.1"
+flatten-dict = ">=0.4.1,<1"
+fsspec = ">=2021.10.1"
+funcy = ">=1.14"
+nanotime = ">=0.5.2"
+shortuuid = ">=0.5.0"
+tqdm = ">=4.63.1,<5"
+typing-extensions = ">=3.7.4"
+
+[package.extras]
+all = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "aiohttp-retry (>=2.4.5)", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)"]
+azure = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack"]
+dev = ["pytest (==6.2.5)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.6.1)", "pylint (==2.12.2)", "mypy (==0.931)", "adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "aiohttp-retry (>=2.4.5)", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)"]
+gdrive = ["pydrive2[fsspec] (>=1.10.1)"]
+gs = ["gcsfs (>=2021.11.1)"]
+hdfs = ["pyarrow (>=1)", "fsspec"]
+http = ["aiohttp-retry (>=2.4.5)"]
+oss = ["ossfs (>=2021.8.0)"]
+s3 = ["s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)"]
+ssh = ["bcrypt", "sshfs[bcrypt] (>=2021.11.2)"]
+tests = ["pytest (==6.2.5)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.6.1)", "pylint (==2.12.2)", "mypy (==0.931)"]
+webdav = ["webdav4 (>=0.9.3)"]
 
 [[package]]
 name = "dvc-render"
@@ -1928,7 +1977,7 @@ numpy = ">=1.17.3,<1.25.0"
 
 [[package]]
 name = "scmrepo"
-version = "0.0.19"
+version = "0.0.24"
 description = "SCM wrapper and fsspec filesystem for Git for use in DVC"
 category = "main"
 optional = false
@@ -1936,7 +1985,7 @@ python-versions = ">=3.7"
 
 [package.dependencies]
 asyncssh = ">=2.7.1,<3"
-dulwich = ">=0.20.34"
+dulwich = ">=0.20.38"
 fsspec = ">=2021.7.0"
 funcy = ">=1.14"
 gitpython = ">3"
@@ -1945,7 +1994,7 @@ pygit2 = ">=1.7.2"
 pygtrie = ">=2.3.2"
 
 [package.extras]
-dev = ["pytest (==6.2.5)", "pytest-sugar (==0.9.4)", "pytest-test-utils (==0.0.6)", "pytest-cov (==3.0.0)", "pytest-mock (==3.6.1)", "pytest-asyncio (==0.16.0)", "pylint (==2.11.1)", "mock (==4.0.3)", "mypy (==0.910)", "paramiko (==2.8.1)", "types-certifi (==2021.10.8.0)", "types-mock (==4.0.13)", "types-paramiko (==2.8.1)", "pytest-docker (==0.10.3)"]
+dev = ["pytest (==6.2.5)", "pytest-sugar (==0.9.4)", "pytest-test-utils (==0.0.6)", "pytest-cov (==3.0.0)", "pytest-mock (==3.6.1)", "pytest-asyncio (==0.16.0)", "pylint (==2.11.1)", "mock (==4.0.3)", "mypy (==0.910)", "paramiko (==2.10.0)", "types-certifi (==2021.10.8.0)", "types-mock (==4.0.13)", "types-paramiko (==2.10.0)", "pytest-docker (==0.10.3)"]
 
 [[package]]
 name = "send2trash"
@@ -2413,7 +2462,7 @@ python-versions = ">=3.7"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<3.11"
-content-hash = "ede0a03e8d65e666cfa3006aa048eee0c746365ee5c0750afd0ae77e37a1d2dd"
+content-hash = "f6cdb1b14fcee738b6729a464a4f851b2e92c8a13cf15f04ee168a5de57d6daf"
 
 [metadata.files]
 aiohttp = [
@@ -2840,8 +2889,16 @@ dulwich = [
     {file = "dulwich-0.20.42.tar.gz", hash = "sha256:72ba3b60ae6a554d1332b3b40a345febe16ec469cf6014bb443b719902e33ef0"},
 ]
 dvc = [
-    {file = "dvc-2.10.2-py3-none-any.whl", hash = "sha256:b332ed1f48f2c9764767a5eb1830ba47d0c0b47b07edeae09a27f1b33e3a8b0f"},
-    {file = "dvc-2.10.2.tar.gz", hash = "sha256:b2da2306ad4102604b3470a0407e812b13edd0f43a184c945c4b8845e2545f1e"},
+    {file = "dvc-2.11.0-py3-none-any.whl", hash = "sha256:8fe9238724acadfaaf838b775fb92d2a79e35344328aff2d2258198678b2aacc"},
+    {file = "dvc-2.11.0.tar.gz", hash = "sha256:26f5ba2a89a94874a4cc5046835717f8122c6e9adcf7097f5ec93a3a816388a0"},
+]
+dvc-data = [
+    {file = "dvc-data-0.0.2.tar.gz", hash = "sha256:17b67b3457e85eaa436313a69ad858dc282b59495bb02add5d5710c3e349caba"},
+    {file = "dvc_data-0.0.2-py3-none-any.whl", hash = "sha256:b523348b7e4b7bb9a1df7dc8d7789996befd04d67109931da18c9e7f82be40f7"},
+]
+dvc-objects = [
+    {file = "dvc-objects-0.0.2.tar.gz", hash = "sha256:65370e3ea83b4c4b2ad8567ef8aa79b5b4c0fc2b3a4ff6ea2290ca64a65c6fcf"},
+    {file = "dvc_objects-0.0.2-py3-none-any.whl", hash = "sha256:930c6ebf1aa9c9e7f1694f348c937dba1911d6ebdf3319ca18eb8dafcd2b07df"},
 ]
 dvc-render = [
     {file = "dvc-render-0.0.5.tar.gz", hash = "sha256:a864df15152533f3363b62851df06f0e830b9a217ad88ca184b8ecfbaefce485"},
@@ -3821,8 +3878,8 @@ scipy = [
     {file = "scipy-1.8.1.tar.gz", hash = "sha256:9e3fb1b0e896f14a85aa9a28d5f755daaeeb54c897b746df7a55ccb02b340f33"},
 ]
 scmrepo = [
-    {file = "scmrepo-0.0.19-py3-none-any.whl", hash = "sha256:ae26b70ce3b1cb59ae8e81718723f53091747a61c2df65202e96ffa8166e979b"},
-    {file = "scmrepo-0.0.19.tar.gz", hash = "sha256:30b57f5d4452efd090074cba2395055a895ba7725cfe5abfee294acb8a673e3e"},
+    {file = "scmrepo-0.0.24-py3-none-any.whl", hash = "sha256:5201f10d850237596f2c0ae8f5b5757fe9994e4c637ffe85a3940b9d71bdf529"},
+    {file = "scmrepo-0.0.24.tar.gz", hash = "sha256:8bbe72a3546694febab5fc57a47017c181a96f4a44c00ccd1fd9d5b6fa06246e"},
 ]
 send2trash = [
     {file = "Send2Trash-1.8.0-py3-none-any.whl", hash = "sha256:f20eaadfdb517eaca5ce077640cb261c7d2698385a6a0f072a4a5447fd49fa08"},
