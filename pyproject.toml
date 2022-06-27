@@ -14,7 +14,7 @@ pyyaml = "^6.0"
 znjson = "^0.1.2"
 dot4dict = "^0.1.1"
 tqdm = "^4.64.0"
-pandas = "^1.4.2"
+pandas = "^1.4.3"
 
 [tool.poetry.dev-dependencies]
 pytest = "^7.1.2"
