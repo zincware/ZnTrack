@@ -6,6 +6,8 @@ import logging
 import pathlib
 import typing
 
+import znjson
+
 from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
@@ -273,7 +275,7 @@ class GraphWriter:
         params_dict = self.zntrack.collect(zn_params)
         params_dict["node_name"] = self.node_name
 
-        return hash(json.dumps(params_dict, sort_keys=True))
+        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
 
     @property
     def _descriptor_list(self) -> typing.List[BaseDescriptorType]:

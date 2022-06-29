@@ -42,6 +42,11 @@ information or write an issue on Github for https://github.com/zincware/ZnTrack
 
 .. toctree::
    :maxdepth: 1
+
+   _architecture/zntrack
+
+.. toctree::
+   :maxdepth: 1
    :caption: Migration to v0.3:
 
    _tutorials/migration_guide_v3

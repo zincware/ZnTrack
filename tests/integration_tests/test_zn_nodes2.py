@@ -1,8 +1,10 @@
+import dataclasses
 import os
 import shutil
 import subprocess
 
 import pytest
+import znjson
 
 from zntrack import zn
 from zntrack.core.base import Node
@@ -120,3 +122,47 @@ def test_NodeWithOuts(proj_path):
     node_1.write_graph(run=True)
 
     assert SingleExampleNode.load().params1.factor == 2
+
+
+@dataclasses.dataclass
+class Parameter:
+    value: int = 0
+
+
+class NodeWithParameter(Node):
+    parameter = zn.params(Parameter())
+    _hash = zn.Hash()
+
+
+class MoreNode(Node):
+    node: NodeWithParameter = zn.Nodes()
+
+
+class ParameterConverter(znjson.ConverterBase):
+    level = 100
+    representation = "parameter"
+    instance = Parameter
+
+    def _encode(self, obj: Parameter) -> dict:
+        return dataclasses.asdict(obj)
+
+    def _decode(self, value: dict) -> Parameter:
+        return Parameter(**value)
+
+
+def test_DataclassNode(proj_path):
+    znjson.register(ParameterConverter)
+
+    node_w_params = NodeWithParameter(parameter=Parameter(value=42))
+    node_w_params.write_graph()
+
+    node = MoreNode(node=NodeWithParameter(parameter=Parameter(value=10)))
+    node.write_graph()
+
+    node_w_params = node_w_params.load()
+    assert node_w_params.parameter.value == 42
+
+    node = node.load()
+    assert node.node.parameter.value == 10
+
+    znjson.deregister(ParameterConverter)

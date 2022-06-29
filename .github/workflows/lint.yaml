@@ -12,7 +12,7 @@ jobs:
       - name: Black Check
         uses: psf/black@stable
         with:
-          version: "22.3.0"
+          version: "22.6.0"
 
   isort:
     runs-on: ubuntu-latest
