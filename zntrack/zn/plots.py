@@ -35,6 +35,8 @@ class plots(PlotsModifyOption):  # pylint: disable=invalid-name
 
     def get_data_from_files(self, instance):
         """Load value with pd.read_csv"""
-
-        file = self.get_filename(instance)
-        return pd.read_csv(file, index_col=0)
+        try:
+            file = self.get_filename(instance)
+            return pd.read_csv(file, index_col=0)
+        except FileNotFoundError:
+            return None
