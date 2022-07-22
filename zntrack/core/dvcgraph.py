@@ -113,56 +113,6 @@ def handle_dvc(value, dvc_args) -> list:
     return [f(x) for x in value for f in (option_func, posix_func)]
 
 
-def filter_ZnTrackOption(
-    data,
-    cls,
-    zn_type: typing.Union[utils.ZnTypes, typing.List[utils.ZnTypes]],
-    return_with_type=False,
-    allow_none: bool = False,
-) -> dict:
-    """Filter the descriptor instances by zn_type
-
-    Parameters
-    ----------
-    data: List[ZnTrackOption]
-        The ZnTrack options to query through
-    cls:
-        The instance the ZnTrack options are attached to
-    zn_type: str
-        The zn_type of the descriptors to gather
-    return_with_type: bool, default=False
-        return a dictionary with the Descriptor.dvc_option as keys
-    allow_none: bool, default=False
-        Use getattr(obj, name, None) instead of getattr(obj, name) to yield
-        None when an AttributeError occurs.
-
-    Returns
-    -------
-    dict:
-        either {attr_name: attr_value}
-        or
-        {descriptor.dvc_option: {attr_name: attr_value}}
-
-    """
-    if not isinstance(zn_type, list):
-        zn_type = [zn_type]
-    data = [x for x in data if x.zn_type in zn_type]
-    if return_with_type:
-        types_dict = {x.dvc_option: {} for x in data}
-        for entity in data:
-            if allow_none:
-                # avoid AttributeError
-                value = getattr(cls, entity.name, None)
-            else:
-                value = getattr(cls, entity.name)
-            types_dict[entity.dvc_option].update({entity.name: value})
-        return types_dict
-    if allow_none:
-        return {x.name: getattr(cls, x.name, None) for x in data}
-    # avoid AttributeError
-    return {x.name: getattr(cls, x.name) for x in data}
-
-
 def prepare_dvc_script(
     node_name,
     dvc_run_option: DVCRunOptions,
@@ -441,7 +391,7 @@ class GraphWriter:
         custom_args = []
         dependencies = []
         # Handle Parameter
-        params_list = filter_ZnTrackOption(
+        params_list = utils.helpers.filter_ZnTrackOption(
             data=self._descriptor_list, cls=self, zn_type=[utils.ZnTypes.PARAMS]
         )
         if len(params_list) > 0:
