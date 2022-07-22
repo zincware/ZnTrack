@@ -12,6 +12,7 @@ from zntrack import descriptor, utils
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.descriptor import BaseDescriptorType
+from zntrack.metadata.collectors import NodeInfo, RunInfo
 from zntrack.zn import Nodes as zn_nodes
 from zntrack.zn import params as zn_params
 from zntrack.zn.dependencies import NodeAttribute
@@ -161,13 +162,18 @@ def prepare_dvc_script(
     return script
 
 
+ZN_COLLECT_TYPE = typing.Type[
+    typing.Union[NodeInfo, RunInfo, descriptor.BaseDescriptorType]
+]
+
+
 class ZnTrackInfo:
     """Helping class for access to ZnTrack information"""
 
     def __init__(self, parent):
         self._parent = parent
 
-    def collect(self, zntrackoption: typing.Type[descriptor.BaseDescriptorType]) -> dict:
+    def collect(self, zntrackoption: ZN_COLLECT_TYPE) -> dict:
         """Collect the values of all ZnTrackOptions of the passed type
 
         Parameters
@@ -186,6 +192,13 @@ class ZnTrackInfo:
                 "collect only supports single ZnTrackOptions. Found"
                 f" {zntrackoption} instead."
             )
+
+        if zntrackoption in (NodeInfo, RunInfo):
+            for option in dir(type(self._parent)):
+                value = getattr(type(self._parent), option)
+                if isinstance(value, zntrackoption):
+                    return {option: value}
+
         options = descriptor.get_descriptors(zntrackoption, self=self._parent)
         return {x.name: x.__get__(self._parent) for x in options}
 
