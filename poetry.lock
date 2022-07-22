@@ -49,6 +49,17 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "amqp"
+version = "5.1.1"
+description = "Low-level AMQP client for Python (fork of amqplib)."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+vine = ">=5.0.0"
+
+[[package]]
 name = "anyio"
 version = "3.6.1"
 description = "High level compatibility layer for multiple asynchronous event loop implementations"
@@ -237,6 +248,14 @@ html5lib = ["html5lib"]
 lxml = ["lxml"]
 
 [[package]]
+name = "billiard"
+version = "4.0.0"
+description = "Python multiprocessing fork with improvements and bugfixes"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "black"
 version = "22.6.0"
 description = "The uncompromising code formatter."
@@ -273,6 +292,57 @@ webencodings = "*"
 [package.extras]
 css = ["tinycss2 (>=1.1.0,<1.2)"]
 dev = ["build (==0.8.0)", "flake8 (==4.0.1)", "hashin (==0.17.0)", "pip-tools (==6.6.2)", "pytest (==7.1.2)", "Sphinx (==4.3.2)", "tox (==3.25.0)", "twine (==4.0.1)", "wheel (==0.37.1)", "black (==22.3.0)", "mypy (==0.961)"]
+
+[[package]]
+name = "celery"
+version = "5.3.0a1"
+description = "Distributed Task Queue."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+billiard = ">=3.6.4.0,<5.0"
+click = ">=8.1.2,<9.0"
+click-didyoumean = ">=0.3.0"
+click-plugins = ">=1.1.1"
+click-repl = ">=0.2.0"
+kombu = ">=5.3.0a1,<6.0"
+pytz = ">=2021.3"
+vine = ">=5.0.0,<6.0"
+
+[package.extras]
+arangodb = ["pyArango (>=2.0.1)"]
+auth = ["cryptography (>=37.0.1,<37.1.0)"]
+azureblockblob = ["azure-storage-blob (>=12.11.0)"]
+brotli = ["brotli (>=1.0.0)", "brotlipy (>=0.7.0)"]
+cassandra = ["cassandra-driver (>=3.25.0,<4)"]
+consul = ["python-consul2 (==0.1.5)"]
+cosmosdbsql = ["pydocumentdb (==2.3.5)"]
+couchbase = ["couchbase (>=3.0.0)"]
+couchdb = ["pycouchdb (==1.14.2)"]
+django = ["Django (>=1.11)"]
+dynamodb = ["boto3 (>=1.22.2)"]
+elasticsearch = ["elasticsearch (<8.0)"]
+eventlet = ["eventlet (>=0.32.0)"]
+gevent = ["gevent (>=1.5.0)"]
+librabbitmq = ["librabbitmq (>=1.5.0)"]
+memcache = ["pylibmc (==1.6.1)"]
+mongodb = ["pymongo[srv] (>=4.0.2)"]
+msgpack = ["msgpack (==1.0.4)"]
+pymemcache = ["python-memcached (==1.59)"]
+pyro = ["pyro4 (==4.82)"]
+pytest = ["pytest-celery (==0.0.0)"]
+redis = ["redis (>=4.2.2)"]
+s3 = ["boto3 (>=1.9.125)"]
+slmq = ["softlayer-messaging (>=1.0.3)"]
+solar = ["ephem (>=4.1.3,<4.2.0)"]
+sqlalchemy = ["sqlalchemy (>=1.4.34,<1.5.0)"]
+sqs = ["kombu[sqs] (>=5.2.4,<5.3.0)"]
+tblib = ["tblib (>=1.3.0)", "tblib (>=1.5.0)"]
+yaml = ["PyYAML (>=3.10)"]
+zookeeper = ["kazoo (>=1.3.1)"]
+zstd = ["zstandard (==0.17.0)"]
 
 [[package]]
 name = "certifi"
@@ -316,12 +386,50 @@ unicode_backport = ["unicodedata2"]
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
 colorama = {version = "*", markers = "platform_system == \"Windows\""}
+
+[[package]]
+name = "click-didyoumean"
+version = "0.3.0"
+description = "Enables git-like *did-you-mean* feature in click"
+category = "main"
+optional = false
+python-versions = ">=3.6.2,<4.0.0"
+
+[package.dependencies]
+click = ">=7"
+
+[[package]]
+name = "click-plugins"
+version = "1.1.1"
+description = "An extension module for click to enable registering CLI commands via setuptools entry-points."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = ">=4.0"
+
+[package.extras]
+dev = ["coveralls", "wheel", "pytest-cov", "pytest (>=3.6)"]
+
+[[package]]
+name = "click-repl"
+version = "0.2.0"
+description = "REPL plugin for Click"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = "*"
+prompt-toolkit = "*"
+six = "*"
 
 [[package]]
 name = "colorama"
@@ -497,7 +605,7 @@ pgp = ["gpg"]
 
 [[package]]
 name = "dvc"
-version = "2.13.0"
+version = "2.15.0"
 description = "Git for data scientists - manage your code and data together"
 category = "main"
 optional = false
@@ -510,8 +618,9 @@ colorama = ">=0.3.9"
 configobj = ">=5.0.6"
 distro = ">=1.3.0"
 dpath = ">=2.0.2,<3"
-dvc-data = "0.0.23"
+dvc-data = "0.1.5"
 dvc-render = "0.0.6"
+dvc-task = "0.1.0"
 dvclive = ">=0.7.3"
 flatten-dict = ">=0.4.1,<1"
 "flufl.lock" = ">=5"
@@ -543,7 +652,7 @@ voluptuous = ">=0.11.7"
 [package.extras]
 all = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2022.6.0)", "webdav4 (>=0.9.3)"]
 azure = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack"]
-dev = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2022.6.0)", "webdav4 (>=0.9.3)", "tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.2)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.8.2)", "pytest-lazy-fixture (==0.6.3)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.7.1)", "pylint (==2.14.4)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.961)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "beautifulsoup4 (==4.11.1)", "dvc-data", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
+dev = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "pyarrow (>=1)", "fsspec", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2022.6.0)", "webdav4 (>=0.9.3)", "tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.2)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.8.2)", "pytest-lazy-fixture (==0.6.3)", "pytest-test-utils (==0.0.8)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.7.1)", "pylint (==2.14.5)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.971)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "beautifulsoup4 (==4.11.1)", "dvc-data", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
 gdrive = ["pydrive2[fsspec] (>=1.10.1)"]
 gs = ["gcsfs (>=2021.11.1)"]
 hdfs = ["pyarrow (>=1)", "fsspec"]
@@ -552,13 +661,13 @@ s3 = ["s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)"]
 ssh = ["bcrypt", "sshfs[bcrypt] (>=2022.6.0)"]
 ssh_gssapi = ["sshfs[gssapi] (>=2022.6.0)"]
 terraform = ["tpi[ssh] (>=2.1.0)"]
-tests = ["tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.2)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.8.2)", "pytest-lazy-fixture (==0.6.3)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.7.1)", "pylint (==2.14.4)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.961)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "beautifulsoup4 (==4.11.1)", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
+tests = ["tpi[ssh] (>=2.1.0)", "dvc-ssh (==0.0.1a0)", "pytest (==7.1.2)", "pytest-cov (==3.0.0)", "pytest-xdist (==2.5.0)", "pytest-mock (==3.8.2)", "pytest-lazy-fixture (==0.6.3)", "pytest-test-utils (==0.0.8)", "flaky (==3.7.0)", "mock (==4.0.3)", "pytest-timeout (==2.1.0)", "filelock (==3.7.1)", "pylint (==2.14.5)", "pylint-pytest (==1.1.2)", "pylint-plugin-utils (==0.7)", "mypy (==0.971)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)", "dvclive[image] (>=0.7.3)", "beautifulsoup4 (==4.11.1)", "pytest-docker (==0.11.0)", "pywin32 (>=225)"]
 webdav = ["webdav4 (>=0.9.3)"]
-webdhfs_kerberos = ["requests-kerberos (==0.14.0)"]
+webhdfs_kerberos = ["requests-kerberos (==0.14.0)"]
 
 [[package]]
 name = "dvc-data"
-version = "0.0.23"
+version = "0.1.5"
 description = "dvc data"
 category = "main"
 optional = false
@@ -567,21 +676,21 @@ python-versions = ">=3.8"
 [package.dependencies]
 dictdiffer = ">=0.8.1"
 diskcache = ">=5.2.1"
-dvc-objects = "0.0.23"
+dvc-objects = "0.1.5"
 funcy = ">=1.14"
 nanotime = ">=0.5.2"
 pygtrie = ">=2.3.2"
 shortuuid = ">=0.5.0"
 
 [package.extras]
-all = ["typer (>0.4,<0.6)", "rich (>=10.11.0,<13.0.0)"]
-cli = ["typer (>0.4,<0.6)", "rich (>=10.11.0,<13.0.0)"]
-dev = ["typer (>0.4,<0.6)", "rich (>=10.11.0,<13.0.0)", "pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.1)", "pylint (==2.14.4)", "mypy (==0.961)", "moto[server] (==3.1.16)", "requests (==2.28.1)", "types-requests (==2.28.0)", "universal-pathlib (==0.0.19)", "s3fs[boto3] (>=2022.02.0)"]
-tests = ["pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.1)", "pylint (==2.14.4)", "mypy (==0.961)", "moto[server] (==3.1.16)", "requests (==2.28.1)", "types-requests (==2.28.0)", "universal-pathlib (==0.0.19)", "s3fs[boto3] (>=2022.02.0)"]
+dev = ["pylint (==2.14.5)", "typer[rich] (>=0.6)", "rich (>=10.11.0,<13.0.0)", "pytest (==7.1.2)", "pytest-sugar (==0.9.5)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "mypy (==0.961)", "pytest-servers[s3] (==0.0.7)", "blake3 (>=0.3.1)"]
+all = ["typer[rich] (>=0.6)", "rich (>=10.11.0,<13.0.0)"]
+cli = ["typer[rich] (>=0.6)", "rich (>=10.11.0,<13.0.0)"]
+tests = ["pytest (==7.1.2)", "pytest-sugar (==0.9.5)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pylint (==2.14.5)", "mypy (==0.961)", "pytest-servers[s3] (==0.0.7)"]
 
 [[package]]
 name = "dvc-objects"
-version = "0.0.23"
+version = "0.1.5"
 description = "dvc objects"
 category = "main"
 optional = false
@@ -597,17 +706,17 @@ tqdm = ">=4.63.1,<5"
 typing-extensions = ">=3.7.4"
 
 [package.extras]
-all = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "aiohttp-retry (>=2.4.5)", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)", "pyarrow (>=1)", "fsspec"]
+all = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.14.0)", "gcsfs (>=2021.11.1)", "aiohttp-retry (>=2.4.5)", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)", "pyarrow (>=1)", "fsspec"]
 azure = ["adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack"]
-dev = ["pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.1)", "pylint (==2.14.4)", "mypy (==0.961)", "pytest-servers[s3] (==0.0.3)", "adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.10.1)", "gcsfs (>=2021.11.1)", "aiohttp-retry (>=2.4.5)", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)", "pyarrow (>=1)", "fsspec"]
-gdrive = ["pydrive2[fsspec] (>=1.10.1)"]
+dev = ["pytest (==7.1.2)", "pytest-sugar (==0.9.5)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pylint (==2.14.5)", "mypy (==0.961)", "pytest-servers[s3] (==0.0.7)", "adlfs (>=2021.10.0)", "azure-identity (>=1.4.0)", "knack", "pydrive2[fsspec] (>=1.14.0)", "gcsfs (>=2021.11.1)", "aiohttp-retry (>=2.4.5)", "ossfs (>=2021.8.0)", "s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)", "bcrypt", "sshfs[bcrypt] (>=2021.11.2)", "webdav4 (>=0.9.3)", "pyarrow (>=1)", "fsspec"]
+gdrive = ["pydrive2[fsspec] (>=1.14.0)"]
 gs = ["gcsfs (>=2021.11.1)"]
 hdfs = ["pyarrow (>=1)", "fsspec"]
 http = ["aiohttp-retry (>=2.4.5)"]
 oss = ["ossfs (>=2021.8.0)"]
 s3 = ["s3fs[boto3] (>=2022.02.0)", "aiobotocore[boto3] (>2)"]
 ssh = ["bcrypt", "sshfs[bcrypt] (>=2021.11.2)"]
-tests = ["pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.1)", "pylint (==2.14.4)", "mypy (==0.961)", "pytest-servers[s3] (==0.0.3)"]
+tests = ["pytest (==7.1.2)", "pytest-sugar (==0.9.5)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pylint (==2.14.5)", "mypy (==0.961)", "pytest-servers[s3] (==0.0.7)"]
 webdav = ["webdav4 (>=0.9.3)"]
 
 [[package]]
@@ -626,6 +735,26 @@ tabulate = ">=0.8.7"
 dev = ["pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.7.0)", "pylint (==2.13.9)", "mypy (==0.961)", "pytest-test-utils (>=0.0.6)", "mkdocs (==1.3.0)", "mkdocs-gen-files (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-section-index (==0.3.4)", "mkdocstrings-python (==0.7.0)"]
 docs = ["mkdocs (==1.3.0)", "mkdocs-gen-files (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-section-index (==0.3.4)", "mkdocstrings-python (==0.7.0)"]
 tests = ["pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.7.0)", "pylint (==2.13.9)", "mypy (==0.961)", "pytest-test-utils (>=0.0.6)"]
+
+[[package]]
+name = "dvc-task"
+version = "0.1.0"
+description = "Extensible task queue used in DVC."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+celery = ">=5.3.0a1,<6"
+funcy = ">=1.17"
+kombu = ">=5.3.0a1"
+pywin32 = {version = ">=225", markers = "sys_platform == \"win32\""}
+shortuuid = ">=1.0.8"
+
+[package.extras]
+dev = ["flaky (==3.7.0)", "pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.7.0)", "pylint (==2.13.9)", "mypy (==0.950)", "pytest-test-utils (>=0.0.6)", "pytest-celery", "celery-types (>=0.11.0)", "mkdocs (==1.3.0)", "mkdocs-gen-files (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-section-index (==0.3.4)", "mkdocstrings-python (==0.7.0)"]
+docs = ["mkdocs (==1.3.0)", "mkdocs-gen-files (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-section-index (==0.3.4)", "mkdocstrings-python (==0.7.0)"]
+tests = ["flaky (==3.7.0)", "pytest (==7.1.2)", "pytest-sugar (==0.9.4)", "pytest-cov (==3.0.0)", "pytest-mock (==3.7.0)", "pylint (==2.13.9)", "mypy (==0.950)", "pytest-test-utils (>=0.0.6)", "pytest-celery", "celery-types (>=0.11.0)"]
 
 [[package]]
 name = "dvclive"
@@ -1187,6 +1316,35 @@ optional = false
 python-versions = ">=3.7"
 
 [[package]]
+name = "kombu"
+version = "5.3.0a1"
+description = "Messaging library for Python."
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[package.dependencies]
+amqp = ">=5.1.1,<6.0.0"
+typing-extensions = {version = "*", markers = "python_version < \"3.10\""}
+vine = "*"
+
+[package.extras]
+azureservicebus = ["azure-servicebus (>=7.6.1)"]
+azurestoragequeues = ["azure-storage-queue (>=12.2.0)"]
+consul = ["python-consul2"]
+librabbitmq = ["librabbitmq (>=2.0.0)"]
+mongodb = ["pymongo (>=4.1.1)"]
+msgpack = ["msgpack"]
+pyro = ["pyro4"]
+qpid = ["qpid-python (>=0.26)", "qpid-tools (>=0.26)"]
+redis = ["redis (>=4.2.2)"]
+slmq = ["softlayer-messaging (>=1.0.3)"]
+sqlalchemy = ["sqlalchemy"]
+sqs = ["boto3 (>=1.22.2)", "pycurl (>=7.44.1,<7.45.0)", "urllib3 (>=1.26.9)"]
+yaml = ["PyYAML (>=3.10)"]
+zookeeper = ["kazoo (>=2.8.0)"]
+
+[[package]]
 name = "mailchecker"
 version = "4.1.17"
 description = "Cross-language email validation. Backed by a database of thousands throwable email providers."
@@ -1604,8 +1762,8 @@ optional = false
 python-versions = ">=3.6"
 
 [package.extras]
-dev = ["pre-commit", "tox"]
-testing = ["pytest", "pytest-benchmark"]
+testing = ["pytest-benchmark", "pytest"]
+dev = ["tox", "pre-commit"]
 
 [[package]]
 name = "pre-commit"
@@ -1638,7 +1796,7 @@ twisted = ["twisted"]
 name = "prompt-toolkit"
 version = "3.0.30"
 description = "Library for building powerful interactive command lines in Python"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.6.2"
 
@@ -1865,7 +2023,7 @@ python-versions = "*"
 name = "pywin32"
 version = "304"
 description = "Python for Window Extensions"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -2116,8 +2274,8 @@ python-versions = ">=3.6"
 sphinx = ">=1.8"
 
 [package.extras]
+rtd = ["sphinx-book-theme", "myst-nb", "ipython", "sphinx"]
 code_style = ["pre-commit (==2.12.1)"]
-rtd = ["sphinx", "ipython", "myst-nb", "sphinx-book-theme"]
 
 [[package]]
 name = "sphinx-rtd-theme"
@@ -2143,8 +2301,8 @@ optional = false
 python-versions = ">=3.5"
 
 [package.extras]
-lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
+lint = ["docutils-stubs", "mypy", "flake8"]
 
 [[package]]
 name = "sphinxcontrib-devhelp"
@@ -2345,6 +2503,14 @@ secure = ["pyOpenSSL (>=0.14)", "cryptography (>=1.3.4)", "idna (>=2.0.0)", "cer
 socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
+name = "vine"
+version = "5.0.0"
+description = "Promises, promises, promises."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "virtualenv"
 version = "20.15.1"
 description = "Virtual Python Environment builder"
@@ -2542,6 +2708,10 @@ alabaster = [
     {file = "alabaster-0.7.12-py2.py3-none-any.whl", hash = "sha256:446438bdcca0e05bd45ea2de1668c1d9b032e1a9154c2c259092d77031ddd359"},
     {file = "alabaster-0.7.12.tar.gz", hash = "sha256:a661d72d58e6ea8a57f7a86e37d86716863ee5e92788398526d58b26a4e4dc02"},
 ]
+amqp = [
+    {file = "amqp-5.1.1-py3-none-any.whl", hash = "sha256:6f0956d2c23d8fa6e7691934d8c3930eadb44972cbbd1a7ae3a520f735d43359"},
+    {file = "amqp-5.1.1.tar.gz", hash = "sha256:2c1b13fecc0893e946c65cbd5f36427861cffa4ea2201d8f6fca22e2a373b5e2"},
+]
 anyio = [
     {file = "anyio-3.6.1-py3-none-any.whl", hash = "sha256:cb29b9c70620506a9a8f87a309591713446953302d7d995344d0d7c6c0c9a7be"},
     {file = "anyio-3.6.1.tar.gz", hash = "sha256:413adf95f93886e442aea925f3ee43baa5a765a64a0f52c6081894f9992fdd0b"},
@@ -2620,6 +2790,10 @@ beautifulsoup4 = [
     {file = "beautifulsoup4-4.11.1-py3-none-any.whl", hash = "sha256:58d5c3d29f5a36ffeb94f02f0d786cd53014cf9b3b3951d42e0080d8a9498d30"},
     {file = "beautifulsoup4-4.11.1.tar.gz", hash = "sha256:ad9aa55b65ef2808eb405f46cf74df7fcb7044d5cbc26487f96eb2ef2e436693"},
 ]
+billiard = [
+    {file = "billiard-4.0.0-py3-none-any.whl", hash = "sha256:5d48c4168456d906c0057f2facc1f6316daa26d611b4b37766d5112057efa22d"},
+    {file = "billiard-4.0.0.tar.gz", hash = "sha256:344d9a1d7d3addf171eb2c596c9e98d1eff81b0e03f1f9398939a3518ca263a9"},
+]
 black = [
     {file = "black-22.6.0-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:f586c26118bc6e714ec58c09df0157fe2d9ee195c764f630eb0d8e7ccce72e69"},
     {file = "black-22.6.0-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:b270a168d69edb8b7ed32c193ef10fd27844e5c60852039599f9184460ce0807"},
@@ -2648,6 +2822,10 @@ black = [
 bleach = [
     {file = "bleach-5.0.1-py3-none-any.whl", hash = "sha256:085f7f33c15bd408dd9b17a4ad77c577db66d76203e5984b1bd59baeee948b2a"},
     {file = "bleach-5.0.1.tar.gz", hash = "sha256:0d03255c47eb9bd2f26aa9bb7f2107732e7e8fe195ca2f64709fcf3b0a4a085c"},
+]
+celery = [
+    {file = "celery-5.3.0a1-py3-none-any.whl", hash = "sha256:608cc4b6513e5f42b72e4cc3b894141e062f0a3f7c06d78f5bfd56b2d7f8a4fe"},
+    {file = "celery-5.3.0a1.tar.gz", hash = "sha256:474056b21b4491ef3328c6e69d1911dda3e3f67967c8760b0b55b80cf8963d3b"},
 ]
 certifi = [
     {file = "certifi-2022.6.15-py3-none-any.whl", hash = "sha256:fe86415d55e84719d75f8b69414f6438ac3547d2078ab91b67e779ef69378412"},
@@ -2730,6 +2908,18 @@ charset-normalizer = [
 click = [
     {file = "click-8.1.3-py3-none-any.whl", hash = "sha256:bb4d8133cb15a609f44e8213d9b391b0809795062913b383c62be0ee95b1db48"},
     {file = "click-8.1.3.tar.gz", hash = "sha256:7682dc8afb30297001674575ea00d1814d808d6a36af415a82bd481d37ba7b8e"},
+]
+click-didyoumean = [
+    {file = "click-didyoumean-0.3.0.tar.gz", hash = "sha256:f184f0d851d96b6d29297354ed981b7dd71df7ff500d82fa6d11f0856bee8035"},
+    {file = "click_didyoumean-0.3.0-py3-none-any.whl", hash = "sha256:a0713dc7a1de3f06bc0df5a9567ad19ead2d3d5689b434768a6145bff77c0667"},
+]
+click-plugins = [
+    {file = "click-plugins-1.1.1.tar.gz", hash = "sha256:46ab999744a9d831159c3411bb0c79346d94a444df9a3a3742e9ed63645f264b"},
+    {file = "click_plugins-1.1.1-py2.py3-none-any.whl", hash = "sha256:5d262006d3222f5057fd81e1623d4443e41dcda5dc815c06b442aa3c02889fc8"},
+]
+click-repl = [
+    {file = "click-repl-0.2.0.tar.gz", hash = "sha256:cd12f68d745bf6151210790540b4cb064c7b13e571bc64b6957d98d120dacfd8"},
+    {file = "click_repl-0.2.0-py3-none-any.whl", hash = "sha256:94b3fbbc9406a236f176e0506524b2937e4b23b6f4c0c0b2a0a83f8a64e9194b"},
 ]
 colorama = [
     {file = "colorama-0.4.5-py2.py3-none-any.whl", hash = "sha256:854bf444933e37f5824ae7bfc1e98d5bce2ebe4160d46b5edf346a89358e99da"},
@@ -2893,20 +3083,24 @@ dulwich = [
     {file = "dulwich-0.20.44.tar.gz", hash = "sha256:10e8d73763dd30c86a99a15ade8bfcf3ab8fe96532cdf497e8cb1d11832352b8"},
 ]
 dvc = [
-    {file = "dvc-2.13.0-py3-none-any.whl", hash = "sha256:790f42cb617652044e7d660336ac063752258d1d83ecee5fc43968902ff8ed3c"},
-    {file = "dvc-2.13.0.tar.gz", hash = "sha256:f63a17da82c12183087d42a566f62932372be934be2d579c62a2a9496f82fc5e"},
+    {file = "dvc-2.15.0-py3-none-any.whl", hash = "sha256:b9635e6cae57e6e48514e286b867cbaae10b9dc4d77c9508d7709ac4f4f1a129"},
+    {file = "dvc-2.15.0.tar.gz", hash = "sha256:11daa67ad2a7c89425be64799e269a47d8cf8b66e65406bc6968ca9bceec9e23"},
 ]
 dvc-data = [
-    {file = "dvc-data-0.0.23.tar.gz", hash = "sha256:cc99b8b28e3379b4742245c257194ae9c3611bde42698820aadee01d04ca972d"},
-    {file = "dvc_data-0.0.23-py3-none-any.whl", hash = "sha256:d9f4e92d1ab5b30ce32a5cad4e6ccf0fd6e5fd6e097cd7e148e7a7dc4d699ac2"},
+    {file = "dvc-data-0.1.5.tar.gz", hash = "sha256:b4ad7e8d0006a91de1d578613d1348342d29a0da31bedd3b94e969071f4fef66"},
+    {file = "dvc_data-0.1.5-py3-none-any.whl", hash = "sha256:048caf4c6ec486413de831860495ac8d814e0e77334224a13dd562214259f7fa"},
 ]
 dvc-objects = [
-    {file = "dvc-objects-0.0.23.tar.gz", hash = "sha256:69fb2f1315fd11899e96b079a6042a44c9745bffb3f7b15b072f99e9d21cf42d"},
-    {file = "dvc_objects-0.0.23-py3-none-any.whl", hash = "sha256:b3c9dec89c789b5e78985011d0673878074568dea6585a51767e76b9f534f07d"},
+    {file = "dvc-objects-0.1.5.tar.gz", hash = "sha256:b05456b62a03d786ceca5bc1134cedd953d5cb9e76d184c5dff0b054736fc415"},
+    {file = "dvc_objects-0.1.5-py3-none-any.whl", hash = "sha256:a19493dd5ea11a5f8803f254427558da3ab66170d507d03ed051a1b86af397a1"},
 ]
 dvc-render = [
     {file = "dvc-render-0.0.6.tar.gz", hash = "sha256:fe914d34118fca36b97c4ae2c129e803b74028319ca1b9d16c35cd91a5b2dd38"},
     {file = "dvc_render-0.0.6-py3-none-any.whl", hash = "sha256:fa076cba01a4a039fd930bbf3a40c68b2e078041d44b90f3764b299fc0dbf259"},
+]
+dvc-task = [
+    {file = "dvc-task-0.1.0.tar.gz", hash = "sha256:5c5670b70d230f1575758fe30725e76cf94c13ee660261079bd44d43822393d8"},
+    {file = "dvc_task-0.1.0-py3-none-any.whl", hash = "sha256:f61aea6178953d58e97e5cdd6004c0f7149b591e2bc469737706fc075061f2cc"},
 ]
 dvclive = [
     {file = "dvclive-0.9.0-py2.py3-none-any.whl", hash = "sha256:87c71ec8f3df729538c84f8612edc2dc615680c0e292d9dc0f002d326574d04e"},
@@ -3158,6 +3352,10 @@ kiwisolver = [
     {file = "kiwisolver-1.4.3-pp37-pypy37_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:1ae7aa0784aeadfbd693c27993727792fbe1455b84d49970bad5886b42976b18"},
     {file = "kiwisolver-1.4.3-pp37-pypy37_pp73-win_amd64.whl", hash = "sha256:130c6c35eded399d3967cf8a542c20b671f5ba85bd6f210f8b939f868360e9eb"},
     {file = "kiwisolver-1.4.3.tar.gz", hash = "sha256:ab8a15c2750ae8d53e31f77a94f846d0a00772240f1c12817411fa2344351f86"},
+]
+kombu = [
+    {file = "kombu-5.3.0a1-py3-none-any.whl", hash = "sha256:4d3005d7164af56434d5623d9ee1172989ad9c8570118c21cbf5d49dafee9f5c"},
+    {file = "kombu-5.3.0a1.tar.gz", hash = "sha256:02f3258b75c967586418e10942a14996900a04c62ea23252b4b4d3dd5c6d81ab"},
 ]
 mailchecker = [
     {file = "mailchecker-4.1.17.tar.gz", hash = "sha256:35f80b238f74ffd6281c85d3543f3dd114defaa3fdaebc0016ff1791cd48639b"},
@@ -4030,6 +4228,10 @@ typing-extensions = [
 urllib3 = [
     {file = "urllib3-1.26.10-py2.py3-none-any.whl", hash = "sha256:8298d6d56d39be0e3bc13c1c97d133f9b45d797169a0e11cdd0e0489d786f7ec"},
     {file = "urllib3-1.26.10.tar.gz", hash = "sha256:879ba4d1e89654d9769ce13121e0f94310ea32e8d2f8cf587b77c08bbcdb30d6"},
+]
+vine = [
+    {file = "vine-5.0.0-py2.py3-none-any.whl", hash = "sha256:4c9dceab6f76ed92105027c49c823800dd33cacce13bdedc5b914e3514b7fb30"},
+    {file = "vine-5.0.0.tar.gz", hash = "sha256:7d3b1624a953da82ef63462013bbd271d3eb75751489f9807598e8f340bd637e"},
 ]
 virtualenv = [
     {file = "virtualenv-20.15.1-py2.py3-none-any.whl", hash = "sha256:b30aefac647e86af6d82bfc944c556f8f1a9c90427b2fb4e3bfbf338cb82becf"},
