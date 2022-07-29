@@ -112,7 +112,7 @@ class ZnTrackOption(descriptor.Descriptor):
 
         if instance is None:
             return self
-        elif instance.is_loaded:
+        elif instance.is_loaded and not instance._is_attribute:
             is_lazy_option = instance.__dict__.get(self.name) is utils.LazyOption
             is_not_in_dict = self.name not in instance.__dict__
 
@@ -132,6 +132,9 @@ class ZnTrackOption(descriptor.Descriptor):
                             f"Could not load {self.name} for {instance}"
                         ) from err
         else:
+            is_lazy_option = instance.__dict__.get(self.name) is utils.LazyOption
+            if instance._is_attribute and is_lazy_option:
+                instance.__dict__[self.name] = copy.deepcopy(self.default_value)
             # if the instance is not loaded, there is no LazyOption handling
             try:
                 return instance.__dict__[self.name]
