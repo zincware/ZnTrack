@@ -70,5 +70,7 @@ class Nodes(ZnTrackOption):
             return self
         value = super().__get__(instance, owner)
         value = utils.utils.load_node_dependency(value)  # use value = Cls.load()
+        # does it work with lists?
+        value._is_attribute = True
         setattr(instance, self.name, value)
         return value
