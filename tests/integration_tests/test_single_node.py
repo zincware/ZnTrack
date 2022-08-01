@@ -371,3 +371,17 @@ def test_collect(proj_path):
 
     with pytest.raises(ValueError):
         ExampleNode01["TestNode"].zntrack.collect((zn.params, zn.outs))
+
+
+class OnlyOutsNode(Node):
+    _hash = zn.Hash()
+    outs: pathlib.Path = dvc.outs(use_node_dir=True)
+
+    def run(self):
+        if self.outs is not None:
+            self.outs.touch()
+
+
+def test_OnlyOutsNode(proj_path):
+    OnlyOutsNode(outs=pathlib.Path("test_node")).write_graph(run=True)
+    OnlyOutsNode(name="empty").write_graph(run=True)  # this is the actual test
