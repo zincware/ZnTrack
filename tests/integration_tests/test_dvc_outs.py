@@ -60,3 +60,74 @@ def test_multiple_outs(proj_path):
         pathlib.Path("test_1.txt"),
         pathlib.Path("test_2.txt"),
     ]
+
+
+class SingleNodeInNodeDir(Node):
+    path1: pathlib.Path = dvc.outs(use_node_dir=True)
+
+    def __init__(self, path_x=None, **kwargs):
+        super().__init__(**kwargs)
+        self.path1 = pathlib.Path(f"{path_x}.json")
+
+    def run(self):
+        self.path1.write_text("")
+
+
+class SingleNodeInNodeDirDefault(Node):
+    path1: pathlib.Path = dvc.outs(pathlib.Path("outs.txt"), use_node_dir=True)
+
+    def run(self):
+        self.path1.write_text("")
+
+
+class ListNodeInNodeDirDefault(Node):
+    path1: typing.List[pathlib.Path] = dvc.outs(
+        [pathlib.Path("outs1.txt"), pathlib.Path("outs2.txt")], use_node_dir=True
+    )
+
+    def run(self):
+        [x.touch() for x in self.path1]
+
+
+def test_load_dvc_outs_node_dir(proj_path):
+    node = SingleNodeInNodeDir(path_x="test", name="1500")
+    assert node.path1 == pathlib.Path("nodes/1500/test.json")
+
+    node.write_graph(run=True)
+
+    assert SingleNodeInNodeDir["1500"].path1 == pathlib.Path("nodes/1500/test.json")
+
+
+def test_load_dvc_outs_node_dir_default(proj_path):
+    node = SingleNodeInNodeDirDefault()
+    assert node.path1 == pathlib.Path("nodes/SingleNodeInNodeDirDefault/outs.txt")
+
+    node.write_graph(run=True)
+
+    assert SingleNodeInNodeDirDefault.load().path1 == pathlib.Path(
+        "nodes/SingleNodeInNodeDirDefault/outs.txt"
+    )
+
+
+def test_ListNodeInNodeDirDefault():
+    node = ListNodeInNodeDirDefault()
+    assert node.path1 == [
+        pathlib.Path("nodes/ListNodeInNodeDirDefault/outs1.txt"),
+        pathlib.Path("nodes/ListNodeInNodeDirDefault/outs2.txt"),
+    ]
+
+
+def test_ListNodeInNodeDirDefaultSet():
+    node = ListNodeInNodeDirDefault(
+        path1=[pathlib.Path("outs1.txt"), pathlib.Path("outs2.txt")]
+    )
+    assert node.path1 == [
+        pathlib.Path("nodes/ListNodeInNodeDirDefault/outs1.txt"),
+        pathlib.Path("nodes/ListNodeInNodeDirDefault/outs2.txt"),
+    ]
+
+
+def test_modify_node_dir_outs():
+    node = SingleNodeInNodeDir(path_x="test")
+    with pytest.raises(ValueError):
+        node.path1 = node.path1.with_suffix(".txt")
