@@ -36,7 +36,19 @@ def update_iterable_paths(
 
 
 class DVCOption(ZnTrackOption):
-    def __init__(self, default_value=None, *, use_node_dir=None, **kwargs):
+    def __init__(self, default_value=None, *, use_node_dir=False, **kwargs):
+        """
+
+        Parameters
+        ----------
+        default_value
+        use_node_dir: bool (default=False)
+            Update all paths set for this DVCOption to point to nodes/<node_name>/filename
+            This allows to save files more easily outside the root directory and sort them
+            into the nodes directories without using self.node_name / file_name somewhere
+            in the init.
+        kwargs
+        """
         super().__init__(default_value=default_value, **kwargs)
         self.use_node_dir = use_node_dir
 
