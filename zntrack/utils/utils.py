@@ -86,12 +86,16 @@ def get_auto_init(fields: typing.List[str], super_init: typing.Callable):
 
     def auto_init(self, **kwargs):
         """Wrapper for the __init__"""
+        init_kwargs = {}
         for field in fields:
             try:
-                setattr(self, field, kwargs.pop(field))
+                init_kwargs[field] = kwargs.pop(field)
             except KeyError:
                 pass
         super_init(self, **kwargs)  # call the super_init explicitly instead of super
+        # must call the super_init first e.g. it is requried to set the node_name
+        for key, value in init_kwargs.items():
+            setattr(self, key, value)
 
         try:
             self.post_init()
