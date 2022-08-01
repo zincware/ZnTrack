@@ -75,7 +75,11 @@ class DVCOption(ZnTrackOption):
 
         if instance is None:
             return self
-        elif (not instance.is_loaded) and (self.name not in instance.__dict__):
+        elif (
+            (not instance.is_loaded)
+            and (self.name not in instance.__dict__)
+            and self.use_node_dir
+        ):
             instance.__dict__[self.name] = update_iterable_paths(
                 copy.deepcopy(self.default_value),
                 pathlib.Path("nodes", instance.node_name),
