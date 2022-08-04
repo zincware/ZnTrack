@@ -4,6 +4,7 @@ import sys
 
 import znjson
 
+from zntrack import utils
 from zntrack.core.base import Node
 from zntrack.core.functions.decorator import NodeConfig, nodify
 from zntrack.interface.base import DVCInterface
@@ -27,6 +28,7 @@ __all__ = [
     nodify.__name__,
     NodeConfig.__name__,
     "getdeps",
+    "utils",
 ]
 
 __version__ = importlib.metadata.version("zntrack")

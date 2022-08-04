@@ -45,7 +45,7 @@ class DVCZnOuts(Node):
 
 
 class DependenciesCollector(Node):
-    dependencies = dvc.deps()
+    dependencies = zn.deps()
 
     def __init__(self, dependencies=None, **kwargs):
         super().__init__(**kwargs)
@@ -56,7 +56,7 @@ class DependenciesCollector(Node):
 
 
 class DepsCollwOuts(Node):
-    dependencies = dvc.deps()
+    dependencies = zn.deps()
     outs: Path = dvc.outs()
 
     def __init__(self, dependencies=None, **kwargs):
