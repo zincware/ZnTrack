@@ -2,6 +2,7 @@
 
 from zntrack.utils import exceptions, file_io, helpers
 from zntrack.utils.config import Files, config
+from zntrack.utils.nwd import nwd
 from zntrack.utils.structs import (
     FILE_DVC_TRACKED,
     VALUE_DVC_TRACKED,
@@ -45,4 +46,5 @@ __all__ = [
     "DVCOptions",
     "LazyOption",
     "helpers",
+    "nwd",
 ]
