@@ -52,19 +52,30 @@ def replace_nwd_placeholder(
             if y is True:
                 replace = True
         return paths, replace
-    log.info(f"Replacing {nwd} with {node_working_directory} in {path}")
-
-    if isinstance(node_working_directory, pathlib.Path):
-        node_working_directory = node_working_directory.as_posix()
 
     _type = "str"
     if isinstance(path, pathlib.Path):
         _type = "path"
-        path = path.as_posix()
+        _path = path.as_posix()
+    else:
+        _path = path
 
-    replace = True if nwd in path else False
-    path = path.replace(nwd, node_working_directory)
+    try:
+        replace = True if nwd in _path else False
+    except TypeError:
+        # argument of type <Node> is not iterable. This can happen when you use
+        #  e.g. dvc.deps(Node) (deprecated)
+        return path, False
+    if not replace:
+        return path, False
+
+    if isinstance(node_working_directory, pathlib.Path):
+        node_working_directory = node_working_directory.as_posix()
+
+    _path = _path.replace(nwd, node_working_directory)
 
     if _type == "path":
-        path = pathlib.Path(path)
-    return path, replace
+        _path = pathlib.Path(_path)
+
+    log.info(f"Replacing {nwd} with {node_working_directory} -> {_path}")
+    return _path, replace
