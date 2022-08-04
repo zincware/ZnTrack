@@ -11,10 +11,11 @@ log = logging.getLogger(__name__)
 
 
 class DVCOption(ZnTrackOption):
-    def __set__(self, instance, value):
-        """Save value to instance.__dict__"""
+    """Allow for nwd placeholder in strings to be automatically replaced"""
 
     def __get__(self, instance, owner=None):
+        """Overwrite getter to replace nwd placeholder when read the first time"""
+
         self._instance = instance
 
         if instance is None:
