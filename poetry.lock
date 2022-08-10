@@ -605,7 +605,7 @@ pgp = ["gpg"]
 
 [[package]]
 name = "dvc"
-version = "2.15.0"
+version = "2.17.0"
 description = "Git for data scientists - manage your code and data together"
 category = "main"
 optional = false
@@ -618,10 +618,10 @@ colorama = ">=0.3.9"
 configobj = ">=5.0.6"
 distro = ">=1.3.0"
 dpath = ">=2.0.2,<3"
-dvc-data = "0.1.5"
-dvc-render = "0.0.6"
-dvc-task = "0.1.0"
-dvclive = ">=0.7.3"
+dvc-data = "0.1.13"
+dvc-render = "0.0.9"
+dvc-task = "0.1.2"
+dvclive = ">=0.10.0"
 flatten-dict = ">=0.4.1,<1"
 "flufl.lock" = ">=5"
 fsspec = {version = ">=2021.10.1", extras = ["http"]}
@@ -643,7 +643,7 @@ scmrepo = "0.0.25"
 shortuuid = ">=0.5.0"
 shtab = ">=1.3.4,<2"
 tabulate = ">=0.8.7"
-toml = ">=0.10.1"
+tomlkit = ">=0.11.1"
 tqdm = ">=4.63.1,<5"
 typing-extensions = ">=3.7.4"
 voluptuous = ">=0.11.7"
@@ -667,7 +667,7 @@ webhdfs_kerberos = ["requests-kerberos (==0.14.0)"]
 
 [[package]]
 name = "dvc-data"
-version = "0.1.5"
+version = "0.1.13"
 description = "dvc data"
 category = "main"
 optional = false
@@ -676,21 +676,21 @@ python-versions = ">=3.8"
 [package.dependencies]
 dictdiffer = ">=0.8.1"
 diskcache = ">=5.2.1"
-dvc-objects = "0.1.5"
+dvc-objects = "0.1.7"
 funcy = ">=1.14"
 nanotime = ">=0.5.2"
 pygtrie = ">=2.3.2"
 shortuuid = ">=0.5.0"
 
 [package.extras]
-tests = ["pytest-servers[s3] (==0.0.7)", "mypy (==0.961)", "pylint (==2.14.5)", "pytest-mock (==3.8.2)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.5)", "pytest (==7.1.2)"]
-dev = ["blake3 (>=0.3.1)", "pytest-servers[s3] (==0.0.7)", "mypy (==0.961)", "pylint (==2.14.5)", "pytest-mock (==3.8.2)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.5)", "pytest (==7.1.2)", "rich (>=10.11.0,<13.0.0)", "typer[rich] (>=0.6)"]
-cli = ["rich (>=10.11.0,<13.0.0)", "typer[rich] (>=0.6)"]
-all = ["rich (>=10.11.0,<13.0.0)", "typer[rich] (>=0.6)"]
+all = ["typer[rich] (>=0.6)", "rich (>=10.11.0,<13.0.0)"]
+cli = ["typer[rich] (>=0.6)", "rich (>=10.11.0,<13.0.0)"]
+dev = ["typer[rich] (>=0.6)", "rich (>=10.11.0,<13.0.0)", "pytest (==7.1.2)", "pytest-sugar (==0.9.5)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pylint (==2.14.5)", "mypy (==0.971)", "pytest-servers[s3] (==0.0.8)", "blake3 (>=0.3.1)"]
+tests = ["pytest (==7.1.2)", "pytest-sugar (==0.9.5)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pylint (==2.14.5)", "mypy (==0.971)", "pytest-servers[s3] (==0.0.8)"]
 
 [[package]]
 name = "dvc-objects"
-version = "0.1.5"
+version = "0.1.7"
 description = "dvc objects"
 category = "main"
 optional = false
@@ -707,7 +707,7 @@ typing-extensions = ">=3.7.4"
 
 [package.extras]
 webdav = ["webdav4 (>=0.9.3)"]
-tests = ["pytest-servers[s3] (==0.0.7)", "mypy (==0.961)", "pylint (==2.14.5)", "pytest-mock (==3.8.2)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.5)", "pytest (==7.1.2)"]
+tests = ["pytest-servers[s3] (==0.0.8)", "mypy (==0.971)", "pylint (==2.14.5)", "pytest-mock (==3.8.2)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.5)", "pytest (==7.1.2)"]
 ssh = ["sshfs[bcrypt] (>=2021.11.2)", "bcrypt"]
 s3 = ["aiobotocore[boto3] (>2)", "s3fs[boto3] (>=2022.02.0)"]
 oss = ["ossfs (>=2021.8.0)"]
@@ -715,62 +715,63 @@ http = ["aiohttp-retry (>=2.4.5)"]
 hdfs = ["fsspec", "pyarrow (>=1)"]
 gs = ["gcsfs (>=2021.11.1)"]
 gdrive = ["pydrive2[fsspec] (>=1.14.0)"]
-dev = ["fsspec", "pyarrow (>=1)", "webdav4 (>=0.9.3)", "sshfs[bcrypt] (>=2021.11.2)", "bcrypt", "aiobotocore[boto3] (>2)", "s3fs[boto3] (>=2022.02.0)", "ossfs (>=2021.8.0)", "aiohttp-retry (>=2.4.5)", "gcsfs (>=2021.11.1)", "pydrive2[fsspec] (>=1.14.0)", "knack", "azure-identity (>=1.4.0)", "adlfs (>=2021.10.0)", "pytest-servers[s3] (==0.0.7)", "mypy (==0.961)", "pylint (==2.14.5)", "pytest-mock (==3.8.2)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.5)", "pytest (==7.1.2)"]
+dev = ["fsspec", "pyarrow (>=1)", "webdav4 (>=0.9.3)", "sshfs[bcrypt] (>=2021.11.2)", "bcrypt", "aiobotocore[boto3] (>2)", "s3fs[boto3] (>=2022.02.0)", "ossfs (>=2021.8.0)", "aiohttp-retry (>=2.4.5)", "gcsfs (>=2021.11.1)", "pydrive2[fsspec] (>=1.14.0)", "knack", "azure-identity (>=1.4.0)", "adlfs (>=2021.10.0)", "pytest-servers[s3] (==0.0.8)", "mypy (==0.971)", "pylint (==2.14.5)", "pytest-mock (==3.8.2)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.5)", "pytest (==7.1.2)"]
 azure = ["knack", "azure-identity (>=1.4.0)", "adlfs (>=2021.10.0)"]
 all = ["fsspec", "pyarrow (>=1)", "webdav4 (>=0.9.3)", "sshfs[bcrypt] (>=2021.11.2)", "bcrypt", "aiobotocore[boto3] (>2)", "s3fs[boto3] (>=2022.02.0)", "ossfs (>=2021.8.0)", "aiohttp-retry (>=2.4.5)", "gcsfs (>=2021.11.1)", "pydrive2[fsspec] (>=1.14.0)", "knack", "azure-identity (>=1.4.0)", "adlfs (>=2021.10.0)"]
 
 [[package]]
 name = "dvc-render"
-version = "0.0.6"
+version = "0.0.9"
 description = "DVC render"
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
-funcy = ">=1.17"
-tabulate = ">=0.8.7"
+tabulate = {version = ">=0.8.7", optional = true, markers = "extra == \"table\""}
 
 [package.extras]
-tests = ["pytest-test-utils (>=0.0.6)", "mypy (==0.961)", "pylint (==2.13.9)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)"]
+tests = ["pytest-test-utils (>=0.0.6)", "mypy (==0.961)", "pylint (==2.14.1)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)", "funcy (>=1.17)", "matplotlib", "tabulate (>=0.8.7)"]
+table = ["tabulate (>=0.8.7)"]
+markdown = ["matplotlib", "tabulate (>=0.8.7)"]
 docs = ["mkdocstrings-python (==0.7.0)", "mkdocs-section-index (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-gen-files (==0.3.4)", "mkdocs (==1.3.0)"]
-dev = ["mkdocstrings-python (==0.7.0)", "mkdocs-section-index (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-gen-files (==0.3.4)", "mkdocs (==1.3.0)", "pytest-test-utils (>=0.0.6)", "mypy (==0.961)", "pylint (==2.13.9)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)"]
+dev = ["mkdocstrings-python (==0.7.0)", "mkdocs-section-index (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-gen-files (==0.3.4)", "mkdocs (==1.3.0)", "pytest-test-utils (>=0.0.6)", "mypy (==0.961)", "pylint (==2.14.1)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)", "funcy (>=1.17)", "matplotlib", "tabulate (>=0.8.7)"]
 
 [[package]]
 name = "dvc-task"
-version = "0.1.0"
+version = "0.1.2"
 description = "Extensible task queue used in DVC."
 category = "main"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 
 [package.dependencies]
-celery = ">=5.3.0a1,<6"
+celery = ">=5.2.0,<6"
 funcy = ">=1.17"
-kombu = ">=5.3.0a1"
+kombu = ">=5.2.0,<6"
 pywin32 = {version = ">=225", markers = "sys_platform == \"win32\""}
 shortuuid = ">=1.0.8"
 
 [package.extras]
-tests = ["celery-types (>=0.11.0)", "pytest-celery", "pytest-test-utils (>=0.0.6)", "mypy (==0.950)", "pylint (==2.13.9)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)", "flaky (==3.7.0)"]
-docs = ["mkdocstrings-python (==0.7.0)", "mkdocs-section-index (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-gen-files (==0.3.4)", "mkdocs (==1.3.0)"]
-dev = ["mkdocstrings-python (==0.7.0)", "mkdocs-section-index (==0.3.4)", "mkdocs-material (==8.2.15)", "mkdocs-gen-files (==0.3.4)", "mkdocs (==1.3.0)", "celery-types (>=0.11.0)", "pytest-celery", "pytest-test-utils (>=0.0.6)", "mypy (==0.950)", "pylint (==2.13.9)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)", "flaky (==3.7.0)"]
+tests = ["celery-types (>=0.11.0)", "pytest-celery", "pytest-test-utils (>=0.0.6)", "mypy (==0.961)", "pylint (==2.14.3)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)", "flaky (==3.7.0)"]
+docs = ["mkdocstrings-python (==0.7.1)", "mkdocs-section-index (==0.3.4)", "mkdocs-material (==8.3.7)", "mkdocs-gen-files (==0.3.4)", "mkdocs (==1.3.0)"]
+dev = ["mkdocstrings-python (==0.7.1)", "mkdocs-section-index (==0.3.4)", "mkdocs-material (==8.3.7)", "mkdocs-gen-files (==0.3.4)", "mkdocs (==1.3.0)", "celery-types (>=0.11.0)", "pytest-celery", "pytest-test-utils (>=0.0.6)", "mypy (==0.961)", "pylint (==2.14.3)", "pytest-mock (==3.7.0)", "pytest-cov (==3.0.0)", "pytest-sugar (==0.9.4)", "pytest (==7.1.2)", "flaky (==3.7.0)"]
 
 [[package]]
 name = "dvclive"
-version = "0.9.0"
+version = "0.10.0"
 description = "Metric logger for ML projects."
 category = "main"
 optional = false
-python-versions = ">=3.6"
+python-versions = ">=3.8"
 
 [package.dependencies]
-dvc-render = "*"
+dvc-render = {version = ">=0.0.8", extras = ["table"]}
 
 [package.extras]
 xgb = ["xgboost"]
 tf = ["tensorflow"]
-tests = ["scikit-learn", "pytorch-lightning (>=1.6)", "fastai", "catalyst (<=21.12)", "datasets", "transformers", "lightgbm", "xgboost", "tensorflow", "mmcv", "pillow", "dvc-render", "dvc (>=2.0.0)", "funcy (>=1.14)", "pandas (>=1.3.1)", "pytest-mock (>=3.6.1)", "pytest-cov (>=2.12.1)", "pylint-plugin-utils (>=0.6)", "pre-commit", "pytest (>=6.0.1)", "pylint (==2.5.3)"]
+tests = ["scikit-learn", "pytorch-lightning (>=1.6)", "fastai", "catalyst (<=21.12)", "datasets", "transformers", "lightgbm", "xgboost", "tensorflow", "mmcv", "pillow", "dvc-render[table] (>=0.0.8)", "dvc (>=2.0.0)", "funcy (>=1.14)", "pandas (>=1.3.1)", "pytest-mock (>=3.6.1)", "pytest-cov (>=2.12.1)", "pylint-plugin-utils (>=0.6)", "pre-commit", "pytest (>=6.0.1)", "pylint (==2.5.3)"]
 sklearn = ["scikit-learn"]
 pytorch_lightning = ["pytorch-lightning (>=1.6)"]
 plots = ["scikit-learn"]
@@ -780,7 +781,7 @@ image = ["pillow"]
 huggingface = ["datasets", "transformers"]
 fastai = ["fastai"]
 catalyst = ["catalyst (<=21.12)"]
-all = ["scikit-learn", "pytorch-lightning (>=1.6)", "fastai", "catalyst (<=21.12)", "datasets", "transformers", "lightgbm", "xgboost", "tensorflow", "mmcv", "pillow", "dvc-render"]
+all = ["scikit-learn", "pytorch-lightning (>=1.6)", "fastai", "catalyst (<=21.12)", "datasets", "transformers", "lightgbm", "xgboost", "tensorflow", "mmcv", "pillow", "dvc-render[table] (>=0.0.8)"]
 
 [[package]]
 name = "entrypoints"
@@ -2225,9 +2226,9 @@ optional = false
 python-versions = "*"
 
 [package.extras]
-win32 = ["pywin32"]
+nativelib = ["pyobjc-framework-cocoa", "pywin32"]
 objc = ["pyobjc-framework-cocoa"]
-nativelib = ["pywin32", "pyobjc-framework-cocoa"]
+win32 = ["pywin32"]
 
 [[package]]
 name = "setuptools-scm"
@@ -2432,8 +2433,8 @@ optional = false
 python-versions = ">=3.5"
 
 [package.extras]
-lint = ["flake8", "mypy", "docutils-stubs"]
 test = ["pytest"]
+lint = ["docutils-stubs", "mypy", "flake8"]
 
 [[package]]
 name = "stack-data"
@@ -2516,6 +2517,14 @@ description = "A lil' TOML parser"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
+
+[[package]]
+name = "tomlkit"
+version = "0.11.3"
+description = "Style preserving TOML library"
+category = "main"
+optional = false
+python-versions = ">=3.6,<4.0"
 
 [[package]]
 name = "tornado"
@@ -3154,28 +3163,28 @@ dulwich = [
     {file = "dulwich-0.20.45.tar.gz", hash = "sha256:70710dd9ca2a442190c7e506892db074c318ac762e221f7529b8ce34802041b7"},
 ]
 dvc = [
-    {file = "dvc-2.15.0-py3-none-any.whl", hash = "sha256:b9635e6cae57e6e48514e286b867cbaae10b9dc4d77c9508d7709ac4f4f1a129"},
-    {file = "dvc-2.15.0.tar.gz", hash = "sha256:11daa67ad2a7c89425be64799e269a47d8cf8b66e65406bc6968ca9bceec9e23"},
+    {file = "dvc-2.17.0-py3-none-any.whl", hash = "sha256:3e5f3f6a3c540eb9ab5064f07a872f58e70a7b4c0ec1b4f370bc81ff356cfb21"},
+    {file = "dvc-2.17.0.tar.gz", hash = "sha256:d92c7cb66323027e2f485b8d3e05d7a0f46bdf468e64f128bcfd80f6227e80d6"},
 ]
 dvc-data = [
-    {file = "dvc-data-0.1.5.tar.gz", hash = "sha256:b4ad7e8d0006a91de1d578613d1348342d29a0da31bedd3b94e969071f4fef66"},
-    {file = "dvc_data-0.1.5-py3-none-any.whl", hash = "sha256:048caf4c6ec486413de831860495ac8d814e0e77334224a13dd562214259f7fa"},
+    {file = "dvc-data-0.1.13.tar.gz", hash = "sha256:4bf1f4ef9d79c04893791bd47821c22f88e865307804d537c2fdf99f52db063f"},
+    {file = "dvc_data-0.1.13-py3-none-any.whl", hash = "sha256:aef8ab632d25667d38ff157cb697de6c7c039e886a866584c8a7a6ea7b325a1a"},
 ]
 dvc-objects = [
-    {file = "dvc-objects-0.1.5.tar.gz", hash = "sha256:b05456b62a03d786ceca5bc1134cedd953d5cb9e76d184c5dff0b054736fc415"},
-    {file = "dvc_objects-0.1.5-py3-none-any.whl", hash = "sha256:a19493dd5ea11a5f8803f254427558da3ab66170d507d03ed051a1b86af397a1"},
+    {file = "dvc-objects-0.1.7.tar.gz", hash = "sha256:21a752c08044a58c61ba238608af720c4c4f3b320d497a04e14c431afd9bc3e7"},
+    {file = "dvc_objects-0.1.7-py3-none-any.whl", hash = "sha256:b18ce5192ae6e10c8d4a6609f301cef2d5704b2d09e9d26d017f7f80b4f77972"},
 ]
 dvc-render = [
-    {file = "dvc-render-0.0.6.tar.gz", hash = "sha256:fe914d34118fca36b97c4ae2c129e803b74028319ca1b9d16c35cd91a5b2dd38"},
-    {file = "dvc_render-0.0.6-py3-none-any.whl", hash = "sha256:fa076cba01a4a039fd930bbf3a40c68b2e078041d44b90f3764b299fc0dbf259"},
+    {file = "dvc-render-0.0.9.tar.gz", hash = "sha256:6309e963f730b0a58c6e190ace02e076932fca66fcc55ea5e19086495a443e83"},
+    {file = "dvc_render-0.0.9-py3-none-any.whl", hash = "sha256:18697756d0f332df2760ff5f4ccc42f44b4eba58f22291bb92edb277a84d48a7"},
 ]
 dvc-task = [
-    {file = "dvc-task-0.1.0.tar.gz", hash = "sha256:5c5670b70d230f1575758fe30725e76cf94c13ee660261079bd44d43822393d8"},
-    {file = "dvc_task-0.1.0-py3-none-any.whl", hash = "sha256:f61aea6178953d58e97e5cdd6004c0f7149b591e2bc469737706fc075061f2cc"},
+    {file = "dvc-task-0.1.2.tar.gz", hash = "sha256:7dece92338232ad81f21a9c5fa1b4765cb2713ca06f85ea3c407480471fdeab7"},
+    {file = "dvc_task-0.1.2-py3-none-any.whl", hash = "sha256:37a0283e9246762c91e8cc080aa1cf71cb866227532a8b1fe69e170cca850d9e"},
 ]
 dvclive = [
-    {file = "dvclive-0.9.0-py2.py3-none-any.whl", hash = "sha256:87c71ec8f3df729538c84f8612edc2dc615680c0e292d9dc0f002d326574d04e"},
-    {file = "dvclive-0.9.0.tar.gz", hash = "sha256:57c0e3cad1f082960e2ad3698e52f9ed06fdb5bb5c3ba7415e2da72cecbbf2a6"},
+    {file = "dvclive-0.10.0-py2.py3-none-any.whl", hash = "sha256:2c4102968f7572681c7a2a1bdc92c00bd5f8031d5e25404c3c756deca3da9c96"},
+    {file = "dvclive-0.10.0.tar.gz", hash = "sha256:0a56c76619ba194de5239f0857b6c0a4cb596f6d829bcc2128887c00b429ab1b"},
 ]
 entrypoints = [
     {file = "entrypoints-0.4-py3-none-any.whl", hash = "sha256:f174b5ff827504fd3cd97cc3f8649f3693f51538c7e4bdf3ef002c8429d42f9f"},
@@ -4282,6 +4291,10 @@ toml = [
 tomli = [
     {file = "tomli-2.0.1-py3-none-any.whl", hash = "sha256:939de3e7a6161af0c887ef91b7d41a53e7c5a1ca976325f429cb46ea9bc30ecc"},
     {file = "tomli-2.0.1.tar.gz", hash = "sha256:de526c12914f0c550d15924c62d72abc48d6fe7364aa87328337a31007fe8a4f"},
+]
+tomlkit = [
+    {file = "tomlkit-0.11.3-py3-none-any.whl", hash = "sha256:800628e7705ff7c7cc4395c29836c7073e55b9ec820e1fc696080f9c5591a789"},
+    {file = "tomlkit-0.11.3.tar.gz", hash = "sha256:0ace4c975e0f3e6f71be8a2d61fe568777f1634bc80abff642cd3323ce709a0d"},
 ]
 tornado = [
     {file = "tornado-6.2-cp37-abi3-macosx_10_9_universal2.whl", hash = "sha256:20f638fd8cc85f3cbae3c732326e96addff0a15e22d80f049e00121651e82e72"},
