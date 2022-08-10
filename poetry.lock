@@ -1269,7 +1269,7 @@ test = ["coverage", "ipykernel", "pre-commit", "pytest-console-scripts", "pytest
 
 [[package]]
 name = "jupyterlab"
-version = "3.4.4"
+version = "3.4.5"
 description = "JupyterLab computational environment"
 category = "dev"
 optional = false
@@ -2699,7 +2699,7 @@ python-versions = ">=3.8,<4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "c8423250adebc695f8bd66449d960c9493e8cbf8cb62a7d791742b95cc03af09"
+content-hash = "6da63667731f2b18c5ed87835dd8582d66d0a0da831161e7dd7113ddda9fe742"
 
 [metadata.files]
 aiohttp = [
@@ -3381,8 +3381,8 @@ jupyter-server = [
     {file = "jupyter_server-1.18.1.tar.gz", hash = "sha256:2b72fc595bccae292260aad8157a0ead8da2c703ec6ae1bb7b36dbad0e267ea7"},
 ]
 jupyterlab = [
-    {file = "jupyterlab-3.4.4-py3-none-any.whl", hash = "sha256:2c12a0c995bf5d49b0a17e833aaf6417c6d6a4721dfd4742a5f22f4e48661146"},
-    {file = "jupyterlab-3.4.4.tar.gz", hash = "sha256:5a2a0fdd22bd8628ad45b618e3520387c32a4818e3af112dbad1f649304dfc20"},
+    {file = "jupyterlab-3.4.5-py3-none-any.whl", hash = "sha256:3181d60518e6101b9e43f6da231aa4be812a59d81ddcc8fe680dd33066fddae6"},
+    {file = "jupyterlab-3.4.5.tar.gz", hash = "sha256:472f6b7996c75f6991592483c26d9fe205a59a71ccbce15842400155dc64f59b"},
 ]
 jupyterlab-pygments = [
     {file = "jupyterlab_pygments-0.2.2-py2.py3-none-any.whl", hash = "sha256:2405800db07c9f770863bcf8049a529c3dd4d3e28536638bd7c1c01d2748309f"},
