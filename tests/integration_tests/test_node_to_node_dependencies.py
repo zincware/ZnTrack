@@ -1,5 +1,3 @@
-import os
-import shutil
 import subprocess
 from pathlib import Path
 
@@ -68,16 +66,6 @@ class DepsCollwOuts(Node):
 
     def run(self):
         self.outs.write_text("Lorem Ipsum")
-
-
-@pytest.fixture()
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 def test_dvc_outs(proj_path):

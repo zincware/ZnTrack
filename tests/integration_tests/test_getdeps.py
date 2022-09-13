@@ -1,7 +1,5 @@
 """Additional tests for getdeps can be found in test_node_to_node_dependencies"""
-import os
 import pathlib
-import shutil
 import subprocess
 
 import numpy as np
@@ -11,16 +9,6 @@ from zntrack import getdeps, utils, zn
 from zntrack.core import ZnTrackOption
 from zntrack.core.base import Node
 from zntrack.zn.dependencies import NodeAttribute, get_origin
-
-
-@pytest.fixture()
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 class SeedNumbers(Node):

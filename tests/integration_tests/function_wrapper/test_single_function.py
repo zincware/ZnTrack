@@ -1,22 +1,9 @@
-import os
 import pathlib
-import shutil
-import subprocess
 
 import pytest
 
 from zntrack import utils
 from zntrack.core.functions.decorator import NodeConfig, nodify
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 @nodify(outs="test.txt", params={"text": "Lorem Ipsum"})
