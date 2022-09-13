@@ -375,7 +375,7 @@ def test_collect(proj_path):
 
 class OnlyOutsNode(Node):
     _hash = zn.Hash()
-    outs: pathlib.Path = dvc.outs(use_node_dir=True)
+    outs: pathlib.Path = dvc.outs()
 
     def run(self):
         if self.outs is not None:
