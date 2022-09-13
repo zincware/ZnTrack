@@ -30,4 +30,7 @@ def proj_path(tmp_path, request) -> pathlib.Path:
     subprocess.check_call(["git", "init"])
     subprocess.check_call(["dvc", "init"])
 
+    subprocess.check_call(["git", "add", "."])
+    subprocess.check_call(["git", "commit", "-m", "init"])
+
     return tmp_path
