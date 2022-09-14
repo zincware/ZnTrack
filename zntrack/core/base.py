@@ -123,8 +123,16 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
 
     def __repr__(self):
-        origin = super().__repr__()
-        return f"{origin}(name={self.node_name})"
+        key = hex(id(self))  # TODO replace by git rev in the future
+        status = "known" if self._graph_entry_exists else "unknown"
+        # TODO add a state: available which checks e.g. via dvc status
+        #  or later if loading by revision is available otherwise
+        #  if the outputs are available
+        if self.node_name == self.__class__.__name__:
+            name = f"'{self.node_name}'"
+        else:
+            name = f"'{self.node_name}' from '{self.__class__.__name__}'"
+        return f"<ZnTrack: {name}: status: {status}, key: {key}>"
 
     def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other)
