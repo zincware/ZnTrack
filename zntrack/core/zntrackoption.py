@@ -138,6 +138,12 @@ class ZnTrackOption(descriptor.Descriptor):
                         f"Could not load {self.name} for {instance}"
                     ) from err
         elif is_not_in_dict:
+            if self.zn_type in utils.VALUE_DVC_TRACKED:
+                raise utils.exceptions.DataNotAvailableError(
+                    "Can not access class attributes for a Node which is not loaded."
+                    f" Consider using '<Node>.load(name='{instance.node_name}')' to load"
+                    " the results"
+                )
             # if the instance is not loaded, there is no LazyOption handling
             # instead of .get(name, default_value) we make a copy of the default value
             # because it could be changed.
