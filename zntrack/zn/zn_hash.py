@@ -1,4 +1,5 @@
 import datetime
+import uuid
 
 from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
@@ -40,7 +41,7 @@ class Hash(ZnTrackOption):
         if instance is None:
             return self
         if self.use_time:
-            return hash(instance) + hash(datetime.datetime.now())
+            return hash(instance) + hash(datetime.datetime.now()) + hash(uuid.uuid4())
         return hash(instance)
 
     def __set__(self, instance, value):
