@@ -57,7 +57,7 @@ BaseNodeType = typing.TypeVar("BaseNodeType", bound="Node")
 class LoadViaGetItem(type):
     """Metaclass for adding getitem support to load"""
 
-    def __getitem__(cls: Node, item) -> BaseNodeType:
+    def __getitem__(cls: Node, item: typing.Union[str, dict]) -> BaseNodeType:
         """Allow Node[<nodename>] to access an instance of the Node
 
         Attributes
@@ -66,7 +66,15 @@ class LoadViaGetItem(type):
             Can be a string, for load(name=item)
             Can be a dict for load(**item) | e.g. {name:"nodename", lazy:True}
 
+        Raises
+        -------
+        ValueError: if you don't pass a dict or string.
+
         """
+        if not isinstance(item, (str, dict)):
+            raise ValueError(
+                f"Can only load {cls} with type (str, dict). Found {type(item)}"
+            )
         if isinstance(item, dict):
             return cls.load(**item)
         return cls.load(name=item)
@@ -128,11 +136,11 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         # TODO add a state: available which checks e.g. via dvc status
         #  or later if loading by revision is available otherwise
         #  if the outputs are available
-        if self.node_name == self.__class__.__name__:
-            name = f"'{self.node_name}'"
-        else:
-            name = f"'{self.node_name}' from '{self.__class__.__name__}'"
-        return f"<ZnTrack: {name}: status: {status}, id: {hex_id}>"
+        obj = self.__class__.__name__
+        return (
+            f"<ZnTrack {obj}: status: {status}, loaded: {self.is_loaded}, name:"
+            f" {self.node_name}, id: {hex_id}>"
+        )
 
     def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other)

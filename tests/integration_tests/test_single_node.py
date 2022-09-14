@@ -314,6 +314,9 @@ def test_load_named_nodes(proj_path):
     assert ExampleNode01[{"name": "Node01", "lazy": True}].outputs == 42
     assert ExampleNode01[{"name": "Node01", "lazy": False}].outputs == 42
 
+    with pytest.raises(ValueError):
+        _ = ExampleNode01[1]
+
 
 class NodeCustomFileName(Node):
     output_std = zn.outs()
