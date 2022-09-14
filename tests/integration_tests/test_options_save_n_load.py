@@ -1,17 +1,6 @@
-import os
 import pathlib
-import shutil
-
-import pytest
 
 from zntrack import Node, dvc, zn
-
-
-@pytest.fixture()
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    return tmp_path
 
 
 class ZnDeps(Node):

@@ -1,6 +1,3 @@
-import os
-import shutil
-
 from zntrack import Node, ZnTrackProject, zn
 
 
@@ -19,13 +16,9 @@ class HelloWorld(Node):
         self.output = self.inputs
 
 
-def test_basic_io_assertion(tmp_path):
+def test_basic_io_assertion(proj_path):
     """Make a simple input/output assertion test for the nodes with different names"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-
     project = ZnTrackProject()
-    project.create_dvc_repository()
 
     HelloWorld(inputs=3).write_graph()
     HelloWorld(name="Test01", inputs=17).write_graph()

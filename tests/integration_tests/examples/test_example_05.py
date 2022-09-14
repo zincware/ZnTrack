@@ -1,6 +1,3 @@
-import os
-import shutil
-
 import numpy as np
 
 from zntrack import Node, ZnTrackProject, zn
@@ -20,13 +17,9 @@ class ComputeA(Node):
         self.out = np.power(2, self.inp)
 
 
-def test_stage_addition(tmp_path):
+def test_stage_addition(proj_path):
     """Check that the dvc repro works"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
     project = ZnTrackProject()
-    project.name = "test01"
-    project.create_dvc_repository()
 
     ComputeA(inp=np.arange(5)).write_graph()
 
@@ -37,14 +30,8 @@ def test_stage_addition(tmp_path):
     np.testing.assert_array_equal(finished_stage.inp, np.arange(5))
 
 
-def test_stage_addition_run(tmp_path):
+def test_stage_addition_run(proj_path):
     """Check that the PyTracks run method works"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    project = ZnTrackProject()
-    project.name = "test01"
-    project.create_dvc_repository()
-
     a = ComputeA(inp=np.arange(5))
 
     a.save()  # need to save to access the parameters zn.params
