@@ -28,8 +28,7 @@ def read_file(file: pathlib.Path) -> dict:
         Content of the json/yaml file
     """
     if file.suffix in [".yaml", ".yml"]:
-        with file.open("r") as f:
-            file_content = yaml.safe_load(f)
+        file_content = yaml.safe_load(file.read_text())
     elif file.suffix == ".json":
         file_content = json.loads(file.read_text())
     else:

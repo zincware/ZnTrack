@@ -93,6 +93,7 @@ def test__load():
     )
     params_mock = mock_open(read_data=yaml.safe_dump({"ExampleFullNode": {"params": 42}}))
     zn_outs_mock = mock_open(read_data=json.dumps({"zn_outs": "outs_"}))
+    dvc_mock = mock_open(read_data=yaml.safe_dump({"stages": {"ExampleFullNode": None}}))
 
     example = ExampleFullNode()
 
@@ -103,6 +104,9 @@ def test__load():
             return params_mock(*args, **kwargs)
         elif args[0] == pathlib.Path("nodes/ExampleFullNode/outs.json"):
             return zn_outs_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("dvc.yaml"):
+            # required for logging with __repr__ which uses '_graph_entry_exists'
+            return dvc_mock(*args, **kwargs)
         else:
             raise ValueError(args)
 
