@@ -36,8 +36,10 @@ def test_example_func_dry_run(proj_path):
             "params.yaml:example_func",
             "--outs",
             "test.txt",
-            f'{utils.get_python_interpreter()} -c "from test_single_function import '
-            'example_func; example_func(exec_func=True)" ',
+            (
+                f'{utils.get_python_interpreter()} -c "from test_single_function import '
+                'example_func; example_func(exec_func=True)" '
+            ),
         ]
     )
 

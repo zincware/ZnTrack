@@ -169,8 +169,10 @@ def test_prepare_dvc_script():
         "--force",
         "--deps",
         "file.txt",
-        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
-        ' MyNode.load().run_and_save()" ',
+        (
+            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            ' MyNode.load().run_and_save()" '
+        ),
     ]
 
     script = prepare_dvc_script(
@@ -196,8 +198,10 @@ def test_prepare_dvc_script():
         "file.txt",
         "--deps",
         "src/file.py",
-        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
-        ' MyNode.load().run_and_save()" ',
+        (
+            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            ' MyNode.load().run_and_save()" '
+        ),
     ]
 
 
