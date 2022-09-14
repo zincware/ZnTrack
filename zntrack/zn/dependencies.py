@@ -72,6 +72,10 @@ def get_origin(
     Typically, when using zn.deps there is no way to access the original Node where
     the data comes from. This function allows you to get the underlying
     NodeAttribute object to access e.g. the name of the original Node.
+
+    Raises
+    ------
+    AttributeError: if the attribute is not of type zn.deps
     """
     znjson.register(RawNodeAttributeConverter)
     new_node = node.load(name=node.node_name)
@@ -79,14 +83,16 @@ def get_origin(
 
     znjson.deregister(RawNodeAttributeConverter)
 
-    attr_err = AttributeError(
-        f"'{new_node.node_name}' object has no attribute '{attribute}' of type 'zn.deps'."
-        f" Found type {type(getattr(node, attribute))} instead"
-    )
+    def not_zn_deps_err() -> AttributeError:
+        """Evaluate error message when raising the error"""
+        return AttributeError(
+            f"'{new_node.node_name}' object has no attribute '{attribute}' of type"
+            f" 'zn.deps'. Found {type(getattr(node.__class__, attribute))} instead"
+        )
 
     if isinstance(value, (list, tuple)):
         if any([not isinstance(x, NodeAttribute) for x in value]):
-            raise attr_err
+            raise not_zn_deps_err()
     elif not isinstance(value, NodeAttribute):
-        raise attr_err
+        raise not_zn_deps_err()
     return value

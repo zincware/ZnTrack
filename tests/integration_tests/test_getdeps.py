@@ -185,7 +185,8 @@ def test_err_get_origin(proj_path):
     sd.write_graph()
     ModifyNumber(inputs=getdeps(sd, "number")).write_graph()
 
-    with pytest.raises(AttributeError):
+    with pytest.raises(utils.exceptions.DataNotAvailableError):
+        # Try to access the 'outputs' data which is not available at this point in time
         get_origin(ModifyNumber.load(), "outputs")
 
     with pytest.raises(AttributeError):
