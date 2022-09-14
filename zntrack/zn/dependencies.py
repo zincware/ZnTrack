@@ -75,15 +75,18 @@ def get_origin(
     """
     znjson.register(RawNodeAttributeConverter)
     new_node = node.load(name=node.node_name)
-    try:
-        value = getattr(new_node, attribute)
-    except AttributeError as err:
-        raise AttributeError("Can only use get_origin with zn.deps") from err
+    value = getattr(new_node, attribute)
+
     znjson.deregister(RawNodeAttributeConverter)
+
+    attr_err = AttributeError(
+        f"'{new_node.node_name}' object has no attribute '{attribute}' of type 'zn.deps'."
+        f" Found type {type(getattr(node, attribute))} instead"
+    )
 
     if isinstance(value, (list, tuple)):
         if any([not isinstance(x, NodeAttribute) for x in value]):
-            raise AttributeError("Can only use get_origin with zn.deps using getdeps.")
+            raise attr_err
     elif not isinstance(value, NodeAttribute):
-        raise AttributeError("Can only use get_origin with zn.deps using getdeps.")
+        raise attr_err
     return value
