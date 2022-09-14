@@ -88,7 +88,9 @@ def test_read_file_yaml():
     with patch.object(pathlib.Path, "open", pathlib_open):
         assert file_io.read_file(pathlib.Path("example.yaml")) == {"a": "b"}
 
-        open_mock.assert_called_with(pathlib.Path("example.yaml"), "r")
+        open_mock.assert_called_with(
+            pathlib.Path("example.yaml"), mode="r", encoding=None, errors=None
+        )
 
 
 def test_read_file_yml():
@@ -100,7 +102,9 @@ def test_read_file_yml():
     with patch.object(pathlib.Path, "open", pathlib_open):
         assert file_io.read_file(pathlib.Path("example.yml")) == {"a": "b"}
 
-        open_mock.assert_called_with(pathlib.Path("example.yml"), "r")
+        open_mock.assert_called_with(
+            pathlib.Path("example.yml"), mode="r", encoding=None, errors=None
+        )
 
 
 def test_read_file_txt():
