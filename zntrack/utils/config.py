@@ -58,6 +58,7 @@ class Files:
 
     zntrack: Path = Path("zntrack.json")
     params: Path = Path("params.yaml")
+    dvc: Path = Path("dvc.yaml")
 
 
 config = Config()

@@ -215,7 +215,10 @@ class ZnTrackInfo:
     """Helping class for access to ZnTrack information"""
 
     def __init__(self, parent):
-        self._parent = parent
+        self._parent: GraphWriter = parent
+
+    def __repr__(self):
+        return f"ZnTrackInfo: {self._parent}"
 
     def collect(
         self, zntrackoption: typing.Type[descriptor.BaseDescriptorType] = ZnTrackOption
@@ -506,6 +509,16 @@ class GraphWriter:
     @property
     def zntrack(self) -> ZnTrackInfo:
         return ZnTrackInfo(parent=self)
+
+    @property
+    def _graph_entry_exists(self) -> bool:
+        """If this Graph exists in the dvc.yaml file"""
+        try:
+            file_content = utils.file_io.read_file(utils.Files.dvc)
+        except FileNotFoundError:
+            file_content = {}
+
+        return self.node_name in file_content.get("stages", {})
 
 
 def run_post_dvc_cmd(descriptor_list, instance):

@@ -188,6 +188,25 @@ class ZnTrackOption(descriptor.Descriptor):
         file = self.get_filename(instance)
         file.parent.mkdir(exist_ok=True, parents=True)
 
+    def _raise_loading_errors(self, instance, err):
+        """Raise specific errors when reading ZnTrackOptions
+
+        Raises
+        -------
+        DataNotAvailableError:
+            if the graph exists in dvc.yaml but the output files do not exist.
+        GraphNotAvailableError:
+            if the graph does not exist in dvc.yaml. This has higher priority
+        """
+        if instance._graph_entry_exists:
+            raise utils.exceptions.DataNotAvailableError(
+                f"Could not load data for '{self.name}' from file."
+            ) from err
+        raise utils.exceptions.GraphNotAvailableError(
+            f"Could not find the graph configuration for '{instance.node_name}' in"
+            f" {utils.Files.dvc}."
+        ) from err
+
     def get_data_from_files(self, instance):
         """Load the value/s for the given instance from the file/s
 
@@ -204,13 +223,18 @@ class ZnTrackOption(descriptor.Descriptor):
             returns the value loaded from file/s for the given instance.
         """
         file = self.get_filename(instance)
-        file_content = utils.file_io.read_file(file)
+        try:
+            file_content = utils.file_io.read_file(file)
+        except FileNotFoundError as err:
+            self._raise_loading_errors(instance, err)
         # The problem here is, that I can not / don't want to load all Nodes but
         # only the ones, that are in [self.node_name][self.name] for deserializing
-        if uses_node_name(self.zn_type, instance) is not None:
-            values = utils.decode_dict(file_content[instance.node_name][self.name])
-        else:
-            values = utils.decode_dict(file_content[self.name])
-
+        try:
+            if uses_node_name(self.zn_type, instance) is not None:
+                values = utils.decode_dict(file_content[instance.node_name][self.name])
+            else:
+                values = utils.decode_dict(file_content[self.name])
+        except KeyError as err:
+            self._raise_loading_errors(instance, err)
         log.debug(f"Loading {instance.node_name} from {file}: ({values})")
         return values

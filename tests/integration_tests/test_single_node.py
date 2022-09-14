@@ -359,3 +359,10 @@ def test_collect(proj_path):
 
     with pytest.raises(ValueError):
         ExampleNode01["TestNode"].zntrack.collect((zn.params, zn.outs))
+
+
+def test__graph_entry_exists(proj_path):
+    ExampleNode01(inputs="Hello World", name="TestNode").write_graph()
+
+    assert ExampleNode01.load()._graph_entry_exists is False
+    assert ExampleNode01["TestNode"]._graph_entry_exists

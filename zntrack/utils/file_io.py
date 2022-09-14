@@ -17,6 +17,11 @@ def read_file(file: pathlib.Path) -> dict:
     file: pathlib.Path
         The file to read
 
+    Raises
+    ------
+    ValueError: if the file type is not supported
+    FileNotFoundError: if the file does not exist
+
     Returns
     -------
     dict:
