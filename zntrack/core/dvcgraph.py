@@ -217,13 +217,16 @@ class ZnTrackInfo:
     def __init__(self, parent):
         self._parent = parent
 
-    def collect(self, zntrackoption: typing.Type[descriptor.BaseDescriptorType]) -> dict:
+    def collect(
+        self, zntrackoption: typing.Type[descriptor.BaseDescriptorType] = ZnTrackOption
+    ) -> dict:
         """Collect the values of all ZnTrackOptions of the passed type
 
         Parameters
         ----------
         zntrackoption:
-            Any cls of a ZnTrackOption such as zn.params
+            Any cls of a ZnTrackOption such as zn.params.
+            By default, collect all ZnTrackOptions
 
         Returns
         -------
