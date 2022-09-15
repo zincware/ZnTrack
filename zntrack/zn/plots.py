@@ -21,9 +21,6 @@ class plots(PlotsModifyOption):
         """Save value with pd.DataFrame.to_csv"""
         value = self.__get__(instance, self.owner)
 
-        if value is None:
-            return
-
         if not isinstance(value, pd.DataFrame):
             raise TypeError(
                 f"zn.plots() only supports <pd.DataFrame> and not {type(value)}"

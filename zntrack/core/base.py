@@ -57,7 +57,7 @@ BaseNodeType = typing.TypeVar("BaseNodeType", bound="Node")
 class LoadViaGetItem(type):
     """Metaclass for adding getitem support to load"""
 
-    def __getitem__(cls: Node, item) -> BaseNodeType:
+    def __getitem__(cls: Node, item: typing.Union[str, dict]) -> BaseNodeType:
         """Allow Node[<nodename>] to access an instance of the Node
 
         Attributes
@@ -66,7 +66,15 @@ class LoadViaGetItem(type):
             Can be a string, for load(name=item)
             Can be a dict for load(**item) | e.g. {name:"nodename", lazy:True}
 
+        Raises
+        -------
+        ValueError: if you don't pass a dict or string.
+
         """
+        if not isinstance(item, (str, dict)):
+            raise ValueError(
+                f"Can only load {cls} with type (str, dict). Found {type(item)}"
+            )
         if isinstance(item, dict):
             return cls.load(**item)
         return cls.load(name=item)
@@ -123,8 +131,16 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         """Still here for a depreciation warning for migrating to class based ZnTrack"""
 
     def __repr__(self):
-        origin = super().__repr__()
-        return f"{origin}(name={self.node_name})"
+        hex_id = hex(id(self))  # TODO replace by git rev in the future
+        status = "known" if self._graph_entry_exists else "unknown"
+        # TODO add a state: available which checks e.g. via dvc status
+        #  or later if loading by revision is available otherwise
+        #  if the outputs are available
+        obj = self.__class__.__name__
+        return (
+            f"<ZnTrack {obj}: status: {status}, loaded: {self.is_loaded}, name:"
+            f" {self.node_name}, id: {hex_id}>"
+        )
 
     def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other)
@@ -306,6 +322,10 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
 
     def run_and_save(self):
         """Main method to run for the actual calculation"""
+        if not self.is_loaded:
+            # Save e.g. the parameters if the Node is not loaded
+            #  this can happen, when using this method outside 'dvc repro'
+            self.save()
         self.run()
         self.save(results=True)
 

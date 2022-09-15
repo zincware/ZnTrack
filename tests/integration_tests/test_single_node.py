@@ -314,6 +314,9 @@ def test_load_named_nodes(proj_path):
     assert ExampleNode01[{"name": "Node01", "lazy": True}].outputs == 42
     assert ExampleNode01[{"name": "Node01", "lazy": False}].outputs == 42
 
+    with pytest.raises(ValueError):
+        _ = ExampleNode01[1]
+
 
 class NodeCustomFileName(Node):
     output_std = zn.outs()
@@ -359,3 +362,10 @@ def test_collect(proj_path):
 
     with pytest.raises(ValueError):
         ExampleNode01["TestNode"].zntrack.collect((zn.params, zn.outs))
+
+
+def test__graph_entry_exists(proj_path):
+    ExampleNode01(inputs="Hello World", name="TestNode").write_graph()
+
+    assert ExampleNode01.load()._graph_entry_exists is False
+    assert ExampleNode01["TestNode"]._graph_entry_exists

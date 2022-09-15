@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from zntrack import dvc, getdeps, zn
+from zntrack import dvc, getdeps, utils, zn
 from zntrack.core.base import Node
 
 
@@ -94,7 +94,7 @@ def test_dvc_outs_no_load(proj_path):
 
 def test_dvc_reversed(proj_path):
     """Create the instances first and at the end call write_graph"""
-    with pytest.raises(AttributeError):
+    with pytest.raises(utils.exceptions.GraphNotAvailableError):
         # this can not work, because DVCOuts affected files is not now at the stage
         # where DependenciesCollector writes its DVC stage
         DependenciesCollector(dependencies=DVCOuts.load()).write_graph()

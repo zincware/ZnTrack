@@ -27,10 +27,10 @@ def test_example_func_dry_run(proj_path):
     assert " ".join(script) == " ".join(
         [
             "dvc",
-            "run",
+            "stage",
+            "add",
             "-n",
             "example_func",
-            "--no-exec",
             "--force",
             "--params",
             "params.yaml:example_func",
