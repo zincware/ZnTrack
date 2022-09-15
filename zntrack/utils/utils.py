@@ -72,24 +72,72 @@ def encode_dict(value) -> dict:
     return json.loads(json.dumps(value, cls=znjson.ZnEncoder))
 
 
-def get_auto_init(fields: typing.List[str], super_init: typing.Callable):
+def get_init_type_error(required_keys, uses_super: bool = False) -> TypeError:
+    """Get a TypeError similar to a wrong __init__"""
+    if len(required_keys) == 1:
+        if uses_super:
+            return TypeError(
+                f"__init__() missing 1 required positional argument: '{required_keys[0]}'"
+            )
+        return TypeError(
+            "super().__init__() missing 1 required positional argument:"
+            f" '{required_keys[0]}'"
+        )
+    if len(required_keys) > 1:
+        if uses_super:
+            return TypeError(
+                f"__init__() missing {len(required_keys)} required positional arguments:"
+                f""" '{"', '".join(required_keys[:-1])}' and '{required_keys[-1]}'"""
+            )
+        return TypeError(
+            f"super().__init__() missing {len(required_keys)} required positional"
+            " arguments:"
+            f""" '{"', '".join(required_keys[:-1])}' and '{required_keys[-1]}'"""
+        )
+
+
+def get_auto_init(
+    kwargs_no_default: typing.List[str],
+    kwargs_with_default: dict,
+    super_init: typing.Callable,
+):
     """Automatically create an __init__ based on fields
 
     Parameters
     ----------
-    fields: list[str]
-        A list of strings that will be used in the __init__, e.g. for [foo, bar]
-        it will create __init__(self, foo=None, bar=None) using **kwargs
+    kwargs_no_default: list[str]
+        A list that strings (required kwarg without default value) that will be used in
+        the __init__, e.g. for [foo, bar] will create  __init__(self, foo, bar)
+    kwargs_with_default: dict[str, any]
+        A dict that contains the name of the kwarg as key and the default value
+         (kwargs with default value) that will be used in
+        the __init__, e.g. for {foo: None, bar: 10} will create
+         __init__(self, foo=None, bar=10)
     super_init: Callable
         typically this is Node.__init__
     """
 
+    kwargs_no_default = [] if kwargs_no_default is None else kwargs_no_default
+    kwargs_with_default = {} if kwargs_with_default is None else kwargs_with_default
+
     def auto_init(self, **kwargs):
         """Wrapper for the __init__"""
         init_kwargs = {}
-        for field in fields:
+        required_keys = []
+        self_uses_auto_init = getattr(self.__init__, "_uses_auto_init", False)
+        log.debug(f"The '__init__' uses auto_init: {self_uses_auto_init}")
+        for kwarg_name in kwargs_no_default:
             try:
-                init_kwargs[field] = kwargs.pop(field)
+                init_kwargs[kwarg_name] = kwargs.pop(kwarg_name)
+            except KeyError:
+                required_keys.append(kwarg_name)
+
+        if len(required_keys) > 0:
+            raise get_init_type_error(required_keys, self_uses_auto_init)
+
+        for kwarg_name, kwarg_value in kwargs_with_default.items():
+            try:
+                init_kwargs[kwarg_name] = kwargs.pop(kwarg_name, kwarg_value)
             except KeyError:
                 pass
         super_init(self, **kwargs)  # call the super_init explicitly instead of super

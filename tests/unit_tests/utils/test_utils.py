@@ -27,41 +27,88 @@ def test_decode_dict_path():
     assert utils.decode_dict(None) is None
 
 
-class Test:
+class EmptyCls:
     pass
 
 
-class TestWithPostInit:
+class ClsWithPostInit:
     def post_init(self):
         self.post_init = True
         self.text = f"{self.foo} {self.bar}"
 
 
 def test_get_auto_init():
+    _ = EmptyCls()
+
     with pytest.raises(TypeError):
-        Test(foo="foo")
+        # has no init
+        EmptyCls(foo="foo")
 
-    mock = MagicMock()
-    setattr(Test, "__init__", utils.get_auto_init(fields=["foo", "bar"], super_init=mock))
-    test = Test(foo="foo", bar="bar")
+    def set_init(lst, dct):
+        mock = MagicMock()
+        setattr(
+            EmptyCls,
+            "__init__",
+            utils.get_auto_init(
+                kwargs_no_default=lst, kwargs_with_default=dct, super_init=mock
+            ),
+        )
+        return mock
 
+    # only none-default values
+    mock = set_init(["foo", "bar"], {})
+
+    with pytest.raises(TypeError):
+        # type error after setting the init
+        _ = EmptyCls()
+
+    test = EmptyCls(foo="foo", bar="bar")
+    assert test.foo == "foo"
+    assert test.bar == "bar"
+    mock.assert_called()
+
+    # only default values
+    mock = set_init([], {"foo": None, "bar": 10})
+    test = EmptyCls()
+    assert test.foo is None
+    assert test.bar == 10
+    mock.assert_called()
+
+    test = EmptyCls(foo="foo", bar="bar")
     assert test.foo == "foo"
     assert test.bar == "bar"
 
+    # mixed case
+    mock = set_init(["foo"], {"bar": 10})
+    with pytest.raises(TypeError):
+        _ = EmptyCls()
+
+    with pytest.raises(TypeError):
+        _ = EmptyCls(bar=20)
+
+    test = EmptyCls(foo="foo")
+    assert test.foo == "foo"
+    assert test.bar == 10
+
+    test = EmptyCls(foo="foo", bar="bar")
+    assert test.foo == "foo"
+    assert test.bar == "bar"
     mock.assert_called()
 
 
 def test_get_post_init():
     with pytest.raises(TypeError):
-        TestWithPostInit(foo="foo")
+        ClsWithPostInit(foo="foo")
 
     mock = MagicMock()
     setattr(
-        TestWithPostInit,
+        ClsWithPostInit,
         "__init__",
-        utils.get_auto_init(fields=["foo", "bar"], super_init=mock),
+        utils.get_auto_init(
+            kwargs_no_default=["foo", "bar"], kwargs_with_default={}, super_init=mock
+        ),
     )
-    test = TestWithPostInit(foo="foo", bar="bar")
+    test = ClsWithPostInit(foo="foo", bar="bar")
 
     assert test.foo == "foo"
     assert test.bar == "bar"

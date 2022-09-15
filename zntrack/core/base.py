@@ -13,10 +13,20 @@ from zntrack.zn.dependencies import NodeAttribute, getdeps
 log = logging.getLogger(__name__)
 
 
-def get_auto_init_signature(cls) -> (list, list):
+def get_auto_init_signature(cls) -> (list, dict, list):
     """Iterate over ZnTrackOptions in the __dict__ and save the option name
-    and create a signature Parameter"""
-    zn_option_names, signature_params = [], []
+    and create a signature Parameter
+
+    Returns:
+        kwargs_no_default: list
+            a list of names that will be converted to kwargs
+        kwargs_with_default: dict
+            a dict of {name: default_value} that will be converted to kwargs
+        signature_params: inspect.Parameter
+    """
+    signature_params = []
+    kwargs_no_default = []
+    kwargs_with_default = {}
     _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
     descriptors = get_descriptors(ZnTrackOption, cls=cls)
     for descriptor in descriptors:
@@ -24,17 +34,21 @@ def get_auto_init_signature(cls) -> (list, list):
             # exclude zn.outs / metrics / plots / ... options
             continue
         # For the new __init__
-        zn_option_names.append(descriptor.name)
+        if descriptor.default_value is None:
+            kwargs_no_default.append(descriptor.name)
+        else:
+            kwargs_with_default[descriptor.name] = descriptor.default_value
 
         # For the new __signature__
         signature_params.append(
             inspect.Parameter(
+                # default=...
                 name=descriptor.name,
                 kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
                 annotation=cls.__annotations__.get(descriptor.name),
             )
         )
-    return zn_option_names, signature_params
+    return kwargs_no_default, kwargs_with_default, signature_params
 
 
 def update_dependency_options(value):
@@ -176,13 +190,19 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
                     return cls
 
         # attach an automatically generated __init__ if None is provided
-        zn_option_names, signature_params = get_auto_init_signature(cls)
+        (
+            kwargs_no_default,
+            kwargs_with_default,
+            signature_params,
+        ) = get_auto_init_signature(cls)
 
         # Add new __init__ to the subclass
         setattr(
             cls,
             "__init__",
-            utils.get_auto_init(fields=zn_option_names, super_init=Node.__init__),
+            utils.get_auto_init(
+                kwargs_no_default, kwargs_with_default, super_init=Node.__init__
+            ),
         )
 
         # Add new __signature__ to the subclass
@@ -295,24 +315,27 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError as type_error:
-            try:
-                instance = cls()
-                if name not in (None, cls.__name__):
-                    instance.node_name = name
-                log.warning(
-                    "Can not pass <name> to the super.__init__ and trying workaround!"
-                    " This can lead to unexpected behaviour and can be avoided by"
-                    " passing ( **kwargs) to the super().__init__(**kwargs) - Received"
-                    f" '{type_error}'"
-                )
-            except TypeError as err:
+            if getattr(cls.__init__, "_uses_auto_init", False):
+                # using new + init from Node class to circumvent required
+                # arguments in the automatic init
+                instance = object.__new__(cls)
+                Node.__init__(instance, name=name, is_loaded=True)
+            else:
+                # when not using the automatic init all arguments must have a
+                # default value and the super call is required. It would still
+                # be
                 raise TypeError(
                     f"Unable to create a new instance of {cls}. Check that all arguments"
                     " default to None. It must be possible to instantiate the class via"
-                    f" {cls}() without passing any arguments. See the ZnTrack"
-                    " documentation for more information."
-                ) from err
+                    f" {cls}() without passing any arguments. Furthermore, the"
+                    " '**kwargs' must be passed to the 'super().__init__(**kwargs)'"
+                    "See the ZnTrack documentation for more information."
+                ) from type_error
 
+        assert instance.node_name is not None, (
+            "The name of the Node is not set. Probably missing"
+            " 'super().__init__(**kwargs)' inside the custom '__init__'."
+        )
         instance._update_options(lazy=lazy)
 
         if utils.config.nb_name is not None:
