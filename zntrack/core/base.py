@@ -322,6 +322,10 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
 
     def run_and_save(self):
         """Main method to run for the actual calculation"""
+        if not self.is_loaded:
+            # Save e.g. the parameters if the Node is not loaded
+            #  this can happen, when using this method outside 'dvc repro'
+            self.save()
         self.run()
         self.save(results=True)
 
