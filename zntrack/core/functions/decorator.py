@@ -286,7 +286,6 @@ def nodify(
                     external=external,
                     always_changed=always_changed,
                     no_run_cache=no_run_cache,
-                    no_exec=no_exec,
                     force=force,
                 )
 
@@ -303,6 +302,10 @@ def nodify(
                 if dry_run:
                     return script
                 utils.run_dvc_cmd(script)
+
+                if not no_exec:
+                    utils.run_dvc_cmd(["dvc", "repro", func.__name__])
+
                 cfg.convert_fields_to_dotdict()
                 return cfg
 

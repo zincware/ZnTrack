@@ -68,7 +68,6 @@ class DVCRunOptions:
     external: bool
     always_changed: bool
     no_run_cache: bool
-    no_exec: bool
     force: bool
 
     @property
@@ -157,10 +156,16 @@ def filter_ZnTrackOption(
                 value = getattr(cls, entity.name)
             types_dict[entity.dvc_option].update({entity.name: value})
         return types_dict
-    if allow_none:
-        return {x.name: getattr(cls, x.name, None) for x in data}
-    # avoid AttributeError
-    return {x.name: getattr(cls, x.name) for x in data}
+    output = {}
+    for attr in data:
+        try:
+            output[attr.name] = getattr(cls, attr.name)
+        except utils.exceptions.DataNotAvailableError as err:
+            if allow_none:
+                output[attr.name] = None
+            else:
+                raise err
+    return output
 
 
 def prepare_dvc_script(
@@ -197,7 +202,7 @@ def prepare_dvc_script(
         The list to be passed to the subprocess call
 
     """
-    script = ["dvc", "run", "-n", node_name]
+    script = ["dvc", "stage", "add", "-n", node_name]
     script += dvc_run_option.dvc_args
     script += custom_args
 
@@ -215,15 +220,21 @@ class ZnTrackInfo:
     """Helping class for access to ZnTrack information"""
 
     def __init__(self, parent):
-        self._parent = parent
+        self._parent: GraphWriter = parent
 
-    def collect(self, zntrackoption: typing.Type[descriptor.BaseDescriptorType]) -> dict:
+    def __repr__(self):
+        return f"ZnTrackInfo: {self._parent}"
+
+    def collect(
+        self, zntrackoption: typing.Type[descriptor.BaseDescriptorType] = ZnTrackOption
+    ) -> dict:
         """Collect the values of all ZnTrackOptions of the passed type
 
         Parameters
         ----------
         zntrackoption:
-            Any cls of a ZnTrackOption such as zn.params
+            Any cls of a ZnTrackOption such as zn.params.
+            By default, collect all ZnTrackOptions
 
         Returns
         -------
@@ -429,7 +440,6 @@ class GraphWriter:
             external=external,
             always_changed=always_changed,
             no_run_cache=no_run_cache,
-            no_exec=no_exec,
             force=force,
         )
 
@@ -500,9 +510,22 @@ class GraphWriter:
 
         run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
 
+        if not no_exec:
+            utils.run_dvc_cmd(["dvc", "repro", self.node_name])
+
     @property
     def zntrack(self) -> ZnTrackInfo:
         return ZnTrackInfo(parent=self)
+
+    @property
+    def _graph_entry_exists(self) -> bool:
+        """If this Graph exists in the dvc.yaml file"""
+        try:
+            file_content = utils.file_io.read_file(utils.Files.dvc)
+        except FileNotFoundError:
+            file_content = {}
+
+        return self.node_name in file_content.get("stages", {})
 
 
 def run_post_dvc_cmd(descriptor_list, instance):

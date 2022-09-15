@@ -1,23 +1,10 @@
 import dataclasses
-import os
-import shutil
-import subprocess
 
 import pytest
 
 from zntrack import zn
 from zntrack.core.base import Node
 from zntrack.utils import LazyOption
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 class HelloWorld(Node):

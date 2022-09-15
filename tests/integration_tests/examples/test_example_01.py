@@ -1,6 +1,4 @@
 """"""
-import os
-import shutil
 from pathlib import Path
 
 from zntrack import Node, ZnTrackProject, dvc, zn
@@ -53,12 +51,9 @@ class StageAddition(Node):
         Path(self.outs).write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
 
 
-def test_stage_addition(tmp_path):
+def test_stage_addition(proj_path):
     """Check that the dvc repro works"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
     project = ZnTrackProject()
-    project.create_dvc_repository()
 
     StageAddition(5, 10).write_graph()
     project.name = "Test1"
@@ -78,12 +73,9 @@ def test_stage_addition(tmp_path):
     assert finished_stage.sum == 150
 
 
-def test_stage_io(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
+def test_stage_io(proj_path):
     project = ZnTrackProject()
     project.name = "Test1"
-    project.create_dvc_repository()
 
     deps = Path("test_example_01.py").resolve()
 

@@ -1,8 +1,6 @@
 import dataclasses
 import json
-import os
 import pathlib
-import shutil
 import subprocess
 
 import pytest
@@ -10,16 +8,6 @@ import pytest
 from zntrack import dvc, zn
 from zntrack.core.base import Node
 from zntrack.utils.exceptions import DVCProcessError
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 class ExampleNode01(Node):
@@ -326,6 +314,9 @@ def test_load_named_nodes(proj_path):
     assert ExampleNode01[{"name": "Node01", "lazy": True}].outputs == 42
     assert ExampleNode01[{"name": "Node01", "lazy": False}].outputs == 42
 
+    with pytest.raises(ValueError):
+        _ = ExampleNode01[1]
+
 
 class NodeCustomFileName(Node):
     output_std = zn.outs()
@@ -373,6 +364,7 @@ def test_collect(proj_path):
         ExampleNode01["TestNode"].zntrack.collect((zn.params, zn.outs))
 
 
+
 class OnlyOutsNode(Node):
     _hash = zn.Hash()
     outs: pathlib.Path = dvc.outs()
@@ -385,3 +377,10 @@ class OnlyOutsNode(Node):
 def test_OnlyOutsNode(proj_path):
     OnlyOutsNode(outs=pathlib.Path("test_node")).write_graph(run=True)
     OnlyOutsNode(name="empty").write_graph(run=True)  # this is the actual test
+
+def test__graph_entry_exists(proj_path):
+    ExampleNode01(inputs="Hello World", name="TestNode").write_graph()
+
+    assert ExampleNode01.load()._graph_entry_exists is False
+    assert ExampleNode01["TestNode"]._graph_entry_exists
+

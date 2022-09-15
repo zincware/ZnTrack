@@ -93,6 +93,7 @@ def test__load():
     )
     params_mock = mock_open(read_data=yaml.safe_dump({"ExampleFullNode": {"params": 42}}))
     zn_outs_mock = mock_open(read_data=json.dumps({"zn_outs": "outs_"}))
+    dvc_mock = mock_open(read_data=yaml.safe_dump({"stages": {"ExampleFullNode": None}}))
 
     example = ExampleFullNode()
 
@@ -103,6 +104,9 @@ def test__load():
             return params_mock(*args, **kwargs)
         elif args[0] == pathlib.Path("nodes/ExampleFullNode/outs.json"):
             return zn_outs_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("dvc.yaml"):
+            # required for logging with __repr__ which uses '_graph_entry_exists'
+            return dvc_mock(*args, **kwargs)
         else:
             raise ValueError(args)
 
@@ -150,10 +154,12 @@ class RunTestNode(Node):
         self.outs = 42
 
 
-def test_run_and_save():
+@pytest.mark.parametrize("is_loaded", (True, False))
+def test_run_and_save(is_loaded):
     open_mock = mock_open(read_data="{}")
 
     example = RunTestNode()
+    example.is_loaded = is_loaded
 
     def pathlib_open(*args, **kwargs):
         return open_mock(*args, **kwargs)
@@ -163,9 +169,16 @@ def test_run_and_save():
 
         assert example.outs == 42
 
-    assert open_mock().write.mock_calls == [
-        call(json.dumps({"outs": 42}, indent=4)),
-    ]
+    if example.is_loaded:
+        assert open_mock().write.mock_calls == [
+            call(json.dumps({"outs": 42}, indent=4)),
+        ]
+    else:
+        assert open_mock().write.mock_calls == [
+            call("{}\n"),  # clear_config_file(utils.Files.params) in save
+            call("{}"),  # clear_config_file(utils.Files.zntrack) in save
+            call(json.dumps({"outs": 42}, indent=4)),
+        ]
 
 
 class WrongInit(Node):

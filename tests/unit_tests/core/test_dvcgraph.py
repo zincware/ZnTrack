@@ -19,17 +19,22 @@ class ExampleDVCOutsNode(GraphWriter):
     outs = dvc.outs(pathlib.Path("example.dat"))
 
 
+class ExampleDVCOutsParams(GraphWriter):
+    is_loaded = False
+    outs = dvc.outs(pathlib.Path("example.dat"))
+    param1 = zn.params(5)
+
+
 def test_get_dvc_arguments():
     dvc_options = DVCRunOptions(
         force=True,
         always_changed=False,
-        no_exec=True,
-        external=False,
+        external=True,
         no_commit=False,
         no_run_cache=False,
     )
 
-    assert dvc_options.dvc_args == ["--no-exec", "--force"]
+    assert dvc_options.dvc_args == ["--external", "--force"]
 
 
 def test_handle_deps():
@@ -138,7 +143,6 @@ def test_prepare_dvc_script():
         external=True,
         always_changed=True,
         no_run_cache=False,
-        no_exec=True,
         force=True,
     )
 
@@ -154,17 +158,19 @@ def test_prepare_dvc_script():
 
     assert script == [
         "dvc",
-        "run",
+        "stage",
+        "add",
         "-n",
         "node01",
         "--external",
         "--always-changed",
-        "--no-exec",
         "--force",
         "--deps",
         "file.txt",
-        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
-        ' MyNode.load().run_and_save()" ',
+        (
+            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            ' MyNode.load().run_and_save()" '
+        ),
     ]
 
     script = prepare_dvc_script(
@@ -179,19 +185,21 @@ def test_prepare_dvc_script():
 
     assert script == [
         "dvc",
-        "run",
+        "stage",
+        "add",
         "-n",
         "node01",
         "--external",
         "--always-changed",
-        "--no-exec",
         "--force",
         "--deps",
         "file.txt",
         "--deps",
         "src/file.py",
-        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
-        ' MyNode.load().run_and_save()" ',
+        (
+            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            ' MyNode.load().run_and_save()" '
+        ),
     ]
 
 
@@ -210,6 +218,30 @@ def test_ZnTrackInfo_collect():
     example = ExampleClassWithParams()
 
     assert example.zntrack.collect(zn.params) == {"param1": 1, "param2": 2}
+
+    # show all
+    assert example.zntrack.collect() == {"param1": 1, "param2": 2}
+
+    # no zn.outs available
+    assert example.zntrack.collect(zn.outs) == {}
+
+    example_with_outs = ExampleDVCOutsNode()
+    assert example_with_outs.zntrack.collect(dvc.outs) == {
+        "outs": pathlib.Path("example.dat")
+    }
+    assert example_with_outs.zntrack.collect() == {"outs": pathlib.Path("example.dat")}
+    assert example_with_outs.zntrack.collect(zn.params) == {}
+
+    example_outs_params = ExampleDVCOutsParams()
+
+    assert example_outs_params.zntrack.collect(dvc.outs) == {
+        "outs": pathlib.Path("example.dat")
+    }
+    assert example_outs_params.zntrack.collect(zn.params) == {"param1": 5}
+    assert example_outs_params.zntrack.collect() == {
+        "outs": pathlib.Path("example.dat"),
+        "param1": 5,
+    }
 
 
 @pytest.mark.parametrize(

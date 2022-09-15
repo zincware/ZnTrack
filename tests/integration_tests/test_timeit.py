@@ -1,6 +1,3 @@
-import os
-import shutil
-import subprocess
 import time
 
 import pytest
@@ -8,16 +5,6 @@ import pytest
 from zntrack import Node, zn
 from zntrack.metadata import TimeIt
 from zntrack.utils.exceptions import DescriptorMissing
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 class SleepClassNoMetadata(Node):
@@ -65,8 +52,8 @@ def test_timeit_loop(proj_path):
     sleep_class = SleepClassLoop()
     sleep_class.run_and_save()
     assert (
-        pytest.approx(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["mean"], 0.01)
+        pytest.approx(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["mean"], 0.1)
         == 0.1
     )
-    assert SleepClassLoop.load().timeit_metrics["sleep:timeit"]["std"] < 1e-3
+    assert SleepClassLoop.load().timeit_metrics["sleep:timeit"]["std"] < 1e-2
     assert len(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["values"]) == 30

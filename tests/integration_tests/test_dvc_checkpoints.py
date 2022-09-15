@@ -1,24 +1,10 @@
-import os
 import pathlib
-import shutil
-import subprocess
 import typing
 
-import pytest
 import yaml
 
 from zntrack import dvc
 from zntrack.core.base import Node
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 class SingleNode(Node):

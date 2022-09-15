@@ -93,7 +93,7 @@ def get_auto_init(fields: typing.List[str], super_init: typing.Callable):
             except KeyError:
                 pass
         super_init(self, **kwargs)  # call the super_init explicitly instead of super
-        # must call the super_init first e.g. it is requried to set the node_name
+        # must call the super_init first e.g. it is required to set the node_name
         for key, value in init_kwargs.items():
             setattr(self, key, value)
 
@@ -135,7 +135,7 @@ def module_handler(obj) -> str:
 def check_type(
     obj, types, allow_iterable=False, allow_none=False, allow_dict=False
 ) -> bool:
-    """Check if the obj is of any of the given types
+    """Check if the obj is of the given types
 
     This includes recursive search for nested lists / dicts and fails
     if any of the values is not in types
@@ -220,8 +220,8 @@ def run_dvc_cmd(script):
         A list of strings to pass the subprocess command
 
     """
-    dvc_short_string = " ".join(script[:4])
-    if len(script) > 4:
+    dvc_short_string = " ".join(script[:5])
+    if len(script) > 5:
         dvc_short_string += " ..."
     log.warning(f"Running DVC command: '{dvc_short_string}'")
     try:
