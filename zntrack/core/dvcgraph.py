@@ -68,7 +68,6 @@ class DVCRunOptions:
     external: bool
     always_changed: bool
     no_run_cache: bool
-    no_exec: bool
     force: bool
 
     @property
@@ -203,7 +202,7 @@ def prepare_dvc_script(
         The list to be passed to the subprocess call
 
     """
-    script = ["dvc", "run", "-n", node_name]
+    script = ["dvc", "stage", "add", "-n", node_name]
     script += dvc_run_option.dvc_args
     script += custom_args
 
@@ -441,7 +440,6 @@ class GraphWriter:
             external=external,
             always_changed=always_changed,
             no_run_cache=no_run_cache,
-            no_exec=no_exec,
             force=force,
         )
 
@@ -511,6 +509,9 @@ class GraphWriter:
         utils.run_dvc_cmd(script)
 
         run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+        if not no_exec:
+            utils.run_dvc_cmd(["dvc", "repro", self.node_name])
 
     @property
     def zntrack(self) -> ZnTrackInfo:

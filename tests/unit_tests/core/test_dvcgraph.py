@@ -29,13 +29,12 @@ def test_get_dvc_arguments():
     dvc_options = DVCRunOptions(
         force=True,
         always_changed=False,
-        no_exec=True,
-        external=False,
+        external=True,
         no_commit=False,
         no_run_cache=False,
     )
 
-    assert dvc_options.dvc_args == ["--no-exec", "--force"]
+    assert dvc_options.dvc_args == ["--external", "--force"]
 
 
 def test_handle_deps():
@@ -144,7 +143,6 @@ def test_prepare_dvc_script():
         external=True,
         always_changed=True,
         no_run_cache=False,
-        no_exec=True,
         force=True,
     )
 
@@ -160,12 +158,12 @@ def test_prepare_dvc_script():
 
     assert script == [
         "dvc",
-        "run",
+        "stage",
+        "add",
         "-n",
         "node01",
         "--external",
         "--always-changed",
-        "--no-exec",
         "--force",
         "--deps",
         "file.txt",
@@ -187,12 +185,12 @@ def test_prepare_dvc_script():
 
     assert script == [
         "dvc",
-        "run",
+        "stage",
+        "add",
         "-n",
         "node01",
         "--external",
         "--always-changed",
-        "--no-exec",
         "--force",
         "--deps",
         "file.txt",
