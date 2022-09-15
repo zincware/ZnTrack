@@ -49,7 +49,7 @@ class SingleExampleNode(Node):
 
 
 def test_SingleExampleNode(proj_path):
-    SingleExampleNode().write_graph(run=True)
+    SingleExampleNode(params1=None).write_graph(run=True)
 
     assert SingleExampleNode.load().outs == "Lorem Ipsum"
 
@@ -79,7 +79,7 @@ def test_depth_graph(proj_path):
 
     node_3 = NodeNodeParams(deps=node_1, node=node_2, name="Node3")
 
-    node_4 = ExampleNode2(params1=node_3)
+    node_4 = ExampleNode2(params1=node_3, params2=None)
 
     node_4.write_graph(run=True)
 
@@ -104,7 +104,7 @@ class NodeWithOuts(Node):
 
 
 def test_NodeWithOuts(proj_path):
-    node_1 = SingleExampleNode(params1=NodeWithOuts(factor=2))
+    node_1 = SingleExampleNode(params1=NodeWithOuts(factor=2, input=None))
     node_1.write_graph(run=True)
 
     assert SingleExampleNode.load().params1.factor == 2
