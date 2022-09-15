@@ -154,10 +154,12 @@ class RunTestNode(Node):
         self.outs = 42
 
 
-def test_run_and_save():
+@pytest.mark.parametrize("is_loaded", (True, False))
+def test_run_and_save(is_loaded):
     open_mock = mock_open(read_data="{}")
 
     example = RunTestNode()
+    example.is_loaded = is_loaded
 
     def pathlib_open(*args, **kwargs):
         return open_mock(*args, **kwargs)
@@ -167,9 +169,16 @@ def test_run_and_save():
 
         assert example.outs == 42
 
-    assert open_mock().write.mock_calls == [
-        call(json.dumps({"outs": 42}, indent=4)),
-    ]
+    if example.is_loaded:
+        assert open_mock().write.mock_calls == [
+            call(json.dumps({"outs": 42}, indent=4)),
+        ]
+    else:
+        assert open_mock().write.mock_calls == [
+            call("{}\n"),  # clear_config_file(utils.Files.params) in save
+            call("{}"),  # clear_config_file(utils.Files.zntrack) in save
+            call(json.dumps({"outs": 42}, indent=4)),
+        ]
 
 
 class WrongInit(Node):
