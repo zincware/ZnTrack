@@ -52,8 +52,8 @@ def test_timeit_loop(proj_path):
     sleep_class = SleepClassLoop()
     sleep_class.run_and_save()
     assert (
-        pytest.approx(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["mean"], 0.01)
+        pytest.approx(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["mean"], 0.1)
         == 0.1
     )
-    assert SleepClassLoop.load().timeit_metrics["sleep:timeit"]["std"] < 1e-3
+    assert SleepClassLoop.load().timeit_metrics["sleep:timeit"]["std"] < 1e-2
     assert len(SleepClassLoop.load().timeit_metrics["sleep:timeit"]["values"]) == 30

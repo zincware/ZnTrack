@@ -157,10 +157,16 @@ def filter_ZnTrackOption(
                 value = getattr(cls, entity.name)
             types_dict[entity.dvc_option].update({entity.name: value})
         return types_dict
-    if allow_none:
-        return {x.name: getattr(cls, x.name, None) for x in data}
-    # avoid AttributeError
-    return {x.name: getattr(cls, x.name) for x in data}
+    output = {}
+    for attr in data:
+        try:
+            output[attr.name] = getattr(cls, attr.name)
+        except utils.exceptions.DataNotAvailableError as err:
+            if allow_none:
+                output[attr.name] = None
+            else:
+                raise err
+    return output
 
 
 def prepare_dvc_script(
