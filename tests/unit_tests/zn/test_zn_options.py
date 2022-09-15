@@ -5,7 +5,7 @@ import pathlib
 import pytest
 import znjson
 
-from zntrack import zn
+from zntrack import exceptions, zn
 from zntrack.zn.dependencies import NodeAttribute, getdeps
 from zntrack.zn.split_option import combine_values, split_value
 
@@ -39,7 +39,8 @@ class ExamplePlots:
 def test_zn_plots():
     example = ExamplePlots()
     # test save and load if there is nothing to save or load
-    assert ExamplePlots.plots.save(example) is None
+    with pytest.raises(exceptions.DataNotAvailableError):
+        _ = ExamplePlots.plots.save(example)
     with pytest.raises(FileNotFoundError):
         _ = ExamplePlots.plots.get_data_from_files(example)
 
