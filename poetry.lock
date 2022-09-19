@@ -2724,7 +2724,7 @@ testing = ["func-timeout", "jaraco.itertools", "pytest (>=6)", "pytest-black (>=
 
 [[package]]
 name = "zninit"
-version = "0.1.0"
+version = "0.1.1"
 description = "Descriptor based dataclass implementation"
 category = "main"
 optional = false
@@ -2741,7 +2741,7 @@ python-versions = ">=3.8,<4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "d1ca187b8d769b0c87286c2250de1d8e8b1a3d1752015ef606f6b9f534fb5648"
+content-hash = "52c4057b1cbfd8b86bfc1c469176e41680cf327d41544aaaad3b7dc417cac849"
 
 [metadata.files]
 aiohttp = [
@@ -4689,8 +4689,8 @@ zipp = [
     {file = "zipp-3.8.1.tar.gz", hash = "sha256:05b45f1ee8f807d0cc928485ca40a07cb491cf092ff587c0df9cb1fd154848d2"},
 ]
 zninit = [
-    {file = "zninit-0.1.0-py3-none-any.whl", hash = "sha256:e60abd9baf5ae41432e8fff36fdafb0071bd325deb970ec98fbfcecf6a8697e1"},
-    {file = "zninit-0.1.0.tar.gz", hash = "sha256:b6887a1c21e98d5bfb84b91a37b8ba2cdd509db5a936ce10b060423b210f886c"},
+    {file = "zninit-0.1.1-py3-none-any.whl", hash = "sha256:a89c276e89e47df9b561733dc437cd0f5bd8364e171e253cdf76459955e8026c"},
+    {file = "zninit-0.1.1.tar.gz", hash = "sha256:faf1d0cd3d05ed94c209d9730aec69d3f17673258bbc3afa86d618e465199617"},
 ]
 znjson = [
     {file = "znjson-0.1.3-py3-none-any.whl", hash = "sha256:351335e401b1970d31a97d6e667ce2e542cfabe76d262b7a8a5b09d5de3a3984"},
