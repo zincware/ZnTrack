@@ -3,6 +3,8 @@ import logging
 import pathlib
 import typing
 
+import zninit
+
 from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
 from zntrack.utils.nwd import replace_nwd_placeholder
@@ -38,7 +40,7 @@ class DVCOption(ZnTrackOption):
 class PlotsModifyOption(DVCOption):
     def __init__(
         self,
-        default_value=None,
+        default=zninit.descriptor.Empty,
         *,
         template=None,
         x=None,
@@ -52,7 +54,7 @@ class PlotsModifyOption(DVCOption):
         """
         See https://dvc.org/doc/command-reference/plots/modify for parameter information.
         """
-        super().__init__(default_value=default_value, **kwargs)
+        super().__init__(default=default, **kwargs)
         self.template = template
         self.x = x
         self.y = y

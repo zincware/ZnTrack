@@ -6,7 +6,9 @@ import logging
 import pathlib
 import typing
 
-from zntrack import descriptor, utils
+import zninit
+
+from zntrack import utils
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +37,7 @@ def uses_node_name(zn_type, instance) -> typing.Union[str, None]:
     return instance.node_name
 
 
-class ZnTrackOption(descriptor.Descriptor):
+class ZnTrackOption(zninit.Descriptor):
     """Descriptor for all DVC options
 
     This class handles the __get__ and __set__ for the DVC options.
@@ -61,12 +63,12 @@ class ZnTrackOption(descriptor.Descriptor):
     zn_type: utils.ZnTypes = None
     allow_lazy: bool = True
 
-    def __init__(self, default_value=None, **kwargs):
+    def __init__(self, default=zninit.descriptor.Empty, **kwargs):
         """Constructor for ZnTrackOptions
 
         Attributes
         ----------
-        default_value: Any
+        default: Any
             The default value of the descriptor
         filename:
             part of the kwargs, optional filename overwrite.
@@ -76,14 +78,17 @@ class ZnTrackOption(descriptor.Descriptor):
         ValueError: If dvc_option is None and the class name is not in utils.DVCOptions
 
         """
-        if default_value is not None and self.zn_type in utils.VALUE_DVC_TRACKED:
+        if (
+            default is not zninit.descriptor.Empty
+            and self.zn_type in utils.VALUE_DVC_TRACKED
+        ):
             raise ValueError(f"Can not set default to a tracked value ({self.zn_type})")
         if self.dvc_option is None:
             # use the name of the class as DVCOption if registered in DVCOptions
             self.dvc_option = utils.DVCOptions(self.__class__.__name__).value
 
         self.filename = kwargs.pop("filename", self.dvc_option)
-        super().__init__(default_value=default_value, **kwargs)
+        super().__init__(default=default, **kwargs)
 
     @property
     def dvc_args(self) -> str:
@@ -147,7 +152,7 @@ class ZnTrackOption(descriptor.Descriptor):
             # if the instance is not loaded, there is no LazyOption handling
             # instead of .get(name, default_value) we make a copy of the default value
             # because it could be changed.
-            instance.__dict__[self.name] = copy.deepcopy(self.default_value)
+            instance.__dict__[self.name] = copy.deepcopy(self.default)
 
     def __get__(self, instance, owner=None):
         self._instance = instance
