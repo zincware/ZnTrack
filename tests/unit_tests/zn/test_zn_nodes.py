@@ -43,4 +43,3 @@ def test_require_hash():
         _ = ExampleNode(example=(ParamsNodeWithHash(),))
 
     _ = ExampleNode(example=None)  # allow None type
-    _ = ExampleNode()

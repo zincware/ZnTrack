@@ -135,16 +135,16 @@ def test_load():
     default_correct_node = CorrectNode.load()
     assert default_correct_node.node_name == CorrectNode.__name__
 
-    default_incorrect_node = InCorrectNode.load()
-    assert default_incorrect_node.node_name == InCorrectNode.__name__
+    with pytest.raises(TypeError):
+        # can not load a Node that misses a correct super().__init__(**kwargs)
+        _ = InCorrectNode.load()
+
+    with pytest.raises(TypeError):
+        _ = InCorrectNode["Test"]
 
     correct_node = CorrectNode.load(name="Test")
     assert correct_node.node_name == "Test"
     assert correct_node.test_name == correct_node.node_name
-
-    incorrect_node = InCorrectNode.load(name="Test")
-    assert incorrect_node.node_name == "Test"
-    assert incorrect_node.test_name != incorrect_node.node_name
 
 
 class RunTestNode(Node):
@@ -231,17 +231,12 @@ class CollectionChild(ZnTrackOptionCollection):
 
 @pytest.mark.parametrize("cls", (ZnTrackOptionCollection, CollectionChild))
 def test_get_auto_init_signature(cls):
-    zn_option_names, signature_params = get_auto_init_signature(cls)
+    kwargs_no_default, kwargs_with_default, signature_params = get_auto_init_signature(
+        cls
+    )
 
-    assert zn_option_names == ["out1", "out2", "out3", "param1", "param2", "param3"]
-
-    # assert signature_params[0].name == "out1"
-    #
-    # assert signature_params[3].name == "param1"
-    # assert signature_params[3].annotation == dict
-    #
-    # assert signature_params[5].name == "param3"
-    # assert signature_params[5].annotation is None
+    assert kwargs_no_default == ["out1", "out2", "out3", "param1", "param3"]
+    assert kwargs_with_default == {"param2": [1, 2]}
 
 
 class NodeMock(metaclass=LoadViaGetItem):

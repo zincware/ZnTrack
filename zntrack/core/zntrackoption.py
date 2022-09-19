@@ -194,7 +194,11 @@ class ZnTrackOption(descriptor.Descriptor):
         file = self.get_filename(instance)
         file.parent.mkdir(exist_ok=True, parents=True)
 
-    def _raise_loading_errors(self, instance, err):
+    def _get_loading_errors(
+        self, instance
+    ) -> typing.Union[
+        utils.exceptions.DataNotAvailableError, utils.exceptions.GraphNotAvailableError
+    ]:
         """Raise specific errors when reading ZnTrackOptions
 
         Raises
@@ -205,13 +209,13 @@ class ZnTrackOption(descriptor.Descriptor):
             if the graph does not exist in dvc.yaml. This has higher priority
         """
         if instance._graph_entry_exists:
-            raise utils.exceptions.DataNotAvailableError(
+            return utils.exceptions.DataNotAvailableError(
                 f"Could not load data for '{self.name}' from file."
-            ) from err
-        raise utils.exceptions.GraphNotAvailableError(
+            )
+        return utils.exceptions.GraphNotAvailableError(
             f"Could not find the graph configuration for '{instance.node_name}' in"
             f" {utils.Files.dvc}."
-        ) from err
+        )
 
     def get_data_from_files(self, instance):
         """Load the value/s for the given instance from the file/s
@@ -232,7 +236,7 @@ class ZnTrackOption(descriptor.Descriptor):
         try:
             file_content = utils.file_io.read_file(file)
         except FileNotFoundError as err:
-            self._raise_loading_errors(instance, err)
+            raise self._get_loading_errors(instance) from err
         # The problem here is, that I can not / don't want to load all Nodes but
         # only the ones, that are in [self.node_name][self.name] for deserializing
         try:
@@ -241,6 +245,6 @@ class ZnTrackOption(descriptor.Descriptor):
             else:
                 values = utils.decode_dict(file_content[self.name])
         except KeyError as err:
-            self._raise_loading_errors(instance, err)
+            raise self._get_loading_errors(instance) from err
         log.debug(f"Loading {instance.node_name} from {file}: ({values})")
         return values

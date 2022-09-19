@@ -15,8 +15,8 @@ class WriteData(InOuts):
 
 class WriteDataWithInit(InOuts):
     def __init__(self, inputs=None, **kwargs):
-        super().__init__(**kwargs)
-        self.inputs = inputs
+        super().__init__(inputs=inputs, **kwargs)
+        # this calls the auto_init of the subclass which demands the inputs argument!
 
     def run(self):
         self.outputs = self.inputs
