@@ -3,7 +3,10 @@ def isnode(node) -> bool:
     from zntrack.core.base import Node
 
     if isinstance(node, (list, tuple)):
-        return any([isnode(x) for x in node])
+        for x in node:
+            if isnode(x):
+                return True
+        return False
     else:
         try:
             if isinstance(node, Node) or issubclass(node, Node):

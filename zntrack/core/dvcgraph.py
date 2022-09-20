@@ -41,10 +41,10 @@ class DVCRunOptions:
             ["--no-commit", "--external"]
         """
         out = []
-        for field_name in self.__dataclass_fields__:
-            value = getattr(self, field_name)
+        for datacls_field in dataclasses.fields(self):
+            value = getattr(self, datacls_field.name)
             if value:
-                out.append(f"--{field_name.replace('_', '-')}")
+                out.append(f"--{datacls_field.name.replace('_', '-')}")
         return out
 
 

@@ -91,8 +91,9 @@ def get_origin(
         )
 
     if isinstance(value, (list, tuple)):
-        if any([not isinstance(x, NodeAttribute) for x in value]):
-            raise not_zn_deps_err()
+        for entry in value:
+            if not isinstance(entry, NodeAttribute):
+                raise not_zn_deps_err()
     elif not isinstance(value, NodeAttribute):
         raise not_zn_deps_err()
     return value

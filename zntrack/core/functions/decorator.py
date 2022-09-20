@@ -43,10 +43,10 @@ class NodeConfig:
     plots_no_cache: UnionDictListOfStrPath = None
 
     def __post_init__(self):
-        for option_name in self.__dataclass_fields__:
+        for datacls_field in dataclasses.fields(self):
             # type checking
-            option_value = getattr(self, option_name)
-            if option_name == "params":
+            option_value = getattr(self, datacls_field.name)
+            if datacls_field.name == "params":
                 # params does not have to be a string
                 if not isinstance(option_value, dict) and option_value is not None:
                     raise ValueError("Parameter must be dict or dot4dict.dotdict.")
@@ -65,10 +65,10 @@ class NodeConfig:
 
     def convert_fields_to_dotdict(self):
         """Update all fields to dotdict, if they are of type dict"""
-        for option_name in self.__dataclass_fields__:
-            option_value = getattr(self, option_name)
+        for datacls_field in dataclasses.fields(self):
+            option_value = getattr(self, datacls_field.name)
             if isinstance(option_value, dict):
-                setattr(self, option_name, dot4dict.dotdict(option_value))
+                setattr(self, datacls_field.name, dot4dict.dotdict(option_value))
 
     def write_dvc_command(self, node_name: str) -> list:
         """Collect dvc commands
@@ -89,25 +89,25 @@ class NodeConfig:
         if self.params is not None:
             if len(self.params) > 0:
                 script += ["--params", f"{utils.Files.params}:{node_name}"]
-        for field in self.__dataclass_fields__:
-            if field == "params":
+        for datacls_field in dataclasses.fields(self):
+            if datacls_field.name == "params":
                 continue
-            if isinstance(getattr(self, field), (list, tuple)):
-                for element in getattr(self, field):
+            if isinstance(getattr(self, datacls_field.name), (list, tuple)):
+                for element in getattr(self, datacls_field.name):
                     script += [
-                        f"--{field.replace('_', '-')}",
+                        f"--{datacls_field.name.replace('_', '-')}",
                         pathlib.Path(element).as_posix(),
                     ]
-            elif isinstance(getattr(self, field), dict):
-                for element in getattr(self, field).values():
+            elif isinstance(getattr(self, datacls_field.name), dict):
+                for element in getattr(self, datacls_field.name).values():
                     script += [
-                        f"--{field.replace('_', '-')}",
+                        f"--{datacls_field.name.replace('_', '-')}",
                         pathlib.Path(element).as_posix(),
                     ]
-            elif getattr(self, field) is not None:
+            elif getattr(self, datacls_field.name) is not None:
                 script += [
-                    f"--{field.replace('_', '-')}",
-                    pathlib.Path(getattr(self, field)).as_posix(),
+                    f"--{datacls_field.name.replace('_', '-')}",
+                    pathlib.Path(getattr(self, datacls_field.name)).as_posix(),
                 ]
 
         return script

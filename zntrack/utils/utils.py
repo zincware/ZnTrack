@@ -1,3 +1,4 @@
+"""ZnTrack utils"""
 import json
 import logging
 import os
@@ -6,7 +7,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import typing
 
 import znjson
 
@@ -33,7 +33,8 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
         The temporary  directory file. Close with temp_dir.cleanup() at the end.
 
     """
-    temp_dir = tempfile.TemporaryDirectory()  # add ignore_cleanup_errors=True in Py3.10?
+    temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+    # add ignore_cleanup_errors=True in Py3.10?
 
     if config.nb_name is not None:
         shutil.copy(config.nb_name, temp_dir.name)
@@ -70,90 +71,6 @@ def decode_dict(value):
 def encode_dict(value) -> dict:
     """Encode value into a dict serialized with ZnJson"""
     return json.loads(json.dumps(value, cls=znjson.ZnEncoder))
-
-
-def get_init_type_error(required_keys, uses_super: bool = False) -> TypeError:
-    """Get a TypeError similar to a wrong __init__"""
-    if len(required_keys) == 1:
-        if uses_super:
-            return TypeError(
-                f"__init__() missing 1 required positional argument: '{required_keys[0]}'"
-            )
-        return TypeError(
-            "super().__init__() missing 1 required positional argument:"
-            f" '{required_keys[0]}'"
-        )
-    if len(required_keys) > 1:
-        if uses_super:
-            return TypeError(
-                f"__init__() missing {len(required_keys)} required positional arguments:"
-                f""" '{"', '".join(required_keys[:-1])}' and '{required_keys[-1]}'"""
-            )
-        return TypeError(
-            f"super().__init__() missing {len(required_keys)} required positional"
-            " arguments:"
-            f""" '{"', '".join(required_keys[:-1])}' and '{required_keys[-1]}'"""
-        )
-
-
-def get_auto_init(
-    kwargs_no_default: typing.List[str],
-    kwargs_with_default: dict,
-    super_init: typing.Callable,
-):
-    """Automatically create an __init__ based on fields
-
-    Parameters
-    ----------
-    kwargs_no_default: list[str]
-        A list that strings (required kwarg without default value) that will be used in
-        the __init__, e.g. for [foo, bar] will create  __init__(self, foo, bar)
-    kwargs_with_default: dict[str, any]
-        A dict that contains the name of the kwarg as key and the default value
-         (kwargs with default value) that will be used in
-        the __init__, e.g. for {foo: None, bar: 10} will create
-         __init__(self, foo=None, bar=10)
-    super_init: Callable
-        typically this is Node.__init__
-    """
-
-    kwargs_no_default = [] if kwargs_no_default is None else kwargs_no_default
-    kwargs_with_default = {} if kwargs_with_default is None else kwargs_with_default
-
-    def auto_init(self, **kwargs):
-        """Wrapper for the __init__"""
-        init_kwargs = {}
-        required_keys = []
-        self_uses_auto_init = getattr(self.__init__, "_uses_auto_init", False)
-        log.debug(f"The '__init__' uses auto_init: {self_uses_auto_init}")
-        for kwarg_name in kwargs_no_default:
-            try:
-                init_kwargs[kwarg_name] = kwargs.pop(kwarg_name)
-            except KeyError:
-                required_keys.append(kwarg_name)
-
-        if len(required_keys) > 0:
-            raise get_init_type_error(required_keys, self_uses_auto_init)
-
-        for kwarg_name, kwarg_value in kwargs_with_default.items():
-            try:
-                init_kwargs[kwarg_name] = kwargs.pop(kwarg_name, kwarg_value)
-            except KeyError:
-                pass
-        super_init(self, **kwargs)  # call the super_init explicitly instead of super
-        # must call the super_init first e.g. it is required to set the node_name
-        for key, value in init_kwargs.items():
-            setattr(self, key, value)
-
-        try:
-            self.post_init()
-        except AttributeError:
-            pass
-
-    # we add this attribute to the __init__ to make it identifiable
-    auto_init._uses_auto_init = True
-
-    return auto_init
 
 
 def module_handler(obj) -> str:

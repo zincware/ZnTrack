@@ -21,7 +21,7 @@ log = logging.getLogger(__name__)
 # detailed explanations on https://dvc.org/doc/command-reference/run#options
 
 
-class params(DVCOption):
+class params(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -32,7 +32,7 @@ class params(DVCOption):
     file = utils.Files.zntrack
 
 
-class deps(DVCOption):
+class deps(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -52,7 +52,7 @@ class deps(DVCOption):
         return value
 
 
-class outs(DVCOption):
+class outs(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -63,7 +63,7 @@ class outs(DVCOption):
     file = utils.Files.zntrack
 
 
-class checkpoints(DVCOption):
+class checkpoints(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -74,7 +74,7 @@ class checkpoints(DVCOption):
     file = utils.Files.zntrack
 
 
-class outs_no_cache(DVCOption):
+class outs_no_cache(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -85,7 +85,7 @@ class outs_no_cache(DVCOption):
     file = utils.Files.zntrack
 
 
-class outs_persistent(DVCOption):
+class outs_persistent(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -96,7 +96,7 @@ class outs_persistent(DVCOption):
     file = utils.Files.zntrack
 
 
-class metrics(DVCOption):
+class metrics(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -107,7 +107,7 @@ class metrics(DVCOption):
     file = utils.Files.zntrack
 
 
-class metrics_no_cache(DVCOption):
+class metrics_no_cache(DVCOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -118,7 +118,7 @@ class metrics_no_cache(DVCOption):
     file = utils.Files.zntrack
 
 
-class plots(PlotsModifyOption):
+class plots(PlotsModifyOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -129,7 +129,7 @@ class plots(PlotsModifyOption):
     file = utils.Files.zntrack
 
 
-class plots_no_cache(PlotsModifyOption):
+class plots_no_cache(PlotsModifyOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -140,7 +140,7 @@ class plots_no_cache(PlotsModifyOption):
     file = utils.Files.zntrack
 
 
-__all__ = [
+options = [
     params,
     deps,
     outs,

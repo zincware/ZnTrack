@@ -1,3 +1,8 @@
+"""Special ZnTrack Hash output
+
+Define a custom unique output on Nodes that otherwise don't produce outputs.
+This allows them to be used as a dependency in the DVC graph.
+"""
 import datetime
 import uuid
 

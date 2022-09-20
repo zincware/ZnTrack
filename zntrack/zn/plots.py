@@ -9,7 +9,7 @@ from zntrack.dvc.custom_base import PlotsModifyOption
 log = logging.getLogger(__name__)
 
 
-class plots(PlotsModifyOption):
+class plots(PlotsModifyOption):  # pylint: disable=invalid-name
     dvc_option = utils.DVCOptions.PLOTS_NO_CACHE.value
     zn_type = utils.ZnTypes.PLOTS
 
