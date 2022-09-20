@@ -1,54 +1,16 @@
 from __future__ import annotations
 
 import dataclasses
-import json
 import logging
 import pathlib
 import typing
 
-import znjson
+from zninit.descriptor import DescriptorTypeT, get_descriptors
 
-from zntrack import descriptor, utils
-from zntrack.core.jupyter import jupyter_class_to_file
+from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
-from zntrack.descriptor import BaseDescriptorType
-from zntrack.zn import Nodes as zn_nodes
-from zntrack.zn import params as zn_params
-from zntrack.zn.dependencies import NodeAttribute
 
 log = logging.getLogger(__name__)
-
-
-def handle_deps(value) -> typing.List[str]:
-    """Find all dependencies of value
-
-    Parameters
-    ----------
-    value: any
-        list, string, tuple, Path or Node instance
-
-    Returns
-    -------
-    list:
-        A list dependency files
-
-    """
-    deps_files: typing.List[str] = []
-    if isinstance(value, (list, tuple)):
-        for lst_val in value:
-            deps_files += handle_deps(lst_val)
-    else:
-        if isinstance(value, (GraphWriter, NodeAttribute)):
-            for file in value.affected_files:
-                deps_files.append(pathlib.Path(file).as_posix())
-        elif isinstance(value, (str, pathlib.Path)):
-            deps_files.append(pathlib.Path(value).as_posix())
-        elif value is None:
-            pass
-        else:
-            raise ValueError(f"Type {type(value)} ({value}) is not supported!")
-
-    return deps_files
 
 
 @dataclasses.dataclass
@@ -220,13 +182,13 @@ class ZnTrackInfo:
     """Helping class for access to ZnTrack information"""
 
     def __init__(self, parent):
-        self._parent: GraphWriter = parent
+        self._parent = parent
 
     def __repr__(self):
         return f"ZnTrackInfo: {self._parent}"
 
     def collect(
-        self, zntrackoption: typing.Type[descriptor.BaseDescriptorType] = ZnTrackOption
+        self, zntrackoption: typing.Type[DescriptorTypeT] = ZnTrackOption
     ) -> dict:
         """Collect the values of all ZnTrackOptions of the passed type
 
@@ -247,285 +209,8 @@ class ZnTrackInfo:
                 "collect only supports single ZnTrackOptions. Found"
                 f" {zntrackoption} instead."
             )
-        options = descriptor.get_descriptors(zntrackoption, self=self._parent)
+        options = get_descriptors(zntrackoption, self=self._parent)
         return {x.name: x.__get__(self._parent) for x in options}
-
-
-class GraphWriter:
-    """Write the DVC Graph
-
-    Main method that handles writing the Graph / dvc.yaml file
-
-    node_name: str
-        first priority is by passing it through kwargs
-        second is having the class attribute set in the class definition
-        last if both above are None it will be set to __class__.__name__
-    is_attribute: bool, default = False
-        If the Node is not used directly but through e.g. zn.Nodes() as a dependency
-        this can be set to True. It will disable all outputs in the params.yaml file
-        except for the zn.Hash().
-    """
-
-    node_name = None
-    _module = None
-    _is_attribute = False
-
-    def __init__(self, **kwargs):
-        name = kwargs.pop("name", None)
-        if name is not None:
-            # overwrite node_name attribute
-            self.node_name = name
-        if self.node_name is None:
-            # set default value of node_name attribute
-            self.node_name = self.__class__.__name__
-        if len(kwargs) > 0:
-            raise TypeError(f"'{kwargs}' are an invalid keyword argument")
-
-    def __hash__(self):
-        """compute the hash based on the parameters and node_name"""
-        params_dict = self.zntrack.collect(zn_params)
-        params_dict["node_name"] = self.node_name
-
-        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
-
-    @property
-    def _descriptor_list(self) -> typing.List[BaseDescriptorType]:
-        """Get all descriptors of this instance"""
-        descriptors = descriptor.get_descriptors(ZnTrackOption, self=self)
-        if self._is_attribute:
-            allowed_types = [utils.ZnTypes.PARAMS, utils.ZnTypes.HASH, utils.ZnTypes.DEPS]
-            return [x for x in descriptors if x.zn_type in allowed_types]
-        return descriptors
-
-    @property
-    def module(self) -> str:
-        """Module from which to import <name>
-
-        Used for from <module> import <name>
-
-        Notes
-        -----
-        this can be changed when using nb_mode
-        """
-        if self._module is None:
-            if utils.config.nb_name is not None:
-                return f"{utils.config.nb_class_path}.{self.__class__.__name__}"
-            return utils.module_handler(self.__class__)
-        return self._module
-
-    def save(self, results: bool = False):
-        """Save Class state to files
-
-        Parameters
-        -----------
-        results: bool, default=False
-            Save changes in zn.<option>.
-            By default, this function saves e.g. parameters but does not save results
-            that are stored in zn.<option> and primarily zn.params / dvc.<option>
-            Set this option to True if they should be saved, e.g. in run_and_save
-        """
-        raise NotImplementedError
-
-    @property
-    def affected_files(self) -> typing.Set[pathlib.Path]:
-        """list of all files that can be changed by this instance"""
-        files = []
-        for option in self._descriptor_list:
-            file = option.get_filename(self)
-            if option.zn_type in utils.VALUE_DVC_TRACKED:
-                files.append(file)
-            elif option.zn_type in utils.FILE_DVC_TRACKED:
-                value = getattr(self, option.name)
-                if isinstance(value, (list, tuple)):
-                    files += value
-                else:
-                    files.append(value)
-            # deps or params are not affected files
-
-        files = [x for x in files if x is not None]
-        return set(files)
-
-    @classmethod
-    def convert_notebook(cls, nb_name: str = None):
-        """Use jupyter_class_to_file to convert ipynb to py
-
-        Parameters
-        ----------
-        nb_name: str
-            Notebook name when not using config.nb_name (this is not recommended)
-        """
-        jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
-
-    def _handle_nodes_as_methods(self):
-        """Write the graph for all zn.Nodes ZnTrackOptions
-
-        zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
-        They are shown in the dvc dag and have their own parameter section.
-        The name is <nodename>-<attributename> for these Nodes and they only
-        have a single hash output to be available for DVC dependencies.
-        """
-        for attribute, node in self.zntrack.collect(zn_nodes).items():
-            if node is None:
-                continue
-            node.node_name = f"{self.node_name}-{attribute}"
-            node._is_attribute = True
-            node.write_graph(
-                run=True,
-                call_args=f".load(name='{node.node_name}').save(results=True)",
-            )
-
-    def write_graph(
-        self,
-        silent: bool = False,
-        nb_name: str = None,
-        notebook: bool = True,
-        no_commit: bool = False,
-        external: bool = False,
-        always_changed: bool = False,
-        no_exec: bool = True,
-        force: bool = True,
-        no_run_cache: bool = False,
-        dry_run: bool = False,
-        run: bool = None,
-        *,
-        call_args: str = None,
-    ):
-        """Write the DVC file using run.
-
-        If it already exists it'll tell you that the stage is already persistent and
-        has been run before. Otherwise it'll run the stage for you.
-
-        Parameters
-        ----------
-        silent: bool
-            If called with no_exec=False this allows to hide the output from the
-            subprocess call.
-        nb_name: str
-            Notebook name when not using config.nb_name (this is not recommended)
-        notebook: bool, default = True
-            convert the notebook to a py File
-        no_commit: dvc parameter
-        external: dvc parameter
-        always_changed: dvc parameter
-        no_exec: dvc parameter
-        run: bool, inverse of no_exec. Will overwrite no_exec if set.
-        force: dvc parameter
-        no_run_cache: dvc parameter
-        dry_run: bool, default = False
-            Only return the script but don't actually run anything
-        call_args: str, default = None
-            Custom call args. Defaults to '.load(name='{self.node_name}').run_and_save()'
-
-        Notes
-        -----
-        If the dependencies for a stage change this function won't necessarily tell you.
-        Use 'dvc status' to check, if the stage needs to be rerun.
-
-        """
-
-        self._handle_nodes_as_methods()
-
-        if silent:
-            log.warning(
-                "DeprecationWarning: silent was replaced by 'zntrack.config.log_level ="
-                " logging.ERROR'"
-            )
-        if run is not None:
-            no_exec = not run
-
-        log.debug("--- Writing new DVC file ---")
-
-        dvc_run_option = DVCRunOptions(
-            no_commit=no_commit,
-            external=external,
-            always_changed=always_changed,
-            no_run_cache=no_run_cache,
-            force=force,
-        )
-
-        # Jupyter Notebook
-        nb_name = utils.update_nb_name(nb_name)
-        if nb_name is not None and notebook:
-            self.convert_notebook(nb_name)
-
-        custom_args = []
-        dependencies = []
-        # Handle Parameter
-        params_list = filter_ZnTrackOption(
-            data=self._descriptor_list, cls=self, zn_type=[utils.ZnTypes.PARAMS]
-        )
-        if len(params_list) > 0:
-            custom_args += [
-                "--params",
-                f"{utils.Files.params}:{self.node_name}",
-            ]
-        zn_options_set = set()
-        for option in self._descriptor_list:
-            if option.zn_type == utils.ZnTypes.DVC:
-                value = getattr(self, option.name)
-                custom_args += handle_dvc(value, option.dvc_args)
-            # Handle Zn Options
-            elif option.zn_type in utils.VALUE_DVC_TRACKED:
-                zn_options_set.add(
-                    (
-                        f"--{option.dvc_args}",
-                        option.get_filename(self).as_posix(),
-                    )
-                )
-            elif option.zn_type == utils.ZnTypes.DEPS:
-                value = getattr(self, option.name)
-                dependencies += handle_deps(value)
-
-        for dependency in set(dependencies):
-            custom_args += ["--deps", dependency]
-
-        for pair in zn_options_set:
-            custom_args += pair
-
-        if call_args is None:
-            call_args = f".load(name='{self.node_name}').run_and_save()"
-
-        script = prepare_dvc_script(
-            node_name=self.node_name,
-            dvc_run_option=dvc_run_option,
-            custom_args=custom_args,
-            nb_name=nb_name,
-            module=self.module,
-            func_or_cls=self.__class__.__name__,
-            call_args=call_args,
-        )
-
-        # Add command to run the script
-
-        self.save()
-
-        log.debug(
-            "If you are using a jupyter notebook, you may not be able to see the "
-            "output in real time!"
-        )
-
-        if dry_run:
-            return script
-        utils.run_dvc_cmd(script)
-
-        run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
-
-        if not no_exec:
-            utils.run_dvc_cmd(["dvc", "repro", self.node_name])
-
-    @property
-    def zntrack(self) -> ZnTrackInfo:
-        return ZnTrackInfo(parent=self)
-
-    @property
-    def _graph_entry_exists(self) -> bool:
-        """If this Graph exists in the dvc.yaml file"""
-        try:
-            file_content = utils.file_io.read_file(utils.Files.dvc)
-        except FileNotFoundError:
-            file_content = {}
-
-        return self.node_name in file_content.get("stages", {})
 
 
 def run_post_dvc_cmd(descriptor_list, instance):

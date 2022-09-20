@@ -1,54 +1,29 @@
 from __future__ import annotations
 
-import inspect
+import json
 import logging
+import pathlib
 import typing
 
-from zntrack import utils
-from zntrack.core.dvcgraph import GraphWriter
+import zninit
+import znjson
+
+from zntrack import dvc, utils, zn
+from zntrack.core.dvcgraph import (
+    DVCRunOptions,
+    ZnTrackInfo,
+    filter_ZnTrackOption,
+    handle_dvc,
+    prepare_dvc_script,
+    run_post_dvc_cmd,
+)
+from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
-from zntrack.descriptor import get_descriptors
+from zntrack.zn import Nodes as zn_nodes
+from zntrack.zn import params as zn_params
 from zntrack.zn.dependencies import NodeAttribute, getdeps
 
 log = logging.getLogger(__name__)
-
-
-def get_auto_init_signature(cls) -> (list, dict, list):
-    """Iterate over ZnTrackOptions in the __dict__ and save the option name
-    and create a signature Parameter
-
-    Returns:
-        kwargs_no_default: list
-            a list of names that will be converted to kwargs
-        kwargs_with_default: dict
-            a dict of {name: default_value} that will be converted to kwargs
-        signature_params: inspect.Parameter
-    """
-    signature_params = []
-    kwargs_no_default = []
-    kwargs_with_default = {}
-    _ = cls.__annotations__  # fix for https://bugs.python.org/issue46930
-    descriptors = get_descriptors(ZnTrackOption, cls=cls)
-    for descriptor in descriptors:
-        if descriptor.zn_type in utils.VALUE_DVC_TRACKED:
-            # exclude zn.outs / metrics / plots / ... options
-            continue
-        # For the new __init__
-        if descriptor.default_value is None:
-            kwargs_no_default.append(descriptor.name)
-        else:
-            kwargs_with_default[descriptor.name] = descriptor.default_value
-
-        # For the new __signature__
-        signature_params.append(
-            inspect.Parameter(
-                # default=...
-                name=descriptor.name,
-                kind=inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                annotation=cls.__annotations__.get(descriptor.name),
-            )
-        )
-    return kwargs_no_default, kwargs_with_default, signature_params
 
 
 def update_dependency_options(value):
@@ -63,6 +38,38 @@ def update_dependency_options(value):
             update_dependency_options(item)
     if isinstance(value, Node):
         value._update_options()
+
+
+def handle_deps(value) -> typing.List[str]:
+    """Find all dependencies of value
+
+    Parameters
+    ----------
+    value: any
+        list, string, tuple, Path or Node instance
+
+    Returns
+    -------
+    list:
+        A list dependency files
+
+    """
+    deps_files: typing.List[str] = []
+    if isinstance(value, (list, tuple)):
+        for lst_val in value:
+            deps_files += handle_deps(lst_val)
+    else:
+        if isinstance(value, (Node, NodeAttribute)):
+            for file in value.affected_files:
+                deps_files.append(pathlib.Path(file).as_posix())
+        elif isinstance(value, (str, pathlib.Path)):
+            deps_files.append(pathlib.Path(value).as_posix())
+        elif value is None:
+            pass
+        else:
+            raise ValueError(f"Type {type(value)} ({value}) is not supported!")
+
+    return deps_files
 
 
 BaseNodeType = typing.TypeVar("BaseNodeType", bound="Node")
@@ -112,26 +119,63 @@ class LoadViaGetItem(type):
         return getdeps(self, other)
 
 
-class Node(GraphWriter, metaclass=LoadViaGetItem):
-    """Main parent class for all ZnTrack Node
-
-    The methods implemented in this class are primarily loading and saving parameters.
-    This includes restoring the Node from files and saving results to files after run.
+class NodeBase(zninit.ZnInit):
+    """This helper is used to define the lower bound __init__ that is applied
+    as super call when using the automatically generated __init__.
 
     Attributes
     ----------
     is_loaded: bool
         if the class is loaded this can be used to only run certain code, e.g. in the init
+    node_name: str
+        first priority is by passing it through kwargs
+        second is having the class attribute set in the class definition
+        last if both above are None it will be set to __class__.__name__
+    is_attribute: bool, default = False
+        If the Node is not used directly but through e.g. zn.Nodes() as a dependency
+        this can be set to True. It will disable all outputs in the params.yaml file
+        except for the zn.Hash().
     """
 
     is_loaded: bool = False
+    node_name = None
+    _module = None
+    _is_attribute = False
 
     def __init__(self, **kwargs):
         self.is_loaded = kwargs.pop("is_loaded", False)
-        super().__init__(**kwargs)
+        name = kwargs.pop("name", None)
+        if len(kwargs) > 0:
+            raise TypeError(f"'{kwargs}' are an invalid keyword argument")
+        if name is not None:
+            # overwrite node_name attribute
+            self.node_name = name
+        if self.node_name is None:
+            # set default value of node_name attribute
+            self.node_name = self.__class__.__name__
         for data in self._descriptor_list:
             if data.zn_type == utils.ZnTypes.DEPS:
-                update_dependency_options(data.default_value)
+                update_dependency_options(data.default)
+
+    @property
+    def _descriptor_list(self) -> typing.List[zninit.descriptor.DescriptorTypeT]:
+        """Get all descriptors of this instance"""
+        descriptors = zninit.get_descriptors(ZnTrackOption, self=self)
+        if self._is_attribute:
+            allowed_types = [utils.ZnTypes.PARAMS, utils.ZnTypes.HASH, utils.ZnTypes.DEPS]
+            return [x for x in descriptors if x.zn_type in allowed_types]
+        return descriptors
+
+
+class Node(NodeBase, metaclass=LoadViaGetItem):
+    """Main parent class for all ZnTrack Node
+
+    The methods implemented in this class are primarily loading and saving parameters.
+    This includes restoring the Node from files and saving results to files after run.
+    """
+
+    init_subclass_basecls = NodeBase
+    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes] + dvc.__all__
 
     @utils.deprecated(
         reason=(
@@ -174,49 +218,6 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
             )
         return getdeps(self, other)
 
-    def __init_subclass__(cls, **kwargs):
-        """Add a dataclass-like init if None is provided"""
-        super().__init_subclass__(**kwargs)
-        # User provides an __init__
-        for inherited in cls.__mro__:
-            # Go through the mro until you find the Node class.
-            # If found an init before that class it will implement super
-            # if not add the fields to the __init__ automatically.
-            if inherited == Node:
-                log.debug("Found Node instance - adding dataclass-like __init__")
-                break
-            elif inherited.__dict__.get("__init__") is not None:
-                if not getattr(inherited.__init__, "_uses_auto_init", False):
-                    return cls
-
-        # attach an automatically generated __init__ if None is provided
-        (
-            kwargs_no_default,
-            kwargs_with_default,
-            signature_params,
-        ) = get_auto_init_signature(cls)
-
-        # Add new __init__ to the subclass
-        setattr(
-            cls,
-            "__init__",
-            utils.get_auto_init(
-                kwargs_no_default, kwargs_with_default, super_init=Node.__init__
-            ),
-        )
-
-        # Add new __signature__ to the subclass
-        signature = inspect.Signature(parameters=signature_params)
-        setattr(cls, "__signature__", signature)
-
-    def post_init(self):
-        """Implement if cmds after the automatically generated __init__ should be run
-
-        This only works if no __init__ is defined and the automatically generated
-        __init__ from ZnTrack is used.
-        """
-        raise AttributeError(f"'{self.node_name}' object has no attribute 'post_init'")
-
     def save_plots(self):
         """Save the zn.plots
 
@@ -237,7 +238,6 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
             By default, this function saves e.g. parameters from zn.params / dvc.<option>,
             but does not save results  that are stored in zn.<option>.
             Set this option to True if they should be saved, e.g. in run_and_save
-            If true changes in e.g. zn.params will not be saved.
         """
         if not results:
             # Reset everything in params.yaml and zntrack.json before saving
@@ -315,7 +315,7 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError as type_error:
-            if getattr(cls.__init__, "_uses_auto_init", False):
+            if getattr(cls.__init__, "uses_auto_init", False):
                 # using new + init from Node class to circumvent required
                 # arguments in the automatic init
                 instance = object.__new__(cls)
@@ -356,3 +356,227 @@ class Node(GraphWriter, metaclass=LoadViaGetItem):
     def run(self):
         """Overwrite this method for the actual calculation"""
         raise NotImplementedError
+
+    def __hash__(self):
+        """compute the hash based on the parameters and node_name"""
+        params_dict = self.zntrack.collect(zn_params)
+        params_dict["node_name"] = self.node_name
+
+        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
+
+    @property
+    def module(self) -> str:
+        """Module from which to import <name>
+
+        Used for from <module> import <name>
+
+        Notes
+        -----
+        this can be changed when using nb_mode
+        """
+        if self._module is None:
+            if utils.config.nb_name is not None:
+                return f"{utils.config.nb_class_path}.{self.__class__.__name__}"
+            return utils.module_handler(self.__class__)
+        return self._module
+
+    @property
+    def affected_files(self) -> typing.Set[pathlib.Path]:
+        """list of all files that can be changed by this instance"""
+        files = []
+        for option in self._descriptor_list:
+            file = option.get_filename(self)
+            if option.zn_type in utils.VALUE_DVC_TRACKED:
+                files.append(file)
+            elif option.zn_type in utils.FILE_DVC_TRACKED:
+                value = getattr(self, option.name)
+                if isinstance(value, (list, tuple)):
+                    files += value
+                else:
+                    files.append(value)
+            # deps or params are not affected files
+
+        files = [x for x in files if x is not None]
+        return set(files)
+
+    @classmethod
+    def convert_notebook(cls, nb_name: str = None):
+        """Use jupyter_class_to_file to convert ipynb to py
+
+        Parameters
+        ----------
+        nb_name: str
+            Notebook name when not using config.nb_name (this is not recommended)
+        """
+        jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
+
+    def _handle_nodes_as_methods(self):
+        """Write the graph for all zn.Nodes ZnTrackOptions
+
+        zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
+        They are shown in the dvc dag and have their own parameter section.
+        The name is <nodename>-<attributename> for these Nodes and they only
+        have a single hash output to be available for DVC dependencies.
+        """
+        for attribute, node in self.zntrack.collect(zn_nodes).items():
+            if node is None:
+                continue
+            node.node_name = f"{self.node_name}-{attribute}"
+            node._is_attribute = True
+            node.write_graph(
+                run=True,
+                call_args=f".load(name='{node.node_name}').save(results=True)",
+            )
+
+    @property
+    def zntrack(self) -> ZnTrackInfo:
+        return ZnTrackInfo(parent=self)
+
+    @property
+    def _graph_entry_exists(self) -> bool:
+        """If this Graph exists in the dvc.yaml file"""
+        try:
+            file_content = utils.file_io.read_file(utils.Files.dvc)
+        except FileNotFoundError:
+            file_content = {}
+
+        return self.node_name in file_content.get("stages", {})
+
+    def write_graph(
+        self,
+        silent: bool = False,
+        nb_name: str = None,
+        notebook: bool = True,
+        no_commit: bool = False,
+        external: bool = False,
+        always_changed: bool = False,
+        no_exec: bool = True,
+        force: bool = True,
+        no_run_cache: bool = False,
+        dry_run: bool = False,
+        run: bool = None,
+        *,
+        call_args: str = None,
+    ):
+        """Write the DVC file using run.
+
+        If it already exists it'll tell you that the stage is already persistent and
+        has been run before. Otherwise it'll run the stage for you.
+
+        Parameters
+        ----------
+        silent: bool
+            If called with no_exec=False this allows to hide the output from the
+            subprocess call.
+        nb_name: str
+            Notebook name when not using config.nb_name (this is not recommended)
+        notebook: bool, default = True
+            convert the notebook to a py File
+        no_commit: dvc parameter
+        external: dvc parameter
+        always_changed: dvc parameter
+        no_exec: dvc parameter
+        run: bool, inverse of no_exec. Will overwrite no_exec if set.
+        force: dvc parameter
+        no_run_cache: dvc parameter
+        dry_run: bool, default = False
+            Only return the script but don't actually run anything
+        call_args: str, default = None
+            Custom call args. Defaults to '.load(name='{self.node_name}').run_and_save()'
+
+        Notes
+        -----
+        If the dependencies for a stage change this function won't necessarily tell you.
+        Use 'dvc status' to check, if the stage needs to be rerun.
+
+        """
+
+        self._handle_nodes_as_methods()
+
+        if silent:
+            log.warning(
+                "DeprecationWarning: silent was replaced by 'zntrack.config.log_level ="
+                " logging.ERROR'"
+            )
+        if run is not None:
+            no_exec = not run
+
+        log.debug("--- Writing new DVC file ---")
+
+        dvc_run_option = DVCRunOptions(
+            no_commit=no_commit,
+            external=external,
+            always_changed=always_changed,
+            no_run_cache=no_run_cache,
+            force=force,
+        )
+
+        # Jupyter Notebook
+        nb_name = utils.update_nb_name(nb_name)
+        if nb_name is not None and notebook:
+            self.convert_notebook(nb_name)
+
+        custom_args = []
+        dependencies = []
+        # Handle Parameter
+        params_list = filter_ZnTrackOption(
+            data=self._descriptor_list, cls=self, zn_type=[utils.ZnTypes.PARAMS]
+        )
+        if len(params_list) > 0:
+            custom_args += [
+                "--params",
+                f"{utils.Files.params}:{self.node_name}",
+            ]
+        zn_options_set = set()
+        for option in self._descriptor_list:
+            if option.zn_type == utils.ZnTypes.DVC:
+                value = getattr(self, option.name)
+                custom_args += handle_dvc(value, option.dvc_args)
+            # Handle Zn Options
+            elif option.zn_type in utils.VALUE_DVC_TRACKED:
+                zn_options_set.add(
+                    (
+                        f"--{option.dvc_args}",
+                        option.get_filename(self).as_posix(),
+                    )
+                )
+            elif option.zn_type == utils.ZnTypes.DEPS:
+                value = getattr(self, option.name)
+                dependencies += handle_deps(value)
+
+        for dependency in set(dependencies):
+            custom_args += ["--deps", dependency]
+
+        for pair in zn_options_set:
+            custom_args += pair
+
+        if call_args is None:
+            call_args = f".load(name='{self.node_name}').run_and_save()"
+
+        script = prepare_dvc_script(
+            node_name=self.node_name,
+            dvc_run_option=dvc_run_option,
+            custom_args=custom_args,
+            nb_name=nb_name,
+            module=self.module,
+            func_or_cls=self.__class__.__name__,
+            call_args=call_args,
+        )
+
+        # Add command to run the script
+
+        self.save()
+
+        log.debug(
+            "If you are using a jupyter notebook, you may not be able to see the "
+            "output in real time!"
+        )
+
+        if dry_run:
+            return script
+        utils.run_dvc_cmd(script)
+
+        run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+        if not no_exec:
+            utils.run_dvc_cmd(["dvc", "repro", self.node_name])

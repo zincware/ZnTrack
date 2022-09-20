@@ -9,7 +9,7 @@ def test_zn_outs_error():
 
         class ExampleOutsDefault:
             node_name = "test"
-            parameter = zn.outs(default_value="Lorem Ipsum")
+            parameter = zn.outs(default="Lorem Ipsum")
 
 
 def test_dvc_option_from_cls_name():
@@ -51,7 +51,7 @@ class ExampleParams:
 class ExampleParamsDefault:
     node_name = "test"
     is_loaded = False  # here we test load from default
-    parameter = zn.params(default_value="Lorem Ipsum")
+    parameter = zn.params(default="Lorem Ipsum")
 
 
 @pytest.mark.parametrize("cls", [ExampleParams, ExampleParamsDefault])

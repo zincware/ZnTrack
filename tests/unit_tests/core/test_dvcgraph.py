@@ -2,24 +2,23 @@ import pathlib
 
 import pytest
 
-from zntrack import dvc, utils, zn
+from zntrack import Node, dvc, utils, zn
+from zntrack.core.base import handle_deps
 from zntrack.core.dvcgraph import (
     DVCRunOptions,
-    GraphWriter,
     ZnTrackInfo,
     filter_ZnTrackOption,
-    handle_deps,
     handle_dvc,
     prepare_dvc_script,
 )
 
 
-class ExampleDVCOutsNode(GraphWriter):
+class ExampleDVCOutsNode(Node):
     is_loaded = False
     outs = dvc.outs(pathlib.Path("example.dat"))
 
 
-class ExampleDVCOutsParams(GraphWriter):
+class ExampleDVCOutsParams(Node):
     is_loaded = False
     outs = dvc.outs(pathlib.Path("example.dat"))
     param1 = zn.params(5)
@@ -83,7 +82,7 @@ def test_handle_deps_node():
     assert handle_deps(ExampleDVCOutsNode()) == ["example.dat"]
 
 
-class ExampleAffectedFiles(GraphWriter):
+class ExampleAffectedFiles(Node):
     is_loaded = False
     param = zn.params()
     zn_outs = zn.outs()
@@ -95,7 +94,7 @@ class ExampleAffectedFiles(GraphWriter):
 
 
 def test_affected_files():
-    example = ExampleAffectedFiles()
+    example = ExampleAffectedFiles(dvc_empty=None, param=None)
 
     assert example.affected_files == {
         pathlib.Path("dvc_metrics.json"),
@@ -107,10 +106,10 @@ def test_affected_files():
     }
 
 
-class ExampleClassWithParams(GraphWriter):
+class ExampleClassWithParams(Node):
     is_loaded = False
-    param1 = zn.params(default_value=1)
-    param2 = zn.params(default_value=2)
+    param1 = zn.params(default=1)
+    param2 = zn.params(default=2)
 
 
 def test__descriptor_list():
@@ -204,13 +203,13 @@ def test_prepare_dvc_script():
 
 
 def test_ZnTrackInfo():
-    node = GraphWriter()
+    node = Node()
     assert isinstance(node.zntrack, ZnTrackInfo)
     assert node.zntrack._parent == node
 
 
 def test_ZnTrackInfo_collect():
-    node = GraphWriter()
+    node = Node()
 
     with pytest.raises(ValueError):
         node.zntrack.collect([zn.params, zn.outs])

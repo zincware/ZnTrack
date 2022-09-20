@@ -138,3 +138,17 @@ class plots_no_cache(PlotsModifyOption):
 
     zn_type = utils.ZnTypes.DVC
     file = utils.Files.zntrack
+
+
+__all__ = [
+    params,
+    deps,
+    outs,
+    checkpoints,
+    outs_no_cache,
+    outs_persistent,
+    metrics,
+    metrics_no_cache,
+    plots,
+    plots_no_cache,
+]

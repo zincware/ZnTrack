@@ -6,12 +6,7 @@ import pytest
 import yaml
 
 from zntrack import dvc, zn
-from zntrack.core.base import (
-    LoadViaGetItem,
-    Node,
-    get_auto_init_signature,
-    update_dependency_options,
-)
+from zntrack.core.base import LoadViaGetItem, Node, update_dependency_options
 
 
 class ExampleDVCOutsNode(Node):
@@ -227,16 +222,6 @@ class ZnTrackOptionCollection:
 
 class CollectionChild(ZnTrackOptionCollection):
     pass
-
-
-@pytest.mark.parametrize("cls", (ZnTrackOptionCollection, CollectionChild))
-def test_get_auto_init_signature(cls):
-    kwargs_no_default, kwargs_with_default, signature_params = get_auto_init_signature(
-        cls
-    )
-
-    assert kwargs_no_default == ["out1", "out2", "out3", "param1", "param3"]
-    assert kwargs_with_default == {"param2": [1, 2]}
 
 
 class NodeMock(metaclass=LoadViaGetItem):
