@@ -4,7 +4,6 @@ import pathlib
 import sys
 from unittest.mock import MagicMock, patch
 
-import pytest
 import znjson
 
 from zntrack.utils import utils
@@ -35,87 +34,6 @@ class ClsWithPostInit:
     def post_init(self):
         self.post_init = True
         self.text = f"{self.foo} {self.bar}"
-
-
-def test_get_auto_init():
-    _ = EmptyCls()
-
-    with pytest.raises(TypeError):
-        # has no init
-        EmptyCls(foo="foo")
-
-    def set_init(lst, dct):
-        mock = MagicMock()
-        setattr(
-            EmptyCls,
-            "__init__",
-            utils.get_auto_init(
-                kwargs_no_default=lst, kwargs_with_default=dct, super_init=mock
-            ),
-        )
-        return mock
-
-    # only none-default values
-    mock = set_init(["foo", "bar"], {})
-
-    with pytest.raises(TypeError):
-        # type error after setting the init
-        _ = EmptyCls()
-
-    test = EmptyCls(foo="foo", bar="bar")
-    assert test.foo == "foo"
-    assert test.bar == "bar"
-    mock.assert_called()
-
-    # only default values
-    mock = set_init([], {"foo": None, "bar": 10})
-    test = EmptyCls()
-    assert test.foo is None
-    assert test.bar == 10
-    mock.assert_called()
-
-    test = EmptyCls(foo="foo", bar="bar")
-    assert test.foo == "foo"
-    assert test.bar == "bar"
-
-    # mixed case
-    mock = set_init(["foo"], {"bar": 10})
-    with pytest.raises(TypeError):
-        _ = EmptyCls()
-
-    with pytest.raises(TypeError):
-        _ = EmptyCls(bar=20)
-
-    test = EmptyCls(foo="foo")
-    assert test.foo == "foo"
-    assert test.bar == 10
-
-    test = EmptyCls(foo="foo", bar="bar")
-    assert test.foo == "foo"
-    assert test.bar == "bar"
-    mock.assert_called()
-
-
-def test_get_post_init():
-    with pytest.raises(TypeError):
-        ClsWithPostInit(foo="foo")
-
-    mock = MagicMock()
-    setattr(
-        ClsWithPostInit,
-        "__init__",
-        utils.get_auto_init(
-            kwargs_no_default=["foo", "bar"], kwargs_with_default={}, super_init=mock
-        ),
-    )
-    test = ClsWithPostInit(foo="foo", bar="bar")
-
-    assert test.foo == "foo"
-    assert test.bar == "bar"
-    assert test.post_init
-    assert test.text == "foo bar"
-
-    mock.assert_called()
 
 
 def test_module_handler():

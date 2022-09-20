@@ -61,7 +61,7 @@ def replace_nwd_placeholder(
         _path = path
 
     try:
-        replace = True if nwd in _path else False
+        replace = nwd in _path
     except TypeError:
         # argument of type <Node> is not iterable. This can happen when you use
         #  e.g. dvc.deps(Node) (deprecated)

@@ -32,7 +32,7 @@ except ImportError:
 # for direct file references use dvc.<option> instead.
 
 
-class outs(ZnTrackOption):
+class outs(ZnTrackOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -42,7 +42,7 @@ class outs(ZnTrackOption):
     zn_type = utils.ZnTypes.RESULTS
 
 
-class deps(ZnTrackOption):
+class deps(ZnTrackOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -62,7 +62,7 @@ class deps(ZnTrackOption):
         return value
 
 
-class metrics(ZnTrackOption):
+class metrics(ZnTrackOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -73,7 +73,7 @@ class metrics(ZnTrackOption):
     zn_type = utils.ZnTypes.RESULTS
 
 
-class params(SplitZnTrackOption):
+class params(SplitZnTrackOption):  # pylint: disable=invalid-name
     """Identify DVC option
 
     See https://dvc.org/doc/command-reference/run#options for more information
@@ -84,17 +84,7 @@ class params(SplitZnTrackOption):
     file = utils.Files.params
 
 
-class iterable(ZnTrackOption):
-    """Special ZnTrack option
-
-    This option defines an iterable parameter for spawning nodes.
-    """
-
-    dvc_option = utils.DVCOptions.PARAMS.value
-    zn_type = utils.ZnTypes.ITERABLE
-
-
-class metadata(ZnTrackOption):
+class metadata(ZnTrackOption):  # pylint: disable=invalid-name
     """Special ZnTrack option
 
     This option defines a <metrics_no_cache> output that is used by ZnTracks metadata

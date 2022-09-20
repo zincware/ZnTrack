@@ -16,7 +16,6 @@ from zntrack.utils.utils import (
     decode_dict,
     deprecated,
     encode_dict,
-    get_auto_init,
     get_python_interpreter,
     module_handler,
     module_to_path,

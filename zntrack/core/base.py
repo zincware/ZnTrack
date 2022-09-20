@@ -1,3 +1,4 @@
+"""ZnTrack Node class module"""
 from __future__ import annotations
 
 import json
@@ -72,13 +73,13 @@ def handle_deps(value) -> typing.List[str]:
     return deps_files
 
 
-BaseNodeType = typing.TypeVar("BaseNodeType", bound="Node")
+BaseNodeTypeT = typing.TypeVar("BaseNodeTypeT", bound="Node")
 
 
 class LoadViaGetItem(type):
     """Metaclass for adding getitem support to load"""
 
-    def __getitem__(cls: Node, item: typing.Union[str, dict]) -> BaseNodeType:
+    def __getitem__(cls: Node, item: typing.Union[str, dict]) -> BaseNodeTypeT:
         """Allow Node[<nodename>] to access an instance of the Node
 
         Attributes
@@ -100,7 +101,7 @@ class LoadViaGetItem(type):
             return cls.load(**item)
         return cls.load(name=item)
 
-    def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
+    def __matmul__(cls, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other)
 
         Parameters
@@ -116,7 +117,7 @@ class LoadViaGetItem(type):
             raise ValueError(
                 f"Can not compute 'Node @ {type(other)}'. Expected 'Node @ str'."
             )
-        return getdeps(self, other)
+        return getdeps(cls, other)
 
 
 class NodeBase(zninit.ZnInit):
@@ -175,7 +176,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
     """
 
     init_subclass_basecls = NodeBase
-    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes] + dvc.__all__
+    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes] + dvc.options
 
     @utils.deprecated(
         reason=(
@@ -430,6 +431,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @property
     def zntrack(self) -> ZnTrackInfo:
+        """Get a ZnTrackInfo object"""
         return ZnTrackInfo(parent=self)
 
     @property
