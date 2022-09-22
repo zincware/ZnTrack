@@ -229,7 +229,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             if option.zn_type is utils.ZnTypes.PLOTS:
                 option.save(instance=self)
 
-    def save(self, results: bool = False):
+    def save(self, results: bool = False, hash_only: bool = False):
         """Save Class state to files
 
         Parameters
@@ -239,12 +239,20 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             By default, this function saves e.g. parameters from zn.params / dvc.<option>,
             but does not save results  that are stored in zn.<option>.
             Set this option to True if they should be saved, e.g. in run_and_save
+
+        hash_only: bool, default = False
+            Only save zn.Hash and nothing else. This is required for usage as zn.Nodes
         """
+        if hash_only:
+            zninit.get_descriptors(zn.Hash, self=self)[0].save(instance=self)
+            return
+
         if not results:
             # Reset everything in params.yaml and zntrack.json before saving
             utils.file_io.clear_config_file(utils.Files.params, node_name=self.node_name)
             utils.file_io.clear_config_file(utils.Files.zntrack, node_name=self.node_name)
         # Save dvc.<option>, dvc.deps, zn.Method
+
         for option in self._descriptor_list:
             if results:
                 if option.zn_type in utils.VALUE_DVC_TRACKED:
@@ -416,7 +424,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
         They are shown in the dvc dag and have their own parameter section.
-        The name is <nodename>-<attributename> for these Nodes and they only
+        The name is <nodename>-<attributename> for these Nodes. They only
         have a single hash output to be available for DVC dependencies.
         """
         for attribute, node in self.zntrack.collect(zn_nodes).items():
@@ -426,7 +434,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             node._is_attribute = True
             node.write_graph(
                 run=True,
-                call_args=f".load(name='{node.node_name}').save(results=True)",
+                call_args=f".load(name='{node.node_name}').save(hash_only=True)",
             )
 
     @property

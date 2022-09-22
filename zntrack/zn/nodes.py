@@ -69,6 +69,7 @@ class Nodes(ZnTrackOption):
         if instance is None:
             return self
         value = super().__get__(instance, owner)
+        # value._is_attribute = True # value can be None
         value = utils.utils.load_node_dependency(value)  # use value = Cls.load()
         setattr(instance, self.name, value)
         return value

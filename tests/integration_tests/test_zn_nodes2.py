@@ -1,5 +1,7 @@
 import dataclasses
 
+import pandas as pd
+import yaml
 import znjson
 
 from zntrack import zn
@@ -23,6 +25,29 @@ class ExampleNode(Node):
 
     def run(self):
         self.outs = self.params1.param1 + self.params2.param2
+
+
+class NodeWithPlots(Node):
+    _hash = zn.Hash()
+    plots = zn.plots()
+    factor: float = zn.params()
+
+    def run(self):
+        self.plots = pd.DataFrame(
+            {
+                "x": [1, 2, 3, 4],
+                "y": [self.factor, 2 * self.factor, 3 * self.factor, 4 * self.factor],
+            }
+        )
+
+
+class ExampleUsesPlots(Node):
+    node_with_plots: NodeWithPlots = zn.Nodes()
+    param: int = zn.params()
+    out = zn.outs()
+
+    def run(self):
+        self.out = self.node_with_plots.factor * self.param
 
 
 def test_ExampleNode(proj_path):
@@ -152,3 +177,24 @@ def test_DataclassNode(proj_path):
     assert node.node.parameter.value == 10
 
     znjson.deregister(ParameterConverter)
+
+
+def test_ExampleUsesPlots(proj_path):
+    node = ExampleUsesPlots(node_with_plots=NodeWithPlots(factor=2.5), param=2.0)
+    assert node.node_with_plots._is_attribute is True
+    # assert node.node_with_plots.node_name == "NodeWithPlots"
+    assert len(node.node_with_plots._descriptor_list) == 2
+
+    node.write_graph()
+    ExampleUsesPlots.load().run_and_save()
+
+    assert ExampleUsesPlots.load().out == 2.5 * 2.0
+
+    # Just checking if changing the parameters works as well
+    with open("params.yaml", "r") as file:
+        parameters = yaml.safe_load(file)
+    parameters["ExampleUsesPlots-node_with_plots"]["factor"] = 1.0
+    with open("params.yaml", "a") as file:
+        yaml.safe_dump(parameters, file)
+
+    assert ExampleUsesPlots.load().node_with_plots.factor == 1.0
