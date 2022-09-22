@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, call, mock_open, patch
 import pytest
 import yaml
 
-from zntrack import dvc, zn
+from zntrack import dvc, utils, zn
 from zntrack.core.base import LoadViaGetItem, Node, update_dependency_options
 
 
@@ -29,6 +29,15 @@ class ExampleFullNode(Node):
 
     def run(self):
         self.zn_outs = "outs"
+
+
+class ExampleHashNode(Node):
+    hash = zn.Hash()
+    # None of these are tested, they should be ignored
+    params = zn.params(10)
+    zn_outs = zn.outs()
+    dvc_outs = dvc.outs("file.txt")
+    deps = dvc.deps("deps.inp")
 
 
 @pytest.mark.parametrize("run", (True, False))
@@ -56,8 +65,11 @@ def test_save(run):
             assert zn_outs_mock().write.mock_calls == [
                 call(json.dumps({"zn_outs": "outs"}, indent=4))
             ]
+            assert not zntrack_mock().write.called
+            assert not params_mock().write.called
         else:
             example.save()
+            assert not zn_outs_mock().write.called
             assert zntrack_mock().write.mock_calls == [
                 call(json.dumps({})),  # clear everything first
                 call(
@@ -77,6 +89,38 @@ def test_save(run):
                 call(yaml.safe_dump({})),  # clear everything first
                 call(yaml.safe_dump({"ExampleFullNode": {"params": 10}}, indent=4)),
             ]
+
+
+def test_save_only_hash():
+    zntrack_mock = mock_open(read_data="{}")
+    params_mock = mock_open(read_data="{}")
+    zn_outs_mock = mock_open(read_data="{}")
+    hash_mock = mock_open(read_data="{}")
+
+    example = ExampleFullNode()
+
+    with pytest.raises(utils.exceptions.DescriptorMissing):
+        example.save(hash_only=True)
+
+    def pathlib_open(*args, **kwargs):
+        if args[0] == pathlib.Path("zntrack.json"):
+            return zntrack_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("params.yaml"):
+            return params_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("nodes/ExampleFullNode/outs.json"):
+            return zn_outs_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("nodes/ExampleHashNode/hash.json"):
+            return hash_mock(*args, **kwargs)
+        else:
+            raise ValueError(args)
+
+    example = ExampleHashNode()
+    with patch.object(pathlib.Path, "open", pathlib_open):
+        example.save(hash_only=True)
+        assert not params_mock().write.called
+        assert not zntrack_mock().write.called
+        assert not zn_outs_mock().write.called
+        assert hash_mock().write.called
 
 
 def test__load():

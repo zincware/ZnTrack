@@ -107,15 +107,33 @@ def test_affected_files():
 
 
 class ExampleClassWithParams(Node):
-    is_loaded = False
     param1 = zn.params(default=1)
     param2 = zn.params(default=2)
+
+
+class ExampleClassDifferentTypes(Node):
+    _is_attribute = True
+    _hash = zn.Hash()
+    param = zn.params(1)
+    outs = dvc.outs("file.txt")
+    metrics = zn.metrics()
+    plots = zn.plots()
 
 
 def test__descriptor_list():
     example = ExampleClassWithParams()
 
     assert len(example._descriptor_list) == 2
+
+
+def test_descriptor_list_attr():
+    """test the descriptor list if _is_attribute=True"""
+    example = ExampleClassDifferentTypes()
+
+    assert len(example._descriptor_list) == 2
+
+    example._is_attribute = False
+    assert len(example._descriptor_list) == 5
 
 
 def test_descriptor_list_filter():
