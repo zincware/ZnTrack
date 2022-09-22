@@ -244,7 +244,12 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             Only save zn.Hash and nothing else. This is required for usage as zn.Nodes
         """
         if hash_only:
-            zninit.get_descriptors(zn.Hash, self=self)[0].save(instance=self)
+            try:
+                zninit.get_descriptors(zn.Hash, self=self)[0].save(instance=self)
+            except IndexError as err:
+                raise utils.exceptions.DescriptorMissing(
+                    "Could not find a hash descriptor. Please add zn.Hash()"
+                ) from err
             return
 
         if not results:
@@ -430,11 +435,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         for attribute, node in self.zntrack.collect(zn_nodes).items():
             if node is None:
                 continue
-            node.node_name = f"{self.node_name}-{attribute}"
-            node._is_attribute = True
             node.write_graph(
                 run=True,
-                call_args=f".load(name='{node.node_name}').save(hash_only=True)",
+                call_args=f"['{node.node_name}'].save(hash_only=True)",
             )
 
     @property
@@ -561,7 +564,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             custom_args += pair
 
         if call_args is None:
-            call_args = f".load(name='{self.node_name}').run_and_save()"
+            call_args = f"['{self.node_name}'].run_and_save()"
 
         script = prepare_dvc_script(
             node_name=self.node_name,

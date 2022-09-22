@@ -1,6 +1,6 @@
 import dataclasses
 
-import pandas as pd
+import pytest
 import yaml
 import znjson
 
@@ -33,12 +33,7 @@ class NodeWithPlots(Node):
     factor: float = zn.params()
 
     def run(self):
-        self.plots = pd.DataFrame(
-            {
-                "x": [1, 2, 3, 4],
-                "y": [self.factor, 2 * self.factor, 3 * self.factor, 4 * self.factor],
-            }
-        )
+        pass
 
 
 class ExampleUsesPlots(Node):
@@ -179,22 +174,51 @@ def test_DataclassNode(proj_path):
     znjson.deregister(ParameterConverter)
 
 
-def test_ExampleUsesPlots(proj_path):
-    node = ExampleUsesPlots(node_with_plots=NodeWithPlots(factor=2.5), param=2.0)
+@pytest.mark.parametrize("node_name", ("ExampleUsesPlots", "test12"))
+def test_ExampleUsesPlots(proj_path, node_name):
+    node = ExampleUsesPlots(
+        node_with_plots=NodeWithPlots(factor=2.5), param=2.0, name=node_name
+    )
     assert node.node_with_plots._is_attribute is True
-    # assert node.node_with_plots.node_name == "NodeWithPlots"
+    assert node.node_with_plots.node_name == f"{node_name}-node_with_plots"
     assert len(node.node_with_plots._descriptor_list) == 2
 
     node.write_graph()
-    ExampleUsesPlots.load().run_and_save()
+    ExampleUsesPlots[node_name].run_and_save()
 
-    assert ExampleUsesPlots.load().out == 2.5 * 2.0
+    assert ExampleUsesPlots[node_name].out == 2.5 * 2.0
 
     # Just checking if changing the parameters works as well
     with open("params.yaml", "r") as file:
         parameters = yaml.safe_load(file)
-    parameters["ExampleUsesPlots-node_with_plots"]["factor"] = 1.0
+    parameters[f"{node_name}-node_with_plots"]["factor"] = 1.0
     with open("params.yaml", "a") as file:
         yaml.safe_dump(parameters, file)
 
-    assert ExampleUsesPlots.load().node_with_plots.factor == 1.0
+    assert ExampleUsesPlots[node_name].node_with_plots.factor == 1.0
+
+
+class NodeAsDataClass(Node):
+    _hash = zn.Hash()
+    param1 = zn.params()
+    param2 = zn.params()
+    param3 = zn.params()
+
+
+class UseNodeAsDataClass(Node):
+    params: NodeAsDataClass = zn.Nodes()
+    output = zn.outs()
+
+    def run(self):
+        self.output = self.params.param1 + self.params.param2 + self.params.param3
+
+
+def test_UseNodeAsDataClass(proj_path):
+    node = UseNodeAsDataClass(params=NodeAsDataClass(param1=1, param2=10, param3=100))
+    node.write_graph(run=True)
+
+    node = UseNodeAsDataClass.load()
+    assert node.output == 111
+    assert node.params.param1 == 1
+    assert node.params.param2 == 10
+    assert node.params.param3 == 100
