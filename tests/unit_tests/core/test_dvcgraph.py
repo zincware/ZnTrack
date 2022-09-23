@@ -2,34 +2,38 @@ import pathlib
 
 import pytest
 
-from zntrack import dvc, utils, zn
+from zntrack import Node, dvc, utils, zn
+from zntrack.core.base import handle_deps
 from zntrack.core.dvcgraph import (
     DVCRunOptions,
-    GraphWriter,
     ZnTrackInfo,
     filter_ZnTrackOption,
-    handle_deps,
     handle_dvc,
     prepare_dvc_script,
 )
 
 
-class ExampleDVCOutsNode(GraphWriter):
+class ExampleDVCOutsNode(Node):
     is_loaded = False
     outs = dvc.outs(pathlib.Path("example.dat"))
+
+
+class ExampleDVCOutsParams(Node):
+    is_loaded = False
+    outs = dvc.outs(pathlib.Path("example.dat"))
+    param1 = zn.params(5)
 
 
 def test_get_dvc_arguments():
     dvc_options = DVCRunOptions(
         force=True,
         always_changed=False,
-        no_exec=True,
-        external=False,
+        external=True,
         no_commit=False,
         no_run_cache=False,
     )
 
-    assert dvc_options.dvc_args == ["--no-exec", "--force"]
+    assert dvc_options.dvc_args == ["--external", "--force"]
 
 
 def test_handle_deps():
@@ -78,7 +82,7 @@ def test_handle_deps_node():
     assert handle_deps(ExampleDVCOutsNode()) == ["example.dat"]
 
 
-class ExampleAffectedFiles(GraphWriter):
+class ExampleAffectedFiles(Node):
     is_loaded = False
     param = zn.params()
     zn_outs = zn.outs()
@@ -90,7 +94,7 @@ class ExampleAffectedFiles(GraphWriter):
 
 
 def test_affected_files():
-    example = ExampleAffectedFiles()
+    example = ExampleAffectedFiles(dvc_empty=None, param=None)
 
     assert example.affected_files == {
         pathlib.Path("dvc_metrics.json"),
@@ -102,16 +106,34 @@ def test_affected_files():
     }
 
 
-class ExampleClassWithParams(GraphWriter):
-    is_loaded = False
-    param1 = zn.params(default_value=1)
-    param2 = zn.params(default_value=2)
+class ExampleClassWithParams(Node):
+    param1 = zn.params(default=1)
+    param2 = zn.params(default=2)
+
+
+class ExampleClassDifferentTypes(Node):
+    _is_attribute = True
+    _hash = zn.Hash()
+    param = zn.params(1)
+    outs = dvc.outs("file.txt")
+    metrics = zn.metrics()
+    plots = zn.plots()
 
 
 def test__descriptor_list():
     example = ExampleClassWithParams()
 
     assert len(example._descriptor_list) == 2
+
+
+def test_descriptor_list_attr():
+    """test the descriptor list if _is_attribute=True"""
+    example = ExampleClassDifferentTypes()
+
+    assert len(example._descriptor_list) == 2
+
+    example._is_attribute = False
+    assert len(example._descriptor_list) == 5
 
 
 def test_descriptor_list_filter():
@@ -138,7 +160,6 @@ def test_prepare_dvc_script():
         external=True,
         always_changed=True,
         no_run_cache=False,
-        no_exec=True,
         force=True,
     )
 
@@ -154,17 +175,19 @@ def test_prepare_dvc_script():
 
     assert script == [
         "dvc",
-        "run",
+        "stage",
+        "add",
         "-n",
         "node01",
         "--external",
         "--always-changed",
-        "--no-exec",
         "--force",
         "--deps",
         "file.txt",
-        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
-        ' MyNode.load().run_and_save()" ',
+        (
+            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            ' MyNode.load().run_and_save()" '
+        ),
     ]
 
     script = prepare_dvc_script(
@@ -179,30 +202,32 @@ def test_prepare_dvc_script():
 
     assert script == [
         "dvc",
-        "run",
+        "stage",
+        "add",
         "-n",
         "node01",
         "--external",
         "--always-changed",
-        "--no-exec",
         "--force",
         "--deps",
         "file.txt",
         "--deps",
         "src/file.py",
-        f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
-        ' MyNode.load().run_and_save()" ',
+        (
+            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            ' MyNode.load().run_and_save()" '
+        ),
     ]
 
 
 def test_ZnTrackInfo():
-    node = GraphWriter()
+    node = Node()
     assert isinstance(node.zntrack, ZnTrackInfo)
     assert node.zntrack._parent == node
 
 
 def test_ZnTrackInfo_collect():
-    node = GraphWriter()
+    node = Node()
 
     with pytest.raises(ValueError):
         node.zntrack.collect([zn.params, zn.outs])
@@ -210,6 +235,30 @@ def test_ZnTrackInfo_collect():
     example = ExampleClassWithParams()
 
     assert example.zntrack.collect(zn.params) == {"param1": 1, "param2": 2}
+
+    # show all
+    assert example.zntrack.collect() == {"param1": 1, "param2": 2}
+
+    # no zn.outs available
+    assert example.zntrack.collect(zn.outs) == {}
+
+    example_with_outs = ExampleDVCOutsNode()
+    assert example_with_outs.zntrack.collect(dvc.outs) == {
+        "outs": pathlib.Path("example.dat")
+    }
+    assert example_with_outs.zntrack.collect() == {"outs": pathlib.Path("example.dat")}
+    assert example_with_outs.zntrack.collect(zn.params) == {}
+
+    example_outs_params = ExampleDVCOutsParams()
+
+    assert example_outs_params.zntrack.collect(dvc.outs) == {
+        "outs": pathlib.Path("example.dat")
+    }
+    assert example_outs_params.zntrack.collect(zn.params) == {"param1": 5}
+    assert example_outs_params.zntrack.collect() == {
+        "outs": pathlib.Path("example.dat"),
+        "param1": 5,
+    }
 
 
 @pytest.mark.parametrize(

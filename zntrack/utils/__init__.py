@@ -2,6 +2,7 @@
 
 from zntrack.utils import exceptions, file_io, helpers
 from zntrack.utils.config import Files, config
+from zntrack.utils.nwd import nwd
 from zntrack.utils.structs import (
     FILE_DVC_TRACKED,
     VALUE_DVC_TRACKED,
@@ -15,7 +16,6 @@ from zntrack.utils.utils import (
     decode_dict,
     deprecated,
     encode_dict,
-    get_auto_init,
     get_python_interpreter,
     module_handler,
     module_to_path,
@@ -45,4 +45,5 @@ __all__ = [
     "DVCOptions",
     "LazyOption",
     "helpers",
+    "nwd",
 ]

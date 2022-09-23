@@ -1,15 +1,46 @@
 """Custom base classes for e.g. plots to account for plots modify"""
+import logging
 import pathlib
 import typing
 
+import zninit
+
 from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
+from zntrack.utils.nwd import replace_nwd_placeholder
+
+log = logging.getLogger(__name__)
 
 
-class PlotsModifyOption(ZnTrackOption):
+class DVCOption(ZnTrackOption):
+    """Allow for nwd placeholder in strings to be automatically replaced"""
+
+    def __get__(self, instance, owner=None):
+        """Overwrite getter to replace nwd placeholder when read the first time"""
+
+        self._instance = instance
+
+        if instance is None:
+            return self
+        else:
+            self._write_instance_dict(instance)
+
+        # this is a cheap operation, so we run this every single time.
+        nwd = pathlib.Path("nodes", instance.node_name)
+
+        instance.__dict__[self.name], mkdir = replace_nwd_placeholder(
+            instance.__dict__[self.name], node_working_directory=nwd
+        )
+        if mkdir:
+            nwd.mkdir(exist_ok=True, parents=True)
+
+        return instance.__dict__[self.name]
+
+
+class PlotsModifyOption(DVCOption):
     def __init__(
         self,
-        default_value=None,
+        default=zninit.descriptor.Empty,
         *,
         template=None,
         x=None,
@@ -18,12 +49,12 @@ class PlotsModifyOption(ZnTrackOption):
         y_label=None,
         title=None,
         no_header=False,
-        **kwargs
+        **kwargs,
     ):
         """
         See https://dvc.org/doc/command-reference/plots/modify for parameter information.
         """
-        super().__init__(default_value=default_value, **kwargs)
+        super().__init__(default=default, **kwargs)
         self.template = template
         self.x = x
         self.y = y

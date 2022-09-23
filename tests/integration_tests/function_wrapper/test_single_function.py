@@ -1,22 +1,9 @@
-import os
 import pathlib
-import shutil
-import subprocess
 
 import pytest
 
 from zntrack import utils
 from zntrack.core.functions.decorator import NodeConfig, nodify
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 @nodify(outs="test.txt", params={"text": "Lorem Ipsum"})
@@ -40,17 +27,19 @@ def test_example_func_dry_run(proj_path):
     assert " ".join(script) == " ".join(
         [
             "dvc",
-            "run",
+            "stage",
+            "add",
             "-n",
             "example_func",
-            "--no-exec",
             "--force",
             "--params",
             "params.yaml:example_func",
             "--outs",
             "test.txt",
-            f'{utils.get_python_interpreter()} -c "from test_single_function import '
-            'example_func; example_func(exec_func=True)" ',
+            (
+                f'{utils.get_python_interpreter()} -c "from test_single_function import '
+                'example_func; example_func(exec_func=True)" '
+            ),
         ]
     )
 

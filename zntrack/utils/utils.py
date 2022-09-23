@@ -1,3 +1,4 @@
+"""ZnTrack utils"""
 import json
 import logging
 import os
@@ -6,7 +7,6 @@ import shutil
 import subprocess
 import sys
 import tempfile
-import typing
 
 import znjson
 
@@ -33,7 +33,8 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
         The temporary  directory file. Close with temp_dir.cleanup() at the end.
 
     """
-    temp_dir = tempfile.TemporaryDirectory()  # add ignore_cleanup_errors=True in Py3.10?
+    temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+    # add ignore_cleanup_errors=True in Py3.10?
 
     if config.nb_name is not None:
         shutil.copy(config.nb_name, temp_dir.name)
@@ -72,38 +73,6 @@ def encode_dict(value) -> dict:
     return json.loads(json.dumps(value, cls=znjson.ZnEncoder))
 
 
-def get_auto_init(fields: typing.List[str], super_init: typing.Callable):
-    """Automatically create an __init__ based on fields
-
-    Parameters
-    ----------
-    fields: list[str]
-        A list of strings that will be used in the __init__, e.g. for [foo, bar]
-        it will create __init__(self, foo=None, bar=None) using **kwargs
-    super_init: Callable
-        typically this is Node.__init__
-    """
-
-    def auto_init(self, **kwargs):
-        """Wrapper for the __init__"""
-        for field in fields:
-            try:
-                setattr(self, field, kwargs.pop(field))
-            except KeyError:
-                pass
-        super_init(self, **kwargs)  # call the super_init explicitly instead of super
-
-        try:
-            self.post_init()
-        except AttributeError:
-            pass
-
-    # we add this attribute to the __init__ to make it identifiable
-    auto_init._uses_auto_init = True
-
-    return auto_init
-
-
 def module_handler(obj) -> str:
     """Get the module for the Node
 
@@ -131,7 +100,7 @@ def module_handler(obj) -> str:
 def check_type(
     obj, types, allow_iterable=False, allow_none=False, allow_dict=False
 ) -> bool:
-    """Check if the obj is of any of the given types
+    """Check if the obj is of the given types
 
     This includes recursive search for nested lists / dicts and fails
     if any of the values is not in types
@@ -216,8 +185,8 @@ def run_dvc_cmd(script):
         A list of strings to pass the subprocess command
 
     """
-    dvc_short_string = " ".join(script[:4])
-    if len(script) > 4:
+    dvc_short_string = " ".join(script[:5])
+    if len(script) > 5:
         dvc_short_string += " ..."
     log.warning(f"Running DVC command: '{dvc_short_string}'")
     try:

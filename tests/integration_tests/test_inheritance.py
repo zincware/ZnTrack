@@ -1,20 +1,6 @@
-import os
-import shutil
-import subprocess
-
 import pytest
 
 from zntrack import Node, zn
-
-
-@pytest.fixture()
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 class InOuts(Node):
@@ -29,8 +15,8 @@ class WriteData(InOuts):
 
 class WriteDataWithInit(InOuts):
     def __init__(self, inputs=None, **kwargs):
-        super().__init__(**kwargs)
-        self.inputs = inputs
+        super().__init__(inputs=inputs, **kwargs)
+        # this calls the auto_init of the subclass which demands the inputs argument!
 
     def run(self):
         self.outputs = self.inputs

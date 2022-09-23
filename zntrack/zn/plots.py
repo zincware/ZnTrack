@@ -9,7 +9,7 @@ from zntrack.dvc.custom_base import PlotsModifyOption
 log = logging.getLogger(__name__)
 
 
-class plots(PlotsModifyOption):
+class plots(PlotsModifyOption):  # pylint: disable=invalid-name
     dvc_option = utils.DVCOptions.PLOTS_NO_CACHE.value
     zn_type = utils.ZnTypes.PLOTS
 
@@ -20,9 +20,6 @@ class plots(PlotsModifyOption):
     def save(self, instance):
         """Save value with pd.DataFrame.to_csv"""
         value = self.__get__(instance, self.owner)
-
-        if value is None:
-            return
 
         if not isinstance(value, pd.DataFrame):
             raise TypeError(
@@ -38,6 +35,5 @@ class plots(PlotsModifyOption):
 
     def get_data_from_files(self, instance):
         """Load value with pd.read_csv"""
-
         file = self.get_filename(instance)
         return pd.read_csv(file, index_col=0)

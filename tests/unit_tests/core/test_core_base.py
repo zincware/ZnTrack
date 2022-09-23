@@ -5,13 +5,8 @@ from unittest.mock import MagicMock, call, mock_open, patch
 import pytest
 import yaml
 
-from zntrack import dvc, zn
-from zntrack.core.base import (
-    LoadViaGetItem,
-    Node,
-    get_auto_init_signature,
-    update_dependency_options,
-)
+from zntrack import dvc, utils, zn
+from zntrack.core.base import LoadViaGetItem, Node, update_dependency_options
 
 
 class ExampleDVCOutsNode(Node):
@@ -34,6 +29,15 @@ class ExampleFullNode(Node):
 
     def run(self):
         self.zn_outs = "outs"
+
+
+class ExampleHashNode(Node):
+    hash = zn.Hash()
+    # None of these are tested, they should be ignored
+    params = zn.params(10)
+    zn_outs = zn.outs()
+    dvc_outs = dvc.outs("file.txt")
+    deps = dvc.deps("deps.inp")
 
 
 @pytest.mark.parametrize("run", (True, False))
@@ -61,8 +65,11 @@ def test_save(run):
             assert zn_outs_mock().write.mock_calls == [
                 call(json.dumps({"zn_outs": "outs"}, indent=4))
             ]
+            assert not zntrack_mock().write.called
+            assert not params_mock().write.called
         else:
             example.save()
+            assert not zn_outs_mock().write.called
             assert zntrack_mock().write.mock_calls == [
                 call(json.dumps({})),  # clear everything first
                 call(
@@ -84,6 +91,38 @@ def test_save(run):
             ]
 
 
+def test_save_only_hash():
+    zntrack_mock = mock_open(read_data="{}")
+    params_mock = mock_open(read_data="{}")
+    zn_outs_mock = mock_open(read_data="{}")
+    hash_mock = mock_open(read_data="{}")
+
+    example = ExampleFullNode()
+
+    with pytest.raises(utils.exceptions.DescriptorMissing):
+        example.save(hash_only=True)
+
+    def pathlib_open(*args, **kwargs):
+        if args[0] == pathlib.Path("zntrack.json"):
+            return zntrack_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("params.yaml"):
+            return params_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("nodes/ExampleFullNode/outs.json"):
+            return zn_outs_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("nodes/ExampleHashNode/hash.json"):
+            return hash_mock(*args, **kwargs)
+        else:
+            raise ValueError(args)
+
+    example = ExampleHashNode()
+    with patch.object(pathlib.Path, "open", pathlib_open):
+        example.save(hash_only=True)
+        assert not params_mock().write.called
+        assert not zntrack_mock().write.called
+        assert not zn_outs_mock().write.called
+        assert hash_mock().write.called
+
+
 def test__load():
     zntrack_mock = mock_open(
         read_data=json.dumps(
@@ -93,6 +132,7 @@ def test__load():
     )
     params_mock = mock_open(read_data=yaml.safe_dump({"ExampleFullNode": {"params": 42}}))
     zn_outs_mock = mock_open(read_data=json.dumps({"zn_outs": "outs_"}))
+    dvc_mock = mock_open(read_data=yaml.safe_dump({"stages": {"ExampleFullNode": None}}))
 
     example = ExampleFullNode()
 
@@ -103,6 +143,9 @@ def test__load():
             return params_mock(*args, **kwargs)
         elif args[0] == pathlib.Path("nodes/ExampleFullNode/outs.json"):
             return zn_outs_mock(*args, **kwargs)
+        elif args[0] == pathlib.Path("dvc.yaml"):
+            # required for logging with __repr__ which uses '_graph_entry_exists'
+            return dvc_mock(*args, **kwargs)
         else:
             raise ValueError(args)
 
@@ -131,16 +174,16 @@ def test_load():
     default_correct_node = CorrectNode.load()
     assert default_correct_node.node_name == CorrectNode.__name__
 
-    default_incorrect_node = InCorrectNode.load()
-    assert default_incorrect_node.node_name == InCorrectNode.__name__
+    with pytest.raises(TypeError):
+        # can not load a Node that misses a correct super().__init__(**kwargs)
+        _ = InCorrectNode.load()
+
+    with pytest.raises(TypeError):
+        _ = InCorrectNode["Test"]
 
     correct_node = CorrectNode.load(name="Test")
     assert correct_node.node_name == "Test"
     assert correct_node.test_name == correct_node.node_name
-
-    incorrect_node = InCorrectNode.load(name="Test")
-    assert incorrect_node.node_name == "Test"
-    assert incorrect_node.test_name != incorrect_node.node_name
 
 
 class RunTestNode(Node):
@@ -150,10 +193,12 @@ class RunTestNode(Node):
         self.outs = 42
 
 
-def test_run_and_save():
+@pytest.mark.parametrize("is_loaded", (True, False))
+def test_run_and_save(is_loaded):
     open_mock = mock_open(read_data="{}")
 
     example = RunTestNode()
+    example.is_loaded = is_loaded
 
     def pathlib_open(*args, **kwargs):
         return open_mock(*args, **kwargs)
@@ -163,9 +208,16 @@ def test_run_and_save():
 
         assert example.outs == 42
 
-    assert open_mock().write.mock_calls == [
-        call(json.dumps({"outs": 42}, indent=4)),
-    ]
+    if example.is_loaded:
+        assert open_mock().write.mock_calls == [
+            call(json.dumps({"outs": 42}, indent=4)),
+        ]
+    else:
+        assert open_mock().write.mock_calls == [
+            call("{}\n"),  # clear_config_file(utils.Files.params) in save
+            call("{}"),  # clear_config_file(utils.Files.zntrack) in save
+            call(json.dumps({"outs": 42}, indent=4)),
+        ]
 
 
 class WrongInit(Node):
@@ -214,21 +266,6 @@ class ZnTrackOptionCollection:
 
 class CollectionChild(ZnTrackOptionCollection):
     pass
-
-
-@pytest.mark.parametrize("cls", (ZnTrackOptionCollection, CollectionChild))
-def test_get_auto_init_signature(cls):
-    zn_option_names, signature_params = get_auto_init_signature(cls)
-
-    assert zn_option_names == ["out1", "out2", "out3", "param1", "param2", "param3"]
-
-    # assert signature_params[0].name == "out1"
-    #
-    # assert signature_params[3].name == "param1"
-    # assert signature_params[3].annotation == dict
-    #
-    # assert signature_params[5].name == "param3"
-    # assert signature_params[5].annotation is None
 
 
 class NodeMock(metaclass=LoadViaGetItem):

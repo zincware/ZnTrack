@@ -9,36 +9,24 @@ log = logging.getLogger(__name__)
 
 
 class Nodes(ZnTrackOption):
-    """ZnTrack methods passing descriptor
+    """Have a ZnTrack Node as an attribute to another (main) Node
 
-    This descriptor allows to pass a class instance that is not a ZnTrack Node as a
-    method that can be used later. It requires that all passed class attributes have
-    the same name in the __init__ and via getattr an that they are serializable.
-
-    Example
-    --------
-    >>> class HelloWorld:
-    >>>     def __init__(self, name):
-    >>>         self.name = name
-    >>>
-    >>> class MyNode(zntrack.Node)
-    >>>     my_method = Method()
-    >>> MyNode().my_method = HelloWorld(name="Max")
-
+    If you want to use a method of another ZnTrack Node you can pass it
+    as a zn.Nodes()
     """
 
     dvc_option = utils.DVCOptions.DEPS
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
-    def __init__(self, default_value=None, **kwargs):
-        if default_value is not None:
+    def __init__(self, default=None, **kwargs):
+        if default is not None:
             raise ValueError(
                 "zn.Nodes does not support default values because they can be mutable."
                 " Please set the default value in the __init__"
             )
 
-        super().__init__(**kwargs)
+        super().__init__(default=default, **kwargs)
 
     def __set__(self, instance, value):
         """Include type check for better error reporting"""
@@ -69,6 +57,10 @@ class Nodes(ZnTrackOption):
         if instance is None:
             return self
         value = super().__get__(instance, owner)
+        if value is not None:
+            value._is_attribute = True
+            value.node_name = f"{instance.node_name}-{self.name}"
+        # value._is_attribute = True # value can be None
         value = utils.utils.load_node_dependency(value)  # use value = Cls.load()
         # does it work with lists?
         value._is_attribute = True

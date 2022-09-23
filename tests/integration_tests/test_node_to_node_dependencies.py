@@ -1,11 +1,9 @@
-import os
-import shutil
 import subprocess
 from pathlib import Path
 
 import pytest
 
-from zntrack import dvc, getdeps, zn
+from zntrack import dvc, getdeps, utils, zn
 from zntrack.core.base import Node
 
 
@@ -45,7 +43,7 @@ class DVCZnOuts(Node):
 
 
 class DependenciesCollector(Node):
-    dependencies = dvc.deps()
+    dependencies = zn.deps()
 
     def __init__(self, dependencies=None, **kwargs):
         super().__init__(**kwargs)
@@ -56,7 +54,7 @@ class DependenciesCollector(Node):
 
 
 class DepsCollwOuts(Node):
-    dependencies = dvc.deps()
+    dependencies = zn.deps()
     outs: Path = dvc.outs()
 
     def __init__(self, dependencies=None, **kwargs):
@@ -68,16 +66,6 @@ class DepsCollwOuts(Node):
 
     def run(self):
         self.outs.write_text("Lorem Ipsum")
-
-
-@pytest.fixture()
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 def test_dvc_outs(proj_path):
@@ -106,7 +94,7 @@ def test_dvc_outs_no_load(proj_path):
 
 def test_dvc_reversed(proj_path):
     """Create the instances first and at the end call write_graph"""
-    with pytest.raises(AttributeError):
+    with pytest.raises(utils.exceptions.GraphNotAvailableError):
         # this can not work, because DVCOuts affected files is not now at the stage
         # where DependenciesCollector writes its DVC stage
         DependenciesCollector(dependencies=DVCOuts.load()).write_graph()

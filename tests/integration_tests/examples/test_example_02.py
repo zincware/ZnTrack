@@ -1,6 +1,3 @@
-import os
-import shutil
-
 import numpy as np
 
 from zntrack import Node, ZnTrackProject, dvc, zn
@@ -79,13 +76,10 @@ class ComputeABNamed(Node):
         self.out = self.a.out + self.b.out
 
 
-def test_stage_addition(tmp_path):
+def test_stage_addition(proj_path):
     """Check that the dvc repro works"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.name = "test01"
-    project.create_dvc_repository()
 
     ComputeA(inp=2).write_graph()
     ComputeB(inp=3).write_graph()
@@ -97,13 +91,10 @@ def test_stage_addition(tmp_path):
     assert finished_stage.out == 31
 
 
-def test_stage_addition_named(tmp_path):
+def test_stage_addition_named(proj_path):
     """Check that the dvc repro works with named stages"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
     project = ZnTrackProject()
     project.name = "test01"
-    project.create_dvc_repository()
 
     ComputeANamed(inp=2).write_graph()
     ComputeB(inp=3).write_graph()
@@ -114,14 +105,8 @@ def test_stage_addition_named(tmp_path):
     assert finished_stage.out == 31
 
 
-def test_stage_addition_run(tmp_path):
+def test_stage_addition_run(proj_path):
     """Check that the PyTracks run method works"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    project = ZnTrackProject()
-    project.name = "test01"
-    project.create_dvc_repository()
-
     a = ComputeA(inp=2)
     a.run_and_save()  # I must save here, because of the dependency of the output in AB
     b = ComputeB(inp=3)
@@ -134,14 +119,8 @@ def test_stage_addition_run(tmp_path):
     assert finished_stage.out == 31
 
 
-def test_stage_addition_named_run(tmp_path):
+def test_stage_addition_named_run(proj_path):
     """Check that the PyTracks run method works with named stages"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    project = ZnTrackProject()
-    project.name = "test01"
-    project.create_dvc_repository()
-
     ComputeANamed(inp=2).save()
     ComputeB(inp=3).save()
     ComputeAB().save()
@@ -155,13 +134,8 @@ def test_stage_addition_named_run(tmp_path):
     assert finished_stage.out == 31
 
 
-def test_named_single_stage(tmp_path):
+def test_named_single_stage(proj_path):
     """Test a single named stage"""
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    project = ZnTrackProject()
-    project.create_dvc_repository()
-
     ComputeANamed(inp=2).write_graph(no_exec=False)
 
     assert ComputeANamed.load().out == 4

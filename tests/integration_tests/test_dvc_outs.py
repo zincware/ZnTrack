@@ -1,23 +1,8 @@
-import os
 import pathlib
-import shutil
-import subprocess
 import typing
 
-import pytest
-
-from zntrack import dvc
+from zntrack import dvc, utils
 from zntrack.core.base import Node
-
-
-@pytest.fixture
-def proj_path(tmp_path):
-    shutil.copy(__file__, tmp_path)
-    os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
-
-    return tmp_path
 
 
 class SingleNode(Node):
@@ -60,3 +45,31 @@ def test_multiple_outs(proj_path):
         pathlib.Path("test_1.txt"),
         pathlib.Path("test_2.txt"),
     ]
+
+
+class SingleNodeInNodeDir(Node):
+    path: pathlib.Path = dvc.outs(utils.nwd / "test.json")
+
+    def run(self):
+        if isinstance(self.path, list):
+            [pathlib.Path(x).touch() for x in self.path]
+        else:
+            self.path.write_text("")
+
+
+def test_SingleNodeInNodeDir(proj_path):
+    SingleNodeInNodeDir().write_graph(run=True)
+
+    result = SingleNodeInNodeDir.load()
+    assert result.path == pathlib.Path("nodes", "SingleNodeInNodeDir", "test.json")
+    assert result.path.exists()
+
+
+def test_SingleNodeInNodeDirMulti(proj_path):
+    SingleNodeInNodeDir(
+        path=[utils.nwd / "test.json", "file.txt"], name="TestNode"
+    ).write_graph(run=True)
+
+    result = SingleNodeInNodeDir["TestNode"]
+    assert result.path == [pathlib.Path("nodes", "TestNode", "test.json"), "file.txt"]
+    assert all([pathlib.Path(x).exists() for x in result.path])
