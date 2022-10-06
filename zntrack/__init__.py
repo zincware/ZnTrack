@@ -23,7 +23,7 @@ from zntrack.utils.serializer import (
 from zntrack.zn.dependencies import getdeps
 
 # register converters
-znjson.register([ZnTrackTypeConverter, MethodConverter, NodeAttributeConverter])
+znjson.config.register([ZnTrackTypeConverter, MethodConverter, NodeAttributeConverter])
 
 __all__ = [
     Node.__name__,

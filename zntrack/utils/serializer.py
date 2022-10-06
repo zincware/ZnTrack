@@ -67,7 +67,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
     representation = "ZnTrackType"
     level = 10
 
-    def _encode(self, obj: Node) -> dict:
+    def encode(self, obj: Node) -> dict:
         """Convert Node to serializable dict"""
         return dataclasses.asdict(
             SerializedNode(
@@ -77,7 +77,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
             )
         )
 
-    def _decode(self, value: dict) -> Node:
+    def decode(self, value: dict) -> Node:
         """return serialized Node"""
 
         serialized_node = SerializedNode(**value)
@@ -94,11 +94,11 @@ class NodeAttributeConverter(znjson.ConverterBase):
     representation = "NodeAttribute"
     level = 10
 
-    def _encode(self, obj: NodeAttribute) -> dict:
+    def encode(self, obj: NodeAttribute) -> dict:
         """Convert NodeAttribute to serializable dict"""
         return dataclasses.asdict(obj)
 
-    def _decode(self, value: dict):
+    def decode(self, value: dict):
         """return serialized Node attribute"""
 
         node_attribute = NodeAttribute(**value)
@@ -115,7 +115,7 @@ class MethodConverter(znjson.ConverterBase):
     representation = "zn.method"
     level = 10
 
-    def _encode(self, obj):
+    def encode(self, obj):
         """Serialize the object"""
 
         serialized_method = SerializedMethod(
@@ -147,7 +147,7 @@ class MethodConverter(znjson.ConverterBase):
 
         return dataclasses.asdict(serialized_method)
 
-    def _decode(self, value: dict):
+    def decode(self, value: dict):
         """Deserialize the object"""
 
         if "name" in value:
