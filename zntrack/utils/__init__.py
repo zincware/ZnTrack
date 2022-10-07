@@ -5,6 +5,7 @@ from zntrack.utils.config import Files, config
 from zntrack.utils.nwd import nwd
 from zntrack.utils.structs import (
     FILE_DVC_TRACKED,
+    GIT_TRACKED,
     VALUE_DVC_TRACKED,
     DVCOptions,
     LazyOption,
@@ -39,11 +40,11 @@ __all__ = [
     "check_type",
     "get_python_interpreter",
     "run_dvc_cmd",
-    "get_auto_init",
     "FILE_DVC_TRACKED",
     "VALUE_DVC_TRACKED",
     "DVCOptions",
     "LazyOption",
     "helpers",
     "nwd",
+    "GIT_TRACKED",
 ]

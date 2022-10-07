@@ -139,3 +139,16 @@ def update_desc(file: pathlib.Path, node_name: str, desc: str):
         file_content = read_file(file)
         file_content["stages"][node_name]["desc"] = desc
         write_file(file, value=file_content)
+
+
+def update_meta(file: pathlib.Path, node_name: str, data: dict):
+    """Update the 'dvc.yaml' with a description"""
+    if data is not None:
+        file_content = read_file(file)
+        meta_data = file_content["stages"][node_name].get("meta", {})
+        if not isinstance(meta_data, dict):
+            # The user already entered something into 'meta' in the 'dvc.yaml'
+            meta_data = {"meta": meta_data}
+        meta_data.update(data)
+        file_content["stages"][node_name]["meta"] = meta_data
+        write_file(file, value=file_content)
