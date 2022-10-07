@@ -31,11 +31,11 @@ class RawNodeAttributeConverter(znjson.ConverterBase):
     representation = "NodeAttribute"
     level = 999
 
-    def _encode(self, obj: NodeAttribute) -> dict:
+    def encode(self, obj: NodeAttribute) -> dict:
         """Convert NodeAttribute to serializable dict"""
         return dataclasses.asdict(obj)
 
-    def _decode(self, value: dict) -> NodeAttribute:
+    def decode(self, value: dict) -> NodeAttribute:
         """return serialized Node attribute"""
         return NodeAttribute(**value)
 
@@ -77,11 +77,11 @@ def get_origin(
     ------
     AttributeError: if the attribute is not of type zn.deps
     """
-    znjson.register(RawNodeAttributeConverter)
+    znjson.config.register(RawNodeAttributeConverter)
     new_node = node.load(name=node.node_name)
     value = getattr(new_node, attribute)
 
-    znjson.deregister(RawNodeAttributeConverter)
+    znjson.config.deregister(RawNodeAttributeConverter)
 
     def not_zn_deps_err() -> AttributeError:
         """Evaluate error message when raising the error"""

@@ -564,7 +564,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             custom_args += pair
 
         if call_args is None:
-            call_args = f"['{self.node_name}'].run_and_save()"
+            call_args = f".load(name='{self.node_name}').run_and_save()"
 
         script = prepare_dvc_script(
             node_name=self.node_name,
@@ -590,6 +590,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         utils.run_dvc_cmd(script)
 
         run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+        utils.file_io.update_desc(
+            file=utils.Files.dvc, node_name=self.node_name, desc=self.__doc__
+        )
 
         if not no_exec:
             utils.run_dvc_cmd(["dvc", "repro", self.node_name])

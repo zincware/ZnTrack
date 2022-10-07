@@ -304,3 +304,31 @@ def test_matmul_not_supported():
         RunTestNode() @ "outs"
 
     assert mock.call_count == 3
+
+
+def test_write_graph():
+    example = ExampleDVCOutsNode()
+
+    with patch.object(ExampleDVCOutsNode, "save") as save_mock, patch.object(
+        ExampleDVCOutsNode, "_handle_nodes_as_methods"
+    ) as handle_znnodes_mock:
+        # Patch the methods that write to disk
+        script = example.write_graph(dry_run=True)
+
+    assert save_mock.called
+    assert handle_znnodes_mock.called
+
+    assert script == [
+        "dvc",
+        "stage",
+        "add",
+        "-n",
+        "ExampleDVCOutsNode",
+        "--force",
+        "--outs",
+        "example.dat",
+        (
+            'python3 -c "from test_core_base import ExampleDVCOutsNode; '
+            "ExampleDVCOutsNode.load(name='ExampleDVCOutsNode').run_and_save()\" "
+        ),
+    ]

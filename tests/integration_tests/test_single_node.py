@@ -4,6 +4,7 @@ import pathlib
 import subprocess
 
 import pytest
+import yaml
 
 from zntrack import dvc, zn
 from zntrack.core.base import Node
@@ -11,6 +12,8 @@ from zntrack.utils.exceptions import DVCProcessError
 
 
 class ExampleNode01(Node):
+    """Node Description Example"""
+
     inputs = zn.params()
     outputs = zn.outs()
 
@@ -72,6 +75,9 @@ def test_run(proj_path):
 
     load_test_node_1 = ExampleNode01.load()
     assert load_test_node_1.outputs == "Lorem Ipsum"
+
+    dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    assert dvc_file["stages"]["ExampleNode01"]["desc"] == "Node Description Example"
 
 
 def test_run_no_exec(proj_path):
