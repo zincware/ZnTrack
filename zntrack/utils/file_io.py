@@ -131,3 +131,11 @@ def update_config_file(
         file_content[node_name] = node_content
     write_file(file, value=file_content)
     log.debug(f"Update <{file}> with: {file_content}")
+
+
+def update_desc(file: pathlib.Path, node_name: str, desc: str):
+    """Update the 'dvc.yaml' with a description"""
+    if desc is not None:
+        file_content = read_file(file)
+        file_content["stages"][node_name]["desc"] = desc
+        write_file(file, value=file_content)
