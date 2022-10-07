@@ -222,3 +222,24 @@ def test_update_config_error():
         file_io.update_config_file(
             file="file.txt", node_name=None, value_name=None, value={}
         )
+
+
+@pytest.mark.parametrize("desc", ("Lorem Ipsum", None, ""))
+def test_update_desc(desc):
+    dvc_dict = {"stages": {"MyNode": {"cmd": "run"}}}
+
+    open_mock = mock_open(read_data=yaml.safe_dump(dvc_dict))
+
+    def pathlib_open(*args, **kwargs):
+        return open_mock(*args, **kwargs)
+
+    file = pathlib.Path("dvc.yaml")
+
+    with patch.object(pathlib.Path, "open", pathlib_open):
+        file_io.update_desc(file, node_name="MyNode", desc=desc)
+
+    if desc is not None:
+        dvc_dict["stages"]["MyNode"]["desc"] = desc
+        open_mock().write.assert_called_once_with(yaml.safe_dump(dvc_dict, indent=4))
+    else:
+        assert not open_mock().called

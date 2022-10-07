@@ -591,5 +591,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
 
+        utils.file_io.update_desc(
+            file=utils.Files.dvc, node_name=self.node_name, desc=self.__doc__
+        )
+
         if not no_exec:
             utils.run_dvc_cmd(["dvc", "repro", self.node_name])
