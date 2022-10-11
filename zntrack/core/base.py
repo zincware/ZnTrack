@@ -437,7 +437,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                 continue
             node.write_graph(
                 run=True,
-                call_args=f"['{node.node_name}'].save(hash_only=True)",
+                call_args=f".load(name='{node.node_name}').save(hash_only=True)",
             )
 
     @property
