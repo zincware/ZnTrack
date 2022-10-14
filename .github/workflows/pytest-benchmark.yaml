@@ -22,8 +22,8 @@ jobs:
           installer-parallel: true
       - name: Install package
         run: |
+          poetry add pytest-benchmark --no-interaction
           poetry install --no-interaction
-          poetry add pytest-benchmark
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
