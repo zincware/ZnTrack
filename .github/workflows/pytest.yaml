@@ -47,6 +47,7 @@ jobs:
           poetry run coverage run -m pytest --benchmark-autosave
           poetry run coverage xml
           poetry run coverage lcov
+          poetry run py.test-benchmark compare --csv=export.csv
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
