@@ -1,0 +1,42 @@
+name: pytest-benchmark
+
+on:
+  push:
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: iterative/setup-cml@v1
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Install package
+        run: |
+          poetry install --no-interaction
+      - name: Setup git user
+        run: |
+          git config --global user.name "John Doe"
+          git config --global user.email johndoe@example.com
+          git config --global init.defaultBranch "main"
+      - name: Pytest
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          source .venv/bin/activate
+          pytest tests/benchmark --benchmark-autosave .
+          py.test-benchmark compare --csv=export.csv
+          
+          echo "# Report" > report.md
+          python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown)" >> report.md
+          
+          cml comment create --publish report.md
