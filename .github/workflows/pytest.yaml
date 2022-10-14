@@ -58,6 +58,8 @@ jobs:
           flags: fulltest
           verbose: true
       - name: CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "# Report for Python ${{ matrix.python-version }}" > report.md
           poetry run python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown())" >> report.md
