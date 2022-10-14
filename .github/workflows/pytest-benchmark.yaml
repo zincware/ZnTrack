@@ -38,6 +38,6 @@ jobs:
           py.test-benchmark compare --csv=export.csv
           
           echo "# Report" > report.md
-          python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown)" >> report.md
+          python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown())" >> report.md
           
           cml comment create --publish report.md
