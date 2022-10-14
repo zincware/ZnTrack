@@ -314,8 +314,8 @@ def test_matmul_not_supported():
 def test_write_graph():
     example = ExampleDVCOutsNode()
 
-    with patch.object(ExampleDVCOutsNode, "save") as save_mock, patch.object(
-        ExampleDVCOutsNode, "_handle_nodes_as_methods"
+    with patch.object(ExampleDVCOutsNode, "save") as save_mock, patch(
+        "zntrack.core.base._handle_nodes_as_methods",
     ) as handle_znnodes_mock:
         # Patch the methods that write to disk
         script = example.write_graph(dry_run=True)
