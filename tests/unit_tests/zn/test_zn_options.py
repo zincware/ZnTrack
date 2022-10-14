@@ -128,5 +128,4 @@ def test_getdeps():
         cls="ExampleNode",
         name="node01",
         attribute="my_attr",
-        affected_files=["a", "b"],
     )
