@@ -34,7 +34,7 @@ jobs:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           source .venv/bin/activate
-          pytest tests/benchmark --benchmark-autosave .
+          pytest tests/benchmark --benchmark-autosave
           py.test-benchmark compare --csv=export.csv
           
           echo "# Report" > report.md
