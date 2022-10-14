@@ -73,6 +73,28 @@ def handle_deps(value) -> typing.List[str]:
     return deps_files
 
 
+def _handle_nodes_as_methods(nodes: dict):
+    """Write the graph for all zn.Nodes ZnTrackOptions
+
+    zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
+    They are shown in the dvc dag and have their own parameter section.
+    The name is <nodename>-<attributename> for these Nodes. They only
+    have a single hash output to be available for DVC dependencies.
+
+    Attributes
+    ----------
+    nodes: dict
+        A dictionary of {option_name: zntrack.Node}
+    """
+    for attribute, node in nodes.items():
+        if node is None:
+            continue
+        node.write_graph(
+            run=True,
+            call_args=f".load(name='{node.node_name}').save(hash_only=True)",
+        )
+
+
 BaseNodeTypeT = typing.TypeVar("BaseNodeTypeT", bound="Node")
 
 
@@ -424,22 +446,6 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         """
         jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
 
-    def _handle_nodes_as_methods(self):
-        """Write the graph for all zn.Nodes ZnTrackOptions
-
-        zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
-        They are shown in the dvc dag and have their own parameter section.
-        The name is <nodename>-<attributename> for these Nodes. They only
-        have a single hash output to be available for DVC dependencies.
-        """
-        for attribute, node in self.zntrack.collect(zn_nodes).items():
-            if node is None:
-                continue
-            node.write_graph(
-                run=True,
-                call_args=f".load(name='{node.node_name}').save(hash_only=True)",
-            )
-
     @property
     def zntrack(self) -> ZnTrackInfo:
         """Get a ZnTrackInfo object"""
@@ -504,7 +510,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         """
 
-        self._handle_nodes_as_methods()
+        _handle_nodes_as_methods(self.zntrack.collect(zn_nodes))
 
         if silent:
             log.warning(

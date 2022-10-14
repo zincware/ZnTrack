@@ -6,7 +6,12 @@ import pytest
 import yaml
 
 from zntrack import dvc, utils, zn
-from zntrack.core.base import LoadViaGetItem, Node, update_dependency_options
+from zntrack.core.base import (
+    LoadViaGetItem,
+    Node,
+    _handle_nodes_as_methods,
+    update_dependency_options,
+)
 
 
 class ExampleDVCOutsNode(Node):
@@ -332,3 +337,18 @@ def test_write_graph():
             "ExampleDVCOutsNode.load(name='ExampleDVCOutsNode').run_and_save()\" "
         ),
     ]
+
+
+def test__handle_nodes_as_methods():
+    example = ExampleDVCOutsNode()
+
+    with patch.object(ExampleDVCOutsNode, "write_graph") as write_graph_mock:
+        _handle_nodes_as_methods({"example": example})
+
+    write_graph_mock.assert_called_with(
+        run=True, call_args=f".load(name='{example.node_name}').save(hash_only=True)"
+    )
+
+    with patch.object(ExampleDVCOutsNode, "write_graph") as write_graph_mock:
+        _handle_nodes_as_methods({"example": None})
+    assert not write_graph_mock.called
