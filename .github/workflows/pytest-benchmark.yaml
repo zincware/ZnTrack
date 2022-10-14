@@ -30,10 +30,10 @@ jobs:
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pytest tests/benchmark --benchmark-autosave
-          py.test-benchmark compare --csv=export.csv
+          poetry run pytest tests/benchmark --benchmark-autosave
+          poetry run py.test-benchmark compare --csv=export.csv
           
           echo "# Report" > report.md
-          python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown())" >> report.md
+          poetry run python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown())" >> report.md
           
           cml comment create --publish report.md
