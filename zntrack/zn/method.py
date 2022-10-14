@@ -36,8 +36,8 @@ class Method(SplitZnTrackOption):
         ),
         version="v0.4.3",
     )
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def get_filename(self, instance):
         """Does not have a single file but params.yaml and zntrack.json"""
