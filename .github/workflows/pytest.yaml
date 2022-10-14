@@ -58,7 +58,7 @@ jobs:
           verbose: true
       - name: CML Report
         run: |
-          echo "# Report" > report.md
+          echo "# Report for Python ${{ matrix.python-version }}" > report.md
           poetry run python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown())" >> report.md
           cml comment create --publish report.md
 
