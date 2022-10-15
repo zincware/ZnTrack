@@ -20,8 +20,8 @@ class NodeAttribute:
     name: str
     attribute: str
 
-    # Not dataclass related attributes
-    _node: Node = None
+    # Not dataclass related attributes. See https://peps.python.org/pep-0557/#id7
+    _node = None
 
     @property
     def affected_files(self) -> Set[pathlib.Path]:
