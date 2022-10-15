@@ -10,15 +10,26 @@ class MyNode(Node):
 
 
 @pytest.mark.parametrize(
-    ("node", "true_val"),
+    ("node", "allow_subclass", "true_val"),
     [
-        (MyNode(), True),
-        (MyNode, True),
-        ([MyNode, MyNode], True),
-        ([MyNode(), MyNode()], True),
-        ("Node", False),
-        (["Node", MyNode()], True),
+        (MyNode(), True, True),
+        (MyNode, True, True),
+        (MyNode, False, False),
+        ([MyNode, MyNode], True, True),
+        ([MyNode(), MyNode()], True, True),
+        ([MyNode(), MyNode], False, False),
+        ("Node", True, False),
+        (["Node", MyNode()], True, False),
+        (
+            [
+                MyNode(),
+                "Node",
+            ],
+            True,
+            False,
+        ),
+        ([MyNode(), "Node", MyNode], False, False),
     ],
 )
-def test_isnode(node, true_val):
-    assert helpers.isnode(node) == true_val
+def test_isnode(node, allow_subclass, true_val):
+    assert helpers.isnode(node, subclass=allow_subclass) == true_val
