@@ -40,13 +40,15 @@ class Nodes(ZnTrackOption):
                 " instead."
             )
 
-        if not helpers.isnode(value):
+        if not helpers.isnode(value, subclass=False):
+            # Only allow instances
             raise ValueError(
-                f"zn.Nodes() only supports type <Node>. Found {type(value)} instead."
+                "zn.Nodes() only supports instances of 'zntrack.Node'. Found"
+                f" {type(value)} instead."
             )
         if len(value.zntrack.collect(ZnHash)) < 1:
             raise ValueError(
-                "To use zn.Nodes the passed Node must have a zn.Hash "
+                "To use zn.Nodes the passed Node must have a 'zn.Hash' "
                 "attribute. This is required for generating an output even "
                 "though the run method is not in use."
             )

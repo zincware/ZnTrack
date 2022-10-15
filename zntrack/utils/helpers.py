@@ -1,15 +1,24 @@
-def isnode(node) -> bool:
-    """Check if node contains a Node instance or class"""
+def isnode(node, subclass: bool = True) -> bool:
+    """Check if node contains a Node instance or class
+
+    Attributes
+    ----------
+    subclass: bool, default=True
+        Allow instances and class definitions. If False, only allow instances
+    """
     from zntrack.core.base import Node
 
     if isinstance(node, (list, tuple)):
         for x in node:
-            if isnode(x):
-                return True
-        return False
+            if not isnode(x, subclass=subclass):
+                return False
+        return True
     else:
         try:
-            if isinstance(node, Node) or issubclass(node, Node):
+            if subclass:
+                if isinstance(node, Node) or issubclass(node, Node):
+                    return True
+            elif isinstance(node, Node):
                 return True
         except TypeError:
             pass
