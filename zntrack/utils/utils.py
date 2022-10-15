@@ -182,7 +182,7 @@ def run_dvc_cmd(script):
 
     Parameters
     ----------
-    script: list[str]
+    script: tuple[str]|list[str]
         A list of strings to pass the subprocess command
 
     """

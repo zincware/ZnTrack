@@ -49,7 +49,7 @@ class DVCInterface:
             # Only load it once! This speeds things up. If experiments change
             # during the lifetime of this instance they won't be
             # registered except _reset is called!
-            cmd = ["dvc", "exp", "show", "--show-json", "-A"]
+            cmd = ("dvc", "exp", "show", "--show-json", "-A")
             log.debug(f"DVC command: {cmd}")
             out = subprocess.run(cmd, capture_output=True, check=True)
             decodec_out = out.stdout.decode("utf-8")
@@ -122,7 +122,7 @@ class DVCInterface:
                 file = pathlib.Path(file)
                 out_path = path / experiment.name
                 out_path.mkdir(parents=True, exist_ok=True)
-                cmd = [
+                cmd = (
                     "dvc",
                     "get",
                     ".",
@@ -131,6 +131,6 @@ class DVCInterface:
                     experiment.hash,
                     "--out",
                     out_path.as_posix(),
-                ]
+                )
                 log.debug(f"DVC command: {cmd}")
                 utils.run_dvc_cmd(cmd)

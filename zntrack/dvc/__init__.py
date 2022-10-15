@@ -140,7 +140,7 @@ class plots_no_cache(PlotsModifyOption):  # pylint: disable=invalid-name
     file = utils.Files.zntrack
 
 
-options = [
+options = (
     params,
     deps,
     outs,
@@ -151,4 +151,4 @@ options = [
     metrics_no_cache,
     plots,
     plots_no_cache,
-]
+)
