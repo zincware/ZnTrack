@@ -71,7 +71,6 @@ def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
         cls=node.__class__.__name__,
         name=node.node_name,
         attribute=attribute,
-        # affected_files=list(node.affected_files),
     )
 
 
