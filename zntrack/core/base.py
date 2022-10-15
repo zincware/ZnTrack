@@ -1,6 +1,8 @@
 """ZnTrack Node class module"""
+
 from __future__ import annotations
 
+import contextlib
 import json
 import logging
 import pathlib
@@ -59,16 +61,13 @@ def handle_deps(value) -> typing.List[str]:
     if isinstance(value, (list, tuple)):
         for lst_val in value:
             deps_files += handle_deps(lst_val)
-    else:
-        if isinstance(value, (Node, NodeAttribute)):
-            for file in value.affected_files:
-                deps_files.append(pathlib.Path(file).as_posix())
-        elif isinstance(value, (str, pathlib.Path)):
-            deps_files.append(pathlib.Path(value).as_posix())
-        elif value is None:
-            pass
-        else:
-            raise ValueError(f"Type {type(value)} ({value}) is not supported!")
+    elif isinstance(value, (Node, NodeAttribute)):
+        for file in value.affected_files:
+            deps_files.append(pathlib.Path(file).as_posix())
+    elif isinstance(value, (str, pathlib.Path)):
+        deps_files.append(pathlib.Path(value).as_posix())
+    elif value is not None:
+        raise ValueError(f"Type {type(value)} ({value}) is not supported!")
 
     return deps_files
 
@@ -86,13 +85,12 @@ def _handle_nodes_as_methods(nodes: dict):
     nodes: dict
         A dictionary of {option_name: zntrack.Node}
     """
-    for attribute, node in nodes.items():
-        if node is None:
-            continue
-        node.write_graph(
-            run=True,
-            call_args=f".load(name='{node.node_name}').save(hash_only=True)",
-        )
+    for node in nodes.values():
+        if node is not None:
+            node.write_graph(
+                run=True,
+                call_args=f".load(name='{node.node_name}').save(hash_only=True)",
+            )
 
 
 BaseNodeTypeT = typing.TypeVar("BaseNodeTypeT", bound="Node")
@@ -119,9 +117,8 @@ class LoadViaGetItem(type):
             raise ValueError(
                 f"Can only load {cls} with type (str, dict). Found {type(item)}"
             )
-        if isinstance(item, dict):
-            return cls.load(**item)
-        return cls.load(name=item)
+
+        return cls.load(**item) if isinstance(item, dict) else cls.load(name=item)
 
     def __matmul__(cls, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other)
@@ -151,7 +148,7 @@ class NodeBase(zninit.ZnInit):
     is_loaded: bool
         if the class is loaded this can be used to only run certain code, e.g. in the init
     node_name: str
-        first priority is by passing it through kwargs
+        first priority is bypassing it through kwargs
         second is having the class attribute set in the class definition
         last if both above are None it will be set to __class__.__name__
     is_attribute: bool, default = False
@@ -168,7 +165,7 @@ class NodeBase(zninit.ZnInit):
     def __init__(self, **kwargs):
         self.is_loaded = kwargs.pop("is_loaded", False)
         name = kwargs.pop("name", None)
-        if len(kwargs) > 0:
+        if kwargs:
             raise TypeError(f"'{kwargs}' are an invalid keyword argument")
         if name is not None:
             # overwrite node_name attribute
@@ -307,12 +304,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             if not lazy:
                 # trigger loading the data into memory
                 value = getattr(self, option.name)
-                try:
+                with contextlib.suppress(AttributeError):
                     value._update_options(lazy=False)
-                except AttributeError:
-                    # if lazy=False trigger update_options iteratively on
-                    # all dependency Nodes
-                    pass
         self.is_loaded = True
 
     @classmethod
@@ -351,15 +344,11 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         try:
             instance = cls(name=name, is_loaded=True)
         except TypeError as type_error:
-            if getattr(cls.__init__, "uses_auto_init", False):
+            if not getattr(cls.__init__, "uses_auto_init", False):
+                # when not using the automatic init all arguments must have a
+                # default value and the super call is required. It would still be
                 # using new + init from Node class to circumvent required
                 # arguments in the automatic init
-                instance = object.__new__(cls)
-                Node.__init__(instance, name=name, is_loaded=True)
-            else:
-                # when not using the automatic init all arguments must have a
-                # default value and the super call is required. It would still
-                # be
                 raise TypeError(
                     f"Unable to create a new instance of {cls}. Check that all arguments"
                     " default to None. It must be possible to instantiate the class via"
@@ -368,6 +357,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                     "See the ZnTrack documentation for more information."
                 ) from type_error
 
+            instance = object.__new__(cls)
+            Node.__init__(instance, name=name, is_loaded=True)
         assert instance.node_name is not None, (
             "The name of the Node is not set. Probably missing"
             " 'super().__init__(**kwargs)' inside the custom '__init__'."
@@ -480,7 +471,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         """Write the DVC file using run.
 
         If it already exists it'll tell you that the stage is already persistent and
-        has been run before. Otherwise it'll run the stage for you.
+        has been run before. Otherwise, it'll run the stage for you.
 
         Parameters
         ----------

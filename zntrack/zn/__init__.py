@@ -5,6 +5,8 @@ defining and writing to a file explicitly. For more information on the individua
 see https://dvc.org/doc/command-reference/run#options
 
 """
+
+import contextlib
 import logging
 
 from zntrack import utils
@@ -18,18 +20,10 @@ log = logging.getLogger(__name__)
 
 __all__ = [Method.__name__, Hash.__name__, Nodes.__name__]
 
-try:
+with contextlib.suppress(ImportError):
     from .plots import plots
 
     __all__ += [plots.__name__]
-except ImportError:
-    pass
-
-
-# module class definitions to be used via zn.<option>
-# detailed explanations on https://dvc.org/doc/command-reference/run#options
-# with the exception that these will be loaded to memory when.
-# for direct file references use dvc.<option> instead.
 
 
 class outs(ZnTrackOption):  # pylint: disable=invalid-name

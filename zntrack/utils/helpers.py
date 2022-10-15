@@ -1,3 +1,6 @@
+import contextlib
+
+
 def isnode(node, subclass: bool = True) -> bool:
     """Check if node contains a Node instance or class
 
@@ -9,17 +12,11 @@ def isnode(node, subclass: bool = True) -> bool:
     from zntrack.core.base import Node
 
     if isinstance(node, (list, tuple)):
-        for x in node:
-            if not isnode(x, subclass=subclass):
-                return False
-        return True
-    else:
-        try:
-            if subclass:
-                if isinstance(node, Node) or issubclass(node, Node):
-                    return True
-            elif isinstance(node, Node):
+        return all(isnode(x, subclass=subclass) for x in node)
+    with contextlib.suppress(TypeError):
+        if subclass:
+            if isinstance(node, Node) or issubclass(node, Node):
                 return True
-        except TypeError:
-            pass
+        elif isinstance(node, Node):
+            return True
     return False
