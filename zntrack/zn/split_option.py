@@ -1,8 +1,10 @@
 """
-Description: The SplitZnTrackOption is used to for serializing objects and stroring the
+Description: The SplitZnTrackOption is used to for serializing objects and storing the
 parameters / attributes in one file (params.yaml) and the rest, which is not considered
 a parameter in another (zntrack.json)
 """
+
+import contextlib
 import logging
 import typing
 
@@ -32,13 +34,12 @@ def split_value(input_val) -> (typing.Union[dict, list], typing.Union[dict, list
     if isinstance(input_val, (list, tuple)):
         data = [split_value(x) for x in input_val]
         params_data, _ = zip(*data)
+    elif input_val["_type"] in ["zn.method"]:
+        params_data = input_val["value"].pop("kwargs")
+        params_data["_cls"] = input_val["value"].pop("cls")
     else:
-        if input_val["_type"] in ["zn.method"]:
-            params_data = input_val["value"].pop("kwargs")
-            params_data["_cls"] = input_val["value"].pop("cls")
-        else:
-            # things that are not zn.method and do not have kwargs, such as pathlib, ...
-            params_data = input_val.pop("value")
+        # things that are not zn.method and do not have kwargs, such as pathlib, ...
+        params_data = input_val.pop("value")
     return params_data, input_val
 
 
@@ -59,11 +60,8 @@ def combine_values(cls_dict: dict, params_val):
     """
     result = cls_dict
     if result["_type"] in ["zn.method"]:
-        try:
+        with contextlib.suppress(KeyError):
             result["value"]["cls"] = params_val.pop("_cls")
-        except KeyError:
-            # using old file where the cls is stored in zntrack.json and not params.yaml
-            pass
         result["value"]["kwargs"] = params_val
     else:
         # things that are not zn.method and do not have kwargs, such as pathlib, ...

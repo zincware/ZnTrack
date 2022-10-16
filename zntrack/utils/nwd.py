@@ -34,9 +34,9 @@ def replace_nwd_placeholder(
     -------
     path: obj
         Object of the same type as the input (tuples -> list conversion) with the
-        placeholder replaced by node_working_directory. Additionally a boolean value
+        placeholder replaced by node_working_directory. Additionally, a boolean value
     replaced: bool
-        Whether the placeholder was found and repalced or not
+        Whether the placeholder was found and replaced or not
 
 
     """

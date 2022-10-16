@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import dataclasses
+import importlib
 import pathlib
-from typing import TYPE_CHECKING, List, Union
+from typing import TYPE_CHECKING, List, Set, Union
 
 import znjson
 
@@ -18,7 +19,17 @@ class NodeAttribute:
     cls: str
     name: str
     attribute: str
-    affected_files: List[pathlib.Path]
+
+    # Not dataclass related attributes. See https://peps.python.org/pep-0557/#id7
+    _node = None
+
+    @property
+    def affected_files(self) -> Set[pathlib.Path]:
+        if self._node is None:
+            module = importlib.import_module(self.module)
+            cls = getattr(module, self.cls)
+            self._node = cls.load(self.name)
+        return self._node.affected_files
 
 
 class RawNodeAttributeConverter(znjson.ConverterBase):
@@ -60,7 +71,6 @@ def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
         cls=node.__class__.__name__,
         name=node.node_name,
         attribute=attribute,
-        affected_files=list(node.affected_files),
     )
 
 

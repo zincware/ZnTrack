@@ -1,4 +1,6 @@
 """ZnTrack utils"""
+
+import contextlib
 import json
 import logging
 import os
@@ -88,13 +90,12 @@ def module_handler(obj) -> str:
     obj:
         Any object that implements __module__
     """
-    if obj.__module__ == "__main__":
-        if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
-            # special case for e.g. testing
-            return obj.__module__
-        return pathlib.Path(sys.argv[0]).stem
-    else:
+    if obj.__module__ != "__main__":
         return obj.__module__
+    if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
+        # special case for e.g. testing
+        return obj.__module__
+    return pathlib.Path(sys.argv[0]).stem
 
 
 def check_type(
@@ -181,7 +182,7 @@ def run_dvc_cmd(script):
 
     Parameters
     ----------
-    script: list[str]
+    script: tuple[str]|list[str]
         A list of strings to pass the subprocess command
 
     """
@@ -222,12 +223,9 @@ def load_node_dependency(value, log_warning=False):
 
     if isinstance(value, (list, tuple)):
         value = [load_node_dependency(x, log_warning) for x in value]
-    try:
+    with contextlib.suppress(TypeError):
         if issubclass(value, Node):
             value = value.load()
-    except TypeError:
-        # value is not a class
-        pass
     if isinstance(value, Node) and log_warning:
         log.warning(
             f"DeprecationWarning: Found Node instance ({value}) in dvc.deps(), please use"

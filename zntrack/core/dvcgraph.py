@@ -105,8 +105,8 @@ def filter_ZnTrackOption(
         {descriptor.dvc_option: {attr_name: attr_value}}
 
     """
-    if not isinstance(zn_type, list):
-        zn_type = [zn_type]
+    if not isinstance(zn_type, (list, tuple)):
+        zn_type = (zn_type,)
     data = [x for x in data if x.zn_type in zn_type]
     if return_with_type:
         types_dict = {x.dvc_option: {} for x in data}

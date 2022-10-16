@@ -39,7 +39,6 @@ __all__ = [
     "check_type",
     "get_python_interpreter",
     "run_dvc_cmd",
-    "get_auto_init",
     "FILE_DVC_TRACKED",
     "VALUE_DVC_TRACKED",
     "DVCOptions",

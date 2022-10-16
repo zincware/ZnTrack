@@ -76,7 +76,7 @@ class SingleNodeMethodList(Node):
         self.data_classes = data_classes
 
     def run(self):
-        self.result = sum([x.param1 + x.param2 for x in self.data_classes])
+        self.result = sum(x.param1 + x.param2 for x in self.data_classes)
 
 
 def test_methods_list(proj_path):

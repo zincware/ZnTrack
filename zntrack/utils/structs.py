@@ -29,10 +29,15 @@ class ZnTypes(enum.Enum):
     HASH = enum.auto()
 
 
-FILE_DVC_TRACKED = [ZnTypes.DVC]
+FILE_DVC_TRACKED = (ZnTypes.DVC,)
 # if the getattr(instance, self.name) is an affected file,
 # e.g. the dvc.<outs> is a file / list of files
-VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA, ZnTypes.PLOTS, ZnTypes.HASH]
+VALUE_DVC_TRACKED = (
+    ZnTypes.RESULTS,
+    ZnTypes.METADATA,
+    ZnTypes.PLOTS,
+    ZnTypes.HASH,
+)
 
 
 # if the internal file,

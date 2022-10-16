@@ -53,19 +53,13 @@ def test_experiments(loaded_dvc_interface):
 
 
 def test_exp_list(loaded_dvc_interface):
-    assert (
-        loaded_dvc_interface.exp_list[0].name == "master"
-        or loaded_dvc_interface.exp_list[0].name == "main"
-    )
+    assert loaded_dvc_interface.exp_list[0].name in ["master", "main"]
     assert len(loaded_dvc_interface.exp_list) == 1
 
 
 def test__reset(loaded_dvc_interface):
     loaded_dvc_interface._reset()
-    assert (
-        loaded_dvc_interface.exp_list[0].name == "master"
-        or loaded_dvc_interface.exp_list[0].name == "main"
-    )
+    assert loaded_dvc_interface.exp_list[0].name in ["master", "main"]
 
 
 def test_load_files_into_directory(multi_experiment_path):
