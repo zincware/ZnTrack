@@ -23,7 +23,7 @@ from zntrack.utils.utils import (
     update_nb_name,
 )
 
-__all__ = (
+__all__ = [
     "config",
     "cwd_temp_dir",
     "decode_dict",
@@ -45,4 +45,4 @@ __all__ = (
     "LazyOption",
     "helpers",
     "nwd",
-)
+]

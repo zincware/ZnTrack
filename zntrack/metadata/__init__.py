@@ -2,4 +2,4 @@
 from .base import MetaData
 from .decorators import TimeIt
 
-__all__ = ("MetaData", "TimeIt")
+__all__ = ["MetaData", "TimeIt"]

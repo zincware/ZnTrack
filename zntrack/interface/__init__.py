@@ -2,4 +2,4 @@
 
 from .base import DVCInterface
 
-__all__ = ("DVCInterface",)
+__all__ = ["DVCInterface"]

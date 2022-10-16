@@ -25,7 +25,7 @@ from zntrack.zn.dependencies import getdeps
 # register converters
 znjson.config.register([ZnTrackTypeConverter, MethodConverter, NodeAttributeConverter])
 
-__all__ = (
+__all__ = [
     Node.__name__,
     ZnTrackProject.__name__,
     DVCInterface.__name__,
@@ -35,7 +35,7 @@ __all__ = (
     "getdeps",
     "utils",
     "exceptions",
-)
+]
 
 __version__ = importlib.metadata.version("zntrack")
 

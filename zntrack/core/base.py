@@ -148,7 +148,7 @@ class NodeBase(zninit.ZnInit):
     is_loaded: bool
         if the class is loaded this can be used to only run certain code, e.g. in the init
     node_name: str
-        first priority is bypassing it through kwargs
+        first priority is if requested via kwargs
         second is having the class attribute set in the class definition
         last if both above are None it will be set to __class__.__name__
     is_attribute: bool, default = False
