@@ -11,12 +11,12 @@ def func_1(cfg: NodeConfig):
 
 @nodify(outs=pathlib.Path("test2.txt"), deps=pathlib.Path("test.txt"))
 def func_2(cfg: NodeConfig):
-    cfg.outs.write_text(cfg.deps.read_text() + " 2")
+    cfg.outs.write_text(f"{cfg.deps.read_text()} 2")
 
 
 @nodify(outs=pathlib.Path("test3.txt"), deps=pathlib.Path("test.txt"))
 def func_3(cfg: NodeConfig):
-    cfg.outs.write_text(cfg.deps.read_text() + " 3")
+    cfg.outs.write_text(f"{cfg.deps.read_text()} 3")
 
 
 def test_example_func(proj_path):

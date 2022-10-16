@@ -23,7 +23,7 @@ def arg(request):
 
 @pytest.fixture
 def fix_list() -> list:
-    return [x for x in range(10)]
+    return list(range(10))
 
 
 @pytest.fixture

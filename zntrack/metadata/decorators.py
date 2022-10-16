@@ -1,3 +1,4 @@
+import contextlib
 import dataclasses
 import statistics
 from time import time
@@ -15,11 +16,9 @@ class AggregateData:
 
     def update(self):
         """Recompute mean and standard deviation"""
-        try:
+        with contextlib.suppress(statistics.StatisticsError):
             self.mean = statistics.mean(self.values)
             self.std = statistics.stdev(self.values)
-        except statistics.StatisticsError:
-            pass
 
 
 class TimeIt(MetaData):
