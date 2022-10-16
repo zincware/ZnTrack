@@ -28,7 +28,7 @@ class DepsCollector(Node):
     outs = zn.outs()
 
     def run(self):
-        self.outs = sum([x.outs for x in self.deps])
+        self.outs = sum(x.outs for x in self.deps)
 
 
 def test_multi_deps(proj_path):

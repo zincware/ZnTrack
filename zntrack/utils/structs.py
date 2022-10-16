@@ -30,10 +30,17 @@ class ZnTypes(enum.Enum):
     META = enum.auto()
 
 
-FILE_DVC_TRACKED = [ZnTypes.DVC]
+FILE_DVC_TRACKED = (ZnTypes.DVC,)
 # if the getattr(instance, self.name) is an affected file,
 # e.g. the dvc.<outs> is a file / list of files
-VALUE_DVC_TRACKED = [ZnTypes.RESULTS, ZnTypes.METADATA, ZnTypes.PLOTS, ZnTypes.HASH]
+
+VALUE_DVC_TRACKED = (
+    ZnTypes.RESULTS,
+    ZnTypes.METADATA,
+    ZnTypes.PLOTS,
+    ZnTypes.HASH,
+)
+
 # The data is not tracked / used via any DVC command
 GIT_TRACKED = [ZnTypes.META]
 

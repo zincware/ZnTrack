@@ -11,7 +11,7 @@ class Method(SplitZnTrackOption):
 
     This descriptor allows to pass a class instance that is not a ZnTrack Node as a
     method that can be used later. It requires that all passed class attributes have
-    the same name in the __init__ and via getattr an that they are serializable.
+    the same name in the __init__ and via getattr and that they are serializable.
 
     Example
     --------
@@ -27,6 +27,17 @@ class Method(SplitZnTrackOption):
 
     dvc_option = utils.DVCOptions.PARAMS.value
     zn_type = utils.ZnTypes.PARAMS
+
+    @utils.deprecated(
+        reason=(
+            "'zn.Method' should be replaced by 'zn.Nodes'. Upcoming issues with"
+            " 'zn.Method' will probably not be fixed and it will be removed in future"
+            " versions. Please be aware that 'zn.Nodes' is NOT a drop-in replacement."
+        ),
+        version="v0.4.3",
+    )
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def get_filename(self, instance):
         """Does not have a single file but params.yaml and zntrack.json"""

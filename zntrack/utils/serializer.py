@@ -4,7 +4,7 @@ Notes
 -----
     These functions can be used for e.g., small numpy arrays.
     The content will be converted to json serializable data.
-    Converting e.g., large numpy arrays can cause major slow downs and is not recommended!
+    Converting e.g., large numpy arrays can cause major slow-downs and is not recommended!
     Please consider using DVC.outs() and save them in a binary file format.
 
 """

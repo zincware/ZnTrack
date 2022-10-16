@@ -72,4 +72,4 @@ def test_SingleNodeInNodeDirMulti(proj_path):
 
     result = SingleNodeInNodeDir["TestNode"]
     assert result.path == [pathlib.Path("nodes", "TestNode", "test.json"), "file.txt"]
-    assert all([pathlib.Path(x).exists() for x in result.path])
+    assert all(pathlib.Path(x).exists() for x in result.path)

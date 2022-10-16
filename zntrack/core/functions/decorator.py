@@ -50,18 +50,17 @@ class NodeConfig:
                 # params does not have to be a string
                 if not isinstance(option_value, dict) and option_value is not None:
                     raise ValueError("Parameter must be dict or dot4dict.dotdict.")
-            else:
-                if not utils.check_type(
-                    option_value,
-                    (str, pathlib.Path),
-                    allow_iterable=True,
-                    allow_none=True,
-                    allow_dict=True,
-                ):
-                    raise ValueError(
-                        f"{option_value} is not a supported type. "
-                        "Please use single values or lists of <str> and <pathlib.Path>."
-                    )
+            elif not utils.check_type(
+                option_value,
+                (str, pathlib.Path),
+                allow_iterable=True,
+                allow_none=True,
+                allow_dict=True,
+            ):
+                raise ValueError(
+                    f"{option_value} is not a supported type. "
+                    "Please use single values or lists of <str> and <pathlib.Path>."
+                )
 
     def convert_fields_to_dotdict(self):
         """Update all fields to dotdict, if they are of type dict"""
@@ -86,9 +85,8 @@ class NodeConfig:
 
         """
         script = []
-        if self.params is not None:
-            if len(self.params) > 0:
-                script += ["--params", f"{utils.Files.params}:{node_name}"]
+        if self.params is not None and len(self.params) > 0:
+            script += ["--params", f"{utils.Files.params}:{node_name}"]
         for datacls_field in dataclasses.fields(self):
             if datacls_field.name == "params":
                 continue
@@ -278,36 +276,35 @@ def nodify(
             if exec_func:
                 return execute_function_call(func)
 
-            else:
-                cfg = copy.deepcopy(cfg_)
-                save_node_config_to_files(cfg=cfg, node_name=func.__name__)
-                dvc_run_option = DVCRunOptions(
-                    no_commit=no_commit,
-                    external=external,
-                    always_changed=always_changed,
-                    no_run_cache=no_run_cache,
-                    force=force,
-                )
+            cfg = copy.deepcopy(cfg_)
+            save_node_config_to_files(cfg=cfg, node_name=func.__name__)
+            dvc_run_option = DVCRunOptions(
+                no_commit=no_commit,
+                external=external,
+                always_changed=always_changed,
+                no_run_cache=no_run_cache,
+                force=force,
+            )
 
-                script = prepare_dvc_script(
-                    node_name=func.__name__,
-                    dvc_run_option=dvc_run_option,
-                    custom_args=cfg.write_dvc_command(func.__name__),
-                    nb_name=nb_name,
-                    module=module,
-                    func_or_cls=func.__name__,
-                    call_args="(exec_func=True)",
-                )
+            script = prepare_dvc_script(
+                node_name=func.__name__,
+                dvc_run_option=dvc_run_option,
+                custom_args=cfg.write_dvc_command(func.__name__),
+                nb_name=nb_name,
+                module=module,
+                func_or_cls=func.__name__,
+                call_args="(exec_func=True)",
+            )
 
-                if dry_run:
-                    return script
-                utils.run_dvc_cmd(script)
+            if dry_run:
+                return script
+            utils.run_dvc_cmd(script)
 
-                if not no_exec:
-                    utils.run_dvc_cmd(["dvc", "repro", func.__name__])
+            if not no_exec:
+                utils.run_dvc_cmd(["dvc", "repro", func.__name__])
 
-                cfg.convert_fields_to_dotdict()
-                return cfg
+            cfg.convert_fields_to_dotdict()
+            return cfg
 
         return wrapper
 
