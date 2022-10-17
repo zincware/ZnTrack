@@ -63,7 +63,7 @@ multi_line_output = 3
 relative_files = true
 branch = true
 # omit the tests themselves
-omit = ["*/tests/*", "*/tmp/*", "zntrack/interface"]
+omit = ["*/tests/*", "*/tmp/*", "*/interface/*"]
 
 [tool.coverage.report]
 exclude_lines = [
