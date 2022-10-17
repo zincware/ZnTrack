@@ -54,6 +54,33 @@ def test_zn_plots():
     assert ExamplePlotsNoCache.plots_cache.dvc_option == utils.DVCOptions.PLOTS.value
 
 
+class ExampleMetrics:
+    module = None
+    is_loaded = False
+    node_name = "ExampleMetrics"
+    metrics = zn.metrics()
+
+
+class ExampleMetricsCache(ExampleMetrics):
+    metrics = zn.metrics()
+    metrics_cache = zn.metrics(cache=True)
+
+
+def test_zn_metrics():
+    example = ExampleMetrics()
+    # test save and load if there is nothing to save or load
+    with pytest.raises(exceptions.DataNotAvailableError):
+        _ = ExampleMetrics.metrics.save(example)
+    # with pytest.raises(FileNotFoundError):
+    #    _ = ExampleMetrics.metrics.get_data_from_files(example)
+
+    assert ExampleMetrics.metrics.dvc_option == utils.DVCOptions.METRICS_NO_CACHE.value
+    assert (
+        ExampleMetricsCache.metrics.dvc_option == utils.DVCOptions.METRICS_NO_CACHE.value
+    )
+    assert ExampleMetricsCache.metrics_cache.dvc_option == utils.DVCOptions.METRICS.value
+
+
 @dataclasses.dataclass
 class ExampleDataClass:
     a: int = 5
