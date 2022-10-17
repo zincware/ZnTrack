@@ -5,7 +5,7 @@ import pathlib
 import pytest
 import znjson
 
-from zntrack import exceptions, zn
+from zntrack import exceptions, utils, zn
 from zntrack.zn.dependencies import NodeAttribute, getdeps
 from zntrack.zn.split_option import combine_values, split_value
 
@@ -36,6 +36,11 @@ class ExamplePlots:
     plots = zn.plots()
 
 
+class ExamplePlotsNoCache(ExamplePlots):
+    plots = zn.plots(cache=False)
+    plots_cache = zn.plots(cache=True)
+
+
 def test_zn_plots():
     example = ExamplePlots()
     # test save and load if there is nothing to save or load
@@ -43,6 +48,10 @@ def test_zn_plots():
         _ = ExamplePlots.plots.save(example)
     with pytest.raises(FileNotFoundError):
         _ = ExamplePlots.plots.get_data_from_files(example)
+
+    assert ExamplePlots.plots.dvc_option == utils.DVCOptions.PLOTS.value
+    assert ExamplePlotsNoCache.plots.dvc_option == utils.DVCOptions.PLOTS_NO_CACHE.value
+    assert ExamplePlotsNoCache.plots_cache.dvc_option == utils.DVCOptions.PLOTS.value
 
 
 @dataclasses.dataclass
