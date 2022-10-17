@@ -37,8 +37,8 @@ class DVCInterface:
 
     @utils.deprecated(
         reason=(
-            "The DVCInterace is currently unmaintained and might be removed "
-            "in a future release. It might bot be compatible with newer DVC versions"
+            "The 'DVCInterface' is currently unmaintained and might be removed "
+            "in a future release. It might not be compatible with newer DVC versions"
         ),
         version="0.4.3",
     )
