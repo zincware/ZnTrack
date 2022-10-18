@@ -11,7 +11,6 @@ import logging
 
 from zntrack import utils
 from zntrack.core.zntrackoption import ZnTrackOption
-from zntrack.zn.meta import Meta
 from zntrack.zn.method import Method
 from zntrack.zn.nodes import Nodes
 from zntrack.zn.split_option import SplitZnTrackOption
@@ -19,7 +18,7 @@ from zntrack.zn.zn_hash import Hash
 
 log = logging.getLogger(__name__)
 
-__all__ = [Method.__name__, Hash.__name__, Nodes.__name__, Meta.__name__]
+__all__ = [Method.__name__, Hash.__name__, Nodes.__name__]
 
 with contextlib.suppress(ImportError):
     from .plots import plots
