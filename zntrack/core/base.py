@@ -465,6 +465,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         no_run_cache: bool = False,
         dry_run: bool = False,
         run: bool = None,
+        write_desc: bool = True,
         *,
         call_args: str = None,
     ):
@@ -491,6 +492,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         no_run_cache: dvc parameter
         dry_run: bool, default = False
             Only return the script but don't actually run anything
+        write_desc: bool, default = True
+            Save the Node.__doc__ to the 'dvc.yaml' Node description.
         call_args: str, default = None
             Custom call args. Defaults to '.load(name='{self.node_name}').run_and_save()'
 
@@ -592,9 +595,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             if option.zn_type in utils.GIT_TRACKED:
                 option.save(instance=self)
 
-        utils.file_io.update_desc(
-            file=utils.Files.dvc, node_name=self.node_name, desc=self.__doc__
-        )
+        if write_desc:
+            utils.file_io.update_desc(
+                file=utils.Files.dvc, node_name=self.node_name, desc=self.__doc__
+            )
 
         if not no_exec:
             utils.run_dvc_cmd(["dvc", "repro", self.node_name])
