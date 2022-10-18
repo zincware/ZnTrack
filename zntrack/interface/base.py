@@ -35,6 +35,13 @@ class Experiment:
 class DVCInterface:
     """A Python Interface for DVC"""
 
+    @utils.deprecated(
+        reason=(
+            "The 'DVCInterface' is currently unmaintained and might be removed "
+            "in a future release. It might not be compatible with newer DVC versions"
+        ),
+        version="0.4.3",
+    )
     def __init__(self):
         """DVCInterface for getting experiments and loading data from
         multiple experiments
