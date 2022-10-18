@@ -67,6 +67,19 @@ class metrics(ZnTrackOption):  # pylint: disable=invalid-name
     dvc_option = utils.DVCOptions.METRICS_NO_CACHE.value
     zn_type = utils.ZnTypes.RESULTS
 
+    def __init__(self, *args, cache: bool = False, **kwargs):
+        """Parse additional attributes for plots
+
+        Parameters
+        ----------
+        cache: bool, default = False
+            Store the result of 'zn.metrics' inside the DVC cache.
+            This can e.g. be useful it the metrics are large and should not be GIT tracked
+        """
+        if cache:
+            self.dvc_option = utils.DVCOptions.METRICS.value
+        super().__init__(*args, **kwargs)
+
 
 class params(SplitZnTrackOption):  # pylint: disable=invalid-name
     """Identify DVC option

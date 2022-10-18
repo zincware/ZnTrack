@@ -10,8 +10,21 @@ log = logging.getLogger(__name__)
 
 
 class plots(PlotsModifyOption):  # pylint: disable=invalid-name
-    dvc_option = utils.DVCOptions.PLOTS_NO_CACHE.value
+    dvc_option = utils.DVCOptions.PLOTS.value
     zn_type = utils.ZnTypes.PLOTS
+
+    def __init__(self, *args, cache: bool = True, **kwargs):
+        """Parse additional attributes for plots
+
+        Parameters
+        ----------
+        cache: bool, default = True
+            Store the result of 'zn.plots' inside the DVC cache. If False
+            store the results as 'dvc plots-no-cache'.
+        """
+        if not cache:
+            self.dvc_option = utils.DVCOptions.PLOTS_NO_CACHE.value
+        super().__init__(*args, **kwargs)
 
     def get_filename(self, instance) -> pathlib.Path:
         """Overwrite filename to csv"""
