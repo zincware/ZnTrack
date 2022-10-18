@@ -41,10 +41,12 @@ def test_CombinedNodeWithMeta(proj_path):
 
     CombinedNodeWithMeta(author="World").write_graph(run=True)
     assert CombinedNodeWithMeta.load().output == "Hello World"
+    assert CombinedNodeWithMeta.load().author == "World"
 
     CombinedNodeWithMeta(author="there").write_graph(run=True)
     # changing the 'meta.Text' should not trigger running the model again
     assert CombinedNodeWithMeta.load().output == "Hello World"
+    assert CombinedNodeWithMeta.load().author == "there"
 
     subprocess.check_call(["dvc", "repro", "-f"])
     # Forcing rerun should use the updated meta keyword.
