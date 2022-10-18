@@ -5,6 +5,7 @@ from zntrack.utils.config import Files, config
 from zntrack.utils.nwd import nwd
 from zntrack.utils.structs import (
     FILE_DVC_TRACKED,
+    GIT_TRACKED,
     VALUE_DVC_TRACKED,
     DVCOptions,
     LazyOption,
@@ -45,4 +46,5 @@ __all__ = [
     "LazyOption",
     "helpers",
     "nwd",
+    "GIT_TRACKED",
 ]

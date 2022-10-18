@@ -11,7 +11,7 @@ import typing
 import zninit
 import znjson
 
-from zntrack import dvc, utils, zn
+from zntrack import dvc, meta, utils, zn
 from zntrack.core.dvcgraph import (
     DVCRunOptions,
     ZnTrackInfo,
@@ -195,7 +195,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
     """
 
     init_subclass_basecls = NodeBase
-    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes] + dvc.options
+    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes, meta.Text] + dvc.options
 
     @utils.deprecated(
         reason=(
@@ -283,7 +283,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                     # only save results
                     option.save(instance=self)
             else:
-                if option.zn_type not in utils.VALUE_DVC_TRACKED:
+                if option.zn_type not in utils.VALUE_DVC_TRACKED + utils.GIT_TRACKED:
                     # save all dvc.<options>
                     option.save(instance=self)
                 else:
@@ -590,6 +590,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         utils.run_dvc_cmd(script)
 
         run_post_dvc_cmd(descriptor_list=self._descriptor_list, instance=self)
+
+        for option in self._descriptor_list:
+            if option.zn_type in utils.GIT_TRACKED:
+                option.save(instance=self)
 
         if write_desc:
             utils.file_io.update_desc(
