@@ -243,3 +243,38 @@ def test_update_desc(desc):
         open_mock().write.assert_called_once_with(yaml.safe_dump(dvc_dict, indent=4))
     else:
         assert not open_mock().called
+
+
+@pytest.mark.parametrize("data", ({"author": "Fabian"}, None))
+def test_update_meta(data):
+    dvc_dict = {"stages": {"MyNode": {"cmd": "run", "meta": {"a": "b"}}}}
+
+    open_mock = mock_open(read_data=yaml.safe_dump(dvc_dict))
+
+    def pathlib_open(*args, **kwargs):
+        return open_mock(*args, **kwargs)
+
+    file = pathlib.Path("dvc.yaml")
+
+    with patch.object(pathlib.Path, "open", pathlib_open):
+        file_io.update_meta(file=file, node_name="MyNode", data=data)
+
+    if data is not None:
+        dvc_dict["stages"]["MyNode"]["meta"].update(data)
+        open_mock().write.assert_called_once_with(yaml.safe_dump(dvc_dict, indent=4))
+    else:
+        assert not open_mock().called
+
+
+def test_update_meta_existing():
+    dvc_dict = {"stages": {"MyNode": {"meta": "not a dict"}}}
+    open_mock = mock_open(read_data=yaml.safe_dump(dvc_dict))
+
+    def pathlib_open(*args, **kwargs):
+        return open_mock(*args, **kwargs)
+
+    file = pathlib.Path("dvc.yaml")
+
+    with patch.object(pathlib.Path, "open", pathlib_open):
+        with pytest.raises(ValueError):
+            file_io.update_meta(file=file, node_name="MyNode", data={"a": "b"})

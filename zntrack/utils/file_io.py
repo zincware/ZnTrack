@@ -142,13 +142,15 @@ def update_desc(file: pathlib.Path, node_name: str, desc: str):
 
 
 def update_meta(file: pathlib.Path, node_name: str, data: dict):
-    """Update the 'dvc.yaml' with a description"""
+    """Update the file (dvc.yaml) given the Node for 'meta' key with the data"""
     if data is not None:
         file_content = read_file(file)
         meta_data = file_content["stages"][node_name].get("meta", {})
         if not isinstance(meta_data, dict):
-            # The user already entered something into 'meta' in the 'dvc.yaml'
-            meta_data = {"meta": meta_data}
+            raise ValueError(
+                "The 'meta' key in the 'dvc.yaml' is not empty or was otherwise modified."
+                " To use 'zntrack.meta' it is not possible to use that field otherwise."
+            )
         meta_data.update(data)
         file_content["stages"][node_name]["meta"] = meta_data
         write_file(file, value=file_content)

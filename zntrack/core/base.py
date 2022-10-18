@@ -11,7 +11,7 @@ import typing
 import zninit
 import znjson
 
-from zntrack import dvc, utils, zn
+from zntrack import dvc, meta, utils, zn
 from zntrack.core.dvcgraph import (
     DVCRunOptions,
     ZnTrackInfo,
@@ -195,7 +195,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
     """
 
     init_subclass_basecls = NodeBase
-    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes] + dvc.options
+    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes, meta.Text] + dvc.options
 
     @utils.deprecated(
         reason=(
