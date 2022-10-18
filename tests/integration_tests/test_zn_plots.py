@@ -16,6 +16,10 @@ class WritePlots(Node):
         self.plots.index.name = "my_index"
 
 
+class WritePlotsNoCache(WritePlots):
+    plots = zn.plots(cache=False)
+
+
 class WritePlotsNoIndex(Node):
     plots: pd.DataFrame = zn.plots()
 
@@ -30,12 +34,33 @@ class WritePlotsWrongData(Node):
         self.plots = {"value": list(range(100))}
 
 
-def test_write_plots(proj_path):
-    WritePlots().write_graph(no_exec=False)
+@pytest.mark.parametrize(
+    ("PlotsCls", "cache"), [(WritePlots, True), (WritePlotsNoCache, False)]
+)
+def test_write_plots(proj_path, PlotsCls, cache):
+    PlotsCls().write_graph(run=True)
     subprocess.check_call(["dvc", "plots", "show"])
 
-    wp = WritePlots.load()
+    wp = PlotsCls.load()
     assert wp.plots.index.name == "my_index"
+    plots_file = PlotsCls.plots.get_filename(wp)
+    if cache:
+        _ = subprocess.check_call(["git", "check-ignore", plots_file])
+    else:
+        with pytest.raises(subprocess.CalledProcessError):
+            _ = subprocess.check_call(["git", "check-ignore", plots_file])
+
+
+def test_plots_default():
+    with pytest.raises(ValueError):
+
+        class WrongDefaultNode1(Node):
+            plots = zn.plots(pd.DataFrame({"value": list(range(100))}))
+
+    with pytest.raises(ValueError):
+
+        class WrongDefaultNode2(Node):
+            plots = zn.plots(pd.DataFrame({"value": list(range(100))}), cache=False)
 
 
 def test_load_plots(proj_path):
