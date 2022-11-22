@@ -1,4 +1,4 @@
-"""Standard python init file for the utils directory"""
+"""Standard python init file for the utils directory."""
 
 from zntrack.utils import exceptions, file_io, helpers
 from zntrack.utils.config import Files, config

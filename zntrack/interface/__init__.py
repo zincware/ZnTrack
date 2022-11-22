@@ -1,5 +1,5 @@
-"""Some basic interface functionality"""
+"""Some basic interface functionality."""
 
-from .base import DVCInterface
+from zntrack.interface.base import DVCInterface
 
 __all__ = ["DVCInterface"]

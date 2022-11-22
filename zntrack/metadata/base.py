@@ -1,3 +1,5 @@
+"""ZnTrack metadata."""
+
 from abc import ABC, abstractmethod
 from functools import partial
 from typing import Callable
@@ -7,7 +9,7 @@ from zntrack.core.dvcgraph import filter_ZnTrackOption
 
 
 class MetaData(ABC):
-    """Base class for implementing MetaData decorators
+    """Base class for implementing MetaData decorators.
 
     Attributes
     ----------
@@ -19,7 +21,7 @@ class MetaData(ABC):
     name_of_metric: str
 
     def __init__(self, func: Callable):
-        """Get the decorated function
+        """Get the decorated function.
 
         The MetaData decorator does not take arguments!
         @MetaData() does not work, use @MetaData or implement
@@ -28,23 +30,24 @@ class MetaData(ABC):
         Parameters
         ----------
         func
+            the function to decorate.
         """
         self.func: Callable = func
         self.func_name = self.func.__name__
 
     @abstractmethod
     def __call__(self, cls, *args, **kwargs):
-        """Actual decorator"""
+        """Actual decorator."""
         raise NotImplementedError
 
     @property
     def name(self) -> str:
-        """Get the name of the metric this decorator will use"""
+        """Get the name of the metric this decorator will use."""
         return f"{self.func_name}:{self.name_of_metric}"
 
     @staticmethod
     def get_history(cls) -> (dict, str):
-        """Get the values of the zn.metadata descriptor
+        """Get the values of the zn.metadata descriptor.
 
         Get a full metadata dict containing all previously collected metadata.
         """
@@ -60,7 +63,7 @@ class MetaData(ABC):
                 )
             )
         except StopIteration as error:
-            raise utils.exceptions.DescriptorMissing(
+            raise utils.exceptions.DescriptorMissingError(
                 "Could not find a metadata descriptor. Please add zn.metadata()!"
             ) from error
         if metadata is None:
@@ -69,7 +72,7 @@ class MetaData(ABC):
         return metadata, metadata_attr
 
     def __get__(self, instance, owner):
-        """Converting decorator into descriptor
+        """Converting decorator into descriptor.
 
         tl;dr
 
@@ -79,11 +82,10 @@ class MetaData(ABC):
         See the following answer for a full explanation why this is required
         https://stackoverflow.com/questions/30104047/how-can-i-decorate-an-instance-method-with-a-decorator-class
         """
-
         return partial(self.__call__, instance)
 
     def save_metadata(self, cls, value):
-        """Save metadata to the class dict
+        """Save metadata to the class dict.
 
         Will save the metadata as func_name:metric_name dictionary entry.
         If the func was called multiple times it will increment automatically by
@@ -91,16 +93,16 @@ class MetaData(ABC):
 
         Parameters
         ----------
-        cls: the class that has the cls.metadata ZnTrackOption
+        cls:
+            the class that has the cls.metadata ZnTrackOption
         value:
             Any value that should be saved
 
         Raises
         ------
-        DescriptorMissing:
+        DescriptorMissingError:
             If the Node does not contain a <zn.metadata> descriptor
         """
-
         metadata, metadata_attr = self.get_history(cls)
         metadata[self.name] = value
 

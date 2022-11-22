@@ -1,4 +1,4 @@
-"""Special ZnTrack Hash output
+"""Special ZnTrack Hash output.
 
 Define a custom unique output on Nodes that otherwise don't produce outputs.
 This allows them to be used as a dependency in the DVC graph.
@@ -11,7 +11,7 @@ from zntrack.core.zntrackoption import ZnTrackOption
 
 
 class Hash(ZnTrackOption):
-    """Special ZnTrack outs
+    """Special ZnTrack outs.
 
     This 'zn.Hash' can be useful if you are dealing with a Node that typically has no
     outputs but is used e.g. for storing parameters. Because other Nodes don't use the
@@ -27,7 +27,7 @@ class Hash(ZnTrackOption):
     allow_lazy: bool = False
 
     def __init__(self, *, use_time: bool = True, **kwargs):
-        """
+        """Special ZnTrack outs creating a unique hash.
 
         Parameters
         ----------
@@ -36,13 +36,14 @@ class Hash(ZnTrackOption):
             to change independently of the given parameters. This is the default,
             because rerunning the Node typically is associated with some changed
             dependencies which are not accounted for in the parameters.
-        kwargs
+        kwargs:
+            additional kwargs for super.__init__
         """
         super().__init__(filename="hash", **kwargs)
         self.use_time = use_time
 
     def __get__(self, instance, owner=None) -> int:
-        """"""
+        """Get the hash value."""
         if instance is None:
             return self
         if self.use_time:
@@ -50,5 +51,5 @@ class Hash(ZnTrackOption):
         return hash(instance)
 
     def __set__(self, instance, value):
-        """Don't allow to set the value"""
+        """Don't allow to set the value."""
         raise ValueError("Can not set value of zn.Hash")

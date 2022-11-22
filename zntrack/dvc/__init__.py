@@ -1,4 +1,4 @@
-"""Collection of DVC options
+"""Collection of DVC options.
 
 Based on ZnTrackOption python descriptors this gives access to them being used
 to define e.g. dependencies
@@ -8,6 +8,7 @@ Examples
 >>> from zntrack import Node, dvc
 >>> class HelloWorld(Node)
 >>>     vars = dvc.params()
+
 """
 import logging
 
@@ -22,7 +23,7 @@ log = logging.getLogger(__name__)
 
 
 class params(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -33,7 +34,7 @@ class params(DVCOption):  # pylint: disable=invalid-name
 
 
 class deps(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -43,7 +44,7 @@ class deps(DVCOption):  # pylint: disable=invalid-name
     file = utils.Files.zntrack
 
     def __get__(self, instance, owner=None):
-        """Use load_node_dependency before returning the value"""
+        """Use load_node_dependency before returning the value."""
         if instance is None:
             return self
         value = super().__get__(instance, owner)
@@ -53,7 +54,7 @@ class deps(DVCOption):  # pylint: disable=invalid-name
 
 
 class outs(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -64,7 +65,7 @@ class outs(DVCOption):  # pylint: disable=invalid-name
 
 
 class checkpoints(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -75,7 +76,7 @@ class checkpoints(DVCOption):  # pylint: disable=invalid-name
 
 
 class outs_no_cache(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -86,7 +87,7 @@ class outs_no_cache(DVCOption):  # pylint: disable=invalid-name
 
 
 class outs_persistent(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -97,7 +98,7 @@ class outs_persistent(DVCOption):  # pylint: disable=invalid-name
 
 
 class metrics(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -108,7 +109,7 @@ class metrics(DVCOption):  # pylint: disable=invalid-name
 
 
 class metrics_no_cache(DVCOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -119,7 +120,7 @@ class metrics_no_cache(DVCOption):  # pylint: disable=invalid-name
 
 
 class plots(PlotsModifyOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options
@@ -130,7 +131,7 @@ class plots(PlotsModifyOption):  # pylint: disable=invalid-name
 
 
 class plots_no_cache(PlotsModifyOption):  # pylint: disable=invalid-name
-    """Identify DVC option
+    """Identify DVC option.
 
     See https://dvc.org/doc/command-reference/run#options for more information
      on the available options

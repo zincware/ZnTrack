@@ -1,3 +1,4 @@
+"""ZnTrack file I/O."""
 import json
 import logging
 import pathlib
@@ -10,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 def read_file(file: pathlib.Path) -> dict:
-    """Read a json/yaml file without the znjson.Decoder
+    """Read a json/yaml file without the znjson.Decoder.
 
     Parameters
     ----------
@@ -37,7 +38,7 @@ def read_file(file: pathlib.Path) -> dict:
 
 
 def write_file(file: pathlib.Path, value: dict, mkdir: bool = True):
-    """Save dict to file
+    """Save dict to file.
 
     Store dictionary to json or yaml file
 
@@ -62,7 +63,7 @@ def write_file(file: pathlib.Path, value: dict, mkdir: bool = True):
 
 
 def clear_config_file(file: pathlib.Path, node_name: str):
-    """Clear the entries in the files for the given node name
+    """Clear the entries in the files for the given node name.
 
     Parameters
     ----------
@@ -86,7 +87,7 @@ def update_config_file(
     value_name: typing.Union[str, None],
     value,
 ):
-    """Update a configuration file
+    """Update a configuration file.
 
     The file structure for node_name is not None is something like
     >>> {node_name: {value_name: value}}
@@ -134,7 +135,7 @@ def update_config_file(
 
 
 def update_desc(file: pathlib.Path, node_name: str, desc: str):
-    """Update the 'dvc.yaml' with a description"""
+    """Update the 'dvc.yaml' with a description."""
     if desc is not None:
         file_content = read_file(file)
         file_content["stages"][node_name]["desc"] = desc
@@ -142,7 +143,7 @@ def update_desc(file: pathlib.Path, node_name: str, desc: str):
 
 
 def update_meta(file: pathlib.Path, node_name: str, data: dict):
-    """Update the file (dvc.yaml) given the Node for 'meta' key with the data"""
+    """Update the file (dvc.yaml) given the Node for 'meta' key with the data."""
     if data is not None:
         file_content = read_file(file)
         meta_data = file_content["stages"][node_name].get("meta", {})

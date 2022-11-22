@@ -1,4 +1,5 @@
-"""
+"""ZnTrack split option methods.
+
 Description: The SplitZnTrackOption is used to for serializing objects and storing the
 parameters / attributes in one file (params.yaml) and the rest, which is not considered
 a parameter in another (zntrack.json)
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 
 def split_value(input_val) -> (typing.Union[dict, list], typing.Union[dict, list]):
-    """Split input_val into data for params.yaml and zntrack.json
+    """Split input_val into data for params.yaml and zntrack.json.
 
     Parameters
     ----------
@@ -44,7 +45,7 @@ def split_value(input_val) -> (typing.Union[dict, list], typing.Union[dict, list
 
 
 def combine_values(cls_dict: dict, params_val):
-    """Combine values from params.yaml and zntrack.json
+    """Combine values from params.yaml and zntrack.json.
 
     Parameters
     ----------
@@ -71,13 +72,13 @@ def combine_values(cls_dict: dict, params_val):
 
 
 class SplitZnTrackOption(ZnTrackOption):
-    """Method to split a value into params.yaml and zntrack.json
+    """Method to split a value into params.yaml and zntrack.json.
 
     Serialize data into params.yaml if human-readable and the type in zntrack.json
     """
 
     def save(self, instance):
-        """Overwrite the save method
+        """Overwrite the save method.
 
         This save method tries to split the value into params.yaml and zntrack.json.
         This allows e.g. having pathlib.Path() as a zn.params or a dataclass as zn.Method
@@ -112,7 +113,7 @@ class SplitZnTrackOption(ZnTrackOption):
             super().save(instance)
 
     def get_data_from_files(self, instance):
-        """Overwrite the load method
+        """Overwrite the load method.
 
         Try to load from zntrack.json / params.yaml in a combined approach first,
         if no entry in zntrack.json is found, load from params.yaml only without

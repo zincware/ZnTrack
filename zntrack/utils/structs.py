@@ -1,8 +1,12 @@
+"""ZnTrack structs and LazyOption."""
 import enum
 
 
 class LazyOption:
+    """A LazyOption for lazy loading."""
+
     def __init__(self):
+        """Prohibit instantiation of LazyOption."""
         raise ValueError(
             "Can not initialize LazyOption. If you expected something else open an "
             "issue at https://github.com/zincware/ZnTrack and describe how you got here."
@@ -10,7 +14,7 @@ class LazyOption:
 
 
 class ZnTypes(enum.Enum):
-    """Collection of ZnTrack Types to identify descriptors beyond their dvc option
+    """Collection of ZnTrack Types to identify descriptors beyond their dvc option.
 
     Attributes
     ----------
@@ -50,6 +54,8 @@ GIT_TRACKED = [ZnTypes.META]
 
 
 class DVCOptions(enum.Enum):
+    """Available DVCOptions."""
+
     # Use enum over dataclass because it is iterable
     PARAMS = "params"
     DEPS = "deps"

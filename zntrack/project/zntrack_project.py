@@ -1,4 +1,4 @@
-"""The class for the ZnTrackProject"""
+"""The class for the ZnTrackProject."""
 import logging
 import subprocess
 from datetime import datetime
@@ -10,10 +10,10 @@ log = logging.getLogger(__name__)
 
 
 class ZnTrackProject(DVCInterface):
-    """Node Project to handle experiments via subprocess calls to DVC"""
+    """Node Project to handle experiments via subprocess calls to DVC."""
 
     def __init__(self, name: str = None):
-        """
+        """Define __init__.
 
         Parameters
         ----------
@@ -26,7 +26,7 @@ class ZnTrackProject(DVCInterface):
         self.name = name
 
     def queue(self, name: str = None):
-        """Add this project to the DVC queue"""
+        """Add this project to the DVC queue."""
         if name is not None:
             self.name = name
         log.info("Running git add")
@@ -36,20 +36,20 @@ class ZnTrackProject(DVCInterface):
 
     @staticmethod
     def remove_queue():
-        """Empty the queue"""
+        """Empty the queue."""
         log.warning("Removing all queried experiments!")
         subprocess.check_call(["dvc", "exp", "remove", "--queue"])
 
     @staticmethod
     def run_all():
-        """Run all queried experiments"""
+        """Run all queried experiments."""
         log.info("RUN DVC stage")
         utils.run_dvc_cmd(["dvc", "exp", "run", "--run-all"])
         log.info("Running git add")
         subprocess.check_call(["git", "add", "."])
 
     def run(self, name: str = None):
-        """Add this experiment to the queue and run the full queue"""
+        """Add this experiment to the queue and run the full queue."""
         self.queue(name=name)
         self.run_all()
         self.load(name=name)
@@ -57,7 +57,7 @@ class ZnTrackProject(DVCInterface):
         log.info("Finished")
 
     def load(self, name=None):
-        """Load this project"""
+        """Load this project."""
         if name is not None:
             self.name = name
         for trial in range(3):
@@ -70,7 +70,7 @@ class ZnTrackProject(DVCInterface):
                     raise error
 
     def create_dvc_repository(self):
-        """Perform git and dvc init"""
+        """Perform git and dvc init."""
         try:
             subprocess.check_call(
                 ["dvc", "status"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
@@ -97,10 +97,10 @@ class ZnTrackProject(DVCInterface):
 
     @staticmethod
     def _destroy():
-        """Remove the DVC directory"""
+        """Remove the DVC directory."""
         subprocess.check_call(["dvc", "destroy", "-f"])
 
     @staticmethod
     def repro():
-        """Run dvc repro"""
+        """Run dvc repro."""
         utils.run_dvc_cmd(["dvc", "repro"])
