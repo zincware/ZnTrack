@@ -1,4 +1,4 @@
-"""DVC Interface through ZnTrack"""
+"""DVC Interface through ZnTrack."""
 import copy
 import dataclasses
 import json
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class Experiment:
-    """Collection of the output of dvc exp show --show-json"""
+    """Collection of the output of dvc exp show --show-json."""
 
     name: str
     hash: str
@@ -33,7 +33,7 @@ class Experiment:
 
 
 class DVCInterface:
-    """A Python Interface for DVC"""
+    """A Python Interface for DVC."""
 
     @utils.deprecated(
         reason=(
@@ -43,15 +43,13 @@ class DVCInterface:
         version="0.4.3",
     )
     def __init__(self):
-        """DVCInterface for getting experiments and loading data from
-        multiple experiments
-        """
+        """DVCInterface for getting experiments and loading data."""
         self._experiments = None
         self._exp_list = None
 
     @property
     def experiments(self) -> dict:
-        """Get all experiments in json format"""
+        """Get all experiments in json format."""
         if self._experiments is None:
             # Only load it once! This speeds things up. If experiments change
             # during the lifetime of this instance they won't be
@@ -69,13 +67,12 @@ class DVCInterface:
 
     @property
     def exp_list(self) -> List[Experiment]:
-        """Get all experiment names and hash values for the current commit
+        """Get all experiment names and hash values for the current commit.
 
         Returns
         -------
         list[Experiment]: A list containing experiment dataclasses
         """
-
         if self._exp_list is None:
             experiments = copy.deepcopy(self.experiments)
             experiments.pop("workspace")
@@ -91,14 +88,14 @@ class DVCInterface:
         return self._exp_list
 
     def _reset(self):
-        """Reset properties to be loaded again"""
+        """Reset properties to be loaded again."""
         self._experiments = None
         self._exp_list = None
 
     def load_files_into_directory(
         self, files: List[str], path: str = "experiments", experiments: List[str] = None
     ):
-        """Save files from multiple experiments in a single directory
+        """Save files from multiple experiments in a single directory.
 
         Create a parent directory "path" that contains subdirectories for each
         experiment where the requested files are saved.

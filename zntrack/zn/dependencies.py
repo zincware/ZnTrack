@@ -1,3 +1,4 @@
+"""ZnTrack dependencies."""
 from __future__ import annotations
 
 import dataclasses
@@ -15,6 +16,8 @@ if TYPE_CHECKING:
 
 @dataclasses.dataclass
 class NodeAttribute:
+    """ZnTrack NodeAttribute."""
+
     module: str
     cls: str
     name: str
@@ -25,6 +28,7 @@ class NodeAttribute:
 
     @property
     def affected_files(self) -> Set[pathlib.Path]:
+        """Get a list of all affected files."""
         if self._node is None:
             module = importlib.import_module(self.module)
             cls = getattr(module, self.cls)
@@ -33,7 +37,7 @@ class NodeAttribute:
 
 
 class RawNodeAttributeConverter(znjson.ConverterBase):
-    """Serializer for Node Attributes
+    """Serializer for Node Attributes.
 
     Instead of returning the actual attribute this returns the NodeAttribute cls.
     """
@@ -43,26 +47,16 @@ class RawNodeAttributeConverter(znjson.ConverterBase):
     level = 999
 
     def encode(self, obj: NodeAttribute) -> dict:
-        """Convert NodeAttribute to serializable dict"""
+        """Convert NodeAttribute to serializable dict."""
         return dataclasses.asdict(obj)
 
     def decode(self, value: dict) -> NodeAttribute:
-        """return serialized Node attribute"""
+        """return serialized Node attribute."""
         return NodeAttribute(**value)
 
 
 def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
-    """Allow for Node attributes as dependencies
-
-    Parameters
-    ----------
-    node
-    attribute
-
-    Returns
-    -------
-
-    """
+    """Allow for Node attributes as dependencies."""
     # TODO add check if the attribute exists in the given Node
     # _ = getattr(node, attribute)
     node = utils.load_node_dependency(node)  # run node = Node.load() if required
@@ -77,7 +71,7 @@ def getdeps(node: Union[Node, type(Node)], attribute: str) -> NodeAttribute:
 def get_origin(
     node: Union[Node, type(Node)], attribute: str
 ) -> Union[NodeAttribute, List[NodeAttribute]]:
-    """Get the NodeAttribute from a zn.deps
+    """Get the NodeAttribute from a zn.deps.
 
     Typically, when using zn.deps there is no way to access the original Node where
     the data comes from. This function allows you to get the underlying
@@ -94,7 +88,7 @@ def get_origin(
     znjson.config.deregister(RawNodeAttributeConverter)
 
     def not_zn_deps_err() -> AttributeError:
-        """Evaluate error message when raising the error"""
+        """Evaluate error message when raising the error."""
         return AttributeError(
             f"'{new_node.node_name}' object has no attribute '{attribute}' of type"
             f" 'zn.deps'. Found {type(getattr(node.__class__, attribute))} instead"

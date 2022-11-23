@@ -1,4 +1,4 @@
-"""List of functions that are used to serialize and deserialize Python Objects
+"""List of functions that are used to serialize and deserialize Python Objects.
 
 Notes
 -----
@@ -24,13 +24,13 @@ log = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class SerializedClass:
-    """Store a serialized Class"""
+    """Store a serialized Class."""
 
     module: str
     cls: str
 
     def get_cls(self) -> typing.Type[Node]:
-        """Import the serialized class from the given module"""
+        """Import the serialized class from the given module."""
         module = importlib.import_module(self.module)
         cls = getattr(module, self.cls)
         return cls
@@ -38,7 +38,8 @@ class SerializedClass:
 
 @dataclasses.dataclass
 class SerializedNode(SerializedClass):
-    """
+    """DataClass for a serialized Node.
+
     Attributes
     ----------
     name: str
@@ -50,7 +51,8 @@ class SerializedNode(SerializedClass):
 
 @dataclasses.dataclass
 class SerializedMethod(SerializedClass):
-    """
+    """DataClass for a serialized method.
+
     Attributes
     ----------
     kwargs: dict
@@ -61,14 +63,14 @@ class SerializedMethod(SerializedClass):
 
 
 class ZnTrackTypeConverter(znjson.ConverterBase):
-    """Main Serializer for ZnTrack Nodes, e.g. as dependencies"""
+    """Main Serializer for ZnTrack Nodes, e.g. as dependencies."""
 
     instance = Node
     representation = "ZnTrackType"
     level = 10
 
     def encode(self, obj: Node) -> dict:
-        """Convert Node to serializable dict"""
+        """Convert Node to serializable dict."""
         return dataclasses.asdict(
             SerializedNode(
                 module=obj.module,
@@ -78,14 +80,13 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
         )
 
     def decode(self, value: dict) -> Node:
-        """return serialized Node"""
-
+        """return serialized Node."""
         serialized_node = SerializedNode(**value)
         return serialized_node.get_cls().load(name=serialized_node.name)
 
 
 class NodeAttributeConverter(znjson.ConverterBase):
-    """Serializer for Node Attributes
+    """Serializer for Node Attributes.
 
     This allows to use getdeps(Node, "attr") as dvc/zn.deps() directly.
     """
@@ -95,12 +96,11 @@ class NodeAttributeConverter(znjson.ConverterBase):
     level = 10
 
     def encode(self, obj: NodeAttribute) -> dict:
-        """Convert NodeAttribute to serializable dict"""
+        """Convert NodeAttribute to serializable dict."""
         return dataclasses.asdict(obj)
 
     def decode(self, value: dict):
-        """return serialized Node attribute"""
-
+        """return serialized Node attribute."""
         node_attribute = NodeAttribute(**value)
         serialized_node = SerializedNode(
             module=node_attribute.module, cls=node_attribute.cls, name=node_attribute.name
@@ -110,14 +110,13 @@ class NodeAttributeConverter(znjson.ConverterBase):
 
 
 class MethodConverter(znjson.ConverterBase):
-    """ZnJSON Converter for zn.method attributes"""
+    """ZnJSON Converter for zn.method attributes."""
 
     representation = "zn.method"
     level = 10
 
     def encode(self, obj):
-        """Serialize the object"""
-
+        """Serialize the object."""
         serialized_method = SerializedMethod(
             module=obj.__class__.__module__,
             cls=obj.__class__.__name__,
@@ -148,8 +147,7 @@ class MethodConverter(znjson.ConverterBase):
         return dataclasses.asdict(serialized_method)
 
     def decode(self, value: dict):
-        """Deserialize the object"""
-
+        """Deserialize the object."""
         if "name" in value:
             # keep it backwards compatible
             value["cls"] = value.pop("name")
@@ -158,7 +156,7 @@ class MethodConverter(znjson.ConverterBase):
         return serialized_method.get_cls()(**serialized_method.kwargs)
 
     def __eq__(self, other) -> bool:
-        """Identify if this serializer should be applied"""
+        """Identify if this serializer should be applied."""
         try:
             return other.znjson_zn_method
         except AttributeError:

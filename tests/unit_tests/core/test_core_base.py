@@ -104,7 +104,7 @@ def test_save_only_hash():
 
     example = ExampleFullNode()
 
-    with pytest.raises(utils.exceptions.DescriptorMissing):
+    with pytest.raises(utils.exceptions.DescriptorMissingError):
         example.save(hash_only=True)
 
     def pathlib_open(*args, **kwargs):

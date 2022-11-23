@@ -1,8 +1,9 @@
+"""ZnTrack helpers."""
 import contextlib
 
 
 def isnode(node, subclass: bool = True) -> bool:
-    """Check if node contains a Node instance or class
+    """Check if node contains a Node instance or class.
 
     Attributes
     ----------

@@ -1,4 +1,4 @@
-"""Helpers for the Node Working Directory (NWD)"""
+"""Helpers for the Node Working Directory (NWD)."""
 
 import logging
 import pathlib
@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 
 
 class _NWD(str):
-    """String that allows for pathlib like truediv operation"""
+    """String that allows for pathlib like truediv operation."""
 
     def __truediv__(self, other) -> pathlib.Path:
         return pathlib.Path(self, other)
@@ -17,11 +17,11 @@ class _NWD(str):
 nwd = _NWD("$nwd$")
 
 
-def replace_nwd_placeholder(
+def replace_nwd_placeholder(  # noqa: C901
     path: typing.Union[str, pathlib.Path, tuple, list],
     node_working_directory: typing.Union[str, pathlib.Path],
 ):
-    """Replace the nwd placeholder in the path with the actual node_working_directory
+    """Replace the nwd placeholder in the path with the actual node_working_directory.
 
     Parameters
     ----------

@@ -4,7 +4,7 @@ import pytest
 
 from zntrack import Node, zn
 from zntrack.metadata import TimeIt
-from zntrack.utils.exceptions import DescriptorMissing
+from zntrack.utils.exceptions import DescriptorMissingError
 
 
 class SleepClassNoMetadata(Node):
@@ -39,7 +39,7 @@ class SleepClassLoop(Node):
 
 
 def test_timeit_no_metadata_err(proj_path):
-    with pytest.raises(DescriptorMissing):
+    with pytest.raises(DescriptorMissingError):
         SleepClassNoMetadata().run_and_save()
 
 

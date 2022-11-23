@@ -1,3 +1,4 @@
+"""The ZnTrack Node class."""
 import logging
 
 from zntrack import utils
@@ -9,7 +10,7 @@ log = logging.getLogger(__name__)
 
 
 class Nodes(ZnTrackOption):
-    """Have a ZnTrack Node as an attribute to another (main) Node
+    """Have a ZnTrack Node as an attribute to another (main) Node.
 
     If you want to use a method of another ZnTrack Node you can pass it
     as a zn.Nodes()
@@ -20,6 +21,7 @@ class Nodes(ZnTrackOption):
     file = utils.Files.zntrack
 
     def __init__(self, default=None, **kwargs):
+        """Add a check before calling super."""
         if default is not None:
             raise ValueError(
                 "zn.Nodes does not support default values because they can be mutable."
@@ -29,7 +31,7 @@ class Nodes(ZnTrackOption):
         super().__init__(default=default, **kwargs)
 
     def __set__(self, instance, value):
-        """Include type check for better error reporting"""
+        """Include type check for better error reporting."""
         if value is None:
             return
 
@@ -55,7 +57,7 @@ class Nodes(ZnTrackOption):
         super().__set__(instance, value)
 
     def __get__(self, instance, owner=None):
-        """Use load_node_dependency before returning the value"""
+        """Use load_node_dependency before returning the value."""
         if instance is None:
             return self
         value = super().__get__(instance, owner)

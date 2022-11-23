@@ -1,4 +1,4 @@
-"""ZnTrack Node class module"""
+"""ZnTrack Node class module."""
 
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ from zntrack.core.dvcgraph import (
 )
 from zntrack.core.jupyter import jupyter_class_to_file
 from zntrack.core.zntrackoption import ZnTrackOption
-from zntrack.zn import Nodes as zn_nodes
+from zntrack.zn import Nodes as ZnNodes
 from zntrack.zn import params as zn_params
 from zntrack.zn.dependencies import NodeAttribute, getdeps
 
@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 
 
 def update_dependency_options(value):
-    """Handle Node dependencies
+    """Handle Node dependencies.
 
     The default value is created upton instantiation of a ZnTrackOption,
     if a new class is created via Instance.load() it does not automatically load
@@ -44,7 +44,7 @@ def update_dependency_options(value):
 
 
 def handle_deps(value) -> typing.List[str]:
-    """Find all dependencies of value
+    """Find all dependencies of value.
 
     Parameters
     ----------
@@ -55,7 +55,6 @@ def handle_deps(value) -> typing.List[str]:
     -------
     list:
         A list dependency files
-
     """
     deps_files: typing.List[str] = []
     if isinstance(value, (list, tuple)):
@@ -73,7 +72,7 @@ def handle_deps(value) -> typing.List[str]:
 
 
 def _handle_nodes_as_methods(nodes: dict):
-    """Write the graph for all zn.Nodes ZnTrackOptions
+    """Write the graph for all zn.Nodes ZnTrackOptions.
 
     zn.Nodes ZnTrackOptions will require a dedicated graph to be written.
     They are shown in the dvc dag and have their own parameter section.
@@ -97,10 +96,10 @@ BaseNodeTypeT = typing.TypeVar("BaseNodeTypeT", bound="Node")
 
 
 class LoadViaGetItem(type):
-    """Metaclass for adding getitem support to load"""
+    """Metaclass for adding getitem support to load."""
 
     def __getitem__(cls: Node, item: typing.Union[str, dict]) -> BaseNodeTypeT:
-        """Allow Node[<nodename>] to access an instance of the Node
+        """Allow Node[<nodename>] to access an instance of the Node.
 
         Attributes
         ----------
@@ -109,7 +108,7 @@ class LoadViaGetItem(type):
             Can be a dict for load(**item) | e.g. {name:"nodename", lazy:True}
 
         Raises
-        -------
+        ------
         ValueError: if you don't pass a dict or string.
 
         """
@@ -121,7 +120,7 @@ class LoadViaGetItem(type):
         return cls.load(**item) if isinstance(item, dict) else cls.load(name=item)
 
     def __matmul__(cls, other: str) -> typing.Union[NodeAttribute, typing.Any]:
-        """Shorthand for: getdeps(Node, other)
+        """Shorthand for: getdeps(Node, other).
 
         Parameters
         ----------
@@ -140,8 +139,10 @@ class LoadViaGetItem(type):
 
 
 class NodeBase(zninit.ZnInit):
-    """This helper is used to define the lower bound __init__ that is applied
-    as super call when using the automatically generated __init__.
+    """NodeBase helper is used to define the lower bound __init__.
+
+     That __init__ is applied as super call when using the
+        automatically generated __init__.
 
     Attributes
     ----------
@@ -163,6 +164,7 @@ class NodeBase(zninit.ZnInit):
     _is_attribute = False
 
     def __init__(self, **kwargs):
+        """__init__ of NodeBase."""
         self.is_loaded = kwargs.pop("is_loaded", False)
         name = kwargs.pop("name", None)
         if kwargs:
@@ -179,7 +181,7 @@ class NodeBase(zninit.ZnInit):
 
     @property
     def _descriptor_list(self) -> typing.List[zninit.descriptor.DescriptorTypeT]:
-        """Get all descriptors of this instance"""
+        """Get all descriptors of this instance."""
         descriptors = zninit.get_descriptors(ZnTrackOption, self=self)
         if self._is_attribute:
             allowed_types = [utils.ZnTypes.PARAMS, utils.ZnTypes.HASH, utils.ZnTypes.DEPS]
@@ -188,7 +190,7 @@ class NodeBase(zninit.ZnInit):
 
 
 class Node(NodeBase, metaclass=LoadViaGetItem):
-    """Main parent class for all ZnTrack Node
+    """Main parent class for all ZnTrack Node.
 
     The methods implemented in this class are primarily loading and saving parameters.
     This includes restoring the Node from files and saving results to files after run.
@@ -206,9 +208,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         version="v0.3",
     )
     def __call__(self, *args, **kwargs):
-        """Still here for a depreciation warning for migrating to class based ZnTrack"""
+        """Still here for a depreciation warning for migrating to class based ZnTrack."""
 
     def __repr__(self):
+        """__repr__ of Node."""
         hex_id = hex(id(self))  # TODO replace by git rev in the future
         status = "known" if self._graph_entry_exists else "unknown"
         # TODO add a state: available which checks e.g. via dvc status
@@ -221,7 +224,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         )
 
     def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
-        """Shorthand for: getdeps(Node, other)
+        """Shorthand for: getdeps(Node, other).
 
         Parameters
         ----------
@@ -239,7 +242,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         return getdeps(self, other)
 
     def save_plots(self):
-        """Save the zn.plots
+        """Save the zn.plots.
 
         Similar to DVC Live this  can be used to save the plots during a run
         for live output.
@@ -249,10 +252,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                 option.save(instance=self)
 
     def save(self, results: bool = False, hash_only: bool = False):
-        """Save Class state to files
+        """Save Class state to files.
 
         Parameters
-        -----------
+        ----------
         results: bool, default=False
             Save changes in zn.<option>.
             By default, this function saves e.g. parameters from zn.params / dvc.<option>,
@@ -266,7 +269,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             try:
                 zninit.get_descriptors(zn.Hash, self=self)[0].save(instance=self)
             except IndexError as err:
-                raise utils.exceptions.DescriptorMissing(
+                raise utils.exceptions.DescriptorMissingError(
                     "Could not find a hash descriptor. Please add zn.Hash()"
                 ) from err
             return
@@ -292,7 +295,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                     option.mkdir(instance=self)
 
     def _update_options(self, lazy=None):
-        """Update all ZnTrack options inheriting from ZnTrackOption
+        """Update all ZnTrack options inheriting from ZnTrackOption.
 
         This will overwrite the value in __dict__ even it the value was changed
         """
@@ -310,7 +313,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @classmethod
     def load(cls, name=None, lazy: bool = None) -> Node:
-        """classmethod that yield a Node object
+        """classmethod that yield a Node object.
 
         This method does
         1. create a new instance of Node
@@ -371,7 +374,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         return instance
 
     def run_and_save(self):
-        """Main method to run for the actual calculation"""
+        """Main method to run for the actual calculation."""
         if not self.is_loaded:
             # Save e.g. the parameters if the Node is not loaded
             #  this can happen, when using this method outside 'dvc repro'
@@ -381,11 +384,11 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     # @abc.abstractmethod
     def run(self):
-        """Overwrite this method for the actual calculation"""
+        """Overwrite this method for the actual calculation."""
         raise NotImplementedError
 
     def __hash__(self):
-        """compute the hash based on the parameters and node_name"""
+        """compute the hash based on the parameters and node_name."""
         params_dict = self.zntrack.collect(zn_params)
         params_dict["node_name"] = self.node_name
 
@@ -393,7 +396,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @property
     def module(self) -> str:
-        """Module from which to import <name>
+        """Module from which to import <name>.
 
         Used for from <module> import <name>
 
@@ -409,7 +412,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @property
     def affected_files(self) -> typing.Set[pathlib.Path]:
-        """list of all files that can be changed by this instance"""
+        """list of all files that can be changed by this instance."""
         files = []
         for option in self._descriptor_list:
             file = option.get_filename(self)
@@ -428,7 +431,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @classmethod
     def convert_notebook(cls, nb_name: str = None):
-        """Use jupyter_class_to_file to convert ipynb to py
+        """Use jupyter_class_to_file to convert ipynb to py.
 
         Parameters
         ----------
@@ -439,12 +442,12 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @property
     def zntrack(self) -> ZnTrackInfo:
-        """Get a ZnTrackInfo object"""
+        """Get a ZnTrackInfo object."""
         return ZnTrackInfo(parent=self)
 
     @property
     def _graph_entry_exists(self) -> bool:
-        """If this Graph exists in the dvc.yaml file"""
+        """If this Graph exists in the dvc.yaml file."""
         try:
             file_content = utils.file_io.read_file(utils.Files.dvc)
         except FileNotFoundError:
@@ -452,7 +455,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         return self.node_name in file_content.get("stages", {})
 
-    def write_graph(
+    def write_graph(  # noqa: C901
         self,
         silent: bool = False,
         nb_name: str = None,
@@ -483,13 +486,20 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             Notebook name when not using config.nb_name (this is not recommended)
         notebook: bool, default = True
             convert the notebook to a py File
-        no_commit: dvc parameter
-        external: dvc parameter
-        always_changed: dvc parameter
-        no_exec: dvc parameter
-        run: bool, inverse of no_exec. Will overwrite no_exec if set.
-        force: dvc parameter
-        no_run_cache: dvc parameter
+        no_commit:
+            dvc parameter
+        external:
+            dvc parameter
+        always_changed:
+            dvc parameter
+        no_exec:
+            dvc parameter
+        run: bool
+            inverse of no_exec. Will overwrite no_exec if set.
+        force:
+            dvc parameter
+        no_run_cache:
+            dvc parameter
         dry_run: bool, default = False
             Only return the script but don't actually run anything
         write_desc: bool, default = True
@@ -503,8 +513,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
-
-        _handle_nodes_as_methods(self.zntrack.collect(zn_nodes))
+        _handle_nodes_as_methods(self.zntrack.collect(ZnNodes))
 
         if silent:
             log.warning(

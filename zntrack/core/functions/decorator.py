@@ -1,4 +1,4 @@
-"""Function decorator for ZnTrack"""
+"""Function decorator for ZnTrack."""
 import copy
 import dataclasses
 import logging
@@ -23,7 +23,7 @@ UnionDictListOfStrPath = typing.Union[
 
 @dataclasses.dataclass
 class NodeConfig:
-    """DataClass to contain the arguments passed by the user
+    """DataClass to contain the arguments passed by the user.
 
     Attributes
     ----------
@@ -43,6 +43,7 @@ class NodeConfig:
     plots_no_cache: UnionDictListOfStrPath = None
 
     def __post_init__(self):
+        """dataclass post_init."""
         for datacls_field in dataclasses.fields(self):
             # type checking
             option_value = getattr(self, datacls_field.name)
@@ -63,14 +64,14 @@ class NodeConfig:
                 )
 
     def convert_fields_to_dotdict(self):
-        """Update all fields to dotdict, if they are of type dict"""
+        """Update all fields to dotdict, if they are of type dict."""
         for datacls_field in dataclasses.fields(self):
             option_value = getattr(self, datacls_field.name)
             if isinstance(option_value, dict):
                 setattr(self, datacls_field.name, dot4dict.dotdict(option_value))
 
     def write_dvc_command(self, node_name: str) -> list:
-        """Collect dvc commands
+        """Collect dvc commands.
 
         Parameters
         ----------
@@ -115,7 +116,7 @@ AnyOrNodeConfig = typing.Union[typing.Any, NodeConfig]
 
 
 def execute_function_call(func):
-    """Run the function call
+    """Run the function call.
 
     1. Load the parameters from the Files.zntrack / Files.params
     2. Deserialize them
@@ -124,7 +125,8 @@ def execute_function_call(func):
 
     Parameters
     ----------
-    func: decorated function
+    func: callable
+        decorated function
 
     Returns
     -------
@@ -144,7 +146,7 @@ def execute_function_call(func):
 
 
 def save_node_config_to_files(cfg: NodeConfig, node_name: str):
-    """Save the values from cfg to zntrack.json / params.yaml
+    """Save the values from cfg to zntrack.json / params.yaml.
 
     Parameters
     ----------
@@ -183,10 +185,10 @@ def nodify(
     plots: UnionDictListOfStrPath = None,
     plots_no_cache: UnionDictListOfStrPath = None,
 ):
-    """Main wrapper Function to convert a function into a DVC Stage
+    """Main wrapper Function to convert a function into a DVC Stage.
 
-    Parameters
-    ----------
+    Special Parameters
+    ------------------
     params: dict
         for the params.yaml file context
     **kwargs: str|Path|list
@@ -211,7 +213,7 @@ def nodify(
     )
 
     def func_collector(func):
-        """Required for decorator to work"""
+        """Required for decorator to work."""
 
         def wrapper(
             *,
@@ -227,7 +229,7 @@ def nodify(
             run: bool = None,
             exec_func=False,
         ) -> AnyOrNodeConfig:
-            """Wrap the function
+            """Wrap the function.
 
             Parameters
             ----------
@@ -238,13 +240,20 @@ def nodify(
                 subprocess call.
             nb_name: str
                 Notebook name when not using config.nb_name (this is not recommended)
-            no_commit: dvc parameter
-            external: dvc parameter
-            always_changed: dvc parameter
-            no_exec: dvc parameter
-            run: bool, inverse of no_exec. Will overwrite no_exec if set.
-            force: dvc parameter
-            no_run_cache: dvc parameter
+            no_commit:
+                dvc parameter
+            external:
+                dvc parameter
+            always_changed:
+                dvc parameter
+            no_exec:
+                dvc parameter
+            run: bool,
+                inverse of no_exec. Will overwrite no_exec if set.
+            force:
+                dvc parameter
+            no_run_cache:
+                dvc parameter
             dry_run: bool, default = False
                 Only return the script but don't actually run anything
 

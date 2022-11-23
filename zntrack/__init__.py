@@ -1,4 +1,4 @@
-"""ZnTrack - Create, visualize, run & benchmark DVC pipelines in Python
+"""ZnTrack - Create, visualize, run & benchmark DVC pipelines in Python.
 
 GitHub: https://github.com/zincware/ZnTrack
 """

@@ -1,3 +1,4 @@
+"""DVC Graph as parent class for the Node."""
 from __future__ import annotations
 
 import dataclasses
@@ -15,7 +16,7 @@ log = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class DVCRunOptions:
-    """Collection of DVC run options
+    """Collection of DVC run options.
 
     Attributes
     ----------
@@ -34,7 +35,8 @@ class DVCRunOptions:
 
     @property
     def dvc_args(self) -> list:
-        """Get the activated options
+        """Get the activated options.
+
         Returns
         -------
         list: A list of strings for the subprocess call, e.g.:
@@ -49,7 +51,7 @@ class DVCRunOptions:
 
 
 def handle_dvc(value, dvc_args) -> list:
-    """Convert list of dvc_paths to a dvc input string
+    """Convert list of dvc_paths to a dvc input string.
 
     >>> handle_dvc("src/file.txt", "outs") == ["--outs", "src/file.txt"]
     """
@@ -81,7 +83,7 @@ def filter_ZnTrackOption(
     return_with_type=False,
     allow_none: bool = False,
 ) -> dict:
-    """Filter the descriptor instances by zn_type
+    """Filter the descriptor instances by zn_type.
 
     Parameters
     ----------
@@ -139,7 +141,7 @@ def prepare_dvc_script(
     func_or_cls,
     call_args,
 ) -> list:
-    """Prepare the dvc cmd to be called by subprocess
+    """Prepare the dvc cmd to be called by subprocess.
 
     Parameters
     ----------
@@ -151,7 +153,8 @@ def prepare_dvc_script(
         all the params / deps / ... to be added to the script
     nb_name: str|None
         Notebook name for jupyter support
-    module: str like "src.my_module"
+    module: str
+        like "src.my_module"
     func_or_cls: str
         The name of the Node class or function to be imported and run
     call_args: str
@@ -159,10 +162,8 @@ def prepare_dvc_script(
 
     Returns
     -------
-
     list[str]
         The list to be passed to the subprocess call
-
     """
     script = ["dvc", "stage", "add", "-n", node_name]
     script += dvc_run_option.dvc_args
@@ -179,18 +180,20 @@ def prepare_dvc_script(
 
 
 class ZnTrackInfo:
-    """Helping class for access to ZnTrack information"""
+    """Helping class for access to ZnTrack information."""
 
     def __init__(self, parent):
+        """ZnTrackInfo __init__."""
         self._parent = parent
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        """__repr__."""
         return f"ZnTrackInfo: {self._parent}"
 
     def collect(
         self, zntrackoption: typing.Type[DescriptorTypeT] = ZnTrackOption
     ) -> dict:
-        """Collect the values of all ZnTrackOptions of the passed type
+        """Collect the values of all ZnTrackOptions of the passed type.
 
         Parameters
         ----------
@@ -214,7 +217,7 @@ class ZnTrackInfo:
 
 
 def run_post_dvc_cmd(descriptor_list, instance):
-    """Run all post-dvc-cmds like plots modify"""
+    """Run all post-dvc-cmds like plots modify."""
     for desc in descriptor_list:
         if desc.post_dvc_cmd(instance) is not None:
             utils.run_dvc_cmd(desc.post_dvc_cmd(instance))

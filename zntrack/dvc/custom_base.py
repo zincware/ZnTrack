@@ -1,4 +1,4 @@
-"""Custom base classes for e.g. plots to account for plots modify"""
+"""Custom base classes for e.g. plots to account for plots modify."""
 import logging
 import pathlib
 import typing
@@ -13,11 +13,10 @@ log = logging.getLogger(__name__)
 
 
 class DVCOption(ZnTrackOption):
-    """Allow for nwd placeholder in strings to be automatically replaced"""
+    """Allow for nwd placeholder in strings to be automatically replaced."""
 
     def __get__(self, instance, owner=None):
-        """Overwrite getter to replace nwd placeholder when read the first time"""
-
+        """Overwrite getter to replace nwd placeholder when read the first time."""
         self._instance = instance
 
         if instance is None:
@@ -38,6 +37,8 @@ class DVCOption(ZnTrackOption):
 
 
 class PlotsModifyOption(DVCOption):
+    """Descriptor to allow plots to be modified."""
+
     def __init__(
         self,
         default=zninit.descriptor.Empty,
@@ -51,7 +52,8 @@ class PlotsModifyOption(DVCOption):
         no_header=False,
         **kwargs,
     ):
-        """
+        """PlotsModifyOption.
+
         See https://dvc.org/doc/command-reference/plots/modify for parameter information.
         """
         super().__init__(default=default, **kwargs)
@@ -64,7 +66,7 @@ class PlotsModifyOption(DVCOption):
         self.no_header = no_header
 
     def post_dvc_cmd(self, instance) -> typing.List[str]:
-        """Get a dvc cmd to run plots modify"""
+        """Get a dvc cmd to run plots modify."""
         if not any(
             [
                 self.template,

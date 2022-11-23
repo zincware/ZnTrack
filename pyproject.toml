@@ -19,7 +19,14 @@ pandas = "^1.4.3"
 pygit2 = ">=1.9,<1.11"
 zninit = ">=0.1.1"
 
-[tool.poetry.dev-dependencies]
+
+[tool.poetry.urls]
+documentation = "https://zntrack.readthedocs.io"
+repository = "https://github.com/zincware/ZnTrack"
+
+[tool.poetry.group.dev.dependencies]
+pytest-benchmark = "^3.4.1"
+ruff = "^0.0.133"
 pytest = "^7.1.2"
 sphinx-rtd-theme = "^1.0.0"
 jupyterlab = "^3.4.3"
@@ -39,12 +46,6 @@ coverage = "^6.4"
 nbmake = "^1.3.3"
 pytest-xdist = "^2.5.0"
 
-[tool.poetry.urls]
-documentation = "https://zntrack.readthedocs.io"
-repository = "https://github.com/zincware/ZnTrack"
-
-[tool.poetry.group.dev.dependencies]
-pytest-benchmark = "^3.4.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -90,4 +91,18 @@ disable = [
     "no-else-return",
     # allow for open TODOs
     "fixme",
+]
+
+[tool.ruff]
+line-length = 90
+
+select = ["E", "F", "D", "N", "C"] #, "ANN"]
+extend-ignore = [
+    "D213", "D203", "N802", "N801"
+]
+
+exclude = [
+    "tmp",
+    "tests",
+    "docs",
 ]
