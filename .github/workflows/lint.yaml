@@ -27,19 +27,21 @@ jobs:
       - name: run isort
         run: |
           isort --check-only --quiet .
-  flake8:
+  ruff:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - name: Install Python
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.x'
-      - name: Install flake8
+          python-version: "3.10"
+      - name: Install dependencies
         run: |
-          pip install flake8==4.0.1
-      - name: run flake8
-        run: |
-          flake8 . --count --show-source --statistics
+          python -m pip install --upgrade pip
+          pip install ruff
+      - name: Run Ruff
+        run: ruff .
+
   pylint-disabled:
     runs-on: ubuntu-latest
     steps:
