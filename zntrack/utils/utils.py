@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 
+import dvc.cli
 import znjson
 
 from zntrack.utils.config import config
@@ -188,20 +189,23 @@ def run_dvc_cmd(script):
     script: tuple[str]|list[str]
         A list of strings to pass the subprocess command
 
+    Raises
+    ------
+    DVCProcessError:
+        if the dvc cli command fails
+
     """
     dvc_short_string = " ".join(script[:5])
     if len(script) > 5:
         dvc_short_string += " ..."
     log.warning(f"Running DVC command: '{dvc_short_string}'")
-    try:
-        # do not display the output if log.log_level > logging.INFO
-        subprocess.run(script, check=True, capture_output=config.log_level > logging.INFO)
-    except subprocess.CalledProcessError as err:
+    # do not display the output if log.log_level > logging.INFO
+    return_code = dvc.cli.main(script)
+    if (return_code != 0) and (config.log_level > logging.INFO):
+        dvc.cli.main(script + ["--verbose", "--verbose"])
         raise DVCProcessError(
-            f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
-            f"# failed after stdout: \n{err.stdout.decode()}"
-            f"# with stderr: \n{err.stderr.decode()}"
-        ) from err
+            f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(script)}\" "
+        )
 
 
 def load_node_dependency(value, log_warning=False):
