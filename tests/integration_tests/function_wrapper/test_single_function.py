@@ -26,7 +26,6 @@ def test_example_func_dry_run(proj_path):
     script = example_func(dry_run=True)
     assert " ".join(script) == " ".join(
         [
-            "dvc",
             "stage",
             "add",
             "-n",

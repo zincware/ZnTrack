@@ -324,7 +324,6 @@ def test_write_graph():
     assert handle_znnodes_mock.called
 
     assert script == [
-        "dvc",
         "stage",
         "add",
         "-n",
