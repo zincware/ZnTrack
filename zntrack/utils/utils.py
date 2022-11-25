@@ -205,7 +205,7 @@ def run_dvc_cmd(script):
         script = script[:2] + ["--quiet"] + script[2:]
 
     return_code = dvc.cli.main(script)
-    if (return_code != 0) and show_log:
+    if return_code != 0:
         cmd = script[:2] + ["--verbose", "--verbose"] + script[2:]
         dvc.cli.main(cmd)
         raise DVCProcessError(
