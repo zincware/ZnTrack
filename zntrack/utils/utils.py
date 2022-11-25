@@ -212,6 +212,10 @@ def run_dvc_cmd(script):
         raise DVCProcessError(
             f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(cmd)}\" "
         )
+    # fix for https://github.com/iterative/dvc/issues/8631
+    for logger_name, logger in logging.root.manager.loggerDict.items():
+        if logger_name.startswith("zntrack"):
+            logger.disabled = False
     return return_code
 
 
