@@ -8,6 +8,7 @@ import sys
 
 import znjson
 
+from zntrack import utils
 from zntrack.core.base import Node
 from zntrack.core.functions.decorator import NodeConfig, nodify
 from zntrack.interface.base import DVCInterface
