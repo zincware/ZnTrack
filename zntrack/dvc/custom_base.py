@@ -89,7 +89,7 @@ class PlotsModifyOption(DVCOption):
         else:
             filename = self.get_filename(instance).as_posix()
 
-        script = ["dvc", "plots", "modify", filename]
+        script = ["plots", "modify", filename]
         for key, value in [
             ("--template", self.template),
             ("-x", self.x),

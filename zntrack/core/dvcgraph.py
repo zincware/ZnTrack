@@ -165,7 +165,7 @@ def prepare_dvc_script(
     list[str]
         The list to be passed to the subprocess call
     """
-    script = ["dvc", "stage", "add", "-n", node_name]
+    script = ["stage", "add", "-n", node_name]
     script += dvc_run_option.dvc_args
     script += custom_args
 

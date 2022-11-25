@@ -200,11 +200,16 @@ def run_dvc_cmd(script):
         dvc_short_string += " ..."
     log.warning(f"Running DVC command: '{dvc_short_string}'")
     # do not display the output if log.log_level > logging.INFO
+    show_log = config.log_level < logging.INFO
+    if not show_log:
+        script = script[:2] + ["--quiet"] + script[2:]
+
     return_code = dvc.cli.main(script)
-    if (return_code != 0) and (config.log_level > logging.INFO):
-        dvc.cli.main(script + ["--verbose", "--verbose"])
+    if (return_code != 0) and show_log:
+        cmd = script[:2] + ["--verbose", "--verbose"] + script[2:]
+        dvc.cli.main(cmd)
         raise DVCProcessError(
-            f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(script)}\" "
+            f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(cmd)}\" "
         )
 
 
