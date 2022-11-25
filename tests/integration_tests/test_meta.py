@@ -48,6 +48,6 @@ def test_CombinedNodeWithMeta(proj_path):
     assert CombinedNodeWithMeta.load().output == "Hello World"
     assert CombinedNodeWithMeta.load().author == "there"
 
-    subprocess.check_call(["dvc", "repro", "-f"])
+    zntrack.utils.run_dvc_cmd(["repro", "-f"])
     # Forcing rerun should use the updated meta keyword.
     assert CombinedNodeWithMeta.load().output == "Hello there"

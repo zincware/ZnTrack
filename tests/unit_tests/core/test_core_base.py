@@ -323,7 +323,7 @@ def test_write_graph():
     assert save_mock.called
     assert handle_znnodes_mock.called
 
-    assert script == [
+    expected_script = [
         "stage",
         "add",
         "-n",
@@ -331,10 +331,16 @@ def test_write_graph():
         "--force",
         "--outs",
         "example.dat",
-        (
-            'python3 -c "from test_core_base import ExampleDVCOutsNode; '
-            "ExampleDVCOutsNode.load(name='ExampleDVCOutsNode').run_and_save()\" "
-        ),
+    ]
+
+    cmd = (
+        'python -c "from test_core_base import ExampleDVCOutsNode; '
+        "ExampleDVCOutsNode.load(name='ExampleDVCOutsNode').run_and_save()\" "
+    )
+
+    assert script in [
+        expected_script + [cmd],
+        expected_script + [cmd.replace("python", "python3")],
     ]
 
 

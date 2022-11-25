@@ -3,7 +3,7 @@ import subprocess
 
 import pytest
 
-from zntrack import Node, zn
+from zntrack import Node, utils, zn
 from zntrack.interface import DVCInterface
 
 
@@ -25,7 +25,7 @@ def single_experiment_path(proj_path):
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
 
-    subprocess.run(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
 
 @pytest.fixture()
@@ -34,12 +34,12 @@ def multi_experiment_path(proj_path):
     subprocess.run(["git", "add", "."])
     subprocess.run(["git", "commit", "-m", "Init"])
 
-    subprocess.run(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     HelloWorld(inputs=2).write_graph()
-    subprocess.run(["dvc", "exp", "run", "-n", "Test02"])
+    utils.run_dvc_cmd(["exp", "run", "-n", "Test02"])
     HelloWorld(inputs=3).write_graph()
-    subprocess.run(["dvc", "exp", "run", "-n", "Test03"])
+    utils.run_dvc_cmd(["exp", "run", "-n", "Test03"])
 
 
 @pytest.fixture()

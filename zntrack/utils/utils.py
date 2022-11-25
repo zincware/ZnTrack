@@ -206,11 +206,13 @@ def run_dvc_cmd(script):
 
     return_code = dvc.cli.main(script)
     if return_code != 0:
+        script = [x for x in script if x != "--quiet"]
         cmd = script[:2] + ["--verbose", "--verbose"] + script[2:]
         dvc.cli.main(cmd)
         raise DVCProcessError(
             f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(cmd)}\" "
         )
+    return return_code
 
 
 def load_node_dependency(value, log_warning=False):

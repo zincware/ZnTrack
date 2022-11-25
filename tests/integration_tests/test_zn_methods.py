@@ -7,7 +7,7 @@ import typing
 import pytest
 import yaml
 
-from zntrack import zn
+from zntrack import utils, zn
 from zntrack.core.base import Node
 
 
@@ -48,7 +48,7 @@ def test_run_twice_diff_params(proj_path):
     assert SingleNode.load().result == 2
     # second run
     SingleNode(data_class=ExampleMethod(2, 2)).write_graph(no_exec=False)
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
     assert SingleNode.load().result == 4
 
 

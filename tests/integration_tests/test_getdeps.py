@@ -43,7 +43,7 @@ def test_getdeps_via_matmul(proj_path):
                 name=f"rld_{step}",
             ).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     for step in range(steps):
         assert RandomLikeDeps[f"rld_{step}"].number.shape == (5, 5)
@@ -65,7 +65,7 @@ def test_stacked_name_getdeps(proj_path, steps):
                 name=f"rld_{step}",
             ).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     for step in range(steps):
         assert RandomLikeDeps[f"rld_{step}"].number.shape == (5, 5)
