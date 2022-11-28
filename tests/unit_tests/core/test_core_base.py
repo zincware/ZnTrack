@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 from unittest.mock import MagicMock, call, mock_open, patch
 
@@ -352,3 +353,28 @@ def test__handle_nodes_as_methods():
     with patch.object(ExampleDVCOutsNode, "write_graph") as write_graph_mock:
         _handle_nodes_as_methods({"example": None})
     assert not write_graph_mock.called
+
+
+def test_node_name(tmp_path):
+    os.chdir(tmp_path)
+    node = ExampleDVCOutsNode()
+    assert node.node_name == "ExampleDVCOutsNode"
+    assert node.nwd == pathlib.Path("nodes") / "ExampleDVCOutsNode"
+    assert node.nwd.exists()
+
+    # load
+    node = ExampleDVCOutsNode.load(name="MyNode")
+    assert node.node_name == "MyNode"
+    assert node.nwd == pathlib.Path("nodes") / "MyNode"
+    assert node.nwd.exists()
+
+    # set
+    node = ExampleDVCOutsNode()
+    node.node_name = "MyNode"
+    assert node.node_name == "MyNode"
+    assert node.nwd == pathlib.Path("nodes") / "MyNode"
+    assert node.nwd.exists()
+
+    node.nwd = pathlib.Path("nodes") / "CustomNWD"
+    assert node.nwd == pathlib.Path("nodes") / "CustomNWD"
+    assert node.nwd.exists()
