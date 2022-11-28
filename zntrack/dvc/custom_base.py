@@ -25,15 +25,9 @@ class DVCOption(ZnTrackOption):
             self._write_instance_dict(instance)
 
         # this is a cheap operation, so we run this every single time.
-        nwd = pathlib.Path("nodes", instance.node_name)
-
-        instance.__dict__[self.name], mkdir = replace_nwd_placeholder(
-            instance.__dict__[self.name], node_working_directory=nwd
+        return replace_nwd_placeholder(
+            instance.__dict__[self.name], node_working_directory=instance.nwd
         )
-        if mkdir:
-            nwd.mkdir(exist_ok=True, parents=True)
-
-        return instance.__dict__[self.name]
 
 
 class PlotsModifyOption(DVCOption):

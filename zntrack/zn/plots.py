@@ -35,7 +35,7 @@ class plots(PlotsModifyOption):  # pylint: disable=invalid-name
 
     def get_filename(self, instance) -> pathlib.Path:
         """Overwrite filename to csv."""
-        return pathlib.Path("nodes", instance.node_name, f"{self.name}.csv")
+        return instance.nwd / f"{self.name}.csv"
 
     def save(self, instance):
         """Save value with pd.DataFrame.to_csv."""

@@ -152,6 +152,8 @@ class NodeBase(zninit.ZnInit):
         first priority is if requested via kwargs
         second is having the class attribute set in the class definition
         last if both above are None it will be set to __class__.__name__
+    nwd: pathlib.Path
+        The 'node working directory' which is typically 'nodes/<node_name>'.
     is_attribute: bool, default = False
         If the Node is not used directly but through e.g. zn.Nodes() as a dependency
         this can be set to True. It will disable all outputs in the params.yaml file
@@ -160,6 +162,7 @@ class NodeBase(zninit.ZnInit):
 
     is_loaded: bool = False
     node_name = None
+    nwd: pathlib.Path = None
     _module = None
     _is_attribute = False
 
@@ -175,6 +178,10 @@ class NodeBase(zninit.ZnInit):
         if self.node_name is None:
             # set default value of node_name attribute
             self.node_name = self.__class__.__name__
+
+        self.nwd = pathlib.Path("nodes", self.node_name)
+        self.nwd.mkdir(exist_ok=True, parents=True)
+
         for data in self._descriptor_list:
             if data.zn_type == utils.ZnTypes.DEPS:
                 update_dependency_options(data.default)

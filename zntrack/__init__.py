@@ -13,7 +13,7 @@ from zntrack.core.base import Node
 from zntrack.core.functions.decorator import NodeConfig, nodify
 from zntrack.interface.base import DVCInterface
 from zntrack.project.zntrack_project import ZnTrackProject
-from zntrack.utils import exceptions
+from zntrack.utils import exceptions, nwd
 from zntrack.utils.config import config
 from zntrack.utils.serializer import (
     MethodConverter,
@@ -35,6 +35,7 @@ __all__ = [
     "getdeps",
     "utils",
     "exceptions",
+    "nwd",
 ]
 
 __version__ = importlib.metadata.version("zntrack")
