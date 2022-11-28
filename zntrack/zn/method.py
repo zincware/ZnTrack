@@ -56,7 +56,7 @@ class Method(SplitZnTrackOption):
             )
         super().__set__(instance, value)
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance, owner=None, serialize=False):
         """Add some custom attributes to the instance to identify it in znjson."""
         if instance is None:
             # this must be here, even though it is in the super call, what follows

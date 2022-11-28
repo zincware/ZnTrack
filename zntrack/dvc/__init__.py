@@ -43,7 +43,7 @@ class deps(DVCOption):  # pylint: disable=invalid-name
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance, owner=None, serialize=False):
         """Use load_node_dependency before returning the value."""
         if instance is None:
             return self
