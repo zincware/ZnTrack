@@ -43,7 +43,7 @@ def replace_nwd_placeholder(
 
 @replace_nwd_placeholder.register
 def _(path: None, node_working_directory) -> None:
-    """Replace nothing"""
+    """Replace nothing."""
     return path
 
 
@@ -55,17 +55,17 @@ def _(path: str, node_working_directory) -> str:
 
 @replace_nwd_placeholder.register
 def _(path: list, node_working_directory) -> list:
-    """Replace list"""
+    """Replace list."""
     return [replace_nwd_placeholder(x, node_working_directory) for x in path]
 
 
 @replace_nwd_placeholder.register
 def _(path: tuple, node_working_directory) -> tuple:
-    """Replace tuple"""
+    """Replace tuple."""
     return tuple(replace_nwd_placeholder(x, node_working_directory) for x in path)
 
 
 @replace_nwd_placeholder.register
 def _(path: pathlib.Path, node_working_directory) -> pathlib.Path:
-    """replace pathlib.Path"""
+    """Replace pathlib.Path."""
     return pathlib.Path(replace_nwd_placeholder(path.as_posix(), node_working_directory))
