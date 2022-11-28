@@ -57,3 +57,13 @@ class plots(PlotsModifyOption):  # pylint: disable=invalid-name
         """Load value with pd.read_csv."""
         file = self.get_filename(instance)
         return pd.read_csv(file, index_col=0)
+
+    def __get__(self, instance, owner=None):
+        """__get__ method."""
+        self._instance = instance
+
+        if instance is None:
+            return self
+        else:
+            self._write_instance_dict(instance)
+        return instance.__dict__[self.name]

@@ -17,6 +17,7 @@ class DVCOption(ZnTrackOption):
 
     def __get__(self, instance, owner=None):
         """Overwrite getter to replace nwd placeholder when read the first time."""
+        # TODO maybe make this a mixin?
         self._instance = instance
 
         if instance is None:
