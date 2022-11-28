@@ -179,6 +179,8 @@ class InCorrectNode(Node):
 def test_load():
     default_correct_node = CorrectNode.load()
     assert default_correct_node.node_name == CorrectNode.__name__
+    default_correct_node = CorrectNode.load(name=None)
+    assert default_correct_node.node_name == CorrectNode.__name__
 
     with pytest.raises(TypeError):
         # can not load a Node that misses a correct super().__init__(**kwargs)
@@ -190,6 +192,9 @@ def test_load():
     correct_node = CorrectNode.load(name="Test")
     assert correct_node.node_name == "Test"
     assert correct_node.test_name == correct_node.node_name
+
+    with pytest.raises(ValueError):
+        CorrectNode.load(name=25)
 
 
 class RunTestNode(Node):

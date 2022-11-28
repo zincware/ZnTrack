@@ -370,6 +370,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             super().__init__(**kwargs)
 
         """
+        if not (isinstance(name, str) or (name is None)):
+            raise ValueError(f"name must be string or None. Found {name}.")
         if lazy is None:
             lazy = utils.config.lazy
         try:
