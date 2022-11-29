@@ -50,14 +50,14 @@ class deps(DVCOption):  # pylint: disable=invalid-name
         def check_correct_type(x):
             """Check if correct type is passed."""
             # TODO make this check available for more DVCOptions.
-            if not isinstance(x, (str, pathlib.Path)):
+            if not (isinstance(x, (str, pathlib.Path)) or (x is None)):
                 if hasattr(x, "node_name"):
                     raise ValueError(
                         f"Found Node instance ({x}) in dvc.deps(), use zn.deps() instead."
                     )
                 raise ValueError(
-                    f"Found type '{x}', but 'dvc.deps' only supports lists/tuples of"
-                    " string or Path."
+                    f"Found type '{type(x)}', but 'dvc.deps' only supports lists/tuples"
+                    " of string or Path."
                 )
 
         if isinstance(value, (list, tuple)):
