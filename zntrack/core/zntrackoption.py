@@ -170,7 +170,7 @@ class ZnTrackOption(zninit.Descriptor):
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to."""
         if uses_node_name(self.zn_type, instance) is None:
-            return pathlib.Path("nodes", instance.node_name, f"{self.filename}.json")
+            return instance.nwd / f"{self.filename}.json"
         return pathlib.Path(self.file)
 
     def save(self, instance):

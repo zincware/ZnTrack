@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import dataclasses
 import importlib
+import inspect
 import pathlib
 from typing import TYPE_CHECKING, List, Set, Union
 
@@ -82,7 +83,8 @@ def get_origin(
     AttributeError: if the attribute is not of type zn.deps
     """
     znjson.config.register(RawNodeAttributeConverter)
-    new_node = node.load(name=node.node_name)
+    node_name = None if inspect.isclass(node) else node.node_name
+    new_node = node.load(name=node_name)
     value = getattr(new_node, attribute)
 
     znjson.config.deregister(RawNodeAttributeConverter)
