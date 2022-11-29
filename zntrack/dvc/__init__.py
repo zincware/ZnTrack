@@ -44,15 +44,6 @@ class deps(DVCOption):  # pylint: disable=invalid-name
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
-    def __get__(self, instance, owner=None, serialize=False):
-        """Use load_node_dependency before returning the value."""
-        if instance is None:
-            return self
-        value = super().__get__(instance, owner)
-        value = utils.utils.load_node_dependency(value, log_warning=True)
-        setattr(instance, self.name, value)
-        return value
-
     def __set__(self, instance, value):
         """Add a type check."""
 
