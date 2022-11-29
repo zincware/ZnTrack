@@ -6,7 +6,6 @@ import contextlib
 import json
 import logging
 import pathlib
-import shutil
 import typing
 
 import zninit
@@ -642,44 +641,3 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         if not no_exec:
             utils.run_dvc_cmd(["dvc", "repro", self.node_name])
-
-    @contextlib.contextmanager
-    def temporary_directory(self):
-        """Work in a temporary directory until successfully finished.
-
-        This context manager will replace $nwd$ with 'temp_$nwd$' and move the files
-        to $nwd$ when successfully finished. This can be useful, when you are running
-        e.g., on hardware with limited execution time and can't use 'dvc checkpoints'.
-
-        When successfully finished, all files will be moved from 'temp_$nwd$' to $nwd$.
-        You can call 'dvc repro' multiple times to continue from 'temp_$nwd$'.
-
-        If used properly this will result in reproducible data but:
-        - checkpoints will not be removed if parameters change. Always remove a
-            checkpoint, when running with new parameters!
-        - checkpoints are not versioned. If you want to checkpoint e.g., model training,
-            use 'dvc checkpoints'.
-        """
-        # TODO: add to gitignore.
-        nwd = self.nwd.with_name(f"temp_{self.nwd.name}")
-        if nwd.exists():
-            log.info(f"Continuing from checkpoint in {nwd}.")
-        else:
-            log.info(f"Creating new temporary directory: {nwd}")
-        self.nwd = nwd
-        try:
-            yield
-        except Exception as err:
-            log.warning("Node execution was interrupted.")
-            raise err
-        finally:
-            # Save e.g. `zn.outs` before stopping.
-            self.save(results=True)
-
-        log.info("Finished successfully. Moving files.")
-        nwd = self.nwd.with_name(self.nwd.name[5:])  # strip "temp_"
-        for src_file in self.nwd.glob("*.*"):
-            if src_file in self.affected_files:
-                shutil.copy(src_file, nwd)
-        shutil.rmtree(self.nwd)
-        self.nwd = nwd
