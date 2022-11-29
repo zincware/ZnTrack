@@ -9,7 +9,7 @@ class CreateNumbers(Node):
 
 
 class AddOne(Node):
-    inp = dvc.deps(CreateNumbers.load())
+    inp = zn.deps(CreateNumbers.load())
     number = zn.outs()
 
     def run(self):
@@ -17,7 +17,7 @@ class AddOne(Node):
 
 
 class SubtractOne(Node):
-    inp = dvc.deps(CreateNumbers.load())
+    inp = zn.deps(CreateNumbers.load())
     number = zn.outs()
 
     def run(self):
@@ -27,7 +27,7 @@ class SubtractOne(Node):
 class Summation(Node):
     """Stage that is actually tested, containing the multiple dependencies"""
 
-    inp = dvc.deps([AddOne.load(), SubtractOne.load()])
+    inp = zn.deps([AddOne.load(), SubtractOne.load()])
     number = zn.outs()
 
     def run(self):
@@ -40,7 +40,7 @@ class SummationTuple(Node):
     Additionally testing for tuple conversion here!
     """
 
-    inp = dvc.deps((AddOne.load(), SubtractOne.load()))
+    inp = zn.deps((AddOne.load(), SubtractOne.load()))
     number = zn.outs()
 
     def run(self):

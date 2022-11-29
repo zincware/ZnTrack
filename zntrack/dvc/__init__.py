@@ -11,6 +11,7 @@ Examples
 
 """
 import logging
+import pathlib
 
 from zntrack import utils
 from zntrack.dvc.custom_base import DVCOption, PlotsModifyOption
@@ -43,14 +44,28 @@ class deps(DVCOption):  # pylint: disable=invalid-name
     zn_type = utils.ZnTypes.DEPS
     file = utils.Files.zntrack
 
-    def __get__(self, instance, owner=None):
-        """Use load_node_dependency before returning the value."""
-        if instance is None:
-            return self
-        value = super().__get__(instance, owner)
-        value = utils.utils.load_node_dependency(value, log_warning=True)
-        setattr(instance, self.name, value)
-        return value
+    def __set__(self, instance, value):
+        """Add a type check."""
+
+        def check_correct_type(x):
+            """Check if correct type is passed."""
+            # TODO make this check available for more DVCOptions.
+            if not (isinstance(x, (str, pathlib.Path)) or (x is None)):
+                if hasattr(x, "node_name"):
+                    raise ValueError(
+                        f"Found Node instance ({x}) in dvc.deps(), use zn.deps() instead."
+                    )
+                raise ValueError(
+                    f"Found type '{type(x)}', but 'dvc.deps' only supports lists/tuples"
+                    " of string or Path."
+                )
+
+        if isinstance(value, (list, tuple)):
+            [check_correct_type(x) for x in value]
+        else:
+            check_correct_type(value)
+
+        super().__set__(instance, value)
 
 
 class outs(DVCOption):  # pylint: disable=invalid-name
