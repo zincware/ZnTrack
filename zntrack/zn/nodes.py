@@ -56,7 +56,7 @@ class Nodes(ZnTrackOption):
             )
         super().__set__(instance, value)
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance, owner=None, serialize=False):
         """Use load_node_dependency before returning the value."""
         if instance is None:
             return self

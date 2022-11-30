@@ -42,7 +42,7 @@ class Hash(ZnTrackOption):
         super().__init__(filename="hash", **kwargs)
         self.use_time = use_time
 
-    def __get__(self, instance, owner=None) -> int:
+    def __get__(self, instance, owner=None, serialize=False) -> int:
         """Get the hash value."""
         if instance is None:
             return self

@@ -251,6 +251,13 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             f" {self.node_name}, id: {hex_id}>"
         )
 
+    def __hash__(self):
+        """compute the hash based on the parameters and node_name."""
+        params_dict = self.zntrack.collect(zn_params)
+        params_dict["node_name"] = self.node_name
+
+        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
+
     def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other).
 
@@ -416,13 +423,6 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
     def run(self):
         """Overwrite this method for the actual calculation."""
         raise NotImplementedError
-
-    def __hash__(self):
-        """compute the hash based on the parameters and node_name."""
-        params_dict = self.zntrack.collect(zn_params)
-        params_dict["node_name"] = self.node_name
-
-        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
 
     @property
     def module(self) -> str:

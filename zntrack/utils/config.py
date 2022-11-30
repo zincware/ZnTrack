@@ -33,7 +33,7 @@ class Config:
     nb_class_path: Path = Path("src")
     lazy: bool = True
     allow_empty_loading: bool = False
-    _log_level: int = dataclasses.field(default=logging.WARNING, init=False, repr=True)
+    _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
 
     @property
     def log_level(self):

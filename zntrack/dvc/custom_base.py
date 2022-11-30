@@ -15,7 +15,7 @@ log = logging.getLogger(__name__)
 class DVCOption(ZnTrackOption):
     """Allow for nwd placeholder in strings to be automatically replaced."""
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance, owner=None, serialize=False):
         """Overwrite getter to replace nwd placeholder when read the first time."""
         # TODO maybe make this a mixin?
         self._instance = instance
@@ -26,6 +26,8 @@ class DVCOption(ZnTrackOption):
             self._write_instance_dict(instance)
 
         # this is a cheap operation, so we run this every single time.
+        if serialize:
+            return instance.__dict__[self.name]
         return replace_nwd_placeholder(
             instance.__dict__[self.name], node_working_directory=instance.nwd
         )
