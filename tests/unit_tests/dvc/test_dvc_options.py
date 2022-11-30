@@ -21,3 +21,29 @@ def test_dvc_deps_type():
     node.deps = None
     with pytest.raises(ValueError):
         node.deps = 25
+
+
+def test_dvc_nwd():
+    """Test nwd and serialize=True."""
+
+    class Example:
+        nwd = pathlib.Path("nodes", "Example")
+        is_loaded = True
+        outs = dvc.outs()
+
+    node = Example()
+    node.outs = pathlib.Path("$nwd$", "file.txt")
+
+    assert node.outs == pathlib.Path("nodes", "Example", "file.txt")
+    assert node.outs == node.nwd / "file.txt"
+
+    assert Example.outs.__get__(node, serialize=True) == pathlib.Path("$nwd$", "file.txt")
+
+    # now with lists
+    node.outs = [pathlib.Path("$nwd$", "file.txt")]
+    assert node.outs == [pathlib.Path("nodes", "Example", "file.txt")]
+    assert node.outs == [node.nwd / "file.txt"]
+
+    assert Example.outs.__get__(node, serialize=True) == [
+        pathlib.Path("$nwd$", "file.txt")
+    ]
