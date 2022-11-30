@@ -1,3 +1,4 @@
+"""Define a ZnTrack Method (deprecated)."""
 import logging
 
 from zntrack import utils
@@ -7,14 +8,14 @@ log = logging.getLogger(__name__)
 
 
 class Method(SplitZnTrackOption):
-    """ZnTrack methods passing descriptor
+    """ZnTrack methods passing descriptor.
 
     This descriptor allows to pass a class instance that is not a ZnTrack Node as a
     method that can be used later. It requires that all passed class attributes have
     the same name in the __init__ and via getattr and that they are serializable.
 
-    Example
-    --------
+    Example.
+    -------
     >>> class HelloWorld:
     >>>     def __init__(self, name):
     >>>         self.name = name
@@ -37,14 +38,15 @@ class Method(SplitZnTrackOption):
         version="v0.4.3",
     )
     def __init__(self, *args, **kwargs):
+        """Wrap init with deprecated descriptor."""
         super().__init__(*args, **kwargs)
 
     def get_filename(self, instance):
-        """Does not have a single file but params.yaml and zntrack.json"""
+        """Does not have a single file but params.yaml and zntrack.json."""
         return None
 
     def __set__(self, instance, value):
-        """Include type check for better error reporting"""
+        """Include type check for better error reporting."""
         # TODO raise error on default values,
         #  make compatible types an attribute of descriptor
         if utils.helpers.isnode(value):
@@ -54,8 +56,8 @@ class Method(SplitZnTrackOption):
             )
         super().__set__(instance, value)
 
-    def __get__(self, instance, owner=None):
-        """Add some custom attributes to the instance to identify it in znjson"""
+    def __get__(self, instance, owner=None, serialize=False):
+        """Add some custom attributes to the instance to identify it in znjson."""
         if instance is None:
             # this must be here, even though it is in the super call, what follows
             #  after does not work otherwise

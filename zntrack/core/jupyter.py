@@ -1,3 +1,4 @@
+"""ZnTrack Jupyer Notebook interface."""
 import logging
 import pathlib
 import re
@@ -11,7 +12,7 @@ log = logging.getLogger(__name__)
 
 @lru_cache(None)
 def log_jupyter_warning():
-    """Use lru_cache to only print this once"""
+    """Use lru_cache to only print this once."""
     log.warning(
         "Jupyter support is an experimental feature! Please save your "
         "notebook before running this command!\n"
@@ -20,7 +21,7 @@ def log_jupyter_warning():
 
 
 def jupyter_class_to_file(nb_name, module_name):
-    """Extract the class definition form an ipynb file"""
+    """Extract the class definition form an ipynb file."""
     # TODO is it really module_name and not class name?
 
     log_jupyter_warning()

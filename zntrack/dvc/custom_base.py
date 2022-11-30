@@ -1,4 +1,4 @@
-"""Custom base classes for e.g. plots to account for plots modify"""
+"""Custom base classes for e.g. plots to account for plots modify."""
 import logging
 import pathlib
 import typing
@@ -13,11 +13,11 @@ log = logging.getLogger(__name__)
 
 
 class DVCOption(ZnTrackOption):
-    """Allow for nwd placeholder in strings to be automatically replaced"""
+    """Allow for nwd placeholder in strings to be automatically replaced."""
 
-    def __get__(self, instance, owner=None):
-        """Overwrite getter to replace nwd placeholder when read the first time"""
-
+    def __get__(self, instance, owner=None, serialize=False):
+        """Overwrite getter to replace nwd placeholder when read the first time."""
+        # TODO maybe make this a mixin?
         self._instance = instance
 
         if instance is None:
@@ -26,18 +26,16 @@ class DVCOption(ZnTrackOption):
             self._write_instance_dict(instance)
 
         # this is a cheap operation, so we run this every single time.
-        nwd = pathlib.Path("nodes", instance.node_name)
-
-        instance.__dict__[self.name], mkdir = replace_nwd_placeholder(
-            instance.__dict__[self.name], node_working_directory=nwd
+        if serialize:
+            return instance.__dict__[self.name]
+        return replace_nwd_placeholder(
+            instance.__dict__[self.name], node_working_directory=instance.nwd
         )
-        if mkdir:
-            nwd.mkdir(exist_ok=True, parents=True)
-
-        return instance.__dict__[self.name]
 
 
 class PlotsModifyOption(DVCOption):
+    """Descriptor to allow plots to be modified."""
+
     def __init__(
         self,
         default=zninit.descriptor.Empty,
@@ -51,7 +49,8 @@ class PlotsModifyOption(DVCOption):
         no_header=False,
         **kwargs,
     ):
-        """
+        """PlotsModifyOption.
+
         See https://dvc.org/doc/command-reference/plots/modify for parameter information.
         """
         super().__init__(default=default, **kwargs)
@@ -64,7 +63,7 @@ class PlotsModifyOption(DVCOption):
         self.no_header = no_header
 
     def post_dvc_cmd(self, instance) -> typing.List[str]:
-        """Get a dvc cmd to run plots modify"""
+        """Get a dvc cmd to run plots modify."""
         if not any(
             [
                 self.template,

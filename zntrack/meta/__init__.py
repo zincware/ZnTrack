@@ -1,4 +1,4 @@
-"""ZnTrack Node meta data __init__
+"""ZnTrack Node meta data __init__.
 
 Collection of Nodes that allow the storage of data inside a Node that is neither a true
 parameter but also not an output. This can be e.g. information about the user, some
@@ -13,7 +13,7 @@ from zntrack.core.zntrackoption import ZnTrackOption
 
 
 class Text(ZnTrackOption):
-    """ZnTrack Text based meta descriptor
+    """ZnTrack Text based meta descriptor.
 
     This ZnTrackOption allows the storage of plain text data in the 'dvc.yaml' meta key.
     """
@@ -23,12 +23,15 @@ class Text(ZnTrackOption):
     dvc_option = utils.DVCOptions.PARAMS
 
     def get_filename(self, instance) -> pathlib.Path:
+        """No File available."""
         return
 
     def mkdir(self, instance):
+        """No directory to be created."""
         return
 
     def get_data_from_files(self, instance):
+        """Load data from files."""
         try:
             file_content = utils.file_io.read_file(self.file)
         except FileNotFoundError as err:
@@ -41,6 +44,7 @@ class Text(ZnTrackOption):
         return values
 
     def save(self, instance):
+        """Save data to file."""
         if instance.__dict__.get(self.name) is utils.LazyOption:
             # do not save anything if __get__/__set__ was never used
             return

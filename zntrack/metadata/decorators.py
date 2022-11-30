@@ -1,3 +1,4 @@
+"""ZnTrack metadata decorator."""
 import contextlib
 import dataclasses
 import statistics
@@ -8,28 +9,26 @@ from zntrack.metadata.base import MetaData
 
 @dataclasses.dataclass
 class AggregateData:
-    """Dataclass to collect the values together with their mean and std"""
+    """Dataclass to collect the values together with their mean and std."""
 
     values: list = dataclasses.field(default_factory=list)
     mean: float = None
     std: float = None
 
     def update(self):
-        """Recompute mean and standard deviation"""
+        """Recompute mean and standard deviation."""
         with contextlib.suppress(statistics.StatisticsError):
             self.mean = statistics.mean(self.values)
             self.std = statistics.stdev(self.values)
 
 
 class TimeIt(MetaData):
-    """TimeIt decorator that saves the execution time of decorated method"""
+    """TimeIt decorator that saves the execution time of decorated method."""
 
     name_of_metric = "timeit"
 
     def __call__(self, cls, *args, **kwargs):
-        """Measure the execution time by storing the time
-        before and after the function call
-        """
+        """Measure the execution time by storing the time."""
         start_time = time()
         parsed_func = self.func(cls, *args, **kwargs)
         stop_time = time()

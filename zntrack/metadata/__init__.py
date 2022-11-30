@@ -1,4 +1,4 @@
-"""meta data collections such as execution times"""
+"""meta data collections such as execution times."""
 from .base import MetaData
 from .decorators import TimeIt
 

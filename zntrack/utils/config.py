@@ -1,4 +1,4 @@
-"""Description: Configuration File for ZnTrack"""
+"""Description: Configuration File for ZnTrack."""
 import dataclasses
 import logging
 from pathlib import Path
@@ -6,7 +6,7 @@ from pathlib import Path
 
 @dataclasses.dataclass
 class Config:
-    """Collection of Node configurations
+    """Collection of Node configurations.
 
     Attributes
     ----------
@@ -33,15 +33,16 @@ class Config:
     nb_class_path: Path = Path("src")
     lazy: bool = True
     allow_empty_loading: bool = False
-    _log_level: int = dataclasses.field(default=logging.WARNING, init=False, repr=True)
+    _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
 
     @property
     def log_level(self):
+        """Get the log level."""
         return self._log_level
 
     @log_level.setter
     def log_level(self, value):
-        """Update the loglevel of the ZnTrack logger"""
+        """Update the loglevel of the ZnTrack logger."""
         self._log_level = value
         logger = logging.getLogger("zntrack")
         logger.setLevel(self._log_level)
@@ -49,10 +50,10 @@ class Config:
 
 @dataclasses.dataclass(frozen=True)
 class Files:
-    """Important File paths for ZnTrack to work
+    """Important File paths for ZnTrack to work.
 
     Notes
-    ------
+    -----
     Currently frozen because changing the value is not tested.
     """
 

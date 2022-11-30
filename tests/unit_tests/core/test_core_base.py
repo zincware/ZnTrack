@@ -1,4 +1,5 @@
 import json
+import os
 import pathlib
 from unittest.mock import MagicMock, call, mock_open, patch
 
@@ -104,7 +105,7 @@ def test_save_only_hash():
 
     example = ExampleFullNode()
 
-    with pytest.raises(utils.exceptions.DescriptorMissing):
+    with pytest.raises(utils.exceptions.DescriptorMissingError):
         example.save(hash_only=True)
 
     def pathlib_open(*args, **kwargs):
@@ -178,6 +179,8 @@ class InCorrectNode(Node):
 def test_load():
     default_correct_node = CorrectNode.load()
     assert default_correct_node.node_name == CorrectNode.__name__
+    default_correct_node = CorrectNode.load(name=None)
+    assert default_correct_node.node_name == CorrectNode.__name__
 
     with pytest.raises(TypeError):
         # can not load a Node that misses a correct super().__init__(**kwargs)
@@ -189,6 +192,9 @@ def test_load():
     correct_node = CorrectNode.load(name="Test")
     assert correct_node.node_name == "Test"
     assert correct_node.test_name == correct_node.node_name
+
+    with pytest.raises(ValueError):
+        CorrectNode.load(name=25)
 
 
 class RunTestNode(Node):
@@ -352,3 +358,28 @@ def test__handle_nodes_as_methods():
     with patch.object(ExampleDVCOutsNode, "write_graph") as write_graph_mock:
         _handle_nodes_as_methods({"example": None})
     assert not write_graph_mock.called
+
+
+def test_node_name(tmp_path):
+    os.chdir(tmp_path)
+    node = ExampleDVCOutsNode()
+    assert node.node_name == "ExampleDVCOutsNode"
+    assert node.nwd == pathlib.Path("nodes") / "ExampleDVCOutsNode"
+    assert node.nwd.exists()
+
+    # load
+    node = ExampleDVCOutsNode.load(name="MyNode")
+    assert node.node_name == "MyNode"
+    assert node.nwd == pathlib.Path("nodes") / "MyNode"
+    assert node.nwd.exists()
+
+    # set
+    node = ExampleDVCOutsNode()
+    node.node_name = "MyNode"
+    assert node.node_name == "MyNode"
+    assert node.nwd == pathlib.Path("nodes") / "MyNode"
+    assert node.nwd.exists()
+
+    node.nwd = pathlib.Path("nodes") / "CustomNWD"
+    assert node.nwd == pathlib.Path("nodes") / "CustomNWD"
+    assert node.nwd.exists()

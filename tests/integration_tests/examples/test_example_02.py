@@ -1,6 +1,6 @@
 import numpy as np
 
-from zntrack import Node, ZnTrackProject, dvc, zn
+from zntrack import Node, ZnTrackProject, zn
 
 
 class ComputeA(Node):
@@ -34,8 +34,8 @@ class ComputeB(Node):
 class ComputeAB(Node):
     """Node stage AB, depending on A&B"""
 
-    a: ComputeA = dvc.deps(ComputeA.load())
-    b: ComputeB = dvc.deps(ComputeB.load())
+    a: ComputeA = zn.deps(ComputeA.load())
+    b: ComputeB = zn.deps(ComputeB.load())
     out = zn.outs()
     param = zn.params("default")
 
@@ -61,8 +61,8 @@ class ComputeANamed(Node):
 class ComputeABNamed(Node):
     """Node stage AB, depending on A&B with a custom stage name"""
 
-    a: ComputeANamed = dvc.deps(ComputeANamed.load())
-    b: ComputeB = dvc.deps(ComputeB.load())
+    a: ComputeANamed = zn.deps(ComputeANamed.load())
+    b: ComputeB = zn.deps(ComputeB.load())
     out = zn.outs()
 
     param = zn.params()

@@ -1,5 +1,6 @@
-"""Helpers for the Node Working Directory (NWD)"""
+"""Helpers for the Node Working Directory (NWD)."""
 
+import functools
 import logging
 import pathlib
 import typing
@@ -8,7 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class _NWD(str):
-    """String that allows for pathlib like truediv operation"""
+    """String that allows for pathlib like truediv operation."""
 
     def __truediv__(self, other) -> pathlib.Path:
         return pathlib.Path(self, other)
@@ -17,11 +18,12 @@ class _NWD(str):
 nwd = _NWD("$nwd$")
 
 
+@functools.singledispatch
 def replace_nwd_placeholder(
-    path: typing.Union[str, pathlib.Path, tuple, list],
+    path,
     node_working_directory: typing.Union[str, pathlib.Path],
-):
-    """Replace the nwd placeholder in the path with the actual node_working_directory
+) -> str:
+    """Replace the nwd placeholder in the path with the actual node_working_directory.
 
     Parameters
     ----------
@@ -35,47 +37,35 @@ def replace_nwd_placeholder(
     path: obj
         Object of the same type as the input (tuples -> list conversion) with the
         placeholder replaced by node_working_directory. Additionally, a boolean value
-    replaced: bool
-        Whether the placeholder was found and replaced or not
-
-
     """
-    if path is None:
-        return path, False
-    if isinstance(path, (tuple, list)):
-        # This could be cleaned up
-        paths = []
-        replace = False
-        for _path in path:
-            x, y = replace_nwd_placeholder(_path, node_working_directory)
-            paths.append(x)
-            if y is True:
-                replace = True
-        return paths, replace
+    raise ValueError(f"replace_nwd_placeholder is not implemented for {type(path)}")
 
-    _type = "str"
-    if isinstance(path, pathlib.Path):
-        _type = "path"
-        _path = path.as_posix()
-    else:
-        _path = path
 
-    try:
-        replace = nwd in _path
-    except TypeError:
-        # argument of type <Node> is not iterable. This can happen when you use
-        #  e.g. dvc.deps(Node) (deprecated)
-        return path, False
-    if not replace:
-        return path, False
+@replace_nwd_placeholder.register
+def _(path: None, node_working_directory) -> None:
+    """Replace nothing."""
+    return path
 
-    if isinstance(node_working_directory, pathlib.Path):
-        node_working_directory = node_working_directory.as_posix()
 
-    _path = _path.replace(nwd, node_working_directory)
+@replace_nwd_placeholder.register
+def _(path: str, node_working_directory) -> str:
+    """Main function to replace $nwd$ with 'nwd'."""
+    return path.replace(nwd, pathlib.Path(node_working_directory).as_posix())
 
-    if _type == "path":
-        _path = pathlib.Path(_path)
 
-    log.info(f"Replacing {nwd} with {node_working_directory} -> {_path}")
-    return _path, replace
+@replace_nwd_placeholder.register
+def _(path: list, node_working_directory) -> list:
+    """Replace list."""
+    return [replace_nwd_placeholder(x, node_working_directory) for x in path]
+
+
+@replace_nwd_placeholder.register
+def _(path: tuple, node_working_directory) -> tuple:
+    """Replace tuple."""
+    return tuple(replace_nwd_placeholder(x, node_working_directory) for x in path)
+
+
+@replace_nwd_placeholder.register
+def _(path: pathlib.Path, node_working_directory) -> pathlib.Path:
+    """Replace pathlib.Path."""
+    return pathlib.Path(replace_nwd_placeholder(path.as_posix(), node_working_directory))
