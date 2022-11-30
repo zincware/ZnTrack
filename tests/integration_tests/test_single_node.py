@@ -66,7 +66,7 @@ class ExampleNodeWithCompMethod(Node):
 def test_run(proj_path):
     test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
     assert test_node_1.inputs == "Lorem Ipsum"
-    test_node_1.write_graph()
+    test_node_1.write_graph(write_desc=True)
 
     obj = ExampleNode01.load()
     assert obj.inputs == "Lorem Ipsum"
