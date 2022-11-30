@@ -58,7 +58,6 @@ jobs:
           flags: fulltest
           verbose: true
       - name: CML Report
-        if: ${{ github.event_name == 'pull_request' }}
         env:
           REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
