@@ -192,10 +192,11 @@ def run_dvc_cmd(script):
     dvc_short_string = " ".join(script[:5])
     if len(script) > 5:
         dvc_short_string += " ..."
-    log.warning(f"Running DVC command: '{dvc_short_string}'")
+    log.info(f"Running DVC command: '{dvc_short_string}'")
     try:
         # do not display the output if log.log_level > logging.INFO
-        subprocess.run(script, check=True, capture_output=config.log_level > logging.INFO)
+        output = subprocess.run(script, check=True, capture_output=True)
+        log.info(output.stdout.decode())
     except subprocess.CalledProcessError as err:
         raise DVCProcessError(
             f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
