@@ -622,7 +622,7 @@ pgp = ["gpg"]
 
 [[package]]
 name = "dvc"
-version = "2.35.2"
+version = "2.36.0"
 description = "Git for data scientists - manage your code and data together"
 category = "main"
 optional = false
@@ -634,7 +634,7 @@ colorama = ">=0.3.9"
 configobj = ">=5.0.6"
 distro = ">=1.3.0"
 dpath = ">=2.0.2,<3"
-dvc-data = "0.28.0"
+dvc-data = "0.28.3"
 dvc-http = "2.27.2"
 dvc-render = "0.0.14"
 dvc-task = "0.1.6"
@@ -656,7 +656,7 @@ pyparsing = ">=2.4.7"
 requests = ">=2.22.0"
 rich = ">=10.13.0"
 "ruamel.yaml" = ">=0.17.11"
-scmrepo = "0.1.3"
+scmrepo = "0.1.4"
 shortuuid = ">=0.5.0"
 shtab = ">=1.3.4,<2"
 tabulate = ">=0.8.7"
@@ -679,14 +679,14 @@ ssh = ["dvc-ssh (==2.20.0)"]
 ssh-gssapi = ["dvc-ssh[gssapi] (==2.20.0)"]
 terraform = ["tpi[ssh] (>=2.1.0)"]
 testing = ["pytest-test-utils (==0.0.8)"]
-tests = ["beautifulsoup4 (==4.11.1)", "dvc-ssh (==2.20.0)", "dvclive (>=1.0)", "filelock (==3.8.0)", "flaky (==3.7.0)", "mypy (==0.990)", "pylint (==2.15.5)", "pylint-plugin-utils (==0.7)", "pylint-pytest (==1.1.2)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-docker (==0.11.0)", "pytest-lazy-fixture (==0.6.3)", "pytest-mock (==3.10.0)", "pytest-test-utils (==0.0.8)", "pytest-timeout (==2.1.0)", "pytest-xdist (==3.0.2)", "pywin32 (>=225)", "tpi[ssh] (>=2.1.0)", "types-requests (>=2.27.15)", "types-tabulate (>=0.8.6)", "types-toml (>=0.10.4)"]
+tests = ["beautifulsoup4 (==4.11.1)", "dvc-ssh (==2.20.0)", "filelock (==3.8.0)", "flaky (==3.7.0)", "mypy (==0.990)", "pylint (==2.15.7)", "pylint-plugin-utils (==0.7)", "pylint-pytest (==1.1.2)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-docker (==0.11.0)", "pytest-lazy-fixture (==0.6.3)", "pytest-mock (==3.10.0)", "pytest-test-utils (==0.0.8)", "pytest-timeout (==2.1.0)", "pytest-xdist (==3.0.2)", "pywin32 (>=225)", "tpi[ssh] (>=2.1.0)", "types-requests", "types-tabulate", "types-toml"]
 webdav = ["dvc-webdav (==2.19.0)"]
 webhdfs = ["dvc-webhdfs (==2.19.0)"]
 webhdfs-kerberos = ["dvc-webhdfs[kerberos] (==2.19.0)"]
 
 [[package]]
 name = "dvc-data"
-version = "0.28.0"
+version = "0.28.3"
 description = "dvc data"
 category = "main"
 optional = false
@@ -2273,7 +2273,7 @@ test = ["asv", "gmpy2", "mpmath", "pytest", "pytest-cov", "pytest-xdist", "sciki
 
 [[package]]
 name = "scmrepo"
-version = "0.1.3"
+version = "0.1.4"
 description = "SCM wrapper and fsspec filesystem for Git for use in DVC"
 category = "main"
 optional = false
@@ -2290,8 +2290,8 @@ pygit2 = ">=1.10.0"
 pygtrie = ">=2.3.2"
 
 [package.extras]
-dev = ["mock (==4.0.3)", "mypy (==0.971)", "paramiko (==2.11.0)", "pylint (==2.15.0)", "pytest (==7.1.2)", "pytest-asyncio (==0.18.3)", "pytest-cov (==3.0.0)", "pytest-docker (==0.12.0)", "pytest-mock (==3.8.2)", "pytest-sugar (==0.9.5)", "pytest-test-utils (==0.0.8)", "types-certifi (==2021.10.8.3)", "types-mock (==4.0.15)", "types-paramiko (==2.11.6)"]
-tests = ["mock (==4.0.3)", "mypy (==0.971)", "paramiko (==2.11.0)", "pylint (==2.15.0)", "pytest (==7.1.2)", "pytest-asyncio (==0.18.3)", "pytest-cov (==3.0.0)", "pytest-docker (==0.12.0)", "pytest-mock (==3.8.2)", "pytest-sugar (==0.9.5)", "pytest-test-utils (==0.0.8)", "types-certifi (==2021.10.8.3)", "types-mock (==4.0.15)", "types-paramiko (==2.11.6)"]
+dev = ["mock (==4.0.3)", "mypy (==0.971)", "paramiko (==2.12.0)", "pylint (==2.15.0)", "pytest (==7.2.0)", "pytest-asyncio (==0.18.3)", "pytest-cov (==3.0.0)", "pytest-docker (==0.12.0)", "pytest-mock (==3.8.2)", "pytest-sugar (==0.9.5)", "pytest-test-utils (==0.0.8)", "types-certifi (==2021.10.8.3)", "types-mock (==4.0.15.2)", "types-paramiko (==2.12.0.1)"]
+tests = ["mock (==4.0.3)", "mypy (==0.971)", "paramiko (==2.12.0)", "pylint (==2.15.0)", "pytest (==7.2.0)", "pytest-asyncio (==0.18.3)", "pytest-cov (==3.0.0)", "pytest-docker (==0.12.0)", "pytest-mock (==3.8.2)", "pytest-sugar (==0.9.5)", "pytest-test-utils (==0.0.8)", "types-certifi (==2021.10.8.3)", "types-mock (==4.0.15.2)", "types-paramiko (==2.12.0.1)"]
 
 [[package]]
 name = "send2trash"
@@ -3392,12 +3392,12 @@ dulwich = [
     {file = "dulwich-0.20.50.tar.gz", hash = "sha256:50a941796b2c675be39be728d540c16b5b7ce77eb9e1b3f855650ece6832d2be"},
 ]
 dvc = [
-    {file = "dvc-2.35.2-py3-none-any.whl", hash = "sha256:ba8875d1bbd7113c3fe0f562719be1120160f28c4dfc30b2effce61aa178fc9a"},
-    {file = "dvc-2.35.2.tar.gz", hash = "sha256:e74a7fafb3ac57d07fc7ccb74385eb467f7615a9d59f46b3f2a044ee61e67805"},
+    {file = "dvc-2.36.0-py3-none-any.whl", hash = "sha256:15d9946652357e3044e1bf0ab6ce5f3e173153a45054b301d5a05360ec9c4ff4"},
+    {file = "dvc-2.36.0.tar.gz", hash = "sha256:69ad12a63c55533f67b4a5ee4e91b08468866c52a21e377be092d4a60e879890"},
 ]
 dvc-data = [
-    {file = "dvc-data-0.28.0.tar.gz", hash = "sha256:d7ec483d20ee6fd5dbe9f2105352bb37e7858d5fd531361adc25987ff9cab222"},
-    {file = "dvc_data-0.28.0-py3-none-any.whl", hash = "sha256:cc1ab1391feeac5c1ba0e5eadf56b34095aba828090b0c6801d80b1d7985fbf4"},
+    {file = "dvc-data-0.28.3.tar.gz", hash = "sha256:cc43e32473769c98ded379b1f9e72f323321795c0535c5f94152077b5827022e"},
+    {file = "dvc_data-0.28.3-py3-none-any.whl", hash = "sha256:9ce6587e198691d5be8f2faaba7f1511a084dd455181ce1e0ed3d041db18d43e"},
 ]
 dvc-http = [
     {file = "dvc-http-2.27.2.tar.gz", hash = "sha256:242bed287ba1055b7a59eb7931023f2b617b8e670330fbee52312d7b31eb4b44"},
@@ -3556,9 +3556,7 @@ gitpython = [
 ]
 grandalf = [
     {file = "grandalf-0.6-py2-none-any.whl", hash = "sha256:d671fdfa5310f2639538b6c858c4b1aef7755535ccfcb9c1cdf0d29171326add"},
-    {file = "grandalf-0.6-py2.7.egg", hash = "sha256:51e34e141be2dd19bca74448918ebce88c1cd95498842a13d191df0a52a3955a"},
     {file = "grandalf-0.6-py3-none-any.whl", hash = "sha256:357946e2fd35fc92c327cf3c091acc5aef93e0c74c60fed0a727d827ab3b1272"},
-    {file = "grandalf-0.6-py3.5.egg", hash = "sha256:aa985ba9992aba30e9c09d3cd9574054268b74ff2d34ced68aa9e7ca698724b0"},
     {file = "grandalf-0.6.tar.gz", hash = "sha256:7471db231bd7338bc0035b16edf0dc0c900c82d23060f4b4d0c4304caedda6e4"},
 ]
 hydra-core = [
@@ -4244,6 +4242,7 @@ pygments = [
     {file = "Pygments-2.13.0.tar.gz", hash = "sha256:56a8508ae95f98e2b9bdf93a6be5ae3f7d8af858b43e02c5a2ff083726be40c1"},
 ]
 pygtrie = [
+    {file = "pygtrie-2.5.0-py3-none-any.whl", hash = "sha256:8795cda8105493d5ae159a5bef313ff13156c5d4d72feddefacaad59f8c8ce16"},
     {file = "pygtrie-2.5.0.tar.gz", hash = "sha256:203514ad826eb403dab1d2e2ddd034e0d1534bbe4dbe0213bb0593f66beba4e2"},
 ]
 pyparsing = [
@@ -4330,6 +4329,13 @@ pyyaml = [
     {file = "PyYAML-6.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:f84fbc98b019fef2ee9a1cb3ce93e3187a6df0b2538a651bfb890254ba9f90b5"},
     {file = "PyYAML-6.0-cp310-cp310-win32.whl", hash = "sha256:2cd5df3de48857ed0544b34e2d40e9fac445930039f3cfe4bcc592a1f836d513"},
     {file = "PyYAML-6.0-cp310-cp310-win_amd64.whl", hash = "sha256:daf496c58a8c52083df09b80c860005194014c3698698d1a57cbcfa182142a3a"},
+    {file = "PyYAML-6.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:d4b0ba9512519522b118090257be113b9468d804b19d63c71dbcf4a48fa32358"},
+    {file = "PyYAML-6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:81957921f441d50af23654aa6c5e5eaf9b06aba7f0a19c18a538dc7ef291c5a1"},
+    {file = "PyYAML-6.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:afa17f5bc4d1b10afd4466fd3a44dc0e245382deca5b3c353d8b757f9e3ecb8d"},
+    {file = "PyYAML-6.0-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:dbad0e9d368bb989f4515da330b88a057617d16b6a8245084f1b05400f24609f"},
+    {file = "PyYAML-6.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:432557aa2c09802be39460360ddffd48156e30721f5e8d917f01d31694216782"},
+    {file = "PyYAML-6.0-cp311-cp311-win32.whl", hash = "sha256:bfaef573a63ba8923503d27530362590ff4f576c626d86a9fed95822a8255fd7"},
+    {file = "PyYAML-6.0-cp311-cp311-win_amd64.whl", hash = "sha256:01b45c0191e6d66c470b6cf1b9531a771a83c1c4208272ead47a3ae4f2f603bf"},
     {file = "PyYAML-6.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:897b80890765f037df3403d22bab41627ca8811ae55e9a722fd0392850ec4d86"},
     {file = "PyYAML-6.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:50602afada6d6cbfad699b0c7bb50d5ccffa7e46a3d738092afddc1f9758427f"},
     {file = "PyYAML-6.0-cp36-cp36m-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:48c346915c114f5fdb3ead70312bd042a953a8ce5c7106d5bfb1a5254e47da92"},
@@ -4522,8 +4528,8 @@ scipy = [
     {file = "scipy-1.9.3.tar.gz", hash = "sha256:fbc5c05c85c1a02be77b1ff591087c83bc44579c6d2bd9fb798bb64ea5e1a027"},
 ]
 scmrepo = [
-    {file = "scmrepo-0.1.3-py3-none-any.whl", hash = "sha256:5327d8ea37320adf4e38effe4dd272e737c372137e84af57c56eefe36c33feb5"},
-    {file = "scmrepo-0.1.3.tar.gz", hash = "sha256:9ae20c2dc32a588215bb9b76040129cec68e2ef51b06cda48cdc32df15575998"},
+    {file = "scmrepo-0.1.4-py3-none-any.whl", hash = "sha256:7feaf08511452051734829dda76911778b1f9691d792754765a84b09948a5a17"},
+    {file = "scmrepo-0.1.4.tar.gz", hash = "sha256:e552f85a31bb4afb065da3e29eaf7464e3bcf281fb2d22ad8ebccfc3ae673174"},
 ]
 send2trash = [
     {file = "Send2Trash-1.8.0-py3-none-any.whl", hash = "sha256:f20eaadfdb517eaca5ce077640cb261c7d2698385a6a0f072a4a5447fd49fa08"},
