@@ -48,8 +48,10 @@ def _(path: None, node_working_directory) -> None:
 
 
 @replace_nwd_placeholder.register
-def _(path: str, node_working_directory) -> str:
+def _(path: str, node_working_directory) -> typing.Union[str, pathlib.Path]:
     """Main function to replace $nwd$ with 'nwd'."""
+    if path == nwd:
+        return node_working_directory
     return path.replace(nwd, pathlib.Path(node_working_directory).as_posix())
 
 
