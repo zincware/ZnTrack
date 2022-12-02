@@ -150,36 +150,6 @@ def module_to_path(module: str, suffix=".py") -> pathlib.Path:
     return pathlib.Path(*module.split(".")).with_suffix(suffix)
 
 
-def get_python_interpreter() -> str:
-    """Find the most suitable python interpreter.
-
-    Try to run subprocess check calls to see, which python interpreter
-    should be selected
-
-    Returns
-    -------
-    interpreter: str
-        Name of the python interpreter that works with subprocess calls
-    """
-    for interpreter in ["python3", "python"]:
-        try:
-            subprocess.check_call(
-                [interpreter, "--version"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            log.debug(f"Using command {interpreter} for dvc!")
-            return interpreter
-
-        except subprocess.CalledProcessError:
-            log.debug(f"{interpreter} is not working!")
-        except FileNotFoundError as err:
-            log.debug(err)
-    raise ValueError(
-        "Could not find a working python interpreter to work with subprocesses!"
-    )
-
-
 def run_dvc_cmd(script):
     """Run the DVC script via subprocess calls.
 
