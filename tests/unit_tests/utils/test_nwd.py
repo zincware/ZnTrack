@@ -75,3 +75,13 @@ def test_replace_nwd_placeholder():
         replace_nwd_placeholder(5, node_working_directory="tmp")
 
     assert replace_nwd_placeholder(None, node_working_directory="tmp") is None
+
+
+def test_replace_nwd_single():
+    """Replace 'nwd' without __truediv__."""
+    assert replace_nwd_placeholder(
+        utils.nwd, pathlib.Path("node", "nodename")
+    ) == pathlib.Path("node", "nodename")
+    assert replace_nwd_placeholder(
+        "$nwd$", pathlib.Path("node", "nodename")
+    ) == pathlib.Path("node", "nodename")
