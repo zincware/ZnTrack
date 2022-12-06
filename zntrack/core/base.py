@@ -498,7 +498,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         no_run_cache: bool = False,
         dry_run: bool = False,
         run: bool = None,
-        write_desc: bool = True,
+        write_desc: bool = False,
         *,
         call_args: str = None,
     ):
