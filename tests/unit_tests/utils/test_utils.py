@@ -70,12 +70,19 @@ def test_check_type():
     assert utils.check_type({"a": {"b": "c"}}, str, allow_dict=True)
 
 
-def test_python_interpreter():
-    assert utils.get_python_interpreter() in ["python", "python3"]
+def test_config_interpreter():
+    assert utils.config.interpreter in ["python", "python3"]
 
 
 def test_module_to_path():
     assert utils.module_to_path("src.module") == pathlib.Path("src", "module.py")
+
+
+def test_config_change():
+    assert utils.config.lazy
+    with utils.config.updated_config(lazy=False):
+        assert not utils.config.lazy
+    assert utils.config.lazy
 
 
 @pytest.mark.parametrize(

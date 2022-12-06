@@ -179,6 +179,14 @@ def test_get_origin_lst(proj_path):
     assert node_attr[0].name == "SeedNumber"
     assert node_attr[1].name == "sd2"
 
+    # Should also work with classes and not instances.
+    # Node Name is not taken into account in this case.
+    node_attr = get_origin(ModifyNumber, "inputs")
+    assert isinstance(node_attr[0], NodeAttribute)
+    assert isinstance(node_attr[1], NodeAttribute)
+    assert node_attr[0].name == "SeedNumber"
+    assert node_attr[1].name == "sd2"
+
 
 def test_err_get_origin(proj_path):
     sd = SeedNumber(inputs=20)

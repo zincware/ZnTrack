@@ -152,6 +152,8 @@ class NodeBase(zninit.ZnInit):
         first priority is if requested via kwargs
         second is having the class attribute set in the class definition
         last if both above are None it will be set to __class__.__name__
+    nwd: pathlib.Path
+        The 'node working directory' which is typically 'nodes/<node_name>'.
     is_attribute: bool, default = False
         If the Node is not used directly but through e.g. zn.Nodes() as a dependency
         this can be set to True. It will disable all outputs in the params.yaml file
@@ -159,7 +161,6 @@ class NodeBase(zninit.ZnInit):
     """
 
     is_loaded: bool = False
-    node_name = None
     _module = None
     _is_attribute = False
 
@@ -172,12 +173,39 @@ class NodeBase(zninit.ZnInit):
         if name is not None:
             # overwrite node_name attribute
             self.node_name = name
-        if self.node_name is None:
-            # set default value of node_name attribute
-            self.node_name = self.__class__.__name__
+
         for data in self._descriptor_list:
             if data.zn_type == utils.ZnTypes.DEPS:
                 update_dependency_options(data.default)
+
+    @property
+    def node_name(self) -> str:
+        """Get the node name."""
+        return self.__dict__.get("node_name", self.__class__.__name__)
+
+    @node_name.setter
+    def node_name(self, value: str):
+        """Set the node name.
+
+        Thereby, resetting 'self.nwd'.
+        """
+        self.__dict__["node_name"] = value
+        self.__dict__["nwd"] = None
+
+    @property
+    def nwd(self) -> pathlib.Path:
+        """Get the node working directory."""
+        nwd = self.__dict__.get("nwd")
+        if nwd is None:
+            nwd = pathlib.Path("nodes", self.node_name)
+            nwd.mkdir(exist_ok=True, parents=True)
+        return nwd
+
+    @nwd.setter
+    def nwd(self, value: pathlib.Path):
+        """Set the node working directory and create the directory."""
+        self.__dict__["nwd"] = value
+        value.mkdir(exist_ok=True, parents=True)
 
     @property
     def _descriptor_list(self) -> typing.List[zninit.descriptor.DescriptorTypeT]:
@@ -222,6 +250,13 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             f"<ZnTrack {obj}: status: {status}, loaded: {self.is_loaded}, name:"
             f" {self.node_name}, id: {hex_id}>"
         )
+
+    def __hash__(self):
+        """compute the hash based on the parameters and node_name."""
+        params_dict = self.zntrack.collect(zn_params)
+        params_dict["node_name"] = self.node_name
+
+        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
 
     def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other).
@@ -342,6 +377,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             super().__init__(**kwargs)
 
         """
+        if not (isinstance(name, str) or (name is None)):
+            raise ValueError(f"name must be string or None. Found {name}.")
         if lazy is None:
             lazy = utils.config.lazy
         try:
@@ -386,13 +423,6 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
     def run(self):
         """Overwrite this method for the actual calculation."""
         raise NotImplementedError
-
-    def __hash__(self):
-        """compute the hash based on the parameters and node_name."""
-        params_dict = self.zntrack.collect(zn_params)
-        params_dict["node_name"] = self.node_name
-
-        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
 
     @property
     def module(self) -> str:

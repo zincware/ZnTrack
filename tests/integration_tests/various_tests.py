@@ -22,7 +22,7 @@ class CustomDeps(Node):
 
 
 class DepsCollector(Node):
-    deps: typing.List[CustomDeps] = dvc.deps(
+    deps: typing.List[CustomDeps] = zn.deps(
         [CustomDeps.load(name="Deps1"), CustomDeps.load(name="Deps2")]
     )
     outs = zn.outs()

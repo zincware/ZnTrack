@@ -56,14 +56,14 @@ class Nodes(ZnTrackOption):
             )
         super().__set__(instance, value)
 
-    def __get__(self, instance, owner=None):
+    def __get__(self, instance, owner=None, serialize=False):
         """Use load_node_dependency before returning the value."""
         if instance is None:
             return self
         value = super().__get__(instance, owner)
         if value is not None:
             value._is_attribute = True
-            value.node_name = f"{instance.node_name}-{self.name}"
+            value.node_name = f"{instance.node_name}_{self.name}"
         # value._is_attribute = True # value can be None
         value = utils.utils.load_node_dependency(value)  # use value = Cls.load()
         setattr(instance, self.name, value)

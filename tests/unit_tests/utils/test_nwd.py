@@ -1,6 +1,8 @@
 import os
 import pathlib
 
+import pytest
+
 from zntrack import utils
 from zntrack.utils.nwd import replace_nwd_placeholder
 
@@ -13,56 +15,73 @@ def test_nwd():
 
 
 def test_replace_nwd_placeholder():
-    assert replace_nwd_placeholder(utils.nwd / "test.txt", "node") == (
-        pathlib.Path("node", "test.txt"),
-        True,
+    assert replace_nwd_placeholder(utils.nwd / "test.txt", "node") == pathlib.Path(
+        "node", "test.txt"
     )
     assert replace_nwd_placeholder(
         utils.nwd / "test.txt", pathlib.Path("node", "nodename")
-    ) == (pathlib.Path("node", "nodename", "test.txt"), True)
+    ) == pathlib.Path("node", "nodename", "test.txt")
 
     assert replace_nwd_placeholder(
         [utils.nwd / "test1.txt", utils.nwd / "test2.txt"], "node"
-    ) == ([pathlib.Path("node", "test1.txt"), pathlib.Path("node", "test2.txt")], True)
+    ) == [pathlib.Path("node", "test1.txt"), pathlib.Path("node", "test2.txt")]
 
     assert replace_nwd_placeholder(
         [f"{utils.nwd}/test1.txt", f"{utils.nwd}/test2.txt"], "node"
-    ) == (["node/test1.txt", "node/test2.txt"], True)
+    ) == ["node/test1.txt", "node/test2.txt"]
 
     assert replace_nwd_placeholder(
         [f"{utils.nwd}/test1.txt", f"{utils.nwd}/test2.txt"], pathlib.Path("node")
-    ) == (["node/test1.txt", "node/test2.txt"], True)
+    ) == ["node/test1.txt", "node/test2.txt"]
+
+    assert replace_nwd_placeholder(
+        (f"{utils.nwd}/test1.txt", f"{utils.nwd}/test2.txt"), pathlib.Path("node")
+    ) == ("node/test1.txt", "node/test2.txt")
 
     # Test the return value if nothing is to be replaced.
 
-    assert replace_nwd_placeholder(pathlib.Path("node") / "test.txt", "node") == (
-        pathlib.Path("node", "test.txt"),
-        False,
-    )
+    assert replace_nwd_placeholder(
+        pathlib.Path("node") / "test.txt", "node"
+    ) == pathlib.Path("node", "test.txt")
 
-    assert replace_nwd_placeholder("my_string", "node") == ("my_string", False)
-    assert replace_nwd_placeholder(["my_string_a", "my_string_b"], "node") == (
-        ["my_string_a", "my_string_b"],
-        False,
-    )
+    assert replace_nwd_placeholder("my_string", "node") == "my_string"
+    assert replace_nwd_placeholder(["my_string_a", "my_string_b"], "node") == [
+        "my_string_a",
+        "my_string_b",
+    ]
 
-    assert replace_nwd_placeholder(["node/test1.txt", "node/test2.txt"], "node") == (
-        ["node/test1.txt", "node/test2.txt"],
-        False,
-    )
+    assert replace_nwd_placeholder(["node/test1.txt", "node/test2.txt"], "node") == [
+        "node/test1.txt",
+        "node/test2.txt",
+    ]
 
-    assert replace_nwd_placeholder(["$nwd$/test1.txt", "node/test2.txt"], "node") == (
-        ["node/test1.txt", "node/test2.txt"],
-        True,
-    )
+    assert replace_nwd_placeholder(["$nwd$/test1.txt", "node/test2.txt"], "node") == [
+        "node/test1.txt",
+        "node/test2.txt",
+    ]
 
-    assert replace_nwd_placeholder(["node/test1.txt", "$nwd$/test2.txt"], "node") == (
-        ["node/test1.txt", "node/test2.txt"],
-        True,
-    )
+    assert replace_nwd_placeholder(["node/test1.txt", "$nwd$/test2.txt"], "node") == [
+        "node/test1.txt",
+        "node/test2.txt",
+    ]
 
     # mixed type
 
     assert replace_nwd_placeholder(
         ["$nwd$/test1.txt", utils.nwd / "test2.txt"], "node"
-    ) == (["node/test1.txt", pathlib.Path("node/test2.txt")], True)
+    ) == ["node/test1.txt", pathlib.Path("node/test2.txt")]
+
+    with pytest.raises(ValueError):
+        replace_nwd_placeholder(5, node_working_directory="tmp")
+
+    assert replace_nwd_placeholder(None, node_working_directory="tmp") is None
+
+
+def test_replace_nwd_single():
+    """Replace 'nwd' without __truediv__."""
+    assert replace_nwd_placeholder(
+        utils.nwd, pathlib.Path("node", "nodename")
+    ) == pathlib.Path("node", "nodename")
+    assert replace_nwd_placeholder(
+        "$nwd$", pathlib.Path("node", "nodename")
+    ) == pathlib.Path("node", "nodename")

@@ -172,7 +172,7 @@ def prepare_dvc_script(
     if nb_name is not None:
         script += ["--deps", utils.module_to_path(module).as_posix()]
 
-    import_str = f"""{utils.get_python_interpreter()} -c "from {module} import """
+    import_str = f"""{utils.config.interpreter} -c "from {module} import """
     import_str += f"""{func_or_cls}; {func_or_cls}{call_args}" """
     script += [import_str]
     log.debug(f"dvc script: {' '.join([str(x) for x in script])}")

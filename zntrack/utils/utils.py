@@ -151,36 +151,6 @@ def module_to_path(module: str, suffix=".py") -> pathlib.Path:
     return pathlib.Path(*module.split(".")).with_suffix(suffix)
 
 
-def get_python_interpreter() -> str:
-    """Find the most suitable python interpreter.
-
-    Try to run subprocess check calls to see, which python interpreter
-    should be selected
-
-    Returns
-    -------
-    interpreter: str
-        Name of the python interpreter that works with subprocess calls
-    """
-    for interpreter in ["python3", "python"]:
-        try:
-            subprocess.check_call(
-                [interpreter, "--version"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            log.debug(f"Using command {interpreter} for dvc!")
-            return interpreter
-
-        except subprocess.CalledProcessError:
-            log.debug(f"{interpreter} is not working!")
-        except FileNotFoundError as err:
-            log.debug(err)
-    raise ValueError(
-        "Could not find a working python interpreter to work with subprocesses!"
-    )
-
-
 def run_dvc_cmd(script):
     """Run the DVC script via subprocess calls.
 
@@ -219,7 +189,7 @@ def run_dvc_cmd(script):
     return return_code
 
 
-def load_node_dependency(value, log_warning=False):
+def load_node_dependency(value):
     """Load a Node dependency if passed only a class.
 
     Parameters
@@ -227,26 +197,18 @@ def load_node_dependency(value, log_warning=False):
     value: anything
         This function creates an instance of value if it is a class of node. Otherwise,
         it does nothing.
-    log_warning: bool
-        Log a DepreciationWarning when used from dvc.deps()
 
     Returns
     -------
     value:
         If value was subclass of Node, it returns an instance of value, otherwise
         it returns value
-
     """
     from zntrack.core.base import Node
 
     if isinstance(value, (list, tuple)):
-        value = [load_node_dependency(x, log_warning) for x in value]
+        value = [load_node_dependency(x) for x in value]
     with contextlib.suppress(TypeError):
         if issubclass(value, Node):
             value = value.load()
-    if isinstance(value, Node) and log_warning:
-        log.warning(
-            f"DeprecationWarning: Found Node instance ({value}) in dvc.deps(), please use"
-            " zn.deps() instead."
-        )
     return value

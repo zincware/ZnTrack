@@ -157,8 +157,19 @@ class ZnTrackOption(zninit.Descriptor):
             # because it could be changed.
             instance.__dict__[self.name] = copy.deepcopy(self.default)
 
-    def __get__(self, instance, owner=None):
-        """__get__ method."""
+    def __get__(self, instance, owner=None, serialize=False):
+        """__get__ method.
+
+        Parameters
+        ----------
+        instance: obj
+            The instance to get the attribute from.
+        owner: None
+            ...
+        serialize: bool, default = False.
+            return the value to be serialized.
+            E.g., if True '$nwd$' will not be converted.
+        """
         self._instance = instance
 
         if instance is None:
@@ -170,7 +181,7 @@ class ZnTrackOption(zninit.Descriptor):
     def get_filename(self, instance) -> pathlib.Path:
         """Get the name of the file this ZnTrackOption will save its values to."""
         if uses_node_name(self.zn_type, instance) is None:
-            return pathlib.Path("nodes", instance.node_name, f"{self.filename}.json")
+            return instance.nwd / f"{self.filename}.json"
         return pathlib.Path(self.file)
 
     def save(self, instance):
@@ -190,7 +201,7 @@ class ZnTrackOption(zninit.Descriptor):
             file=self.get_filename(instance),
             node_name=uses_node_name(self.zn_type, instance),
             value_name=self.name,
-            value=self.__get__(instance, self.owner),
+            value=self.__get__(instance, self.owner, serialize=True),
         )
 
     def mkdir(self, instance):

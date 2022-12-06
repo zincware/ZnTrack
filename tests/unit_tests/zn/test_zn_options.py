@@ -33,6 +33,7 @@ class ExamplePlots:
     module = None
     is_loaded = False
     node_name = "ExamplePlots"
+    nwd = pathlib.Path("nodes", "ExamplePlots")
     plots = zn.plots()
 
 
@@ -58,6 +59,7 @@ class ExampleMetrics:
     module = None
     is_loaded = False
     node_name = "ExampleMetrics"
+    nwd = pathlib.Path("nodes", "ExampleMetrics")
     metrics = zn.metrics()
 
 
