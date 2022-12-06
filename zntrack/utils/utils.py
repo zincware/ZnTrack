@@ -41,6 +41,7 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
 
     if config.nb_name is not None:
         shutil.copy(config.nb_name, temp_dir.name)
+        config.dvc_api = False
     if required_files is not None:
         for file in required_files:
             shutil.copy(file, temp_dir.name)
