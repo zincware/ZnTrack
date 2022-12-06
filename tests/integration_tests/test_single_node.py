@@ -6,7 +6,7 @@ import subprocess
 import pytest
 import yaml
 
-from zntrack import dvc, zn
+from zntrack import dvc, utils, zn
 from zntrack.core.base import Node
 from zntrack.utils.exceptions import DVCProcessError
 
@@ -71,7 +71,7 @@ def test_run(proj_path):
     obj = ExampleNode01.load()
     assert obj.inputs == "Lorem Ipsum"
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     load_test_node_1 = ExampleNode01.load()
     assert load_test_node_1.outputs == "Lorem Ipsum"
@@ -106,7 +106,7 @@ def test_datacls_method(proj_path):
         ExampleNodeWithDataClsMethod.load().my_datacls, ExampleDataClsMethod
     )
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert ExampleNodeWithDataClsMethod.load().result == 30
 
@@ -122,7 +122,7 @@ def test_compute_method(proj_path):
     example = ExampleNodeWithCompMethod(method=ComputeMethod(5))
     example.write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert ExampleNodeWithCompMethod.load().result == 50
 
@@ -137,7 +137,7 @@ def test_overwrite_outs(proj_path):
     # Create the parent directory for .gitignore
     assert out_file.parent.exists()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     # Now the file should exist after the Node ran.
     assert out_file.exists()

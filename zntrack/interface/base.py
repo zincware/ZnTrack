@@ -127,7 +127,6 @@ class DVCInterface:
                 out_path = path / experiment.name
                 out_path.mkdir(parents=True, exist_ok=True)
                 cmd = [
-                    "dvc",
                     "get",
                     ".",
                     file.as_posix(),

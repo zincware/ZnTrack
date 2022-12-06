@@ -10,6 +10,7 @@ import subprocess
 import sys
 import tempfile
 
+import dvc.cli
 import znjson
 
 from zntrack.utils.config import config
@@ -40,6 +41,10 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
 
     if config.nb_name is not None:
         shutil.copy(config.nb_name, temp_dir.name)
+        if config.dvc_api:
+            # TODO: why is this required?
+            log.debug("Setting 'config.dvc_api=False' for use in Jupyter Notebooks.")
+            config.dvc_api = False
     if required_files is not None:
         for file in required_files:
             shutil.copy(file, temp_dir.name)
@@ -158,21 +163,47 @@ def run_dvc_cmd(script):
     script: tuple[str]|list[str]
         A list of strings to pass the subprocess command
 
+    Raises
+    ------
+    DVCProcessError:
+        if the dvc cli command fails
+
     """
     dvc_short_string = " ".join(script[:5])
     if len(script) > 5:
         dvc_short_string += " ..."
-    log.info(f"Running DVC command: '{dvc_short_string}'")
-    try:
-        # do not display the output if log.log_level > logging.INFO
-        output = subprocess.run(script, check=True, capture_output=True)
-        log.info(output.stdout.decode())
-    except subprocess.CalledProcessError as err:
-        raise DVCProcessError(
-            f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
-            f"# failed after stdout: \n{err.stdout.decode()}"
-            f"# with stderr: \n{err.stderr.decode()}"
-        ) from err
+    log.warning(f"Running DVC command: '{dvc_short_string}'")
+    # do not display the output if log.log_level > logging.INFO
+    show_log = config.log_level < logging.INFO
+    if not show_log:
+        script = script[:2] + ["--quiet"] + script[2:]
+
+    if config.dvc_api:
+        return_code = dvc.cli.main(script)
+        if return_code != 0:
+            script = [x for x in script if x != "--quiet"]
+            cmd = script[:2] + ["--verbose", "--verbose"] + script[2:]
+            dvc.cli.main(cmd)
+            raise DVCProcessError(
+                f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(cmd)}\" "
+            )
+        # fix for https://github.com/iterative/dvc/issues/8631
+        for logger_name, logger in logging.root.manager.loggerDict.items():
+            if logger_name.startswith("zntrack"):
+                logger.disabled = False
+        return return_code
+    else:
+        script = ["dvc"] + script
+        try:
+            # do not display the output if log.log_level > logging.INFO
+            output = subprocess.run(script, check=True, capture_output=True)
+            log.info(output.stdout.decode())
+        except subprocess.CalledProcessError as err:
+            raise DVCProcessError(
+                f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
+                f"# failed after stdout: \n{err.stdout.decode()}"
+                f"# with stderr: \n{err.stderr.decode()}"
+            ) from err
 
 
 def load_node_dependency(value):

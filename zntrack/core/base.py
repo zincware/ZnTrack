@@ -645,4 +645,4 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             )
 
         if not no_exec:
-            utils.run_dvc_cmd(["dvc", "repro", self.node_name])
+            utils.run_dvc_cmd(["repro", self.node_name])

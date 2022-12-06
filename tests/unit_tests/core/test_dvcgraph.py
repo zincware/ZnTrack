@@ -174,7 +174,6 @@ def test_prepare_dvc_script():
     )
 
     assert script == [
-        "dvc",
         "stage",
         "add",
         "-n",
@@ -201,7 +200,6 @@ def test_prepare_dvc_script():
     )
 
     assert script == [
-        "dvc",
         "stage",
         "add",
         "-n",

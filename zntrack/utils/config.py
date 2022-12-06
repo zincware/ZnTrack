@@ -36,6 +36,8 @@ class Config:
         Use e.g. `config.interpreter=sys.executable` to use a specific version.
         Note, that changing the command will also affect your graph, and you might
         not be able to use the existing cache.
+    dvc_api: bool, default = True
+        Use the `dvc.cli.main` function instead of subprocess
     """
 
     nb_name: str = None
@@ -43,6 +45,7 @@ class Config:
     lazy: bool = True
     allow_empty_loading: bool = False
     interpreter: typing.Union[str, Path] = Path(sys.executable).name
+    dvc_api: bool = True
     _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
 
     @property

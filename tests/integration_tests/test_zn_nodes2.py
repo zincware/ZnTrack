@@ -4,7 +4,7 @@ import pytest
 import yaml
 import znjson
 
-from zntrack import zn
+from zntrack import config, zn
 from zntrack.core.base import Node
 
 
@@ -91,26 +91,28 @@ class ExampleNode2(Node):
         pass
 
 
-def test_depth_graph(proj_path):
-    node_1 = NodeViaParams(param1="Lorem", param2="Ipsum", name="Node1")
-    node_1.write_graph(run=True)  # defined as dependency, so it must run first.
+@pytest.mark.parametrize("dvc_api", (True, False))
+def test_depth_graph(proj_path, dvc_api):
+    with config.updated_config(dvc_api=dvc_api):
+        node_1 = NodeViaParams(param1="Lorem", param2="Ipsum", name="Node1")
+        node_1.write_graph(run=True)  # defined as dependency, so it must run first.
 
-    node_2 = NodeViaParams(param1="Lorem", param2="Ipsum")
+        node_2 = NodeViaParams(param1="Lorem", param2="Ipsum")
 
-    node_3 = NodeNodeParams(deps=node_1, node=node_2, name="Node3")
+        node_3 = NodeNodeParams(deps=node_1, node=node_2, name="Node3")
 
-    node_4 = ExampleNode2(params1=node_3, params2=None)
+        node_4 = ExampleNode2(params1=node_3, params2=None)
 
-    node_4.write_graph(run=True)
+        node_4.write_graph(run=True)
 
-    node_4 = ExampleNode2.load()
+        node_4 = ExampleNode2.load()
 
-    assert node_4.params1.deps.param1 == "Lorem"
-    assert node_4.params1.node.param2 == "Ipsum"
+        assert node_4.params1.deps.param1 == "Lorem"
+        assert node_4.params1.node.param2 == "Ipsum"
 
-    assert node_4.params1.node_name == "ExampleNode2_params1"
-    assert node_4.params1.deps.node_name == "Node1"
-    assert node_4.params1.node.node_name == "ExampleNode2_params1_node"
+        assert node_4.params1.node_name == "ExampleNode2_params1"
+        assert node_4.params1.deps.node_name == "Node1"
+        assert node_4.params1.node.node_name == "ExampleNode2_params1_node"
 
 
 class NodeWithOuts(Node):

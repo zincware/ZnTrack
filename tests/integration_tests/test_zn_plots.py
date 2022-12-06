@@ -6,6 +6,7 @@ import pytest
 import yaml
 
 from zntrack import Node, dvc, zn
+from zntrack.utils.utils import run_dvc_cmd
 
 
 class WritePlots(Node):
@@ -39,7 +40,7 @@ class WritePlotsWrongData(Node):
 )
 def test_write_plots(proj_path, PlotsCls, cache):
     PlotsCls().write_graph(run=True)
-    subprocess.check_call(["dvc", "plots", "show"])
+    run_dvc_cmd(["plots", "show"])
 
     wp = PlotsCls.load()
     assert wp.plots.index.name == "my_index"
