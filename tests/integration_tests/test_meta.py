@@ -4,7 +4,7 @@ import subprocess
 import pytest
 import yaml
 
-import zntrack
+import zntrack.zn
 
 
 class NodeWithMeta(zntrack.Node):
@@ -51,3 +51,25 @@ def test_CombinedNodeWithMeta(proj_path):
     zntrack.utils.run_dvc_cmd(["repro", "-f"])
     # Forcing rerun should use the updated meta keyword.
     assert CombinedNodeWithMeta.load().output == "Hello there"
+
+
+class NodeWithMetaHash(zntrack.Node):
+    author: str = zntrack.meta.Text()
+    _hash = zntrack.zn.Hash()
+
+
+class NodeWithNodeDeps(zntrack.Node):
+    other_node: NodeWithMeta = zntrack.zn.Nodes()
+
+    def run(self):
+        pass
+
+
+def test_NodeDepsMeta(proj_path):
+    """Check 'meta.Text' in a 'zn.Nodes' dependency."""
+    node = NodeWithNodeDeps(other_node=NodeWithMetaHash(author="John Doe"))
+    node.write_graph()
+
+    node = NodeWithNodeDeps.load()
+
+    assert node.other_node.author == "John Doe"
