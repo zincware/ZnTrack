@@ -8,7 +8,7 @@ import sys
 
 import znjson
 
-from zntrack import meta, utils
+from zntrack import utils
 from zntrack.core.base import Node
 from zntrack.core.functions.decorator import NodeConfig, nodify
 from zntrack.interface.base import DVCInterface
@@ -36,7 +36,6 @@ __all__ = [
     "utils",
     "exceptions",
     "nwd",
-    "meta",
 ]
 
 __version__ = importlib.metadata.version("zntrack")
