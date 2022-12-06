@@ -174,19 +174,32 @@ def run_dvc_cmd(script):
     if not show_log:
         script = script[:2] + ["--quiet"] + script[2:]
 
-    return_code = dvc.cli.main(script)
-    if return_code != 0:
-        script = [x for x in script if x != "--quiet"]
-        cmd = script[:2] + ["--verbose", "--verbose"] + script[2:]
-        dvc.cli.main(cmd)
-        raise DVCProcessError(
-            f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(cmd)}\" "
-        )
-    # fix for https://github.com/iterative/dvc/issues/8631
-    for logger_name, logger in logging.root.manager.loggerDict.items():
-        if logger_name.startswith("zntrack"):
-            logger.disabled = False
-    return return_code
+    if config.dvc_api:
+        return_code = dvc.cli.main(script)
+        if return_code != 0:
+            script = [x for x in script if x != "--quiet"]
+            cmd = script[:2] + ["--verbose", "--verbose"] + script[2:]
+            dvc.cli.main(cmd)
+            raise DVCProcessError(
+                f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(cmd)}\" "
+            )
+        # fix for https://github.com/iterative/dvc/issues/8631
+        for logger_name, logger in logging.root.manager.loggerDict.items():
+            if logger_name.startswith("zntrack"):
+                logger.disabled = False
+        return return_code
+    else:
+        script = ["dvc"] + script
+        try:
+            # do not display the output if log.log_level > logging.INFO
+            output = subprocess.run(script, check=True, capture_output=True)
+            log.info(output.stdout.decode())
+        except subprocess.CalledProcessError as err:
+            raise DVCProcessError(
+                f"Subprocess call with cmd: \n \"{' '.join(script)}\" \n"
+                f"# failed after stdout: \n{err.stdout.decode()}"
+                f"# with stderr: \n{err.stderr.decode()}"
+            ) from err
 
 
 def load_node_dependency(value):
