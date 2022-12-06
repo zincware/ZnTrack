@@ -6,6 +6,7 @@ import pytest
 
 from zntrack import zn
 from zntrack.core.base import Node
+from zntrack.utils.utils import run_dvc_cmd
 
 
 class FirstNode(Node):
@@ -58,7 +59,7 @@ def test_LastNodeNoDefault(proj_path, load_node, run):
     first_node = FirstNode.load() if load_node else FirstNode
     LastNodeNoDefault(first_node=first_node).write_graph(run=run)
     if not run:
-        subprocess.check_call(["dvc", "repro"])
+        run_dvc_cmd(["repro"])
 
     assert LastNodeNoDefault.load().outs == 21
 

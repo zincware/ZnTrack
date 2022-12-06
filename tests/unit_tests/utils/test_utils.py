@@ -1,9 +1,11 @@
 import json
 import os
 import pathlib
+import subprocess
 import sys
 from unittest.mock import MagicMock, patch
 
+import pytest
 import znjson
 
 from zntrack.utils import utils
@@ -68,9 +70,29 @@ def test_check_type():
     assert utils.check_type({"a": {"b": "c"}}, str, allow_dict=True)
 
 
-def test_python_interpreter():
-    assert utils.get_python_interpreter() in ["python", "python3"]
+def test_config_interpreter():
+    assert utils.config.interpreter in ["python", "python3"]
 
 
 def test_module_to_path():
     assert utils.module_to_path("src.module") == pathlib.Path("src", "module.py")
+
+
+def test_config_change():
+    assert utils.config.lazy
+    with utils.config.updated_config(lazy=False):
+        assert not utils.config.lazy
+    assert utils.config.lazy
+
+
+@pytest.mark.parametrize(
+    ("cmd", "error"), [(["init"], False), (["add", "file.txt"], True)]
+)
+def test_run_dvc_command(tmp_path, cmd: list, error: bool):
+    os.chdir(tmp_path)
+    subprocess.check_call(["git", "init"])
+    if error:
+        with pytest.raises(utils.DVCProcessError):
+            utils.run_dvc_cmd(cmd)
+    else:
+        assert utils.run_dvc_cmd(cmd) == 0

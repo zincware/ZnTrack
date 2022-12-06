@@ -73,7 +73,7 @@ def test_dvc_outs(proj_path):
 
     DependenciesCollector(dependencies=DVCOuts.load()).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert (
         DependenciesCollector.load().dependencies.data_file.read_text() == "Lorem Ipsum"
@@ -85,7 +85,7 @@ def test_dvc_outs_no_load(proj_path):
     assert issubclass(DVCOuts, Node)
     DependenciesCollector(dependencies=DVCOuts).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert (
         DependenciesCollector.load().dependencies.data_file.read_text() == "Lorem Ipsum"
@@ -106,7 +106,7 @@ def test_zn_outs(proj_path):
 
     DependenciesCollector(dependencies=ZnOuts.load()).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DependenciesCollector.load().dependencies.data == "Lorem Ipsum"
 
@@ -116,7 +116,7 @@ def test_dvc_zn_outs(proj_path):
 
     DependenciesCollector(dependencies=DVCZnOuts.load()).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert (
         DependenciesCollector.load().dependencies.data_file.read_text() == "Lorem Ipsum"
@@ -131,7 +131,7 @@ def test_expand_dependencies(proj_path):
     DependenciesCollector(name="Collector01", dependencies=DVCZnOuts.load()).write_graph()
     DependenciesCollector(name="Collector02", dependencies=DVCZnOuts.load()).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert (
         DependenciesCollector.load(name="Collector01").dependencies.data == "Lorem Ipsum"
@@ -150,7 +150,7 @@ def test_exp_deps_w_outs(proj_path):
         name="Collector02", dependencies=DepsCollwOuts.load(name="Collector01")
     ).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DepsCollwOuts.load("Collector01").dependencies.data == "Lorem Ipsum"
     assert (
@@ -191,7 +191,7 @@ def test_default_dependency(proj_path):
     """Test that an instance of a dependency is loaded correctly when a new
     instance is created"""
     ZnOuts().write_graph()
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
     DefaultDependencyNode().run_and_save()
 
     assert DefaultDependencyNode.load().result == "Lorem Ipsum"
@@ -208,7 +208,7 @@ def test_getdeps(proj_path, load):
 
     DependenciesCollector(dependencies=deps).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DependenciesCollector.load().dependencies.read_text() == "Lorem Ipsum"
 
@@ -220,7 +220,7 @@ def test_getdeps_named(proj_path):
         dependencies=getdeps(DVCOuts.load("node01"), "data_file")
     ).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DependenciesCollector.load().dependencies.read_text() == "Lorem Ipsum"
 
@@ -236,7 +236,7 @@ def test_getdeps_named_multi(proj_path):
         ]
     ).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DependenciesCollector.load().dependencies[0].read_text() == "Lorem Ipsum"
     assert DependenciesCollector.load().dependencies[1] == "Lorem Ipsum"
@@ -252,7 +252,7 @@ def test_getdeps_property(proj_path, load):
 
     DependenciesCollector(dependencies=deps).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DependenciesCollector.load().dependencies == "muspI meroL"
 
@@ -274,7 +274,7 @@ def test_getdeps_double(proj_path):
 
     DefaultDependencyNodeTwo(deps1=deps, deps2=deps).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DefaultDependencyNodeTwo.load().result == ["Lorem Ipsum", "Lorem Ipsum"]
 
@@ -289,7 +289,7 @@ def test_getdeps_double_named(proj_path):
 
     DefaultDependencyNodeTwo(deps1=deps1, deps2=deps2).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     assert DefaultDependencyNodeTwo.load().result == ["Lorem Ipsum", "Lorem Ipsum"]
 
@@ -323,7 +323,7 @@ def test_stacked_name_getdeps(proj_path, steps):
                 inputs=getdeps(AddOne[f"add_{step - 1}"], "output"), name=f"add_{step}"
             ).write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
 
     for step in range(steps):
         assert AddOne[f"add_{step}"].output == step + 1
@@ -351,11 +351,11 @@ def test_ParameterNodeWithHash(proj_path):
     ParameterNodeWithHash(param1=2, param2=40).write_graph()
     ParamDeps().write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["repro"])
     assert ParamDeps.load().outs == 42
 
     # Change parameters and thereby check if the dependencies are executed
     ParameterNodeWithHash(param1=10, param2=7).save()
-    subprocess.check_call(["dvc", "dag"])
-    subprocess.check_call(["dvc", "repro"])
+    utils.run_dvc_cmd(["dag"])
+    utils.run_dvc_cmd(["repro"])
     assert ParamDeps.load().outs == 17

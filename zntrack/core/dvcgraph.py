@@ -165,14 +165,14 @@ def prepare_dvc_script(
     list[str]
         The list to be passed to the subprocess call
     """
-    script = ["dvc", "stage", "add", "-n", node_name]
+    script = ["stage", "add", "-n", node_name]
     script += dvc_run_option.dvc_args
     script += custom_args
 
     if nb_name is not None:
         script += ["--deps", utils.module_to_path(module).as_posix()]
 
-    import_str = f"""{utils.get_python_interpreter()} -c "from {module} import """
+    import_str = f"""{utils.config.interpreter} -c "from {module} import """
     import_str += f"""{func_or_cls}; {func_or_cls}{call_args}" """
     script += [import_str]
     log.debug(f"dvc script: {' '.join([str(x) for x in script])}")

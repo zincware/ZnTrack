@@ -1,6 +1,9 @@
 """Description: Configuration File for ZnTrack."""
+import contextlib
 import dataclasses
 import logging
+import sys
+import typing
 from pathlib import Path
 
 
@@ -27,12 +30,22 @@ class Config:
         runs. If you encounter any issues you can set it to logging.INFO for more in-depth
         information. DEBUG level can produce a lot of useful information for more complex
         issues.
+    interpreter: str|Path, default = None
+        Set the Python interpreter to be used for the 'dvc cmd'.
+        If None, ZnTrack will try to automatically determine the interpreter.
+        Use e.g. `config.interpreter=sys.executable` to use a specific version.
+        Note, that changing the command will also affect your graph, and you might
+        not be able to use the existing cache.
+    dvc_api: bool, default = True
+        Use the `dvc.cli.main` function instead of subprocess
     """
 
     nb_name: str = None
     nb_class_path: Path = Path("src")
     lazy: bool = True
     allow_empty_loading: bool = False
+    interpreter: typing.Union[str, Path] = Path(sys.executable).name
+    dvc_api: bool = True
     _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
 
     @property
@@ -46,6 +59,24 @@ class Config:
         self._log_level = value
         logger = logging.getLogger("zntrack")
         logger.setLevel(self._log_level)
+
+    @contextlib.contextmanager
+    def updated_config(self, **kwargs) -> None:
+        """Temporarily update the config.
+
+        Yields
+        ------
+            Environment with temporarily changed config.
+        """
+        state = {}
+        for key, value in kwargs.items():
+            state[key] = getattr(self, key)
+            setattr(self, key, value)
+        try:
+            yield
+        finally:
+            for key, value in state.items():
+                setattr(self, key, value)
 
 
 @dataclasses.dataclass(frozen=True)

@@ -10,6 +10,8 @@ import subprocess
 
 import pytest
 
+from zntrack.utils.utils import run_dvc_cmd
+
 
 @pytest.fixture
 def proj_path(tmp_path, request) -> pathlib.Path:
@@ -28,7 +30,7 @@ def proj_path(tmp_path, request) -> pathlib.Path:
     shutil.copy(request.module.__file__, tmp_path)
     os.chdir(tmp_path)
     subprocess.check_call(["git", "init"])
-    subprocess.check_call(["dvc", "init"])
+    run_dvc_cmd(["init"])
 
     subprocess.check_call(["git", "add", "."])
     subprocess.check_call(["git", "commit", "-m", "init"])

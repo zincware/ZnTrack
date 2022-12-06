@@ -174,7 +174,6 @@ def test_prepare_dvc_script():
     )
 
     assert script == [
-        "dvc",
         "stage",
         "add",
         "-n",
@@ -185,7 +184,7 @@ def test_prepare_dvc_script():
         "--deps",
         "file.txt",
         (
-            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            f'{utils.config.interpreter} -c "from src.file import MyNode;'
             ' MyNode.load().run_and_save()" '
         ),
     ]
@@ -201,7 +200,6 @@ def test_prepare_dvc_script():
     )
 
     assert script == [
-        "dvc",
         "stage",
         "add",
         "-n",
@@ -214,7 +212,7 @@ def test_prepare_dvc_script():
         "--deps",
         "src/file.py",
         (
-            f'{utils.get_python_interpreter()} -c "from src.file import MyNode;'
+            f'{utils.config.interpreter} -c "from src.file import MyNode;'
             ' MyNode.load().run_and_save()" '
         ),
     ]

@@ -26,7 +26,6 @@ def test_example_func_dry_run(proj_path):
     script = example_func(dry_run=True)
     assert " ".join(script) == " ".join(
         [
-            "dvc",
             "stage",
             "add",
             "-n",
@@ -37,7 +36,7 @@ def test_example_func_dry_run(proj_path):
             "--outs",
             "test.txt",
             (
-                f'{utils.get_python_interpreter()} -c "from test_single_function import '
+                f'{utils.config.interpreter} -c "from test_single_function import '
                 'example_func; example_func(exec_func=True)" '
             ),
         ]

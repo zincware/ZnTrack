@@ -310,7 +310,7 @@ def nodify(
             utils.run_dvc_cmd(script)
 
             if not no_exec:
-                utils.run_dvc_cmd(["dvc", "repro", func.__name__])
+                utils.run_dvc_cmd(["repro", func.__name__])
 
             cfg.convert_fields_to_dotdict()
             return cfg

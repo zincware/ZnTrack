@@ -1,9 +1,9 @@
 import pathlib
-import subprocess
 
 from zntrack import dvc, zn
 from zntrack.core.base import Node
 from zntrack.core.functions.decorator import NodeConfig, nodify
+from zntrack.utils.utils import run_dvc_cmd
 
 
 @nodify(outs=pathlib.Path("text.txt"), params={"text": "Lorem Ipsum"})
@@ -23,7 +23,7 @@ def test_func_node(proj_path):
     write_text()
     MyNode().write_graph()
 
-    subprocess.check_call(["dvc", "repro"])
+    run_dvc_cmd(["repro"])
 
     assert pathlib.Path("text.txt").read_text() == "Lorem Ipsum"
     assert MyNode.load().value == "Lorem Ipsum"

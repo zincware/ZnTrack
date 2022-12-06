@@ -505,7 +505,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         no_run_cache: bool = False,
         dry_run: bool = False,
         run: bool = None,
-        write_desc: bool = True,
+        write_desc: bool = False,
         *,
         call_args: str = None,
     ):
@@ -647,7 +647,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             )
 
         if not no_exec:
-            utils.run_dvc_cmd(["dvc", "repro", self.node_name])
+            utils.run_dvc_cmd(["repro", self.node_name])
 
     @contextlib.contextmanager
     def temporary_directory(self):
