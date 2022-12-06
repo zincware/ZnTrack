@@ -108,9 +108,9 @@ def test_depth_graph(proj_path):
     assert node_4.params1.deps.param1 == "Lorem"
     assert node_4.params1.node.param2 == "Ipsum"
 
-    assert node_4.params1.node_name == "ExampleNode2-params1"
+    assert node_4.params1.node_name == "ExampleNode2_params1"
     assert node_4.params1.deps.node_name == "Node1"
-    assert node_4.params1.node.node_name == "ExampleNode2-params1-node"
+    assert node_4.params1.node.node_name == "ExampleNode2_params1_node"
 
 
 class NodeWithOuts(Node):
@@ -180,7 +180,7 @@ def test_ExampleUsesPlots(proj_path, node_name):
         node_with_plots=NodeWithPlots(factor=2.5), param=2.0, name=node_name
     )
     assert node.node_with_plots._is_attribute is True
-    assert node.node_with_plots.node_name == f"{node_name}-node_with_plots"
+    assert node.node_with_plots.node_name == f"{node_name}_node_with_plots"
     assert len(node.node_with_plots._descriptor_list) == 2
 
     node.write_graph()
@@ -191,7 +191,7 @@ def test_ExampleUsesPlots(proj_path, node_name):
     # Just checking if changing the parameters works as well
     with open("params.yaml", "r") as file:
         parameters = yaml.safe_load(file)
-    parameters[f"{node_name}-node_with_plots"]["factor"] = 1.0
+    parameters[f"{node_name}_node_with_plots"]["factor"] = 1.0
     with open("params.yaml", "a") as file:
         yaml.safe_dump(parameters, file)
 
