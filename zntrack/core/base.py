@@ -212,7 +212,12 @@ class NodeBase(zninit.ZnInit):
         """Get all descriptors of this instance."""
         descriptors = zninit.get_descriptors(ZnTrackOption, self=self)
         if self._is_attribute:
-            allowed_types = [utils.ZnTypes.PARAMS, utils.ZnTypes.HASH, utils.ZnTypes.DEPS]
+            allowed_types = [
+                utils.ZnTypes.PARAMS,
+                utils.ZnTypes.HASH,
+                utils.ZnTypes.DEPS,
+                utils.ZnTypes.META,
+            ]
             return [x for x in descriptors if x.zn_type in allowed_types]
         return descriptors
 
