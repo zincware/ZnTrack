@@ -339,8 +339,9 @@ def test_write_graph():
         "--outs",
         "example.dat",
         (
-            'python3 -c "from test_core_base import ExampleDVCOutsNode; '
-            "ExampleDVCOutsNode.load(name='ExampleDVCOutsNode').run_and_save()\" "
+            f'{utils.config.interpreter} -c "from test_core_base import'
+            " ExampleDVCOutsNode;"
+            " ExampleDVCOutsNode.load(name='ExampleDVCOutsNode').run_and_save()\" "
         ),
     ]
 
