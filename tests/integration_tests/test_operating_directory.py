@@ -40,6 +40,17 @@ def test_ListOfDataNode(proj_path):
     assert ListOfDataNode.load().data == list(range(10))
 
 
+def test_ListOfDataNode2(proj_path):
+    node = ListOfDataNode()
+    node.write_graph()
+
+    with pytest.raises(ValueError):
+        node.run_and_save()
+    node.run_and_save()
+
+    assert node.load().data == list(range(10))
+
+
 def test_RestartFromCheckpoint(proj_path):
     RestartFromCheckpoint().write_graph()
 
@@ -50,3 +61,14 @@ def test_RestartFromCheckpoint(proj_path):
     utils.run_dvc_cmd(["repro"])
 
     assert RestartFromCheckpoint.load().file.read_text() == "Hello there"
+
+
+def test_RestartFromCheckpoint2(proj_path):
+    node = RestartFromCheckpoint()
+    node.write_graph()
+
+    with pytest.raises(ValueError):
+        node.run_and_save()
+    node.run_and_save()
+
+    assert node.load().file.read_text() == "Hello there"
