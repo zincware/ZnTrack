@@ -650,10 +650,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             utils.run_dvc_cmd(["repro", self.node_name])
 
     @contextlib.contextmanager
-    def temporary_directory(self):
-        """Work in a temporary directory until successfully finished.
+    def operating_directory(self, prefix="ckpt") -> bool:
+        """Work in an operating directory until successfully finished.
 
-        This context manager will replace $nwd$ with 'temp_$nwd$' and move the files
+        This context manager will replace $nwd$ with 'prefix_$nwd$' and move the files
         to $nwd$ when successfully finished. This can be useful, when you are running
         e.g., on hardware with limited execution time and can't use 'dvc checkpoints'.
         When successfully finished, all files will be moved from 'temp_$nwd$' to $nwd$.
@@ -663,18 +663,33 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             checkpoint, when running with new parameters!
         - checkpoints are not versioned. If you want to checkpoint e.g., model training,
             use 'dvc checkpoints'.
+
+
+        Yields
+        ------
+        new_ckpt: bool
+            True if creating a new checkpoint. False if the checkpoint already existed.
         """
-        # TODO: add to gitignore.
-        nwd = self.nwd.with_name(f"temp_{self.nwd.name}")
-        if nwd.exists():
-            log.info(f"Continuing from checkpoint in {nwd}.")
-        else:
-            log.info(f"Creating new temporary directory: {nwd}")
+        utils.update_gitignore(prefix=prefix)
+        nwd = self.nwd.with_name(f"{prefix}_{self.nwd.name}")
+
+        new_ckpt = not nwd.exists()
+
+        if new_ckpt:
+            log.info(f"Creating new operating directory: {nwd}")
+            log.warning(
+                "Experimental Feature: operating directory is currently not compatible"
+                " with 'dvc exp --temp' or 'dvc exp --queue'"
+            )
+            # TODO add a unique path per node.
             # TODO check on windows!
             shutil.copytree(self.nwd, nwd, copy_function=os.link)
+        else:
+            log.info(f"Continuing inside operating directory: {nwd}.")
+
         self.nwd = nwd
         try:
-            yield
+            yield new_ckpt
         except Exception as err:
             log.warning("Node execution was interrupted.")
             raise err
@@ -682,8 +697,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             # Save e.g. `zn.outs` before stopping.
             self.save(results=True)
 
-        log.info("Finished successfully. Moving files.")
-        nwd = self.nwd.with_name(self.nwd.name[5:])  # strip "temp_"
+        nwd = self.nwd.with_name(self.nwd.name.split(f"{prefix}_")[1])
+        log.info(f"Finished successfully. Moving files from {self.nwd} to {nwd}")
         shutil.rmtree(nwd)
         shutil.copytree(self.nwd, nwd, copy_function=os.link)
         shutil.rmtree(self.nwd)

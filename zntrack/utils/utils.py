@@ -11,6 +11,7 @@ import sys
 import tempfile
 
 import dvc.cli
+import git
 import znjson
 
 from zntrack.utils.config import config
@@ -177,15 +178,15 @@ def run_dvc_cmd(script):
     show_log = config.log_level < logging.INFO
     if not show_log:
         script = script[:2] + ["--quiet"] + script[2:]
+    if config.log_level == logging.DEBUG:
+        script = [x for x in script if x != "--quiet"]
+        script = script[:2] + ["--verbose", "--verbose"] + script[2:]
 
     if config.dvc_api:
         return_code = dvc.cli.main(script)
         if return_code != 0:
-            script = [x for x in script if x != "--quiet"]
-            cmd = script[:2] + ["--verbose", "--verbose"] + script[2:]
-            dvc.cli.main(cmd)
             raise DVCProcessError(
-                f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(cmd)}\" "
+                f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(script)}\" "
             )
         # fix for https://github.com/iterative/dvc/issues/8631
         for logger_name, logger in logging.root.manager.loggerDict.items():
@@ -229,3 +230,17 @@ def load_node_dependency(value):
         if issubclass(value, Node):
             value = value.load()
     return value
+
+
+def update_gitignore(prefix) -> None:
+    """Add 'nodes/<prefix>_*' to the gitignore file, if not already there."""
+    ignore = f"nodes/{prefix}_*"
+
+    repo = git.Repo(".")
+    if repo.ignored(ignore):
+        return
+
+    gitignore = pathlib.Path(".gitignore")
+    with gitignore.open("a", encoding="utf-8") as file:
+        file.write("\n# ZnTrack operating directory \n")
+        file.write(f"{ignore}\n")

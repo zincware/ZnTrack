@@ -20,6 +20,7 @@ from zntrack.utils.utils import (
     module_handler,
     module_to_path,
     run_dvc_cmd,
+    update_gitignore,
     update_nb_name,
 )
 
@@ -45,4 +46,5 @@ __all__ = [
     "helpers",
     "nwd",
     "GIT_TRACKED",
+    "update_gitignore",
 ]
