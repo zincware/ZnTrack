@@ -365,21 +365,17 @@ def test_node_name(tmp_path):
     node = ExampleDVCOutsNode()
     assert node.node_name == "ExampleDVCOutsNode"
     assert node.nwd == pathlib.Path("nodes") / "ExampleDVCOutsNode"
-    assert node.nwd.exists()
 
     # load
     node = ExampleDVCOutsNode.load(name="MyNode")
     assert node.node_name == "MyNode"
     assert node.nwd == pathlib.Path("nodes") / "MyNode"
-    assert node.nwd.exists()
 
     # set
     node = ExampleDVCOutsNode()
     node.node_name = "MyNode"
     assert node.node_name == "MyNode"
     assert node.nwd == pathlib.Path("nodes") / "MyNode"
-    assert node.nwd.exists()
 
     node.nwd = pathlib.Path("nodes") / "CustomNWD"
     assert node.nwd == pathlib.Path("nodes") / "CustomNWD"
-    assert node.nwd.exists()

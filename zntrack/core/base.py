@@ -5,7 +5,9 @@ from __future__ import annotations
 import contextlib
 import json
 import logging
+import os
 import pathlib
+import shutil
 import typing
 
 import zninit
@@ -198,14 +200,12 @@ class NodeBase(zninit.ZnInit):
         nwd = self.__dict__.get("nwd")
         if nwd is None:
             nwd = pathlib.Path("nodes", self.node_name)
-            nwd.mkdir(exist_ok=True, parents=True)
         return nwd
 
     @nwd.setter
     def nwd(self, value: pathlib.Path):
         """Set the node working directory and create the directory."""
         self.__dict__["nwd"] = value
-        value.mkdir(exist_ok=True, parents=True)
 
     @property
     def _descriptor_list(self) -> typing.List[zninit.descriptor.DescriptorTypeT]:
@@ -227,10 +227,16 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     The methods implemented in this class are primarily loading and saving parameters.
     This includes restoring the Node from files and saving results to files after run.
+
+    Attributes
+    ----------
+    _run_and_save: bool, default = False
+        True if inside 'run_and_save'
     """
 
     init_subclass_basecls = NodeBase
     init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes, meta.Text] + dvc.options
+    _run_and_save: bool = False
 
     @utils.deprecated(
         reason=(
@@ -417,12 +423,17 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     def run_and_save(self):
         """Main method to run for the actual calculation."""
-        if not self.is_loaded:
-            # Save e.g. the parameters if the Node is not loaded
-            #  this can happen, when using this method outside 'dvc repro'
-            self.save()
-        self.run()
-        self.save(results=True)
+        self._run_and_save = True
+        try:
+            self.nwd.mkdir(exist_ok=True, parents=True)
+            if not self.is_loaded:
+                # Save e.g. the parameters if the Node is not loaded
+                #  this can happen, when using this method outside 'dvc repro'
+                self.save()
+            self.run()
+            self.save(results=True)
+        finally:
+            self._run_and_save = False
 
     # @abc.abstractmethod
     def run(self):
@@ -548,6 +559,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
+        self.nwd.mkdir(parents=True, exist_ok=True)
         _handle_nodes_as_methods(self.zntrack.collect(ZnNodes))
 
         if silent:
@@ -646,3 +658,66 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         if not no_exec:
             utils.run_dvc_cmd(["repro", self.node_name])
+
+    @contextlib.contextmanager
+    def operating_directory(self, prefix="ckpt") -> bool:
+        """Work in an operating directory until successfully finished.
+
+        This context manager will replace $nwd$ with 'prefix_$nwd$' and move the files
+        to $nwd$ when successfully finished. This can be useful, when you are running
+        e.g., on hardware with limited execution time and can't use 'dvc checkpoints'.
+        When successfully finished, all files will be moved from 'temp_$nwd$' to $nwd$.
+        You can call 'dvc repro' multiple times to continue from 'temp_$nwd$'.
+        If used properly this will result in reproducible data but:
+        - checkpoints will not be removed if parameters change. Always remove a
+            checkpoint, when running with new parameters!
+        - checkpoints are not versioned. If you want to checkpoint e.g., model training,
+            use 'dvc checkpoints'.
+
+
+        Yields
+        ------
+        new_ckpt: bool
+            True if creating a new checkpoint. False if the checkpoint already existed.
+        """
+        nwd = self.nwd
+        nwd_new = self.nwd.with_name(f"{prefix}_{self.nwd.name}")
+        nwd_is_new = not nwd_new.exists()
+
+        if self._run_and_save:
+            utils.update_gitignore(prefix=prefix)
+
+            if nwd_is_new:
+                log.info(f"Creating new operating directory: {nwd_new}")
+                log.warning(
+                    "Experimental Feature: operating directory is currently not"
+                    " compatible with 'dvc exp --temp' or 'dvc exp --queue'"
+                )
+                # TODO add a unique path per node.
+                # TODO check on windows!
+                shutil.copytree(nwd, nwd_new, copy_function=os.link)
+            else:
+                log.info(f"Continuing inside operating directory: {nwd_new}.")
+
+            self.nwd = nwd_new
+            try:
+                yield nwd_is_new
+            except Exception as err:
+                log.warning("Node execution was interrupted.")
+                raise err
+            finally:
+                # Save e.g. `zn.outs` before stopping.
+                self.save(results=True)
+                self.nwd = nwd
+
+            log.info(f"Finished successfully. Moving files from {nwd_new} to {nwd}")
+            shutil.rmtree(nwd)
+            shutil.copytree(nwd_new, nwd, copy_function=os.link)
+            shutil.rmtree(nwd_new)
+        else:
+            # if not inside 'run_and_save' no directory should be created. ?!?!?!
+            self.nwd = nwd_new
+            try:
+                yield nwd_is_new
+            finally:
+                self.nwd = nwd
