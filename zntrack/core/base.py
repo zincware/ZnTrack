@@ -234,8 +234,14 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         True if inside 'run_and_save'
     """
 
-    init_subclass_basecls = NodeBase
-    init_descriptors = [zn.params, zn.deps, zn.Method, zn.Nodes, meta.Text] + dvc.options
+    _init_subclass_basecls_ = NodeBase
+    _init_descriptors_ = [
+        zn.params,
+        zn.deps,
+        zn.Method,
+        zn.Nodes,
+        meta.Text,
+    ] + dvc.options
     _run_and_save: bool = False
 
     @utils.deprecated(
