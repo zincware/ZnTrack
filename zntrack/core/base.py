@@ -685,7 +685,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         prefix: str, default = 'ckpt'
             Prefix for the temporary directory
         remove_on: Exception or list of Exceptions, default = None
-            If a given exception is raised, the temporary directory will be removed.
+            If one of the exceptions in 'remove_on' is raised, the operating directory
+             will be removed. Otherwise, it will remain and reused upton the next run.
 
 
         Yields
