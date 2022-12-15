@@ -30,12 +30,37 @@ class RestartFromCheckpoint(Node):
                 self.file.write_text(f"{text} there")
 
 
+class RemoveOnError(Node):
+    data: list = zn.outs()
+
+    def run(self):
+        with self.operating_directory(remove_on=(TypeError, ValueError)):
+            raise ValueError("Execution was interrupted")
+
+
+def test_remove_on_error(proj_path):
+    node = RemoveOnError()
+    node.write_graph()
+
+    node = RemoveOnError.load()
+    with pytest.raises(ValueError):
+        node.run_and_save()
+
+    nwd_new = node.nwd.with_name(f"ckpt_{node.nwd.name}")
+    assert not nwd_new.exists()
+
+
 def test_ListOfDataNode(proj_path):
     ListOfDataNode().write_graph()
 
+    node = ListOfDataNode.load()
+
     with pytest.raises(exceptions.DVCProcessError):
         utils.run_dvc_cmd(["repro"])
+    nwd_new = node.nwd.with_name(f"ckpt_{node.nwd.name}")
+    assert nwd_new.exists()
     utils.run_dvc_cmd(["repro"])
+    assert not nwd_new.exists()
 
     assert ListOfDataNode.load().data == list(range(10))
 

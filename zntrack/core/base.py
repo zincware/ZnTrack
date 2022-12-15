@@ -30,6 +30,10 @@ from zntrack.zn.dependencies import NodeAttribute, getdeps
 
 log = logging.getLogger(__name__)
 
+EXCEPTION_OR_LST_EXCEPTIONS = typing.Union[
+    typing.Type[Exception], typing.Collection[typing.Type[Exception]]
+]
+
 
 def update_dependency_options(value):
     """Handle Node dependencies.
@@ -666,7 +670,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             utils.run_dvc_cmd(["repro", self.node_name])
 
     @contextlib.contextmanager
-    def operating_directory(self, prefix="ckpt") -> bool:
+    def operating_directory(
+        self, prefix="ckpt", remove_on: EXCEPTION_OR_LST_EXCEPTIONS = None
+    ) -> bool:
         """Work in an operating directory until successfully finished.
 
         This context manager will replace $nwd$ with 'prefix_$nwd$' and move the files
@@ -680,6 +686,14 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         - checkpoints are not versioned. If you want to checkpoint e.g., model training,
             use 'dvc checkpoints'.
 
+        Parameters
+        ----------
+        prefix: str, default = 'ckpt'
+            Prefix for the temporary directory
+        remove_on: Exception or list of Exceptions, default = None
+            If one of the exceptions in 'remove_on' is raised, the operating directory
+             will be removed. Otherwise, it will remain and reused upton the next run.
+
 
         Yields
         ------
@@ -689,6 +703,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         nwd = self.nwd
         nwd_new = self.nwd.with_name(f"{prefix}_{self.nwd.name}")
         nwd_is_new = not nwd_new.exists()
+
+        remove = False
+        if not isinstance(remove_on, list):
+            remove_on = [remove_on] if remove_on else []
 
         if self._run_and_save:
             utils.update_gitignore(prefix=prefix)
@@ -710,11 +728,16 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                 yield nwd_is_new
             except Exception as err:
                 log.warning("Node execution was interrupted.")
+                if any(isinstance(err, e) for e in remove_on):
+                    remove = True
                 raise err
             finally:
                 # Save e.g. `zn.outs` before stopping.
                 self.save(results=True)
                 self.nwd = nwd
+                if remove:
+                    log.info(f"Removing operating directory: {nwd_new}")
+                    shutil.rmtree(nwd_new)
 
             log.info(f"Finished successfully. Moving files from {nwd_new} to {nwd}")
             shutil.rmtree(nwd)
