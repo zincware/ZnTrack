@@ -273,11 +273,21 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         )
 
     def __hash__(self):
-        """compute the hash based on the parameters and node_name."""
+        """compute the hash based on the parameters and node_name.
+
+        Ignore 'not serializable' here so it will not raise an error.
+        """
         params_dict = self.zntrack.collect(zn_params)
         params_dict["node_name"] = self.node_name
 
-        return hash(json.dumps(params_dict, sort_keys=True, cls=znjson.ZnEncoder))
+        return hash(
+            json.dumps(
+                params_dict,
+                sort_keys=True,
+                cls=znjson.ZnEncoder,
+                default=lambda o: "<not serializable>",
+            )
+        )
 
     def __matmul__(self, other: str) -> typing.Union[NodeAttribute, typing.Any]:
         """Shorthand for: getdeps(Node, other).
