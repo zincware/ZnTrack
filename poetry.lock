@@ -647,7 +647,7 @@ pgp = ["gpg"]
 
 [[package]]
 name = "dvc"
-version = "2.37.0"
+version = "2.38.1"
 description = "Git for data scientists - manage your code and data together"
 category = "main"
 optional = false
@@ -662,8 +662,8 @@ dpath = ">=2.0.2,<3"
 dvc-data = "0.28.4"
 dvc-http = "2.27.2"
 dvc-render = "0.0.15"
-dvc-task = "0.1.6"
-dvclive = ">=1.0"
+dvc-task = "0.1.8"
+dvclive = ">=1.2.2"
 flatten-dict = ">=0.4.1,<1"
 "flufl.lock" = ">=5"
 funcy = ">=1.14"
@@ -704,7 +704,7 @@ ssh = ["dvc-ssh (==2.20.0)"]
 ssh-gssapi = ["dvc-ssh[gssapi] (==2.20.0)"]
 terraform = ["tpi[ssh] (>=2.1.0)"]
 testing = ["pytest-test-utils (==0.0.8)"]
-tests = ["beautifulsoup4 (==4.11.1)", "dvc-ssh (==2.20.0)", "filelock (==3.8.0)", "flaky (==3.7.0)", "mypy (==0.990)", "pylint (==2.15.7)", "pylint-plugin-utils (==0.7)", "pylint-pytest (==1.1.2)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-docker (==0.11.0)", "pytest-lazy-fixture (==0.6.3)", "pytest-mock (==3.10.0)", "pytest-test-utils (==0.0.8)", "pytest-timeout (==2.1.0)", "pytest-xdist (==3.1.0)", "pywin32 (>=225)", "tpi[ssh] (>=2.1.0)", "types-requests", "types-tabulate", "types-toml"]
+tests = ["beautifulsoup4 (==4.11.1)", "dvc-ssh (==2.20.0)", "filelock (==3.8.2)", "flaky (==3.7.0)", "mypy (==0.990)", "pylint (==2.15.8)", "pylint-plugin-utils (==0.7)", "pylint-pytest (==1.1.2)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-docker (==0.11.0)", "pytest-lazy-fixture (==0.6.3)", "pytest-mock (==3.10.0)", "pytest-test-utils (==0.0.8)", "pytest-timeout (==2.1.0)", "pytest-xdist (==3.1.0)", "pywin32 (>=225)", "tpi[ssh] (>=2.1.0)", "types-requests", "types-tabulate", "types-toml"]
 webdav = ["dvc-webdav (==2.19.0)"]
 webhdfs = ["dvc-webhdfs (==2.19.0)"]
 webhdfs-kerberos = ["dvc-webhdfs[kerberos] (==2.19.0)"]
@@ -788,7 +788,7 @@ tests = ["funcy (>=1.17)", "matplotlib", "mypy (==0.981)", "pylint (==2.15.0)", 
 
 [[package]]
 name = "dvc-task"
-version = "0.1.6"
+version = "0.1.8"
 description = "Extensible task queue used in DVC."
 category = "main"
 optional = false
@@ -808,7 +808,7 @@ tests = ["celery-types (>=0.11.0)", "flaky (==3.7.0)", "mypy (==0.971)", "pylint
 
 [[package]]
 name = "dvclive"
-version = "1.2.0"
+version = "1.2.2"
 description = "Metric logger for ML projects."
 category = "main"
 optional = false
@@ -1225,7 +1225,7 @@ arrow = ">=0.15.0"
 
 [[package]]
 name = "isort"
-version = "5.11.1"
+version = "5.11.2"
 description = "A Python utility / library to sort Python imports."
 category = "dev"
 optional = false
@@ -2919,7 +2919,7 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 
 [[package]]
 name = "zninit"
-version = "0.1.6"
+version = "0.1.8"
 description = "Descriptor based dataclass implementation"
 category = "main"
 optional = false
@@ -3541,8 +3541,8 @@ dulwich = [
     {file = "dulwich-0.20.50.tar.gz", hash = "sha256:50a941796b2c675be39be728d540c16b5b7ce77eb9e1b3f855650ece6832d2be"},
 ]
 dvc = [
-    {file = "dvc-2.37.0-py3-none-any.whl", hash = "sha256:044ba63b27b77e2cc1ae5c742176f1c76014ebc4ce676d0b81a3606fa90f30e7"},
-    {file = "dvc-2.37.0.tar.gz", hash = "sha256:8c3a4c0539c66b53455b840a398f05e4d7494b7246a09706c296da40307585a2"},
+    {file = "dvc-2.38.1-py3-none-any.whl", hash = "sha256:f14f0080d5e312eef27863cc2fe082e365bf34e1d1757195c3ca808e8f74fe66"},
+    {file = "dvc-2.38.1.tar.gz", hash = "sha256:88dffe61d4d376d28d5dbd2cb1193782ad640d610fae5169871927b54d828af5"},
 ]
 dvc-data = [
     {file = "dvc-data-0.28.4.tar.gz", hash = "sha256:81a508af473c0a407ef56e1c99caf3a7c37badb2d3d2396fa5b6d004b1208a35"},
@@ -3561,12 +3561,12 @@ dvc-render = [
     {file = "dvc_render-0.0.15-py3-none-any.whl", hash = "sha256:269592638b466b1104753b3b8c3dcafe4db8174909d4e3dc2354f50a14eab1c3"},
 ]
 dvc-task = [
-    {file = "dvc-task-0.1.6.tar.gz", hash = "sha256:2013637c1b0c4504a7082da0f7779f8f4650b2532c4dbba9b1a666a6c28a17f5"},
-    {file = "dvc_task-0.1.6-py3-none-any.whl", hash = "sha256:2111928e59ff6888f3a59cefad6193895fe3406e111dae41addaed33db80b48f"},
+    {file = "dvc-task-0.1.8.tar.gz", hash = "sha256:98906a1bb54995798f5b997e8bf90f4bb525cb893045fdc0fc79f27e5d737dc5"},
+    {file = "dvc_task-0.1.8-py3-none-any.whl", hash = "sha256:bd9a4afd1c38e9c009763ae99768ed2d0f29180dafa63de0ef5e46f0426310a8"},
 ]
 dvclive = [
-    {file = "dvclive-1.2.0-py3-none-any.whl", hash = "sha256:d612c20eb1a7a5b1e50e5edfda67b32c8ed025a4344f5fb303cb8f5e7678905d"},
-    {file = "dvclive-1.2.0.tar.gz", hash = "sha256:ed2aa89038b5119a5c2cd93639251a6477fe7c94e1527450fd89fa28556af3b3"},
+    {file = "dvclive-1.2.2-py3-none-any.whl", hash = "sha256:f1a526223f9333c60c49e71e0e04cb79ff53885197cb100f6cbd5f0a6b1f63ba"},
+    {file = "dvclive-1.2.2.tar.gz", hash = "sha256:231eaec3a1b79dbfb0a45274913ce2e17eb45b19606054e92d7d9e69e0bd1911"},
 ]
 entrypoints = [
     {file = "entrypoints-0.4-py3-none-any.whl", hash = "sha256:f174b5ff827504fd3cd97cc3f8649f3693f51538c7e4bdf3ef002c8429d42f9f"},
@@ -3759,8 +3759,8 @@ isoduration = [
     {file = "isoduration-20.11.0.tar.gz", hash = "sha256:ac2f9015137935279eac671f94f89eb00584f940f5dc49462a0c4ee692ba1bd9"},
 ]
 isort = [
-    {file = "isort-5.11.1-py3-none-any.whl", hash = "sha256:bf02c95f1fe615ebbe13a619cfed1619ddfe8941274c9e3de3143adca406cb02"},
-    {file = "isort-5.11.1.tar.gz", hash = "sha256:7c5bd998504826b6f1e6f2f98b533976b066baba29b8bae83fdeefd0b89c6b70"},
+    {file = "isort-5.11.2-py3-none-any.whl", hash = "sha256:e486966fba83f25b8045f8dd7455b0a0d1e4de481e1d7ce4669902d9fb85e622"},
+    {file = "isort-5.11.2.tar.gz", hash = "sha256:dd8bbc5c0990f2a095d754e50360915f73b4c26fc82733eb5bfc6b48396af4d2"},
 ]
 iterative-telemetry = [
     {file = "iterative-telemetry-0.0.6.tar.gz", hash = "sha256:721bc0bfa962eb4d80877d5a4e04c758881ea7e7e7529a3f0e9bfd7e829365e2"},
@@ -4971,8 +4971,8 @@ zipp = [
     {file = "zipp-3.11.0.tar.gz", hash = "sha256:a7a22e05929290a67401440b39690ae6563279bced5f314609d9d03798f56766"},
 ]
 zninit = [
-    {file = "zninit-0.1.6-py3-none-any.whl", hash = "sha256:060de296f23efaed22dbc43490d07e3392804166fe0b840b79a9743a4c6ed3f6"},
-    {file = "zninit-0.1.6.tar.gz", hash = "sha256:c61f9e53741160c0e424660f609ff3a2e17d4a79d22e9a43f43aa48d3ce475ac"},
+    {file = "zninit-0.1.8-py3-none-any.whl", hash = "sha256:49e0529062658c4f4b3fba250cb69b0bf5b778e0d7b925c2a39fdb3e70be0122"},
+    {file = "zninit-0.1.8.tar.gz", hash = "sha256:5301669afe52538a6c03459f4d367f23ab46db7f256cbc9582cf60133b76a609"},
 ]
 znjson = [
     {file = "znjson-0.2.1-py3-none-any.whl", hash = "sha256:f9ce29c3034361c6c43cfa63070ef73df44257331c5a2d8c9a7338074d8dd796"},
