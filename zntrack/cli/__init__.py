@@ -32,7 +32,7 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     """
     sys.path.append(pathlib.Path.cwd().as_posix())
 
-    package_and_module, cls = node.split(".", 1)
+    package_and_module, cls = node.rsplit(".", 1)
     module = importlib.import_module(package_and_module)
 
     cls = getattr(module, cls)
