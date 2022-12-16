@@ -92,10 +92,7 @@ def _handle_nodes_as_methods(nodes: dict):
     """
     for node in nodes.values():
         if node is not None:
-            node.write_graph(
-                run=True,
-                call_args=f"--name={node.node_name} --hash-only"
-            )
+            node.write_graph(run=True, call_args=f"--name={node.node_name} --hash-only")
 
 
 BaseNodeTypeT = typing.TypeVar("BaseNodeTypeT", bound="Node")

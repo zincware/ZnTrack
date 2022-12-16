@@ -83,16 +83,18 @@ def test_run(proj_path):
 def test_run_dry():
     test_node = ExampleNode01(inputs="Lorem Ipsum", name="MyCustomNode")
     script = test_node.write_graph(dry_run=True)
-    assert script == ['stage',
-                      'add',
-                      '-n',
-                      'MyCustomNode',
-                      '--force',
-                      '--params',
-                      'params.yaml:MyCustomNode',
-                      '--outs',
-                      'nodes/MyCustomNode/outs.json',
-                      'zntrack run test_single_node.ExampleNode01 --name=MyCustomNode']
+    assert script == [
+        "stage",
+        "add",
+        "-n",
+        "MyCustomNode",
+        "--force",
+        "--params",
+        "params.yaml:MyCustomNode",
+        "--outs",
+        "nodes/MyCustomNode/outs.json",
+        "zntrack run test_single_node.ExampleNode01 --name=MyCustomNode",
+    ]
 
 
 def test_run_no_exec(proj_path):

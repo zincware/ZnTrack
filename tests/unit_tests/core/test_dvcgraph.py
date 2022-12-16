@@ -183,7 +183,7 @@ def test_prepare_dvc_script():
         "--force",
         "--deps",
         "file.txt",
-        'zntrack run src.file.MyNode --name=MyNode',
+        "zntrack run src.file.MyNode --name=MyNode",
     ]
 
     script = prepare_dvc_script(
@@ -208,7 +208,7 @@ def test_prepare_dvc_script():
         "file.txt",
         "--deps",
         "src/file.py",
-        'zntrack run src.file.MyNode --name=MyNode',
+        "zntrack run src.file.MyNode --name=MyNode",
     ]
 
 

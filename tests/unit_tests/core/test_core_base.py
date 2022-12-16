@@ -329,7 +329,7 @@ def test_write_graph():
         "--force",
         "--outs",
         "example.dat",
-        'zntrack run test_core_base.ExampleDVCOutsNode --name=ExampleDVCOutsNode'
+        "zntrack run test_core_base.ExampleDVCOutsNode --name=ExampleDVCOutsNode",
     ]
 
     assert script == expected_script
