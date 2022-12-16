@@ -302,7 +302,6 @@ def nodify(
                 nb_name=nb_name,
                 module=module,
                 func_or_cls=func.__name__,
-                call_args="(exec_func=True)",
             )
 
             if dry_run:

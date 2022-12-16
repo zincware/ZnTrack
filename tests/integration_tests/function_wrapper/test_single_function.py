@@ -35,10 +35,7 @@ def test_example_func_dry_run(proj_path):
             "params.yaml:example_func",
             "--outs",
             "test.txt",
-            (
-                f'{utils.config.interpreter} -c "from test_single_function import '
-                'example_func; example_func(exec_func=True)" '
-            ),
+            "zntrack run test_single_function.example_func",
         ]
     )
 

@@ -18,11 +18,17 @@ tqdm = "^4.64.0"
 pandas = "^1.4.3"
 pygit2 = ">=1.9,<1.11"
 zninit = ">=0.1.6"
+typer = "^0.7.0"
 
 
 [tool.poetry.urls]
 documentation = "https://zntrack.readthedocs.io"
 repository = "https://github.com/zincware/ZnTrack"
+
+
+[tool.poetry.scripts]
+zntrack = "zntrack.cli:app"
+
 
 [tool.poetry.group.dev.dependencies]
 pytest-benchmark = "^3.4.1"

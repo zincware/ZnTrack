@@ -92,10 +92,7 @@ def _handle_nodes_as_methods(nodes: dict):
     """
     for node in nodes.values():
         if node is not None:
-            node.write_graph(
-                run=True,
-                call_args=f".load(name='{node.node_name}').save(hash_only=True)",
-            )
+            node.write_graph(run=True, call_args=f"--name={node.node_name} --hash-only")
 
 
 BaseNodeTypeT = typing.TypeVar("BaseNodeTypeT", bound="Node")
@@ -588,8 +585,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
-        self.nwd.mkdir(parents=True, exist_ok=True)
-        _handle_nodes_as_methods(self.zntrack.collect(ZnNodes))
+        if not dry_run:
+            self.nwd.mkdir(parents=True, exist_ok=True)
+            _handle_nodes_as_methods(self.zntrack.collect(ZnNodes))
 
         if silent:
             log.warning(
@@ -611,8 +609,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         # Jupyter Notebook
         nb_name = utils.update_nb_name(nb_name)
-        if nb_name is not None and notebook:
-            self.convert_notebook(nb_name)
+        if not dry_run:
+            if nb_name is not None and notebook:
+                self.convert_notebook(nb_name)
 
         custom_args = []
         dependencies = []
@@ -649,7 +648,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             custom_args += pair
 
         if call_args is None:
-            call_args = f".load(name='{self.node_name}').run_and_save()"
+            call_args = f"--name={self.node_name}"
 
         script = prepare_dvc_script(
             node_name=self.node_name,
@@ -662,8 +661,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         )
 
         # Add command to run the script
-
-        self.save()
+        if not dry_run:
+            self.save()
 
         log.debug(
             "If you are using a jupyter notebook, you may not be able to see the "
