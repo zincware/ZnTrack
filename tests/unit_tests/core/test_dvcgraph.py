@@ -170,7 +170,7 @@ def test_prepare_dvc_script():
         nb_name=None,
         module="src.file",
         func_or_cls="MyNode",
-        call_args="^name=MyNode",
+        call_args="--name=MyNode",
     )
 
     assert script == [
@@ -183,7 +183,7 @@ def test_prepare_dvc_script():
         "--force",
         "--deps",
         "file.txt",
-        'zntrack run src.file.MyNode^name=MyNode',
+        'zntrack run src.file.MyNode --name=MyNode',
     ]
 
     script = prepare_dvc_script(
@@ -193,7 +193,7 @@ def test_prepare_dvc_script():
         nb_name="notebook.ipynb",
         module="src.file",
         func_or_cls="MyNode",
-        call_args="^name=MyNode",
+        call_args="--name=MyNode",
     )
 
     assert script == [
@@ -208,7 +208,7 @@ def test_prepare_dvc_script():
         "file.txt",
         "--deps",
         "src/file.py",
-        'zntrack run src.file.MyNode^name=MyNode',
+        'zntrack run src.file.MyNode --name=MyNode',
     ]
 
 

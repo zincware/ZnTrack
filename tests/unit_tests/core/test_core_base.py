@@ -319,15 +319,7 @@ def test_matmul_not_supported():
 
 def test_write_graph():
     example = ExampleDVCOutsNode()
-
-    with patch.object(ExampleDVCOutsNode, "save") as save_mock, patch(
-        "zntrack.core.base._handle_nodes_as_methods",
-    ) as handle_znnodes_mock:
-        # Patch the methods that write to disk
-        script = example.write_graph(dry_run=True)
-
-    assert save_mock.called
-    assert handle_znnodes_mock.called
+    script = example.write_graph(dry_run=True)
 
     expected_script = [
         "stage",
@@ -337,12 +329,10 @@ def test_write_graph():
         "--force",
         "--outs",
         "example.dat",
-        (
-            f'{utils.config.interpreter} -c "from test_core_base import'
-            " ExampleDVCOutsNode;"
-            " ExampleDVCOutsNode.load(name='ExampleDVCOutsNode').run_and_save()\" "
-        ),
+        'zntrack run test_core_base.ExampleDVCOutsNode --name=ExampleDVCOutsNode'
     ]
+
+    assert script == expected_script
 
 
 def test__handle_nodes_as_methods():
@@ -352,7 +342,7 @@ def test__handle_nodes_as_methods():
         _handle_nodes_as_methods({"example": example})
 
     write_graph_mock.assert_called_with(
-        run=True, call_args=f".load(name='{example.node_name}').save(hash_only=True)"
+        run=True, call_args=f"--name={example.node_name} --hash-only"
     )
 
     with patch.object(ExampleDVCOutsNode, "write_graph") as write_graph_mock:

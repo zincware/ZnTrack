@@ -92,7 +92,7 @@ def test_run_dry():
                       'params.yaml:MyCustomNode',
                       '--outs',
                       'nodes/MyCustomNode/outs.json',
-                      'zntrack run test_single_node.ExampleNode01^name=MyCustomNode']
+                      'zntrack run test_single_node.ExampleNode01 --name=MyCustomNode']
 
 
 def test_run_no_exec(proj_path):

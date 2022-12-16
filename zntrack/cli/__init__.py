@@ -16,37 +16,33 @@ def version_callback(value: bool) -> None:
 
 @app.callback()
 def main(
-    version: bool = typer.Option(
-        None, "--version", callback=version_callback, is_eager=True
-    ),
+        version: bool = typer.Option(
+            None, "--version", callback=version_callback, is_eager=True
+        ),
 ) -> None:
     """ZnTrack CLI callback."""
     _ = version  # this would be greyed out otherwise
 
 
 @app.command()
-def run(cmd: str) -> None:
+def run(node: str, name: str = None, hash_only: bool = False) -> None:
     """Execute a ZnTrack Node.
 
-    Use as `zntrack run module.Node^name=nodename` or in `zntrack run module.nodified`.
+    Use as `zntrack run module.Node --name node_name`.
     """
     sys.path.append(pathlib.Path.cwd().as_posix())
 
-    cmd, *kwargs = cmd.split("^")
-    hash_only = "hash_only" in kwargs
-    if hash_only:
-        kwargs.remove("hash_only")
-    kwargs = [tuple(arg.split("=")) for arg in kwargs]
-    package_and_module, cls = cmd.split(".", 1)
+    package_and_module, cls = node.split(".", 1)
     module = importlib.import_module(package_and_module)
 
     cls = getattr(module, cls)
 
     try:
-        node = cls.load(**dict(kwargs))
+        node = cls.load(name=name)
         if hash_only:
             node.save(hash_only=True)
         else:
             node.run_and_save()
     except AttributeError:
-        cls(exec_func=True, **dict(kwargs))
+        # @nodify function
+        cls(exec_func=True)

@@ -94,7 +94,7 @@ def _handle_nodes_as_methods(nodes: dict):
         if node is not None:
             node.write_graph(
                 run=True,
-                call_args=f"^name={node.node_name}^hash_only"
+                call_args=f"--name={node.node_name} --hash-only"
             )
 
 
@@ -651,7 +651,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             custom_args += pair
 
         if call_args is None:
-            call_args = f"^name={self.node_name}"
+            call_args = f"--name={self.node_name}"
 
         script = prepare_dvc_script(
             node_name=self.node_name,
