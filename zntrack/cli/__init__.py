@@ -8,7 +8,7 @@ app = typer.Typer()
 
 
 def version_callback(value: bool) -> None:
-    """Get the installed dask4dvc version."""
+    """Get the installed 'ZnTrack' version."""
     if value:
         typer.echo(f"ZnTrack {importlib.metadata.version('zntrack')}")
         raise typer.Exit()
@@ -20,7 +20,7 @@ def main(
         None, "--version", callback=version_callback, is_eager=True
     ),
 ) -> None:
-    """ZnTrack CLI callback."""
+    """The ZnTrack CLI."""
     _ = version  # this would be greyed out otherwise
 
 
@@ -28,7 +28,7 @@ def main(
 def run(node: str, name: str = None, hash_only: bool = False) -> None:
     """Execute a ZnTrack Node.
 
-    Use as `zntrack run module.Node --name node_name`.
+    Use as 'zntrack run module.Node --name node_name'.
     """
     sys.path.append(pathlib.Path.cwd().as_posix())
 
