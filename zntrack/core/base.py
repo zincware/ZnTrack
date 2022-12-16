@@ -94,7 +94,7 @@ def _handle_nodes_as_methods(nodes: dict):
         if node is not None:
             node.write_graph(
                 run=True,
-                call_args=f".load(name='{node.node_name}').save(hash_only=True)",
+                call_args=f"^name={node.node_name}^hash_only"
             )
 
 
@@ -588,8 +588,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         Use 'dvc status' to check, if the stage needs to be rerun.
 
         """
-        self.nwd.mkdir(parents=True, exist_ok=True)
-        _handle_nodes_as_methods(self.zntrack.collect(ZnNodes))
+        if not dry_run:
+            self.nwd.mkdir(parents=True, exist_ok=True)
+            _handle_nodes_as_methods(self.zntrack.collect(ZnNodes))
 
         if silent:
             log.warning(
@@ -611,8 +612,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         # Jupyter Notebook
         nb_name = utils.update_nb_name(nb_name)
-        if nb_name is not None and notebook:
-            self.convert_notebook(nb_name)
+        if not dry_run:
+            if nb_name is not None and notebook:
+                self.convert_notebook(nb_name)
 
         custom_args = []
         dependencies = []
@@ -662,8 +664,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         )
 
         # Add command to run the script
-
-        self.save()
+        if not dry_run:
+            self.save()
 
         log.debug(
             "If you are using a jupyter notebook, you may not be able to see the "

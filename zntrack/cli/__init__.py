@@ -33,6 +33,9 @@ def run(cmd: str) -> None:
     sys.path.append(pathlib.Path.cwd().as_posix())
 
     cmd, *kwargs = cmd.split("^")
+    hash_only = "hash_only" in kwargs
+    if hash_only:
+        kwargs.remove("hash_only")
     kwargs = [tuple(arg.split("=")) for arg in kwargs]
     package_and_module, cls = cmd.split(".", 1)
     module = importlib.import_module(package_and_module)
@@ -41,6 +44,9 @@ def run(cmd: str) -> None:
 
     try:
         node = cls.load(**dict(kwargs))
-        node.run_and_save()
+        if hash_only:
+            node.save(hash_only=True)
+        else:
+            node.run_and_save()
     except AttributeError:
         cls(exec_func=True, **dict(kwargs))
