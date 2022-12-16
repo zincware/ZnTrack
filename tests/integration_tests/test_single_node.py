@@ -80,6 +80,23 @@ def test_run(proj_path):
     assert dvc_file["stages"]["ExampleNode01"]["desc"] == "Node Description Example"
 
 
+def test_run_dry():
+    test_node = ExampleNode01(inputs="Lorem Ipsum", name="MyCustomNode")
+    script = test_node.write_graph(dry_run=True)
+    assert script == [
+        "stage",
+        "add",
+        "-n",
+        "MyCustomNode",
+        "--force",
+        "--params",
+        "params.yaml:MyCustomNode",
+        "--outs",
+        "nodes/MyCustomNode/outs.json",
+        "zntrack run test_single_node.ExampleNode01 --name=MyCustomNode",
+    ]
+
+
 def test_run_no_exec(proj_path):
     test_node_1 = ExampleNode01(inputs="Lorem Ipsum")
     test_node_1.write_graph(no_exec=False)
