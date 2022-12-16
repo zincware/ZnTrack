@@ -4,7 +4,7 @@ import pathlib
 import pytest
 
 from zntrack import utils
-from zntrack.utils.nwd import replace_nwd_placeholder
+from zntrack.utils.nwd import move_nwd, replace_nwd_placeholder
 
 
 def test_nwd():
@@ -85,3 +85,15 @@ def test_replace_nwd_single():
     assert replace_nwd_placeholder(
         "$nwd$", pathlib.Path("node", "nodename")
     ) == pathlib.Path("node", "nodename")
+
+
+def test_move_nwd(tmp_path):
+    os.chdir(tmp_path)
+    directory = tmp_path / "test"
+    directory.mkdir()
+    (directory / "test.txt").write_text("Foo bar")
+    destination = tmp_path / "new"
+    move_nwd(directory, destination)
+    assert not directory.exists()
+    assert destination.exists()
+    assert (destination / "test.txt").read_text() == "Foo bar"

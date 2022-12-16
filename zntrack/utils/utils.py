@@ -156,6 +156,13 @@ def module_to_path(module: str, suffix=".py") -> pathlib.Path:
     return pathlib.Path(*module.split(".")).with_suffix(suffix)
 
 
+def dvc_unlock():
+    """Remove DVC lock file."""
+    rwlock = pathlib.Path(".dvc/tmp/rwlock")
+    assert rwlock.exists()
+    rwlock.unlink()
+
+
 def run_dvc_cmd(script):
     """Run the DVC script via subprocess calls.
 

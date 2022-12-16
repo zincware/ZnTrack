@@ -2,7 +2,7 @@
 
 from zntrack.utils import exceptions, file_io, helpers
 from zntrack.utils.config import Files, config
-from zntrack.utils.nwd import nwd
+from zntrack.utils.nwd import move_nwd, nwd
 from zntrack.utils.structs import (
     FILE_DVC_TRACKED,
     GIT_TRACKED,
@@ -47,4 +47,5 @@ __all__ = [
     "nwd",
     "GIT_TRACKED",
     "update_gitignore",
+    "move_nwd",
 ]

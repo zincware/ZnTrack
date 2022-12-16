@@ -2,7 +2,9 @@
 
 import functools
 import logging
+import os
 import pathlib
+import shutil
 import typing
 
 log = logging.getLogger(__name__)
@@ -16,6 +18,14 @@ class _NWD(str):
 
 
 nwd = _NWD("$nwd$")
+
+
+def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
+    """Move files from 'target' to 'destination'."""
+    if destination.exists():
+        shutil.rmtree(destination)
+    shutil.copytree(target, destination, copy_function=os.link)
+    shutil.rmtree(target)
 
 
 @functools.singledispatch
