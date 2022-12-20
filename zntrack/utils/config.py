@@ -46,7 +46,7 @@ class Config:
     allow_empty_loading: bool = False
     interpreter: typing.Union[str, Path] = Path(sys.executable).name
     dvc_api: bool = True
-    _log_level: int = dataclasses.field(default=logging.DEBUG, init=False, repr=True)
+    _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
 
     @property
     def log_level(self):
