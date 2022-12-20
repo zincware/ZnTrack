@@ -31,7 +31,7 @@ from zntrack.zn.dependencies import NodeAttribute, getdeps
 log = logging.getLogger(__name__)
 
 EXCEPTION_OR_LST_EXCEPTIONS = typing.Union[
-    typing.Type[Exception], typing.Collection[typing.Type[Exception]]
+    typing.Type[Exception], typing.Collection[typing.Type[Exception]], None
 ]
 
 
@@ -689,7 +689,11 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @contextlib.contextmanager
     def operating_directory(
-        self, prefix="ckpt", remove_on: EXCEPTION_OR_LST_EXCEPTIONS = None
+        self,
+        prefix="ckpt",
+        remove_on: EXCEPTION_OR_LST_EXCEPTIONS = None,
+        move_on: EXCEPTION_OR_LST_EXCEPTIONS = Exception,
+        disable: bool = None,
     ) -> bool:
         """Work in an operating directory until successfully finished.
 
@@ -711,6 +715,13 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         remove_on: Exception or list of Exceptions, default = None
             If one of the exceptions in 'remove_on' is raised, the operating directory
              will be removed. Otherwise, it will remain and reused upton the next run.
+        move_on: Exception, default = Exception
+            If one of the exceptions in 'move_on' is raised, the operating directories
+            content is moved to $nwd$ and the directory will be removed.
+            This helps, in the case of an error to not restart from an already
+            failed data point.
+        disable: bool, default = False
+            Disable the operating directory. Yields True.
 
 
         Yields
@@ -718,13 +729,20 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         new_ckpt: bool
             True if creating a new checkpoint. False if the checkpoint already existed.
         """
+        if disable is None:
+            disable = utils.config.disable_operating_directory
+        if disable:
+            yield True
+            return
+
         nwd = self.nwd
         nwd_new = self.nwd.with_name(f"{prefix}_{self.nwd.name}")
         nwd_is_new = not nwd_new.exists()
 
         remove = False
-        if not isinstance(remove_on, list):
-            remove_on = [remove_on] if remove_on else []
+        move = False
+        remove_on = utils.utils.convert_to_list(remove_on)
+        move_on = utils.utils.convert_to_list(move_on)
 
         if self._run_and_save:
             utils.update_gitignore(prefix=prefix)
@@ -746,8 +764,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                 yield nwd_is_new
             except Exception as err:
                 log.warning("Node execution was interrupted.")
-                if any(isinstance(err, e) for e in remove_on):
-                    remove = True
+                remove = any(isinstance(err, e) for e in remove_on)
+                move = any(isinstance(err, e) for e in move_on)
+                # finally -> ...
                 raise err
             finally:
                 # Save e.g. `zn.outs` before stopping.
@@ -756,11 +775,12 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                 if remove:
                     log.info(f"Removing operating directory: {nwd_new}")
                     shutil.rmtree(nwd_new)
+                elif move:
+                    log.info(f"Moving files from '{nwd_new}' to {nwd}")
+                    utils.move_nwd(nwd_new, nwd)
 
             log.info(f"Finished successfully. Moving files from {nwd_new} to {nwd}")
-            shutil.rmtree(nwd)
-            shutil.copytree(nwd_new, nwd, copy_function=os.link)
-            shutil.rmtree(nwd_new)
+            utils.move_nwd(nwd_new, nwd)
         else:
             # if not inside 'run_and_save' no directory should be created. ?!?!?!
             self.nwd = nwd_new

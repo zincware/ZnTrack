@@ -96,3 +96,9 @@ def test_run_dvc_command(tmp_path, cmd: list, error: bool):
             utils.run_dvc_cmd(cmd)
     else:
         assert utils.run_dvc_cmd(cmd) == 0
+
+
+def test_convert_to_list():
+    assert utils.convert_to_list("str") == ["str"]
+    assert utils.convert_to_list(["str"]) == ["str"]
+    assert utils.convert_to_list(None) == []
