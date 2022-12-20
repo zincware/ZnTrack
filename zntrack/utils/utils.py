@@ -259,4 +259,7 @@ def convert_to_list(value) -> list:
     If 'value is None', return an empty list.
     """
     if not isinstance(value, (list, tuple)):
-        return [value] if value else []
+        if value is None:
+            return []
+        return [value]
+    return value
