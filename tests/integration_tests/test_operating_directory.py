@@ -6,7 +6,6 @@ import pytest
 
 import zntrack.utils.exceptions
 from zntrack import Node, dvc, exceptions, utils, zn
-from zntrack.utils.utils import dvc_unlock
 
 
 class ListOfDataNode(Node):
@@ -133,43 +132,43 @@ def test_RestartFromCheckpoint2(proj_path):
 
 class WriteNumbersSlow(Node):
     outs = zn.outs()
-
-    maximum = zn.params(10)
+    maximum = zn.params()
 
     def run(self):
-        with self.operating_directory(move_on=None) as new:
+        with self.operating_directory() as new:
             if new:
                 self.outs = []
-                for i in range(self.maximum):
-                    time.sleep(0.1)
-                    self.outs.append(i)
-            else:
-                start = self.outs[-1]
-                for i in range(start, self.maximum):
-                    time.sleep(0.1)
-                    self.outs.append(i)
+            for x in range(len(self.outs), self.maximum):
+                print(x)
+                self.outs.append(x)
+                self.save(results=True)
+                time.sleep(0.1)
 
 
 def test_kill_process(proj_path):
-    node = WriteNumbersSlow()
+    node = WriteNumbersSlow(maximum=15)
     node.write_graph()
-    zntrack.utils.run_dvc_cmd(["repro"])
     nwd_new = node.nwd.with_name(f"ckpt_{node.nwd.name}")
-    assert not nwd_new.exists()
-    assert node.load().outs == list(range(10))
-
-    # and now we kill the process
-    node = WriteNumbersSlow(maximum=100)
-    node.write_graph()
-
     # killing the DVC process will not kill the python process as it would on
     #  a cluster
-    proc = subprocess.Popen(["zntrack run ..."])
-    time.sleep(1.5)
+    proc = subprocess.Popen(
+        ["zntrack", "run", "test_operating_directory.WriteNumbersSlow"]
+    )
+    time.sleep(2.0)
     proc.kill()
     assert nwd_new.exists()
 
-    zntrack.utils.run_dvc_cmd(["repro"])
-    nwd_new = node.nwd.with_name(f"ckpt_{node.nwd.name}")
+    # zntrack.utils.run_dvc_cmd(["repro"])
+    proc = subprocess.Popen(
+        ["zntrack", "run", "test_operating_directory.WriteNumbersSlow"]
+    )
+    proc.wait()
     assert not nwd_new.exists()
-    assert node.load().outs == list(range(100))
+    assert node.load().outs == list(range(15))
+
+    # and now check again without killing
+    node = WriteNumbersSlow(maximum=10)
+    node.write_graph()
+    zntrack.utils.run_dvc_cmd(["repro"])
+    assert not nwd_new.exists()
+    assert node.load().outs == list(range(10))
