@@ -1,6 +1,6 @@
 """Standard python init file for the utils directory."""
 
-from zntrack.utils import exceptions, file_io, helpers
+from zntrack.utils import cli, exceptions, file_io, helpers
 from zntrack.utils.config import Files, config
 from zntrack.utils.nwd import move_nwd, nwd
 from zntrack.utils.structs import (
@@ -48,4 +48,5 @@ __all__ = [
     "GIT_TRACKED",
     "update_gitignore",
     "move_nwd",
+    "cli",
 ]
