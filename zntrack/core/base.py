@@ -693,6 +693,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         prefix="ckpt",
         remove_on: EXCEPTION_OR_LST_EXCEPTIONS = None,
         move_on: EXCEPTION_OR_LST_EXCEPTIONS = Exception,
+        disable: bool = None,
     ) -> bool:
         """Work in an operating directory until successfully finished.
 
@@ -719,6 +720,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             content is moved to $nwd$ and the directory will be removed.
             This helps, in the case of an error to not restart from an already
             failed data point.
+        disable: bool, default = False
+            Disable the operating directory. Yields True.
 
 
         Yields
@@ -726,16 +729,20 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         new_ckpt: bool
             True if creating a new checkpoint. False if the checkpoint already existed.
         """
+        if disable is None:
+            disable = utils.config.disable_operating_directory
+        if disable:
+            yield True
+            return
+
         nwd = self.nwd
         nwd_new = self.nwd.with_name(f"{prefix}_{self.nwd.name}")
         nwd_is_new = not nwd_new.exists()
 
         remove = False
         move = False
-        if not isinstance(remove_on, list):
-            remove_on = [remove_on] if remove_on else []
-        if not isinstance(move_on, list):
-            move_on = [move_on] if move_on else []
+        remove_on = utils.utils.convert_to_list(remove_on)
+        move_on = utils.utils.convert_to_list(move_on)
 
         if self._run_and_save:
             utils.update_gitignore(prefix=prefix)

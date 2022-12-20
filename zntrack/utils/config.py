@@ -38,6 +38,8 @@ class Config:
         not be able to use the existing cache.
     dvc_api: bool, default = True
         Use the `dvc.cli.main` function instead of subprocess
+    disable_operating_directory: bool, default = False
+        Global config to disable operating directory context manager.
     """
 
     nb_name: str = None
@@ -46,6 +48,7 @@ class Config:
     allow_empty_loading: bool = False
     interpreter: typing.Union[str, Path] = Path(sys.executable).name
     dvc_api: bool = True
+    disable_operating_directory: bool = False
     _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
 
     @property

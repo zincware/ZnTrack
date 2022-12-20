@@ -251,3 +251,12 @@ def update_gitignore(prefix) -> None:
     with gitignore.open("a", encoding="utf-8") as file:
         file.write("\n# ZnTrack operating directory \n")
         file.write(f"{ignore}\n")
+
+
+def convert_to_list(value) -> list:
+    """Convert value to a list if it is not already one.
+
+    If 'value is None', return an empty list.
+    """
+    if not isinstance(value, (list, tuple)):
+        return [value] if value else []

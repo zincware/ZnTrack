@@ -172,3 +172,19 @@ def test_kill_process(proj_path):
     zntrack.utils.run_dvc_cmd(["repro"])
     assert not nwd_new.exists()
     assert node.load().outs == list(range(10))
+
+
+def test_disable_operating_directory(proj_path):
+    ListOfDataNode().write_graph()
+    with utils.config.updated_config(disable_operating_directory=True):
+        node = ListOfDataNode.load()
+
+        with pytest.raises(ValueError):
+            ListOfDataNode.load().run_and_save()
+        with pytest.raises(ValueError):  # running it twice does not change the outcome
+            ListOfDataNode.load().run_and_save()
+        assert node.nwd.exists()
+        assert not node.nwd.with_name(f"ckpt_{node.nwd.name}").exists()
+
+        with pytest.raises(exceptions.DataNotAvailableError):
+            _ = ListOfDataNode.load().data
