@@ -647,7 +647,7 @@ pgp = ["gpg"]
 
 [[package]]
 name = "dvc"
-version = "2.38.1"
+version = "2.39.0"
 description = "Git for data scientists - manage your code and data together"
 category = "main"
 optional = false
@@ -659,10 +659,11 @@ colorama = ">=0.3.9"
 configobj = ">=5.0.6"
 distro = ">=1.3.0"
 dpath = ">=2.0.2,<3"
-dvc-data = "0.28.4"
-dvc-http = "2.27.2"
-dvc-render = "0.0.15"
-dvc-task = "0.1.8"
+dvc-data = "0.28.5"
+dvc-http = "*"
+dvc-render = "0.0.17"
+dvc-studio-client = ">=0.1.1"
+dvc-task = "0.1.9"
 dvclive = ">=1.2.2"
 flatten-dict = ">=0.4.1,<1"
 "flufl.lock" = ">=5"
@@ -681,7 +682,7 @@ pyparsing = ">=2.4.7"
 requests = ">=2.22.0"
 rich = ">=10.13.0"
 "ruamel.yaml" = ">=0.17.11"
-scmrepo = "0.1.4"
+scmrepo = "0.1.5"
 shortuuid = ">=0.5.0"
 shtab = ">=1.3.4,<2"
 tabulate = ">=0.8.7"
@@ -704,14 +705,14 @@ ssh = ["dvc-ssh (==2.20.0)"]
 ssh-gssapi = ["dvc-ssh[gssapi] (==2.20.0)"]
 terraform = ["tpi[ssh] (>=2.1.0)"]
 testing = ["pytest-test-utils (==0.0.8)"]
-tests = ["beautifulsoup4 (==4.11.1)", "dvc-ssh (==2.20.0)", "filelock (==3.8.2)", "flaky (==3.7.0)", "mypy (==0.990)", "pylint (==2.15.8)", "pylint-plugin-utils (==0.7)", "pylint-pytest (==1.1.2)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-docker (==0.11.0)", "pytest-lazy-fixture (==0.6.3)", "pytest-mock (==3.10.0)", "pytest-test-utils (==0.0.8)", "pytest-timeout (==2.1.0)", "pytest-xdist (==3.1.0)", "pywin32 (>=225)", "tpi[ssh] (>=2.1.0)", "types-requests", "types-tabulate", "types-toml"]
+tests = ["beautifulsoup4 (==4.11.1)", "dvc-ssh (==2.20.0)", "filelock (==3.9.0)", "flaky (==3.7.0)", "mypy (==0.991)", "pylint (==2.15.9)", "pylint-plugin-utils (==0.7)", "pylint-pytest (==1.1.2)", "pytest (==7.2.0)", "pytest-cov (==4.0.0)", "pytest-docker (==0.11.0)", "pytest-lazy-fixture (==0.6.3)", "pytest-mock (==3.10.0)", "pytest-test-utils (==0.0.8)", "pytest-timeout (==2.1.0)", "pytest-xdist (==3.1.0)", "pywin32 (>=225)", "tpi[ssh] (>=2.1.0)", "types-requests", "types-tabulate", "types-toml"]
 webdav = ["dvc-webdav (==2.19.0)"]
 webhdfs = ["dvc-webhdfs (==2.19.0)"]
 webhdfs-kerberos = ["dvc-webhdfs[kerberos] (==2.19.0)"]
 
 [[package]]
 name = "dvc-data"
-version = "0.28.4"
+version = "0.28.5"
 description = "dvc data"
 category = "main"
 optional = false
@@ -770,7 +771,7 @@ tests = ["mypy (==0.971)", "pylint (==2.15.0)", "pytest (==7.2.0)", "pytest-cov 
 
 [[package]]
 name = "dvc-render"
-version = "0.0.15"
+version = "0.0.17"
 description = "DVC render"
 category = "main"
 optional = false
@@ -787,8 +788,26 @@ table = ["tabulate (>=0.8.7)"]
 tests = ["funcy (>=1.17)", "matplotlib", "mypy (==0.981)", "pylint (==2.15.0)", "pytest (==7.2.0)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pytest-sugar (==0.9.5)", "pytest-test-utils (>=0.0.6)", "tabulate (>=0.8.7)"]
 
 [[package]]
+name = "dvc-studio-client"
+version = "0.3.0"
+description = "Small library to post data from DVC/DVCLive to Iterative Studio"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+
+[package.dependencies]
+gitpython = "*"
+requests = "*"
+voluptuous = "*"
+
+[package.extras]
+dev = ["mkdocs (==1.3.1)", "mkdocs-gen-files (==0.3.5)", "mkdocs-material (==8.4.1)", "mkdocs-section-index (==0.3.4)", "mkdocstrings-python (==0.7.1)", "pytest (==7.2.0)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pytest-sugar (==0.9.5)"]
+docs = ["mkdocs (==1.3.1)", "mkdocs-gen-files (==0.3.5)", "mkdocs-material (==8.4.1)", "mkdocs-section-index (==0.3.4)", "mkdocstrings-python (==0.7.1)"]
+tests = ["pytest (==7.2.0)", "pytest-cov (==3.0.0)", "pytest-mock (==3.8.2)", "pytest-sugar (==0.9.5)"]
+
+[[package]]
 name = "dvc-task"
-version = "0.1.8"
+version = "0.1.9"
 description = "Extensible task queue used in DVC."
 category = "main"
 optional = false
@@ -2400,7 +2419,7 @@ test = ["asv", "gmpy2", "mpmath", "pytest", "pytest-cov", "pytest-xdist", "sciki
 
 [[package]]
 name = "scmrepo"
-version = "0.1.4"
+version = "0.1.5"
 description = "SCM wrapper and fsspec filesystem for Git for use in DVC"
 category = "main"
 optional = false
@@ -3554,12 +3573,12 @@ dulwich = [
     {file = "dulwich-0.20.50.tar.gz", hash = "sha256:50a941796b2c675be39be728d540c16b5b7ce77eb9e1b3f855650ece6832d2be"},
 ]
 dvc = [
-    {file = "dvc-2.38.1-py3-none-any.whl", hash = "sha256:f14f0080d5e312eef27863cc2fe082e365bf34e1d1757195c3ca808e8f74fe66"},
-    {file = "dvc-2.38.1.tar.gz", hash = "sha256:88dffe61d4d376d28d5dbd2cb1193782ad640d610fae5169871927b54d828af5"},
+    {file = "dvc-2.39.0-py3-none-any.whl", hash = "sha256:e0765516c85efac36148804c01fadaf19f4b3a862675499814a96a127a2fa9c1"},
+    {file = "dvc-2.39.0.tar.gz", hash = "sha256:efb00f96b296446c951107d4d82a2fb0b5be4c457d3c9f2d285fbcbf1f7be266"},
 ]
 dvc-data = [
-    {file = "dvc-data-0.28.4.tar.gz", hash = "sha256:81a508af473c0a407ef56e1c99caf3a7c37badb2d3d2396fa5b6d004b1208a35"},
-    {file = "dvc_data-0.28.4-py3-none-any.whl", hash = "sha256:ea4f6f5417bac7ba339c43e1abbee6fbd5bc799add457db959ffe5c69c7a339d"},
+    {file = "dvc-data-0.28.5.tar.gz", hash = "sha256:cf6ae7a7d9220fcd223504427829ef7e9b6088e94b83e7d2882a9846eafb85cb"},
+    {file = "dvc_data-0.28.5-py3-none-any.whl", hash = "sha256:dc5fc5e4d20e20f595a5b84bf1b623652e3d65804f37cb6c937a75e4fc1c0bad"},
 ]
 dvc-http = [
     {file = "dvc-http-2.27.2.tar.gz", hash = "sha256:242bed287ba1055b7a59eb7931023f2b617b8e670330fbee52312d7b31eb4b44"},
@@ -3570,12 +3589,16 @@ dvc-objects = [
     {file = "dvc_objects-0.14.0-py3-none-any.whl", hash = "sha256:8767ab7df049dbd41ed318bdc402976073c51b0d0c95aaa48dd13d337572fcc2"},
 ]
 dvc-render = [
-    {file = "dvc-render-0.0.15.tar.gz", hash = "sha256:bc1a02a2690c9641113be6fb59fb78fea485c7203a9c75d57220ca1e60e99b60"},
-    {file = "dvc_render-0.0.15-py3-none-any.whl", hash = "sha256:269592638b466b1104753b3b8c3dcafe4db8174909d4e3dc2354f50a14eab1c3"},
+    {file = "dvc-render-0.0.17.tar.gz", hash = "sha256:3b119edd39610dff102a60f6735a9bbd4b68ecdb463a65838013a2782e7c7b51"},
+    {file = "dvc_render-0.0.17-py3-none-any.whl", hash = "sha256:73334fa4a6dca15c480bfd78d4bfe1d15d51b5b8296d9108d1fd1d00ba21dc81"},
+]
+dvc-studio-client = [
+    {file = "dvc-studio-client-0.3.0.tar.gz", hash = "sha256:dabe29fbf55795de82faf8157a35fa9c00fe0553867ef8013281503607a1f66b"},
+    {file = "dvc_studio_client-0.3.0-py3-none-any.whl", hash = "sha256:195a11f9340df4687fbc174ca7c38543dbc1fa07f36e4a4ded615a677828bebe"},
 ]
 dvc-task = [
-    {file = "dvc-task-0.1.8.tar.gz", hash = "sha256:98906a1bb54995798f5b997e8bf90f4bb525cb893045fdc0fc79f27e5d737dc5"},
-    {file = "dvc_task-0.1.8-py3-none-any.whl", hash = "sha256:bd9a4afd1c38e9c009763ae99768ed2d0f29180dafa63de0ef5e46f0426310a8"},
+    {file = "dvc-task-0.1.9.tar.gz", hash = "sha256:e2bc6e257fc363fa9e960d727e59cc5b0a40c4355f475bd8a0f1e22fb0ea2a8c"},
+    {file = "dvc_task-0.1.9-py3-none-any.whl", hash = "sha256:539b8e45e29d5c082edc917b19ab2937b48a551ea33966a4d3a1e906e2ecc262"},
 ]
 dvclive = [
     {file = "dvclive-1.2.2-py3-none-any.whl", hash = "sha256:f1a526223f9333c60c49e71e0e04cb79ff53885197cb100f6cbd5f0a6b1f63ba"},
@@ -3722,9 +3745,7 @@ gitpython = [
 ]
 grandalf = [
     {file = "grandalf-0.6-py2-none-any.whl", hash = "sha256:d671fdfa5310f2639538b6c858c4b1aef7755535ccfcb9c1cdf0d29171326add"},
-    {file = "grandalf-0.6-py2.7.egg", hash = "sha256:51e34e141be2dd19bca74448918ebce88c1cd95498842a13d191df0a52a3955a"},
     {file = "grandalf-0.6-py3-none-any.whl", hash = "sha256:357946e2fd35fc92c327cf3c091acc5aef93e0c74c60fed0a727d827ab3b1272"},
-    {file = "grandalf-0.6-py3.5.egg", hash = "sha256:aa985ba9992aba30e9c09d3cd9574054268b74ff2d34ced68aa9e7ca698724b0"},
     {file = "grandalf-0.6.tar.gz", hash = "sha256:7471db231bd7338bc0035b16edf0dc0c900c82d23060f4b4d0c4304caedda6e4"},
 ]
 hydra-core = [
@@ -4441,6 +4462,7 @@ pygments = [
     {file = "Pygments-2.13.0.tar.gz", hash = "sha256:56a8508ae95f98e2b9bdf93a6be5ae3f7d8af858b43e02c5a2ff083726be40c1"},
 ]
 pygtrie = [
+    {file = "pygtrie-2.5.0-py3-none-any.whl", hash = "sha256:8795cda8105493d5ae159a5bef313ff13156c5d4d72feddefacaad59f8c8ce16"},
     {file = "pygtrie-2.5.0.tar.gz", hash = "sha256:203514ad826eb403dab1d2e2ddd034e0d1534bbe4dbe0213bb0593f66beba4e2"},
 ]
 pyparsing = [
@@ -4531,6 +4553,13 @@ pyyaml = [
     {file = "PyYAML-6.0-cp310-cp310-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_12_x86_64.manylinux2010_x86_64.whl", hash = "sha256:f84fbc98b019fef2ee9a1cb3ce93e3187a6df0b2538a651bfb890254ba9f90b5"},
     {file = "PyYAML-6.0-cp310-cp310-win32.whl", hash = "sha256:2cd5df3de48857ed0544b34e2d40e9fac445930039f3cfe4bcc592a1f836d513"},
     {file = "PyYAML-6.0-cp310-cp310-win_amd64.whl", hash = "sha256:daf496c58a8c52083df09b80c860005194014c3698698d1a57cbcfa182142a3a"},
+    {file = "PyYAML-6.0-cp311-cp311-macosx_10_9_x86_64.whl", hash = "sha256:d4b0ba9512519522b118090257be113b9468d804b19d63c71dbcf4a48fa32358"},
+    {file = "PyYAML-6.0-cp311-cp311-macosx_11_0_arm64.whl", hash = "sha256:81957921f441d50af23654aa6c5e5eaf9b06aba7f0a19c18a538dc7ef291c5a1"},
+    {file = "PyYAML-6.0-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:afa17f5bc4d1b10afd4466fd3a44dc0e245382deca5b3c353d8b757f9e3ecb8d"},
+    {file = "PyYAML-6.0-cp311-cp311-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:dbad0e9d368bb989f4515da330b88a057617d16b6a8245084f1b05400f24609f"},
+    {file = "PyYAML-6.0-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:432557aa2c09802be39460360ddffd48156e30721f5e8d917f01d31694216782"},
+    {file = "PyYAML-6.0-cp311-cp311-win32.whl", hash = "sha256:bfaef573a63ba8923503d27530362590ff4f576c626d86a9fed95822a8255fd7"},
+    {file = "PyYAML-6.0-cp311-cp311-win_amd64.whl", hash = "sha256:01b45c0191e6d66c470b6cf1b9531a771a83c1c4208272ead47a3ae4f2f603bf"},
     {file = "PyYAML-6.0-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:897b80890765f037df3403d22bab41627ca8811ae55e9a722fd0392850ec4d86"},
     {file = "PyYAML-6.0-cp36-cp36m-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:50602afada6d6cbfad699b0c7bb50d5ccffa7e46a3d738092afddc1f9758427f"},
     {file = "PyYAML-6.0-cp36-cp36m-manylinux_2_17_s390x.manylinux2014_s390x.whl", hash = "sha256:48c346915c114f5fdb3ead70312bd042a953a8ce5c7106d5bfb1a5254e47da92"},
@@ -4663,6 +4692,7 @@ ruamel-yaml-clib = [
     {file = "ruamel.yaml.clib-0.2.7-cp310-cp310-win_amd64.whl", hash = "sha256:d000f258cf42fec2b1bbf2863c61d7b8918d31ffee905da62dede869254d3b8a"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-macosx_10_9_universal2.whl", hash = "sha256:045e0626baf1c52e5527bd5db361bc83180faaba2ff586e763d3d5982a876a9e"},
     {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-macosx_12_6_arm64.whl", hash = "sha256:721bc4ba4525f53f6a611ec0967bdcee61b31df5a56801281027a3a6d1c2daf5"},
+    {file = "ruamel.yaml.clib-0.2.7-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.manylinux_2_24_x86_64.whl", hash = "sha256:41d0f1fa4c6830176eef5b276af04c89320ea616655d01327d5ce65e50575c94"},
     {file = "ruamel.yaml.clib-0.2.7-cp36-cp36m-macosx_10_9_x86_64.whl", hash = "sha256:4b3a93bb9bc662fc1f99c5c3ea8e623d8b23ad22f861eb6fce9377ac07ad6072"},
     {file = "ruamel.yaml.clib-0.2.7-cp36-cp36m-macosx_12_0_arm64.whl", hash = "sha256:a234a20ae07e8469da311e182e70ef6b199d0fbeb6c6cc2901204dd87fb867e8"},
     {file = "ruamel.yaml.clib-0.2.7-cp36-cp36m-manylinux2014_aarch64.whl", hash = "sha256:15910ef4f3e537eea7fe45f8a5d19997479940d9196f357152a09031c5be59f3"},
@@ -4731,8 +4761,8 @@ scipy = [
     {file = "scipy-1.9.3.tar.gz", hash = "sha256:fbc5c05c85c1a02be77b1ff591087c83bc44579c6d2bd9fb798bb64ea5e1a027"},
 ]
 scmrepo = [
-    {file = "scmrepo-0.1.4-py3-none-any.whl", hash = "sha256:7feaf08511452051734829dda76911778b1f9691d792754765a84b09948a5a17"},
-    {file = "scmrepo-0.1.4.tar.gz", hash = "sha256:e552f85a31bb4afb065da3e29eaf7464e3bcf281fb2d22ad8ebccfc3ae673174"},
+    {file = "scmrepo-0.1.5-py3-none-any.whl", hash = "sha256:95d798e5ce248ad311c7b4fb71b18b47698e1c89111ccdc730e39fa2cc95b417"},
+    {file = "scmrepo-0.1.5.tar.gz", hash = "sha256:27cdbc3c5ead363a2ed6f9b0d7cd38d9df2c3225bf4044b3d56ec90fa437e095"},
 ]
 send2trash = [
     {file = "Send2Trash-1.8.0-py3-none-any.whl", hash = "sha256:f20eaadfdb517eaca5ce077640cb261c7d2698385a6a0f072a4a5447fd49fa08"},
