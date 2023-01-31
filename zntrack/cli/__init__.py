@@ -1,3 +1,4 @@
+"""The ZnTrack CLI."""
 import importlib.metadata
 import pathlib
 import sys
@@ -22,7 +23,7 @@ def main(
         None, "--version", callback=version_callback, is_eager=True
     ),
 ) -> None:
-    """The ZnTrack CLI."""
+    """ZnTrack CLI main callback."""
     _ = version  # this would be greyed out otherwise
 
 
