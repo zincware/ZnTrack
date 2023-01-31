@@ -23,7 +23,7 @@ class Hash(ZnTrackOption):
     """
 
     zn_type = utils.ZnTypes.HASH
-    dvc_option = utils.DVCOptions.OUTS_NO_CACHE.value
+    dvc_option = utils.DVCOptions.OUTS.value
     allow_lazy: bool = False
 
     def __init__(self, *, use_time: bool = True, **kwargs):

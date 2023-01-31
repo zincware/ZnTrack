@@ -185,7 +185,7 @@ def nodify(
     plots: UnionDictListOfStrPath = None,
     plots_no_cache: UnionDictListOfStrPath = None,
 ):
-    """Main wrapper Function to convert a function into a DVC Stage.
+    """Wrapper Function to convert a function into a DVC Stage.
 
     Special Parameters
     ------------------

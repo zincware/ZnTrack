@@ -448,7 +448,10 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         return instance
 
     def run_and_save(self):
-        """Main method to run for the actual calculation."""
+        """Call run and save afterwards.
+
+        Method used e.g. by dvc repro.
+        """
         self._run_and_save = True
         try:
             self.nwd.mkdir(exist_ok=True, parents=True)
