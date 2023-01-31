@@ -12,7 +12,7 @@ jobs:
       - name: Black Check
         uses: psf/black@stable
         with:
-          version: "22.8.0"
+          version: "22.12.0"
 
   isort:
     runs-on: ubuntu-latest
@@ -23,7 +23,7 @@ jobs:
           python-version: '3.x'
       - name: Install isort
         run: |
-          pip install isort==5.10.1
+          pip install isort==5.12.0
       - name: run isort
         run: |
           isort --check-only --quiet .
@@ -41,21 +41,3 @@ jobs:
           pip install ruff
       - name: Run Ruff
         run: ruff .
-
-  pylint-disabled:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'
-      - name: Install package
-        run: |
-          pip install .
-      - name: Install pylint
-        run: |
-          pip install pylint perflint
-      - name: run pylint
-        continue-on-error: true
-        run: |
-          pylint zntrack --load-plugins=perflint
