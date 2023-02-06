@@ -15,28 +15,26 @@
 
 ![Logo](https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/img/zntrack.png)
 
-# Parameter Tracking for Python
+# ZnTrack: A Parameter Tracking Package for Python
 
-ZnTrack [zɪŋk træk] is an easy-to-use package for tracking parameters and creating computational graphs for your Python
-projects.
-What is a parameter? Anything set by a user in your code, for example, the number of
-layers in a neural network or the window size of a moving average.
-ZnTrack works by storing the values of parameters in Python classes and functions and
-monitoring how they change for several different runs.
-These changes can then be compared graphically to see what effect they had on your
-workflow.
-Beyond the standard tracking of parameters in a project, ZnTrack can be used to deploy
-jobs with a set of different parameter values, avoid the re-running of code components
-where parameters have not changed, and to identify computational bottlenecks.
+ZnTrack ``zɪŋk træk`` is a lightweight and easy-to-use package for tracking parameters in your Python projects using DVC.
+With ZnTrack, you can define parameters in Python classes and monitor how they change over time.
+This information can then be used to compare the results of different runs, identify computational bottlenecks, and avoid the re-running of code components where parameters have not changed.
 
-## Example
-ZnTrack is based on [DVC](https://dvc.org).
-With ZnTrack a DVC Node on the computational graph can be written as a Python class.
-DVC Options, such as parameters, input dependencies and output files are defined as class attributes.
+## Key Features
+- Parameter, output and metric tracking: ZnTrack makes it easy to store and track the values of parameters in your Python code. It further allows you to store any outputs produced and gives an easy interface to define metrics.
+- Lightweight and database-free: Unlike other parameter tracking solutions, ZnTrack is lightweight and does not require any databases.
 
-The following example shows a Node to compute a random number between 0 and a user defined maximum.
+## Getting Started
+To get started with ZnTrack, you can install it via pip: ```pip install zntrack```
 
-````python
+Next, you can start using ZnTrack to track parameters, outputs and metrics in your Python code.
+Here's an example of how to use ZnTrack to track the value of a parameter in a Python class.
+Start in an empty directory and run ``git init`` and ``dvc init`` for preparation.
+
+Then put the following into a python file called `hello_world.py` and call it with `python hello_world.py`.
+
+```python
 from zntrack import Node, zn
 from random import randrange
 
@@ -51,16 +49,17 @@ class HelloWorld(Node):
     def run(self):
         """Command to be run by DVC"""
         self.random_number = randrange(self.max_number)
-````
+        
+if __name__ == "__main__":
+    # Write the computational graph
+    HelloWorld(max_number=512).write_graph()
+```
 
-This Node can then be put on the computational graph (writing the `dvc.yaml` and `params.yaml` files) by calling `write_graph()`. 
-The graph can then be executed e.g., through `dvc repro`.
+This will create a [DVC](https://dvc.org) stage ``HelloWorld``.
+The workflow is defined in ``dvc.yaml`` and the parameters are stored in ``params.yaml``.
 
-````python
-HelloWorld(max_number=512).write_graph()
-````    
-
-Once `dvc repro` is called, the results, i.e. the random number can be accessed directly by the Node object.
+You can run the workflow with ``dvc repro``.
+Once the graph is executed, the results, i.e. the random number can be accessed directly by the Node object.
 ```python
 hello_world = HelloWorld.load()
 print(hello_world.random_numer)
@@ -99,24 +98,6 @@ On a fundamental level the ZnTrack package provides an easy-to-use interface for
 It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml` as well as in the script and much more.
 
 For more information on DVC visit their [homepage](https://dvc.org/doc).
-
-
-Installation
-============
-
-Install the stable version from PyPi via
-
-````shell
-pip install zntrack
-```` 
-
-or install the latest development version from source with:
-
-````shell
-git clone https://github.com/zincware/ZnTrack.git
-cd ZnTrack
-pip install .
-````
 
 Copyright
 =========
