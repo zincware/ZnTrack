@@ -7,11 +7,10 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 import importlib
 
-
 project = "ZnTrack"
 copyright = "2023, zincwarecode <zincwarecode@gmail.com>"
 author = "zincwarecode <zincwarecode@gmail.com>"
-version = importlib.import_module('zntrack').__version__
+version = importlib.import_module("zntrack").__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -48,4 +47,3 @@ html_css_files = [
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
 ]
-
