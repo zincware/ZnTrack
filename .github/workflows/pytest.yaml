@@ -25,7 +25,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - uses: iterative/setup-cml@v1
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -57,13 +56,6 @@ jobs:
         with:
           flags: fulltest
           verbose: true
-      - name: CML Report
-        env:
-          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "# Report for Python ${{ matrix.python-version }}" > report.md
-          poetry run python -c "import pandas as pd; print(pd.read_csv('export.csv').to_markdown())" >> report.md
-          cml comment create --publish report.md
 
   nbtest:
     runs-on: ubuntu-latest
