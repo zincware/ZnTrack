@@ -16,6 +16,45 @@ ZnTrack is zincwarecode's first developer package and in fact, the first release
 - :ref:`userdoc-theory`
 - :ref:`userdoc-api`
 
+Example
+=======
+
+Here are two examples of how ZnTrack Nodes can look like.
+ZnTrack supports function and class based Nodes, as well as the combination of both.
+For more information, refer to the :ref:`userdoc-get-started` section.
+
+Class based Node
+----------------
+.. code-block:: python
+
+   from zntrack import Node, zn
+
+   class AddNumbers(Node):
+      number1 = zn.params()
+      number2 = zn.params()
+
+      result = zn.outs()
+
+      def run(self):
+         self.result = self.number1 + self.number2
+
+   AddNumbers(number1=10, number2=20).write_graph()
+
+
+Function based Node
+-------------------
+ .. code-block:: python
+
+   from zntrack import nodify, NodeConfig
+
+   @nodify(outs="number.txt", params={"number1": 10, "number2": 20})
+   def add_numbers(cfg: NodeConfig):
+      with open(cfg.outs) as file:
+            file.write(str(cfg.params.number1 + cfg.params.number2))
+
+   add_numbers()
+
+
 .. toctree::
    :hidden:
 

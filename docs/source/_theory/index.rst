@@ -1,7 +1,7 @@
 .. _userdoc-theory:
 
-ZnTrack Theory
-===============
+Theory
+======
 
 In this section we provide a brief overview of the theory behind ZnTrack.
 
