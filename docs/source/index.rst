@@ -1,60 +1,24 @@
 .. ZnTrack documentation master file, created by
-   sphinx-quickstart on Mon Jun  7 17:11:53 2021.
+   sphinx-quickstart on Mon Feb  6 15:28:26 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ZnTrack's documentation!
-====================================
-ZnTrack is `zincwarecode's <https://zincwarecode.com>`_ first developer package
-and in fact, the first released on PyPi, so we are glad you are here.
-ZnTrack is built to help you write code that can easily be shared and reproduced.
-It uses `Data Version Control <https://dvc.org/>`_ to track generated files and parameters.
-ZnTrack is designed as a developer package aiming to be used in other software packages.
-If you are not planning on writing such packages we highly recommend looking up DVC first.
+ZnTrack's documentation!
+===================================
 
-ZnTrack might still be helpful for you as it provides an Object-Relational Mapping for DVC in Python.
-Additionally, it provides an experimental feature that enables the usage of Python classes
-from within a Jupyter Notebook while utilizing DVC tracking.
-Please have a look at the Tutorials and Documentation for detailed
-information or write an issue on Github for https://github.com/zincware/ZnTrack
+.. image:: _static/logo_ZnTrack.png
+   :alt: ZnTrack logo
+
+ZnTrack is zincwarecode's first developer package and in fact, the first released on PyPi, so we are glad you are here. ZnTrack is built to help you write code that can easily be shared and reproduced.
+
+- :ref:`userdoc-get-started`
+- :ref:`userdoc-examples`
+- :ref:`userdoc-theory`
+
 
 .. toctree::
-   :maxdepth: 1
-   :caption: First Steps:
+   :hidden:
 
-   installation
-
-.. toctree::
-
-   tutorials
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Theory:
-
-   _theory/directed_acyclic_graphs
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Examples:
-
-   examples
-
-.. toctree::
-   :maxdepth: 1
-
-   _architecture/zntrack
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Migration to v0.3:
-
-   _tutorials/migration_guide_v3
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   _get-started/index
+   _examples/index
+   _theory/index

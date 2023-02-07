@@ -15,8 +15,9 @@ structures underpinning many modern theories.
 Graphs in general are defined as sets of vertices connected to each other by edges.
 A typical example of a graph is shown below:
 
-.. image:: ../img/graph.png
+.. image:: https://mermaid.ink/img/pako:eNpVzj0LgzAQBuC_IjedoINRl8wdO7VrlsOcVTCxpAmliP-9kRZ6vekeeO9jg2G1DBrGZX0OE4VYnC_GF99qEJuy_FkhKukWsZXuEDvpHrE_LDbWda3-2Yv9ma0Yz-zEtQ-NhwocB0ezzZ9vR8BAnNixAZ1byyOlJRowfs9RSnG9vvwAOobEFaS7pcinmW6BHOiRlgfvb6CsQXk?type=png
    :width: 400
+   :align: center
    :alt: Image of a standard undirected graph.
 
 In this figure we can see 5 vertices (nodes) each connected to two others by a straight
@@ -44,8 +45,9 @@ within a graph, it becomes necessary to adapt the way we write them.
 Graphically a directed graph is constructed by simple identifying directions between
 vertices as outlined below:
 
-.. image:: ../img/digraph.png
+.. image:: https://mermaid.ink/img/pako:eNpNzj0Lg0AMBuC_Ipki6ODXckOnjp3a9ZbgxSp4Ws47ShH_eyMUmkx54OVNduhXx2BgmNd3P1KI2e1ul-w3FWKV53_XiLV2g9hot4itdofYnVaNZXmpVUBYqX5ho-qEnbombM8yKMBz8DQ5-Xw_AxbiyJ4tGFkdD5TmaMEuh0QpxfXxWXowMSQuIL0cRb5O9AzkwQw0b3x8Acg7Qc4?type=png
    :width: 400
+   :align: center
    :alt: Image of a standard undirected graph.
 
 In this case you can see that node 1 is connected to node 2 but not vice versa. Due to
@@ -73,8 +75,9 @@ the idea of an acyclic graph.
 
 Consider the figure below:
 
-.. image:: ../img/cyclic.png
+.. image:: https://mermaid.ink/img/pako:eNpNzj0Lg0AMBuC_Ipki6ODXckOnjp3a9ZbgxSp4Ws47ShH_eyMUmkx54OVNduhXx2BgmNd3P1KI2e1ul-w3FWKV53_XiLV2g9hot4itdofYnVaNZXmpVUBYqX5ho-qEnbombM8yKMBz8DQ5-Xw_AxbiyJ4tGFkdD5TmaMEuh0QpxfXxWXowMSQuIL0cRb5O9AzkwQw0b3x8Acg7Qc4?type=png
    :width: 400
+   :align: center
    :alt: Image of a standard undirected graph.
 
 and its mathematical description:
@@ -93,8 +96,9 @@ connected at some stage.
 
 Consider now a slight change to this graph:
 
-.. image:: ../img/acyclic.png
+.. image:: https://mermaid.ink/img/pako:eNpVzj0Lg0AMBuC_Ipki6ODXckOnjp3a9ZbgxSp4ZznvKEX87z1poWmmPCR5yQb9YhgUDPPy7EfyIbtctcu-VSFWef5zjVhLN4iNdIvYSneI3WGRWJan-p-dyE9sxHliK9I_U-2gAMve0mTS59uxoCGMbFmDSq3hgeIcNGi3p1WKYbm9XA8q-MgFxIehwOeJ7p4sqIHmlfc3yDNBzg?type=png
    :width: 400
+   :align: center
    :alt: Image of a standard undirected graph.
 
 and its equation:
@@ -127,8 +131,8 @@ Workflow construction
 The first application we will discuss is workflow construction. Consider the graph
 below:
 
-.. image:: ../img/nn_train.png
-   :width: 400
+.. image:: https://mermaid.ink/img/pako:eNplkDtuwzAQRK9CbG3nACpSuQmQAEGcznSxkFYWHX4EagU5MXz3LCmZ8IcqOJwZQm95hjo0BBW0Nkx1h5HV-5f2SlaDjDsNaXvhE2vYz_5AlmqWZJuF2kihhH0Mxzn9nFVJnPzHiv8d0Xj1kU4lM96kK2-yGbTmj5QnnkL8UROZQ8dDaS5nKS-qoKXviq3W69eF85Y52wvhk5_57obIdkK7GeDBSypbV06BgBU4ig5NI896Tj0N3JEjDZXIhlocrTBrf5Eqjhy2v76GiuNIKxh7GYA2Bg8RHVQt2oEu_yp9i1A?type=png
+   :width: 700
    :alt: Workflow of NN training.
 
 In this example we have a semi-typical NN training procedure. Our computational graph
@@ -180,7 +184,7 @@ workflow for each input are stored independently an can be easily compared. For 
 you may produce a graph for this problem comparing number of training points to accuracy
 with fixed weight initialization.
 
-.. image:: ../img/NN_Accuracy.png
+.. image:: ../_static/NN_Accuracy.png
    :width: 400
    :alt: Workflow of NN training.
 
