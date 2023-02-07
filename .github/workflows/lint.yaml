@@ -1,7 +1,6 @@
 name: Check coding style
 
 on:
-  push:
   pull_request:
 
 jobs:
