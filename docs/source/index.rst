@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 ZnTrack's documentation!
-===================================
+========================
 
 .. image:: _static/logo_ZnTrack.png
    :alt: ZnTrack logo
@@ -14,7 +14,7 @@ ZnTrack is zincwarecode's first developer package and in fact, the first release
 - :ref:`userdoc-get-started`
 - :ref:`userdoc-examples`
 - :ref:`userdoc-theory`
-
+- :ref:`userdoc-api`
 
 .. toctree::
    :hidden:
@@ -22,3 +22,4 @@ ZnTrack is zincwarecode's first developer package and in fact, the first release
    _get-started/index
    _examples/index
    _theory/index
+   _api/index
