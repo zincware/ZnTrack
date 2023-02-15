@@ -8,7 +8,8 @@ ZnTrack is build around a few basic principles of a computational workflow (also
 - A node, once executed with a given set of inputs is considered completed and will not be executed again.
 
 Our goal is, to make writing and using nodes as easy as possible.
-Therefore, ZnTrack is desigend as a dabase-free tool written on top of DVC.
+Therefore, ZnTrack is designed as a database-free tool written on top of DVC.
+This allows to focus on the workflow and not on a complicated setup.
 
 Nodes written in ZnTrack can be used across several projects and can be shared with other users.
 Workflows, e.g. how nodes are connected, which parameters are used and which metrics are produced, are stored in git commits.

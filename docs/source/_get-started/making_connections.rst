@@ -34,6 +34,7 @@ With this, any attribute of any Node can be connected.
 .. tip::
     In a Future release of ZnTrack it will be possible to connect Nodes directly inside a Context Manager.
     The current API will still remain but it can be worth looking for updates of the ZnTrack package.
+    Check out `ZnFlow <https://github.com/zincware/znflow>`_ for a preview and further information.
 
     .. code-block:: python
 

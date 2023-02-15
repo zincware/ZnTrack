@@ -8,8 +8,9 @@ ZnTrack's documentation!
 
 .. image:: _static/logo_ZnTrack.png
    :alt: ZnTrack logo
+   :target: https://github.com/zincware/ZnTrack
 
-ZnTrack is zincwarecode's first developer package and in fact, the first released on PyPi, so we are glad you are here. ZnTrack is built to help you write code that can easily be shared and reproduced.
+ZnTrack is `zincware's <https://github.com/zincware>`_ first developer package and in fact, the first released on PyPi, so we are glad you are here. ZnTrack is built to help you write code that can easily be shared and reproduced.
 
 - :ref:`userdoc-get-started`
 - :ref:`userdoc-examples`
