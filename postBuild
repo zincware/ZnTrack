@@ -4,4 +4,4 @@ git config --global user.email johndoe@example.com
 
 pip install poetry
 poetry config virtualenvs.create false
-poetry install
+poetry install --all-extras --without=notebook

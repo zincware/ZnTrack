@@ -11,3 +11,4 @@ venv
 /py_track.egg-info/
 __pycache__/
 .pymon
+.ipynb_checkpoints

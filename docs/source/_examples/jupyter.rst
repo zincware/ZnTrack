@@ -23,6 +23,7 @@ In general one may write:
 
     class Stage(Node):
         output = zn.outs()
+
         def run(self):
             """Actual computation"""
             self.output = "lorem ipsum"

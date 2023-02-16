@@ -1,60 +1,71 @@
 .. ZnTrack documentation master file, created by
-   sphinx-quickstart on Mon Jun  7 17:11:53 2021.
+   sphinx-quickstart on Mon Feb  6 15:28:26 2023.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to ZnTrack's documentation!
-====================================
-ZnTrack is `zincwarecode's <https://zincwarecode.com>`_ first developer package
-and in fact, the first released on PyPi, so we are glad you are here.
-ZnTrack is built to help you write code that can easily be shared and reproduced.
-It uses `Data Version Control <https://dvc.org/>`_ to track generated files and parameters.
-ZnTrack is designed as a developer package aiming to be used in other software packages.
-If you are not planning on writing such packages we highly recommend looking up DVC first.
+ZnTrack's documentation!
+========================
 
-ZnTrack might still be helpful for you as it provides an Object-Relational Mapping for DVC in Python.
-Additionally, it provides an experimental feature that enables the usage of Python classes
-from within a Jupyter Notebook while utilizing DVC tracking.
-Please have a look at the Tutorials and Documentation for detailed
-information or write an issue on Github for https://github.com/zincware/ZnTrack
+.. image:: _static/logo_ZnTrack.png
+   :alt: ZnTrack logo
+   :target: https://github.com/zincware/ZnTrack
+
+.. raw:: html
+
+   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
+   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=fork&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
+
+ZnTrack is `zincware's <https://github.com/zincware>`_ first developer package and in fact, the first released on PyPi, so we are glad you are here. ZnTrack is built to help you write code that can easily be shared and reproduced.
+
+- :ref:`userdoc-get-started`
+- :ref:`userdoc-examples`
+- :ref:`userdoc-theory`
+- :ref:`userdoc-api`
+
+
+Example
+=======
+
+Here are two examples of how ZnTrack Nodes can look like.
+ZnTrack supports function and class based Nodes, as well as the combination of both.
+For more information, refer to the :ref:`userdoc-get-started` section.
+
+Class based Node
+----------------
+.. code-block:: python
+
+   from zntrack import Node, zn
+
+   class AddNumbers(Node):
+      number1 = zn.params()
+      number2 = zn.params()
+
+      result = zn.outs()
+
+      def run(self):
+         self.result = self.number1 + self.number2
+
+   AddNumbers(number1=10, number2=20).write_graph()
+
+
+Function based Node
+-------------------
+ .. code-block:: python
+
+   from zntrack import nodify, NodeConfig
+
+   @nodify(outs="number.txt", params={"number1": 10, "number2": 20})
+   def add_numbers(cfg: NodeConfig):
+      with open(cfg.outs) as file:
+            file.write(str(cfg.params.number1 + cfg.params.number2))
+
+   add_numbers()
+
 
 .. toctree::
-   :maxdepth: 1
-   :caption: First Steps:
+   :hidden:
 
-   installation
-
-.. toctree::
-
-   tutorials
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Theory:
-
-   _theory/directed_acyclic_graphs
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Examples:
-
-   examples
-
-.. toctree::
-   :maxdepth: 1
-
-   _architecture/zntrack
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Migration to v0.3:
-
-   _tutorials/migration_guide_v3
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   _get-started/index
+   _examples/index
+   _theory/index
+   _api/index
