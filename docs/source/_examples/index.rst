@@ -29,3 +29,4 @@ The notebooks are organized in the following way:
     02_Inheritance
     09_lazy
     OptionalDVC
+    jupyter
