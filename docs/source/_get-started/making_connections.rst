@@ -1,7 +1,8 @@
 Connecting Nodes
 ================
 
-**# TODO: Connect function and class based nodes**
+..
+    **# TODO: Connect function and class based nodes**
 
 The strength of the ZnTrack package is within connecting nodes.
 This is easily done by passing one Node as an argument to another one.

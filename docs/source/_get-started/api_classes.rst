@@ -1,22 +1,19 @@
 .. _userdoc-get-started-api_classes:
 
-Base Class: Node
-================
+Node Class: The Backbone of ZnTrack
+===================================
 
-Most functionality in ZnTrack is built into the ``zntrack.Node`` class.
-It is the base class for class-based Nodes on the Graph.
-There are several advantage over the function based approach:
+The ``zntrack.Node`` class is at the core of ZnTrack's functionality.
+It serves as the base class for class-based Nodes on the Graph.
+Compared to the function-based approach, the class-based approach has several advantages:
 
-- The state of the Node is stored as class attributes.
-- Python classes allow for more complex logic.
-- The class can easily be reused in other Nodes.
+- The state of the Node is stored as class attributes, providing greater flexibility.
+- Python classes enable more complex logic to be defined.
+- The class can be easily reused in other Nodes.
 - The class state can be serialized more easily.
-- Parameters, inputs and outputs are handled as class attributes and not via ``NodeConfig``.
+- Parameters, inputs, and outputs are handled as class attributes, simplifying the creation of new Nodes.
 
-To define a custom Node it has to inherit from the Node class.
-One can define parameters and outputs in two different ways.
-The ``from zntrack import zn`` module allows you to automatically serialize Python objects.
-This way almost seamlessly integrates in your existing workflows.
+To define a custom Node, simply inherit from the Node class. Parameters and outputs can be defined in two ways. The ``from zntrack import zn`` module enables seamless integration with your existing workflows, allowing Python objects to be automatically serialized.
 
 
 ..  code-block:: python

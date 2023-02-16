@@ -50,7 +50,7 @@ If we edit ``params.yaml`` and change the text to ``Hello World``, running ``dvc
 
 .. tip::
 
-    If we change the ``params.yaml`` file back to ``Lorem Ipsum``, calling ``dvc repro`` again will load the results from the run cache. See `DVC run cache <https://dvc.org/doc/user-guide/project-structure/internal-files#run-cache>`_ for more information.
+    If we change the ``params.yaml`` file contents back to ``Lorem Ipsum``, calling ``dvc repro`` again will load the results from the run cache. See `DVC run cache <https://dvc.org/doc/user-guide/project-structure/internal-files#run-cache>`_ for more information.
 
 
 

@@ -9,6 +9,7 @@ ZnTrack is designed to build workflows, track parameters and keep track of the a
 .. toctree::
     :maxdepth: 0
 
+    installation
     workflows
     dvc
     api_functions
