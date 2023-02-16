@@ -79,3 +79,24 @@ jobs:
       - name: Pytest
         run: |
           poetry run pytest --nbmake ./examples
+
+  doctest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        uses: abatilo/actions-poetry@v2
+        with:
+          poetry-version: 1.2.2
+      - name: Install package
+        run: |
+          poetry config virtualenvs.create false
+          poetry install --with=docs
+      - name: Build documentation
+        run: |
+          cd ./docs
+          make html
