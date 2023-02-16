@@ -2,12 +2,15 @@
 
 Installation
 ============
-
 The ZnTrack package is available on PyPI and can be installed using
 
 ..  code-block:: bash
 
     pip install zntrack
+
+.. image:: https://badge.fury.io/py/zntrack.svg
+   :alt: PyPI version
+   :target: https://pypi.org/project/zntrack/
 
 Developer Installation
 ----------------------

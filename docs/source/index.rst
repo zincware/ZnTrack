@@ -10,12 +10,18 @@ ZnTrack's documentation!
    :alt: ZnTrack logo
    :target: https://github.com/zincware/ZnTrack
 
+.. raw:: html
+
+   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
+   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=fork&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
+
 ZnTrack is `zincware's <https://github.com/zincware>`_ first developer package and in fact, the first released on PyPi, so we are glad you are here. ZnTrack is built to help you write code that can easily be shared and reproduced.
 
 - :ref:`userdoc-get-started`
 - :ref:`userdoc-examples`
 - :ref:`userdoc-theory`
 - :ref:`userdoc-api`
+
 
 Example
 =======
