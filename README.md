@@ -13,7 +13,7 @@
 
 
 
-![Logo](https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/img/zntrack.png)
+![Logo](https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/_static/logo_ZnTrack.png)
 
 # ZnTrack: A Parameter Tracking Package for Python
 
