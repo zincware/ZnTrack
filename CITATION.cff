@@ -1,0 +1,20 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: ZnTrack
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Fabian
+    family-names: Zills
+    affiliation: >-
+      Institute for Computational Physics, University of
+      Stuttgart
+    orcid: 'https://orcid.org/0000-0002-6936-4692'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.6472850.
+license: Apache-2.0
