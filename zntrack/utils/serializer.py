@@ -80,7 +80,7 @@ class ZnTrackTypeConverter(znjson.ConverterBase):
         )
 
     def decode(self, value: dict) -> Node:
-        """return serialized Node."""
+        """Return serialized Node."""
         serialized_node = SerializedNode(**value)
         return serialized_node.get_cls().load(name=serialized_node.name)
 
@@ -100,7 +100,7 @@ class NodeAttributeConverter(znjson.ConverterBase):
         return dataclasses.asdict(obj)
 
     def decode(self, value: dict):
-        """return serialized Node attribute."""
+        """Return serialized Node attribute."""
         node_attribute = NodeAttribute(**value)
         serialized_node = SerializedNode(
             module=node_attribute.module, cls=node_attribute.cls, name=node_attribute.name

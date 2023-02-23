@@ -52,7 +52,7 @@ class RawNodeAttributeConverter(znjson.ConverterBase):
         return dataclasses.asdict(obj)
 
     def decode(self, value: dict) -> NodeAttribute:
-        """return serialized Node attribute."""
+        """Return serialized Node attribute."""
         return NodeAttribute(**value)
 
 

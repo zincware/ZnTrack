@@ -93,7 +93,7 @@ class ZnTrackOption(zninit.Descriptor):
 
     @property
     def dvc_args(self) -> str:
-        """replace python variables '_' with '-' for dvc."""
+        """Replace python variables '_' with '-' for dvc."""
         return self.dvc_option.replace("_", "-")
 
     def post_dvc_cmd(self, instance) -> typing.List[str]:

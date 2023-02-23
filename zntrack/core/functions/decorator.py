@@ -43,7 +43,7 @@ class NodeConfig:
     plots_no_cache: UnionDictListOfStrPath = None
 
     def __post_init__(self):
-        """dataclass post_init."""
+        """Dataclass post_init."""
         for datacls_field in dataclasses.fields(self):
             # type checking
             option_value = getattr(self, datacls_field.name)
