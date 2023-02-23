@@ -1,6 +1,8 @@
 name: Check coding style
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
 
 jobs:
