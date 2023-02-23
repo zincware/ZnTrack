@@ -270,7 +270,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         )
 
     def __hash__(self):
-        """compute the hash based on the parameters and node_name.
+        """Compute the hash based on the parameters and node_name.
 
         Ignore 'not serializable' here so it will not raise an error.
 
@@ -385,7 +385,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @classmethod
     def load(cls, name=None, lazy: bool = None) -> Node:
-        """classmethod that yield a Node object.
+        """Classmethod that yield a Node object.
 
         This method does
         1. create a new instance of Node
@@ -487,7 +487,7 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @property
     def affected_files(self) -> typing.Set[pathlib.Path]:
-        """list of all files that can be changed by this instance."""
+        """List of all files that can be changed by this instance."""
         files = []
         for option in self._descriptor_list:
             file = option.get_filename(self)
