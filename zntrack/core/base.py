@@ -209,7 +209,9 @@ class NodeBase(zninit.ZnInit):
         self.__dict__["nwd"] = value
 
     @property
-    def _descriptor_list(self) -> typing.List[zninit.descriptor.DescriptorTypeT]:
+    def _descriptor_list(
+        self,
+    ) -> typing.List[zninit.descriptor.DescriptorTypeT]:
         """Get all descriptors of this instance."""
         descriptors = zninit.get_descriptors(ZnTrackOption, self=self)
         if self._is_attribute:
@@ -247,9 +249,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
     @utils.deprecated(
         reason=(
-            "Please check out https://zntrack.readthedocs.io/en/latest/_tutorials/"
-            "migration_guide_v3.html for a migration tutorial from "
-            "ZnTrack v0.2 to v0.3"
+            "Please check out"
+            " https://zntrack.readthedocs.io/en/latest/_tutorials/migration_guide_v3.html"
+            " for a migration tutorial from ZnTrack v0.2 to v0.3"
         ),
         version="v0.3",
     )
@@ -427,11 +429,12 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
                 # using new + init from Node class to circumvent required
                 # arguments in the automatic init
                 raise TypeError(
-                    f"Unable to create a new instance of {cls}. Check that all arguments"
-                    " default to None. It must be possible to instantiate the class via"
-                    f" {cls}() without passing any arguments. Furthermore, the"
-                    " '**kwargs' must be passed to the 'super().__init__(**kwargs)'"
-                    "See the ZnTrack documentation for more information."
+                    f"Unable to create a new instance of {cls}. Check that all"
+                    " arguments default to None. It must be possible to"
+                    f" instantiate the class via {cls}() without passing any"
+                    " arguments. Furthermore, the '**kwargs' must be passed to"
+                    " the 'super().__init__(**kwargs)'See the ZnTrack"
+                    " documentation for more information."
                 ) from type_error
 
             instance = object.__new__(cls)
@@ -594,8 +597,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         if silent:
             log.warning(
-                "DeprecationWarning: silent was replaced by 'zntrack.config.log_level ="
-                " logging.ERROR'"
+                "DeprecationWarning: silent was replaced by"
+                " 'zntrack.config.log_level = logging.ERROR'"
             )
         if run is not None:
             no_exec = not run
@@ -668,8 +671,8 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
             self.save()
 
         log.debug(
-            "If you are using a jupyter notebook, you may not be able to see the "
-            "output in real time!"
+            "If you are using a jupyter notebook, you may not be able to see"
+            " the output in real time!"
         )
 
         if dry_run:
@@ -684,7 +687,9 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
 
         if write_desc:
             utils.file_io.update_desc(
-                file=utils.Files.dvc, node_name=self.node_name, desc=self.__doc__
+                file=utils.Files.dvc,
+                node_name=self.node_name,
+                desc=self.__doc__,
             )
 
         if not no_exec:
@@ -698,17 +703,18 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         move_on: EXCEPTION_OR_LST_EXCEPTIONS = Exception,
         disable: bool = None,
     ) -> bool:
-        """Work in an operating directory until successfully finished.
+        """Work in an temporary operating directory until successfully finished.
 
-        This context manager will replace $nwd$ with 'prefix_$nwd$' and move the files
-        to $nwd$ when successfully finished. This can be useful, when you are running
+        This context manager will replace $nwd$ with a 
+        temporary operating directory 'prefix_$nwd$'and move the files to $nwd$,
+        when successfully finished. This can be useful, when you are running,
         e.g., on hardware with limited execution time and can't use 'dvc checkpoints'.
-        When successfully finished, all files will be moved from 'temp_$nwd$' to $nwd$.
-        You can call 'dvc repro' multiple times to continue from 'temp_$nwd$'.
-        If used properly this will result in reproducible data but:
+        When successfully finished, all files will be moved from 'prefix_$nwd$' to $nwd$.
+        You can call 'dvc repro' multiple times to continue from 'prefix_$nwd$'.
+        If used properly this will result in reproducible data, but:
         - checkpoints will not be removed if parameters change. Always remove a
             checkpoint, when running with new parameters!
-        - checkpoints are not versioned. If you want to checkpoint e.g., model training,
+        - checkpoints are not versioned. If you want to checkpoint, e.g., model training,
             use 'dvc checkpoints'.
 
         Parameters
@@ -716,15 +722,16 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         prefix: str, default = 'ckpt'
             Prefix for the temporary directory
         remove_on: Exception or list of Exceptions, default = None
-            If one of the exceptions in 'remove_on' is raised, the operating directory
-             will be removed. Otherwise, it will remain and reused upton the next run.
+            If one of the exceptions in 'remove_on' is raised, the temporary 
+            operating directory
+            will be removed. Otherwise, it will remain and reused upon the next run.
         move_on: Exception, default = Exception
-            If one of the exceptions in 'move_on' is raised, the operating directories
-            content is moved to $nwd$ and the directory will be removed.
-            This helps, in the case of an error to not restart from an already
-            failed data point.
+            If one of the exceptions in 'move_on' is raised, the temporary 
+            operating directories content is moved to $nwd$ and the temporary 
+            directory will be removed. This helps, in the case of an error, 
+            to not restart from an already failed data point.
         disable: bool, default = False
-            Disable the operating directory. Yields True.
+            Disable the temporary operating directory. Yields True.
 
 
         Yields
