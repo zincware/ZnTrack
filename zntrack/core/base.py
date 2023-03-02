@@ -698,17 +698,19 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         move_on: EXCEPTION_OR_LST_EXCEPTIONS = Exception,
         disable: bool = None,
     ) -> bool:
-        """Work in an operating directory until successfully finished.
+        """Work in a temporary operating directory until successfully finished.
 
-        This context manager will replace $nwd$ with 'prefix_$nwd$' and move the files
-        to $nwd$ when successfully finished. This can be useful, when you are running
-        e.g., on hardware with limited execution time and can't use 'dvc checkpoints'.
-        When successfully finished, all files will be moved from 'temp_$nwd$' to $nwd$.
-        You can call 'dvc repro' multiple times to continue from 'temp_$nwd$'.
-        If used properly this will result in reproducible data but:
+        This context manager will replace the path of the node working
+        directory $nwd$ with a temporary operating directory 'prefix_$nwd$'
+        and move the files to $nwd$, when successfully finished.
+        This can be useful, when you are running, e.g., on hardware
+        with limited execution time and can't use 'dvc checkpoints'.
+        When successfully finished, all files will be moved from 'prefix_$nwd$' to $nwd$.
+        You can call 'dvc repro' multiple times to continue from 'prefix_$nwd$'.
+        If used properly this will result in reproducible data, but:
         - checkpoints will not be removed if parameters change. Always remove a
             checkpoint, when running with new parameters!
-        - checkpoints are not versioned. If you want to checkpoint e.g., model training,
+        - checkpoints are not versioned. If you want to checkpoint, e.g., model training,
             use 'dvc checkpoints'.
 
         Parameters
@@ -716,15 +718,17 @@ class Node(NodeBase, metaclass=LoadViaGetItem):
         prefix: str, default = 'ckpt'
             Prefix for the temporary directory
         remove_on: Exception or list of Exceptions, default = None
-            If one of the exceptions in 'remove_on' is raised, the operating directory
-             will be removed. Otherwise, it will remain and reused upton the next run.
+            If one of the exceptions in 'remove_on' is raised, the temporary
+            operating directory will be removed. Otherwise, it will remain
+            and reused upon the next run.
         move_on: Exception, default = Exception
-            If one of the exceptions in 'move_on' is raised, the operating directories
-            content is moved to $nwd$ and the directory will be removed.
-            This helps, in the case of an error to not restart from an already
-            failed data point.
+            If one of the exceptions in 'move_on' is raised, the temporary
+            operating directories content is moved to $nwd$ and the temporary
+            directory will be removed. This helps, in the case of an error,
+            to not restart from an already failed data point.
+            The default is set to move the files if any Exception occurs.
         disable: bool, default = False
-            Disable the operating directory. Yields True.
+            Disable the temporary operating directory. Yields True.
 
 
         Yields
