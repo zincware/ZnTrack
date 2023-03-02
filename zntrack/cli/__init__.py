@@ -41,11 +41,12 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     cls = getattr(module, cls)
 
     try:
-        node = cls.load(name=name)
+        node = cls.from_rev(name=name)
         if hash_only:
             node.save(hash_only=True)
         else:
-            node.run_and_save()
+            node.run()
+            node.save()
     except AttributeError:
         # @nodify function
         cls(exec_func=True)

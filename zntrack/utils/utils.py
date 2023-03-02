@@ -138,7 +138,7 @@ def check_type(
     else:
         if allow_none and obj is None:
             return True
-        if not isinstance(obj, types):
+        if not isimodulenstance(obj, types):
             return False
 
     return True

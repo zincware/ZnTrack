@@ -3,7 +3,9 @@
 GitHub: https://github.com/zincware/ZnTrack
 """
 import importlib.metadata
+
 from zntrack.core.node import Node
+from zntrack.fields import dvc, zn
 
 __version__ = importlib.metadata.version("zntrack")
 
