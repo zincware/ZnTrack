@@ -64,7 +64,7 @@ We can define such a ``typing.Protocol`` as follows:
         """Protocol for Nodes with data attribute"""
         data: np.ndarray
 
-Then, we can use this ``HasData` protocol as a type hint for the ``input_data`` attribute of the ``ProcessData`` Node:
+Then, we can use this ``HasData`` protocol as a type hint for the ``input_data`` attribute of the ``ProcessData`` Node:
 
 .. code-block:: python
 
