@@ -1,4 +1,4 @@
-import time
+import pytest
 
 import zntrack
 
@@ -33,7 +33,7 @@ def test_project(empty_path):
     project.get_nodes()["AddNodes"].result == 10
 
 
-def test_experiments(empty_path):
+def test_branches(empty_path):
     project = zntrack.Project()
 
     with project.create_branch("expA") as expa:
@@ -53,7 +53,7 @@ def test_experiments(empty_path):
     assert node2.result == 21
 
 
-def test_experiments_reuse(empty_path):
+def test_branch_reuse(empty_path):
     project = zntrack.Project()
 
     exp = project.create_branch("exp")
@@ -69,3 +69,37 @@ def test_experiments_reuse(empty_path):
 
     assert AddNumbers.from_rev(rev="exp1").result == 3
     assert AddNumbers.from_rev(rev="exp2").result == 21
+
+def test_branches_reuse(empty_path):
+    project = zntrack.Project()
+
+    expa = project.create_branch("expA")
+    with expa:
+        _ = AddNumbers(a=1, b=2, name="A")
+    expa.queue("exp1")
+    with expa:
+        _ = AddNumbers(a=1, b=3, name="A")
+    expa.queue("exp2")
+
+    expb = project.create_branch("expB")
+    with expb:
+        _ = AddNumbers(a=1, b=2, name="B")
+    expb.queue("exp3")
+    with expb:
+        _ = AddNumbers(a=1, b=3, name="B")
+    expb.queue("exp4")
+
+    project.run_exp()
+
+    assert AddNumbers.from_rev("A", rev="exp1").result == 3
+    assert AddNumbers.from_rev("A", rev="exp2").result == 4
+
+    assert AddNumbers.from_rev("B", rev="exp3").result == 3
+    assert AddNumbers.from_rev("B", rev="exp4").result == 4
+
+    with pytest.raises(KeyError):
+        # TODO this should be a more specific error.
+        _ = AddNumbers.from_rev("B", rev="exp1")
+    
+    with pytest.raises(KeyError):
+        _ = AddNumbers.from_rev("A", rev="exp3")
