@@ -11,12 +11,10 @@ log = logging.getLogger(__name__)
 
 
 class Project(znflow.DiGraph):
-    def __init__(self, eager=False):
+    def __init__(self, eager=False, repro: bool = True):
         super().__init__()
         self.eager = eager
-
-    # def __exit__(self, exc_type, exc_val, exc_tb):
-    #    super().__exit__(exc_type, exc_val, exc_tb)
+        self.repro = repro
 
     def run(self):
         for node_uuid in self.get_sorted_nodes():
@@ -30,5 +28,5 @@ class Project(znflow.DiGraph):
                 cmd = get_dvc_cmd(node)
                 node.save()
                 dvc.cli.main(cmd)
-        if not self.eager:
+        if not self.eager and self.repro:
             dvc.cli.main(["repro"])

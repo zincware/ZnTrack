@@ -8,6 +8,9 @@ import znjson
 from zntrack import Node
 from zntrack.fields.field import Field
 
+# from znflow import get_attribute as getattr
+
+
 
 class DVCOption(Field):
     def __init__(self, *args, **kwargs):
@@ -28,9 +31,11 @@ class DVCOption(Field):
     def load(self, instance: Node):
         zntrack_dict = json.loads(
             instance.state.get_file_system().read_text("zntrack.json"),
+        )
+        instance.__dict__[self.name] = json.loads(
+            json.dumps(zntrack_dict[instance.name][self.name]),
             cls=znjson.ZnDecoder,
         )
-        instance.__dict__[self.name] = zntrack_dict[instance.name][self.name]
 
     def save(self, instance: Node):
         if instance.state.loaded:
@@ -38,7 +43,10 @@ class DVCOption(Field):
         try:
             zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
         except FileNotFoundError:
-            zntrack_dict = {instance.name: {}}
+            zntrack_dict = {}
+
+        if instance.name not in zntrack_dict:
+            zntrack_dict[instance.name] = {}
         zntrack_dict[instance.name][self.name] = getattr(instance, self.name)
         pathlib.Path("zntrack.json").write_text(
             json.dumps(zntrack_dict, indent=4, cls=znjson.ZnEncoder)

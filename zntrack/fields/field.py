@@ -12,6 +12,8 @@ class Field(zninit.Descriptor, abc.ABC):
     This class handles all the file I/O for the given field.
     """
 
+    dvc_option: str = None
+
     @abc.abstractmethod
     def save(self, instance: Node):
         """Save the field to disk."""
