@@ -23,6 +23,9 @@ class Params(Field):
         except FileNotFoundError:
             params_dict = {instance.name: {}}
 
+        if instance.name not in params_dict:
+            params_dict[instance.name] = {}
+
         params_dict[instance.name][self.name] = getattr(instance, self.name)
         pathlib.Path("params.yaml").write_text(yaml.safe_dump(params_dict, indent=4))
 
@@ -30,7 +33,7 @@ class Params(Field):
         """Load the field from disk."""
         file = self.get_affected_files(instance)[0]
         params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
-        instance.__dict__[self.name] = params_dict[instance.name][self.name]
+        instance.__dict__[self.name] = params_dict[instance.name].get(self.name, None)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
@@ -81,6 +84,7 @@ def params(*args, **kwargs) -> Params:
 
 def outs() -> Output:
     return Output(dvc_option="outs")
+
 
 def metrics() -> Output:
     return Output(dvc_option="metrics")

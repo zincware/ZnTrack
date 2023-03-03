@@ -82,8 +82,15 @@ class _NodeAttributes:
         the node working directory.
     """
 
-    state: NodeStatus = NodeStatus(False, NodeStatusResults.UNKNOWN)
+    _state: NodeStatus = None
     _name: str
+
+    @property
+    def state(self) -> NodeStatus:
+        """Get the state of the node."""
+        if self._state is None:
+            self._state = NodeStatus(False, NodeStatusResults.UNKNOWN)
+        return self._state
 
     @property
     def nwd(self) -> pathlib.Path:
@@ -113,6 +120,7 @@ class Node(zninit.ZnInit, znflow.Node, _NodeAttributes):
         """Load the node's output from disk."""
         for attr in zninit.get_descriptors(self=self):
             attr.load(self)
+
         self.state.loaded = True
 
     @classmethod
@@ -121,7 +129,7 @@ class Node(zninit.ZnInit, znflow.Node, _NodeAttributes):
         node = cls.__new__(cls)
         if name is not None:
             node._name = name
-        node.state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
+        node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
         node.load()
         return node
 

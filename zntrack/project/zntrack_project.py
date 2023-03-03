@@ -1,106 +1,34 @@
 """The class for the ZnTrackProject."""
 import logging
-import subprocess
-from datetime import datetime
 
-from zntrack import utils
-from zntrack.interface import DVCInterface
+import dvc.cli
+import znflow
+from znflow.graph import _UpdateConnectors
+
+from zntrack.core.node import get_dvc_cmd
 
 log = logging.getLogger(__name__)
 
 
-class ZnTrackProject(DVCInterface):
-    """Node Project to handle experiments via subprocess calls to DVC."""
-
-    def __init__(self, name: str = None):
-        """Define __init__.
-
-        Parameters
-        ----------
-        name: str (optional)
-            Name of the project
-        """
+class Project(znflow.DiGraph):
+    def __init__(self, eager=False):
         super().__init__()
-        if name is None:
-            name = f'ZnTrackProject_{datetime.now().strftime("%Y_%m_%d-%H_%M_%S")}'
-        self.name = name
+        self.eager = eager
 
-    def queue(self, name: str = None):
-        """Add this project to the DVC queue."""
-        if name is not None:
-            self.name = name
-        log.info("Running git add")
-        subprocess.check_call(["git", "add", "."])
-        log.info("Queue DVC stage")
-        utils.run_dvc_cmd(["exp", "run", "--name", self.name, "--queue"])
+    # def __exit__(self, exc_type, exc_val, exc_tb):
+    #    super().__exit__(exc_type, exc_val, exc_tb)
 
-    @staticmethod
-    def remove_queue():
-        """Empty the queue."""
-        log.warning("Removing all queried experiments!")
-        subprocess.check_call(["dvc", "exp", "remove", "--queue"])
-
-    @staticmethod
-    def run_all():
-        """Run all queried experiments."""
-        log.info("RUN DVC stage")
-        utils.run_dvc_cmd(["exp", "run", "--run-all"])
-        log.info("Running git add")
-        subprocess.check_call(["git", "add", "."])
-
-    def run(self, name: str = None):
-        """Add this experiment to the queue and run the full queue."""
-        self.queue(name=name)
-        self.run_all()
-        self.load(name=name)
-
-        log.info("Finished")
-
-    def load(self, name=None):
-        """Load this project."""
-        if name is not None:
-            self.name = name
-        for trial in range(3):
-            try:
-                subprocess.check_call(["dvc", "exp", "apply", self.name])
-                break
-            except subprocess.CalledProcessError as error:
-                # sometimes it takes more than one trial (windows)
-                if trial == 2:
-                    raise error
-
-    def create_dvc_repository(self):
-        """Perform git and dvc init."""
-        try:
-            subprocess.check_call(
-                ["dvc", "status"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
-            log.info("DVC repository already exists.")
-        except subprocess.CalledProcessError:
-            log.info("Setting up GIT/DVC repository.")
-            subprocess.check_call(
-                ["git", "init"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
-            subprocess.check_call(
-                ["dvc", "init"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
-            )
-            subprocess.check_call(
-                ["git", "add", "."],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-            subprocess.check_call(
-                ["git", "commit", "-m", f"Initialize {self.name}"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-
-    @staticmethod
-    def _destroy():
-        """Remove the DVC directory."""
-        subprocess.check_call(["dvc", "destroy", "-f"])
-
-    @staticmethod
-    def repro():
-        """Run dvc repro."""
-        utils.run_dvc_cmd(["repro"])
+    def run(self):
+        for node_uuid in self.get_sorted_nodes():
+            node = self.nodes[node_uuid]["value"]
+            if self.eager:
+                # update connectors
+                self._update_node_attributes(node, _UpdateConnectors())
+                node.run()
+                node.save()
+            else:
+                cmd = get_dvc_cmd(node)
+                node.save()
+                dvc.cli.main(cmd)
+        if not self.eager:
+            dvc.cli.main(["repro"])
