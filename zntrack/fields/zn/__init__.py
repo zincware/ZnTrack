@@ -1,3 +1,4 @@
+"""Field with automatic serialization and deserialization."""
 import dataclasses
 import importlib
 import json
@@ -15,44 +16,52 @@ from zntrack.utils import module_handler
 
 
 class ConnectionConverter(znjson.ConverterBase):
+    """Convert a znflow.Connection object to dict and back."""
+
     level = 100
     representation = "znflow.Connection"
     instance = znflow.Connection
 
     def encode(self, obj: znflow.Connection) -> dict:
-        """Convert the znflow.Connection object to dict"""
+        """Convert the znflow.Connection object to dict."""
         return dataclasses.asdict(obj)
 
     def decode(self, value: str) -> znflow.Connection:
-        """Create znflow.Connection object from dict"""
+        """Create znflow.Connection object from dict."""
         return znflow.Connection(**value)
 
 
 class NodeConverter(znjson.ConverterBase):
+    """A converter for the Node class."""
+
     level = 100
     representation = "zntrack.core.node.Node"
     instance = Node
 
-    def encode(self, obj: Node) -> str:
-        """Convert the datetime object to str / isoformat"""
+    def encode(self, obj: Node) -> dict:
+        """Convert the Node object to dict."""
         # TODO rev / origin
+        # TODO can you use the node State here?
         return {
             "module": module_handler(obj),
             "cls": obj.__class__.__name__,
             "name": obj.name,
         }
 
-    def decode(self, value: str) -> Node:
-        """Create datetime object from str / isoformat"""
+    def decode(self, value: dict) -> Node:
+        """Create Node object from dict."""
         module = importlib.import_module(value["module"])
         cls = getattr(module, value["cls"])
         return cls.from_rev(value["name"])
 
 
 class Params(Field):
+    """A parameter field."""
+
     dvc_option: str = "params"
 
     def get_affected_files(self, instance) -> list:
+        """Get the params.yaml file."""
         return ["params.yaml"]
 
     def save(self, instance: Node):
@@ -84,11 +93,15 @@ class Params(Field):
 
 
 class Output(Field):
+    """A field that is saved to disk."""
+
     def __init__(self, dvc_option: str, **kwargs):
+        """Create a new Output field."""
         self.dvc_option = dvc_option
         super().__init__(default=None, **kwargs)
 
     def get_affected_files(self, instance) -> list:
+        """Get the path of the file in the node directory."""
         return [instance.nwd / f"{self.name}.json"]
 
     def save(self, instance: Node):
@@ -121,6 +134,8 @@ class Output(Field):
 
 
 class Dependency(Field):
+    """A dependency field."""
+
     def get_affected_files(self, instance) -> list:
         """Get the affected files of the respective Nodes."""
         files = []
@@ -162,7 +177,8 @@ class Dependency(Field):
 
         if isinstance(value, znflow.Connection):
             # TODO, recursive
-            # If we load the Node, we don't want to load the connection but the instance / result
+            # If we load the Node, we don't want to load the connection
+            # but the instance / result
             value = value.result
 
         instance.__dict__[self.name] = value
@@ -170,22 +186,26 @@ class Dependency(Field):
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
         return [
-            (f"--deps", pathlib.Path(file).as_posix())
+            ("--deps", pathlib.Path(file).as_posix())
             for file in self.get_affected_files(instance)
         ]
 
 
 def params(*args, **kwargs) -> Params:
+    """Create a params field."""
     return Params(*args, **kwargs)
 
 
 def deps(*args, **kwargs) -> Dependency:
+    """Create a dependency field."""
     return Dependency(*args, **kwargs)
 
 
 def outs() -> Output:
+    """Create an output field."""
     return Output(dvc_option="outs", use_repr=False)
 
 
 def metrics() -> Output:
+    """Create a metrics output field."""
     return Output(dvc_option="metrics")

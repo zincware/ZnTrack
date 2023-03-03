@@ -1,52 +1,32 @@
 """Standard python init file for the utils directory."""
+import pathlib
+import sys
 
-from zntrack.utils import cli, exceptions, file_io, helpers
-from zntrack.utils.config import Files, config
-from zntrack.utils.nwd import move_nwd, nwd
-from zntrack.utils.structs import (
-    FILE_DVC_TRACKED,
-    GIT_TRACKED,
-    VALUE_DVC_TRACKED,
-    DVCOptions,
-    LazyOption,
-    ZnTypes,
-)
-from zntrack.utils.utils import (
-    check_type,
-    cwd_temp_dir,
-    decode_dict,
-    deprecated,
-    encode_dict,
-    module_handler,
-    module_to_path,
-    run_dvc_cmd,
-    update_gitignore,
-    update_nb_name,
-)
+from zntrack.utils import cli
 
 __all__ = [
-    "config",
-    "cwd_temp_dir",
-    "decode_dict",
-    "encode_dict",
-    "module_handler",
-    "update_nb_name",
-    "module_to_path",
-    "deprecated",
-    ZnTypes.__name__,
-    "file_io",
-    "exceptions",
-    Files.__name__,
-    "check_type",
-    "run_dvc_cmd",
-    "FILE_DVC_TRACKED",
-    "VALUE_DVC_TRACKED",
-    "DVCOptions",
-    "LazyOption",
-    "helpers",
-    "nwd",
-    "GIT_TRACKED",
-    "update_gitignore",
-    "move_nwd",
     "cli",
 ]
+
+
+def module_handler(obj) -> str:
+    """Get the module for the Node.
+
+    There are three cases that have to be handled here:
+        1. Run from __main__ should not have __main__ as module but
+            the actual filename.
+        2. Run from a Jupyter Notebook should not return the launchers name
+            but __main__ because that might be used in tests
+        3. Return the plain module if the above are not fulfilled.
+
+    Parameters
+    ----------
+    obj:
+        Any object that implements __module__
+    """
+    if obj.__module__ != "__main__":
+        return obj.__module__
+    if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
+        # special case for e.g. testing
+        return obj.__module__
+    return pathlib.Path(sys.argv[0]).stem
