@@ -1,4 +1,5 @@
 """Standard python init file for the utils directory."""
+import logging
 import pathlib
 import sys
 
@@ -7,6 +8,8 @@ from zntrack.utils import cli
 __all__ = [
     "cli",
 ]
+
+log = logging.getLogger(__name__)
 
 
 def module_handler(obj) -> str:
@@ -30,3 +33,19 @@ def module_handler(obj) -> str:
         # special case for e.g. testing
         return obj.__module__
     return pathlib.Path(sys.argv[0]).stem
+
+
+def deprecated(reason, version="v0.0.0"):
+    """Depreciation Warning."""
+
+    def decorator(func):
+        def wrapper(*args, **kwargs):
+            log.critical(
+                f"DeprecationWarning for {func.__name__}: {reason} (Deprecated since"
+                f" {version})"
+            )
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator

@@ -7,7 +7,8 @@ import importlib.metadata
 from zntrack.core.node import Node
 from zntrack.fields import dvc, zn
 from zntrack.project import Project
+from zntrack.utils.nwd import nwd
 
 __version__ = importlib.metadata.version("zntrack")
 
-__all__ = ["Node", "dvc", "zn", "Project"]
+__all__ = ["Node", "dvc", "zn", "Project", "nwd"]

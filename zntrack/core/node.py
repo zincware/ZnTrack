@@ -8,10 +8,11 @@ import pathlib
 import typing
 
 import dvc.api
+import dvc.cli
 import znflow
 import zninit
 
-from zntrack.utils import module_handler
+from zntrack.utils import deprecated, module_handler
 
 
 class NodeStatusResults(enum.Enum):
@@ -132,6 +133,17 @@ class Node(zninit.ZnInit, znflow.Node):
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
         node.load()
         return node
+
+    @deprecated(
+        "Building a graph is now done using 'with zntrack.Project() as project: ...'",
+        version="0.6.0",
+    )
+    def write_graph(self, run: bool = False, **kwargs):
+        """Write the graph to dvc.yaml."""
+        cmd = get_dvc_cmd(self, **kwargs)
+        dvc.cli.main(cmd)
+        if run:
+            dvc.cli.main(["repro", self.name])
 
 
 def get_dvc_cmd(

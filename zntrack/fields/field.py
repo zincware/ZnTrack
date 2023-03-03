@@ -51,7 +51,8 @@ class Field(zninit.Descriptor, abc.ABC):
 
         if instance.name not in zntrack_dict:
             zntrack_dict[instance.name] = {}
-        zntrack_dict[instance.name][self.name] = getattr(instance, self.name)
+        zntrack_dict[instance.name][self.name] = instance.__dict__[self.name]
+        # use the __dict__ to avoid the nwd replacement
         pathlib.Path("zntrack.json").write_text(
             json.dumps(zntrack_dict, indent=4, cls=encoder)
         )

@@ -1,6 +1,5 @@
 """Field with automatic serialization and deserialization."""
 import dataclasses
-import importlib
 import json
 import pathlib
 import typing
@@ -12,7 +11,6 @@ import znjson
 
 from zntrack.core.node import Node, NodeIdentifier, NodeStatusResults
 from zntrack.fields.field import Field
-from zntrack.utils import module_handler
 
 
 class ConnectionConverter(znjson.ConverterBase):

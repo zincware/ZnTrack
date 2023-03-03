@@ -6,6 +6,7 @@ import znjson
 
 from zntrack import Node
 from zntrack.fields.field import Field
+from zntrack.utils import nwd
 
 
 class DVCOption(Field):
@@ -41,6 +42,13 @@ class DVCOption(Field):
         if instance.state.loaded:
             return  # Don't save if the node is loaded from disk
         self._write_value_to_config(instance, encoder=znjson.ZnEncoder)
+
+    def __get__(self, instance: Node, owner=None):
+        """Add replacemt of the nwd to the get method."""
+        if instance is None:
+            return self
+        value = super().__get__(instance, owner)
+        return nwd.ReplaceNWD()(value, nwd=instance.nwd)
 
 
 def outs(*args, **kwargs) -> DVCOption:
