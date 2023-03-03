@@ -69,8 +69,8 @@ class NodeStatus:
         )
 
 
-class _NodeAttributes:
-    """A mixin to sperate class attributes from class methods of a Node.
+class Node(zninit.ZnInit, znflow.Node):
+    """A node in a ZnTrack workflow.
 
     Attributes
     ----------
@@ -83,7 +83,12 @@ class _NodeAttributes:
     """
 
     _state: NodeStatus = None
-    _name: str
+
+    name: str = zninit.Descriptor(None)
+
+    def _post_init_(self):
+        if znflow.get_attribute(self, "name") is None:
+            self.name = self.__class__.__name__
 
     @property
     def state(self) -> NodeStatus:
@@ -97,20 +102,11 @@ class _NodeAttributes:
         """Get the node working directory."""
         return pathlib.Path("nodes", znflow.get_attribute(self, "name"))
 
-    @property
-    def name(self) -> str:
-        """Get the name of the node."""
-        return znflow.get_attribute(self, "_name", self.__class__.__name__)
-
-
-class Node(zninit.ZnInit, znflow.Node, _NodeAttributes):
-    """A node in a ZnTrack workflow."""
-
     def save(self) -> None:
         """Save the node's output to disk."""
-        # TODO do not have a save(results=True) method
-        #   ensure, that parameters are NOT changed during the run.
-        for attr in zninit.get_descriptors(self=self):
+        from zntrack.fields.field import Field
+
+        for attr in zninit.get_descriptors(Field, self=self):
             attr.save(self)
 
     def run(self) -> None:
@@ -118,7 +114,9 @@ class Node(zninit.ZnInit, znflow.Node, _NodeAttributes):
 
     def load(self) -> None:
         """Load the node's output from disk."""
-        for attr in zninit.get_descriptors(self=self):
+        from zntrack.fields.field import Field
+
+        for attr in zninit.get_descriptors(Field, self=self):
             attr.load(self)
 
         self.state.loaded = True
@@ -128,7 +126,7 @@ class Node(zninit.ZnInit, znflow.Node, _NodeAttributes):
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
         if name is not None:
-            node._name = name
+            node.name = name
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
         node.load()
         return node
@@ -136,13 +134,15 @@ class Node(zninit.ZnInit, znflow.Node, _NodeAttributes):
 
 def get_dvc_cmd(node: Node, force: bool = True) -> typing.List[str]:
     """Get the 'dvc stage add' command to run the node."""
+    from zntrack.fields.field import Field
+
     cmd = ["stage", "add"]
     cmd += ["--name", node.name]
     # TODO add all dvc stage extra parameters
     if force:
         cmd += ["--force"]
     field_cmds = []
-    for attr in zninit.get_descriptors(self=node):
+    for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)

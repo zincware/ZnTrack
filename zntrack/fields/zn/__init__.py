@@ -42,9 +42,9 @@ class Params(Field):
 
 
 class Output(Field):
-    def __init__(self, dvc_option: str):
+    def __init__(self, dvc_option: str, **kwargs):
         self.dvc_option = dvc_option
-        super().__init__(default=None)
+        super().__init__(default=None, **kwargs)
 
     def get_affected_files(self, instance) -> list:
         return [instance.nwd / f"{self.name}.json"]
@@ -83,7 +83,7 @@ def params(*args, **kwargs) -> Params:
 
 
 def outs() -> Output:
-    return Output(dvc_option="outs")
+    return Output(dvc_option="outs", use_repr=False)
 
 
 def metrics() -> Output:
