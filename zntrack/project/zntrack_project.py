@@ -13,9 +13,16 @@ log = logging.getLogger(__name__)
 class Project(znflow.DiGraph):
     """The ZnTrack Project class."""
 
-    def __init__(self, eager=False, repro: bool = True):
-        """The Project Constructor.
+    def __init__(self) -> None:
+        """Initialize the Project.
+        
+        Do not allow kwargs.
+        """
+        super().__init__()
 
+    def run(self, eager=False, repro: bool = True):
+        """Run the Project Graph.
+        
         Parameters
         ----------
         eager : bool, default = False
@@ -24,22 +31,17 @@ class Project(znflow.DiGraph):
         repro : bool, default = True
             if True, run dvc repro after running the nodes.
         """
-        super().__init__()
-        self.eager = eager
-        self.repro = repro
-
-    def run(self):
-        """Run the Project Graph."""
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
-            if self.eager:
+            if eager:
                 # update connectors
                 self._update_node_attributes(node, _UpdateConnectors())
                 node.run()
                 node.save()
+                node.state.loaded = True
             else:
                 cmd = get_dvc_cmd(node)
                 node.save()
                 dvc.cli.main(cmd)
-        if not self.eager and self.repro:
+        if not eager and repro:
             dvc.cli.main(["repro"])

@@ -16,11 +16,12 @@ class WriteToNWD(zntrack.Node):
 
 @pytest.mark.parametrize("eager", [True, False])
 def test_WriteToNWD(proj_path, eager):
-    with zntrack.Project(eager=eager) as project:
+    with zntrack.Project() as project:
         write_to_nwd = WriteToNWD(text="Hello World")
 
-    project.run()
+    project.run(eager=eager)
     assert write_to_nwd.file[0].read_text() == "Hello World"
     assert write_to_nwd.file == [pathlib.Path("nodes", "WriteToNWD", "test.txt")]
-    write_to_nwd.load()
+    if not eager:
+        write_to_nwd.load()
     assert write_to_nwd.__dict__["file"] == [pathlib.Path("$nwd$", "test.txt")]

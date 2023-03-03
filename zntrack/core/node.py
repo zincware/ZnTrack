@@ -6,6 +6,7 @@ import enum
 import importlib
 import pathlib
 import typing
+import logging
 
 import dvc.api
 import dvc.cli
@@ -13,6 +14,8 @@ import znflow
 import zninit
 
 from zntrack.utils import deprecated, module_handler
+
+log = logging.getLogger(__name__)
 
 
 class NodeStatusResults(enum.Enum):
@@ -128,9 +131,12 @@ class Node(zninit.ZnInit, znflow.Node):
     def from_rev(cls, name=None, origin="workspace", rev="HEAD") -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
-        if name is not None:
-            node.name = name
+        node.name = name if name is not None else cls.__name__
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
+        log.error(
+            "Creating node"
+            f" {NodeIdentifier(module_handler(cls), cls.__name__, node.name, origin, rev)}"
+        )
         node.load()
         return node
 
