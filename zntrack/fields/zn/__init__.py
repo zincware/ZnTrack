@@ -10,7 +10,7 @@ import znflow
 import zninit
 import znjson
 
-from zntrack.core.node import Node, NodeStatusResults
+from zntrack.core.node import Node, NodeIdentifier, NodeStatusResults
 from zntrack.fields.field import Field
 from zntrack.utils import module_handler
 
@@ -40,19 +40,11 @@ class NodeConverter(znjson.ConverterBase):
 
     def encode(self, obj: Node) -> dict:
         """Convert the Node object to dict."""
-        # TODO rev / origin
-        # TODO can you use the node State here?
-        return {
-            "module": module_handler(obj),
-            "cls": obj.__class__.__name__,
-            "name": obj.name,
-        }
+        return dataclasses.asdict(NodeIdentifier.from_node(obj))
 
     def decode(self, value: dict) -> Node:
         """Create Node object from dict."""
-        module = importlib.import_module(value["module"])
-        cls = getattr(module, value["cls"])
-        return cls.from_rev(value["name"])
+        return NodeIdentifier(**value).get_node()
 
 
 class Params(Field):

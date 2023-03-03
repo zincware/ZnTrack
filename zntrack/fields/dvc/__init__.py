@@ -7,8 +7,6 @@ import znjson
 from zntrack import Node
 from zntrack.fields.field import Field
 
-# from znflow import get_attribute as getattr
-
 
 class DVCOption(Field):
     """A field that is used as a dvc option.

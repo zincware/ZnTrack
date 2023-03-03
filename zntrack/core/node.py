@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import dataclasses
 import enum
+import importlib
 import pathlib
 import typing
 
@@ -10,7 +11,7 @@ import dvc.api
 import znflow
 import zninit
 
-import zntrack.utils
+from zntrack.utils import module_handler
 
 
 class NodeStatusResults(enum.Enum):
@@ -148,6 +149,34 @@ def get_dvc_cmd(node: Node, force: bool = True) -> typing.List[str]:
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
-    module = zntrack.utils.module_handler(node.__class__)
+    module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]
     return cmd
+
+
+@dataclasses.dataclass
+class NodeIdentifier:
+    """All information that uniquly identifies a node."""
+
+    module: str
+    cls: str
+    name: str
+    origin: str
+    rev: str
+
+    @classmethod
+    def from_node(cls, node: Node):
+        """Create a _NodeIdentifier from a Node object."""
+        return cls(
+            module=module_handler(node),
+            cls=node.__class__.__name__,
+            name=node.name,
+            origin=node.state.origin,
+            rev=node.state.rev,
+        )
+
+    def get_node(self) -> Node:
+        """Get the node from the identifier."""
+        module = importlib.import_module(self.module)
+        cls = getattr(module, self.cls)
+        return cls.from_rev(name=self.name, origin=self.origin, rev=self.rev)
