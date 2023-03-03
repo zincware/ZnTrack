@@ -4,9 +4,9 @@ from __future__ import annotations
 import dataclasses
 import enum
 import importlib
+import logging
 import pathlib
 import typing
-import logging
 
 import dvc.api
 import dvc.cli
@@ -110,6 +110,7 @@ class Node(zninit.ZnInit, znflow.Node):
 
     def save(self) -> None:
         """Save the node's output to disk."""
+        # TODO have an option to save and run dvc commit afterwards.
         from zntrack.fields.field import Field
 
         for attr in zninit.get_descriptors(Field, self=self):
@@ -133,10 +134,10 @@ class Node(zninit.ZnInit, znflow.Node):
         node = cls.__new__(cls)
         node.name = name if name is not None else cls.__name__
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
-        log.error(
-            "Creating node"
-            f" {NodeIdentifier(module_handler(cls), cls.__name__, node.name, origin, rev)}"
+        node_identifier = NodeIdentifier(
+            module_handler(cls), cls.__name__, node.name, origin, rev
         )
+        log.error(f"Creating node {node_identifier}")
         node.load()
         return node
 

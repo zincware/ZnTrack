@@ -33,3 +33,23 @@ def proj_path(tmp_path, request) -> pathlib.Path:
     dvc.cli.main(["init"])
 
     return tmp_path
+
+
+@pytest.fixture
+def empty_path(tmp_path, request) -> pathlib.Path:
+    """Create an empty directory at the given path.
+
+    Parameters
+    ----------
+    tmp_path
+        The path to the directory to create.
+
+    Returns
+    -------
+    pathlib.Path
+        The path to the created directory.
+
+    """
+    shutil.copy(request.module.__file__, tmp_path)
+    os.chdir(tmp_path)
+    return tmp_path
