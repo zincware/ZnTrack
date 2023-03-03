@@ -134,15 +134,32 @@ class Node(zninit.ZnInit, znflow.Node):
         return node
 
 
-def get_dvc_cmd(node: Node, force: bool = True) -> typing.List[str]:
+def get_dvc_cmd(
+    node: Node,
+    quiet: bool = False,
+    verbose: bool = False,
+    force: bool = True,
+    external: bool = False,
+    always_changed: bool = False,
+    desc: str = None,
+) -> typing.List[str]:
     """Get the 'dvc stage add' command to run the node."""
     from zntrack.fields.field import Field
 
     cmd = ["stage", "add"]
     cmd += ["--name", node.name]
-    # TODO add all dvc stage extra parameters
+    if quiet:
+        cmd += ["--quiet"]
+    if verbose:
+        cmd += ["--verbose"]
     if force:
         cmd += ["--force"]
+    if external:
+        cmd += ["--external"]
+    if always_changed:
+        cmd += ["--always-changed"]
+    if desc is not None:
+        cmd += ["--desc", desc]
     field_cmds = []
     for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
