@@ -11,7 +11,6 @@ from zntrack.fields.field import Field
 # from znflow import get_attribute as getattr
 
 
-
 class DVCOption(Field):
     def __init__(self, *args, **kwargs):
         self.dvc_option = kwargs.pop("dvc_option")
@@ -29,28 +28,12 @@ class DVCOption(Field):
         ]
 
     def load(self, instance: Node):
-        zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
-        )
-        instance.__dict__[self.name] = json.loads(
-            json.dumps(zntrack_dict[instance.name][self.name]),
-            cls=znjson.ZnDecoder,
-        )
+        return self._get_value_from_config(instance, decoder=znjson.ZnDecoder)
 
     def save(self, instance: Node):
         if instance.state.loaded:
             return  # Don't save if the node is loaded from disk
-        try:
-            zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
-        except FileNotFoundError:
-            zntrack_dict = {}
-
-        if instance.name not in zntrack_dict:
-            zntrack_dict[instance.name] = {}
-        zntrack_dict[instance.name][self.name] = getattr(instance, self.name)
-        pathlib.Path("zntrack.json").write_text(
-            json.dumps(zntrack_dict, indent=4, cls=znjson.ZnEncoder)
-        )
+        self._write_value_to_config(instance, encoder=znjson.ZnEncoder)
 
 
 def outs(*args, **kwargs) -> DVCOption:

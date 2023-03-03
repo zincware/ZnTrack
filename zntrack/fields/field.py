@@ -1,4 +1,6 @@
 import abc
+import json
+import pathlib
 import typing
 
 import zninit
@@ -33,3 +35,22 @@ class Field(zninit.Descriptor, abc.ABC):
     def get_affected_files(self, instance: Node) -> list:
         """Get the files affected by this field."""
         raise NotImplementedError
+
+    def _get_value_from_config(self, instance: Node, decoder=None) -> any:
+        zntrack_dict = json.loads(
+            instance.state.get_file_system().read_text("zntrack.json"),
+        )
+        return json.loads(json.dumps(zntrack_dict[instance.name][self.name]), cls=decoder)
+
+    def _write_value_to_config(self, instance: Node, encoder=None):
+        try:
+            zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
+        except FileNotFoundError:
+            zntrack_dict = {}
+
+        if instance.name not in zntrack_dict:
+            zntrack_dict[instance.name] = {}
+        zntrack_dict[instance.name][self.name] = getattr(instance, self.name)
+        pathlib.Path("zntrack.json").write_text(
+            json.dumps(zntrack_dict, indent=4, cls=encoder)
+        )

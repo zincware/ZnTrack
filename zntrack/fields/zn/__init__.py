@@ -144,32 +144,20 @@ class Dependency(Field):
         if instance.state.loaded:
             # Only save if the node has been loaded
             return
-        try:
-            zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
-        except FileNotFoundError:
-            zntrack_dict = {}
-
-        if instance.name not in zntrack_dict:
-            zntrack_dict[instance.name] = {}
-        zntrack_dict[instance.name][self.name] = getattr(instance, self.name)
-        pathlib.Path("zntrack.json").write_text(
-            json.dumps(
-                zntrack_dict,
-                indent=4,
-                cls=znjson.ZnEncoder.from_converters(
-                    [ConnectionConverter, NodeConverter]
-                ),
-            )
+        self._write_value_to_config(
+            instance,
+            encoder=znjson.ZnEncoder.from_converters(
+                [ConnectionConverter, NodeConverter]
+            ),
         )
 
     def load(self, instance: Node):
         """Load the field from disk."""
-        zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
-        )
-        value = json.loads(
-            json.dumps(zntrack_dict[instance.name][self.name]),
-            cls=znjson.ZnDecoder.from_converters([ConnectionConverter, NodeConverter]),
+        value = self._get_value_from_config(
+            instance,
+            decoder=znjson.ZnDecoder.from_converters(
+                [ConnectionConverter, NodeConverter]
+            ),
         )
 
         if isinstance(value, znflow.Connection):
