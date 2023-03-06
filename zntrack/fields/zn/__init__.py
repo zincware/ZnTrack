@@ -177,8 +177,12 @@ class Dependency(Field):
         A `zn.deps` does not support default values.
         To build a dependency graph, the values must be passed at runtime.
         """
-        super().__init__()
-        if default not in (_default, None):
+        if default is _default:
+            super().__init__()
+            return
+        elif _default is None:
+            super().__init__(default=default)
+        else:
             raise ValueError(
                 "A dependency field does not support default dependencies. You can only"
                 " use 'None' to declare this an optional dependency."
