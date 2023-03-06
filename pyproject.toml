@@ -18,7 +18,7 @@ tqdm = "^4.64.0"
 pandas = "^1.4.3"
 zninit = ">=0.1.6"
 typer = "^0.7.0"
-znflow = {git = "https://github.com/zincware/ZnFlow", rev = "fix_properties"}
+znflow = {git = "https://github.com/zincware/ZnFlow", rev = "main"}
 
 
 [tool.poetry.urls]
