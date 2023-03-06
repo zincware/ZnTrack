@@ -4,6 +4,7 @@ import json
 import pathlib
 import typing
 
+import pandas as pd
 import yaml
 import znflow
 import zninit
@@ -11,7 +12,6 @@ import znjson
 
 from zntrack.core.node import Node, NodeIdentifier, NodeStatusResults
 from zntrack.fields.field import Field
-import pandas as pd
 
 
 class ConnectionConverter(znjson.ConverterBase):
@@ -154,9 +154,7 @@ class Plots(Field):
         """Load the field from disk."""
         file = self.get_affected_files(instance)[0]
         try:
-            value = pd.read_csv(
-                instance.state.get_file_system().open(file.as_posix())
-            )
+            value = pd.read_csv(instance.state.get_file_system().open(file.as_posix()))
             instance.__dict__[self.name] = value
         except FileNotFoundError:
             instance.state.results = NodeStatusResults.UNKNOWN

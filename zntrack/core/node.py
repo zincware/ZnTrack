@@ -148,8 +148,9 @@ class Node(zninit.ZnInit, znflow.Node):
     def write_graph(self, run: bool = False, **kwargs):
         """Write the graph to dvc.yaml."""
         cmd = get_dvc_cmd(self, **kwargs)
-        self.save()
         dvc.cli.main(cmd)
+        self.save()
+
         if run:
             dvc.cli.main(["repro", self.name])
 
