@@ -1,12 +1,17 @@
 """Standard python init file for the utils directory."""
 import logging
 import pathlib
+import subprocess
 import sys
 
+import dvc.cli
+
 from zntrack.utils import cli
+from zntrack.utils.node_wd import nwd
 
 __all__ = [
     "cli",
+    "node_wd",
 ]
 
 log = logging.getLogger(__name__)
@@ -49,3 +54,42 @@ def deprecated(reason, version="v0.0.0"):
         return wrapper
 
     return decorator
+
+
+class DVCProcessError(Exception):
+    """DVC specific message for CalledProcessError."""
+
+
+def run_dvc_cmd(script):
+    """Run the DVC script via subprocess calls.
+    Parameters
+    ----------
+    script: tuple[str]|list[str]
+        A list of strings to pass the subprocess command
+    Raises
+    ------
+    DVCProcessError:
+        if the dvc cli command fails
+    """
+    dvc_short_string = " ".join(script[:5])
+    if len(script) > 5:
+        dvc_short_string += " ..."
+    log.warning(f"Running DVC command: '{dvc_short_string}'")
+    # do not display the output if log.log_level > logging.INFO
+    # show_log = config.log_level < logging.INFO
+    # if not show_log:
+    #     script = script[:2] + ["--quiet"] + script[2:]
+    # if config.log_level == logging.DEBUG:
+    #     script = [x for x in script if x != "--quiet"]
+    #     script = script[:2] + ["--verbose", "--verbose"] + script[2:]
+
+    return_code = dvc.cli.main(script)
+    if return_code != 0:
+        raise DVCProcessError(
+            f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(script)}\" "
+        )
+    # fix for https://github.com/iterative/dvc/issues/8631
+    for logger_name, logger in logging.root.manager.loggerDict.items():
+        if logger_name.startswith("zntrack"):
+            logger.disabled = False
+    return return_code

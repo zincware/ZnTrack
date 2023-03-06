@@ -33,12 +33,18 @@ class NodeConverter(znjson.ConverterBase):
     """A converter for the Node class."""
 
     level = 100
-    representation = "zntrack.core.node.Node"
+    representation = "zntrack.Node"
     instance = Node
 
     def encode(self, obj: Node) -> dict:
         """Convert the Node object to dict."""
-        return dataclasses.asdict(NodeIdentifier.from_node(obj))
+        node_identifier = NodeIdentifier.from_node(obj)
+        if node_identifier.rev != "HEAD":
+            raise NotImplementedError(
+                "Dependencies to other revisions are not supported yet"
+            )
+
+        return dataclasses.asdict(node_identifier)
 
     def decode(self, value: dict) -> Node:
         """Create Node object from dict."""
@@ -126,22 +132,32 @@ class Output(Field):
 class Dependency(Field):
     """A dependency field."""
 
+    def __init__(self):
+        """Create a new dependency field.
+
+        A `zn.deps` does not support default values.
+        To build a dependency graph, the values must be passed at runtime.
+        """
+        super().__init__()
+
     def get_affected_files(self, instance) -> list:
         """Get the affected files of the respective Nodes."""
         files = []
 
         value = getattr(instance, self.name)
-        if isinstance(value, znflow.Connection):
-            # TODO, recursive
-            value = value.instance
-            print(f"Found connection {value}")
 
-        for field in zninit.get_descriptors(Field, self=value):
-            if field.dvc_option == "params":
-                # We do not want to depend on parameter files.
-                continue
-            files.extend(field.get_affected_files(value))
-            print(f"Found field {field} and extended files to {files}")
+        if not isinstance(value, (list, tuple)):
+            value = [value]
+
+        for node in value:
+            if isinstance(node, znflow.Connection):
+                node = node.instance
+            for field in zninit.get_descriptors(Field, self=node):
+                if field.dvc_option == "params":
+                    # We do not want to depend on parameter files.
+                    continue
+                files.extend(field.get_affected_files(node))
+                print(f"Found field {field} and extended files to {files}")
         return files
 
     def save(self, instance: Node):
@@ -165,13 +181,7 @@ class Dependency(Field):
             ),
         )
 
-        if isinstance(value, znflow.Connection):
-            # TODO, recursive
-            # If we load the Node, we don't want to load the connection
-            # but the instance / result
-            value = value.result
-
-        instance.__dict__[self.name] = value
+        instance.__dict__[self.name] = znflow.graph._UpdateConnectors()(value)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
@@ -199,3 +209,8 @@ def outs() -> Output:
 def metrics() -> Output:
     """Create a metrics output field."""
     return Output(dvc_option="metrics")
+
+
+def Hash() -> Output:
+    """Create a metrics output field."""
+    return Output(dvc_option="outs")

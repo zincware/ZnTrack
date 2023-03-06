@@ -6,7 +6,7 @@ import znjson
 
 from zntrack import Node
 from zntrack.fields.field import Field
-from zntrack.utils import nwd
+from zntrack.utils import node_wd
 
 
 class DVCOption(Field):
@@ -35,7 +35,9 @@ class DVCOption(Field):
 
     def load(self, instance: Node):
         """Load the field from config file."""
-        return self._get_value_from_config(instance, decoder=znjson.ZnDecoder)
+        instance.__dict__[self.name] = self._get_value_from_config(
+            instance, decoder=znjson.ZnDecoder
+        )
 
     def save(self, instance: Node):
         """Save the field to config file."""
@@ -48,7 +50,7 @@ class DVCOption(Field):
         if instance is None:
             return self
         value = super().__get__(instance, owner)
-        return nwd.ReplaceNWD()(value, nwd=instance.nwd)
+        return node_wd.ReplaceNWD()(value, nwd=instance.nwd)
 
 
 def outs(*args, **kwargs) -> DVCOption:
