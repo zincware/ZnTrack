@@ -165,16 +165,24 @@ class Plots(Field):
         return [(f"--{self.dvc_option}", file.as_posix())]
 
 
+_default = object()
+
+
 class Dependency(Field):
     """A dependency field."""
 
-    def __init__(self):
+    def __init__(self, default=_default):
         """Create a new dependency field.
 
         A `zn.deps` does not support default values.
         To build a dependency graph, the values must be passed at runtime.
         """
         super().__init__()
+        if default not in (_default, None):
+            raise ValueError(
+                "A dependency field does not support default dependencies. You can only"
+                " use 'None' to declare this an optional dependency."
+            )
 
     def get_affected_files(self, instance) -> list:
         """Get the affected files of the respective Nodes."""
