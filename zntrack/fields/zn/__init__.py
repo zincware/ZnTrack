@@ -11,6 +11,7 @@ import znjson
 
 from zntrack.core.node import Node, NodeIdentifier, NodeStatusResults
 from zntrack.fields.field import Field
+import pandas as pd
 
 
 class ConnectionConverter(znjson.ConverterBase):
@@ -129,6 +130,43 @@ class Output(Field):
         return [(f"--{self.dvc_option}", file.as_posix())]
 
 
+class Plots(Field):
+    """A field that is saved to disk."""
+
+    dvc_option: str = "plots"
+
+    def get_affected_files(self, instance) -> list:
+        """Get the path of the file in the node directory."""
+        return [instance.nwd / f"{self.name}.csv"]
+
+    def save(self, instance: Node):
+        """Save the field to disk."""
+        if not instance.state.loaded:
+            # Only save if the node has been loaded
+            return
+        instance.nwd.mkdir(exist_ok=True, parents=True)
+        file = self.get_affected_files(instance)[0]
+
+        value: pd.DataFrame = getattr(instance, self.name)
+        value.to_csv(file)
+
+    def load(self, instance: Node):
+        """Load the field from disk."""
+        file = self.get_affected_files(instance)[0]
+        try:
+            value = pd.read_csv(
+                instance.state.get_file_system().open(file.as_posix())
+            )
+            instance.__dict__[self.name] = value
+        except FileNotFoundError:
+            instance.state.results = NodeStatusResults.UNKNOWN
+
+    def get_stage_add_argument(self, instance) -> typing.List[tuple]:
+        """Get the dvc command for this field."""
+        file = self.get_affected_files(instance)[0]
+        return [(f"--{self.dvc_option}", file.as_posix())]
+
+
 class Dependency(Field):
     """A dependency field."""
 
@@ -211,6 +249,6 @@ def metrics() -> Output:
     return Output(dvc_option="metrics")
 
 
-def Hash() -> Output:
+def plots(*args, **kwargs) -> Plots:
     """Create a metrics output field."""
-    return Output(dvc_option="outs")
+    return Plots(*args, **kwargs)
