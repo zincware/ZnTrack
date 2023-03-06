@@ -29,11 +29,13 @@ class _ProjectBase(znflow.DiGraph):
             node = self.nodes[node_uuid]["value"]
             if eager:
                 # update connectors
+                log.info(f"Running node {node}")
                 self._update_node_attributes(node, _UpdateConnectors())
                 node.run()
                 node.save()
                 node.state.loaded = True
             else:
+                log.info(f"Adding node {node}")
                 cmd = get_dvc_cmd(node)
                 node.save()
                 dvc.cli.main(cmd)

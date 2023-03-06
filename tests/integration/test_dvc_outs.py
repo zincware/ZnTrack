@@ -1,6 +1,7 @@
 import pathlib
 import typing
 
+import zntrack
 from zntrack import Node, dvc, nwd
 
 
@@ -10,6 +11,13 @@ class SingleNode(Node):
     def __init__(self, path_x=None, **kwargs):
         super().__init__(**kwargs)
         self.path1 = pathlib.Path(f"{path_x}.json")
+
+    def run(self):
+        self.path1.write_text("")
+
+
+class SingleNodeDefaultNWD(Node):
+    path1: pathlib.Path = dvc.outs(nwd / "test.json")
 
     def run(self):
         self.path1.write_text("")
@@ -77,3 +85,16 @@ def test_SingleNodeInNodeDirMulti(proj_path):
     result = SingleNodeInNodeDir.from_rev(name="TestNode")
     assert result.path == [pathlib.Path("nodes", "TestNode", "test.json"), "file.txt"]
     assert all(pathlib.Path(x).exists() for x in result.path)
+
+
+def test_SingleNodeDefaultNWD(proj_path):
+    with zntrack.Project() as proj:
+        SingleNodeDefaultNWD(name="SampleNode")
+        SingleNodeDefaultNWD()
+    proj.run()
+    assert SingleNodeDefaultNWD.from_rev().path1 == pathlib.Path(
+        "nodes", "SingleNodeDefaultNWD", "test.json"
+    )
+    assert SingleNodeDefaultNWD.from_rev(name="SampleNode").path1 == pathlib.Path(
+        "nodes", "SampleNode", "test.json"
+    )

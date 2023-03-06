@@ -6,7 +6,8 @@ import typing
 
 import zninit
 
-from zntrack.core.node import Node
+if typing.TYPE_CHECKING:
+    from zntrack.core.node import Node
 
 
 class Field(zninit.Descriptor, abc.ABC):
@@ -18,32 +19,32 @@ class Field(zninit.Descriptor, abc.ABC):
     dvc_option: str = None
 
     @abc.abstractmethod
-    def save(self, instance: Node):
+    def save(self, instance: "Node"):
         """Save the field to disk."""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def load(self, instance: Node):
+    def load(self, instance: "Node"):
         """Load the field from disk."""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_stage_add_argument(self, instance: Node) -> typing.List[tuple]:
+    def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
         """Get the dvc stage add argument for this field."""
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_affected_files(self, instance: Node) -> list:
+    def get_affected_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         raise NotImplementedError
 
-    def _get_value_from_config(self, instance: Node, decoder=None) -> any:
+    def _get_value_from_config(self, instance: "Node", decoder=None) -> any:
         zntrack_dict = json.loads(
             instance.state.get_file_system().read_text("zntrack.json"),
         )
         return json.loads(json.dumps(zntrack_dict[instance.name][self.name]), cls=decoder)
 
-    def _write_value_to_config(self, instance: Node, encoder=None):
+    def _write_value_to_config(self, instance: "Node", encoder=None):
         try:
             zntrack_dict = json.loads(pathlib.Path("zntrack.json").read_text())
         except FileNotFoundError:

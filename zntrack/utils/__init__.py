@@ -1,7 +1,7 @@
 """Standard python init file for the utils directory."""
+import enum
 import logging
 import pathlib
-import subprocess
 import sys
 
 import dvc.cli
@@ -93,3 +93,29 @@ def run_dvc_cmd(script):
         if logger_name.startswith("zntrack"):
             logger.disabled = False
     return return_code
+
+
+class NodeStatusResults(enum.Enum):
+    """The status of a node.
+
+    Attributes
+    ----------
+    UNKNOWN : int
+        No information is available.
+    PENDING : int
+        the Node instance is written to disk, but not yet run.
+        `dvc stage add ` with the given parameters was run.
+    RUNNING : int
+        the Node instance is currently running.
+        This state will be set when the run method is called.
+    FINISHED : int
+        the Node instance has finished running.
+    FAILED : int
+        the Node instance has failed to run.
+    """
+
+    UNKNOWN = 0
+    PENDING = 1
+    RUNNING = 2
+    FINISHED = 3
+    FAILED = 4

@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import dataclasses
-import enum
 import importlib
 import logging
 import pathlib
@@ -12,36 +11,11 @@ import dvc.api
 import dvc.cli
 import znflow
 import zninit
+import znjson
 
-from zntrack.utils import deprecated, module_handler
+from zntrack.utils import NodeStatusResults, deprecated, module_handler
 
 log = logging.getLogger(__name__)
-
-
-class NodeStatusResults(enum.Enum):
-    """The status of a node.
-
-    Attributes
-    ----------
-    UNKNOWN : int
-        No information is available.
-    PENDING : int
-        the Node instance is written to disk, but not yet run.
-        `dvc stage add ` with the given parameters was run.
-    RUNNING : int
-        the Node instance is currently running.
-        This state will be set when the run method is called.
-    FINISHED : int
-        the Node instance has finished running.
-    FAILED : int
-        the Node instance has failed to run.
-    """
-
-    UNKNOWN = 0
-    PENDING = 1
-    RUNNING = 2
-    FINISHED = 3
-    FAILED = 4
 
 
 @dataclasses.dataclass
@@ -75,6 +49,20 @@ class NodeStatus:
         )
 
 
+class _NameDescriptor(zninit.Descriptor):
+    """A descriptor for the name attribute."""
+
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+        if instance.__dict__.get("name") is None:
+            return instance.__class__.__name__
+        return instance.__dict__["name"]
+
+    def __set__(self, instance, value):
+        instance.__dict__["name"] = value
+
+
 class Node(zninit.ZnInit, znflow.Node):
     """A node in a ZnTrack workflow.
 
@@ -90,11 +78,19 @@ class Node(zninit.ZnInit, znflow.Node):
 
     _state: NodeStatus = None
 
-    name: str = zninit.Descriptor(None)
+    name: str = _NameDescriptor(None)
 
-    def _post_init_(self):
-        if znflow.get_attribute(self, "name") is None:
-            self.name = self.__class__.__name__
+    @property
+    def _init_descriptors_(self):
+        from zntrack import fields
+
+        return [
+            fields.zn.Params,
+            fields.zn.Dependency,
+            fields.meta.Text,
+            fields.dvc.DVCOption,
+            _NameDescriptor,
+        ]
 
     @property
     def state(self) -> NodeStatus:
@@ -106,7 +102,10 @@ class Node(zninit.ZnInit, znflow.Node):
     @property
     def nwd(self) -> pathlib.Path:
         """Get the node working directory."""
-        return pathlib.Path("nodes", znflow.get_attribute(self, "name"))
+        nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
+        if not nwd.exists():
+            nwd.mkdir(parents=True)
+        return nwd
 
     def save(self) -> None:
         """Save the node's output to disk."""
@@ -218,3 +217,28 @@ class NodeIdentifier:
         module = importlib.import_module(self.module)
         cls = getattr(module, self.cls)
         return cls.from_rev(name=self.name, origin=self.origin, rev=self.rev)
+
+
+class NodeConverter(znjson.ConverterBase):
+    """A converter for the Node class."""
+
+    level = 100
+    representation = "zntrack.Node"
+    instance = Node
+
+    def encode(self, obj: Node) -> dict:
+        """Convert the Node object to dict."""
+        node_identifier = NodeIdentifier.from_node(obj)
+        if node_identifier.rev != "HEAD":
+            raise NotImplementedError(
+                "Dependencies to other revisions are not supported yet"
+            )
+
+        return dataclasses.asdict(node_identifier)
+
+    def decode(self, value: dict) -> Node:
+        """Create Node object from dict."""
+        return NodeIdentifier(**value).get_node()
+
+
+znjson.config.register(NodeConverter)

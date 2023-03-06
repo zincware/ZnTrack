@@ -1,6 +1,7 @@
 """Field with automatic serialization and deserialization."""
 import dataclasses
 import json
+import logging
 import pathlib
 import typing
 
@@ -10,8 +11,12 @@ import znflow
 import zninit
 import znjson
 
-from zntrack.core.node import Node, NodeIdentifier, NodeStatusResults
 from zntrack.fields.field import Field
+from zntrack.utils import NodeStatusResults
+
+if typing.TYPE_CHECKING:
+    from zntrack import Node
+log = logging.getLogger(__name__)
 
 
 class ConnectionConverter(znjson.ConverterBase):
@@ -30,28 +35,6 @@ class ConnectionConverter(znjson.ConverterBase):
         return znflow.Connection(**value)
 
 
-class NodeConverter(znjson.ConverterBase):
-    """A converter for the Node class."""
-
-    level = 100
-    representation = "zntrack.Node"
-    instance = Node
-
-    def encode(self, obj: Node) -> dict:
-        """Convert the Node object to dict."""
-        node_identifier = NodeIdentifier.from_node(obj)
-        if node_identifier.rev != "HEAD":
-            raise NotImplementedError(
-                "Dependencies to other revisions are not supported yet"
-            )
-
-        return dataclasses.asdict(node_identifier)
-
-    def decode(self, value: dict) -> Node:
-        """Create Node object from dict."""
-        return NodeIdentifier(**value).get_node()
-
-
 class Params(Field):
     """A parameter field."""
 
@@ -61,7 +44,7 @@ class Params(Field):
         """Get the params.yaml file."""
         return ["params.yaml"]
 
-    def save(self, instance: Node):
+    def save(self, instance: "Node"):
         """Save the field to disk."""
         if instance.state.loaded:
             return  # Don't save if the node is loaded from disk
@@ -75,13 +58,16 @@ class Params(Field):
             params_dict[instance.name] = {}
 
         params_dict[instance.name][self.name] = getattr(instance, self.name)
+        params_dict = json.loads(json.dumps(params_dict, cls=znjson.ZnEncoder))
         pathlib.Path("params.yaml").write_text(yaml.safe_dump(params_dict, indent=4))
 
-    def load(self, instance: Node):
+    def load(self, instance: "Node"):
         """Load the field from disk."""
         file = self.get_affected_files(instance)[0]
         params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
-        instance.__dict__[self.name] = params_dict[instance.name].get(self.name, None)
+        value = params_dict[instance.name].get(self.name, None)
+        value = json.loads(json.dumps(value), cls=znjson.ZnDecoder)
+        instance.__dict__[self.name] = value
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
@@ -95,13 +81,13 @@ class Output(Field):
     def __init__(self, dvc_option: str, **kwargs):
         """Create a new Output field."""
         self.dvc_option = dvc_option
-        super().__init__(default=None, **kwargs)
+        super().__init__(**kwargs)
 
     def get_affected_files(self, instance) -> list:
         """Get the path of the file in the node directory."""
         return [instance.nwd / f"{self.name}.json"]
 
-    def save(self, instance: Node):
+    def save(self, instance: "Node"):
         """Save the field to disk."""
         if not instance.state.loaded:
             # Only save if the node has been loaded
@@ -112,7 +98,7 @@ class Output(Field):
             json.dumps(getattr(instance, self.name), cls=znjson.ZnEncoder, indent=4)
         )
 
-    def load(self, instance: Node):
+    def load(self, instance: "Node"):
         """Load the field from disk."""
         file = self.get_affected_files(instance)[0]
         try:
@@ -139,7 +125,7 @@ class Plots(Field):
         """Get the path of the file in the node directory."""
         return [instance.nwd / f"{self.name}.csv"]
 
-    def save(self, instance: Node):
+    def save(self, instance: "Node"):
         """Save the field to disk."""
         if not instance.state.loaded:
             # Only save if the node has been loaded
@@ -150,7 +136,7 @@ class Plots(Field):
         value: pd.DataFrame = getattr(instance, self.name)
         value.to_csv(file)
 
-    def load(self, instance: Node):
+    def load(self, instance: "Node"):
         """Load the field from disk."""
         file = self.get_affected_files(instance)[0]
         try:
@@ -171,6 +157,8 @@ _default = object()
 class Dependency(Field):
     """A dependency field."""
 
+    dvc_option = "deps"
+
     def __init__(self, default=_default):
         """Create a new dependency field.
 
@@ -179,13 +167,13 @@ class Dependency(Field):
         """
         if default is _default:
             super().__init__()
-            return
-        elif _default is None:
+        elif default is None:
             super().__init__(default=default)
         else:
             raise ValueError(
                 "A dependency field does not support default dependencies. You can only"
-                " use 'None' to declare this an optional dependency."
+                " use 'None' to declare this an optional dependency"
+                f"and not {default}."
             )
 
     def get_affected_files(self, instance) -> list:
@@ -198,17 +186,20 @@ class Dependency(Field):
             value = [value]
 
         for node in value:
+            if node is None:
+                continue
             if isinstance(node, znflow.Connection):
                 node = node.instance
             for field in zninit.get_descriptors(Field, self=node):
-                if field.dvc_option == "params":
-                    # We do not want to depend on parameter files.
+                if field.dvc_option in ["params", "deps"]:
+                    # We do not want to depend on parameter files or
+                    # recursively on dependencies.
                     continue
                 files.extend(field.get_affected_files(node))
-                print(f"Found field {field} and extended files to {files}")
+                log.debug(f"Found field {field} and extended files to {files}")
         return files
 
-    def save(self, instance: Node):
+    def save(self, instance: "Node"):
         """Save the field to disk."""
         if instance.state.loaded:
             # Only save if the node has been loaded
@@ -216,16 +207,16 @@ class Dependency(Field):
         self._write_value_to_config(
             instance,
             encoder=znjson.ZnEncoder.from_converters(
-                [ConnectionConverter, NodeConverter]
+                [ConnectionConverter], add_default=True
             ),
         )
 
-    def load(self, instance: Node):
+    def load(self, instance: "Node"):
         """Load the field from disk."""
         value = self._get_value_from_config(
             instance,
             decoder=znjson.ZnDecoder.from_converters(
-                [ConnectionConverter, NodeConverter]
+                [ConnectionConverter], add_default=True
             ),
         )
 
@@ -234,7 +225,7 @@ class Dependency(Field):
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
         return [
-            ("--deps", pathlib.Path(file).as_posix())
+            (f"--{self.dvc_option}", pathlib.Path(file).as_posix())
             for file in self.get_affected_files(instance)
         ]
 
