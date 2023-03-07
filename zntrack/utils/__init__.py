@@ -7,7 +7,6 @@ import sys
 import dvc.cli
 
 from zntrack.utils import cli
-from zntrack.utils.node_wd import nwd
 
 __all__ = [
     "cli",
@@ -62,6 +61,7 @@ class DVCProcessError(Exception):
 
 def run_dvc_cmd(script):
     """Run the DVC script via subprocess calls.
+
     Parameters
     ----------
     script: tuple[str]|list[str]
@@ -69,7 +69,7 @@ def run_dvc_cmd(script):
     Raises
     ------
     DVCProcessError:
-        if the dvc cli command fails
+        if the dvc cli command fails.
     """
     dvc_short_string = " ".join(script[:5])
     if len(script) > 5:

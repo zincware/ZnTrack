@@ -29,23 +29,23 @@ class NodeStatus:
         If a new Node is created, this will be False.
     results : NodeStatusResults
         The status of the node results. E.g. was the computation successful.
-    origin : str, default = "workspace"
+    origin : str, default = None
         Where the Node has its data from. This could be the current "workspace" or
         a "remote" location, such as a git repository.
-    rev : str, default = "HEAD"
+    rev : str, default = None
         The revision of the Node. This could be the current "HEAD" or a specific revision.
     """
 
     loaded: bool
     results: "NodeStatusResults"
-    origin: str = "workspace"
-    rev: str = "HEAD"
+    origin: str = None
+    rev: str = None
 
     def get_file_system(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
         return dvc.api.DVCFileSystem(
-            url=self.origin if self.origin != "workspace" else None,
-            rev=self.rev if self.rev != "HEAD" else None,
+            url=self.origin,
+            rev=self.rev,
         )
 
 
@@ -55,12 +55,14 @@ class _NameDescriptor(zninit.Descriptor):
     def __get__(self, instance, owner=None):
         if instance is None:
             return self
-        if instance.__dict__.get("name") is None:
-            return instance.__class__.__name__
-        return instance.__dict__["name"]
+        if getattr(instance, "_name_") is None:
+            instance._name_ = instance.__class__.__name__
+        return getattr(instance, "_name_")
 
     def __set__(self, instance, value):
-        instance.__dict__["name"] = value
+        if value is None:
+            return
+        instance._name_ = value
 
 
 class Node(zninit.ZnInit, znflow.Node):
@@ -79,6 +81,7 @@ class Node(zninit.ZnInit, znflow.Node):
     _state: NodeStatus = None
 
     name: str = _NameDescriptor(None)
+    _name_ = None
 
     @property
     def _init_descriptors_(self):
@@ -128,15 +131,15 @@ class Node(zninit.ZnInit, znflow.Node):
         self.state.loaded = True
 
     @classmethod
-    def from_rev(cls, name=None, origin="workspace", rev="HEAD") -> Node:
+    def from_rev(cls, name=None, origin=None, rev=None) -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
-        node.name = name if name is not None else cls.__name__
+        node.name = name
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
         node_identifier = NodeIdentifier(
             module_handler(cls), cls.__name__, node.name, origin, rev
         )
-        log.error(f"Creating node {node_identifier}")
+        log.debug(f"Creating {node_identifier}")
         node.load()
         return node
 
@@ -229,7 +232,7 @@ class NodeConverter(znjson.ConverterBase):
     def encode(self, obj: Node) -> dict:
         """Convert the Node object to dict."""
         node_identifier = NodeIdentifier.from_node(obj)
-        if node_identifier.rev != "HEAD":
+        if node_identifier.rev is not None:
             raise NotImplementedError(
                 "Dependencies to other revisions are not supported yet"
             )
@@ -238,6 +241,7 @@ class NodeConverter(znjson.ConverterBase):
 
     def decode(self, value: dict) -> Node:
         """Create Node object from dict."""
+        # TODO if rev = HEAD, replace with the rev from the 'Node.from_rev'
         return NodeIdentifier(**value).get_node()
 
 

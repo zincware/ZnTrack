@@ -213,13 +213,38 @@ class Dependency(Field):
 
     def load(self, instance: "Node"):
         """Load the field from disk."""
-        value = self._get_value_from_config(
-            instance,
-            decoder=znjson.ZnDecoder.from_converters(
-                [ConnectionConverter], add_default=True
-            ),
+        zntrack_dict = json.loads(
+            instance.state.get_file_system().read_text("zntrack.json"),
+        )
+        value = zntrack_dict[instance.name][self.name]
+
+        def update_key_val(values):
+            """Update the keys of the dictionary to the current state of the node.
+
+            If the Nodes dependecy are the default values,
+            it will set them to the current Node.
+            """
+            if isinstance(values, (list, tuple)):
+                return [update_key_val(v) for v in values]
+            if isinstance(values, dict):
+                for key, val in values.items():
+                    if key == "rev" and val is None:
+                        values[key] = instance.state.rev
+                    if key == "origin" and val is None:
+                        values[key] = instance.state.origin
+                    if isinstance(val, dict):
+                        update_key_val(val)
+                return values
+
+        value = update_key_val(value)
+
+        value = json.loads(
+            json.dumps(value),
+            cls=znjson.ZnDecoder.from_converters(ConnectionConverter, add_default=True),
         )
 
+        # Up until here we have connection objects. Now we need to resolve them to Nodes.
+        # The Nodes, as in 'connection.instance' are already loaded by the ZnDecoder.
         instance.__dict__[self.name] = znflow.graph._UpdateConnectors()(value)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:

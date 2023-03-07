@@ -4,6 +4,7 @@ import json
 import pathlib
 import typing
 
+import znflow
 import zninit
 
 if typing.TYPE_CHECKING:
@@ -17,6 +18,11 @@ class Field(zninit.Descriptor, abc.ABC):
     """
 
     dvc_option: str = None
+
+    @znflow.disable_graph()
+    def __get__(self, instance, owner=None):
+        """Get the value using disabled graph."""
+        return super().__get__(instance, owner)
 
     @abc.abstractmethod
     def save(self, instance: "Node"):

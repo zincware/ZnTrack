@@ -12,3 +12,4 @@ venv
 __pycache__/
 .pymon
 .ipynb_checkpoints
+_examples/

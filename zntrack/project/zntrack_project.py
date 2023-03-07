@@ -1,6 +1,7 @@
 """The class for the ZnTrackProject."""
 from __future__ import annotations
 
+import contextlib
 import logging
 
 import dvc.cli
@@ -14,7 +15,7 @@ log = logging.getLogger(__name__)
 
 
 class _ProjectBase(znflow.DiGraph):
-    def run(self, eager=False, repro: bool = True):
+    def run(self, eager=False, repro: bool = True, optional: dict = None):
         """Run the Project Graph.
 
         Parameters
@@ -24,7 +25,13 @@ class _ProjectBase(znflow.DiGraph):
             if False, run the nodes using dvc.
         repro : bool, default = True
             if True, run dvc repro after running the nodes.
+        optional : dict, default = None
+            A dictionary of optional arguments for each node.
+            Use {node_name: {arg_name: arg_value}} to pass arguments to nodes.
+            Possible arg_names are e.g. 'always_changed: True'
         """
+        if optional is None:
+            optional = {}
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
             if eager:
@@ -36,11 +43,12 @@ class _ProjectBase(znflow.DiGraph):
                 node.state.loaded = True
             else:
                 log.info(f"Adding node {node}")
-                cmd = get_dvc_cmd(node)
-                node.save()
+                cmd = get_dvc_cmd(node, **optional.get(node.name, {}))
                 dvc.cli.main(cmd)
+                node.save()
         if not eager and repro:
             dvc.cli.main(["repro"])
+            # TODO should we load the nodes here?
 
     def load(self):
         for node_uuid in self.get_sorted_nodes():
@@ -68,6 +76,7 @@ class Project(_ProjectBase):
         try:
             _ = git.Repo()
         except git.exc.InvalidGitRepositoryError:
+            # TODO ASSERT IS EMPTY!
             repo = git.Repo.init()
             repo.init()
             dvc.cli.main(["init", "--quiet"])
@@ -79,6 +88,23 @@ class Project(_ProjectBase):
         branch = Branch(self, name)
         branch.create()
         return branch
+
+    @contextlib.contextmanager
+    def create_experiment(self, name: str = None, queue: bool = True) -> None:
+        """Create a new experiment."""
+        # TODO: return an experiment object that allows you to load the results
+        yield None
+
+        for node_uuid in self.get_sorted_nodes():
+            node = self.nodes[node_uuid]["value"]
+            node.save()
+
+        cmd = ["exp", "run"]
+        if queue:
+            cmd.append("--queue")
+        if name is not None:
+            cmd.extend(["--name", name])
+        dvc.cli.main(cmd)
 
     def run_exp(self) -> None:
         """Run all queued experiments."""

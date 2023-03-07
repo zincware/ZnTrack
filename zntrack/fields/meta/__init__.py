@@ -1,3 +1,4 @@
+"""Additional fields that are neither dvc/zn i/o fields."""
 import pathlib
 import typing
 
