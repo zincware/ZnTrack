@@ -28,11 +28,32 @@ class ConnectionConverter(znjson.ConverterBase):
 
     def encode(self, obj: znflow.Connection) -> dict:
         """Convert the znflow.Connection object to dict."""
+        if obj.item is not None:
+            raise NotImplementedError("znflow.Connection getitem is not supported yet.")
         return dataclasses.asdict(obj)
 
     def decode(self, value: str) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
         return znflow.Connection(**value)
+
+
+class SliceConverter(znjson.ConverterBase):
+    """Convert a znflow.Connection object to dict and back."""
+
+    level = 100
+    representation = "slice"
+    instance = slice
+
+    def encode(self, obj: slice) -> dict:
+        """Convert the znflow.Connection object to dict."""
+        return {"start": obj.start, "stop": obj.stop, "step": obj.step}
+
+    def decode(self, value: dict) -> znflow.Connection:
+        """Create znflow.Connection object from dict."""
+        return slice(*value.values())
+
+
+znjson.config.register(SliceConverter)
 
 
 class Params(Field):

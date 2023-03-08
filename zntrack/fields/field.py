@@ -3,7 +3,6 @@ import abc
 import json
 import typing
 
-import znflow
 import zninit
 
 if typing.TYPE_CHECKING:
@@ -22,24 +21,6 @@ class Field(zninit.Descriptor, abc.ABC):
     """
 
     dvc_option: str = None
-
-    @znflow.disable_graph()
-    def __get__(self, instance, owner=None):
-        """Get the value using disabled graph.
-
-        Parameters
-        ----------
-        instance : Node
-            The Node instance to get the value from.
-        owner : type, optional
-            The class owner of the field, by default None.
-
-        Returns
-        -------
-        any
-            The value of the field.
-        """
-        return super().__get__(instance, owner)
 
     @abc.abstractmethod
     def save(self, instance: "Node"):
