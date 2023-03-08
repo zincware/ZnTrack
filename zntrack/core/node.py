@@ -162,15 +162,6 @@ class Node(zninit.ZnInit, znflow.Node):
             # TODO: raise a warning here.
             cls.__init__(node)
 
-        with contextlib.suppress(AttributeError):
-            node.post_init()
-
-        with contextlib.suppress(AttributeError):
-            node._post_init_()
-
-        with contextlib.suppress(AttributeError):
-            node.__post_init__()
-
         node.name = name
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
         node_identifier = NodeIdentifier(
@@ -181,6 +172,15 @@ class Node(zninit.ZnInit, znflow.Node):
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
             node.load()
+
+        with contextlib.suppress(AttributeError):
+            node.post_init()
+
+        with contextlib.suppress(AttributeError):
+            node._post_init_()
+
+        with contextlib.suppress(AttributeError):
+            node.__post_init__()
 
         return node
 

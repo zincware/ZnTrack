@@ -65,6 +65,7 @@ class NodeWithPostInit(zntrack.Node):
     outs = zntrack.zn.outs()
 
     def _post_init_(self):
+        _ = self.params
         self.value = 42
 
     def run(self) -> None:
