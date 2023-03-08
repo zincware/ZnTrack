@@ -36,6 +36,11 @@ def module_handler(obj) -> str:
     obj:
         Any object that implements __module__
     """
+    if config.nb_name:
+        try:
+            return f"{config.nb_class_path}.{obj.__name__}"
+        except AttributeError:
+            return f"{config.nb_class_path}.{obj.__class__.__name__}"
     if obj.__module__ != "__main__":
         return obj.__module__
     if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":

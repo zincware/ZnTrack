@@ -95,6 +95,7 @@ class Project(_ProjectBase):
     def create_experiment(self, name: str = None, queue: bool = True) -> None:
         """Create a new experiment."""
         # TODO: return an experiment object that allows you to load the results
+        # TODO this context manager WILL NOT ADD new nodes to the graph.
         yield None
 
         for node_uuid in self.get_sorted_nodes():
