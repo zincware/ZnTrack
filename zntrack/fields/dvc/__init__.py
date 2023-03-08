@@ -60,13 +60,15 @@ class DVCOption(Field):
             (f"--{self.dvc_option}", file) for file in self.get_affected_files(instance)
         ]
 
-    def load(self, instance: "Node"):
+    def load(self, instance: "Node", lazy: bool = None):
         """Load the field from config file.
 
         Parameters
         ----------
         instance : Node
             The node instance to load the field for.
+        lazy : bool, optional
+            lazy does not apply to DVCOption fields.
 
         """
         instance.__dict__[self.name] = self._get_value_from_config(

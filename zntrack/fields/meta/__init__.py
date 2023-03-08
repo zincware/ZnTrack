@@ -27,7 +27,7 @@ class Text(Field):
             data={self.name: getattr(instance, self.name)},
         )
 
-    def load(self, instance):
+    def load(self, instance, lazy: bool = None):
         """Load the field from disk."""
         dvc_dict = yaml.safe_load(instance.state.get_file_system().read_text("dvc.yaml"))
         instance.__dict__[self.name] = dvc_dict["stages"][instance.name]["meta"].get(

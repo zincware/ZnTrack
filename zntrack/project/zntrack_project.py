@@ -49,7 +49,7 @@ class _ProjectBase(znflow.DiGraph):
                     run_dvc_cmd(x)
                 node.save()
         if not eager and repro:
-            dvc.cli.main(["repro"])
+            run_dvc_cmd(["repro"])
             # TODO should we load the nodes here? Maybe, if lazy loading is implemented.
 
     def load(self):

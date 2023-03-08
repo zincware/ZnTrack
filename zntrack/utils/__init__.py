@@ -18,6 +18,8 @@ __all__ = [
     "config",
 ]
 
+LazyOption = object()
+
 log = logging.getLogger(__name__)
 
 
@@ -152,7 +154,7 @@ class NodeStatusResults(enum.Enum):
 
 def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
     """Change into a temporary directory.
-    
+
     Helper for e.g. the docs to quickly change into a temporary directory
     and copy all files, e.g. the Notebook into that directory.
 

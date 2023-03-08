@@ -12,7 +12,13 @@ import zninit
 import znjson
 
 from zntrack.fields.field import Field
-from zntrack.utils import NodeStatusResults, module_handler, update_key_val
+from zntrack.utils import (
+    LazyOption,
+    NodeStatusResults,
+    config,
+    module_handler,
+    update_key_val,
+)
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -104,13 +110,15 @@ class Params(Field):
         with open(file, "w") as f:
             yaml.safe_dump(params_dict, f, indent=4)
 
-    def load(self, instance: "Node"):
+    def load(self, instance: "Node", lazy: bool = None):
         """Load the field from disk.
 
         Parameters
         ----------
         instance : Node
             The node instance associated with this field.
+        lazy : bool, optional
+            Lazy does not apply to Params.
         """
         file = self.get_affected_files(instance)[0]
         params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
@@ -183,23 +191,37 @@ class Output(Field):
             json.dumps(getattr(instance, self.name), cls=znjson.ZnEncoder, indent=4)
         )
 
-    def load(self, instance: "Node"):
+    def __get__(self, instance, owner=None):
+        """Getter method with added LazyOption support."""
+        if instance is None:
+            return self
+        if instance.__dict__[self.name] is LazyOption:
+            self.load(instance, lazy=False)
+
+        return super().__get__(instance, owner)
+
+    def load(self, instance: "Node", lazy: bool = None):
         """Load the field from disk.
 
         Parameters
         ----------
         instance : Node
             The node instance.
+        lazy : bool, optional
+            If True, the field will be loaded lazily when it is accessed.
         """
-        file = self.get_affected_files(instance)[0]
-        try:
-            value = json.loads(
-                instance.state.get_file_system().read_text(file.as_posix()),
-                cls=znjson.ZnDecoder,
-            )
-            instance.__dict__[self.name] = value
-        except FileNotFoundError:
-            instance.state.results = NodeStatusResults.UNKNOWN
+        if lazy is None and config.lazy:
+            instance.__dict__[self.name] = LazyOption
+        else:
+            file = self.get_affected_files(instance)[0]
+            try:
+                value = json.loads(
+                    instance.state.get_file_system().read_text(file.as_posix()),
+                    cls=znjson.ZnDecoder,
+                )
+                instance.__dict__[self.name] = value
+            except FileNotFoundError:
+                instance.state.results = NodeStatusResults.UNKNOWN
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the DVC command for this field.
@@ -238,16 +260,28 @@ class Plots(Field):
         value: pd.DataFrame = getattr(instance, self.name)
         value.to_csv(file)
 
-    def load(self, instance: "Node"):
+    def __get__(self, instance, owner=None):
+        # TODO make this a mixin / parent method
+        if instance is None:
+            return self
+        if instance.__dict__[self.name] is LazyOption:
+            self.load(instance, lazy=False)
+
+        return super().__get__(instance, owner)
+
+    def load(self, instance: "Node", lazy: bool = None):
         """Load the field from disk."""
-        file = self.get_affected_files(instance)[0]
-        try:
-            value = pd.read_csv(
-                instance.state.get_file_system().open(file.as_posix()), index_col=0
-            )
-            instance.__dict__[self.name] = value
-        except FileNotFoundError:
-            instance.state.results = NodeStatusResults.UNKNOWN
+        if lazy is None and config.lazy:
+            instance.__dict__[self.name] = LazyOption
+        else:
+            file = self.get_affected_files(instance)[0]
+            try:
+                value = pd.read_csv(
+                    instance.state.get_file_system().open(file.as_posix()), index_col=0
+                )
+                instance.__dict__[self.name] = value
+            except FileNotFoundError:
+                instance.state.results = NodeStatusResults.UNKNOWN
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
@@ -315,23 +349,38 @@ class Dependency(Field):
             ),
         )
 
-    def load(self, instance: "Node"):
+    def __get__(self, instance, owner=None):
+        # TODO make this a mixin / parent method
+        if instance is None:
+            return self
+        if instance.__dict__[self.name] is LazyOption:
+            self.load(instance, lazy=False)
+
+        return super().__get__(instance, owner)
+
+    def load(self, instance: "Node", lazy: bool = None):
         """Load the field from disk."""
-        zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
-        )
-        value = zntrack_dict[instance.name][self.name]
+        if lazy is None and config.lazy:
+            instance.__dict__[self.name] = LazyOption
+        else:
+            zntrack_dict = json.loads(
+                instance.state.get_file_system().read_text("zntrack.json"),
+            )
+            value = zntrack_dict[instance.name][self.name]
 
-        value = update_key_val(value, instance=instance)
+            value = update_key_val(value, instance=instance)
 
-        value = json.loads(
-            json.dumps(value),
-            cls=znjson.ZnDecoder.from_converters(ConnectionConverter, add_default=True),
-        )
+            value = json.loads(
+                json.dumps(value),
+                cls=znjson.ZnDecoder.from_converters(
+                    ConnectionConverter, add_default=True
+                ),
+            )
 
-        # Up until here we have connection objects. Now we need to resolve them to Nodes.
-        # The Nodes, as in 'connection.instance' are already loaded by the ZnDecoder.
-        instance.__dict__[self.name] = znflow.graph._UpdateConnectors()(value)
+            # Up until here we have connection objects. Now we need
+            # to resolve them to Nodes. The Nodes, as in 'connection.instance'
+            #  are already loaded by the ZnDecoder.
+            instance.__dict__[self.name] = znflow.graph._UpdateConnectors()(value)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""

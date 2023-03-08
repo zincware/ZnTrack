@@ -34,13 +34,15 @@ class Field(zninit.Descriptor, abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def load(self, instance: "Node"):
+    def load(self, instance: "Node", lazy: bool = None):
         """Load the field from disk.
 
         Parameters
         ----------
         instance : Node
             The Node instance to load the field for.
+        lazy : bool, optional
+            Whether to load the field lazily, by default 'zntrack.config.lazy'.
         """
         raise NotImplementedError
 

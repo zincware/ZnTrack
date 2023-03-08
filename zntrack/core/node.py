@@ -139,12 +139,12 @@ class Node(zninit.ZnInit, znflow.Node):
     def run(self) -> None:
         """Run the node's code."""
 
-    def load(self) -> None:
+    def load(self, lazy: bool = None) -> None:
         """Load the node's output from disk."""
         from zntrack.fields.field import Field
 
         for attr in zninit.get_descriptors(Field, self=self):
-            attr.load(self)
+            attr.load(self, lazy=lazy)
 
         self.state.loaded = True
 
