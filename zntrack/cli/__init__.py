@@ -2,6 +2,7 @@
 import importlib.metadata
 import pathlib
 import sys
+import uuid
 
 import typer
 
@@ -43,7 +44,9 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     try:
         node = cls.from_rev(name=name)
         if hash_only:
-            node.save(hash_only=True)
+            nwd = pathlib.Path("nodes", name)
+            nwd.mkdir(parents=True, exist_ok=True)
+            (nwd / "hash").write_text(str(uuid.uuid4))
         else:
             node.run()
             node.save()

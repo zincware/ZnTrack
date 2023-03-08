@@ -10,6 +10,7 @@ import znflow
 from znflow.graph import _UpdateConnectors
 
 from zntrack.core.node import get_dvc_cmd
+from zntrack.utils import run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +46,7 @@ class _ProjectBase(znflow.DiGraph):
                 log.info(f"Adding node {node}")
                 cmd = get_dvc_cmd(node, **optional.get(node.name, {}))
                 for x in cmd:
-                    dvc.cli.main(x)
+                    run_dvc_cmd(x)
                 node.save()
         if not eager and repro:
             dvc.cli.main(["repro"])

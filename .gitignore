@@ -1,3 +1,4 @@
+.vscode/
 tmp/
 /tests/basic/.git
 /docs/build

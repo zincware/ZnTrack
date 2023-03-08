@@ -13,7 +13,7 @@ import znflow
 import zninit
 import znjson
 
-from zntrack.utils import NodeStatusResults, deprecated, module_handler
+from zntrack.utils import NodeStatusResults, deprecated, module_handler, run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
@@ -151,11 +151,11 @@ class Node(zninit.ZnInit, znflow.Node):
         """Write the graph to dvc.yaml."""
         cmd = get_dvc_cmd(self, **kwargs)
         for x in cmd:
-            dvc.cli.main(x)
+            run_dvc_cmd(x)
         self.save()
 
         if run:
-            dvc.cli.main(["repro", self.name])
+            run_dvc_cmd(["repro", self.name])
 
 
 def get_dvc_cmd(
@@ -189,12 +189,13 @@ def get_dvc_cmd(
     field_cmds = []
     for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
-        optionals += attr.get_optional_dvc_cmd(node)
+        optionals.append(attr.get_optional_dvc_cmd(node))
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]
+    optionals = [x for x in optionals if x]  # remove empty entries []
     return [cmd] + optionals
 
 

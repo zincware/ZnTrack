@@ -5217,15 +5217,19 @@ version = "0.1.2"
 description = ""
 category = "main"
 optional = false
-python-versions = ">=3.8,<4.0"
-files = [
-    {file = "znflow-0.1.2-py3-none-any.whl", hash = "sha256:7049586a57b49aa861d1d2aaff7238f2a23d322073e11e5ee6b0a5f55b6e9fb7"},
-    {file = "znflow-0.1.2.tar.gz", hash = "sha256:d721bb26074188346cb0e5bb7a0dfaa2f51af2ad08b3a06c9ff34b857e2f9041"},
-]
+python-versions = "^3.8"
+files = []
+develop = false
 
 [package.dependencies]
-matplotlib = ">=3.6.3,<4.0.0"
-networkx = ">=3.0,<4.0"
+matplotlib = "^3.6.3"
+networkx = "^3.0"
+
+[package.source]
+type = "git"
+url = "https://github.com/zincware/znflow"
+reference = "allow_non_graph"
+resolved_reference = "fda54069e332a1304bf804f31a71eb324e8d0e14"
 
 [[package]]
 name = "zninit"
@@ -5257,4 +5261,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "3ae88fe204b335de70fc68147324791306a376bccf5f7cd3ae91c19ce031751e"
+content-hash = "09e6b4cb5343402e2c904379efc6c7b21eda3b0bc8c58540ccc8936700992ce0"

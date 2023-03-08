@@ -52,7 +52,7 @@ class DVCOption(Field):
         Returns
         -------
         list of tuple of str
-            A list of command-line arguments to use when adding 
+            A list of command-line arguments to use when adding
             this field to the DVC stage.
 
         """
