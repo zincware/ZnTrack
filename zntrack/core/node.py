@@ -150,7 +150,8 @@ class Node(zninit.ZnInit, znflow.Node):
     def write_graph(self, run: bool = False, **kwargs):
         """Write the graph to dvc.yaml."""
         cmd = get_dvc_cmd(self, **kwargs)
-        dvc.cli.main(cmd)
+        for x in cmd:
+            dvc.cli.main(x)
         self.save()
 
         if run:
@@ -165,9 +166,11 @@ def get_dvc_cmd(
     external: bool = False,
     always_changed: bool = False,
     desc: str = None,
-) -> typing.List[str]:
+) -> typing.List[typing.List[str]]:
     """Get the 'dvc stage add' command to run the node."""
     from zntrack.fields.field import Field
+
+    optionals = []
 
     cmd = ["stage", "add"]
     cmd += ["--name", node.name]
@@ -181,17 +184,18 @@ def get_dvc_cmd(
         cmd += ["--external"]
     if always_changed:
         cmd += ["--always-changed"]
-    if desc is not None:
+    if desc:
         cmd += ["--desc", desc]
     field_cmds = []
     for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
+        optionals += attr.get_optional_dvc_cmd(node)
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]
-    return cmd
+    return [cmd] + optionals
 
 
 @dataclasses.dataclass

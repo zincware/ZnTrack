@@ -44,11 +44,12 @@ class _ProjectBase(znflow.DiGraph):
             else:
                 log.info(f"Adding node {node}")
                 cmd = get_dvc_cmd(node, **optional.get(node.name, {}))
-                dvc.cli.main(cmd)
+                for x in cmd:
+                    dvc.cli.main(x)
                 node.save()
         if not eager and repro:
             dvc.cli.main(["repro"])
-            # TODO should we load the nodes here?
+            # TODO should we load the nodes here? Maybe, if lazy loading is implemented.
 
     def load(self):
         for node_uuid in self.get_sorted_nodes():

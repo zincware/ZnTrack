@@ -11,7 +11,7 @@ from zntrack.utils import file_io
 class Text(Field):
     """A metadata field."""
 
-    dvc_option: str = "params"
+    dvc_option: str = None
 
     def get_affected_files(self, instance) -> list:
         """Get the params.yaml file."""

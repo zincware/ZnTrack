@@ -95,6 +95,25 @@ def run_dvc_cmd(script):
     return return_code
 
 
+def update_key_val(values, instance):
+    """Update the keys of the dictionary to the current state of the node.
+
+    If the node's dependencies are the default values,
+    they will be set to the current node.
+    """
+    if isinstance(values, (list, tuple)):
+        return [update_key_val(v, instance) for v in values]
+    if isinstance(values, dict):
+        for key, val in values.items():
+            if key == "rev" and val is None:
+                values[key] = instance.state.rev
+            if key == "origin" and val is None:
+                values[key] = instance.state.origin
+            if isinstance(val, dict):
+                update_key_val(val, instance)
+        return values
+
+
 class NodeStatusResults(enum.Enum):
     """The status of a node.
 
