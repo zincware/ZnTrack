@@ -1,4 +1,5 @@
 """DVC fields without serialization of data / for file paths."""
+import json
 import pathlib
 import typing
 
@@ -60,19 +61,26 @@ class DVCOption(Field):
             (f"--{self.dvc_option}", file) for file in self.get_affected_files(instance)
         ]
 
-    def load(self, instance: "Node", lazy: bool = None):
-        """Load the field from config file.
+    def _get_value_from_file(self, instance: "Node") -> any:
+        """Get the value of the field from the configuration file.
 
         Parameters
         ----------
         instance : Node
-            The node instance to load the field for.
-        lazy : bool, optional
-            lazy does not apply to DVCOption fields.
+            The Node instance to get the field value for.
+        decoder : Any, optional
+            The decoder to use when parsing the configuration file, by default None.
 
+        Returns
+        -------
+        any
+            The value of the field from the configuration file.
         """
-        instance.__dict__[self.name] = self._get_value_from_config(
-            instance, decoder=znjson.ZnDecoder
+        zntrack_dict = json.loads(
+            instance.state.get_file_system().read_text("zntrack.json"),
+        )
+        return json.loads(
+            json.dumps(zntrack_dict[instance.name][self.name]), cls=znjson.ZnDecoder
         )
 
     def save(self, instance: "Node"):

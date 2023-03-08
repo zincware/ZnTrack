@@ -5,6 +5,8 @@ import typing
 
 import zninit
 
+from zntrack.utils import LazyOption, config
+
 if typing.TYPE_CHECKING:
     from zntrack.core.node import Node
 
@@ -33,7 +35,6 @@ class Field(zninit.Descriptor, abc.ABC):
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
     def load(self, instance: "Node", lazy: bool = None):
         """Load the field from disk.
 
@@ -42,9 +43,10 @@ class Field(zninit.Descriptor, abc.ABC):
         instance : Node
             The Node instance to load the field for.
         lazy : bool, optional
-            Whether to load the field lazily, by default 'zntrack.config.lazy'.
+            Whether to load the field lazily.
+            This only applies to 'LazyField' classes.
         """
-        raise NotImplementedError
+        instance.__dict__[self.name] = self._get_value_from_file(instance)
 
     @abc.abstractmethod
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
@@ -95,25 +97,10 @@ class Field(zninit.Descriptor, abc.ABC):
         """
         return []
 
-    def _get_value_from_config(self, instance: "Node", decoder=None) -> any:
-        """Get the value of the field from the configuration file.
-
-        Parameters
-        ----------
-        instance : Node
-            The Node instance to get the field value for.
-        decoder : Any, optional
-            The decoder to use when parsing the configuration file, by default None.
-
-        Returns
-        -------
-        any
-            The value of the field from the configuration file.
-        """
-        zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
-        )
-        return json.loads(json.dumps(zntrack_dict[instance.name][self.name]), cls=decoder)
+    @abc.abstractmethod
+    def _get_value_from_file(self, instance: "Node") -> any:
+        """Get the value of the field from the file."""
+        raise NotImplementedError
 
     def _write_value_to_config(self, instance: "Node", encoder=None):
         """Write the value of this field to the zntrack config file.
@@ -138,3 +125,31 @@ class Field(zninit.Descriptor, abc.ABC):
         # use the __dict__ to avoid the nwd replacement
         with open("zntrack.json", "w") as f:
             json.dump(zntrack_dict, f, indent=4, cls=encoder)
+
+
+class LazyField(Field):
+    """Base class for fields that are loaded lazily."""
+    def __get__(self, instance, owner=None):
+        """Load the field from disk if it is not already loaded."""
+        if instance is None:
+            return self
+        if instance.__dict__[self.name] is LazyOption:
+            self.load(instance, lazy=False)
+
+        return super().__get__(instance, owner)
+
+    def load(self, instance: "Node", lazy: bool = None):
+        """Load the field from disk.
+
+        Parameters
+        ----------
+        instance : Node
+            The Node instance to load the field for.
+        lazy : bool, optional
+            Whether to load the field lazily, by default 'zntrack.config.lazy'.
+        """
+        # TODO try / except e.g. FileNotFoundError and set Node State
+        if lazy is None and config.lazy:
+            instance.__dict__[self.name] = LazyOption
+        else:
+            instance.__dict__[self.name] = self._get_value_from_file(instance)

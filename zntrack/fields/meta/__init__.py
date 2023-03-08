@@ -7,6 +7,9 @@ import yaml
 from zntrack.fields.field import Field
 from zntrack.utils import file_io
 
+if typing.TYPE_CHECKING:
+    from zntrack import Node
+
 
 class Text(Field):
     """A metadata field."""
@@ -27,12 +30,9 @@ class Text(Field):
             data={self.name: getattr(instance, self.name)},
         )
 
-    def load(self, instance, lazy: bool = None):
-        """Load the field from disk."""
+    def _get_value_from_file(self, instance: "Node") -> any:
         dvc_dict = yaml.safe_load(instance.state.get_file_system().read_text("dvc.yaml"))
-        instance.__dict__[self.name] = dvc_dict["stages"][instance.name]["meta"].get(
-            self.name, None
-        )
+        return dvc_dict["stages"][instance.name]["meta"].get(self.name, None)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
