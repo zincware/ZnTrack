@@ -99,7 +99,7 @@ class Params(Field):
             params_dict[instance.name] = {}
 
         params_dict[instance.name][self.name] = getattr(instance, self.name)
-        params_dict = json.loads(json.dumps(params_dict))
+        params_dict = json.loads(json.dumps(params_dict, cls=znjson.ZnEncoder))
 
         with open(file, "w") as f:
             yaml.safe_dump(params_dict, f, indent=4)
@@ -108,7 +108,7 @@ class Params(Field):
         file = self.get_affected_files(instance)[0]
         params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
         value = params_dict[instance.name].get(self.name, None)
-        return json.loads(json.dumps(value))
+        return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
 
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
         """Get the DVC stage add argument for this field.
