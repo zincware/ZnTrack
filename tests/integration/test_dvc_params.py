@@ -20,11 +20,11 @@ def test_dvc_params(proj_path):
 
     file.write_text(yaml.safe_dump(params))
 
-    SingleNode(params_file=file).write_graph()
+    SingleNode(params_file=file).write_graph(run=True)
 
     assert SingleNode.from_rev().params_file == file
     dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
-    assert ["my_params.yaml"] == dvc_file["stages"]["SingleNode"]["params"]
+    assert [{"my_params.yaml": None}] == dvc_file["stages"]["SingleNode"]["params"]
 
 
 def test_dvc_params_list(proj_path):
@@ -36,13 +36,13 @@ def test_dvc_params_list(proj_path):
     file1.write_text(yaml.safe_dump(params))
     file2.write_text(yaml.safe_dump(params))
 
-    SingleNode(params_file=[file1, file2]).write_graph()
+    SingleNode(params_file=[file1, file2]).write_graph(run=True)
 
     assert SingleNode.from_rev().params_file == [file1, file2]
     dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
-    assert ["my_params1.yaml", "my_params2.yaml"] == dvc_file["stages"]["SingleNode"][
-        "params"
-    ]
+    assert [{"my_params1.yaml": None}, {"my_params2.yaml": None}] == dvc_file["stages"][
+        "SingleNode"
+    ]["params"]
 
 
 class MixedParams(Node):
@@ -65,15 +65,17 @@ def test_dvc_mixed_params_list(proj_path):
 
     MixedParams(
         params_file1=[file1, file2], params_file2=file1, params={"a": 100}
-    ).write_graph()
+    ).write_graph(run=True)
 
     assert MixedParams.from_rev().params_file1 == [file1, file2]
     assert MixedParams.from_rev().params_file2 == file1
     assert MixedParams.from_rev().params == {"a": 100}
     dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
-    assert ["MixedParams", "my_params1.yaml", "my_params2.yaml"] == dvc_file["stages"][
-        "MixedParams"
-    ]["params"]
+    assert [
+        "MixedParams",
+        {"my_params1.yaml": None},
+        {"my_params2.yaml": None},
+    ] == dvc_file["stages"]["MixedParams"]["params"]
 
 
 def test_dvc_params_error(proj_path):

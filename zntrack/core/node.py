@@ -172,7 +172,7 @@ class Node(zninit.ZnInit, znflow.Node):
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
             node.load()
-
+        # TODO How to handle init / post_init with .load and .from_rev properly?
         with contextlib.suppress(AttributeError):
             node.post_init()
 

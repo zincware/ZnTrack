@@ -57,9 +57,16 @@ class DVCOption(Field):
             this field to the DVC stage.
 
         """
-        return [
-            (f"--{self.dvc_option}", file) for file in self.get_affected_files(instance)
-        ]
+        if self.dvc_option == "params":
+            return [
+                (f"--{self.dvc_option}", f"{file}:")
+                for file in self.get_affected_files(instance)
+            ]
+        else:
+            return [
+                (f"--{self.dvc_option}", file)
+                for file in self.get_affected_files(instance)
+            ]
 
     def _get_value_from_file(self, instance: "Node") -> any:
         """Get the value of the field from the configuration file.
