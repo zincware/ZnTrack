@@ -13,7 +13,9 @@ import znflow
 import zninit
 import znjson
 
+from zntrack.notebooks.jupyter import jupyter_class_to_file
 from zntrack.utils import NodeStatusResults, deprecated, module_handler, run_dvc_cmd
+from zntrack.utils.config import config
 
 log = logging.getLogger(__name__)
 
@@ -83,6 +85,18 @@ class Node(zninit.ZnInit, znflow.Node):
     name: str = _NameDescriptor(None)
     _name_ = None
 
+    @classmethod
+    def convert_notebook(cls, nb_name: str = None):
+        """Use jupyter_class_to_file to convert ipynb to py.
+
+        Parameters
+        ----------
+        nb_name: str
+            Notebook name when not using config.nb_name (this is not recommended)
+        """
+        # TODO this should not be a class method, but a function.
+        jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
+
     @property
     def _init_descriptors_(self):
         from zntrack import fields
@@ -114,6 +128,10 @@ class Node(zninit.ZnInit, znflow.Node):
         """Save the node's output to disk."""
         # TODO have an option to save and run dvc commit afterwards.
         from zntrack.fields.field import Field
+
+        # Jupyter Notebook
+        if config.nb_name:
+            self.convert_notebook(config.nb_name)
 
         for attr in zninit.get_descriptors(Field, self=self):
             attr.save(self)
