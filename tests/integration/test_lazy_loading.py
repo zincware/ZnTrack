@@ -64,3 +64,10 @@ def test_CollectOutputs(proj_path, lazy, eager):
         assert node.nodes[0].output == 17
         assert node.nodes[1].output == 42
         assert node.output == 59
+
+        if not eager:
+            # Check that non-lazy loading works
+            node = node.from_rev(lazy=False)
+            assert node.__dict__["output"] is 59
+            assert node.__dict__["nodes"][0].name == "a"
+            assert node.__dict__["nodes"][1].name == "b"

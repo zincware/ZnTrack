@@ -5,7 +5,7 @@ import typing
 
 import zninit
 
-from zntrack.utils import LazyOption, config
+from zntrack.utils import LazyOption, NodeStatusResults, config
 
 if typing.TYPE_CHECKING:
     from zntrack.core.node import Node
@@ -46,7 +46,11 @@ class Field(zninit.Descriptor, abc.ABC):
             Whether to load the field lazily.
             This only applies to 'LazyField' classes.
         """
-        instance.__dict__[self.name] = self._get_value_from_file(instance)
+        try:
+            instance.__dict__[self.name] = self._get_value_from_file(instance)
+        except FileNotFoundError:
+            # TODO write tests for raises FileNotFoundError with config.lazy = False!
+            instance.state.results = NodeStatusResults.UNKNOWN
 
     @abc.abstractmethod
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
@@ -129,6 +133,7 @@ class Field(zninit.Descriptor, abc.ABC):
 
 class LazyField(Field):
     """Base class for fields that are loaded lazily."""
+
     def __get__(self, instance, owner=None):
         """Load the field from disk if it is not already loaded."""
         if instance is None:
@@ -148,8 +153,7 @@ class LazyField(Field):
         lazy : bool, optional
             Whether to load the field lazily, by default 'zntrack.config.lazy'.
         """
-        # TODO try / except e.g. FileNotFoundError and set Node State
-        if lazy is None and config.lazy:
+        if lazy in [None, True] and config.lazy:
             instance.__dict__[self.name] = LazyOption
         else:
-            instance.__dict__[self.name] = self._get_value_from_file(instance)
+            super().load(instance)

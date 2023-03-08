@@ -18,7 +18,20 @@ __all__ = [
     "config",
 ]
 
-LazyOption = object()
+
+class LazyOption:
+    """Indicates that the value of the field should is loaded lazily."""
+
+    def __init__(self) -> None:
+        """Constructor.
+
+        Raises
+        ------
+        NotImplementedError:
+            This class is not meant to be instantiated.
+        """
+        raise NotImplementedError("This class is not meant to be instantiated.")
+
 
 log = logging.getLogger(__name__)
 

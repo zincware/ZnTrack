@@ -143,13 +143,16 @@ class Node(zninit.ZnInit, znflow.Node):
         """Load the node's output from disk."""
         from zntrack.fields.field import Field
 
-        for attr in zninit.get_descriptors(Field, self=self):
-            attr.load(self, lazy=lazy)
+        kwargs = {} if lazy is None else {"lazy": lazy}
+        with config.updated_config(**kwargs):
+            # TODO: it would be much nicer not to use a global config object here.
+            for attr in zninit.get_descriptors(Field, self=self):
+                attr.load(self)
 
         self.state.loaded = True
 
     @classmethod
-    def from_rev(cls, name=None, origin=None, rev=None) -> Node:
+    def from_rev(cls, name=None, origin=None, rev=None, lazy: bool = None) -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
         node.name = name
@@ -158,7 +161,11 @@ class Node(zninit.ZnInit, znflow.Node):
             module_handler(cls), cls.__name__, node.name, origin, rev
         )
         log.debug(f"Creating {node_identifier}")
-        node.load()
+
+        kwargs = {} if lazy is None else {"lazy": lazy}
+        with config.updated_config(**kwargs):
+            node.load()
+
         return node
 
     @deprecated(
