@@ -43,3 +43,65 @@ def test_AddNumbers_named(proj_path, eager):
     assert add_numbers_a.state.loaded
     assert add_numbers_b.c == 3
     assert add_numbers_b.state.loaded
+
+
+class NodeWithInit(zntrack.Node):
+    params = zntrack.zn.params()
+    outs = zntrack.zn.outs()
+
+    def __init__(self, params=None, **kwargs):
+        # This test only works, because we don't have any non-default parameters
+        # It is highly recommended to use '_post_init_' instead.
+        super().__init__(**kwargs)
+        self.params = params
+        self.value = 42
+
+    def run(self) -> None:
+        self.outs = self.params
+
+
+class NodeWithPostInit(zntrack.Node):
+    params = zntrack.zn.params()
+    outs = zntrack.zn.outs()
+
+    def _post_init_(self):
+        self.value = 42
+
+    def run(self) -> None:
+        self.outs = self.params
+
+
+@pytest.mark.parametrize("cls", [NodeWithInit, NodeWithPostInit])
+def test_NodeWithInit(proj_path, cls):
+    with zntrack.Project() as project:
+        node = cls(params=10)
+    project.run()
+
+    node = cls.from_rev()
+    assert node.value == 42
+    assert node.outs == 10
+
+
+class NonDefaultInit(zntrack.Node):
+    params = zntrack.zn.params()
+    outs = zntrack.zn.outs()
+
+    def __init__(self, params, **kwargs):
+        super().__init__(**kwargs)
+        self.params = params
+        self.value = 42
+
+    def run(self) -> None:
+        self.outs = self.params
+
+
+def test_NonDefaultInit(proj_path):
+    with zntrack.Project() as project:
+        node = NonDefaultInit(params=10)
+    project.run()
+
+    node = NonDefaultInit.from_rev()
+    with pytest.raises(AttributeError):
+        """We can not load an __init__ with non-default parameters"""
+        assert node.value == 42
+    assert node.outs == 10

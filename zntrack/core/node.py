@@ -1,6 +1,7 @@
 """The Node class."""
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import importlib
 import logging
@@ -155,6 +156,21 @@ class Node(zninit.ZnInit, znflow.Node):
     def from_rev(cls, name=None, origin=None, rev=None, lazy: bool = None) -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
+        with contextlib.suppress(TypeError):
+            # This happens if the __init__ method has non-default parameter.
+            # In this case, we just ignore it.
+            # TODO: raise a warning here.
+            cls.__init__(node)
+
+        with contextlib.suppress(AttributeError):
+            node.post_init()
+
+        with contextlib.suppress(AttributeError):
+            node._post_init_()
+
+        with contextlib.suppress(AttributeError):
+            node.__post_init__()
+
         node.name = name
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
         node_identifier = NodeIdentifier(

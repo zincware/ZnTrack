@@ -5,7 +5,7 @@ GitHub: https://github.com/zincware/ZnTrack
 import importlib.metadata
 
 from zntrack.core.node import Node
-from zntrack.fields import dvc, meta, zn, Field, LazyField
+from zntrack.fields import Field, LazyField, dvc, meta, zn
 from zntrack.project import Project
 from zntrack.utils import config
 from zntrack.utils.node_wd import nwd
