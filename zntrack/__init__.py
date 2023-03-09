@@ -5,6 +5,7 @@ GitHub: https://github.com/zincware/ZnTrack
 import importlib.metadata
 
 from zntrack.core.node import Node
+from zntrack.core.nodify import NodeConfig, nodify
 from zntrack.fields import Field, FieldGroup, LazyField, dvc, meta, zn
 from zntrack.project import Project
 from zntrack.utils import config
@@ -23,4 +24,6 @@ __all__ = [
     "Field",
     "LazyField",
     "FieldGroup",
+    "nodify",
+    "NodeConfig",
 ]
