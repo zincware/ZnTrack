@@ -9,7 +9,7 @@ import git
 import znflow
 from znflow.graph import _UpdateConnectors
 
-from zntrack.core.node import get_dvc_cmd
+from zntrack.core.node import Node, get_dvc_cmd
 from zntrack.utils import run_dvc_cmd
 
 log = logging.getLogger(__name__)
@@ -34,7 +34,7 @@ class _ProjectBase(znflow.DiGraph):
         if optional is None:
             optional = {}
         for node_uuid in self.get_sorted_nodes():
-            node = self.nodes[node_uuid]["value"]
+            node: Node = self.nodes[node_uuid]["value"]
             if eager:
                 # update connectors
                 log.info(f"Running node {node}")
@@ -47,7 +47,7 @@ class _ProjectBase(znflow.DiGraph):
                 cmd = get_dvc_cmd(node, **optional.get(node.name, {}))
                 for x in cmd:
                     run_dvc_cmd(x)
-                node.save()
+                node.save(results=False)
         if not eager and repro:
             run_dvc_cmd(["repro"])
             # TODO should we load the nodes here? Maybe, if lazy loading is implemented.

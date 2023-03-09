@@ -3,6 +3,7 @@ import abc
 import enum
 import json
 import logging
+import pathlib
 import typing
 
 import zninit
@@ -65,7 +66,6 @@ class Field(zninit.Descriptor, abc.ABC):
             log.warning(f"Could not load field {self.name} for node {instance.name}.")
             instance.state.loaded = False
 
-    @abc.abstractmethod
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
         """Get the dvc stage add argument for this field.
 
@@ -79,7 +79,10 @@ class Field(zninit.Descriptor, abc.ABC):
         typing.List[tuple]
             The stage add argument for this field.
         """
-        raise NotImplementedError
+        return [
+            (f"--{self.dvc_option}", pathlib.Path(x).as_posix())
+            for x in self.get_affected_files(instance)
+        ]
 
     @abc.abstractmethod
     def get_affected_files(self, instance: "Node") -> list:
