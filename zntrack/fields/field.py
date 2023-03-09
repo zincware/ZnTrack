@@ -110,11 +110,13 @@ class Field(zninit.Descriptor, abc.ABC):
         """Get the value of the field from the file."""
         raise NotImplementedError
 
-    def _write_value_to_config(self, instance: "Node", encoder=None):
+    def _write_value_to_config(self, value, instance: "Node", encoder=None):
         """Write the value of this field to the zntrack config file.
 
         Parameters
         ----------
+        value: any
+            The value to write to the config file.
         instance : Node
             The node instance to which this field belongs.
         encoder : json.JSONEncoder, optional
@@ -129,7 +131,7 @@ class Field(zninit.Descriptor, abc.ABC):
 
         if instance.name not in zntrack_dict:
             zntrack_dict[instance.name] = {}
-        zntrack_dict[instance.name][self.name] = instance.__dict__[self.name]
+        zntrack_dict[instance.name][self.name] = value
         # use the __dict__ to avoid the nwd replacement
         with open("zntrack.json", "w") as f:
             json.dump(zntrack_dict, f, indent=4, cls=encoder)
@@ -142,7 +144,7 @@ class LazyField(Field):
         """Load the field from disk if it is not already loaded."""
         if instance is None:
             return self
-        if instance.__dict__[self.name] is LazyOption:
+        if instance.__dict__.get(self.name) is LazyOption:
             self.load(instance, lazy=False)
 
         return super().__get__(instance, owner)

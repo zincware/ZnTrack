@@ -99,9 +99,11 @@ class DVCOption(Field):
             The node instance to save the field for.
 
         """
-        if instance.state.loaded:
-            return  # Don't save if the node is loaded from disk
-        self._write_value_to_config(instance, encoder=znjson.ZnEncoder)
+        try:
+            value = instance.__dict__[self.name]
+        except KeyError:
+            return
+        self._write_value_to_config(value, instance, encoder=znjson.ZnEncoder)
 
     def __get__(self, instance: "Node", owner=None):
         """Add replacement of the nwd to the get method.

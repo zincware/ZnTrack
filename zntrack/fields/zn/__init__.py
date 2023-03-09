@@ -166,14 +166,14 @@ class Output(LazyField):
         instance : Node
             The node instance.
         """
-        if not instance.state.loaded:
-            # Only save if the node has been loaded
+        try:
+            value = getattr(instance, self.name)
+        except AttributeError:
             return
+
         instance.nwd.mkdir(exist_ok=True, parents=True)
         file = self.get_affected_files(instance)[0]
-        file.write_text(
-            json.dumps(getattr(instance, self.name), cls=znjson.ZnEncoder, indent=4)
-        )
+        file.write_text(json.dumps(value, cls=znjson.ZnEncoder, indent=4))
 
     def _get_value_from_file(self, instance: "Node") -> any:
         file = self.get_affected_files(instance)[0]
@@ -210,13 +210,13 @@ class Plots(LazyField):
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
-        if not instance.state.loaded:
-            # Only save if the node has been loaded
+        try:
+            value: pd.DataFrame = getattr(instance, self.name)
+        except AttributeError:
             return
+
         instance.nwd.mkdir(exist_ok=True, parents=True)
         file = self.get_affected_files(instance)[0]
-
-        value: pd.DataFrame = getattr(instance, self.name)
         value.to_csv(file)
 
     def _get_value_from_file(self, instance: "Node") -> any:
@@ -281,10 +281,13 @@ class Dependency(LazyField):
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
-        if instance.state.loaded:
-            # Only save if the node has been loaded
+        try:
+            value = instance.__dict__[self.name]
+        except KeyError:
             return
+
         self._write_value_to_config(
+            value,
             instance,
             encoder=znjson.ZnEncoder.from_converters(
                 [ConnectionConverter], add_default=True
