@@ -41,16 +41,14 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
 
     cls = getattr(module, cls)
 
-    try:
+    if issubclass(cls, Node):
         node: Node = cls.from_rev(name=name)
         if hash_only:
-            nwd = pathlib.Path("nodes", name)
-            nwd.mkdir(parents=True, exist_ok=True)
-            (nwd / "hash").write_text(str(uuid.uuid4))
+            (node.nwd / "hash").write_text(str(uuid.uuid4))
         else:
             node.run()
             node.save(parameter=False)
-    except AttributeError:
+    else:
         # @nodify function
         cls(exec_func=True)
 
