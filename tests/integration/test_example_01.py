@@ -73,22 +73,19 @@ def test_stage_addition(tmp_path_2):
     assert node.from_rev(rev="exp2").sum == 150
 
 
-# def test_stage_io(proj_path):
-#     project = ZnTrackProject()
-#     project.name = "Test1"
+def test_stage_io(proj_path):
+    deps = Path("test_example_01.py").resolve()
+    with zntrack.Project() as project:
+        stage_io = StageIO(file=deps)
+    assert stage_io.deps == deps
+    assert stage_io.param == deps
+    project.run(repro=False)
+    # load
+    stage_io.load()
+    assert stage_io.param == deps
+    assert stage_io.deps == deps
+    project.run(repro=True)
 
-#     deps = Path("test_example_01.py").resolve()
+    stage_io.load()
 
-#     stage_io = StageIO(file=deps)
-#     assert stage_io.deps == deps
-#     assert stage_io.param == deps
-#     stage_io.write_graph()
-#     # load
-#     stage_io = StageIO.load()
-#     assert stage_io.param == deps
-#     assert stage_io.deps == deps
-#     project.repro()
-
-#     stage = StageIO.load()
-
-#     assert stage.outs.read_text().startswith('"""')
+    assert stage_io.outs.read_text().startswith('"""')
