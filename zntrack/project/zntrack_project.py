@@ -79,13 +79,20 @@ class _ProjectBase(znflow.DiGraph):
 class Project(_ProjectBase):
     """The ZnTrack Project class."""
 
-    def __init__(self) -> None:
+    def __init__(self, initialize: bool = True) -> None:
         """Initialize the Project.
 
-        Do not allow kwargs.
+        Attributes
+        ----------
+        initialize : bool, default = True
+            If True, initialize a git repository and a dvc repository.
         """
         super().__init__()
+        if initialize:
+            self.initalize()
 
+    def initalize(self):
+        """Initialize the project."""
         try:
             _ = git.Repo()
         except git.exc.InvalidGitRepositoryError:
