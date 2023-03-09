@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import contextlib
+import dataclasses
 import json
 import logging
 import pathlib
@@ -12,7 +13,7 @@ import znflow
 from znflow.graph import _UpdateConnectors
 
 from zntrack.core.node import Node, get_dvc_cmd
-from zntrack.utils import run_dvc_cmd
+from zntrack.utils import capture_run_dvc_cmd, run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
@@ -116,11 +117,14 @@ class Project(_ProjectBase):
         return branch
 
     @contextlib.contextmanager
-    def create_experiment(self, name: str = None, queue: bool = True) -> None:
+    def create_experiment(self, name: str = None, queue: bool = True) -> Experiment:
         """Create a new experiment."""
         # TODO: return an experiment object that allows you to load the results
         # TODO this context manager WILL NOT ADD new nodes to the graph.
-        yield None
+
+        exp = Experiment(name, project=self)
+
+        yield exp
 
         for node_uuid in self.get_sorted_nodes():
             node: Node = self.nodes[node_uuid]["value"]
@@ -131,7 +135,7 @@ class Project(_ProjectBase):
             cmd.append("--queue")
         if name is not None:
             cmd.extend(["--name", name])
-        run_dvc_cmd(cmd)
+        exp.name = capture_run_dvc_cmd(cmd).split("'")[1]
 
     def run_exp(self) -> None:
         """Run all queued experiments."""
@@ -142,6 +146,23 @@ class Project(_ProjectBase):
         """Get the branches in the project."""
         repo = git.Repo()
         return [Branch(project=self, name=branch.name) for branch in repo.branches]
+
+
+@dataclasses.dataclass
+class Experiment:
+    """A DVC Experiment."""
+
+    name: str
+    project: Project
+
+    nodes: dict = dataclasses.field(default_factory=dict, init=False, repr=False)
+
+    def load(self) -> None:
+        """Load the nodes from this experiment."""
+        self.nodes = {
+            name: node.from_rev(name=name, rev=self.name)
+            for name, node in self.project.get_nodes().items()
+        }
 
 
 class Branch(_ProjectBase):
