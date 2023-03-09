@@ -2,10 +2,13 @@
 from __future__ import annotations
 
 import contextlib
+import json
 import logging
+import pathlib
 
 import dvc.cli
 import git
+import yaml
 import znflow
 from znflow.graph import _UpdateConnectors
 
@@ -82,6 +85,10 @@ class Project(_ProjectBase):
             repo = git.Repo.init()
             repo.init()
             dvc.cli.main(["init", "--quiet"])
+            # Create required files:
+            pathlib.Path("zntrack.json").write_text(json.dumps({}))
+            pathlib.Path("dvc.yaml").write_text(yaml.safe_dump({}))
+            pathlib.Path("params.yaml").write_text(yaml.safe_dump({}))
             repo.git.add(A=True)
             repo.index.commit("Project initialized.")
 
@@ -99,8 +106,8 @@ class Project(_ProjectBase):
         yield None
 
         for node_uuid in self.get_sorted_nodes():
-            node = self.nodes[node_uuid]["value"]
-            node.save()
+            node: Node = self.nodes[node_uuid]["value"]
+            node.save(results=False)
 
         cmd = ["exp", "run"]
         if queue:

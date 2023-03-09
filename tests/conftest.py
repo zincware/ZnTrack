@@ -14,6 +14,14 @@ import pytest
 
 
 @pytest.fixture
+def tmp_path_2(tmp_path, request) -> pathlib.Path:
+    """temporary directory with the test file copied to it"""
+    shutil.copy(request.module.__file__, tmp_path)
+    os.chdir(tmp_path)
+    return tmp_path
+
+
+@pytest.fixture
 def proj_path(tmp_path, request) -> pathlib.Path:
     """temporary directory for testing DVC calls
 

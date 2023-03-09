@@ -23,8 +23,6 @@ class Text(Field):
 
     def save(self, instance):
         """Save the field to disk."""
-        if instance.state.loaded:
-            return  # Don't save if the node is loaded from disk
         file_io.update_meta(
             file=pathlib.Path("dvc.yaml"),
             node_name=instance.name,

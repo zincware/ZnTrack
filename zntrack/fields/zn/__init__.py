@@ -86,9 +86,6 @@ class Params(Field):
         instance : Node
             The node instance associated with this field.
         """
-        if instance.state.loaded:
-            return  # Don't save if the node is loaded from disk
-
         file = self.get_affected_files(instance)[0]
 
         try:
