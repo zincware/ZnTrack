@@ -356,7 +356,6 @@ def nodify(
         def wrapper(
             *,
             silent: bool = False,
-            nb_name: str = None,
             no_commit: bool = False,
             external: bool = False,
             always_changed: bool = False,
@@ -376,8 +375,6 @@ def nodify(
             silent: bool
                 If called with no_exec=False this allows to hide the output from the
                 subprocess call.
-            nb_name: str
-                Notebook name when not using config.nb_name (this is not recommended)
             no_commit:
                 dvc parameter
             external:
@@ -412,7 +409,7 @@ def nodify(
             # Jupyter Notebook
             if config.nb_name is not None:
                 module = f"{config.nb_class_path}.{func.__name__}"
-                jupyter_class_to_file(nb_name=nb_name, module_name=func.__name__)
+                jupyter_class_to_file(nb_name=config.nb_name, module_name=func.__name__)
 
             if exec_func:
                 return execute_function_call(func)
@@ -431,7 +428,7 @@ def nodify(
                 node_name=func.__name__,
                 dvc_run_option=dvc_run_option,
                 custom_args=cfg.write_dvc_command(func.__name__),
-                nb_name=nb_name,
+                nb_name=config.nb_name,
                 module=module,
                 func_or_cls=func.__name__,
             )
@@ -445,6 +442,8 @@ def nodify(
 
             cfg.convert_fields_to_dotdict()
             return cfg
+
+        wrapper.is_node = True
 
         return wrapper
 

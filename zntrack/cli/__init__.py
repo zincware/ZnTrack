@@ -41,7 +41,9 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
 
     cls = getattr(module, cls)
 
-    if issubclass(cls, Node):
+    if getattr(cls, "is_node", False):
+        cls(exec_func=True)
+    elif issubclass(cls, Node):
         node: Node = cls.from_rev(name=name)
         if hash_only:
             (node.nwd / "hash").write_text(str(uuid.uuid4))
@@ -49,8 +51,7 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
             node.run()
             node.save(parameter=False)
     else:
-        # @nodify function
-        cls(exec_func=True)
+        raise ValueError(f"Node {node} is not a ZnTrack Node.")
 
 
 @app.command()
