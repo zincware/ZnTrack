@@ -19,7 +19,9 @@ log = logging.getLogger(__name__)
 
 
 class _ProjectBase(znflow.DiGraph):
-    def run(self, eager=False, repro: bool = True, optional: dict = None):
+    def run(
+        self, eager=False, repro: bool = True, optional: dict = None, save: bool = True
+    ):
         """Run the Project Graph.
 
         Parameters
@@ -27,6 +29,9 @@ class _ProjectBase(znflow.DiGraph):
         eager : bool, default = False
             if True, run the nodes in eager mode.
             if False, run the nodes using dvc.
+        save : bool, default = True
+            if using 'eager=True' this will save the results to disk.
+            Otherwise, the results will only be in memory.
         repro : bool, default = True
             if True, run dvc repro after running the nodes.
         optional : dict, default = None
@@ -34,6 +39,8 @@ class _ProjectBase(znflow.DiGraph):
             Use {node_name: {arg_name: arg_value}} to pass arguments to nodes.
             Possible arg_names are e.g. 'always_changed: True'
         """
+        if not save and not eager:
+            raise ValueError("Save can only be false if eager is True")
         if optional is None:
             optional = {}
         for node_uuid in self.get_sorted_nodes():
@@ -43,7 +50,8 @@ class _ProjectBase(znflow.DiGraph):
                 log.info(f"Running node {node}")
                 self._update_node_attributes(node, _UpdateConnectors())
                 node.run()
-                node.save()
+                if save:
+                    node.save()
                 node.state.loaded = True
             else:
                 log.info(f"Adding node {node}")
