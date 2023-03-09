@@ -62,6 +62,12 @@ def test_WriteIO_no_name(tmp_path_2, assert_before_exp):
     assert exp1.nodes["WriteIO"].inputs == "Hello World"
     assert exp1.nodes["WriteIO"].outputs == "Hello World"
 
+    assert exp1["WriteIO"].inputs == "Hello World"
+    assert exp1["WriteIO"].outputs == "Hello World"
+
     exp2.load()
     assert exp2.nodes["WriteIO"].inputs == "Lorem Ipsum"
     assert exp2.nodes["WriteIO"].outputs == "Lorem Ipsum"
+
+    assert exp2["WriteIO"].inputs == "Lorem Ipsum"
+    assert exp2["WriteIO"].outputs == "Lorem Ipsum"
