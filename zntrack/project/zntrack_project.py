@@ -6,7 +6,6 @@ import json
 import logging
 import pathlib
 
-import dvc.cli
 import git
 import yaml
 import znflow
@@ -84,7 +83,7 @@ def _initalize():
         # TODO ASSERT IS EMPTY!
         repo = git.Repo.init()
         repo.init()
-        dvc.cli.main(["init", "--quiet"])
+        run_dvc_cmd(["init", "--quiet"])
         # Create required files:
         pathlib.Path("zntrack.json").write_text(json.dumps({}))
         pathlib.Path("dvc.yaml").write_text(yaml.safe_dump({}))
@@ -132,11 +131,11 @@ class Project(_ProjectBase):
             cmd.append("--queue")
         if name is not None:
             cmd.extend(["--name", name])
-        dvc.cli.main(cmd)
+        run_dvc_cmd(cmd)
 
     def run_exp(self) -> None:
         """Run all queued experiments."""
-        dvc.cli.main(["exp", "run", "--run-all"])
+        run_dvc_cmd(["exp", "run", "--run-all"])
 
     @property
     def branches(self):
@@ -169,7 +168,7 @@ class Branch(_ProjectBase):
         # if len(self.repo.untracked_files) > 0:
         self.repo.git.add(A=True)
         self.repo.index.commit(f"parameters for {name}")
-        dvc.cli.main(["exp", "run", "--name", name, "--queue"])
+        run_dvc_cmd(["exp", "run", "--name", name, "--queue"])
 
         for node_uuid in self.get_sorted_nodes():
             node = self.nodes[node_uuid]["value"]
