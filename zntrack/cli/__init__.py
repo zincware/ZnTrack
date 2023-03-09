@@ -6,7 +6,7 @@ import uuid
 
 import typer
 
-from zntrack import utils
+from zntrack import Node, utils
 
 app = typer.Typer()
 
@@ -42,14 +42,14 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     cls = getattr(module, cls)
 
     try:
-        node = cls.from_rev(name=name)
+        node: Node = cls.from_rev(name=name)
         if hash_only:
             nwd = pathlib.Path("nodes", name)
             nwd.mkdir(parents=True, exist_ok=True)
             (nwd / "hash").write_text(str(uuid.uuid4))
         else:
             node.run()
-            node.save()
+            node.save(parameter=False)
     except AttributeError:
         # @nodify function
         cls(exec_func=True)

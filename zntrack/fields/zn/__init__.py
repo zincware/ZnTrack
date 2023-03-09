@@ -11,7 +11,7 @@ import znflow.utils
 import zninit
 import znjson
 
-from zntrack.fields.field import Field, LazyField
+from zntrack.fields.field import Field, FieldGroup, LazyField
 from zntrack.utils import module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
@@ -66,6 +66,7 @@ class Params(Field):
     """
 
     dvc_option: str = "params"
+    group = FieldGroup.PARAMETER
 
     def get_affected_files(self, instance: "Node") -> list:
         """Get the list of files affected by this field.
@@ -129,6 +130,8 @@ class Params(Field):
 
 class Output(LazyField):
     """A field that is saved to disk."""
+
+    group = FieldGroup.RESULT
 
     def __init__(self, dvc_option: str, **kwargs):
         """Create a new Output field.
@@ -203,6 +206,7 @@ class Plots(LazyField):
     """A field that is saved to disk."""
 
     dvc_option: str = "plots"
+    group = FieldGroup.RESULT
 
     def get_affected_files(self, instance) -> list:
         """Get the path of the file in the node directory."""
@@ -238,6 +242,7 @@ class Dependency(LazyField):
     """A dependency field."""
 
     dvc_option = "deps"
+    group = FieldGroup.PARAMETER
 
     def __init__(self, default=_default):
         """Create a new dependency field.

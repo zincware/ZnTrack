@@ -1,5 +1,6 @@
 """The base class for all fields."""
 import abc
+import enum
 import json
 import logging
 import typing
@@ -14,6 +15,13 @@ if typing.TYPE_CHECKING:
 log = logging.getLogger(__name__)
 
 
+class FieldGroup(enum.Enum):
+    """Characterizes the group of a field."""
+
+    PARAMETER = enum.auto()
+    RESULT = enum.auto()
+
+
 class Field(zninit.Descriptor, abc.ABC):
     """Base class for fields.
 
@@ -26,6 +34,7 @@ class Field(zninit.Descriptor, abc.ABC):
     """
 
     dvc_option: str = None
+    group: FieldGroup = None
 
     @abc.abstractmethod
     def save(self, instance: "Node"):

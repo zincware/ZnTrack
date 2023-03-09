@@ -132,17 +132,25 @@ class Node(zninit.ZnInit, znflow.Node):
             nwd.mkdir(parents=True)
         return nwd
 
-    def save(self) -> None:
+    def save(self, parameter: bool = True, results: bool = True) -> None:
         """Save the node's output to disk."""
         # TODO have an option to save and run dvc commit afterwards.
-        from zntrack.fields.field import Field
+        from zntrack.fields import Field, FieldGroup
 
         # Jupyter Notebook
         if config.nb_name:
             self.convert_notebook(config.nb_name)
 
         for attr in zninit.get_descriptors(Field, self=self):
-            attr.save(self)
+            if attr.group == FieldGroup.PARAMETER and parameter:
+                attr.save(self)
+            if attr.group == FieldGroup.RESULT and results:
+                attr.save(self)
+            if attr.group is None:
+                raise ValueError(
+                    f"Field {attr} has no group. Please assign a group from"
+                    f" '{FieldGroup.__module__}.{FieldGroup.__name__}'."
+                )
 
     def run(self) -> None:
         """Run the node's code."""

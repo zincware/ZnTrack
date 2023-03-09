@@ -4,7 +4,7 @@ import typing
 
 import yaml
 
-from zntrack.fields.field import Field
+from zntrack.fields.field import Field, FieldGroup
 from zntrack.utils import file_io
 
 if typing.TYPE_CHECKING:
@@ -15,6 +15,7 @@ class Text(Field):
     """A metadata field."""
 
     dvc_option: str = None
+    group = FieldGroup.PARAMETER
 
     def get_affected_files(self, instance) -> list:
         """Get the params.yaml file."""

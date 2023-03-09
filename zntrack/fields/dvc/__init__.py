@@ -5,7 +5,7 @@ import typing
 
 import znjson
 
-from zntrack.fields.field import Field
+from zntrack.fields.field import Field, FieldGroup
 from zntrack.utils import node_wd
 
 if typing.TYPE_CHECKING:
@@ -17,6 +17,8 @@ class DVCOption(Field):
 
     The DVCOption field is designed for paths only.
     """
+
+    group = FieldGroup.PARAMETER
 
     def __init__(self, *args, **kwargs):
         """Create a DVCOption field."""
