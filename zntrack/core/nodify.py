@@ -11,7 +11,7 @@ import znflow
 import znjson
 
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import file_io, run_dvc_cmd
+from zntrack.utils import file_io, module_handler, run_dvc_cmd
 from zntrack.utils.config import config
 
 log = logging.getLogger(__name__)
@@ -410,6 +410,8 @@ def nodify(
             if config.nb_name is not None:
                 module = f"{config.nb_class_path}.{func.__name__}"
                 jupyter_class_to_file(nb_name=config.nb_name, module_name=func.__name__)
+            else:
+                module = module_handler(func)
 
             if exec_func:
                 return execute_function_call(func)
