@@ -164,6 +164,10 @@ class Experiment:
             for name, node in self.project.get_nodes().items()
         }
 
+    def __getitem__(self, key) -> Node:
+        """Get the Node from the experiment."""
+        return self.nodes[key]
+
 
 class Branch(_ProjectBase):
     """The ZnTrack Branch class for managing experiments."""
