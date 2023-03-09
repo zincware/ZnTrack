@@ -31,7 +31,8 @@ class Text(Field):
             data={self.name: getattr(instance, self.name)},
         )
 
-    def _get_value_from_file(self, instance: "Node") -> any:
+    def get_data(self, instance: "Node") -> any:
+        """Get the value of the field from the file."""
         dvc_dict = yaml.safe_load(instance.state.get_file_system().read_text("dvc.yaml"))
         return dvc_dict["stages"][instance.name]["meta"].get(self.name, None)
 

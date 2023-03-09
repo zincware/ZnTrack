@@ -48,6 +48,27 @@ class Field(zninit.Descriptor, abc.ABC):
         """
         raise NotImplementedError
 
+    @abc.abstractmethod
+    def get_data(self, instance: "Node") -> any:
+        """Get the value of the field from the file."""
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def get_affected_files(self, instance: "Node") -> list:
+        """Get the files affected by this field.
+
+        Parameters
+        ----------
+        instance : Node
+            The Node instance to get the affected files for.
+
+        Returns
+        -------
+        list
+            The affected files.
+        """
+        raise NotImplementedError
+
     def load(self, instance: "Node", lazy: bool = None):
         """Load the field from disk.
 
@@ -60,7 +81,7 @@ class Field(zninit.Descriptor, abc.ABC):
             This only applies to 'LazyField' classes.
         """
         try:
-            instance.__dict__[self.name] = self._get_value_from_file(instance)
+            instance.__dict__[self.name] = self.get_data(instance)
         except FileNotFoundError:
             # if something was not loaded, we set the loaded state to False
             log.warning(f"Could not load field {self.name} for node {instance.name}.")
@@ -84,22 +105,6 @@ class Field(zninit.Descriptor, abc.ABC):
             for x in self.get_affected_files(instance)
         ]
 
-    @abc.abstractmethod
-    def get_affected_files(self, instance: "Node") -> list:
-        """Get the files affected by this field.
-
-        Parameters
-        ----------
-        instance : Node
-            The Node instance to get the affected files for.
-
-        Returns
-        -------
-        list
-            The affected files.
-        """
-        raise NotImplementedError
-
     def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[str]:
         """Get optional dvc commands that will be executed beside the main dvc command.
 
@@ -116,11 +121,6 @@ class Field(zninit.Descriptor, abc.ABC):
             The optional dvc commands.
         """
         return []
-
-    @abc.abstractmethod
-    def _get_value_from_file(self, instance: "Node") -> any:
-        """Get the value of the field from the file."""
-        raise NotImplementedError
 
     def _write_value_to_config(self, value, instance: "Node", encoder=None):
         """Write the value of this field to the zntrack config file.
@@ -171,7 +171,7 @@ class LazyField(Field):
         lazy : bool, optional
             Whether to load the field lazily, by default 'zntrack.config.lazy'.
         """
-        if lazy in [None, True] and config.lazy:
+        if lazy in {None, True} and config.lazy:
             instance.__dict__[self.name] = LazyOption
         else:
             super().load(instance)

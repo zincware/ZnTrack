@@ -105,7 +105,8 @@ class Params(Field):
         with open(file, "w") as f:
             yaml.safe_dump(params_dict, f, indent=4)
 
-    def _get_value_from_file(self, instance: "Node") -> any:
+    def get_data(self, instance: "Node") -> any:
+        """Get the value of the field from the file."""
         file = self.get_affected_files(instance)[0]
         params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
         value = params_dict[instance.name].get(self.name, None)
@@ -178,7 +179,8 @@ class Output(LazyField):
         file = self.get_affected_files(instance)[0]
         file.write_text(json.dumps(value, cls=znjson.ZnEncoder, indent=4))
 
-    def _get_value_from_file(self, instance: "Node") -> any:
+    def get_data(self, instance: "Node") -> any:
+        """Get the value of the field from the file."""
         file = self.get_affected_files(instance)[0]
         return json.loads(
             instance.state.get_file_system().read_text(file.as_posix()),
@@ -223,7 +225,8 @@ class Plots(LazyField):
         file = self.get_affected_files(instance)[0]
         value.to_csv(file)
 
-    def _get_value_from_file(self, instance: "Node") -> any:
+    def get_data(self, instance: "Node") -> any:
+        """Get the value of the field from the file."""
         file = self.get_affected_files(instance)[0]
         return pd.read_csv(
             instance.state.get_file_system().open(file.as_posix()), index_col=0
@@ -299,7 +302,8 @@ class Dependency(LazyField):
             ),
         )
 
-    def _get_value_from_file(self, instance: "Node") -> any:
+    def get_data(self, instance: "Node") -> any:
+        """Get the value of the field from the file."""
         zntrack_dict = json.loads(
             instance.state.get_file_system().read_text("zntrack.json"),
         )

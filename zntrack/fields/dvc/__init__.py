@@ -70,7 +70,7 @@ class DVCOption(Field):
                 for file in self.get_affected_files(instance)
             ]
 
-    def _get_value_from_file(self, instance: "Node") -> any:
+    def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the configuration file.
 
         Parameters
