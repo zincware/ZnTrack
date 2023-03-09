@@ -166,6 +166,7 @@ class Node(zninit.ZnInit, znflow.Node):
             for attr in zninit.get_descriptors(Field, self=self):
                 attr.load(self)
 
+        # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
 
     @classmethod
@@ -187,10 +188,6 @@ class Node(zninit.ZnInit, znflow.Node):
             #  the `__init__` might do something like self.param = kwargs["param"]
             #  and this would overwrite the loaded value.
             node.__init__()
-
-        # for method in ["post_init", "_post_init_", "__post_init__"]:
-        #     if hasattr(node, method):
-        #         getattr(node, method)()
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
