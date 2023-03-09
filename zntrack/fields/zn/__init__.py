@@ -12,7 +12,7 @@ import zninit
 import znjson
 
 from zntrack.fields.field import Field, FieldGroup, LazyField
-from zntrack.utils import module_handler, update_key_val
+from zntrack.utils import LazyOption, module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -172,6 +172,9 @@ class Output(LazyField):
         except AttributeError:
             return
 
+        if value is LazyOption:
+            return
+
         instance.nwd.mkdir(exist_ok=True, parents=True)
         file = self.get_affected_files(instance)[0]
         file.write_text(json.dumps(value, cls=znjson.ZnEncoder, indent=4))
@@ -216,6 +219,9 @@ class Plots(LazyField):
         try:
             value: pd.DataFrame = getattr(instance, self.name)
         except AttributeError:
+            return
+
+        if value is LazyOption:
             return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
@@ -291,6 +297,9 @@ class Dependency(LazyField):
         except KeyError:
             return
 
+        if value is LazyOption:
+            return
+
         self._write_value_to_config(
             value,
             instance,
@@ -359,6 +368,8 @@ class NodeFiled(Dependency):
     def save(self, instance: "Node"):
         """Save the Node parameters to disk."""
         value = instance.__dict__[self.name]
+        if value is LazyOption:
+            return
         _SaveNodes()(value, name=self.get_node_name(instance))
         super().save(instance)
 

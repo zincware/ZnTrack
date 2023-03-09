@@ -1,3 +1,5 @@
+import pytest
+
 import zntrack
 
 
@@ -9,14 +11,16 @@ class WriteIO(zntrack.Node):
         self.outputs = self.inputs
 
 
-def test_WriteIO(tmp_path_2):
+@pytest.mark.parametrize("assert_before_exp", [True, False])
+def test_WriteIO(tmp_path_2, assert_before_exp):
     """Test the WriteIO node."""
     with zntrack.Project() as project:
         node = WriteIO(inputs="Hello World")
 
     project.run()
     node.load()
-    assert node.outputs == "Hello World"
+    if assert_before_exp:
+        assert node.outputs == "Hello World"
 
     with project.create_experiment(name="exp1"):
         node.inputs = "Hello World"
