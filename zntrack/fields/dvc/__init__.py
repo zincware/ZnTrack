@@ -104,7 +104,12 @@ class DVCOption(Field):
         try:
             value = instance.__dict__[self.name]
         except KeyError:
-            return
+            try:
+                # default value is not stored in __dict__
+                # TODO: not sure if I like this
+                value = getattr(instance, self.name)
+            except AttributeError:
+                return
         self._write_value_to_config(value, instance, encoder=znjson.ZnEncoder)
 
     def __get__(self, instance: "Node", owner=None):

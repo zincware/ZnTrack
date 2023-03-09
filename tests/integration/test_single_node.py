@@ -124,3 +124,25 @@ def test_NonDefaultInit(proj_path):
         """We can not load an __init__ with non-default parameters"""
         assert node.value == 42
     assert node.outs == 10
+
+
+class NoOutsWritten(zntrack.Node):
+    params = zntrack.zn.params()
+    outs = zntrack.zn.outs()
+
+    def run(self) -> None:
+        pass
+
+
+# @pytest.mark.parametrize("eager", [True, False])
+# def test_NoOutsWritten(proj_path, eager):
+#     with zntrack.Project() as project:
+#         node = NoOutsWritten(params=10)
+#     project.run(eager=eager)
+#     if eager:
+#         node.save()
+#     else:
+#         node.load()
+
+#     node = NoOutsWritten.from_rev()
+#     assert node.outs is None
