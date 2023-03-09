@@ -6,6 +6,11 @@ This includes decorators to time method runtimes.
 import functools
 from time import time
 
+import numpy as np
+import zninit
+
+from zntrack.fields import Field
+
 
 def timeit(field: str):
     """Decorator to time a function.
@@ -24,15 +29,22 @@ def timeit(field: str):
             result = func(self, *args, **kwargs)
             runtime = time() - start_time
 
+            if field not in [x.name for x in zninit.get_descriptors(Field, self=self)]:
+                raise AttributeError(
+                    f"Cannot time {func.__name__} because {field} is not an attribute of"
+                    f" {self.__class__.__name__}."
+                )
             field_data = getattr(self, field, {})
             if not isinstance(field_data, dict):
                 # TODO: hotfix, field_data is LazyOption here!
                 field_data = {}
             if func.__name__ in field_data:
                 value = field_data[func.__name__]
-                if not isinstance(value, list):
-                    value = [value]
-                value.append(runtime)
+                if not isinstance(value, dict):
+                    value = {"values": [value], "mean": value, "std": 0.0}
+                value["values"].append(runtime)
+                value["mean"] = np.mean(value["values"]).item()
+                value["std"] = np.std(value["values"]).item()
                 field_data[func.__name__] = value
             else:
                 field_data[func.__name__] = runtime
