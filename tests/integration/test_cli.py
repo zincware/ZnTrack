@@ -4,7 +4,7 @@ import pathlib
 import pytest
 from typer.testing import CliRunner
 
-from zntrack import Node, zn  # NodeConfig, nodify,
+from zntrack import Node, NodeConfig, nodify, zn
 from zntrack.cli import app
 
 
@@ -74,11 +74,11 @@ class InputsToOutputs(Node):
         self.outputs = self.inputs
 
 
-# @nodify(outs="test.txt", params={"text": "Lorem Ipsum"})
-# def example_func(cfg: NodeConfig) -> NodeConfig:
-#     out_file = pathlib.Path(cfg.outs)
-#     out_file.write_text(cfg.params.text)
-#     return cfg
+@nodify(outs="test.txt", params={"text": "Lorem Ipsum"})
+def example_func(cfg: NodeConfig) -> NodeConfig:
+    out_file = pathlib.Path(cfg.outs)
+    out_file.write_text(cfg.params.text)
+    return cfg
 
 
 def test_run(proj_path, runner):
@@ -91,11 +91,11 @@ def test_run(proj_path, runner):
     assert node.outputs == 15
 
 
-# def test_run_nodify(proj_path, runner):
-#     example_func()
-#     result = runner.invoke(app, ["run", "test_cli.example_func"])
-#     assert result.exit_code == 0
-#     assert pathlib.Path("test.txt").read_text() == "Lorem Ipsum"
+def test_run_nodify(proj_path, runner):
+    example_func()
+    result = runner.invoke(app, ["run", "test_cli.example_func"])
+    assert result.exit_code == 0
+    assert pathlib.Path("test.txt").read_text() == "Lorem Ipsum"
 
 
 def test_run_w_name(proj_path, runner):
