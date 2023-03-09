@@ -30,6 +30,7 @@ class NodeStatus:
     loaded : bool
         Whether the attributes of the Node are loaded from disk.
         If a new Node is created, this will be False.
+        If some attributes could not be loaded, this will be False.
     results : NodeStatusResults
         The status of the node results. E.g. was the computation successful.
     origin : str, default = None
@@ -85,6 +86,12 @@ class Node(zninit.ZnInit, znflow.Node):
 
     name: str = _NameDescriptor(None)
     _name_ = None
+
+    def _post_load_(self) -> None:
+        """Post load hook.
+
+        This is called after the 'self.load()' is called.
+        """
 
     @classmethod
     def convert_notebook(cls, nb_name: str = None):
@@ -145,23 +152,18 @@ class Node(zninit.ZnInit, znflow.Node):
         from zntrack.fields.field import Field
 
         kwargs = {} if lazy is None else {"lazy": lazy}
+        self.state.loaded = True  # we assume loading will be successful.
         with config.updated_config(**kwargs):
             # TODO: it would be much nicer not to use a global config object here.
             for attr in zninit.get_descriptors(Field, self=self):
                 attr.load(self)
 
-        self.state.loaded = True
+        self._post_load_()
 
     @classmethod
     def from_rev(cls, name=None, origin=None, rev=None, lazy: bool = None) -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
-        with contextlib.suppress(TypeError):
-            # This happens if the __init__ method has non-default parameter.
-            # In this case, we just ignore it.
-            # TODO: raise a warning here.
-            cls.__init__(node)
-
         node.name = name
         node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
         node_identifier = NodeIdentifier(
@@ -169,18 +171,22 @@ class Node(zninit.ZnInit, znflow.Node):
         )
         log.debug(f"Creating {node_identifier}")
 
+        with contextlib.suppress(TypeError):
+            # This happens if the __init__ method has non-default parameter.
+            # In this case, we just ignore it. This can e.g. happen
+            #  if the init is auto-generated.
+            # We call '__init__' before loading, because
+            #  the `__init__` might do something like self.param = kwargs["param"]
+            #  and this would overwrite the loaded value.
+            node.__init__()
+
+        # for method in ["post_init", "_post_init_", "__post_init__"]:
+        #     if hasattr(node, method):
+        #         getattr(node, method)()
+
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
             node.load()
-        # TODO How to handle init / post_init with .load and .from_rev properly?
-        with contextlib.suppress(AttributeError):
-            node.post_init()
-
-        with contextlib.suppress(AttributeError):
-            node._post_init_()
-
-        with contextlib.suppress(AttributeError):
-            node.__post_init__()
 
         return node
 

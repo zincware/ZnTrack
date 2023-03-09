@@ -65,21 +65,39 @@ class NodeWithPostInit(zntrack.Node):
     outs = zntrack.zn.outs()
 
     def _post_init_(self):
-        _ = self.params
+        # _ = self.params
+        # the value is not loaded in the _post_init_
         self.value = 42
 
     def run(self) -> None:
         self.outs = self.params
 
 
-@pytest.mark.parametrize("cls", [NodeWithInit, NodeWithPostInit])
-def test_NodeWithInit(proj_path, cls):
+@pytest.mark.parametrize("eager", [True, False])
+def test_NodeWithInit(proj_path, eager):
     with zntrack.Project() as project:
-        node = cls(params=10)
-    project.run()
+        node = NodeWithInit(params=10)
 
-    node = cls.from_rev()
+    project.run(eager=eager)
+    if eager:
+        node.save()
+    node = NodeWithInit.from_rev()
     assert node.value == 42
+    assert node.outs == 10
+
+
+@pytest.mark.parametrize("eager", [True, False])
+def test_NodeWithPostInit(proj_path, eager):
+    with zntrack.Project() as project:
+        node = NodeWithPostInit(params=10)
+
+    project.run(eager=eager)
+    if eager:
+        node.save()
+    node = NodeWithPostInit.from_rev()
+    with pytest.raises(AttributeError):
+        # _post_init_ is not called when loading from rev
+        assert node.value == 42
     assert node.outs == 10
 
 

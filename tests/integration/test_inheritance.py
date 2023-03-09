@@ -46,15 +46,15 @@ class WriteDataParentInitWithInit(InOutsWInit):
 
 
 @pytest.mark.parametrize(
-    "MyNode",
+    "cls",
     (WriteData, WriteDataWithInit, WriteDataParentInit, WriteDataParentInitWithInit),
 )
-def test_simple_inheritance(proj_path, MyNode):
-    node = MyNode(inputs="HelloWorld")
+def test_simple_inheritance(proj_path, cls):
+    node = cls(inputs="HelloWorld")
     node.write_graph(run=True)
     node.load()
     assert node.outputs == "HelloWorld"
-    assert MyNode.from_rev().outputs == "HelloWorld"
+    assert cls.from_rev().outputs == "HelloWorld"
 
 
 class WriteCustomData(InOuts):

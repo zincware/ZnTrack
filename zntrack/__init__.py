@@ -12,4 +12,14 @@ from zntrack.utils.node_wd import nwd
 
 __version__ = importlib.metadata.version("zntrack")
 
-__all__ = ["Node", "dvc", "zn", "Project", "nwd", "meta", "config", "Field", "LazyField"]
+__all__ = [
+    "Node",
+    "dvc",
+    "zn",
+    "Project",
+    "nwd",
+    "meta",
+    "config",
+    "Field",
+    "LazyField",
+]

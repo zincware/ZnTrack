@@ -1,14 +1,17 @@
 """The base class for all fields."""
 import abc
 import json
+import logging
 import typing
 
 import zninit
 
-from zntrack.utils import LazyOption, NodeStatusResults, config
+from zntrack.utils import LazyOption, config
 
 if typing.TYPE_CHECKING:
     from zntrack.core.node import Node
+
+log = logging.getLogger(__name__)
 
 
 class Field(zninit.Descriptor, abc.ABC):
@@ -49,8 +52,9 @@ class Field(zninit.Descriptor, abc.ABC):
         try:
             instance.__dict__[self.name] = self._get_value_from_file(instance)
         except FileNotFoundError:
-            # TODO write tests for raises FileNotFoundError with config.lazy = False!
-            instance.state.results = NodeStatusResults.UNKNOWN
+            # if something was not loaded, we set the loaded state to False
+            log.warning(f"Could not load field {self.name} for node {instance.name}.")
+            instance.state.loaded = False
 
     @abc.abstractmethod
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
