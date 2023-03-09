@@ -76,6 +76,23 @@ class _ProjectBase(znflow.DiGraph):
         return nodes
 
 
+def _initalize():
+    """Initialize the project."""
+    try:
+        _ = git.Repo()
+    except git.exc.InvalidGitRepositoryError:
+        # TODO ASSERT IS EMPTY!
+        repo = git.Repo.init()
+        repo.init()
+        dvc.cli.main(["init", "--quiet"])
+        # Create required files:
+        pathlib.Path("zntrack.json").write_text(json.dumps({}))
+        pathlib.Path("dvc.yaml").write_text(yaml.safe_dump({}))
+        pathlib.Path("params.yaml").write_text(yaml.safe_dump({}))
+        repo.git.add(A=True)
+        repo.index.commit("Project initialized.")
+
+
 class Project(_ProjectBase):
     """The ZnTrack Project class."""
 
@@ -87,25 +104,11 @@ class Project(_ProjectBase):
         initialize : bool, default = True
             If True, initialize a git repository and a dvc repository.
         """
+        # TODO maybe it is not a good idea to base everything on the DiGraph class.
+        #  It seems to call some class methods
         super().__init__()
         if initialize:
-            self.initalize()
-
-    def initalize(self):
-        """Initialize the project."""
-        try:
-            _ = git.Repo()
-        except git.exc.InvalidGitRepositoryError:
-            # TODO ASSERT IS EMPTY!
-            repo = git.Repo.init()
-            repo.init()
-            dvc.cli.main(["init", "--quiet"])
-            # Create required files:
-            pathlib.Path("zntrack.json").write_text(json.dumps({}))
-            pathlib.Path("dvc.yaml").write_text(yaml.safe_dump({}))
-            pathlib.Path("params.yaml").write_text(yaml.safe_dump({}))
-            repo.git.add(A=True)
-            repo.index.commit("Project initialized.")
+            _initalize()
 
     def create_branch(self, name: str) -> "Branch":
         """Create a branch in the project."""
