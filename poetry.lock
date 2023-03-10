@@ -5213,23 +5213,19 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 
 [[package]]
 name = "znflow"
-version = "0.1.2"
+version = "0.1.3"
 description = ""
 category = "main"
 optional = false
-python-versions = "^3.8"
-files = []
-develop = false
+python-versions = ">=3.8,<4.0"
+files = [
+    {file = "znflow-0.1.3-py3-none-any.whl", hash = "sha256:96c5085fdd7935900b8beb69fba8c176da596dfaf8d150c47297011bd85ab00e"},
+    {file = "znflow-0.1.3.tar.gz", hash = "sha256:9ec55911ae6155ef995c458da31cf68517ceb5cf72d63f679947109180e0131a"},
+]
 
 [package.dependencies]
-matplotlib = "^3.6.3"
-networkx = "^3.0"
-
-[package.source]
-type = "git"
-url = "https://github.com/zincware/znflow"
-reference = "allow_non_graph"
-resolved_reference = "fda54069e332a1304bf804f31a71eb324e8d0e14"
+matplotlib = ">=3.6.3,<4.0.0"
+networkx = ">=3.0,<4.0"
 
 [[package]]
 name = "zninit"
@@ -5261,4 +5257,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "8ebef95f6e6a51eccf2cd27ece7d81b3b9da2f6c09d3f42c1704bb11142b5603"
+content-hash = "0be5d854cb07ea9a510e42e9f26e9effaf7395347d56d9296d2dfb0daa1a88d7"
