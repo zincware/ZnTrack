@@ -17,7 +17,7 @@ class Text(Field):
     dvc_option: str = None
     group = FieldGroup.PARAMETER
 
-    def get_affected_files(self, instance) -> list:
+    def get_files(self, instance) -> list:
         """Get the params.yaml file."""
         return []
 

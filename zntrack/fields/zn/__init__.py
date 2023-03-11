@@ -68,7 +68,7 @@ class Params(Field):
     dvc_option: str = "params"
     group = FieldGroup.PARAMETER
 
-    def get_affected_files(self, instance: "Node") -> list:
+    def get_files(self, instance: "Node") -> list:
         """Get the list of files affected by this field.
 
         Returns
@@ -86,7 +86,7 @@ class Params(Field):
         instance : Node
             The node instance associated with this field.
         """
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
 
         try:
             params_dict = yaml.safe_load(pathlib.Path(file).read_text())
@@ -104,7 +104,7 @@ class Params(Field):
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
         value = params_dict[instance.name].get(self.name, None)
         return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
@@ -122,7 +122,7 @@ class Params(Field):
         list
             A list of tuples containing the DVC option and the file path.
         """
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         return [(f"--{self.dvc_option}", f"{file}:{instance.name}")]
 
 
@@ -144,7 +144,7 @@ class Output(LazyField):
         self.dvc_option = dvc_option
         super().__init__(**kwargs)
 
-    def get_affected_files(self, instance) -> list:
+    def get_files(self, instance) -> list:
         """Get the path of the file in the node directory.
 
         Parameters
@@ -176,12 +176,12 @@ class Output(LazyField):
             return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         file.write_text(json.dumps(value, cls=znjson.ZnEncoder, indent=4))
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         return json.loads(
             instance.state.get_file_system().read_text(file.as_posix()),
             cls=znjson.ZnDecoder,
@@ -200,7 +200,7 @@ class Output(LazyField):
         list
             A list containing the DVC command for this field.
         """
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         return [(f"--{self.dvc_option}", file.as_posix())]
 
 
@@ -210,7 +210,7 @@ class Plots(LazyField):
     dvc_option: str = "plots"
     group = FieldGroup.RESULT
 
-    def get_affected_files(self, instance) -> list:
+    def get_files(self, instance) -> list:
         """Get the path of the file in the node directory."""
         return [instance.nwd / f"{self.name}.csv"]
 
@@ -225,19 +225,19 @@ class Plots(LazyField):
             return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         value.to_csv(file)
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         return pd.read_csv(
             instance.state.get_file_system().open(file.as_posix()), index_col=0
         )
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
-        file = self.get_affected_files(instance)[0]
+        file = self.get_files(instance)[0]
         return [(f"--{self.dvc_option}", file.as_posix())]
 
 
@@ -267,7 +267,7 @@ class Dependency(LazyField):
                 f"and not {default}."
             )
 
-    def get_affected_files(self, instance) -> list:
+    def get_files(self, instance) -> list:
         """Get the affected files of the respective Nodes."""
         files = []
 
@@ -286,7 +286,7 @@ class Dependency(LazyField):
                     # We do not want to depend on parameter files or
                     # recursively on dependencies.
                     continue
-                files.extend(field.get_affected_files(node))
+                files.extend(field.get_files(node))
                 log.debug(f"Found field {field} and extended files to {files}")
         return files
 
@@ -331,7 +331,7 @@ class Dependency(LazyField):
         """Get the dvc command for this field."""
         return [
             (f"--{self.dvc_option}", pathlib.Path(file).as_posix())
-            for file in self.get_affected_files(instance)
+            for file in self.get_files(instance)
         ]
 
 
@@ -390,7 +390,7 @@ class NodeFiled(Dependency):
             f"zntrack run {module}.{node.__class__.__name__} --name {name} --hash-only",
         ]
 
-    def get_affected_files(self, instance: "Node") -> list:
+    def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         name = self.get_node_name(instance)
         return [pathlib.Path(f"nodes/{name}/hash")]
