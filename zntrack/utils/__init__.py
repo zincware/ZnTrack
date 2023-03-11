@@ -140,8 +140,8 @@ def update_key_val(values, instance):
         for key, val in values.items():
             if key == "rev" and val is None:
                 values[key] = instance.state.rev
-            if key == "origin" and val is None:
-                values[key] = instance.state.origin
+            if key == "remote" and val is None:
+                values[key] = instance.state.remote
             if isinstance(val, dict):
                 update_key_val(val, instance)
         return values
