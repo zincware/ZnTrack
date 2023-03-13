@@ -129,10 +129,10 @@ def capture_run_dvc_cmd(script) -> str:
 
 
 def update_key_val(values, instance):
-    """Update the keys of the dictionary to the current state of the node.
+    """Update the keys {rev, remote} based on the instance state.
 
-    If the node's dependencies are the default values,
-    they will be set to the current node.
+    If the value of keys is None, the value is updated based on the instance
+    state. Otherwise, it is assumed the Node depends on a specific rev or remote.
     """
     if isinstance(values, (list, tuple)):
         return [update_key_val(v, instance) for v in values]
@@ -140,9 +140,9 @@ def update_key_val(values, instance):
         for key, val in values.items():
             if key == "rev" and val is None:
                 values[key] = instance.state.rev
-            if key == "remote" and val is None:
+            elif key == "remote" and val is None:
                 values[key] = instance.state.remote
-            if isinstance(val, dict):
+            elif isinstance(val, dict):
                 update_key_val(val, instance)
         return values
 
