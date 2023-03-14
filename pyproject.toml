@@ -16,7 +16,7 @@ znjson = "^0.2.2"
 dot4dict = "^0.1.1"
 tqdm = "^4.64.0"
 pandas = "^1.4.3"
-zninit = ">=0.1.6"
+zninit = "^0.1.9"
 typer = "^0.7.0"
 znflow = "^0.1.3"
 

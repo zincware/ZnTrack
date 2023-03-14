@@ -146,3 +146,13 @@ class NoOutsWritten(zntrack.Node):
 
 #     node = NoOutsWritten.from_rev()
 #     assert node.outs is None
+
+
+def test_outs_in_init(proj_path):
+    with pytest.raises(TypeError):
+        # outs can not be set
+        _ = AddNumbers(a=1, b=2, outs=3)
+    with zntrack.Project() as project:
+        with pytest.raises(TypeError):
+            # outs can not be set
+            _ = AddNumbers(a=1, b=2, c=3)  # c is an output
