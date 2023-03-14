@@ -33,7 +33,7 @@ class NodeStatus:
         If some attributes could not be loaded, this will be False.
     results : NodeStatusResults
         The status of the node results. E.g. was the computation successful.
-    origin : str, default = None
+    remote : str, default = None
         Where the Node has its data from. This could be the current "workspace" or
         a "remote" location, such as a git repository.
     rev : str, default = None
@@ -42,13 +42,13 @@ class NodeStatus:
 
     loaded: bool
     results: "NodeStatusResults"
-    origin: str = None
+    remote: str = None
     rev: str = None
 
     def get_file_system(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
         return dvc.api.DVCFileSystem(
-            url=self.origin,
+            url=self.remote,
             rev=self.rev,
         )
 
@@ -170,13 +170,13 @@ class Node(zninit.ZnInit, znflow.Node):
         self._post_load_()
 
     @classmethod
-    def from_rev(cls, name=None, origin=None, rev=None, lazy: bool = None) -> Node:
+    def from_rev(cls, name=None, remote=None, rev=None, lazy: bool = None) -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
         node.name = name
-        node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, origin, rev)
+        node._state = NodeStatus(False, NodeStatusResults.UNKNOWN, remote, rev)
         node_identifier = NodeIdentifier(
-            module_handler(cls), cls.__name__, node.name, origin, rev
+            module_handler(cls), cls.__name__, node.name, remote, rev
         )
         log.debug(f"Creating {node_identifier}")
 
@@ -258,7 +258,7 @@ class NodeIdentifier:
     module: str
     cls: str
     name: str
-    origin: str
+    remote: str
     rev: str
 
     @classmethod
@@ -268,7 +268,7 @@ class NodeIdentifier:
             module=module_handler(node),
             cls=node.__class__.__name__,
             name=node.name,
-            origin=node.state.origin,
+            remote=node.state.remote,
             rev=node.state.rev,
         )
 
@@ -276,7 +276,7 @@ class NodeIdentifier:
         """Get the node from the identifier."""
         module = importlib.import_module(self.module)
         cls = getattr(module, self.cls)
-        return cls.from_rev(name=self.name, origin=self.origin, rev=self.rev)
+        return cls.from_rev(name=self.name, remote=self.remote, rev=self.rev)
 
 
 class NodeConverter(znjson.ConverterBase):
