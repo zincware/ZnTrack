@@ -1,10 +1,12 @@
 """The ZnTrack CLI."""
 import importlib.metadata
+import os
 import pathlib
 import sys
 import uuid
 
 import typer
+import yaml
 
 from zntrack import Node, utils
 
@@ -34,6 +36,12 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
 
     Use as 'zntrack run module.Node --name node_name'.
     """
+    env_file = pathlib.Path("env.yaml")
+    if env_file.exists():
+        env = yaml.safe_load(env_file.read_text())
+        for key, value in env.get(name, {}).items():
+            os.environ[key] = value
+
     sys.path.append(pathlib.Path.cwd().as_posix())
 
     package_and_module, cls = node.rsplit(".", 1)
