@@ -45,6 +45,11 @@ class Environment(Field):
     dvc_option: str = None
     group = FieldGroup.PARAMETER
 
+    def __init__(self, *args, is_parameter: bool = False, **kwargs):
+        """Initialize the field."""
+        self.is_parameter = is_parameter
+        super().__init__(*args, **kwargs)
+
     def get_affected_files(self, instance) -> list:
         """There are no affect files."""
         return []
@@ -72,4 +77,6 @@ class Environment(Field):
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
+        if self.is_parameter:
+            return [("--params", f"env.yaml:{instance.name}.{self.name}")]
         return []

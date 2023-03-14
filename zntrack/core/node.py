@@ -113,6 +113,7 @@ class Node(zninit.ZnInit, znflow.Node):
             fields.zn.Params,
             fields.zn.Dependency,
             fields.meta.Text,
+            fields.meta.Environment,
             fields.dvc.DVCOption,
             _NameDescriptor,
         ]

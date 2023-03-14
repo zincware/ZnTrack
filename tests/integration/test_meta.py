@@ -15,10 +15,18 @@ class NodeWithMeta(zntrack.Node):
 class NodeWithEnv(zntrack.Node):
     OMP_NUM_THREADS = zntrack.meta.Environment("1")
 
+    result = zntrack.zn.outs()
+
     def run(self):
         import os
 
         assert os.environ["OMP_NUM_THREADS"] == self.OMP_NUM_THREADS
+
+        self.result = os.environ["OMP_NUM_THREADS"]
+
+
+class NodeWithEnvParam(NodeWithEnv):
+    OMP_NUM_THREADS = zntrack.meta.Environment("1", is_parameter=True)
 
 
 def test_NodeWithMeta(proj_path):
@@ -62,7 +70,24 @@ def test_CombinedNodeWithMeta(proj_path):
     assert CombinedNodeWithMeta.from_rev().output == "Hello there"
 
 
-def test_NodeWithEnv(proj_path):
+@pytest.mark.parametrize("cls", [NodeWithEnv, NodeWithEnvParam])
+def test_NodeWithEnv(proj_path, cls):
     with zntrack.Project() as proj:
-        NodeWithEnv()  # the actual test is inside the run method.
+        node = cls()  # the actual test is inside the run method.
     proj.run()
+
+    # check that the env variable is set correctly
+    node.load()
+    assert node.result == "1"
+
+    with proj:
+        node = cls(OMP_NUM_THREADS="2")  # the actual test is inside the run method.
+    proj.run()
+
+    node.load()
+    if cls == NodeWithEnvParam:
+        # Parameter will cause rerun and the result is changed
+        assert node.result == "2"
+    else:
+        # env is not a parameter and will not cause rerun
+        assert node.result == "1"
