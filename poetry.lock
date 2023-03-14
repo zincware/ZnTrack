@@ -5229,14 +5229,14 @@ networkx = ">=3.0,<4.0"
 
 [[package]]
 name = "zninit"
-version = "0.1.8"
+version = "0.1.9"
 description = "Descriptor based dataclass implementation"
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "zninit-0.1.8-py3-none-any.whl", hash = "sha256:49e0529062658c4f4b3fba250cb69b0bf5b778e0d7b925c2a39fdb3e70be0122"},
-    {file = "zninit-0.1.8.tar.gz", hash = "sha256:5301669afe52538a6c03459f4d367f23ab46db7f256cbc9582cf60133b76a609"},
+    {file = "zninit-0.1.9-py3-none-any.whl", hash = "sha256:b10a96c0ed54f67c666b20ccd72958398c68e6347c8f7bd726b36b45d2a6de44"},
+    {file = "zninit-0.1.9.tar.gz", hash = "sha256:18a1f6da53ebd888e39fb2a4105e595cb4bc0f100b3e5b30f1d8b01c14254de8"},
 ]
 
 [package.extras]
@@ -5257,4 +5257,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "0be5d854cb07ea9a510e42e9f26e9effaf7395347d56d9296d2dfb0daa1a88d7"
+content-hash = "11e407c7611b42358c4ebcc75fc12642c34dd60e8c7923dc577a584d8475b239"
