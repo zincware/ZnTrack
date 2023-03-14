@@ -46,7 +46,7 @@ class Environment(Field):
     group = FieldGroup.PARAMETER
 
     def get_affected_files(self, instance) -> list:
-        """No affect files"""
+        """There are no affect files."""
         return []
 
     def save(self, instance):
