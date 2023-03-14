@@ -12,6 +12,15 @@ class NodeWithMeta(zntrack.Node):
     title = zntrack.meta.Text("Test Node")
 
 
+class NodeWithEnv(zntrack.Node):
+    OMP_NUM_THREADS = zntrack.meta.Environment("1")
+
+    def run(self):
+        import os
+
+        assert os.environ["OMP_NUM_THREADS"] == self.OMP_NUM_THREADS
+
+
 def test_NodeWithMeta(proj_path):
     NodeWithMeta().write_graph()
 
@@ -51,3 +60,9 @@ def test_CombinedNodeWithMeta(proj_path):
     zntrack.utils.run_dvc_cmd(["repro", "-f"])
     # Forcing rerun should use the updated meta keyword.
     assert CombinedNodeWithMeta.from_rev().output == "Hello there"
+
+
+def test_NodeWithEnv(proj_path):
+    with zntrack.Project() as proj:
+        NodeWithEnv()  # the actual test is inside the run method.
+    proj.run()
