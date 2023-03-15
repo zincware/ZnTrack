@@ -54,7 +54,7 @@ class Field(zninit.Descriptor, abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def get_affected_files(self, instance: "Node") -> list:
+    def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field.
 
         Parameters
@@ -102,7 +102,7 @@ class Field(zninit.Descriptor, abc.ABC):
         """
         return [
             (f"--{self.dvc_option}", pathlib.Path(x).as_posix())
-            for x in self.get_affected_files(instance)
+            for x in self.get_files(instance)
         ]
 
     def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[str]:

@@ -25,7 +25,7 @@ class DVCOption(Field):
         self.dvc_option = kwargs.pop("dvc_option")
         super().__init__(*args, **kwargs)
 
-    def get_affected_files(self, instance: "Node") -> list:
+    def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field.
 
         Parameters
@@ -61,14 +61,10 @@ class DVCOption(Field):
         """
         if self.dvc_option == "params":
             return [
-                (f"--{self.dvc_option}", f"{file}:")
-                for file in self.get_affected_files(instance)
+                (f"--{self.dvc_option}", f"{file}:") for file in self.get_files(instance)
             ]
         else:
-            return [
-                (f"--{self.dvc_option}", file)
-                for file in self.get_affected_files(instance)
-            ]
+            return [(f"--{self.dvc_option}", file) for file in self.get_files(instance)]
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the configuration file.

@@ -17,7 +17,7 @@ class Text(Field):
     dvc_option: str = None
     group = FieldGroup.PARAMETER
 
-    def get_affected_files(self, instance) -> list:
+    def get_files(self, instance) -> list:
         """Get the params.yaml file."""
         return []
 
@@ -50,7 +50,7 @@ class Environment(Field):
         self.is_parameter = is_parameter
         super().__init__(*args, **kwargs)
 
-    def get_affected_files(self, instance) -> list:
+    def get_files(self, instance) -> list:
         """There are no affect files."""
         return []
 
