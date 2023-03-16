@@ -1,3 +1,4 @@
+.vscode/
 tmp/
 /tests/basic/.git
 /docs/build
@@ -12,3 +13,4 @@ venv
 __pycache__/
 .pymon
 .ipynb_checkpoints
+_examples/

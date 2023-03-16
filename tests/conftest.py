@@ -8,9 +8,17 @@ import pathlib
 import shutil
 import subprocess
 
+import dvc.cli
+import git
 import pytest
 
-from zntrack.utils.utils import run_dvc_cmd
+
+@pytest.fixture
+def tmp_path_2(tmp_path, request) -> pathlib.Path:
+    """temporary directory with the test file copied to it"""
+    shutil.copy(request.module.__file__, tmp_path)
+    os.chdir(tmp_path)
+    return tmp_path
 
 
 @pytest.fixture
@@ -29,10 +37,27 @@ def proj_path(tmp_path, request) -> pathlib.Path:
     """
     shutil.copy(request.module.__file__, tmp_path)
     os.chdir(tmp_path)
-    subprocess.check_call(["git", "init"])
-    run_dvc_cmd(["init"])
+    git.Repo.init()
+    dvc.cli.main(["init"])
 
-    subprocess.check_call(["git", "add", "."])
-    subprocess.check_call(["git", "commit", "-m", "init"])
+    return tmp_path
 
+
+@pytest.fixture
+def empty_path(tmp_path, request) -> pathlib.Path:
+    """Create an empty directory at the given path.
+
+    Parameters
+    ----------
+    tmp_path
+        The path to the directory to create.
+
+    Returns
+    -------
+    pathlib.Path
+        The path to the created directory.
+
+    """
+    shutil.copy(request.module.__file__, tmp_path)
+    os.chdir(tmp_path)
     return tmp_path

@@ -1,11 +1,14 @@
 """The ZnTrack CLI."""
 import importlib.metadata
+import os
 import pathlib
 import sys
+import uuid
 
 import typer
+import yaml
 
-from zntrack import utils
+from zntrack import Node, utils
 
 app = typer.Typer()
 
@@ -33,6 +36,12 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
 
     Use as 'zntrack run module.Node --name node_name'.
     """
+    env_file = pathlib.Path("env.yaml")
+    if env_file.exists():
+        env = yaml.safe_load(env_file.read_text())
+        for key, value in env.get(name, {}).items():
+            os.environ[key] = value
+
     sys.path.append(pathlib.Path.cwd().as_posix())
 
     package_and_module, cls = node.rsplit(".", 1)
@@ -40,15 +49,17 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
 
     cls = getattr(module, cls)
 
-    try:
-        node = cls.load(name=name)
-        if hash_only:
-            node.save(hash_only=True)
-        else:
-            node.run_and_save()
-    except AttributeError:
-        # @nodify function
+    if getattr(cls, "is_node", False):
         cls(exec_func=True)
+    elif issubclass(cls, Node):
+        node: Node = cls.from_rev(name=name)
+        if hash_only:
+            (node.nwd / "hash").write_text(str(uuid.uuid4))
+        else:
+            node.run()
+            node.save(parameter=False)
+    else:
+        raise ValueError(f"Node {node} is not a ZnTrack Node.")
 
 
 @app.command()

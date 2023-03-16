@@ -1,4 +1,4 @@
 """Providing a project class that can run experiments."""
-from zntrack.project.zntrack_project import ZnTrackProject
+from zntrack.project.zntrack_project import Project
 
-__all__ = ["ZnTrackProject"]
+__all__ = ["Project"]
