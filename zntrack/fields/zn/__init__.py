@@ -413,7 +413,7 @@ def outs() -> Output:
 
 def metrics() -> Output:
     """Create a metrics output field."""
-    return Output(dvc_option="metrics")
+    return Output(dvc_option="metrics-no-cache")
 
 
 def plots(*args, **kwargs) -> Plots:
