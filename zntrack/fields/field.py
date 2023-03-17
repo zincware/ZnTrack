@@ -105,7 +105,7 @@ class Field(zninit.Descriptor, abc.ABC):
             for x in self.get_files(instance)
         ]
 
-    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[str]:
+    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[typing.List[str]]:
         """Get optional dvc commands that will be executed beside the main dvc command.
 
         This could be 'plots modify ...' or 'stage add --name node_helper'
