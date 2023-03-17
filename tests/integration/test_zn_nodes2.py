@@ -80,9 +80,29 @@ def test_ExampleNodeLst(proj_path, eager):
 
     if not eager:
         # Check new instance also works
+        nodex = node.from_rev()
+        assert nodex.params[0].param1 == 1
+        assert nodex.params[1].param1 == 10
+        assert nodex.outs == 11
+        assert nodex.params[0].name == "ExampleNodeLst_params_0"
+        assert nodex.params[1].name == "ExampleNodeLst_params_1"
+
+    parameter_1.param1 = 2  # Change parameter
+    assert isinstance(parameter_1, NodeViaParams)
+    with project:
+        # #     # node = ExampleNodeLst(params=[parameter_1, parameter_2])
+        node.params = [parameter_1, parameter_2]
+    project.run(eager=eager)
+
+    if not eager:
+        node.load()
+    assert node.params[0].param1 == 2
+    assert node.params[1].param1 == 10
+    assert node.outs == 12
+
+    if not eager:
+        # Check new instance also works
         node = node.from_rev()
-        assert node.params[0].param1 == 1
+        assert node.params[0].param1 == 2
         assert node.params[1].param1 == 10
-        assert node.outs == 11
-        assert node.params[0].name == "ExampleNodeLst_params_0"
-        assert node.params[1].name == "ExampleNodeLst_params_1"
+        assert node.outs == 12
