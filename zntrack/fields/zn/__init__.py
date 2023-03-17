@@ -338,9 +338,9 @@ class Dependency(LazyField):
 class _SaveNodes(znflow.utils.IterableHandler):
     def default(self, value, **kwargs):
         name = kwargs["name"]
-        if hasattr(value, "save"):
+        if isinstance(value, znflow.Node):
             value.name = name
-            value.save()
+            value.save(results=False)
         return value
 
 
