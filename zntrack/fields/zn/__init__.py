@@ -385,6 +385,7 @@ class NodeFiled(Dependency):
             "add",
             "--name",
             name,
+            "--force",
             "--outs",
             f"nodes/{name}/hash",
             f"zntrack run {module}.{node.__class__.__name__} --name {name} --hash-only",
