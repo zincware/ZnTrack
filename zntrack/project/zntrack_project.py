@@ -137,9 +137,9 @@ class Project(_ProjectBase):
             cmd.extend(["--name", name])
         exp.name = capture_run_dvc_cmd(cmd).split("'")[1]
 
-    def run_exp(self) -> None:
+    def run_exp(self, jobs: int = 1) -> None:
         """Run all queued experiments."""
-        run_dvc_cmd(["exp", "run", "--run-all"])
+        run_dvc_cmd(["exp", "run", "--run-all", "--jobs", str(jobs)])
 
     @property
     def branches(self):
