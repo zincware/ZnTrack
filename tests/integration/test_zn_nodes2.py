@@ -5,6 +5,7 @@ from zntrack import Node, Project, zn
 
 class NodeViaParams(Node):
     param1 = zn.params()
+    outs = zn.outs()
 
     def run(self):
         raise NotImplementedError
