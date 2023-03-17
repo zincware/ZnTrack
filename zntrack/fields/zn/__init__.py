@@ -344,7 +344,7 @@ class _SaveNodes(znflow.utils.IterableHandler):
         return value
 
 
-class NodeFiled(Dependency):
+class NodeField(Dependency):
     """Add another Node as a field.
 
     The other Node will provide its parameters and methods to be used.
@@ -355,46 +355,68 @@ class NodeFiled(Dependency):
 
     def __set__(self, instance, value):
         """Disbale the _graph_ in the value 'Node'."""
-        if hasattr(value, "_graph_"):
-            value._graph_ = None
-        else:
-            raise TypeError(f"The value must be a Node and not {value}.")
+        for entry in value if isinstance(value, (list, tuple)) else [value]:
+            if hasattr(entry, "_graph_"):
+                entry._graph_ = None
+            else:
+                raise TypeError(f"The value must be a Node and not {entry}.")
         return super().__set__(instance, value)
 
-    def get_node_name(self, instance) -> str:
+    def get_node_names(self, instance) -> list:
         """Get the name of the other Node."""
-        return f"{instance.name}_{self.name}"
+        value = instance.__dict__[self.name]
+        if isinstance(value, (list, tuple)):
+            return [f"{instance.name}_{self.name}_{idx}" for idx in range(len(value))]
+        return [f"{instance.name}_{self.name}"]
 
     def save(self, instance: "Node"):
         """Save the Node parameters to disk."""
         value = instance.__dict__[self.name]
         if value is LazyOption:
             return
-        _SaveNodes()(value, name=self.get_node_name(instance))
+        if not isinstance(value, (list, tuple)):
+            value = [value]
+
+        for node, name in zip(value, self.get_node_names(instance)):
+            _SaveNodes()(node, name=name)
         super().save(instance)
 
-    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[tuple]:
+    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[list]:
         """Get the dvc command for this field."""
-        name = self.get_node_name(instance)
-        node = instance.__dict__[self.name]
-        if not isinstance(node, znflow.Node):
-            raise TypeError(f"The value must be a Node and not {node}.")
-        module = module_handler(node.__class__)
-        return [
-            "stage",
-            "add",
-            "--name",
-            name,
-            "--force",
-            "--outs",
-            f"nodes/{name}/hash",
-            f"zntrack run {module}.{node.__class__.__name__} --name {name} --hash-only",
-        ]
+        names = self.get_node_names(instance)
+        nodes = instance.__dict__[self.name]
+        if not isinstance(nodes, (list, tuple)):
+            nodes = [nodes]
+
+        cmd = []
+
+        for node, name in zip(nodes, names):
+            if not isinstance(node, znflow.Node):
+                raise TypeError(f"The value must be a Node and not {node}.")
+            module = module_handler(node.__class__)
+            cmd.append(
+                [
+                    "stage",
+                    "add",
+                    "--name",
+                    name,
+                    "--force",
+                    "--outs",
+                    f"nodes/{name}/hash",
+                    (
+                        f"zntrack run {module}.{node.__class__.__name__} --name"
+                        f" {name} --hash-only"
+                    ),
+                ]
+            )
+
+        return cmd
 
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
-        name = self.get_node_name(instance)
-        return [pathlib.Path(f"nodes/{name}/hash")]
+        return [
+            pathlib.Path(f"nodes/{name}/hash") for name in self.get_node_names(instance)
+        ]
 
 
 def params(*args, **kwargs) -> Params:
@@ -422,6 +444,6 @@ def plots(*args, **kwargs) -> Plots:
     return Plots(*args, **kwargs)
 
 
-def nodes(*args, **kwargs) -> NodeFiled:
+def nodes(*args, **kwargs) -> NodeField:
     """Create a node field."""
-    return NodeFiled(*args, **kwargs)
+    return NodeField(*args, **kwargs)

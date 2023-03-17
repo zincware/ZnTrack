@@ -21,6 +21,14 @@ class ExampleNode(Node):
         self.outs = self.params1.param1 + self.params2.param1
 
 
+class ExampleNodeLst(Node):
+    params: list = zn.nodes()
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = sum([p.param1 for p in self.params])
+
+
 @pytest.mark.parametrize("eager", [True, False])
 def test_ExampleNode(proj_path, eager):
     project = Project()
@@ -37,9 +45,44 @@ def test_ExampleNode(proj_path, eager):
     assert node.params2.param1 == 10
     assert node.outs == 11
 
+    assert node.params1.name == "ExampleNode_params1"
+    assert node.params2.name == "ExampleNode_params2"
+
     if not eager:
         # Check new instance also works
         node = node.from_rev()
         assert node.params1.param1 == 1
         assert node.params2.param1 == 10
         assert node.outs == 11
+
+        assert node.params1.name == "ExampleNode_params1"
+        assert node.params2.name == "ExampleNode_params2"
+
+
+@pytest.mark.parametrize("eager", [True, False])
+def test_ExampleNodeLst(proj_path, eager):
+    project = Project()
+    parameter_1 = NodeViaParams(param1=1)
+    parameter_2 = NodeViaParams(param1=10)
+
+    with project:
+        node = ExampleNodeLst(params=[parameter_1, parameter_2])
+
+    project.run(eager=eager)
+    if not eager:
+        node.load()
+    assert node.params[0].param1 == 1
+    assert node.params[1].param1 == 10
+    assert node.outs == 11
+
+    assert node.params[0].name == "ExampleNodeLst_params_0"
+    assert node.params[1].name == "ExampleNodeLst_params_1"
+
+    if not eager:
+        # Check new instance also works
+        node = node.from_rev()
+        assert node.params[0].param1 == 1
+        assert node.params[1].param1 == 10
+        assert node.outs == 11
+        assert node.params[0].name == "ExampleNodeLst_params_0"
+        assert node.params[1].name == "ExampleNodeLst_params_1"

@@ -242,7 +242,7 @@ def get_dvc_cmd(
     field_cmds = []
     for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
-        optionals.append(attr.get_optional_dvc_cmd(node))
+        optionals += attr.get_optional_dvc_cmd(node)
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
