@@ -105,7 +105,7 @@ disable = [
 [tool.ruff]
 line-length = 90
 
-select = ["E", "F", "D", "N", "C"] #, "ANN"]
+select = ["E", "F", "D", "N", "C", "I"] #, "ANN"]
 extend-ignore = [
     "D213", "D203",
     "D401",
