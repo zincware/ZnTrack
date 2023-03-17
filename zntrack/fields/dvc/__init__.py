@@ -42,7 +42,7 @@ class DVCOption(Field):
         value = getattr(instance, self.name)
         if not isinstance(value, list):
             value = [value]
-        return [pathlib.Path(file).as_posix() for file in value]
+        return [pathlib.Path(file).as_posix() for file in value if file is not None]
 
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
         """Get the dvc command for this field.
