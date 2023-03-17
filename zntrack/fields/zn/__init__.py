@@ -371,7 +371,10 @@ class NodeField(Dependency):
 
     def save(self, instance: "Node"):
         """Save the Node parameters to disk."""
-        value = instance.__dict__[self.name]
+        try:
+            value = getattr(instance, self.name)
+        except AttributeError:
+            return
         if value is LazyOption:
             return
         if not isinstance(value, (list, tuple)):
@@ -393,22 +396,31 @@ class NodeField(Dependency):
         for node, name in zip(nodes, names):
             if not isinstance(node, znflow.Node):
                 raise TypeError(f"The value must be a Node and not {node}.")
+            node.name = name
             module = module_handler(node.__class__)
-            cmd.append(
-                [
-                    "stage",
-                    "add",
-                    "--name",
-                    name,
-                    "--force",
-                    "--outs",
-                    f"nodes/{name}/hash",
-                    (
-                        f"zntrack run {module}.{node.__class__.__name__} --name"
-                        f" {name} --hash-only"
-                    ),
-                ]
-            )
+
+            _cmd = [
+                "stage",
+                "add",
+                "--name",
+                name,
+                "--force",
+                "--outs",
+                f"nodes/{name}/hash",
+            ]
+            field_cmds = []
+            for attr in zninit.get_descriptors(Params, self=node):
+                field_cmds += attr.get_stage_add_argument(node)
+
+            for field_cmd in set(field_cmds):
+                _cmd += list(field_cmd)
+
+            _cmd += [
+                f"zntrack run {module}.{node.__class__.__name__} --name"
+                f" {name} --hash-only"
+            ]
+
+            cmd.append(_cmd)
 
         return cmd
 
