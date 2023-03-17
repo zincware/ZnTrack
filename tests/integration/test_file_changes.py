@@ -41,11 +41,11 @@ class WriteToOutsOutsideRun(Node):
         self.outs = "correct outs"
 
 
-# def test_WriteToOutsOutsideRun(proj_path):
-#     node = WriteToOutsOutsideRun(outs="correct outs")
-#     node.run()
-#     node.save()
-#
-#     assert WriteToOutsOutsideRun.from_rev().outs == "correct outs"
-#     # WriteToOutsOutsideRun(outs="incorrect outs").save()
-#     # assert WriteToOutsOutsideRun.from_rev().outs == "correct outs"
+def test_WriteToOutsOutsideRun(proj_path):
+    node = WriteToOutsOutsideRun(outs="correct outs")
+    node.run()
+    node.save()
+
+    assert WriteToOutsOutsideRun.from_rev().outs == "correct outs"
+    WriteToOutsOutsideRun(outs="incorrect outs").save(results=False)
+    assert WriteToOutsOutsideRun.from_rev().outs == "correct outs"

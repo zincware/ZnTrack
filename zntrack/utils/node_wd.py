@@ -36,7 +36,7 @@ class ReplaceNWD(IterableHandler):
         if isinstance(value, str):
             if value == nwd:
                 # nwd is of type str but will be converted to pathlib.Path
-                return pathlib.Path(kwargs["nwd"]) 
+                return pathlib.Path(kwargs["nwd"])
             return value.replace(nwd, pathlib.Path(kwargs["nwd"]).as_posix())
         elif isinstance(value, pathlib.Path):
             return pathlib.Path(
