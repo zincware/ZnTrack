@@ -10,6 +10,7 @@ import yaml
 import znflow.utils
 import zninit
 import znjson
+from znflow import handler
 
 from zntrack.fields.field import Field, FieldGroup, LazyField
 from zntrack.utils import LazyOption, module_handler, update_key_val
@@ -325,7 +326,7 @@ class Dependency(LazyField):
         # Up until here we have connection objects. Now we need
         # to resolve them to Nodes. The Nodes, as in 'connection.instance'
         #  are already loaded by the ZnDecoder.
-        return znflow.graph._UpdateConnectors()(value)
+        return handler.UpdateConnectors()(value)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
