@@ -62,3 +62,15 @@ def test_from_dvc_deps(proj_path, eager):
         node.load()
 
     assert node.result == "Hello World"
+
+
+class EmptyNodesNode(zntrack.Node):
+    nodes = zntrack.zn.nodes(None)
+
+    def run(self):
+        pass
+
+
+def test_EmptyNode(proj_path):
+    with zntrack.Project() as project:
+        node = EmptyNodesNode()

@@ -356,6 +356,9 @@ class NodeField(Dependency):
 
     def __set__(self, instance, value):
         """Disbale the _graph_ in the value 'Node'."""
+        if value is None:
+            return super().__set__(instance, value)
+
         for entry in value if isinstance(value, (list, tuple)) else [value]:
             if hasattr(entry, "_graph_"):
                 entry._graph_ = None
@@ -376,7 +379,7 @@ class NodeField(Dependency):
             value = getattr(instance, self.name)
         except AttributeError:
             return
-        if value is LazyOption:
+        if value in [LazyOption, None]:
             return
         if not isinstance(value, (list, tuple)):
             value = [value]
@@ -387,8 +390,11 @@ class NodeField(Dependency):
 
     def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[list]:
         """Get the dvc command for this field."""
-        names = self.get_node_names(instance)
         nodes = instance.__dict__[self.name]
+        if nodes is None:
+            return []
+
+        names = self.get_node_names(instance)
         if not isinstance(nodes, (list, tuple)):
             nodes = [nodes]
 
