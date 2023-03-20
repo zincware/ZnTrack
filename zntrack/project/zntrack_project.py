@@ -10,7 +10,7 @@ import pathlib
 import git
 import yaml
 import znflow
-from znflow.graph import _UpdateConnectors
+from znflow.handler import UpdateConnectors
 
 from zntrack.core.node import Node, get_dvc_cmd
 from zntrack.utils import capture_run_dvc_cmd, run_dvc_cmd
@@ -48,7 +48,7 @@ class _ProjectBase(znflow.DiGraph):
             if eager:
                 # update connectors
                 log.info(f"Running node {node}")
-                self._update_node_attributes(node, _UpdateConnectors())
+                self._update_node_attributes(node, UpdateConnectors())
                 node.run()
                 if save:
                     node.save()

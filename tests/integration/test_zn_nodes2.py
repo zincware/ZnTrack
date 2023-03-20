@@ -26,7 +26,7 @@ class ExampleNodeLst(Node):
     outs = zn.outs()
 
     def run(self):
-        self.outs = sum([p.param1 for p in self.params])
+        self.outs = sum(p.param1 for p in self.params)
 
 
 @pytest.mark.parametrize("eager", [True, False])
