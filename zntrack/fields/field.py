@@ -1,5 +1,6 @@
 """The base class for all fields."""
 import abc
+import contextlib
 import enum
 import json
 import logging
@@ -166,11 +167,9 @@ class LazyField(Field):
         DataIsLazyError
             If the value is lazy.
         """
-        try:
+        with contextlib.suppress(KeyError):
             if instance.__dict__[self.name] is LazyOption:
                 raise DataIsLazyError()
-        except KeyError:
-            return 
 
         return getattr(instance, self.name)
 
