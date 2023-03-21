@@ -168,13 +168,10 @@ class Output(LazyField):
         instance : Node
             The node instance.
         """
-        try:
-            value = getattr(instance, self.name)
-        except AttributeError:
+        if instance.__dict__[self.name] is LazyOption:
             return
 
-        if value is LazyOption:
-            return
+        value = getattr(instance, self.name)
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
         file = self.get_files(instance)[0]
@@ -217,13 +214,10 @@ class Plots(LazyField):
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
-        try:
-            value: pd.DataFrame = getattr(instance, self.name)
-        except AttributeError:
+        if instance.__dict__[self.name] is LazyOption:
             return
 
-        if value is LazyOption:
-            return
+        value: pd.DataFrame = getattr(instance, self.name)
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
         file = self.get_files(instance)[0]
@@ -293,13 +287,10 @@ class Dependency(LazyField):
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
-        try:
-            value = instance.__dict__[self.name]
-        except KeyError:
+        if instance.__dict__[self.name] is LazyOption:
             return
 
-        if value is LazyOption:
-            return
+        value = getattr(instance, self.name)
 
         self._write_value_to_config(
             value,
