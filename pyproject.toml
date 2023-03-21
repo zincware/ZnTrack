@@ -18,7 +18,7 @@ typer = "^0.7.0"
 
 dot4dict = "^0.1.1"
 zninit = "^0.1.9"
-znflow = "^0.1.4"
+znflow = "^0.1.5"
 znjson = "^0.2.2"
 
 
