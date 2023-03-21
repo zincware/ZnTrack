@@ -29,8 +29,6 @@ class ConnectionConverter(znjson.ConverterBase):
 
     def encode(self, obj: znflow.Connection) -> dict:
         """Convert the znflow.Connection object to dict."""
-        if obj.item is not None:
-            raise NotImplementedError("znflow.Connection getitem is not supported yet.")
         return dataclasses.asdict(obj)
 
     def decode(self, value: str) -> znflow.Connection:
@@ -267,6 +265,19 @@ class Dependency(LazyField):
                 " use 'None' to declare this an optional dependency"
                 f"and not {default}."
             )
+
+    def get_items_from_connections(self, instance: "Node") -> list:
+        """Get the items from the connections."""
+        items = []
+        value = getattr(instance, self.name)
+        if not isinstance(value, (list, tuple)):
+            value = [value]
+        for node in value:
+            if node is None:
+                continue
+            if isinstance(node, znflow.Connection):
+                items.append(node.item)
+        return items
 
     def get_files(self, instance) -> list:
         """Get the affected files of the respective Nodes."""
