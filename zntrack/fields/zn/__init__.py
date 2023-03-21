@@ -369,6 +369,8 @@ class NodeField(Dependency):
     def get_node_names(self, instance) -> list:
         """Get the name of the other Node."""
         value = instance.__dict__[self.name]
+        if value is None:  # the zn.nodes(None) case
+            return []
         if isinstance(value, (list, tuple)):
             return [f"{instance.name}_{self.name}_{idx}" for idx in range(len(value))]
         return [f"{instance.name}_{self.name}"]
