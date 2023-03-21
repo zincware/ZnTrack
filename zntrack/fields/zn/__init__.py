@@ -218,6 +218,8 @@ class Plots(LazyField):
             value = self.get_value_except_lazy(instance)
         except DataIsLazyError:
             return
+        if value is None:
+            return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
         file = self.get_files(instance)[0]
@@ -381,7 +383,7 @@ class NodeField(Dependency):
             if not isinstance(value, (list, tuple)):
                 value = [value]
 
-            for node, name in zip(value, self.get_node_names(instance), strict=True):
+            for node, name in zip(value, self.get_node_names(instance)):
                 _SaveNodes()(node, name=name)
         super().save(instance)
 
