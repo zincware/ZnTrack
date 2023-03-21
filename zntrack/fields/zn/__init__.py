@@ -12,8 +12,8 @@ import zninit
 import znjson
 from znflow import handler
 
-from zntrack.fields.field import Field, FieldGroup, LazyField
-from zntrack.utils import LazyOption, module_handler, update_key_val
+from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField
+from zntrack.utils import module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -169,11 +169,8 @@ class Output(LazyField):
             The node instance.
         """
         try:
-            value = getattr(instance, self.name)
-        except AttributeError:
-            return
-
-        if value is LazyOption:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
@@ -218,11 +215,10 @@ class Plots(LazyField):
     def save(self, instance: "Node"):
         """Save the field to disk."""
         try:
-            value: pd.DataFrame = getattr(instance, self.name)
-        except AttributeError:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
-
-        if value is LazyOption:
+        if value is None:
             return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
@@ -294,11 +290,8 @@ class Dependency(LazyField):
     def save(self, instance: "Node"):
         """Save the field to disk."""
         try:
-            value = instance.__dict__[self.name]
-        except KeyError:
-            return
-
-        if value is LazyOption:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
 
         self._write_value_to_config(
@@ -368,7 +361,11 @@ class NodeField(Dependency):
 
     def get_node_names(self, instance) -> list:
         """Get the name of the other Node."""
-        value = instance.__dict__[self.name]
+        try:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
+            return []
+
         if value is None:  # the zn.nodes(None) case
             return []
         if isinstance(value, (list, tuple)):
@@ -378,21 +375,21 @@ class NodeField(Dependency):
     def save(self, instance: "Node"):
         """Save the Node parameters to disk."""
         try:
-            value = getattr(instance, self.name)
-        except AttributeError:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
-        if value in [LazyOption, None]:
-            return
-        if not isinstance(value, (list, tuple)):
-            value = [value]
 
-        for node, name in zip(value, self.get_node_names(instance)):
-            _SaveNodes()(node, name=name)
+        if value is not None:
+            if not isinstance(value, (list, tuple)):
+                value = [value]
+
+            for node, name in zip(value, self.get_node_names(instance)):
+                _SaveNodes()(node, name=name)
         super().save(instance)
 
     def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[list]:
         """Get the dvc command for this field."""
-        nodes = instance.__dict__[self.name]
+        nodes = getattr(instance, self.name)
         if nodes is None:
             return []
 
