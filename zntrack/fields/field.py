@@ -171,7 +171,7 @@ class LazyField(Field):
             if instance.__dict__[self.name] is LazyOption:
                 raise DataIsLazyError()
 
-        return getattr(instance, self.name)
+        return getattr(instance, self.name, None)
 
     def __get__(self, instance, owner=None):
         """Load the field from disk if it is not already loaded."""
