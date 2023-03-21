@@ -10,7 +10,6 @@ import typing
 
 import dvc.api
 import dvc.cli
-import yaml
 import znflow
 import zninit
 import znjson
@@ -162,16 +161,15 @@ class Node(zninit.ZnInit, znflow.Node):
         """Load the node's output from disk."""
         from zntrack.fields.field import Field
 
-        dvc_yaml = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
-        if self.name not in dvc_yaml["stages"]:
-            raise exceptions.NodeNotAvailableError(self)
-
         kwargs = {} if lazy is None else {"lazy": lazy}
         self.state.loaded = True  # we assume loading will be successful.
-        with config.updated_config(**kwargs):
-            # TODO: it would be much nicer not to use a global config object here.
-            for attr in zninit.get_descriptors(Field, self=self):
-                attr.load(self)
+        try:
+            with config.updated_config(**kwargs):
+                # TODO: it would be much nicer not to use a global config object here.
+                for attr in zninit.get_descriptors(Field, self=self):
+                    attr.load(self)
+        except KeyError as err:
+            raise exceptions.NodeNotAvailableError(self) from err
 
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
