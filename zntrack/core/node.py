@@ -10,10 +10,12 @@ import typing
 
 import dvc.api
 import dvc.cli
+import yaml
 import znflow
 import zninit
 import znjson
 
+from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
 from zntrack.utils import NodeStatusResults, deprecated, module_handler, run_dvc_cmd
 from zntrack.utils.config import config
@@ -159,6 +161,10 @@ class Node(zninit.ZnInit, znflow.Node):
     def load(self, lazy: bool = None) -> None:
         """Load the node's output from disk."""
         from zntrack.fields.field import Field
+
+        dvc_yaml = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+        if self.name not in dvc_yaml["stages"]:
+            raise exceptions.NodeNotAvailableError(self)
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         self.state.loaded = True  # we assume loading will be successful.
