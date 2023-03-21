@@ -149,8 +149,30 @@ class Field(zninit.Descriptor, abc.ABC):
             json.dump(zntrack_dict, f, indent=4, cls=encoder)
 
 
+class DataIsLazyError(Exception):
+    """Exception to raise when a field is accessed that contains lazy data."""
+
+
 class LazyField(Field):
     """Base class for fields that are loaded lazily."""
+
+    def get_value_except_lazy(self, instance):
+        """Get the value of the field.
+
+        If the value is lazy, raise an Error.
+
+        Raises
+        ------
+        DataIsLazyError
+            If the value is lazy.
+        """
+        try:
+            if instance.__dict__[self.name] is LazyOption:
+                raise DataIsLazyError()
+        except KeyError:
+            return self.default  # this should be correct I guess
+
+        return getattr(instance, self.name)
 
     def __get__(self, instance, owner=None):
         """Load the field from disk if it is not already loaded."""
