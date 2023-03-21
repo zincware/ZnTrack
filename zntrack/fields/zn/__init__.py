@@ -368,22 +368,21 @@ class NodeField(Dependency):
 
     def save(self, instance: "Node"):
         """Save the Node parameters to disk."""
-        try:
-            value = getattr(instance, self.name)
-        except AttributeError:
+        if instance.__dict__[self.name] is LazyOption:
             return
-        if value in [LazyOption, None]:
-            return
-        if not isinstance(value, (list, tuple)):
-            value = [value]
 
-        for node, name in zip(value, self.get_node_names(instance)):
-            _SaveNodes()(node, name=name)
+        value = getattr(instance, self.name)
+        if value is not None:
+            if not isinstance(value, (list, tuple)):
+                value = [value]
+
+            for node, name in zip(value, self.get_node_names(instance), strict=True):
+                _SaveNodes()(node, name=name)
         super().save(instance)
 
     def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[list]:
         """Get the dvc command for this field."""
-        nodes = instance.__dict__[self.name]
+        nodes = getattr(instance, self.name)
         if nodes is None:
             return []
 
