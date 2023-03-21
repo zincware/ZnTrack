@@ -66,11 +66,17 @@ def test_from_dvc_deps(proj_path, eager):
 
 class EmptyNodesNode(zntrack.Node):
     nodes = zntrack.zn.nodes(None)
+    outs = zntrack.zn.outs()
 
     def run(self):
-        pass
+        self.outs = 42
 
 
-def test_EmptyNode(proj_path):
+@pytest.mark.parametrize("eager", [True, False])
+def test_EmptyNode(proj_path, eager):
     with zntrack.Project() as project:
         node = EmptyNodesNode()
+    project.run(eager=eager)
+    if not eager:
+        node.load()
+    assert node.outs == 42
