@@ -170,7 +170,7 @@ class LazyField(Field):
             if instance.__dict__[self.name] is LazyOption:
                 raise DataIsLazyError()
         except KeyError:
-            return self.default  # this should be correct I guess
+            return 
 
         return getattr(instance, self.name)
 
