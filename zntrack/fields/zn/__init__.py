@@ -49,7 +49,9 @@ class CombinedConnectionsConverter(znjson.ConverterBase):
     def encode(self, obj: znflow.CombinedConnections) -> dict:
         """Convert the znflow.Connection object to dict."""
         if obj.item is not None:
-            raise NotImplementedError("znflow.CombinedConnections getitem is not supported yet.")
+            raise NotImplementedError(
+                "znflow.CombinedConnections getitem is not supported yet."
+            )
         return dataclasses.asdict(obj)
 
     def decode(self, value: str) -> znflow.CombinedConnections:
@@ -57,9 +59,11 @@ class CombinedConnectionsConverter(znjson.ConverterBase):
         connections = []
         for item in value["connections"]:
             if isinstance(item, dict):
-                # TODO there can also be functio futures
+                # @nodify functions aren't support as 'zn.deps'
+                # Nodes directly aren't supported because they aren't lists
                 connections.append(znflow.Connection(**item))
             else:
+                # For the case that item is already a znflow.Connection
                 connections.append(item)
         value["connections"] = connections
         return znflow.CombinedConnections(**value)
