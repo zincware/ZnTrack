@@ -7,6 +7,7 @@ import typing
 
 import pandas as pd
 import yaml
+import znflow.base
 import znflow.utils
 import zninit
 import znjson
@@ -36,6 +37,32 @@ class ConnectionConverter(znjson.ConverterBase):
     def decode(self, value: str) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
         return znflow.Connection(**value)
+
+
+class AddedConnectionsConverter(znjson.ConverterBase):
+    """Convert a znflow.Connection object to dict and back."""
+
+    level = 100
+    representation = "znflow.AddedConnections"
+    instance = znflow.base.AddedConnections
+
+    def encode(self, obj: znflow.base.AddedConnections) -> dict:
+        """Convert the znflow.Connection object to dict."""
+        if obj.item is not None:
+            raise NotImplementedError("znflow.Connection getitem is not supported yet.")
+        return dataclasses.asdict(obj)
+
+    def decode(self, value: str) -> znflow.base.AddedConnections:
+        """Create znflow.Connection object from dict."""
+        connections = []
+        for item in value["connections"]:
+            if isinstance(item, dict):
+                # TODO there can also be functio futures
+                connections.append(znflow.Connection(**item))
+            else:
+                connections.append(item)
+        value["connections"] = connections
+        return znflow.base.AddedConnections(**value)
 
 
 class SliceConverter(znjson.ConverterBase):
@@ -273,6 +300,13 @@ class Dependency(LazyField):
         if not isinstance(value, (list, tuple)):
             value = [value]
 
+        others = []
+        for node in value:
+            if isinstance(node, znflow.base.AddedConnections):
+                others.extend(node.connections)
+
+        value.extend(others)
+
         for node in value:
             if node is None:
                 continue
@@ -298,7 +332,7 @@ class Dependency(LazyField):
             value,
             instance,
             encoder=znjson.ZnEncoder.from_converters(
-                [ConnectionConverter], add_default=True
+                [ConnectionConverter, AddedConnectionsConverter], add_default=True
             ),
         )
 
@@ -313,7 +347,9 @@ class Dependency(LazyField):
 
         value = json.loads(
             json.dumps(value),
-            cls=znjson.ZnDecoder.from_converters(ConnectionConverter, add_default=True),
+            cls=znjson.ZnDecoder.from_converters(
+                [ConnectionConverter, AddedConnectionsConverter], add_default=True
+            ),
         )
 
         # Up until here we have connection objects. Now we need
