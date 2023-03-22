@@ -50,7 +50,7 @@ def test_combine_dict(proj_path, eager):
         b = GenerateList(size=2, name="b")
         c = GenerateList(size=3, name="c")
 
-        added = AddOneToDict(data={"a": a.outs, "b": b.outs, "c": c.outs})
+        added = AddOneToDict(data={x.name: x.outs for x in [a, b, c]})
 
     proj.run(eager=eager)
     if not eager:
