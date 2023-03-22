@@ -299,6 +299,8 @@ class Dependency(LazyField):
 
         if not isinstance(value, (list, tuple)):
             value = [value]
+        if isinstance(value, tuple):
+            value = list(value)
 
         others = []
         for node in value:
