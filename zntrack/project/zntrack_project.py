@@ -96,19 +96,29 @@ def _initalize():
 class Project(_ProjectBase):
     """The ZnTrack Project class."""
 
-    def __init__(self, initialize: bool = True) -> None:
+    def __init__(
+        self, initialize: bool = True, remove_existing_graph: bool = False
+    ) -> None:
         """Initialize the Project.
 
         Attributes
         ----------
         initialize : bool, default = True
             If True, initialize a git repository and a dvc repository.
+        remove_existing_graph : bool, default = False
+            If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
+              before writing new nodes.
         """
         # TODO maybe it is not a good idea to base everything on the DiGraph class.
         #  It seems to call some class methods
         super().__init__()
         if initialize:
             _initalize()
+        if remove_existing_graph:
+            # we remove the files that typically contain the graph definition
+            pathlib.Path("zntrack.json").unlink(missing_ok=True)
+            pathlib.Path("dvc.yaml").unlink(missing_ok=True)
+            pathlib.Path("params.yaml").unlink(missing_ok=True)
 
     def create_branch(self, name: str) -> "Branch":
         """Create a branch in the project."""

@@ -14,6 +14,7 @@ import znflow
 import zninit
 import znjson
 
+from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
 from zntrack.utils import NodeStatusResults, deprecated, module_handler, run_dvc_cmd
 from zntrack.utils.config import config
@@ -162,10 +163,13 @@ class Node(zninit.ZnInit, znflow.Node):
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         self.state.loaded = True  # we assume loading will be successful.
-        with config.updated_config(**kwargs):
-            # TODO: it would be much nicer not to use a global config object here.
-            for attr in zninit.get_descriptors(Field, self=self):
-                attr.load(self)
+        try:
+            with config.updated_config(**kwargs):
+                # TODO: it would be much nicer not to use a global config object here.
+                for attr in zninit.get_descriptors(Field, self=self):
+                    attr.load(self)
+        except KeyError as err:
+            raise exceptions.NodeNotAvailableError(self) from err
 
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()

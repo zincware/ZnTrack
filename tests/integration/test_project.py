@@ -71,3 +71,19 @@ def test_WriteIO_no_name(tmp_path_2, assert_before_exp):
 
     assert exp2["WriteIO"].inputs == "Lorem Ipsum"
     assert exp2["WriteIO"].outputs == "Lorem Ipsum"
+
+
+def test_project_remove_graph(proj_path):
+    with zntrack.Project() as project:
+        node = WriteIO(inputs="Hello World")
+    project.run()
+    node.load()
+    assert node.outputs == "Hello World"
+
+    with zntrack.Project(remove_existing_graph=True) as project:
+        node2 = WriteIO(inputs="Lorem Ipsum", name="node2")
+    project.run()
+    node2.load()
+    assert node2.outputs == "Lorem Ipsum"
+    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
+        node.load()
