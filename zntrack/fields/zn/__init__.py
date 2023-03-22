@@ -296,8 +296,10 @@ class Dependency(LazyField):
         files = []
 
         value = getattr(instance, self.name)
-        # TODO what about dicts
+        # TODO use IterableHandler?
 
+        if isinstance(value, dict):
+            value = list(value.values())
         if not isinstance(value, (list, tuple)):
             value = [value]
         if isinstance(value, tuple):
