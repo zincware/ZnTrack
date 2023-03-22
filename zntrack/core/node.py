@@ -88,6 +88,8 @@ class Node(zninit.ZnInit, znflow.Node):
     name: str = _NameDescriptor(None)
     _name_ = None
 
+    _protected_ = znflow.Node._protected_ + ["name"]
+
     def _post_load_(self) -> None:
         """Post load hook.
 

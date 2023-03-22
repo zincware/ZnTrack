@@ -873,21 +873,23 @@ files = [
 
 [[package]]
 name = "comm"
-version = "0.1.2"
+version = "0.1.3"
 description = "Jupyter Python Comm implementation, for usage in ipykernel, xeus-python etc."
 category = "dev"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "comm-0.1.2-py3-none-any.whl", hash = "sha256:9f3abf3515112fa7c55a42a6a5ab358735c9dccc8b5910a9d8e3ef5998130666"},
-    {file = "comm-0.1.2.tar.gz", hash = "sha256:3e2f5826578e683999b93716285b3b1f344f157bf75fa9ce0a797564e742f062"},
+    {file = "comm-0.1.3-py3-none-any.whl", hash = "sha256:16613c6211e20223f215fc6d3b266a247b6e2641bf4e0a3ad34cb1aff2aa3f37"},
+    {file = "comm-0.1.3.tar.gz", hash = "sha256:a61efa9daffcfbe66fd643ba966f846a624e4e6d6767eda9cf6e993aadaab93e"},
 ]
 
 [package.dependencies]
 traitlets = ">=5.3"
 
 [package.extras]
+lint = ["black (>=22.6.0)", "mdformat (>0.7)", "mdformat-gfm (>=0.3.5)", "ruff (>=0.0.156)"]
 test = ["pytest"]
+typing = ["mypy (>=0.990)"]
 
 [[package]]
 name = "configobj"
@@ -5219,14 +5221,14 @@ testing = ["big-O", "flake8 (<5)", "jaraco.functools", "jaraco.itertools", "more
 
 [[package]]
 name = "znflow"
-version = "0.1.5"
+version = "0.1.6"
 description = ""
 category = "main"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "znflow-0.1.5-py3-none-any.whl", hash = "sha256:17bdc7e28f7b3e1802b00aa825248de251b5e2b5db18c9e41c111c8e859efd3f"},
-    {file = "znflow-0.1.5.tar.gz", hash = "sha256:dbccdaa0327b56e04d3a51a7159230e6f8ed2f8a2a00b8b034593b046dc8cb9b"},
+    {file = "znflow-0.1.6-py3-none-any.whl", hash = "sha256:5d13feac56b45e0f0e574e1563620ae135b27d083a5c54d4488c3783a4e56830"},
+    {file = "znflow-0.1.6.tar.gz", hash = "sha256:2864f4a3f2f9c6a001cfc5ff7410bdac42d493accd1d78a90b2089275a0a00d7"},
 ]
 
 [package.dependencies]
@@ -5263,4 +5265,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "f79d7f0b0ee47e6ca375581f4af89be73f09439beacef945c0ade0c8597c5b02"
+content-hash = "4c5437db27f5d39d7e6923c56575f81515179b9b5a49e2526abef015589181db"

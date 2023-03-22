@@ -1,5 +1,6 @@
-import zntrack
 import znflow
+
+import zntrack
 
 
 class NodeWithProperty(zntrack.Node):
