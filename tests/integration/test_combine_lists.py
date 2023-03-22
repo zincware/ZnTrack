@@ -1,5 +1,6 @@
-import zntrack
 import pytest
+
+import zntrack
 
 
 class GenerateList(zntrack.Node):

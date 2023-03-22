@@ -7,7 +7,7 @@ import typing
 
 import pandas as pd
 import yaml
-import znflow.base
+import znflow
 import znflow.utils
 import zninit
 import znjson
@@ -39,20 +39,20 @@ class ConnectionConverter(znjson.ConverterBase):
         return znflow.Connection(**value)
 
 
-class AddedConnectionsConverter(znjson.ConverterBase):
+class CombinedConnectionsConverter(znjson.ConverterBase):
     """Convert a znflow.Connection object to dict and back."""
 
     level = 100
-    representation = "znflow.AddedConnections"
-    instance = znflow.base.AddedConnections
+    representation = "znflow.CombinedConnections"
+    instance = znflow.CombinedConnections
 
-    def encode(self, obj: znflow.base.AddedConnections) -> dict:
+    def encode(self, obj: znflow.CombinedConnections) -> dict:
         """Convert the znflow.Connection object to dict."""
         if obj.item is not None:
             raise NotImplementedError("znflow.Connection getitem is not supported yet.")
         return dataclasses.asdict(obj)
 
-    def decode(self, value: str) -> znflow.base.AddedConnections:
+    def decode(self, value: str) -> znflow.CombinedConnections:
         """Create znflow.Connection object from dict."""
         connections = []
         for item in value["connections"]:
@@ -62,7 +62,7 @@ class AddedConnectionsConverter(znjson.ConverterBase):
             else:
                 connections.append(item)
         value["connections"] = connections
-        return znflow.base.AddedConnections(**value)
+        return znflow.CombinedConnections(**value)
 
 
 class SliceConverter(znjson.ConverterBase):
@@ -296,6 +296,7 @@ class Dependency(LazyField):
         files = []
 
         value = getattr(instance, self.name)
+        # TODO what about dicts
 
         if not isinstance(value, (list, tuple)):
             value = [value]
@@ -304,7 +305,7 @@ class Dependency(LazyField):
 
         others = []
         for node in value:
-            if isinstance(node, znflow.base.AddedConnections):
+            if isinstance(node, znflow.CombinedConnections):
                 others.extend(node.connections)
 
         value.extend(others)
@@ -334,7 +335,7 @@ class Dependency(LazyField):
             value,
             instance,
             encoder=znjson.ZnEncoder.from_converters(
-                [ConnectionConverter, AddedConnectionsConverter], add_default=True
+                [ConnectionConverter, CombinedConnectionsConverter], add_default=True
             ),
         )
 
@@ -350,7 +351,7 @@ class Dependency(LazyField):
         value = json.loads(
             json.dumps(value),
             cls=znjson.ZnDecoder.from_converters(
-                [ConnectionConverter, AddedConnectionsConverter], add_default=True
+                [ConnectionConverter, CombinedConnectionsConverter], add_default=True
             ),
         )
 
