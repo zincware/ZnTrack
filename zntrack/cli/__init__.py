@@ -1,10 +1,10 @@
 """The ZnTrack CLI."""
+import contextlib
 import importlib.metadata
 import os
 import pathlib
 import sys
 import uuid
-import contextlib
 
 import git
 import typer
@@ -18,9 +18,9 @@ app = typer.Typer()
 def version_callback(value: bool) -> None:
     """Get the installed 'ZnTrack' version."""
     if value:
-        path = pathlib.Path(__file__).parent.parent
-
+        path = pathlib.Path(__file__).parent.parent.parent
         report = f"ZnTrack {importlib.metadata.version('zntrack')} at '{path}'"
+
         with contextlib.suppress(git.exc.InvalidGitRepositoryError):
             repo = git.Repo(path)
             _ = repo.git_dir
@@ -29,7 +29,6 @@ def version_callback(value: bool) -> None:
                 report += " (dirty)"
 
         typer.echo(report)
-
         raise typer.Exit()
 
 
