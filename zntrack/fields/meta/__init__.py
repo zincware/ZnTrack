@@ -31,7 +31,7 @@ class Text(Field):
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
-        dvc_dict = yaml.safe_load(instance.state.get_file_system().read_text("dvc.yaml"))
+        dvc_dict = yaml.safe_load(instance.state.fs.read_text("dvc.yaml"))
         return dvc_dict["stages"][instance.name]["meta"].get(self.name, None)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
@@ -72,7 +72,7 @@ class Environment(Field):
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
-        env_dict = yaml.safe_load(instance.state.get_file_system().read_text("env.yaml"))
+        env_dict = yaml.safe_load(instance.state.fs.read_text("env.yaml"))
         return env_dict.get(instance.name, {}).get(self.name, None)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ZnTrack"
-version = "0.6.0a2"
+version = "0.6.0a3"
 description = "Create, Run and Benchmark DVC Pipelines in Python"
 authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
@@ -19,7 +19,7 @@ typer = "^0.7.0"
 dot4dict = "^0.1.1"
 zninit = "^0.1.9"
 znjson = "^0.2.2"
-znflow = "^0.1.6"
+znflow = "^0.1.10"
 
 
 [tool.poetry.urls]
