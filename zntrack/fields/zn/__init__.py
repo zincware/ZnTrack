@@ -7,13 +7,14 @@ import typing
 
 import pandas as pd
 import yaml
+import znflow
 import znflow.utils
 import zninit
 import znjson
 from znflow import handler
 
-from zntrack.fields.field import Field, FieldGroup, LazyField
-from zntrack.utils import LazyOption, module_handler, update_key_val
+from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField
+from zntrack.utils import module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -36,6 +37,36 @@ class ConnectionConverter(znjson.ConverterBase):
     def decode(self, value: str) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
         return znflow.Connection(**value)
+
+
+class CombinedConnectionsConverter(znjson.ConverterBase):
+    """Convert a znflow.Connection object to dict and back."""
+
+    level = 100
+    representation = "znflow.CombinedConnections"
+    instance = znflow.CombinedConnections
+
+    def encode(self, obj: znflow.CombinedConnections) -> dict:
+        """Convert the znflow.Connection object to dict."""
+        if obj.item is not None:
+            raise NotImplementedError(
+                "znflow.CombinedConnections getitem is not supported yet."
+            )
+        return dataclasses.asdict(obj)
+
+    def decode(self, value: str) -> znflow.CombinedConnections:
+        """Create znflow.Connection object from dict."""
+        connections = []
+        for item in value["connections"]:
+            if isinstance(item, dict):
+                # @nodify functions aren't support as 'zn.deps'
+                # Nodes directly aren't supported because they aren't lists
+                connections.append(znflow.Connection(**item))
+            else:
+                # For the case that item is already a znflow.Connection
+                connections.append(item)
+        value["connections"] = connections
+        return znflow.CombinedConnections(**value)
 
 
 class SliceConverter(znjson.ConverterBase):
@@ -169,11 +200,8 @@ class Output(LazyField):
             The node instance.
         """
         try:
-            value = getattr(instance, self.name)
-        except AttributeError:
-            return
-
-        if value is LazyOption:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
@@ -218,11 +246,10 @@ class Plots(LazyField):
     def save(self, instance: "Node"):
         """Save the field to disk."""
         try:
-            value: pd.DataFrame = getattr(instance, self.name)
-        except AttributeError:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
-
-        if value is LazyOption:
+        if value is None:
             return
 
         instance.nwd.mkdir(exist_ok=True, parents=True)
@@ -273,9 +300,21 @@ class Dependency(LazyField):
         files = []
 
         value = getattr(instance, self.name)
+        # TODO use IterableHandler?
 
+        if isinstance(value, dict):
+            value = list(value.values())
         if not isinstance(value, (list, tuple)):
             value = [value]
+        if isinstance(value, tuple):
+            value = list(value)
+
+        others = []
+        for node in value:
+            if isinstance(node, znflow.CombinedConnections):
+                others.extend(node.connections)
+
+        value.extend(others)
 
         for node in value:
             if node is None:
@@ -294,18 +333,15 @@ class Dependency(LazyField):
     def save(self, instance: "Node"):
         """Save the field to disk."""
         try:
-            value = instance.__dict__[self.name]
-        except KeyError:
-            return
-
-        if value is LazyOption:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
 
         self._write_value_to_config(
             value,
             instance,
             encoder=znjson.ZnEncoder.from_converters(
-                [ConnectionConverter], add_default=True
+                [ConnectionConverter, CombinedConnectionsConverter], add_default=True
             ),
         )
 
@@ -320,7 +356,9 @@ class Dependency(LazyField):
 
         value = json.loads(
             json.dumps(value),
-            cls=znjson.ZnDecoder.from_converters(ConnectionConverter, add_default=True),
+            cls=znjson.ZnDecoder.from_converters(
+                [ConnectionConverter, CombinedConnectionsConverter], add_default=True
+            ),
         )
 
         # Up until here we have connection objects. Now we need
@@ -368,7 +406,13 @@ class NodeField(Dependency):
 
     def get_node_names(self, instance) -> list:
         """Get the name of the other Node."""
-        value = instance.__dict__[self.name]
+        try:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
+            return []
+
+        if value is None:  # the zn.nodes(None) case
+            return []
         if isinstance(value, (list, tuple)):
             return [f"{instance.name}_{self.name}_{idx}" for idx in range(len(value))]
         return [f"{instance.name}_{self.name}"]
@@ -376,21 +420,21 @@ class NodeField(Dependency):
     def save(self, instance: "Node"):
         """Save the Node parameters to disk."""
         try:
-            value = getattr(instance, self.name)
-        except AttributeError:
+            value = self.get_value_except_lazy(instance)
+        except DataIsLazyError:
             return
-        if value in [LazyOption, None]:
-            return
-        if not isinstance(value, (list, tuple)):
-            value = [value]
 
-        for node, name in zip(value, self.get_node_names(instance)):
-            _SaveNodes()(node, name=name)
+        if value is not None:
+            if not isinstance(value, (list, tuple)):
+                value = [value]
+
+            for node, name in zip(value, self.get_node_names(instance)):
+                _SaveNodes()(node, name=name)
         super().save(instance)
 
     def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[list]:
         """Get the dvc command for this field."""
-        nodes = instance.__dict__[self.name]
+        nodes = getattr(instance, self.name)
         if nodes is None:
             return []
 
