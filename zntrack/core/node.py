@@ -291,50 +291,42 @@ class Node(zninit.ZnInit, znflow.Node):
         remove_on = convert_to_list(remove_on)
         move_on = convert_to_list(move_on)
 
-        if self._run_and_save:
-            update_gitignore(prefix=prefix)
+        update_gitignore(prefix=prefix)
 
-            if nwd_is_new:
-                log.info(f"Creating new operating directory: {nwd_new}")
-                log.warning(
-                    "Experimental Feature: operating directory is currently not"
-                    " compatible with 'dvc exp --temp' or 'dvc exp --queue'"
-                )
-                # TODO add a unique path per node.
-                # TODO check on windows!
-                shutil.copytree(nwd, nwd_new, copy_function=os.link)
-            else:
-                log.info(f"Continuing inside operating directory: {nwd_new}.")
-
-            self.nwd = nwd_new
-            try:
-                yield nwd_is_new
-            except Exception as err:
-                log.warning("Node execution was interrupted.")
-                remove = any(isinstance(err, e) for e in remove_on)
-                move = any(isinstance(err, e) for e in move_on)
-                # finally -> ...
-                raise err
-            finally:
-                # Save e.g. `zn.outs` before stopping.
-                self.save(results=True)
-                self.nwd = nwd
-                if remove:
-                    log.info(f"Removing operating directory: {nwd_new}")
-                    shutil.rmtree(nwd_new)
-                elif move:
-                    log.info(f"Moving files from '{nwd_new}' to {nwd}")
-                    move_nwd(nwd_new, nwd)
-
-            log.info(f"Finished successfully. Moving files from {nwd_new} to {nwd}")
-            move_nwd(nwd_new, nwd)
+        if nwd_is_new:
+            log.info(f"Creating new operating directory: {nwd_new}")
+            log.warning(
+                "Experimental Feature: operating directory is currently not"
+                " compatible with 'dvc exp --temp' or 'dvc exp --queue'"
+            )
+            # TODO add a unique path per node.
+            # TODO check on windows!
+            shutil.copytree(nwd, nwd_new, copy_function=os.link)
         else:
-            # if not inside 'run_and_save' no directory should be created. ?!?!?!
-            self.nwd = nwd_new
-            try:
-                yield nwd_is_new
-            finally:
-                self.nwd = nwd
+            log.info(f"Continuing inside operating directory: {nwd_new}.")
+
+        self.nwd = nwd_new
+        try:
+            yield nwd_is_new
+        except Exception as err:
+            log.warning("Node execution was interrupted.")
+            remove = any(isinstance(err, e) for e in remove_on)
+            move = any(isinstance(err, e) for e in move_on)
+            # finally -> ...
+            raise err
+        finally:
+            # Save e.g. `zn.outs` before stopping.
+            self.save(results=True)
+            self.nwd = nwd
+            if remove:
+                log.info(f"Removing operating directory: {nwd_new}")
+                shutil.rmtree(nwd_new)
+            elif move:
+                log.info(f"Moving files from '{nwd_new}' to {nwd}")
+                move_nwd(nwd_new, nwd)
+
+        log.info(f"Finished successfully. Moving files from {nwd_new} to {nwd}")
+        move_nwd(nwd_new, nwd)
 
 
 def get_dvc_cmd(
