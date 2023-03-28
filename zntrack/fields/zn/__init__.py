@@ -137,7 +137,7 @@ class Params(Field):
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         file = self.get_files(instance)[0]
-        params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
+        params_dict = yaml.safe_load(instance.state.fs.read_text(file))
         value = params_dict[instance.name].get(self.name, None)
         return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
 
@@ -212,7 +212,7 @@ class Output(LazyField):
         """Get the value of the field from the file."""
         file = self.get_files(instance)[0]
         return json.loads(
-            instance.state.get_file_system().read_text(file.as_posix()),
+            instance.state.fs.read_text(file.as_posix()),
             cls=znjson.ZnDecoder,
         )
 
@@ -259,9 +259,7 @@ class Plots(LazyField):
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         file = self.get_files(instance)[0]
-        return pd.read_csv(
-            instance.state.get_file_system().open(file.as_posix()), index_col=0
-        )
+        return pd.read_csv(instance.state.fs.open(file.as_posix()), index_col=0)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
@@ -348,7 +346,7 @@ class Dependency(LazyField):
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
+            instance.state.fs.read_text("zntrack.json"),
         )
         value = zntrack_dict[instance.name][self.name]
 

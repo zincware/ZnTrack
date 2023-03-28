@@ -82,7 +82,7 @@ class DVCOption(Field):
             The value of the field from the configuration file.
         """
         zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
+            instance.state.fs.read_text("zntrack.json"),
         )
         return json.loads(
             json.dumps(zntrack_dict[instance.name][self.name]), cls=znjson.ZnDecoder

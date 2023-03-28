@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import contextlib
 import dataclasses
+import functools
 import importlib
 import logging
 import pathlib
@@ -47,6 +48,12 @@ class NodeStatus:
     rev: str = None
 
     def get_file_system(self) -> dvc.api.DVCFileSystem:
+        """Get the file system of the Node."""
+        log.warning("Deprecated. Use 'state.fs' instead.")
+        return self.fs
+
+    @functools.cached_property
+    def fs(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
         return dvc.api.DVCFileSystem(
             url=self.remote,
