@@ -159,9 +159,17 @@ class Node(zninit.ZnInit, znflow.Node):
     def run(self) -> None:
         """Run the node's code."""
 
-    def load(self, lazy: bool = None) -> None:
-        """Load the node's output from disk."""
-        from zntrack.fields.field import Field
+    def load(self, lazy: bool = None, results: bool = True) -> None:
+        """Load the node's output from disk.
+
+        Attributes
+        ----------
+        lazy : bool, default = None
+            Whether to load the node lazily. If None, the value from the config is used.
+        results : bool, default = True
+            Whether to load the results. If False, only the parameters are loaded.
+        """
+        from zntrack.fields.field import Field, FieldGroup
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         self.state.loaded = True  # we assume loading will be successful.
@@ -169,6 +177,8 @@ class Node(zninit.ZnInit, znflow.Node):
             with config.updated_config(**kwargs):
                 # TODO: it would be much nicer not to use a global config object here.
                 for attr in zninit.get_descriptors(Field, self=self):
+                    if attr.group == FieldGroup.RESULT and not results:
+                        continue
                     attr.load(self)
         except KeyError as err:
             raise exceptions.NodeNotAvailableError(self) from err
@@ -177,7 +187,9 @@ class Node(zninit.ZnInit, znflow.Node):
         self._post_load_()
 
     @classmethod
-    def from_rev(cls, name=None, remote=None, rev=None, lazy: bool = None) -> Node:
+    def from_rev(
+        cls, name=None, remote=None, rev=None, lazy: bool = None, results: bool = True
+    ) -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
         node.name = name
@@ -198,7 +210,7 @@ class Node(zninit.ZnInit, znflow.Node):
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
-            node.load()
+            node.load(results=results)
 
         return node
 
