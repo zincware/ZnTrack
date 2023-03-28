@@ -9,6 +9,7 @@ import typer
 import yaml
 
 from zntrack import Node, utils
+import git
 
 app = typer.Typer()
 
@@ -16,7 +17,21 @@ app = typer.Typer()
 def version_callback(value: bool) -> None:
     """Get the installed 'ZnTrack' version."""
     if value:
-        typer.echo(f"ZnTrack {importlib.metadata.version('zntrack')}")
+        report = (
+            f"ZnTrack {importlib.metadata.version('zntrack')} at"
+            f" '{pathlib.Path(__file__).parent.parent}'"
+        )
+        try:
+            repo = git.Repo()
+            _ = repo.git_dir
+            report += f" - {repo.active_branch.name}@{repo.head.object.hexsha[:7]}"
+            if repo.is_dirty():
+                report += " (dirty)"
+
+        except git.exc.InvalidGitRepositoryError:
+            pass
+
+        typer.echo(report)
         raise typer.Exit()
 
 
@@ -52,7 +67,7 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     if getattr(cls, "is_node", False):
         cls(exec_func=True)
     elif issubclass(cls, Node):
-        node: Node = cls.from_rev(name=name)
+        node: Node = cls.from_rev(name=name, results=False)
         if hash_only:
             (node.nwd / "hash").write_text(str(uuid.uuid4))
         else:
