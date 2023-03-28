@@ -82,7 +82,7 @@ class SliceConverter(znjson.ConverterBase):
 
     def decode(self, value: dict) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
-        return slice(*value.values())
+        return slice(value["start"], value["stop"], value["step"])
 
 
 znjson.config.register(SliceConverter)
