@@ -24,7 +24,11 @@ def version_callback(value: bool) -> None:
         with contextlib.suppress(git.exc.InvalidGitRepositoryError):
             repo = git.Repo(path)
             _ = repo.git_dir
-            report += f" - {repo.active_branch.name}@{repo.head.object.hexsha[:7]}"
+
+            report += " - "
+            with contextlib.suppress(TypeError):  # detached head
+                report += f"{repo.active_branch.name}@"
+            report += f"{repo.head.object.hexsha[:7]}"
             if repo.is_dirty():
                 report += " (dirty)"
 
