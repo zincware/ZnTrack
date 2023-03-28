@@ -69,7 +69,7 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     elif issubclass(cls, Node):
         node: Node = cls.from_rev(name=name, results=False)
         if hash_only:
-            (node.nwd / "hash").write_text(str(uuid.uuid4))
+            (node.nwd / "hash").write_text(str(uuid.uuid4()))
         else:
             node.run()
             node.save(parameter=False)
