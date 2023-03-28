@@ -5,11 +5,11 @@ import pathlib
 import sys
 import uuid
 
+import git
 import typer
 import yaml
 
 from zntrack import Node, utils
-import git
 
 app = typer.Typer()
 
