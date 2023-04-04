@@ -13,6 +13,7 @@ import zninit
 import znjson
 from znflow import handler
 
+from zntrack import exceptions
 from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField
 from zntrack.utils import module_handler, update_key_val
 
@@ -398,6 +399,10 @@ class NodeField(Dependency):
         for entry in value if isinstance(value, (list, tuple)) else [value]:
             if hasattr(entry, "_graph_"):
                 entry._graph_ = None
+                if entry.uuid in instance._graph_:
+                    raise exceptions.ZnNodesOnGraphError(
+                        node=entry, field=self, instance=instance
+                    )
             else:
                 raise TypeError(f"The value must be a Node and not {entry}.")
         return super().__set__(instance, value)

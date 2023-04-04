@@ -44,7 +44,7 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
-          poetry run coverage run -m pytest --benchmark-autosave
+          poetry run coverage run -m pytest --benchmark-autosave -vv
           poetry run coverage xml
           poetry run coverage lcov
           poetry run py.test-benchmark compare --csv=export.csv

@@ -1,6 +1,6 @@
 import pytest
 
-from zntrack import Node, Project, zn
+from zntrack import Node, Project, zn, exceptions
 
 
 class NodeViaParams(Node):
@@ -106,3 +106,14 @@ def test_ExampleNodeLst(proj_path, eager):
         assert node.params[0].param1 == 2
         assert node.params[1].param1 == 10
         assert node.outs == 12
+
+
+def test_znodes_on_graph(proj_path):
+    project = Project()
+    with project:
+        with pytest.raises(exceptions.ZnNodesOnGraphError):
+            _ = ExampleNodeLst(params=NodeViaParams(param1=1))
+
+    with project:
+        with pytest.raises(exceptions.ZnNodesOnGraphError):
+            _ = ExampleNodeLst(params=[NodeViaParams(param1=1)])
