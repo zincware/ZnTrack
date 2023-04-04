@@ -97,6 +97,15 @@ class Node(zninit.ZnInit, znflow.Node):
 
     _protected_ = znflow.Node._protected_ + ["name"]
 
+    @property
+    def _use_repr_(self) -> bool:
+        """Only use dataclass like __repr__ if outside the _graph_ to avoid recursion.
+
+        Due to modified behavior of '__getattribute__' inside the graph context,
+        a fallback to the python default '__repr__' is needed to avoid recursion.
+        """
+        return self._graph_ is None
+
     def _post_load_(self) -> None:
         """Post load hook.
 

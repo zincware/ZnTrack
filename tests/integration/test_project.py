@@ -87,3 +87,9 @@ def test_project_remove_graph(proj_path):
     assert node2.outputs == "Lorem Ipsum"
     with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
         node.load()
+
+
+def test_project_repr_node(tmp_path_2):
+    with zntrack.Project() as project:
+        node = WriteIO(inputs="Hello World")
+        print(node)
