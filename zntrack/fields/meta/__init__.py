@@ -1,8 +1,10 @@
 """Additional fields that are neither dvc/zn i/o fields."""
+import json
 import pathlib
 import typing
 
 import yaml
+import znjson
 
 from zntrack.fields.field import Field, FieldGroup
 from zntrack.utils import file_io
@@ -16,6 +18,7 @@ class Text(Field):
 
     dvc_option: str = None
     group = FieldGroup.PARAMETER
+    use_dvc_yaml: bool = True
 
     def get_files(self, instance) -> list:
         """Get the params.yaml file."""
@@ -23,16 +26,30 @@ class Text(Field):
 
     def save(self, instance):
         """Save the field to disk."""
-        file_io.update_meta(
-            file=pathlib.Path("dvc.yaml"),
-            node_name=instance.name,
-            data={self.name: getattr(instance, self.name)},
-        )
+        value = getattr(instance, self.name)
+        if pathlib.Path("dvc.yaml").exists() and self.use_dvc_yaml:
+            file_io.update_meta(
+                file=pathlib.Path("dvc.yaml"),
+                node_name=instance.name,
+                data={self.name: value},
+            )
+        else:
+            # load from zntrack.json
+            self._write_value_to_config(value, instance, encoder=znjson.ZnEncoder)
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
-        dvc_dict = yaml.safe_load(instance.state.fs.read_text("dvc.yaml"))
-        return dvc_dict["stages"][instance.name]["meta"].get(self.name, None)
+        if pathlib.Path("dvc.yaml").exists() and self.use_dvc_yaml:
+            dvc_dict = yaml.safe_load(instance.state.fs.read_text("dvc.yaml"))
+            return dvc_dict["stages"][instance.name]["meta"].get(self.name, None)
+        else:
+            # load from zntrack.json
+            zntrack_dict = json.loads(
+                instance.state.fs.read_text("zntrack.json"),
+            )
+            return json.loads(
+                json.dumps(zntrack_dict[instance.name][self.name]), cls=znjson.ZnDecoder
+            )
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""

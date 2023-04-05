@@ -29,17 +29,21 @@ class NodeWithEnvParam(NodeWithEnv):
     OMP_NUM_THREADS = zntrack.meta.Environment("1", is_parameter=True)
 
 
-def test_NodeWithMeta(proj_path):
-    NodeWithMeta().write_graph()
+@pytest.mark.parametrize("eager", [True, False])
+def test_NodeWithMeta(proj_path, eager):
+    with zntrack.Project() as project:
+        node_w_meta = NodeWithMeta()
 
-    node_w_meta = NodeWithMeta.from_rev()
+    project.run(eager=eager)
+    if not eager:
+        node_w_meta.load()
+        dvc_yaml = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+        assert dvc_yaml["stages"]["NodeWithMeta"]["meta"] == {
+            "author": "Fabian",
+            "title": "Test Node",
+        }
+
     assert node_w_meta.author == "Fabian"
-
-    dvc_yaml = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
-    assert dvc_yaml["stages"]["NodeWithMeta"]["meta"] == {
-        "author": "Fabian",
-        "title": "Test Node",
-    }
 
 
 class CombinedNodeWithMeta(zntrack.Node):
