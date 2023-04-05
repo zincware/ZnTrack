@@ -48,11 +48,6 @@ def test_NodeWithMeta(proj_path, eager):
     project.run(eager=eager)
     if not eager:
         node_w_meta.load()
-        dvc_yaml = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
-        assert dvc_yaml["stages"]["NodeWithMeta"]["meta"] == {
-            "author": "Fabian",
-            "title": "Test Node",
-        }
 
     assert node_w_meta.author == "Fabian"
 

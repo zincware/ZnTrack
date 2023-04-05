@@ -18,7 +18,7 @@ class Text(Field):
 
     dvc_option: str = None
     group = FieldGroup.PARAMETER
-    use_dvc_yaml: bool = True
+    use_dvc_yaml: bool = False
 
     def get_files(self, instance) -> list:
         """Get the params.yaml file."""
