@@ -40,23 +40,22 @@ class NodeWithEnvParam(NodeWithEnv):
     OMP_NUM_THREADS = zntrack.meta.Environment("1", is_parameter=True)
 
 
+@pytest.mark.parametrize("eager", [True, False])
+def test_NodeWithMeta(proj_path, eager):
+    with zntrack.Project() as project:
+        node_w_meta = NodeWithMeta()
+
+    project.run(eager=eager)
+    if not eager:
+        node_w_meta.load()
+
+    assert node_w_meta.author == "Fabian"
+
+
 def test_NodeWithEnvNone(proj_path):
     with zntrack.Project() as proj:
         _ = NodeWithEnvNone()  # the actual test is inside the run method.
     proj.run()
-
-
-def test_NodeWithMeta(proj_path):
-    NodeWithMeta().write_graph()
-
-    node_w_meta = NodeWithMeta.from_rev()
-    assert node_w_meta.author == "Fabian"
-
-    dvc_yaml = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
-    assert dvc_yaml["stages"]["NodeWithMeta"]["meta"] == {
-        "author": "Fabian",
-        "title": "Test Node",
-    }
 
 
 class CombinedNodeWithMeta(zntrack.Node):
