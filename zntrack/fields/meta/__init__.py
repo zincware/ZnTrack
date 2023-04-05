@@ -64,7 +64,7 @@ class Environment(Field):
 
         node_context = context.get(instance.name, {})
         value = getattr(instance, self.name)
-        if not isinstance(value, str):
+        if not isinstance(value, str) and value is not None:
             raise ValueError(f"Environment value must be a string, not {type(value)}")
         node_context[self.name] = value
         context[instance.name] = node_context
