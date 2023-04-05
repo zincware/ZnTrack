@@ -25,6 +25,17 @@ class NodeWithEnv(zntrack.Node):
         self.result = os.environ["OMP_NUM_THREADS"]
 
 
+class NodeWithEnvNone(zntrack.Node):
+    OMP_NUM_THREADS = zntrack.meta.Environment(None)
+
+    result = zntrack.zn.outs()
+
+    def run(self):
+        import os
+
+        assert "OMP_NUM_THREADS" not in os.environ
+
+
 class NodeWithEnvParam(NodeWithEnv):
     OMP_NUM_THREADS = zntrack.meta.Environment("1", is_parameter=True)
 
@@ -44,6 +55,12 @@ def test_NodeWithMeta(proj_path, eager):
         }
 
     assert node_w_meta.author == "Fabian"
+
+
+def test_NodeWithEnvNone(proj_path):
+    with zntrack.Project() as proj:
+        _ = NodeWithEnvNone()  # the actual test is inside the run method.
+    proj.run()
 
 
 class CombinedNodeWithMeta(zntrack.Node):
