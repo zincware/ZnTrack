@@ -18,10 +18,10 @@ jobs:
       - name: Install Poetry
         run: |
           pipx install poetry
-      - name: Set up Python ${{ matrix.python-version }}
+      - name: Set up Python 3.11
         uses: actions/setup-python@v3
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.11"
           cache: 'poetry'
       - name: Install lint tools
         run: |
@@ -40,6 +40,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
+          - "3.11" 
           - "3.10"
           - 3.9
           - 3.8
