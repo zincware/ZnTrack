@@ -56,7 +56,10 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     if env_file.exists():
         env = yaml.safe_load(env_file.read_text())
         for key, value in env.get(name, {}).items():
-            os.environ[key] = value
+            if value is None:
+                del os.environ.pop(key, None)
+            else:
+                os.environ[key] = value
 
     sys.path.append(pathlib.Path.cwd().as_posix())
 
