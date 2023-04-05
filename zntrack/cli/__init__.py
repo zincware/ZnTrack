@@ -57,7 +57,7 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
         env = yaml.safe_load(env_file.read_text())
         for key, value in env.get(name, {}).items():
             if value is None:
-                del os.environ.pop(key, None)
+                os.environ.pop(key, None)
             else:
                 os.environ[key] = value
 
