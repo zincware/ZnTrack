@@ -20,7 +20,12 @@ log = logging.getLogger(__name__)
 
 class _ProjectBase(znflow.DiGraph):
     def run(
-        self, eager=False, repro: bool = True, optional: dict = None, save: bool = True
+        self,
+        eager=False,
+        repro: bool = True,
+        optional: dict = None,
+        save: bool = True,
+        environment: dict = None,
     ):
         """Run the Project Graph.
 
@@ -38,9 +43,14 @@ class _ProjectBase(znflow.DiGraph):
             A dictionary of optional arguments for each node.
             Use {node_name: {arg_name: arg_value}} to pass arguments to nodes.
             Possible arg_names are e.g. 'always_changed: True'
+        environment : dict, default = None
+            A dictionary of environment variables for all nodes.
         """
         if not save and not eager:
             raise ValueError("Save can only be false if eager is True")
+
+        self._handle_environment(environment)
+
         if optional is None:
             optional = {}
         for node_uuid in self.get_sorted_nodes():
@@ -62,6 +72,18 @@ class _ProjectBase(znflow.DiGraph):
         if not eager and repro:
             run_dvc_cmd(["repro"])
             # TODO should we load the nodes here? Maybe, if lazy loading is implemented.
+
+    def _handle_environment(self, environment: dict):
+        """Write global environment variables to the env.yaml file."""
+        if environment is not None:
+            file = pathlib.Path("env.yaml")
+            try:
+                context = yaml.safe_load(file.read_text())
+            except FileNotFoundError:
+                context = {}
+
+            context["global"] = environment
+            file.write_text(yaml.safe_dump(context))
 
     def load(self):
         for node_uuid in self.get_sorted_nodes():
