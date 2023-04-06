@@ -55,9 +55,7 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
     env_file = pathlib.Path("env.yaml")
     if env_file.exists():
         env = yaml.safe_load(env_file.read_text())
-        for key, value in env.get("global", {}).items():
-            if value is not None:
-                os.environ[key] = value
+        os.environ.update(env.get("global", {}))
 
         for key, value in env.get("stages", {}).get(name, {}).items():
             if isinstance(value, str):
