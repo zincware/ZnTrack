@@ -134,6 +134,7 @@ class EnvAsDict(zntrack.Node):
         assert self.env["OMP_NUM_THREADS"] == "1"
         assert os.environ["OMP_NUM_THREADS"] == self.env["OMP_NUM_THREADS"]
         assert os.environ["ZNTRACK_EXAMPLE"] == "1"
+        assert os.environ["SPECIAL_ENV"] == "25"
 
 
 def test_EnvAsDict(proj_path):
