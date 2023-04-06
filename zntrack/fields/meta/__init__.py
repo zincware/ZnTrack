@@ -84,10 +84,15 @@ class Environment(Field):
 
         node_context = stages.get(instance.name, {})
         value = getattr(instance, self.name)
-        if not isinstance(value, str) and value is not None:
-            raise ValueError(f"Environment value must be a string, not {type(value)}")
-        node_context[self.name] = value
-        stages[instance.name] = node_context
+        if isinstance(value, (str, dict)):
+            node_context[self.name] = value
+            stages[instance.name] = node_context
+        elif value is None:
+            return
+        else:
+            raise ValueError(
+                f"Environment value must be a string or dict, not {type(value)}"
+            )
 
         context["stages"] = stages
         file.write_text(yaml.safe_dump(context))
