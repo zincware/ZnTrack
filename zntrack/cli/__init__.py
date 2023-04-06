@@ -60,7 +60,7 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
                 os.environ[key] = value
 
         for key, value in env.get("stages", {}).get(name, {}).items():
-            if value is not None:
+            if isinstance(value, str):
                 os.environ[key] = value
 
     sys.path.append(pathlib.Path.cwd().as_posix())
