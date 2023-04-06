@@ -60,6 +60,12 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
         for key, value in env.get("stages", {}).get(name, {}).items():
             if isinstance(value, str):
                 os.environ[key] = value
+            elif isinstance(value, dict):
+                os.environ.update(value)
+            elif value is None:
+                pass
+            else:
+                raise ValueError(f"Unknown value for env variable {key}: {value}")
 
     sys.path.append(pathlib.Path.cwd().as_posix())
 
