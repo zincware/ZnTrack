@@ -79,12 +79,17 @@ class Environment(Field):
         except FileNotFoundError:
             context = {}
 
-        node_context = context.get(instance.name, {})
+        stages = context.get("stages", {})
+        # TODO: when to reset the environment variables?
+
+        node_context = stages.get(instance.name, {})
         value = getattr(instance, self.name)
         if not isinstance(value, str) and value is not None:
             raise ValueError(f"Environment value must be a string, not {type(value)}")
         node_context[self.name] = value
-        context[instance.name] = node_context
+        stages[instance.name] = node_context
+
+        context["stages"] = stages
         file.write_text(yaml.safe_dump(context))
 
     def get_data(self, instance: "Node") -> any:
