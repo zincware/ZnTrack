@@ -49,7 +49,7 @@ class Config:
     interpreter: typing.Union[str, Path] = Path(sys.executable).name
     dvc_api: bool = True
     disable_operating_directory: bool = False
-    _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
+    _log_level: int = dataclasses.field(default=logging.DEBUG, init=False, repr=True)
 
     @property
     def log_level(self):

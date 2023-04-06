@@ -95,10 +95,10 @@ class Environment(Field):
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         env_dict = yaml.safe_load(instance.state.fs.read_text("env.yaml"))
-        return env_dict.get(instance.name, {}).get(self.name, None)
+        return env_dict.get("stages", {}).get(instance.name, {}).get(self.name, None)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
         if self.is_parameter:
-            return [("--params", f"env.yaml:{instance.name}.{self.name}")]
+            return [("--params", f"env.yaml:stages.{instance.name}.{self.name}")]
         return []
