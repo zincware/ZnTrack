@@ -52,12 +52,15 @@ class Project:
     automatic_node_names : bool, default = False
         If True, automatically add a number to the node name if the name is already
             used in the graph.
+    force : bool, default = False
+        overwrite existing nodes.
     """
 
     graph: znflow.DiGraph = dataclasses.field(default_factory=znflow.DiGraph, init=False)
     initialize: bool = True
     remove_existing_graph: bool = False
     automatic_node_names: bool = False
+    force: bool = False
 
     def __post_init__(self):
         """Initialize the Project.
@@ -86,7 +89,8 @@ class Project:
     def __exit__(self, *args, **kwargs):
         """Exit the graph context."""
         self.graph.__exit__(*args, **kwargs)
-        self.update_node_names()
+        if not self.force:
+            self.update_node_names()
 
     def update_node_names(self):
         """Update the node names to be unique."""

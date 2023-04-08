@@ -88,7 +88,7 @@ def test_CombinedNodeWithMeta(proj_path):
 
 @pytest.mark.parametrize("cls", [NodeWithEnv, NodeWithEnvParam])
 def test_NodeWithEnv(proj_path, cls):
-    with zntrack.Project() as proj:
+    with zntrack.Project(force=True) as proj:
         node = cls()  # the actual test is inside the run method.
     proj.run()
 

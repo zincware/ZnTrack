@@ -62,8 +62,9 @@ class DuplicateNodeNameError(Exception):
         """
         msg = (
             f"Node name {node.name} is already used in the graph. Please use"
-            " 'name=...' to specify a unique name or set"
+            " 'name=...' to specify a unique name or set the project attribute"
             " 'automatic_node_names=True' to automatically add a number to"
-            " the name."
+            " the name. Alternatively, set the project attribute 'force=True'"
+            " to overwrite existing nodes."
         )
         super().__init__(msg)
