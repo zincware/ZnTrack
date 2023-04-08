@@ -93,3 +93,18 @@ def test_project_repr_node(tmp_path_2):
     with zntrack.Project() as project:
         node = WriteIO(inputs="Hello World")
         print(node)
+
+
+def test_automatic_node_names(tmp_path_2):
+    with zntrack.Project(automatic_node_names=True) as project:
+        node = WriteIO(inputs="Hello World")
+        node2 = WriteIO(inputs="Lorem Ipsum")
+
+    assert node.name == "WriteIO"
+    assert node2.name == "WriteIO_1"
+
+    project.run()
+    project.load()
+
+    assert node.outputs == "Hello World"
+    assert node2.outputs == "Lorem Ipsum"

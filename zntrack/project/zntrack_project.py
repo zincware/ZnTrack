@@ -37,9 +37,26 @@ def _initalize():
 
 @dataclasses.dataclass
 class Project:
+    """The ZnTrack Project class.
+
+    Attributes
+    ----------
+    graph : znflow.DiGraph
+        the znflow graph of the project.
+    initialize : bool, default = True
+        If True, initialize a git repository and a dvc repository.
+    remove_existing_graph : bool, default = False
+        If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
+            before writing new nodes.
+    automatic_node_names : bool, default = False
+        If True, automatically add a number to the node name if the name is already
+            used in the graph.
+    """
+
     graph: znflow.DiGraph = dataclasses.field(default_factory=znflow.DiGraph, init=False)
     initialize: bool = True
     remove_existing_graph: bool = False
+    automatic_node_names: bool = False
 
     def __post_init__(self):
         """Initialize the Project.
@@ -64,11 +81,27 @@ class Project:
             pathlib.Path("params.yaml").unlink(missing_ok=True)
 
     def __enter__(self, *args, **kwargs):
+        """Enter the graph context."""
         self.graph.__enter__(*args, **kwargs)
         return self
 
     def __exit__(self, *args, **kwargs):
+        """Exit the graph context."""
+        if self.automatic_node_names:
+            self.update_node_names()
+
         return self.graph.__exit__(*args, **kwargs)
+
+    def update_node_names(self):
+        """Update the node names to be unique."""
+        node_names = []
+        for node_uuid in self.graph.get_sorted_nodes():
+            node: Node = self.graph.nodes[node_uuid]["value"]
+            idx = 0
+            while node.name in node_names:
+                idx += 1
+                node.name = f"{node.name}_{idx}"
+            node_names.append(node.name)
 
     def run(
         self, eager=False, repro: bool = True, optional: dict = None, save: bool = True

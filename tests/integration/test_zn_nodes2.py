@@ -1,6 +1,6 @@
 import pytest
 
-from zntrack import Node, Project, zn, exceptions
+from zntrack import Node, Project, exceptions, zn
 
 
 class NodeViaParams(Node):
