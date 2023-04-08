@@ -20,7 +20,9 @@ class NodeWithEnv(zntrack.Node):
     def run(self):
         import os
 
-        assert os.environ["OMP_NUM_THREADS"] == self.OMP_NUM_THREADS
+        assert (
+            os.environ["OMP_NUM_THREADS"] == self.OMP_NUM_THREADS
+        ), f'{os.environ["OMP_NUM_THREADS"]} != {self.OMP_NUM_THREADS}'
 
         self.result = os.environ["OMP_NUM_THREADS"]
 
@@ -36,8 +38,21 @@ class NodeWithEnvNone(zntrack.Node):
         assert "OMP_NUM_THREADS" not in os.environ
 
 
+class AssertGlobalEnv(zntrack.Node):
+    def run(self):
+        import os
+
+        assert os.environ["ZNTRACK_EXAMPLE"] == "1"
+
+
 class NodeWithEnvParam(NodeWithEnv):
     OMP_NUM_THREADS = zntrack.meta.Environment("1", is_parameter=True)
+
+
+def test_GlobalEnv(proj_path):
+    with zntrack.Project() as proj:
+        _ = AssertGlobalEnv()
+    proj.run(environment={"ZNTRACK_EXAMPLE": "1"})
 
 
 @pytest.mark.parametrize("eager", [True, False])
@@ -107,3 +122,22 @@ def test_NodeWithEnv(proj_path, cls):
     else:
         # env is not a parameter and will not cause rerun
         assert node.result == "1"
+
+
+class EnvAsDict(zntrack.Node):
+    env: dict = zntrack.meta.Environment({"OMP_NUM_THREADS": "1"})
+    SPECIAL_ENV = zntrack.meta.Environment()
+
+    def run(self):
+        import os
+
+        assert self.env["OMP_NUM_THREADS"] == "1"
+        assert os.environ["OMP_NUM_THREADS"] == self.env["OMP_NUM_THREADS"]
+        assert os.environ["ZNTRACK_EXAMPLE"] == "1"
+        assert os.environ["SPECIAL_ENV"] == "25"
+
+
+def test_EnvAsDict(proj_path):
+    with zntrack.Project() as proj:
+        _ = EnvAsDict(SPECIAL_ENV="25")  # the actual test is inside the run method.
+    proj.run(environment={"ZNTRACK_EXAMPLE": "1"})
