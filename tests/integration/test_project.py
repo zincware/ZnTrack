@@ -95,7 +95,14 @@ def test_project_repr_node(tmp_path_2):
         print(node)
 
 
-def test_automatic_node_names(tmp_path_2):
+def test_automatic_node_names_False(tmp_path_2):
+    with pytest.raises(zntrack.exceptions.DuplicateNodeNameError):
+        with zntrack.Project(automatic_node_names=False) as project:
+            _ = WriteIO(inputs="Hello World")
+            _ = WriteIO(inputs="Lorem Ipsum")
+
+
+def test_automatic_node_names_True(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
         node = WriteIO(inputs="Hello World")
         node2 = WriteIO(inputs="Lorem Ipsum")

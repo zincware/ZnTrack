@@ -12,6 +12,7 @@ import yaml
 import znflow
 from znflow.handler import UpdateConnectors
 
+from zntrack import exceptions
 from zntrack.core.node import Node, get_dvc_cmd
 from zntrack.utils import capture_run_dvc_cmd, run_dvc_cmd
 
@@ -84,20 +85,23 @@ class Project:
 
     def __exit__(self, *args, **kwargs):
         """Exit the graph context."""
-        if self.automatic_node_names:
-            self.update_node_names()
-
-        return self.graph.__exit__(*args, **kwargs)
+        self.graph.__exit__(*args, **kwargs)
+        self.update_node_names()
 
     def update_node_names(self):
         """Update the node names to be unique."""
         node_names = []
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
-            idx = 0
-            while node.name in node_names:
-                idx += 1
-                node.name = f"{node.name}_{idx}"
+            if self.automatic_node_names:
+                idx = 1
+                while node.name in node_names:
+                    node.name = f"{node.name}_{idx}"
+                    log.debug(f"Updating {node.name = }")
+                    idx += 1
+
+            elif node.name in node_names:
+                raise exceptions.DuplicateNodeNameError(node)
             node_names.append(node.name)
 
     def run(

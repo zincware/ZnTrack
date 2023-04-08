@@ -47,3 +47,23 @@ class ZnNodesOnGraphError(Exception):
         """
 
         super().__init__(msg)
+
+
+class DuplicateNodeNameError(Exception):
+    """Raised when a node is not available."""
+
+    def __init__(self, node):
+        """Initialize the exception.
+
+        Parameters
+        ----------
+        node: Node
+            The node that is already on the graph.
+        """
+        msg = (
+            f"Node name {node.name} is already used in the graph. Please use"
+            " 'name=...' to specify a unique name or set"
+            " 'automatic_node_names=True' to automatically add a number to"
+            " the name."
+        )
+        super().__init__(msg)
