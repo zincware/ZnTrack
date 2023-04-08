@@ -69,9 +69,6 @@ class Project:
             If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
               before writing new nodes.
         """
-        # TODO maybe it is not a good idea to base everything on the DiGraph class.
-        #  It seems to call some class methods
-        super().__init__()
         if self.initialize:
             _initalize()
         if self.remove_existing_graph:
