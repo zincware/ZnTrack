@@ -1,7 +1,9 @@
-import zntrack
-import znjson
 import json
+
 import pytest
+import znjson
+
+import zntrack
 
 
 @pytest.mark.parametrize("myslice", [slice(1, 2, 3), slice(1, 2), slice(1)])

@@ -12,13 +12,102 @@ import yaml
 import znflow
 from znflow.handler import UpdateConnectors
 
+from zntrack import exceptions
 from zntrack.core.node import Node, get_dvc_cmd
 from zntrack.utils import capture_run_dvc_cmd, run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
 
-class _ProjectBase(znflow.DiGraph):
+def _initalize():
+    """Initialize the project."""
+    try:
+        _ = git.Repo()
+    except git.exc.InvalidGitRepositoryError:
+        # TODO ASSERT IS EMPTY!
+        repo = git.Repo.init()
+        repo.init()
+        run_dvc_cmd(["init", "--quiet"])
+        # Create required files:
+        pathlib.Path("zntrack.json").write_text(json.dumps({}))
+        pathlib.Path("dvc.yaml").write_text(yaml.safe_dump({}))
+        pathlib.Path("params.yaml").write_text(yaml.safe_dump({}))
+        repo.git.add(A=True)
+        repo.index.commit("Project initialized.")
+
+
+@dataclasses.dataclass
+class Project:
+    """The ZnTrack Project class.
+
+    Attributes
+    ----------
+    graph : znflow.DiGraph
+        the znflow graph of the project.
+    initialize : bool, default = True
+        If True, initialize a git repository and a dvc repository.
+    remove_existing_graph : bool, default = False
+        If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
+            before writing new nodes.
+    automatic_node_names : bool, default = False
+        If True, automatically add a number to the node name if the name is already
+            used in the graph.
+    force : bool, default = False
+        overwrite existing nodes.
+    """
+
+    graph: znflow.DiGraph = dataclasses.field(default_factory=znflow.DiGraph, init=False)
+    initialize: bool = True
+    remove_existing_graph: bool = False
+    automatic_node_names: bool = False
+    force: bool = False
+
+    def __post_init__(self):
+        """Initialize the Project.
+
+        Attributes
+        ----------
+        initialize : bool, default = True
+            If True, initialize a git repository and a dvc repository.
+        remove_existing_graph : bool, default = False
+            If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
+              before writing new nodes.
+        """
+        if self.initialize:
+            _initalize()
+        if self.remove_existing_graph:
+            # we remove the files that typically contain the graph definition
+            pathlib.Path("zntrack.json").unlink(missing_ok=True)
+            pathlib.Path("dvc.yaml").unlink(missing_ok=True)
+            pathlib.Path("params.yaml").unlink(missing_ok=True)
+
+    def __enter__(self, *args, **kwargs):
+        """Enter the graph context."""
+        self.graph.__enter__(*args, **kwargs)
+        return self
+
+    def __exit__(self, *args, **kwargs):
+        """Exit the graph context."""
+        self.graph.__exit__(*args, **kwargs)
+        if not self.force:
+            self.update_node_names()
+
+    def update_node_names(self):
+        """Update the node names to be unique."""
+        node_names = []
+        for node_uuid in self.graph.get_sorted_nodes():
+            node: Node = self.graph.nodes[node_uuid]["value"]
+            if self.automatic_node_names:
+                idx = 1
+                while node.name in node_names:
+                    node.name = f"{node.name}_{idx}"
+                    log.debug(f"Updating {node.name = }")
+                    idx += 1
+
+            elif node.name in node_names:
+                raise exceptions.DuplicateNodeNameError(node)
+            node_names.append(node.name)
+
     def run(
         self,
         eager=False,
@@ -53,12 +142,13 @@ class _ProjectBase(znflow.DiGraph):
 
         if optional is None:
             optional = {}
-        for node_uuid in self.get_sorted_nodes():
-            node: Node = self.nodes[node_uuid]["value"]
+
+        for node_uuid in self.graph.get_sorted_nodes():
+            node: Node = self.graph.nodes[node_uuid]["value"]
             if eager:
                 # update connectors
                 log.info(f"Running node {node}")
-                self._update_node_attributes(node, UpdateConnectors())
+                self.graph._update_node_attributes(node, UpdateConnectors())
                 node.run()
                 if save:
                     node.save()
@@ -86,61 +176,23 @@ class _ProjectBase(znflow.DiGraph):
             file.write_text(yaml.safe_dump(context))
 
     def load(self):
-        for node_uuid in self.get_sorted_nodes():
-            node = self.nodes[node_uuid]["value"]
+        """Load all nodes in the project."""
+        for node_uuid in self.graph.get_sorted_nodes():
+            node = self.graph.nodes[node_uuid]["value"]
             node.load()
 
     def get_nodes(self) -> dict[str, znflow.Node]:
+        """Get the nodes in the project."""
         nodes = {}
-        for node_uuid in self.get_sorted_nodes():
-            node = self.nodes[node_uuid]["value"]
+        for node_uuid in self.graph.get_sorted_nodes():
+            node = self.graph.nodes[node_uuid]["value"]
             nodes[node.name] = node
         return nodes
 
-
-def _initalize():
-    """Initialize the project."""
-    try:
-        _ = git.Repo()
-    except git.exc.InvalidGitRepositoryError:
-        # TODO ASSERT IS EMPTY!
-        repo = git.Repo.init()
-        repo.init()
-        run_dvc_cmd(["init", "--quiet"])
-        # Create required files:
-        pathlib.Path("zntrack.json").write_text(json.dumps({}))
-        pathlib.Path("dvc.yaml").write_text(yaml.safe_dump({}))
-        pathlib.Path("params.yaml").write_text(yaml.safe_dump({}))
-        repo.git.add(A=True)
-        repo.index.commit("Project initialized.")
-
-
-class Project(_ProjectBase):
-    """The ZnTrack Project class."""
-
-    def __init__(
-        self, initialize: bool = True, remove_existing_graph: bool = False
-    ) -> None:
-        """Initialize the Project.
-
-        Attributes
-        ----------
-        initialize : bool, default = True
-            If True, initialize a git repository and a dvc repository.
-        remove_existing_graph : bool, default = False
-            If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
-              before writing new nodes.
-        """
-        # TODO maybe it is not a good idea to base everything on the DiGraph class.
-        #  It seems to call some class methods
-        super().__init__()
-        if initialize:
-            _initalize()
-        if remove_existing_graph:
-            # we remove the files that typically contain the graph definition
-            pathlib.Path("zntrack.json").unlink(missing_ok=True)
-            pathlib.Path("dvc.yaml").unlink(missing_ok=True)
-            pathlib.Path("params.yaml").unlink(missing_ok=True)
+    @property
+    def nodes(self) -> dict[str, znflow.Node]:
+        """Get the nodes in the project."""
+        return self.get_nodes()
 
     def create_branch(self, name: str) -> "Branch":
         """Create a branch in the project."""
@@ -158,8 +210,8 @@ class Project(_ProjectBase):
 
         yield exp
 
-        for node_uuid in self.get_sorted_nodes():
-            node: Node = self.nodes[node_uuid]["value"]
+        for node_uuid in self.graph.get_sorted_nodes():
+            node: Node = self.graph.nodes[node_uuid]["value"]
             node.save(results=False)
 
         cmd = ["exp", "run"]
@@ -176,7 +228,7 @@ class Project(_ProjectBase):
     @property
     def branches(self):
         """Get the branches in the project."""
-        repo = git.Repo()
+        repo = git.Repo()  # todo should be self.repo
         return [Branch(project=self, name=branch.name) for branch in repo.branches]
 
 
@@ -198,18 +250,18 @@ class Experiment:
 
     def __getitem__(self, key) -> Node:
         """Get the Node from the experiment."""
+        if len(self.nodes) == 0:
+            self.load()
         return self.nodes[key]
 
 
-class Branch(_ProjectBase):
+@dataclasses.dataclass
+class Branch:
     """The ZnTrack Branch class for managing experiments."""
 
-    def __init__(self, project=None, name=None) -> None:
-        """Initialize a Branch."""
-        super().__init__()
-        self.project = project
-        self.name = name
-        self.repo = git.Repo()
+    project: Project
+    name: str
+    repo: git.Repo = dataclasses.field(init=False, repr=False, default_factory=git.Repo)
 
     def create(self):
         """Create the branch."""
@@ -227,7 +279,7 @@ class Branch(_ProjectBase):
         self.repo.index.commit(f"parameters for {name}")
         run_dvc_cmd(["exp", "run", "--name", name, "--queue"])
 
-        for node_uuid in self.get_sorted_nodes():
-            node = self.nodes[node_uuid]["value"]
+        for node_uuid in self.graph.get_sorted_nodes():
+            node = self.graph.nodes[node_uuid]["value"]
             node.state.rev = name
         active_branch.checkout()

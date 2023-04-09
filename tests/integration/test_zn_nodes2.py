@@ -1,6 +1,6 @@
 import pytest
 
-from zntrack import Node, Project, zn, exceptions
+from zntrack import Node, Project, exceptions, zn
 
 
 class NodeViaParams(Node):
@@ -109,7 +109,7 @@ def test_ExampleNodeLst(proj_path, eager):
 
 
 def test_znodes_on_graph(proj_path):
-    project = Project()
+    project = Project(force=True)
     with project:
         with pytest.raises(exceptions.ZnNodesOnGraphError):
             _ = ExampleNodeLst(params=NodeViaParams(param1=1))
