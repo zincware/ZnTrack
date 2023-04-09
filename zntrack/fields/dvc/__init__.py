@@ -164,10 +164,10 @@ class PlotsOption(DVCOption):
         """Add 'dvc plots modify' to this option."""
         cmds = []
         for file in self.get_files(instance):
+            cmd = ["plots", "modify", file]
             for key, value in self.plots_options.items():
-                cmd = ["plots", "modify", file]
                 cmd.append(f"{key}")
-                cmd.append(value)
+                cmd.append(pathlib.Path(value).as_posix())
             cmds.append(cmd)
         return cmds
 

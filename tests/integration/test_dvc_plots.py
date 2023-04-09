@@ -23,3 +23,4 @@ def test_NodeWithPlots(proj_path, eager):
     project.run(eager=eager)
 
     assert node.get_data()["x"].tolist() == [1, 2, 3]
+    # TODO assert in dvc.yaml
