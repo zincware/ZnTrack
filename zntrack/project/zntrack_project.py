@@ -189,6 +189,11 @@ class Project:
             nodes[node.name] = node
         return nodes
 
+    @property
+    def nodes(self) -> dict[str, znflow.Node]:
+        """Get the nodes in the project."""
+        return self.get_nodes()
+
     def create_branch(self, name: str) -> "Branch":
         """Create a branch in the project."""
         branch = Branch(self, name)

@@ -112,6 +112,8 @@ def test_automatic_node_names_True(tmp_path_2):
 
     project.run()
     project.load()
+    assert "WriteIO" in project.nodes
+    assert "WriteIO_1" in project.nodes
 
     assert node.outputs == "Hello World"
     assert node2.outputs == "Lorem Ipsum"
