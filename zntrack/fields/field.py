@@ -225,11 +225,11 @@ class PlotsMixin(Field):
         super().__init__(*args, **kwargs)
         self.plots_options = {}
         self.use_global_plots = use_global_plots
-        # if self.use_global_plots:
-        #     if self.dvc_option == "plots":
-        #         self.dvc_option = "outs"
-        #     elif self.dvc_option == "plots-no-cache":
-        #         self.dvc_option = "outs-no-cache"
+        if self.use_global_plots:
+            if self.dvc_option == "plots":
+                self.dvc_option = "outs"
+            elif self.dvc_option == "plots-no-cache":
+                self.dvc_option = "outs-no-cache"
         if template is not None:
             self.plots_options["--template"] = pathlib.Path(template).as_posix()
         if x is not None:
