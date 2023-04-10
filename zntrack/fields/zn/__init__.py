@@ -246,6 +246,7 @@ class Plots(PlotsMixin, LazyField):
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
+        super().save(instance)
         try:
             value = self.get_value_except_lazy(instance)
         except DataIsLazyError:
