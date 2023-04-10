@@ -1,6 +1,7 @@
 import zntrack
 import pandas as pd
 import pytest
+import pathlib
 import yaml
 from zntrack.utils import run_dvc_cmd
 
@@ -79,6 +80,17 @@ class NodeWithPlotsDVCGlobal(zntrack.Node):
         return pd.read_csv(self.data)
 
 
+class NodeRemoteTemplate(zntrack.Node):
+    data = zntrack.dvc.plots(
+        zntrack.nwd / "data.csv",
+        template=zntrack.__file__,
+    )
+
+    def run(self) -> None:
+        df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6], "z": [7, 8, 9]})
+        df.to_csv(self.data)
+
+
 @pytest.mark.parametrize("cls", [NodeWithPlotsDVC, NodeWithPlotsZn])
 @pytest.mark.parametrize("eager", [True, False])
 def test_NodeWithPlots(proj_path, eager, cls):
@@ -104,6 +116,11 @@ def test_NodeWithPlots(proj_path, eager, cls):
             == plots
         )
         run_dvc_cmd(["plots", "show"])
+
+    if isinstance(node, NodeWithPlotsDVC):
+        assert NodeWithPlotsDVC.from_rev().data == pathlib.Path(
+            "nodes", node.name, "data.csv"
+        )
 
     assert node.get_data()["x"].tolist() == [1, 2, 3]
 
@@ -151,3 +168,12 @@ def test_multiple_plots_nodes(proj_path):
         NodeWithPlotsDVCGlobal()
     project.run()
     run_dvc_cmd(["plots", "show"])
+
+
+def test_NodeRemoteTemplate(proj_path):
+    with zntrack.Project(automatic_node_names=True) as project:
+        NodeRemoteTemplate()
+        NodeRemoteTemplate()
+    project.run(repro=False)
+
+    assert pathlib.Path("dvc_plots", "templates", "__init__.py").exists()

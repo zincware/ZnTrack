@@ -5,6 +5,7 @@ import enum
 import json
 import logging
 import pathlib
+import shutil
 import typing
 
 import yaml
@@ -244,8 +245,22 @@ class PlotsMixin(Field):
 
     def save(self, instance: "Node"):
         """Save plots options to dvc.yaml, if use_global_plots is True."""
+        if self.plots_options.get("--template") is not None:
+            template = pathlib.Path(self.plots_options["--template"]).resolve()
+            if pathlib.Path.cwd() not in template.parents:
+                # copy template to dvc_plots/templates if it is not in the cwd
+                template_dir = pathlib.Path.cwd() / "dvc_plots" / "templates"
+                template_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy(template, template_dir)
+                self.plots_options["--template"] = (
+                    (template_dir / template.name)
+                    .relative_to(pathlib.Path.cwd())
+                    .as_posix()
+                )
+
         if not self.use_global_plots:
             return
+
         dvc_file = pathlib.Path("dvc.yaml")
         if not dvc_file.exists():
             dvc_file.write_text(yaml.safe_dump({}))
