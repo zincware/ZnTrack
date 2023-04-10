@@ -6,6 +6,7 @@ import dataclasses
 import json
 import logging
 import pathlib
+import shutil
 
 import git
 import yaml
@@ -80,6 +81,7 @@ class Project:
             pathlib.Path("zntrack.json").unlink(missing_ok=True)
             pathlib.Path("dvc.yaml").unlink(missing_ok=True)
             pathlib.Path("params.yaml").unlink(missing_ok=True)
+            shutil.rmtree("nodes", ignore_errors=True)
 
     def __enter__(self, *args, **kwargs):
         """Enter the graph context."""
@@ -98,11 +100,12 @@ class Project:
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
             if self.automatic_node_names:
-                idx = 1
-                while node.name in node_names:
+                if node.name in node_names:
+                    idx = 1
+                    while f"{node.name}_{idx}" in node_names:
+                        idx += 1
                     node.name = f"{node.name}_{idx}"
                     log.debug(f"Updating {node.name = }")
-                    idx += 1
 
             elif node.name in node_names:
                 raise exceptions.DuplicateNodeNameError(node)

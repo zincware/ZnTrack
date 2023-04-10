@@ -106,9 +106,11 @@ def test_automatic_node_names_True(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
         node = WriteIO(inputs="Hello World")
         node2 = WriteIO(inputs="Lorem Ipsum")
+        node3 = WriteIO(inputs="Lorem Ipsum")
 
     assert node.name == "WriteIO"
     assert node2.name == "WriteIO_1"
+    assert node3.name == "WriteIO_2"
 
     project.run()
     project.load()
