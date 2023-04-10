@@ -225,7 +225,7 @@ class PlotsMixin(Field):
         self.plots_options = {}
         self.use_global_plots = use_global_plots  # change dvc option to outs?
         if template is not None:
-            self.plots_options["--template"] = template
+            self.plots_options["--template"] = pathlib.Path(template).as_posix()
         if x is not None:
             self.plots_options["-x"] = x
         if y is not None:

@@ -60,6 +60,25 @@ class NodeWithPlotsZnGlobal(zntrack.Node):
         return self.data
 
 
+class NodeWithPlotsDVCGlobal(zntrack.Node):
+    data = zntrack.dvc.plots(
+        zntrack.nwd / "data.csv",
+        x="x",
+        y=["y", "z"],
+        x_label="x",
+        y_label="y",
+        title="title",
+        template="linear",
+    )
+
+    def run(self) -> None:
+        df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6], "z": [7, 8, 9]})
+        df.to_csv(self.data)
+
+    def get_data(self):
+        return pd.read_csv(self.data)
+
+
 @pytest.mark.parametrize("cls", [NodeWithPlotsDVC, NodeWithPlotsZn])
 @pytest.mark.parametrize("eager", [True, False])
 def test_NodeWithPlots(proj_path, eager, cls):
@@ -89,7 +108,7 @@ def test_NodeWithPlots(proj_path, eager, cls):
     assert node.get_data()["x"].tolist() == [1, 2, 3]
 
 
-@pytest.mark.parametrize("cls", [NodeWithPlotsZnGlobal])
+@pytest.mark.parametrize("cls", [NodeWithPlotsZnGlobal, NodeWithPlotsDVCGlobal])
 @pytest.mark.parametrize("eager", [True, False])
 def test_NodeWithPlotsGlobal(proj_path, eager, cls):
     with zntrack.Project() as project:
@@ -114,3 +133,7 @@ def test_NodeWithPlotsGlobal(proj_path, eager, cls):
         run_dvc_cmd(["plots", "show"])
 
     assert node.get_data()["x"].tolist() == [1, 2, 3]
+
+
+def test_multiple_plots_nodes(proj_path):
+    pass
