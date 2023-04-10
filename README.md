@@ -52,16 +52,18 @@ class HelloWorld(Node):
         
 if __name__ == "__main__":
     # Write the computational graph
-    HelloWorld(max_number=512).write_graph()
+    with zntrack.Project() as project:
+        hello_world = HelloWorld(max_number=512)
+    project.run()
 ```
 
 This will create a [DVC](https://dvc.org) stage ``HelloWorld``.
 The workflow is defined in ``dvc.yaml`` and the parameters are stored in ``params.yaml``.
 
-You can run the workflow with ``dvc repro``.
+This will run the workflow with ``dvc repro`` automatically.
 Once the graph is executed, the results, i.e. the random number can be accessed directly by the Node object.
 ```python
-hello_world = HelloWorld.load()
+hello_world.load()
 print(hello_world.random_numer)
 ```
 An overview of all the ZnTrack features as well as more detailed examples can be found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).
@@ -81,7 +83,9 @@ def write_text(cfg: NodeConfig):
         cfg.params.text
     )
 # build the DVC graph
-write_text()
+with zntrack.Project() as project:
+    write_text()
+project.run()
 ````
 
 The ``cfg`` dataclass passed to the function provides access to all configured files
