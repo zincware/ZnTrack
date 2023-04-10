@@ -143,3 +143,11 @@ def test_multiple_plots_nodes(proj_path):
         NodeWithPlotsDVCGlobal()
     project.run()
     run_dvc_cmd(["plots", "show"])
+
+    with project:
+        NodeWithPlotsZnGlobal()
+        NodeWithPlotsZnGlobal()
+        NodeWithPlotsDVCGlobal()
+        NodeWithPlotsDVCGlobal()
+    project.run()
+    run_dvc_cmd(["plots", "show"])
