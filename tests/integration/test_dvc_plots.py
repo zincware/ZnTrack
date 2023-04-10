@@ -53,9 +53,11 @@ class NodeWithPlotsZnGlobal(zntrack.Node):
         title="title",
         template="linear",
     )
+    metrics = zntrack.zn.metrics()
 
     def run(self) -> None:
         self.data = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6], "z": [7, 8, 9]})
+        self.metrics = {"a": 1, "b": 2}
 
     def get_data(self):
         return self.data
@@ -71,10 +73,12 @@ class NodeWithPlotsDVCGlobal(zntrack.Node):
         title="title",
         template="linear",
     )
+    metrics = zntrack.dvc.metrics(zntrack.nwd / "metrics.json")
 
     def run(self) -> None:
         df = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6], "z": [7, 8, 9]})
         df.to_csv(self.data)
+        self.metrics.write_text("{'a': 1, 'b': 2}")
 
     def get_data(self):
         return pd.read_csv(self.data)
@@ -157,17 +161,22 @@ def test_multiple_plots_nodes(proj_path):
         NodeWithPlotsZnGlobal()
         NodeWithPlotsZnGlobal()
         NodeWithPlotsDVCGlobal()
-        NodeWithPlotsDVCGlobal()
+        a = NodeWithPlotsDVCGlobal()
     project.run()
     run_dvc_cmd(["plots", "show"])
 
     with project:
         NodeWithPlotsZnGlobal()
-        NodeWithPlotsZnGlobal()
+        b = NodeWithPlotsZnGlobal()
         NodeWithPlotsDVCGlobal()
         NodeWithPlotsDVCGlobal()
     project.run()
     run_dvc_cmd(["plots", "show"])
+    # run_dvc_cmd(["repro", "-f"])
+
+    # check loading
+    NodeWithPlotsDVCGlobal.from_rev(name=a.name)
+    NodeWithPlotsZnGlobal.from_rev(name=b.name)
 
 
 def test_NodeRemoteTemplate(proj_path):

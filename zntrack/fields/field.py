@@ -258,6 +258,8 @@ class PlotsMixin(Field):
                     .as_posix()
                 )
 
+        with contextlib.suppress(NotImplementedError):
+            super().save(instance=instance)
         if not self.use_global_plots:
             return
 
