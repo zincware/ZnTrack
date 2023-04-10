@@ -136,4 +136,10 @@ def test_NodeWithPlotsGlobal(proj_path, eager, cls):
 
 
 def test_multiple_plots_nodes(proj_path):
-    pass
+    with zntrack.Project(automatic_node_names=True) as project:
+        NodeWithPlotsZnGlobal()
+        NodeWithPlotsZnGlobal()
+        NodeWithPlotsDVCGlobal()
+        NodeWithPlotsDVCGlobal()
+    project.run()
+    run_dvc_cmd(["plots", "show"])
