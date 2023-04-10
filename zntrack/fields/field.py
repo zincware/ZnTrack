@@ -220,7 +220,7 @@ class PlotsMixin(Field):
         ----------
         use_global_plots : bool
             Save the plots config not in 'stages' but in 'plots' in the dvc.yaml file.
-        """            
+        """
         super().__init__(*args, **kwargs)
         self.plots_options = {}
         self.use_global_plots = use_global_plots
