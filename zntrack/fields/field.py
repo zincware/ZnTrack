@@ -232,7 +232,7 @@ class PlotsMixin(Field):
         """Add 'dvc plots modify' to this option."""
         cmds = []
         for file in self.get_files(instance):
-            cmd = ["plots", "modify", file]
+            cmd = ["plots", "modify", pathlib.Path(file).as_posix()]
             for key, value in self.plots_options.items():
                 cmd.append(f"{key}")
                 cmd.append(pathlib.Path(value).as_posix())

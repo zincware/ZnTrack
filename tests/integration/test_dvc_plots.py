@@ -4,9 +4,9 @@ import pytest
 import yaml
 
 
-class NodeWithPlots(zntrack.Node):
+class NodeWithPlotsDVC(zntrack.Node):
     data = zntrack.dvc.plots(
-        "data.csv",
+        zntrack.nwd / "data.csv",
         x="x",
         y="y",
         x_label="x",
@@ -23,14 +23,27 @@ class NodeWithPlots(zntrack.Node):
         return pd.read_csv(self.data)
 
 
+class NodeWithPlotsZn(zntrack.Node):
+    data = zntrack.zn.plots(
+        x="x", y="y", x_label="x", y_label="y", title="title", template="linear"
+    )
+
+    def run(self) -> None:
+        self.data = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
+
+    def get_data(self):
+        return self.data
+
+
+@pytest.mark.parametrize("cls", [NodeWithPlotsDVC, NodeWithPlotsZn])
 @pytest.mark.parametrize("eager", [True, False])
-def test_NodeWithPlots(proj_path, eager):
+def test_NodeWithPlots(proj_path, eager, cls):
     with zntrack.Project() as project:
-        node = NodeWithPlots()
+        node = cls()
     project.run(eager=eager)
 
-    assert node.get_data()["x"].tolist() == [1, 2, 3]
     if not eager:
+        node.load()
         dvc_dict = yaml.safe_load((proj_path / "dvc.yaml").read_text())
 
         plots = {
@@ -42,4 +55,9 @@ def test_NodeWithPlots(proj_path, eager):
             "template": "linear",
         }
 
-        assert dvc_dict["stages"]["NodeWithPlots"]["plots"][0]["data.csv"] == plots
+        assert (
+            dvc_dict["stages"][node.name]["plots"][0][f"nodes/{node.name}/data.csv"]
+            == plots
+        )
+
+    assert node.get_data()["x"].tolist() == [1, 2, 3]
