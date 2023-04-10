@@ -5,8 +5,10 @@ import enum
 import json
 import logging
 import pathlib
+import shutil
 import typing
 
+import yaml
 import zninit
 
 from zntrack.utils import LazyOption, config
@@ -196,3 +198,113 @@ class LazyField(Field):
             instance.__dict__[self.name] = LazyOption
         else:
             super().load(instance)
+
+
+class PlotsMixin(Field):
+    """DVC Plots Option including 'dvc plots modify' command."""
+
+    def __init__(
+        self,
+        *args,
+        template=None,
+        x=None,
+        y=None,
+        x_label=None,
+        y_label=None,
+        title=None,
+        use_global_plots: bool = True,
+        **kwargs,
+    ):
+        """Create a DVCOption field.
+
+        Attributes
+        ----------
+        use_global_plots : bool
+            Save the plots config not in 'stages' but in 'plots' in the dvc.yaml file.
+        """
+        super().__init__(*args, **kwargs)
+        self.plots_options = {}
+        self.use_global_plots = use_global_plots
+        if self.use_global_plots:
+            if self.dvc_option == "plots":
+                self.dvc_option = "outs"
+            elif self.dvc_option == "plots-no-cache":
+                self.dvc_option = "outs-no-cache"
+        if template is not None:
+            self.plots_options["--template"] = pathlib.Path(template).as_posix()
+        if x is not None:
+            self.plots_options["-x"] = x
+        if y is not None:
+            self.plots_options["-y"] = y
+        if x_label is not None:
+            self.plots_options["--x-label"] = x_label
+        if y_label is not None:
+            self.plots_options["--y-label"] = y_label
+        if title is not None:
+            self.plots_options["--title"] = title
+
+    def save(self, instance: "Node"):
+        """Save plots options to dvc.yaml, if use_global_plots is True."""
+        if self.plots_options.get("--template") is not None:
+            template = pathlib.Path(self.plots_options["--template"]).resolve()
+            if pathlib.Path.cwd() not in template.parents:
+                # copy template to dvc_plots/templates if it is not in the cwd
+                template_dir = pathlib.Path.cwd() / "dvc_plots" / "templates"
+                template_dir.mkdir(parents=True, exist_ok=True)
+                shutil.copy(template, template_dir)
+                self.plots_options["--template"] = (
+                    (template_dir / template.name)
+                    .relative_to(pathlib.Path.cwd())
+                    .as_posix()
+                )
+
+        with contextlib.suppress(NotImplementedError):
+            super().save(instance=instance)
+        if not self.use_global_plots:
+            return
+
+        dvc_file = pathlib.Path("dvc.yaml")
+        if not dvc_file.exists():
+            dvc_file.write_text(yaml.safe_dump({}))
+        dvc_config = yaml.safe_load(dvc_file.read_text())
+        plots = dvc_config.get("plots", [])
+
+        # remove leading "-/--"
+        for key in list(self.plots_options):
+            if key.startswith("--"):
+                self.plots_options[key[2:]] = self.plots_options[key]
+                del self.plots_options[key]
+            elif key.startswith("-"):
+                self.plots_options[key[1:]] = self.plots_options[key]
+                del self.plots_options[key]
+        # replace "-" with "_"
+        for key in list(self.plots_options):
+            if key.replace("-", "_") != key:
+                self.plots_options[key.replace("-", "_")] = self.plots_options[key]
+                del self.plots_options[key]
+
+        for file in self.get_files(instance):
+            replaced = False
+            for entry in plots:  # entry: dict{filename: {x:, y:, ...}}
+                if pathlib.Path(file) == pathlib.Path(next(iter(entry))):
+                    entry = {pathlib.Path(file).as_posix(): self.plots_options}
+                    replaced = True
+            if not replaced:
+                plots.append({pathlib.Path(file).as_posix(): self.plots_options})
+
+        dvc_config["plots"] = plots
+        dvc_file.write_text(yaml.dump(dvc_config))
+
+    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[typing.List[str]]:
+        """Add 'dvc plots modify' to this option."""
+        if not self.use_global_plots:
+            cmds = []
+            for file in self.get_files(instance):
+                cmd = ["plots", "modify", pathlib.Path(file).as_posix()]
+                for key, value in self.plots_options.items():
+                    cmd.append(f"{key}")
+                    cmd.append(pathlib.Path(value).as_posix())
+                cmds.append(cmd)
+            return cmds
+        else:
+            return []

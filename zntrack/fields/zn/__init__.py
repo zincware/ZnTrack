@@ -14,7 +14,7 @@ import znjson
 from znflow import handler
 
 from zntrack import exceptions
-from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField
+from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField, PlotsMixin
 from zntrack.utils import module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
@@ -234,7 +234,7 @@ class Output(LazyField):
         return [(f"--{self.dvc_option}", file.as_posix())]
 
 
-class Plots(LazyField):
+class Plots(PlotsMixin, LazyField):
     """A field that is saved to disk."""
 
     dvc_option: str = "plots"
@@ -246,6 +246,7 @@ class Plots(LazyField):
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
+        super().save(instance)
         try:
             value = self.get_value_except_lazy(instance)
         except DataIsLazyError:
