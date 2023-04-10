@@ -1,11 +1,18 @@
 import zntrack
 import pandas as pd
 import pytest
+import yaml
 
 
 class NodeWithPlots(zntrack.Node):
     data = zntrack.dvc.plots(
-        "data.csv", x="x", y="y", x_label="x", y_label="y", title="title"
+        "data.csv",
+        x="x",
+        y="y",
+        x_label="x",
+        y_label="y",
+        title="title",
+        template="linear",
     )
 
     def run(self) -> None:
@@ -23,4 +30,16 @@ def test_NodeWithPlots(proj_path, eager):
     project.run(eager=eager)
 
     assert node.get_data()["x"].tolist() == [1, 2, 3]
-    # TODO assert in dvc.yaml
+    if not eager:
+        dvc_dict = yaml.safe_load((proj_path / "dvc.yaml").read_text())
+
+        plots = {
+            "x": "x",
+            "y": "y",
+            "x_label": "x",
+            "y_label": "y",
+            "title": "title",
+            "template": "linear",
+        }
+
+        assert dvc_dict["stages"]["NodeWithPlots"]["plots"][0]["data.csv"] == plots

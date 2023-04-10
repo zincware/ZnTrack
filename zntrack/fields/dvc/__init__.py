@@ -5,7 +5,7 @@ import typing
 
 import znjson
 
-from zntrack.fields.field import Field, FieldGroup
+from zntrack.fields.field import Field, FieldGroup, PlotsMixin
 from zntrack.utils import node_wd
 
 if typing.TYPE_CHECKING:
@@ -130,46 +130,8 @@ class DVCOption(Field):
         return node_wd.ReplaceNWD()(value, nwd=instance.nwd)
 
 
-class PlotsOption(DVCOption):
-    """DVC Plots Option including 'dvc plots modify' command."""
-
-    def __init__(
-        self,
-        *args,
-        template=None,
-        x=None,
-        y=None,
-        x_label=None,
-        y_label=None,
-        title=None,
-        **kwargs,
-    ):
-        """Create a DVCOption field."""
-        super().__init__(*args, **kwargs)
-        self.plots_options = {}
-        if template is not None:
-            self.plots_options["--template"] = template
-        if x is not None:
-            self.plots_options["-x"] = x
-        if y is not None:
-            self.plots_options["-y"] = y
-        if x_label is not None:
-            self.plots_options["--x-label"] = x_label
-        if y_label is not None:
-            self.plots_options["--y-label"] = y_label
-        if title is not None:
-            self.plots_options["--title"] = title
-
-    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[typing.List[str]]:
-        """Add 'dvc plots modify' to this option."""
-        cmds = []
-        for file in self.get_files(instance):
-            cmd = ["plots", "modify", file]
-            for key, value in self.plots_options.items():
-                cmd.append(f"{key}")
-                cmd.append(pathlib.Path(value).as_posix())
-            cmds.append(cmd)
-        return cmds
+class PlotsOption(PlotsMixin, DVCOption):
+    """Field with DVC plots kwargs."""
 
 
 def outs(*args, **kwargs) -> DVCOption:

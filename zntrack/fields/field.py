@@ -196,3 +196,45 @@ class LazyField(Field):
             instance.__dict__[self.name] = LazyOption
         else:
             super().load(instance)
+
+
+class PlotsMixin(Field):
+    """DVC Plots Option including 'dvc plots modify' command."""
+
+    def __init__(
+        self,
+        *args,
+        template=None,
+        x=None,
+        y=None,
+        x_label=None,
+        y_label=None,
+        title=None,
+        **kwargs,
+    ):
+        """Create a DVCOption field."""
+        super().__init__(*args, **kwargs)
+        self.plots_options = {}
+        if template is not None:
+            self.plots_options["--template"] = template
+        if x is not None:
+            self.plots_options["-x"] = x
+        if y is not None:
+            self.plots_options["-y"] = y
+        if x_label is not None:
+            self.plots_options["--x-label"] = x_label
+        if y_label is not None:
+            self.plots_options["--y-label"] = y_label
+        if title is not None:
+            self.plots_options["--title"] = title
+
+    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[typing.List[str]]:
+        """Add 'dvc plots modify' to this option."""
+        cmds = []
+        for file in self.get_files(instance):
+            cmd = ["plots", "modify", file]
+            for key, value in self.plots_options.items():
+                cmd.append(f"{key}")
+                cmd.append(pathlib.Path(value).as_posix())
+            cmds.append(cmd)
+        return cmds
