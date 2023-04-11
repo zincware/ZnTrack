@@ -21,6 +21,20 @@ class OutsAsNWD(zntrack.Node):
     def run(self):
         (self.outs / "test.txt").write_text(self.text)
 
+    @property
+    def file(self):
+        return self.outs / "test.txt"
+
+
+class FileToOuts(zntrack.Node):
+    # although, this is a file path, it has to be zn.deps
+    file = zntrack.zn.deps()
+    text = zntrack.zn.outs()
+
+    def run(self):
+        with open(self.file, "r") as f:
+            self.text = f.read()
+
 
 @pytest.mark.parametrize("eager", [True, False])
 def test_WriteToNWD(proj_path, eager):
@@ -46,3 +60,13 @@ def test_OutAsNWD(proj_path, eager):
     if not eager:
         outs_as_nwd.load()
     assert outs_as_nwd.__dict__["outs"] == zntrack.nwd
+
+
+def test_FileToOuts(proj_path):
+    with zntrack.Project() as project:
+        write_to_nwd = OutsAsNWD(text="Hello World")
+        file_to_outs = FileToOuts(file=write_to_nwd.file)
+
+    project.run()
+    file_to_outs.load()
+    assert file_to_outs.text == "Hello World"
