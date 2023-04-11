@@ -37,6 +37,20 @@ def _initalize():
         repo.index.commit("Project initialized.")
 
 
+class ZnTrackGraph(znflow.DiGraph):
+    """Subclass of the znflow.DiGraph."""
+
+    project: Project = None
+
+    def add_node(self, node_for_adding, **attr):
+        """Rename Nodes if required."""
+        value = super().add_node(node_for_adding, **attr)
+        if self.project.automatic_node_names and not self.project.force:
+            # TODO this might be slow?
+            self.project.update_node_names()
+        return value
+
+
 @dataclasses.dataclass
 class Project:
     """The ZnTrack Project class.
@@ -57,7 +71,7 @@ class Project:
         overwrite existing nodes.
     """
 
-    graph: znflow.DiGraph = dataclasses.field(default_factory=znflow.DiGraph, init=False)
+    graph: znflow.DiGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
     initialize: bool = True
     remove_existing_graph: bool = False
     automatic_node_names: bool = False
@@ -74,6 +88,7 @@ class Project:
             If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
               before writing new nodes.
         """
+        self.graph.project = self
         if self.initialize:
             _initalize()
         if self.remove_existing_graph:
@@ -91,8 +106,6 @@ class Project:
     def __exit__(self, *args, **kwargs):
         """Exit the graph context."""
         self.graph.__exit__(*args, **kwargs)
-        if not self.force:
-            self.update_node_names()
 
     def update_node_names(self):
         """Update the node names to be unique."""
