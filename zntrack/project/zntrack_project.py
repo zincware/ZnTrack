@@ -45,7 +45,10 @@ class ZnTrackGraph(znflow.DiGraph):
     def add_node(self, node_for_adding, **attr):
         """Rename Nodes if required."""
         value = super().add_node(node_for_adding, **attr)
-        self.project.update_node_names()
+        self.project.update_node_names(check=False)
+        # this is called in __new__ and therefore,
+        # the name might not be set correctly.
+        # update node names only works, if name is not set.
         return value
 
 
@@ -104,22 +107,23 @@ class Project:
     def __exit__(self, *args, **kwargs):
         """Exit the graph context."""
         self.graph.__exit__(*args, **kwargs)
+        self.update_node_names()
 
-    def update_node_names(self):
+    def update_node_names(self, check=True):
         """Update the node names to be unique."""
         node_names = []
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
-            if self.automatic_node_names:
-                if node.name in node_names:
+            if node.name in node_names:
+                if self.automatic_node_names:
                     idx = 1
                     while f"{node.name}_{idx}" in node_names:
                         idx += 1
                     node.name = f"{node.name}_{idx}"
                     log.debug(f"Updating {node.name = }")
 
-            elif node.name in node_names and not self.force:
-                raise exceptions.DuplicateNodeNameError(node)
+                elif not self.force and check:
+                    raise exceptions.DuplicateNodeNameError(node)
             node_names.append(node.name)
 
     def run(
