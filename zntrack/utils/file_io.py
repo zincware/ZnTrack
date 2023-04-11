@@ -62,7 +62,7 @@ def write_file(file: pathlib.Path, value: dict, mkdir: bool = True):
         raise ValueError(f"File with suffix {file.suffix} is not supported")
 
 
-def clear_config_file(file: pathlib.Path, node_name: str):
+def clear_config_file(file: pathlib.Path | str, node_name: str):
     """Clear the entries in the files for the given node name.
 
     Parameters
@@ -72,6 +72,7 @@ def clear_config_file(file: pathlib.Path, node_name: str):
     node_name: str
         The name of the Node
     """
+    file = pathlib.Path(file)
     try:
         file_content = read_file(file)
     except FileNotFoundError:

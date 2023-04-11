@@ -100,13 +100,31 @@ def test_automatic_node_names_False(tmp_path_2):
         with zntrack.Project(automatic_node_names=False) as project:
             _ = WriteIO(inputs="Hello World")
             _ = WriteIO(inputs="Lorem Ipsum")
+    with pytest.raises(zntrack.exceptions.DuplicateNodeNameError):
+        with zntrack.Project(automatic_node_names=False) as project:
+            _ = WriteIO(inputs="Hello World", name="NodeA")
+            _ = WriteIO(inputs="Lorem Ipsum", name="NodeA")
+
+
+def test_automatic_node_names_default(tmp_path_2):
+    with zntrack.Project(automatic_node_names=False) as project:
+        _ = WriteIO(inputs="Hello World")
+        _ = WriteIO(inputs="Lorem Ipsum", name="WriteIO2")
 
 
 def test_automatic_node_names_True(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
         node = WriteIO(inputs="Hello World")
         node2 = WriteIO(inputs="Lorem Ipsum")
-        node3 = WriteIO(inputs="Lorem Ipsum")
+        assert node.name == "WriteIO"
+        assert node2.name == "WriteIO_1"
+    project.run()
+
+    with project:
+        node3 = WriteIO(inputs="Dolor Sit")
+        assert node3.name == "WriteIO_2"
+
+    project.run()
 
     assert node.name == "WriteIO"
     assert node2.name == "WriteIO_1"
@@ -116,6 +134,8 @@ def test_automatic_node_names_True(tmp_path_2):
     project.load()
     assert "WriteIO" in project.nodes
     assert "WriteIO_1" in project.nodes
+    assert "WriteIO_2" in project.nodes
 
     assert node.outputs == "Hello World"
     assert node2.outputs == "Lorem Ipsum"
+    assert node3.outputs == "Dolor Sit"

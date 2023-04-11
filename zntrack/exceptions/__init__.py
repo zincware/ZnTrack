@@ -61,7 +61,7 @@ class DuplicateNodeNameError(Exception):
             The node that is already on the graph.
         """
         msg = (
-            f"Node name {node.name} is already used in the graph. Please use"
+            f"Node name '{node.name}' is already used in the graph. Please use"
             " 'name=...' to specify a unique name or set the project attribute"
             " 'automatic_node_names=True' to automatically add a number to"
             " the name. Alternatively, set the project attribute 'force=True'"

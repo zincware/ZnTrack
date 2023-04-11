@@ -37,6 +37,21 @@ def _initalize():
         repo.index.commit("Project initialized.")
 
 
+class ZnTrackGraph(znflow.DiGraph):
+    """Subclass of the znflow.DiGraph."""
+
+    project: Project = None
+
+    def add_node(self, node_for_adding, **attr):
+        """Rename Nodes if required."""
+        value = super().add_node(node_for_adding, **attr)
+        self.project.update_node_names(check=False)
+        # this is called in __new__ and therefore,
+        # the name might not be set correctly.
+        # update node names only works, if name is not set.
+        return value
+
+
 @dataclasses.dataclass
 class Project:
     """The ZnTrack Project class.
@@ -57,7 +72,7 @@ class Project:
         overwrite existing nodes.
     """
 
-    graph: znflow.DiGraph = dataclasses.field(default_factory=znflow.DiGraph, init=False)
+    graph: znflow.DiGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
     initialize: bool = True
     remove_existing_graph: bool = False
     automatic_node_names: bool = False
@@ -74,6 +89,7 @@ class Project:
             If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
               before writing new nodes.
         """
+        self.graph.project = self
         if self.initialize:
             _initalize()
         if self.remove_existing_graph:
@@ -91,24 +107,23 @@ class Project:
     def __exit__(self, *args, **kwargs):
         """Exit the graph context."""
         self.graph.__exit__(*args, **kwargs)
-        if not self.force:
-            self.update_node_names()
+        self.update_node_names()
 
-    def update_node_names(self):
+    def update_node_names(self, check=True):
         """Update the node names to be unique."""
         node_names = []
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
-            if self.automatic_node_names:
-                if node.name in node_names:
+            if node.name in node_names:
+                if self.automatic_node_names:
                     idx = 1
                     while f"{node.name}_{idx}" in node_names:
                         idx += 1
                     node.name = f"{node.name}_{idx}"
                     log.debug(f"Updating {node.name = }")
 
-            elif node.name in node_names:
-                raise exceptions.DuplicateNodeNameError(node)
+                elif not self.force and check:
+                    raise exceptions.DuplicateNodeNameError(node)
             node_names.append(node.name)
 
     def run(

@@ -1,6 +1,7 @@
 import pytest
 
 from zntrack import Node, Project, exceptions, zn
+import shutil
 
 
 class NodeViaParams(Node):
@@ -117,3 +118,36 @@ def test_znodes_on_graph(proj_path):
     with project:
         with pytest.raises(exceptions.ZnNodesOnGraphError):
             _ = ExampleNodeLst(params=[NodeViaParams(param1=1)])
+
+
+class RandomNumberGen(Node):
+    def get_rnd(self):
+        import random
+
+        return random.random()
+
+
+class ExampleNodeWithRandomNumberGen(Node):
+    rnd: RandomNumberGen = zn.nodes()
+
+    outs = zn.outs()
+
+    def run(self):
+        self.outs = self.rnd.get_rnd()
+
+
+def test_znodes_with_random_number_gen(proj_path):
+    project = Project(force=True)
+
+    rnd = RandomNumberGen()
+
+    with project:
+        node = ExampleNodeWithRandomNumberGen(rnd=rnd)
+    project.run()
+    node.load(lazy=False)
+    shutil.rmtree("nodes")
+
+    project.run()
+
+    node2 = node.from_rev()
+    assert node.outs == node2.outs
