@@ -462,6 +462,8 @@ class NodeField(Dependency):
                 "--force",
                 "--outs",
                 f"nodes/{name}/hash",
+                "--params",
+                f"zntrack.json:{instance.name}.{self.name}.value.name",
             ]
             field_cmds = []
             for attr in zninit.get_descriptors(Params, self=node):
