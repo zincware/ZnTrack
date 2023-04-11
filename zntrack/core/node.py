@@ -167,7 +167,9 @@ class Node(zninit.ZnInit, znflow.Node):
         if config.nb_name:
             self.convert_notebook(config.nb_name)
 
-        file_io.clear_config_file(file="params.yaml", node_name=self.name)
+        if parameter:
+            file_io.clear_config_file(file="params.yaml", node_name=self.name)
+            file_io.clear_config_file(file="zntrack.json", node_name=self.name)
 
         for attr in zninit.get_descriptors(Field, self=self):
             if attr.group == FieldGroup.PARAMETER and parameter:

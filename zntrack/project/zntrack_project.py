@@ -45,9 +45,7 @@ class ZnTrackGraph(znflow.DiGraph):
     def add_node(self, node_for_adding, **attr):
         """Rename Nodes if required."""
         value = super().add_node(node_for_adding, **attr)
-        if self.project.automatic_node_names and not self.project.force:
-            # TODO this might be slow?
-            self.project.update_node_names()
+        self.project.update_node_names()
         return value
 
 
@@ -120,7 +118,7 @@ class Project:
                     node.name = f"{node.name}_{idx}"
                     log.debug(f"Updating {node.name = }")
 
-            elif node.name in node_names:
+            elif node.name in node_names and not self.force:
                 raise exceptions.DuplicateNodeNameError(node)
             node_names.append(node.name)
 
