@@ -17,7 +17,13 @@ import znjson
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import NodeStatusResults, deprecated, module_handler, run_dvc_cmd
+from zntrack.utils import (
+    NodeStatusResults,
+    deprecated,
+    file_io,
+    module_handler,
+    run_dvc_cmd,
+)
 from zntrack.utils.config import config
 
 log = logging.getLogger(__name__)
@@ -160,6 +166,8 @@ class Node(zninit.ZnInit, znflow.Node):
         # Jupyter Notebook
         if config.nb_name:
             self.convert_notebook(config.nb_name)
+
+        file_io.clear_config_file(file="params.yaml", node_name=self.name)
 
         for attr in zninit.get_descriptors(Field, self=self):
             if attr.group == FieldGroup.PARAMETER and parameter:
