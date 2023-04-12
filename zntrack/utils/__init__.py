@@ -58,6 +58,8 @@ def module_handler(obj) -> str:
         except AttributeError:
             return f"{config.nb_class_path}.{obj.__class__.__name__}"
     if obj.__module__ != "__main__":
+        if hasattr(obj, "_module_"):  # allow module override
+            return obj._module_
         return obj.__module__
     if pathlib.Path(sys.argv[0]).stem == "ipykernel_launcher":
         # special case for e.g. testing
