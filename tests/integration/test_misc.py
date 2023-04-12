@@ -50,3 +50,19 @@ def test_SwitchNode(proj_path):
 
     params = yaml.safe_load(pathlib.Path("params.yaml").read_text())
     assert params["Node"] == {"params2": 2}
+
+
+class CustomModule(zntrack.Node):
+    _module_ = "zntrack.nodes"
+
+
+def test_CustomModule(proj_path):
+    with zntrack.Project() as proj:
+        CustomModule()
+    proj.run(repro=False)
+
+    dvc = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    assert (
+        dvc["stages"]["CustomModule"]["cmd"]
+        == "zntrack run zntrack.nodes.CustomModule --name CustomModule"
+    )
