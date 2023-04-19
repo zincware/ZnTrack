@@ -7,10 +7,12 @@ import functools
 import importlib
 import logging
 import pathlib
+import time
 import typing
 
 import dvc.api
 import dvc.cli
+import dvc.utils.strictyaml
 import znflow
 import zninit
 import znjson
@@ -61,10 +63,16 @@ class NodeStatus:
     @functools.cached_property
     def fs(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
-        return dvc.api.DVCFileSystem(
-            url=self.remote,
-            rev=self.rev,
-        )
+        for _ in range(10):
+            try:
+                return dvc.api.DVCFileSystem(
+                    url=self.remote,
+                    rev=self.rev,
+                )
+            except dvc.utils.strictyaml.YAMLValidationError as err:
+                log.debug(err)
+                time.sleep(0.1)
+        raise dvc.utils.strictyaml.YAMLValidationError
 
 
 class _NameDescriptor(zninit.Descriptor):
