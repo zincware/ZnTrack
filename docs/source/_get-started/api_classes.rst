@@ -13,12 +13,13 @@ Compared to the function-based approach, the class-based approach has several ad
 - The class state can be serialized more easily.
 - Parameters, inputs, and outputs are handled as class attributes, simplifying the creation of new Nodes.
 
-To define a custom Node, simply inherit from the Node class. Parameters and outputs can be defined in two ways. The ``from zntrack import zn`` module enables seamless integration with your existing workflows, allowing Python objects to be automatically serialized.
+To define a custom Node, simply inherit from the Node class. Parameters and outputs can be defined in two ways.
+The ``from zntrack import zn`` module enables seamless integration with your existing workflows, allowing Python objects to be automatically serialized.
 
 
 ..  code-block:: python
 
-    from zntrack import Node, zn
+    from zntrack import Node, zn, Project
 
     class SumValues(Node):
         """Node to compute the sum of two parameters."""
@@ -32,14 +33,16 @@ To define a custom Node, simply inherit from the Node class. Parameters and outp
             self.result = self.a + self.b
 
     if __name__ == "__main__":
-        SumValues(a=1, b=2).write_graph()
+        with Project() as project:
+            node = SumValues(a=1, b=2)
+        project.run(repro=False)
 
 We define our parameter using ``zn.params()`` and define the respective output using ``zn.outs()``.
 
 Gather results
 --------------
 
-Using ``<Node>.write_graph()`` will add the Node as a stage to the DVC Graph.
+Using ``project.run(repro=False)`` will add the Node as a stage to the DVC Graph.
 To access the results, we need to run the first graph.
 
 
@@ -52,9 +55,15 @@ It is not only possible to access the results, but also the parameters and input
 
 ..  code-block:: python
 
-    sum_values = SumValues.load()
-    print(sum_values.result)  # will print 3
-    print(sum_values.a)  # will print 1
+    node.load()
+    print(node.result)  # will print 3
+    print(node.a)  # will print 1
+
+If you don't have access to the ``node`` object, you can also load the Node based on it's name:
+
+..  code-block:: python
+
+    node = SumValues.from_rev(name="SumValues")
 
 Explanation
 -----------
@@ -63,7 +72,7 @@ The same files as in the previous ``@nodify`` example are created.
 The main difference is the ``outs`` of our Node ``SumValues``.
 Using the `zntrack.zn` module will store results in the Node Working Directory (``nwd``),
 It is typically set as ``nodes/<nodename>``.
-The ``outs.json`` file is used, when calling ``SumValues.load()`` to gather the results.
+The ``outs.json`` file is used, when calling ``node.load()`` to gather the results.
 
 
 ..  code-block:: yaml

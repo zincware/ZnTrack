@@ -25,7 +25,7 @@ We specify two arguments:
 - ``params``: The parameters of the Node. A dictionary of values used as parameters.
 
 The ``write_text`` function receives these arguments as a ``NodeConfig`` object.
-To put the Node on the graph, we need to run it via ``write_text()``.
+To put the Node on the graph, we need to run it inside the ``zntrack.Project``.
 
 
 ..  caution::
@@ -34,14 +34,7 @@ To put the Node on the graph, we need to run it via ``write_text()``.
 
 Gather results
 --------------
-Running ``write_text()`` alone will not call the function itself.
-Instead, it will create a Node on the DVC graph.
-To access the results, we need to run the graph using:
-
-..  code-block:: bash
-
-    dvc repro
-
+To access the results, we need to run the graph using ``project.run()`` or ``dvc repro``.
 This will run the Node and save the results to disk.
 The file ``outs.txt`` is created with the content ``Lorem Ipsum``.
 At this stage, running the graph again using ``dvc repro`` won't have an affect.
