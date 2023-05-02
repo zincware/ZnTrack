@@ -14,7 +14,13 @@ import znjson
 from znflow import handler
 
 from zntrack import exceptions
-from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField, PlotsMixin
+from zntrack.fields.field import (
+    DataIsLazyError,
+    Field,
+    FieldGroup,
+    LazyField,
+    PlotsMixin,
+)
 from zntrack.utils import module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
