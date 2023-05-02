@@ -117,3 +117,7 @@ exclude = [
     "tests",
     "docs",
 ]
+
+
+[tool.codespell]
+skip = "poetry.lock"
