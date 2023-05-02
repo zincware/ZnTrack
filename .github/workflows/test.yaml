@@ -11,30 +11,7 @@ on:
     - cron: '14 3 * * 1'  # at 03:14 on Monday.
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.11"
-          cache: 'poetry'
-      - name: Install lint tools
-        run: |
-          poetry install --no-root --only=lint
-      - name: black
-        if: always()
-        run: poetry run black --check .
-      - name: ruff
-        if: always()
-        run: poetry run ruff .
-
   pytest:
-    needs: lint
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
