@@ -1,8 +1,10 @@
-import zntrack
+import pathlib
+
 import pandas as pd
 import pytest
-import pathlib
 import yaml
+
+import zntrack
 from zntrack.utils import run_dvc_cmd
 
 

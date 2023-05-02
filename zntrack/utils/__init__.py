@@ -124,7 +124,7 @@ def run_dvc_cmd(script):
 
 
 def capture_run_dvc_cmd(script) -> str:
-    """Try to caputre the output of the DVC command."""
+    """Try to capture the output of the DVC command."""
     with unittest.mock.patch("dvc.ui.ui.write") as magic_mock:
         run_dvc_cmd(script)
     return magic_mock.call_args.args[0]

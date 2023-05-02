@@ -14,7 +14,13 @@ import znjson
 from znflow import handler
 
 from zntrack import exceptions
-from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField, PlotsMixin
+from zntrack.fields.field import (
+    DataIsLazyError,
+    Field,
+    FieldGroup,
+    LazyField,
+    PlotsMixin,
+)
 from zntrack.utils import module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
@@ -393,7 +399,7 @@ class NodeField(Dependency):
     """
 
     def __set__(self, instance, value):
-        """Disbale the _graph_ in the value 'Node'."""
+        """Disable the _graph_ in the value 'Node'."""
         if value is None:
             return super().__set__(instance, value)
 
