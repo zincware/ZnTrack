@@ -1,7 +1,8 @@
+import shutil
+
 import pytest
 
 from zntrack import Node, Project, exceptions, zn
-import shutil
 
 
 class NodeViaParams(Node):
