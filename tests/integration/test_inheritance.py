@@ -3,17 +3,17 @@ import pytest
 from zntrack import Node, zn
 
 
-class InOuts(Node):
+class InputsOutputs(Node):
     inputs = zn.params()
     outputs = zn.outs()
 
 
-class WriteData(InOuts):
+class WriteData(InputsOutputs):
     def run(self):
         self.outputs = self.inputs
 
 
-class WriteDataWithInit(InOuts):
+class WriteDataWithInit(InputsOutputs):
     def __init__(self, inputs=None, **kwargs):
         super().__init__(inputs=inputs, **kwargs)
         # this calls the auto_init of the subclass which demands the inputs argument!
@@ -57,7 +57,7 @@ def test_simple_inheritance(proj_path, cls):
     assert cls.from_rev().outputs == "HelloWorld"
 
 
-class WriteCustomData(InOuts):
+class WriteCustomData(InputsOutputs):
     custom = zn.params()
 
     def run(self):

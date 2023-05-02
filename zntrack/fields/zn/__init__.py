@@ -393,7 +393,7 @@ class NodeField(Dependency):
     """
 
     def __set__(self, instance, value):
-        """Disbale the _graph_ in the value 'Node'."""
+        """Disable the _graph_ in the value 'Node'."""
         if value is None:
             return super().__set__(instance, value)
 
