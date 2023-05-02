@@ -11,7 +11,7 @@ Let us assume two Nodes ``GenerateData`` and ``ProcessData``.
 We can connect these Nodes as follows:
 
 .. code-block:: python
-    
+
     with zntrack.Project() as project:
         generate_data = GenerateData(**kwargs)
         process_data = ProcessData(data=load_data)
