@@ -121,4 +121,4 @@ exclude = [
 
 
 [tool.codespell]
-skip = "poetry.lock, examples/*"
+skip = "poetry.lock,examples/*"
