@@ -1,4 +1,4 @@
-CLI
+cli
 ===
 .. automodule:: zntrack.cli
     :members:

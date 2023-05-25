@@ -6,7 +6,7 @@ Data Version Control
 ====================
 
 Data Version Control (DVC_) is a fundamental building block of the ZnTrack package.
-To learn more about DVC, please refer to the DVC documentation <https://dvc.org/doc>_.
+To learn more about DVC, please refer to the `DVC documentation <https://dvc.org/doc>`_.
 DVC_ is responsible for keeping track of all the files and loading results from the cache if they are already available.
 
 Why not just DVC?

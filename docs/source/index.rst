@@ -34,32 +34,38 @@ Class based Node
 ----------------
 .. code-block:: python
 
-   from zntrack import Node, zn
+   import zntrack
 
-   class AddNumbers(Node):
-      number1 = zn.params()
-      number2 = zn.params()
+   class AddNumbers(zntrack.Node):
+      number1 = zntrack.zn.params()
+      number2 = zntrack.zn.params()
 
-      result = zn.outs()
+      result = zntrack.zn.outs()
 
       def run(self):
          self.result = self.number1 + self.number2
 
-   AddNumbers(number1=10, number2=20).write_graph()
+   with zntrack.Project() as project:
+      node = AddNumbers(number1=10, number2=20)
+
+   project.run()
 
 
 Function based Node
 -------------------
  .. code-block:: python
 
-   from zntrack import nodify, NodeConfig
+   import zntrack
 
-   @nodify(outs="number.txt", params={"number1": 10, "number2": 20})
-   def add_numbers(cfg: NodeConfig):
+   @zntrack.nodify(outs="number.txt", params={"number1": 10, "number2": 20})
+   def add_numbers(cfg: zntrack.NodeConfig):
       with open(cfg.outs) as file:
             file.write(str(cfg.params.number1 + cfg.params.number2))
 
-   add_numbers()
+   with zntrack.Project() as project:
+      node = add_numbers()
+
+   project.run()
 
 
 .. toctree::

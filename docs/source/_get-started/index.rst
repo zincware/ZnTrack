@@ -12,6 +12,7 @@ ZnTrack is designed to build workflows, track parameters and keep track of the a
     installation
     workflows
     dvc
+    project
     api_functions
     api_classes
     making_connections
