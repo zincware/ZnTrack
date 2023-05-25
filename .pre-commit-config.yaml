@@ -11,6 +11,7 @@ repos:
       - id: check-json
       - id: check-merge-conflict
         args: ['--assume-in-merge']
+        exclude: ^(docs/)
       - id: check-toml
       - id: check-yaml
       - id: debug-statements

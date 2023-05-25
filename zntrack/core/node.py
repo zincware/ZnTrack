@@ -1,4 +1,4 @@
-"""The Node class."""
+"""The ZnTrack Node class."""
 from __future__ import annotations
 
 import contextlib
