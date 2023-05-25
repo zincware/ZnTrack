@@ -24,7 +24,7 @@ ZnTrack is `zincware's <https://github.com/zincware>`_ first developer package a
 
 
 Example
-=======
+==========
 
 Here are two examples of how ZnTrack Nodes can look like.
 ZnTrack supports function and class based Nodes, as well as the combination of both.

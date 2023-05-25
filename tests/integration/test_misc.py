@@ -1,8 +1,9 @@
+import pathlib
+
+import yaml
 import znflow
 
 import zntrack
-import pathlib
-import yaml
 
 
 class NodeWithProperty(zntrack.Node):

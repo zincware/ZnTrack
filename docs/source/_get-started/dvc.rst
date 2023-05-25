@@ -31,6 +31,3 @@ Here are some of the most important commands:
 - ``dvc exp run``: Runs an experiment
 - ``dvc checkout``: Checks out the results of the pipeline
 - ``dvc push``: Pushes the results of the pipeline to a remote storage
-
-
-

@@ -213,5 +213,3 @@ that will be helpful to your use of the ZnTrack package.
    operation should be isolated and therefore deployable on its own process.
 3. Nodes are launched in a unique Python shell. This means that changes to a running
    script before a node is executed will change the outcome of that node.
-
-
