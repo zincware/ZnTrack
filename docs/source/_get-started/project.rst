@@ -15,7 +15,7 @@ Let's assume the following two nodes:
 
         def run(self):
             self.outputs = self.parameter + 1
-    
+
     class SubtractOne(zntrack.Node):
         parameter: int = zntrack.zn.deps()
         outputs: int = zntrack.zn.outputs()
@@ -54,7 +54,7 @@ The general API would look as follows:
     with zntrack.Project() as project:
         node1 = AddOne(parameter=1)
         node2 = SubtractOne(parameter=node1.outputs)
-    
+
     project.run(eager=True)
     assert node1.outputs == 2
     assert node2.outputs == 1
@@ -72,7 +72,7 @@ You can use ``project.run(repro=False)`` to only build the graph and execute it 
     with zntrack.Project() as project:
         node1 = AddOne(parameter=1)
         node2 = SubtractOne(parameter=node1.outputs)
-    
+
     project.run()
 
     node1.load()
@@ -80,4 +80,3 @@ You can use ``project.run(repro=False)`` to only build the graph and execute it 
 
     assert node1.outputs == 2
     assert node2.outputs == 1
-
