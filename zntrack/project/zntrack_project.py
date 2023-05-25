@@ -237,7 +237,11 @@ class Project:
             cmd.append("--queue")
         if name is not None:
             cmd.extend(["--name", name])
-        exp.name = capture_run_dvc_cmd(cmd).split("'")[1]
+        else:
+            raise ValueError("name must be specified")
+
+        _ = capture_run_dvc_cmd(cmd)
+        exp.name = name
 
     def run_exp(self, jobs: int = 1) -> None:
         """Run all queued experiments."""
