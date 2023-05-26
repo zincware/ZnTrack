@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import typing
 
+import dvc.api
 import git
 import yaml
 import znflow
@@ -265,9 +266,14 @@ class Project:
         if not queue:
             exp.apply()
 
-    def get_experiment(self, name: str) -> Experiment:
-        """Get an experiment."""
-        return Experiment(name, project=self)
+    @property
+    def experiments(self, *args, **kwargs) -> dict[str, Experiment]:
+        """List all experiments."""
+        experiments = dvc.api.exp_show(*args, **kwargs)
+        return {
+            experiment["Experiment"]: Experiment(experiment["rev"], project=self)
+            for experiment in experiments
+        }
 
     def run_exp(self, jobs: int = 1) -> None:
         """Run all queued experiments."""
@@ -286,6 +292,9 @@ class Experiment:
 
     name: str
     project: Project
+    # TODO the project can not be used. The graph could be different.
+    #  Project must be loaded from rev.
+    # TODO name / rev / remote ...
 
     nodes: dict = dataclasses.field(default_factory=dict, init=False, repr=False)
 
