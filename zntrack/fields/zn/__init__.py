@@ -145,7 +145,7 @@ class Params(Field):
         """Get the value of the field from the file."""
         file = self.get_files(instance)[0]
         params_dict = yaml.safe_load(instance.state.fs.read_text(file))
-        value = params_dict[instance.name].get(self.name, None)
+        value = params_dict[instance.name][self.name]
         return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
 
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
