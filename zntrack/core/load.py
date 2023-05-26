@@ -31,7 +31,7 @@ def _get_stage(name, remote, rev) -> dvc.stage.PipelineStage:
         )
 
 
-def _import_from_tempfile(package_and_module: str, remote, rev) -> typing.ModuleType:
+def _import_from_tempfile(package_and_module: str, remote, rev):
     """Create a temporary file to import from.
 
     Parameters
