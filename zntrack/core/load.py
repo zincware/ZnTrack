@@ -28,7 +28,24 @@ def _get_stage(name, remote, rev) -> dvc.stage.PipelineStage:
 
 
 def from_rev(name, remote=".", rev=None, **kwargs) -> T:
-    """Load a Node."""
+    """Load a ZnTrack Node by its name.
+
+    Parameters
+    ----------
+    name : str
+        The name of the node.
+    remote : str, optional
+        The remote to load the node from. Defaults to workspace.
+    rev : str, optional
+        The revision to load the node from. Defaults to HEAD.
+    **kwargs
+        Additional keyword arguments to pass to the node's constructor.
+
+    Returns
+    -------
+    Node
+        The loaded node.
+    """
     stage = _get_stage(name, remote, rev)
 
     cmd = stage.cmd
