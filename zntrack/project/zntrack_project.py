@@ -8,6 +8,7 @@ import logging
 import pathlib
 import shutil
 import subprocess
+import typing
 
 import git
 import yaml
@@ -270,10 +271,12 @@ class Experiment:
             for name, node in self.project.get_nodes().items()
         }
 
-    def __getitem__(self, key) -> Node:
+    def __getitem__(self, key: typing.Union[str, Node]) -> Node:
         """Get the Node from the experiment."""
         if len(self.nodes) == 0:
             self.load()
+        if isinstance(key, Node):
+            key = key.name
         return self.nodes[key]
 
 
