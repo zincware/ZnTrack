@@ -39,6 +39,7 @@ def test_WriteIO(tmp_path_2, assert_before_exp):
     assert node.from_rev(rev="exp2").outputs == "Lorem Ipsum"
 
 
+@pytest.mark.parametrize("assert_before_exp", [True, False])
 def test_WriteIO_no_name(tmp_path_2, assert_before_exp):
     """Test the WriteIO node."""
     with zntrack.Project() as project:
