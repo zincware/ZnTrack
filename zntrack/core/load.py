@@ -102,8 +102,8 @@ def from_rev(name, remote=".", rev=None, **kwargs) -> T:
     try:
         module = importlib.import_module(package_and_module)
     except ModuleNotFoundError:
-        module = _import_from_tempfile(package_and_module, remote, rev)
-        # with contextlib.suppress(FileNotFoundError, ModuleNotFoundError):
+        with contextlib.suppress(FileNotFoundError, ModuleNotFoundError):
+            module = _import_from_tempfile(package_and_module, remote, rev)
 
     if module is None:
         module_name = package_and_module.split(".")[0]
