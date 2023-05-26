@@ -46,6 +46,21 @@ def test_AddNumbers_remove_params(proj_path):
         add_numbers.load()
 
 
+def test_znrack_from_rev(proj_path):
+    with zntrack.Project() as project:
+        add_numbers = AddNumbers(a=1, b=2)
+
+    assert not add_numbers.state.loaded
+
+    project.run()
+
+    node = zntrack.from_rev(add_numbers.name)
+    assert node.a == 1
+    assert node.b == 2
+    assert node.c == 3
+    assert node.state.loaded
+
+
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNumbers_named(proj_path, eager):
     with zntrack.Project() as project:
