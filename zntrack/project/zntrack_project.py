@@ -7,6 +7,8 @@ import json
 import logging
 import pathlib
 import shutil
+import subprocess
+import typing
 
 import git
 import yaml
@@ -15,7 +17,7 @@ from znflow.handler import UpdateConnectors
 
 from zntrack import exceptions
 from zntrack.core.node import Node, get_dvc_cmd
-from zntrack.utils import capture_run_dvc_cmd, run_dvc_cmd
+from zntrack.utils import run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
@@ -232,12 +234,15 @@ class Project:
             node: Node = self.graph.nodes[node_uuid]["value"]
             node.save(results=False)
 
-        cmd = ["exp", "run"]
+        cmd = ["dvc", "exp", "run"]
         if queue:
             cmd.append("--queue")
         if name is not None:
             cmd.extend(["--name", name])
-        exp.name = capture_run_dvc_cmd(cmd).split("'")[1]
+
+        proc = subprocess.run(cmd, capture_output=True, check=True)
+        # "Reproducing", "Experiment", "'exp-name'"
+        exp.name = proc.stdout.decode("utf-8").split()[2].replace("'", "")
 
     def run_exp(self, jobs: int = 1) -> None:
         """Run all queued experiments."""
@@ -266,10 +271,12 @@ class Experiment:
             for name, node in self.project.get_nodes().items()
         }
 
-    def __getitem__(self, key) -> Node:
+    def __getitem__(self, key: typing.Union[str, Node]) -> Node:
         """Get the Node from the experiment."""
         if len(self.nodes) == 0:
             self.load()
+        if isinstance(key, Node):
+            key = key.name
         return self.nodes[key]
 
 

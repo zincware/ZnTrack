@@ -30,3 +30,4 @@ The notebooks are organized in the following way:
     09_lazy
     OptionalDVC
     jupyter
+    parameter_optimization

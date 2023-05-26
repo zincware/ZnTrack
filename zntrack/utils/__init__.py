@@ -6,7 +6,6 @@ import pathlib
 import shutil
 import sys
 import tempfile
-import unittest.mock
 
 import dvc.cli
 
@@ -121,13 +120,6 @@ def run_dvc_cmd(script):
         if logger_name.startswith("zntrack"):
             logger.disabled = False
     return return_code
-
-
-def capture_run_dvc_cmd(script) -> str:
-    """Try to capture the output of the DVC command."""
-    with unittest.mock.patch("dvc.ui.ui.write") as magic_mock:
-        run_dvc_cmd(script)
-    return magic_mock.call_args.args[0]
 
 
 def update_key_val(values, instance):
