@@ -42,16 +42,16 @@ Then put the following into a python file called `hello_world.py` and call it
 with `python hello_world.py`.
 
 ```python
-from zntrack import Node, zn
+import zntrack
 from random import randrange
 
 
-class HelloWorld(Node):
+class HelloWorld(zntrack.Node):
     """Define a ZnTrack Node"""
     # parameter to be tracked
-    max_number: int = zn.params()
+    max_number: int = zntrack.zn.params()
     # parameter to store as output
-    random_number: int = zn.outs()
+    random_number: int = zntrack.zn.outs()
 
     def run(self):
         """Command to be run by DVC"""
