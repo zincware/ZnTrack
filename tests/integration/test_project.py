@@ -39,7 +39,6 @@ def test_WriteIO(tmp_path_2, assert_before_exp):
     assert node.from_rev(rev="exp2").outputs == "Lorem Ipsum"
 
 
-@pytest.mark.parametrize("assert_before_exp", [True, False])
 def test_WriteIO_no_name(tmp_path_2, assert_before_exp):
     """Test the WriteIO node."""
     with zntrack.Project() as project:
@@ -71,6 +70,12 @@ def test_WriteIO_no_name(tmp_path_2, assert_before_exp):
 
     assert exp2["WriteIO"].inputs == "Lorem Ipsum"
     assert exp2["WriteIO"].outputs == "Lorem Ipsum"
+
+    assert zntrack.from_rev("WriteIO", rev=exp1.name).inputs == "Hello World"
+    assert zntrack.from_rev("WriteIO", rev=exp1.name).outputs == "Hello World"
+
+    assert zntrack.from_rev("WriteIO", rev=exp2.name).inputs == "Lorem Ipsum"
+    assert zntrack.from_rev("WriteIO", rev=exp2.name).outputs == "Lorem Ipsum"
 
 
 def test_project_remove_graph(proj_path):
