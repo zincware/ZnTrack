@@ -9,6 +9,7 @@ import pathlib
 import shutil
 import subprocess
 import typing
+import uuid
 
 import git
 import yaml
@@ -228,8 +229,14 @@ class Project:
 
         exp = Experiment(name, project=self)
 
-        yield exp
+        stash_uuid = uuid.uuid4()
 
+        repo = git.Repo()
+        dirty = repo.is_dirty()
+        if dirty:
+            repo.git.stash("push", "--include-untracked", "-m", str(stash_uuid))
+
+        yield exp
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
             node.save(results=False)
@@ -243,6 +250,12 @@ class Project:
         proc = subprocess.run(cmd, capture_output=True, check=True)
         # "Reproducing", "Experiment", "'exp-name'"
         exp.name = proc.stdout.decode("utf-8").split()[2].replace("'", "")
+
+        repo.git.reset("--hard")
+        if dirty:
+            repo.git.stash("apply", f"stash^{{/{stash_uuid}}}")
+        if not queue:
+            exp.apply(quiet=True)
 
     def run_exp(self, jobs: int = 1) -> None:
         """Run all queued experiments."""
@@ -263,6 +276,10 @@ class Experiment:
     project: Project
 
     nodes: dict = dataclasses.field(default_factory=dict, init=False, repr=False)
+
+    def apply(self, quiet=False) -> None:
+        """Apply the experiment."""
+        run_dvc_cmd(["exp", "apply", self.name] + ["--quiet"] if quiet else [])
 
     def load(self) -> None:
         """Load the nodes from this experiment."""
