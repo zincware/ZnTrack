@@ -7,6 +7,7 @@ import pathlib
 import sys
 import tempfile
 import typing
+import uuid
 
 import dvc.api
 import dvc.repo
@@ -61,9 +62,12 @@ def _import_from_tempfile(package_and_module: str, remote, rev):
         temp_file.write(f.read())
         temp_file.flush()
 
-        spec = importlib.util.spec_from_file_location(package_and_module, temp_file.name)
+        # we use a random uuid to avoid name clashes
+        ref_module = f"{uuid.uuid4()}.{package_and_module}"
+
+        spec = importlib.util.spec_from_file_location(ref_module, temp_file.name)
         module = importlib.util.module_from_spec(spec)
-        sys.modules[package_and_module] = module
+        sys.modules[ref_module] = module
         spec.loader.exec_module(module)
         return module
 
