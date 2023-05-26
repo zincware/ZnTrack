@@ -169,6 +169,9 @@ class Node(zninit.ZnInit, znflow.Node):
     def save(self, parameter: bool = True, results: bool = True) -> None:
         """Save the node's output to disk."""
         # TODO have an option to save and run dvc commit afterwards.
+
+        # TODO: check if there is a difference in saving
+        # a loaded node vs a new node and why
         from zntrack.fields import Field, FieldGroup
 
         # Jupyter Notebook

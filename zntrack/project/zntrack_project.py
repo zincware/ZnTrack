@@ -9,7 +9,6 @@ import pathlib
 import shutil
 import subprocess
 import typing
-import uuid
 
 import git
 import yaml
@@ -210,6 +209,14 @@ class Project:
             nodes[node.name] = node
         return nodes
 
+    def remove(self, name):
+        """Remove all nodes with the given name from the project."""
+        # TODO there should never be multiple nodes with the same name
+        for node_uuid in self.graph.get_sorted_nodes():
+            node = self.graph.nodes[node_uuid]["value"]
+            if node.name == name:
+                self.graph.remove_node(node_uuid)
+
     @property
     def nodes(self) -> dict[str, znflow.Node]:
         """Get the nodes in the project."""
@@ -229,17 +236,17 @@ class Project:
 
         exp = Experiment(name, project=self)
 
-        stash_uuid = uuid.uuid4()
-
         repo = git.Repo()
         dirty = repo.is_dirty()
         if dirty:
-            repo.git.stash("push", "--include-untracked", "-m", str(stash_uuid))
+            repo.git.stash("save", "--include-untracked")
 
-        yield exp
-        for node_uuid in self.graph.get_sorted_nodes():
-            node: Node = self.graph.nodes[node_uuid]["value"]
-            node.save(results=False)
+        force = self.force
+        self.force = True
+        with self:
+            yield exp
+        self.run(repro=False)  # save nodes and update dvc.yaml
+        self.force = force
 
         cmd = ["dvc", "exp", "run"]
         if queue:
@@ -252,10 +259,15 @@ class Project:
         exp.name = proc.stdout.decode("utf-8").split()[2].replace("'", "")
 
         repo.git.reset("--hard")
+        repo.git.clean("-fd")
         if dirty:
-            repo.git.stash("apply", f"stash^{{/{stash_uuid}}}")
+            repo.git.stash("pop")
         if not queue:
-            exp.apply(quiet=True)
+            exp.apply()
+
+    def get_experiment(self, name: str) -> Experiment:
+        """Get an experiment."""
+        return Experiment(name, project=self)
 
     def run_exp(self, jobs: int = 1) -> None:
         """Run all queued experiments."""
@@ -277,9 +289,9 @@ class Experiment:
 
     nodes: dict = dataclasses.field(default_factory=dict, init=False, repr=False)
 
-    def apply(self, quiet=False) -> None:
+    def apply(self) -> None:
         """Apply the experiment."""
-        run_dvc_cmd(["exp", "apply", self.name] + ["--quiet"] if quiet else [])
+        run_dvc_cmd(["exp", "apply", self.name])
 
     def load(self) -> None:
         """Load the nodes from this experiment."""
