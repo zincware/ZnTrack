@@ -42,16 +42,16 @@ Then put the following into a python file called `hello_world.py` and call it
 with `python hello_world.py`.
 
 ```python
-from zntrack import Node, zn
+import zntrack
 from random import randrange
 
 
-class HelloWorld(Node):
+class HelloWorld(zntrack.Node):
     """Define a ZnTrack Node"""
     # parameter to be tracked
-    max_number: int = zn.params()
+    max_number: int = zntrack.zn.params()
     # parameter to store as output
-    random_number: int = zn.outs()
+    random_number: int = zntrack.zn.outs()
 
     def run(self):
         """Command to be run by DVC"""
@@ -73,8 +73,25 @@ Node object.
 
 ```python
 hello_world.load()
-print(hello_world.random_numer)
+print(hello_world.random_number)
 ```
+
+> ## Tip
+>
+> You can easily load this Node directly from a repository.
+>
+> ```python
+> import zntrack
+>
+> node = zntrack.from_rev(
+>     "HelloWorld",
+>     remote="https://github.com/PythonFZ/ZnTrackExamples.git",
+>     rev="b9316bf",
+> )
+> ```
+>
+> Try accessing the `max_number` parameter and `random_number` output. All Nodes
+> from this and many other repositories can be loaded like this.
 
 An overview of all the ZnTrack features as well as more detailed examples can be
 found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).
