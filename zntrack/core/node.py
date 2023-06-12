@@ -55,6 +55,8 @@ class NodeStatus:
     remote: str = None
     rev: str = None
 
+    parent: Node = dataclasses.field(default=None, repr=False)
+
     def get_file_system(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
         log.warning("Deprecated. Use 'state.fs' instead.")
@@ -73,6 +75,21 @@ class NodeStatus:
                 log.debug(err)
                 time.sleep(0.1)
         raise dvc.utils.strictyaml.YAMLValidationError
+
+    @property
+    def params(self) -> dict:
+        """Get the parameters of the Node."""
+        params = dvc.api.params_show(
+            stages=self.parent.name,
+            repo=self.remote,
+            rev=self.rev,
+        )
+        return params.get(self.parent.name, {})
+
+    @property
+    def metrics(self) -> dict:
+        """Get the metrics of the Node."""
+        raise ValueError("Not implemented yet.")
 
 
 class _NameDescriptor(zninit.Descriptor):
@@ -155,7 +172,7 @@ class Node(zninit.ZnInit, znflow.Node):
     def state(self) -> NodeStatus:
         """Get the state of the node."""
         if self._state is None:
-            self._state = NodeStatus(False, NodeStatusResults.UNKNOWN)
+            self._state = NodeStatus(False, NodeStatusResults.UNKNOWN, parent=self)
         return self._state
 
     @property
