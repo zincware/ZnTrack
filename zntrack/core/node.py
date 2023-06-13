@@ -9,6 +9,7 @@ import logging
 import pathlib
 import time
 import typing
+import unittest.mock
 
 import dvc.api
 import dvc.cli
@@ -73,6 +74,32 @@ class NodeStatus:
                 log.debug(err)
                 time.sleep(0.1)
         raise dvc.utils.strictyaml.YAMLValidationError
+
+    @contextlib.contextmanager
+    def patch_open(self) -> typing.Iterator[None]:
+        """Patch the open function to use the Node file system."""
+        import builtins
+        import inspect
+
+        inspect.getmodule(inspect.currentframe().f_back)
+
+        def _open(path, *args, **kwargs):
+            # caller_module = inspect.getmodule(inspect.currentframe().f_back)
+            # if caller_module and caller_module.__name__.startswith(starts_with):
+            #     return self.fs.open(path, *args, **kwargs)
+            #     # dvc_objects.fs.local for DVC 2.58.1
+            # return builtins.open(path, *args, **kwargs)
+            try:
+                return self.fs.open(path, *args, **kwargs)
+            except RecursionError:
+                return builtins.open(path, *args, **kwargs)
+
+        with unittest.mock.patch.object(builtins, "open", _open, create=True):
+            yield
+
+        # if module is None, set it to the module of the caller
+        # with unittest.mock.patch.object(module, "open", self.fs.open, create=True):
+        #     yield
 
 
 class _NameDescriptor(zninit.Descriptor):

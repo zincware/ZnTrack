@@ -6,7 +6,6 @@ https://docs.pytest.org/en/6.2.x/fixture.html#scope-sharing-fixtures-across-clas
 import os
 import pathlib
 import shutil
-import subprocess
 
 import dvc.cli
 import git
