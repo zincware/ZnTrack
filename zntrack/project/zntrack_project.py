@@ -137,7 +137,8 @@ class Project:
         Parameters
         ----------
         name : str, optional
-            The name of the group.
+            The name of the group. If None, the group will be named 'GroupX' where X is
+            the number of groups + 1.
         """
         if name is None:
             name = f"Group{len(self._groups) + 1}"
@@ -155,30 +156,6 @@ class Project:
                 node: Node = self.graph.nodes[node_uuid]["value"]
                 if node_uuid not in existing_nodes:
                     node.name = f"{name}_{node.name}"
-
-    # def group(self, *nodes: typing.List[Node], name: str = None):
-    #     """Group nodes together.
-
-    #     Parameters
-    #     ----------
-    #     name : str
-    #         The name of the group.
-    #     nodes : typing.List[Node]
-    #         The nodes to group.
-    #     """
-    #     if name is None:
-    #         name = f"Group{len(self._groups) + 1}"
-    #     self._groups.append(name)
-
-    #     if self.automatic_node_names:
-    #         raise ValueError(
-    #             "Automatic node names must be disabled to group nodes."
-    #         )
-
-    #     for node in nodes:
-    #         node.name = f"{name}_{node.name}"
-
-    #     self.update_node_names(check=False)
 
     def run(
         self,
