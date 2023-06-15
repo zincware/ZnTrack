@@ -209,6 +209,14 @@ class Project:
             run_dvc_cmd(["repro"])
             # TODO should we load the nodes here? Maybe, if lazy loading is implemented.
 
+    def build(self, environment: dict = None, optional: dict = None) -> None:
+        """Build the project graph without running it."""
+        self.run(repro=False, environment=environment, optional=optional)
+
+    def repro(self) -> None:
+        """Run dvc repro."""
+        run_dvc_cmd(["repro"])
+
     def _handle_environment(self, environment: dict):
         """Write global environment variables to the env.yaml file."""
         if environment is not None:

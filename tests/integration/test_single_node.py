@@ -35,7 +35,8 @@ def test_AddNumbers_remove_params(proj_path):
 
     assert not add_numbers.state.loaded
 
-    project.run()
+    project.build()
+    project.repro()
 
     params = pathlib.Path("params.yaml").read_text()
     params = yaml.safe_load(params)
