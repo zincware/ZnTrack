@@ -1,6 +1,9 @@
+import pathlib
+
 import pytest
 
 import zntrack
+from zntrack.project import Experiment
 
 
 class WriteIO(zntrack.Node):
@@ -22,8 +25,14 @@ def test_WriteIO(tmp_path_2, assert_before_exp):
     if assert_before_exp:
         assert node.outputs == "Hello World"
 
+    # write a non-tracked file using pathlib
+    pathlib.Path("test.txt").write_text("Hello World")
+
     with project.create_experiment(name="exp1") as exp1:
         node.inputs = "Hello World"
+
+    # check that the file is still there
+    assert pathlib.Path("test.txt").read_text() == "Hello World"
 
     with project.create_experiment(name="exp2") as exp2:
         node.inputs = "Lorem Ipsum"
@@ -31,12 +40,27 @@ def test_WriteIO(tmp_path_2, assert_before_exp):
     assert exp1.name == "exp1"
     assert exp2.name == "exp2"
 
+    assert project.experiments.keys() == {"exp1", "exp2"}
+
+    assert isinstance(project.experiments["exp1"], Experiment)
+
     project.run_exp()
     assert node.from_rev(rev="exp1").inputs == "Hello World"
     assert node.from_rev(rev="exp1").outputs == "Hello World"
 
     assert node.from_rev(rev="exp2").inputs == "Lorem Ipsum"
     assert node.from_rev(rev="exp2").outputs == "Lorem Ipsum"
+
+    exp2.apply()
+    assert (
+        zntrack.from_rev("WriteIO").inputs
+        == zntrack.from_rev("WriteIO", rev=exp2.name).inputs
+    )
+    exp1.apply()
+    assert (
+        zntrack.from_rev("WriteIO").inputs
+        == zntrack.from_rev("WriteIO", rev=exp1.name).inputs
+    )
 
 
 @pytest.mark.parametrize("assert_before_exp", [True, False])

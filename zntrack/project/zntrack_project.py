@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import typing
 
+import dvc.api
 import git
 import yaml
 import znflow
@@ -234,6 +235,14 @@ class Project:
             nodes[node.name] = node
         return nodes
 
+    def remove(self, name):
+        """Remove all nodes with the given name from the project."""
+        # TODO there should never be multiple nodes with the same name
+        for node_uuid in self.graph.get_sorted_nodes():
+            node = self.graph.nodes[node_uuid]["value"]
+            if node.name == name:
+                self.graph.remove_node(node_uuid)
+
     @property
     def nodes(self) -> dict[str, znflow.Node]:
         """Get the nodes in the project."""
@@ -253,21 +262,44 @@ class Project:
 
         exp = Experiment(name, project=self)
 
-        yield exp
+        repo = git.Repo()
+        dirty = repo.is_dirty()
+        if dirty:
+            repo.git.stash("save", "--include-untracked")
 
-        for node_uuid in self.graph.get_sorted_nodes():
-            node: Node = self.graph.nodes[node_uuid]["value"]
-            node.save(results=False)
+        force = self.force
+        self.force = True
+        with self:
+            yield exp
+        self.run(repro=False)  # save nodes and update dvc.yaml
+        self.force = force
 
         cmd = ["dvc", "exp", "run"]
         if queue:
             cmd.append("--queue")
         if name is not None:
             cmd.extend(["--name", name])
+        try:
+            proc = subprocess.run(cmd, capture_output=True, check=True)
+            # "Reproducing", "Experiment", "'exp-name'"
+            exp.name = proc.stdout.decode("utf-8").split()[2].replace("'", "")
+        finally:
+            repo.git.reset("--hard")
+            repo.git.clean("-fd")
+            if dirty:
+                repo.git.stash("pop")
+        if not queue:
+            exp.apply()
 
-        proc = subprocess.run(cmd, capture_output=True, check=True)
-        # "Reproducing", "Experiment", "'exp-name'"
-        exp.name = proc.stdout.decode("utf-8").split()[2].replace("'", "")
+    @property
+    def experiments(self, *args, **kwargs) -> dict[str, Experiment]:
+        """List all experiments."""
+        experiments = dvc.api.exp_show(*args, **kwargs)
+        return {
+            experiment["Experiment"]: Experiment(experiment["rev"], project=self)
+            for experiment in experiments
+            if experiment["Experiment"] is not None
+        }
 
     def run_exp(self, jobs: int = 1) -> None:
         """Run all queued experiments."""
@@ -286,8 +318,15 @@ class Experiment:
 
     name: str
     project: Project
+    # TODO the project can not be used. The graph could be different.
+    #  Project must be loaded from rev.
+    # TODO name / rev / remote ...
 
     nodes: dict = dataclasses.field(default_factory=dict, init=False, repr=False)
+
+    def apply(self) -> None:
+        """Apply the experiment."""
+        run_dvc_cmd(["exp", "apply", self.name])
 
     def load(self) -> None:
         """Load the nodes from this experiment."""
