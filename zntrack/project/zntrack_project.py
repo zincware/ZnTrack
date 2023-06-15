@@ -80,6 +80,8 @@ class Project:
     automatic_node_names: bool = False
     force: bool = False
 
+    _groups: list = dataclasses.field(default_factory=list, init=False, repr=False)
+
     def __post_init__(self):
         """Initialize the Project.
 
@@ -127,6 +129,29 @@ class Project:
                 elif not self.force and check:
                     raise exceptions.DuplicateNodeNameError(node)
             node_names.append(node.name)
+
+    @contextlib.contextmanager
+    def group(self, name: str = None):
+        """Group nodes together.
+
+        Parameters
+        ----------
+        name : str, optional
+            The name of the group. If None, the group will be named 'GroupX' where X is
+            the number of groups + 1.
+        """
+        if name is None:
+            name = f"Group{len(self._groups) + 1}"
+        self._groups.append(name)
+
+        existing_nodes = self.graph.get_sorted_nodes()
+        try:
+            yield
+        finally:
+            for node_uuid in self.graph.get_sorted_nodes():
+                node: Node = self.graph.nodes[node_uuid]["value"]
+                if node_uuid not in existing_nodes:
+                    node.name = f"{name}_{node.name}"
 
     def run(
         self,
