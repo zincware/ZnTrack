@@ -143,15 +143,11 @@ class Project:
         if name is None:
             name = f"Group{len(self._groups) + 1}"
         self._groups.append(name)
-
-        self.graph.group_name = name
-
+        
         existing_nodes = self.graph.get_sorted_nodes()
-
         try:
             yield
         finally:
-            self.graph.group_name = None
             for node_uuid in self.graph.get_sorted_nodes():
                 node: Node = self.graph.nodes[node_uuid]["value"]
                 if node_uuid not in existing_nodes:
