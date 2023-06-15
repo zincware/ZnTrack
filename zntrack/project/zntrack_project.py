@@ -273,6 +273,7 @@ class Project:
         return {
             experiment["Experiment"]: Experiment(experiment["rev"], project=self)
             for experiment in experiments
+            if experiment["Experiment"] is not None
         }
 
     def run_exp(self, jobs: int = 1) -> None:
