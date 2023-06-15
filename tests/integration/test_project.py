@@ -145,3 +145,26 @@ def test_automatic_node_names_True(tmp_path_2):
     assert node.outputs == "Hello World"
     assert node2.outputs == "Lorem Ipsum"
     assert node3.outputs == "Dolor Sit"
+
+
+def test_group_nodes(tmp_path_2):
+    with zntrack.Project(automatic_node_names=True) as project:
+        with project.group():
+            node_1 = WriteIO(inputs="Lorem Ipsum")
+            node_2 = WriteIO(inputs="Dolor Sit")
+        with project.group():
+            node_3 = WriteIO(inputs="Amet Consectetur")
+            node_4 = WriteIO(inputs="Adipiscing Elit")
+        with project.group(name="NamedGrp"):
+            node_5 = WriteIO(inputs="Sed Do", name="NodeA")
+            node_6 = WriteIO(inputs="Eiusmod Tempor", name="NodeB")
+
+    project.run()
+
+    assert node_1.name == "Group1_WriteIO"
+    assert node_2.name == "Group1_WriteIO_1"
+    assert node_3.name == "Group2_WriteIO"
+    assert node_4.name == "Group2_WriteIO_1"
+
+    assert node_5.name == "NamedGrp_NodeA"
+    assert node_6.name == "NamedGrp_NodeB"

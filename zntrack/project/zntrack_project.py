@@ -80,6 +80,8 @@ class Project:
     automatic_node_names: bool = False
     force: bool = False
 
+    _groups: list = dataclasses.field(default_factory=list, init=False, repr=False)
+
     def __post_init__(self):
         """Initialize the Project.
 
@@ -127,6 +129,56 @@ class Project:
                 elif not self.force and check:
                     raise exceptions.DuplicateNodeNameError(node)
             node_names.append(node.name)
+
+    @contextlib.contextmanager
+    def group(self, name: str = None):
+        """Group nodes together.
+
+        Parameters
+        ----------
+        name : str, optional
+            The name of the group.
+        """
+        if name is None:
+            name = f"Group{len(self._groups) + 1}"
+        self._groups.append(name)
+
+        self.graph.group_name = name
+
+        existing_nodes = self.graph.get_sorted_nodes()
+
+        try:
+            yield
+        finally:
+            self.graph.group_name = None
+            for node_uuid in self.graph.get_sorted_nodes():
+                node: Node = self.graph.nodes[node_uuid]["value"]
+                if node_uuid not in existing_nodes:
+                    node.name = f"{name}_{node.name}"
+
+    # def group(self, *nodes: typing.List[Node], name: str = None):
+    #     """Group nodes together.
+
+    #     Parameters
+    #     ----------
+    #     name : str
+    #         The name of the group.
+    #     nodes : typing.List[Node]
+    #         The nodes to group.
+    #     """
+    #     if name is None:
+    #         name = f"Group{len(self._groups) + 1}"
+    #     self._groups.append(name)
+
+    #     if self.automatic_node_names:
+    #         raise ValueError(
+    #             "Automatic node names must be disabled to group nodes."
+    #         )
+
+    #     for node in nodes:
+    #         node.name = f"{name}_{node.name}"
+
+    #     self.update_node_names(check=False)
 
     def run(
         self,
