@@ -159,6 +159,10 @@ def test_group_nodes(tmp_path_2):
             node_5 = WriteIO(inputs="Sed Do", name="NodeA")
             node_6 = WriteIO(inputs="Eiusmod Tempor", name="NodeB")
 
+        node7 = WriteIO(inputs="Hello World")
+        node8 = WriteIO(inputs="How are you?")
+        node9 = WriteIO(inputs="I'm fine, thanks!", name="NodeC")
+
     project.run()
 
     assert node_1.name == "Group1_WriteIO"
@@ -168,3 +172,9 @@ def test_group_nodes(tmp_path_2):
 
     assert node_5.name == "NamedGrp_NodeA"
     assert node_6.name == "NamedGrp_NodeB"
+
+    assert node7.name == "WriteIO"
+    assert node8.name == "WriteIO_1"
+    assert node9.name == "NodeC"
+
+    assert WriteIO.from_rev(name="NamedGrp_NodeA").inputs == "Sed Do"
