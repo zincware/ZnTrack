@@ -143,7 +143,7 @@ class Project:
         if name is None:
             name = f"Group{len(self._groups) + 1}"
         self._groups.append(name)
-        
+
         existing_nodes = self.graph.get_sorted_nodes()
         try:
             yield
