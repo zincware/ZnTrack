@@ -254,15 +254,15 @@ class Project:
             cmd.append("--queue")
         if name is not None:
             cmd.extend(["--name", name])
-
-        proc = subprocess.run(cmd, capture_output=True, check=True)
-        # "Reproducing", "Experiment", "'exp-name'"
-        exp.name = proc.stdout.decode("utf-8").split()[2].replace("'", "")
-
-        repo.git.reset("--hard")
-        repo.git.clean("-fd")
-        if dirty:
-            repo.git.stash("pop")
+        try:
+            proc = subprocess.run(cmd, capture_output=True, check=True)
+            # "Reproducing", "Experiment", "'exp-name'"
+            exp.name = proc.stdout.decode("utf-8").split()[2].replace("'", "")
+        finally:
+            repo.git.reset("--hard")
+            repo.git.clean("-fd")
+            if dirty:
+                repo.git.stash("pop")
         if not queue:
             exp.apply()
 
