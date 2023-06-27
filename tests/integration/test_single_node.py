@@ -15,18 +15,25 @@ class AddNumbers(zntrack.Node):
         self.c = self.a + self.b
 
 
+class AddNumbersMetrics(AddNumbers):
+    c = zntrack.zn.metrics()
+
+
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNumbers(proj_path, eager):
     with zntrack.Project() as project:
-        add_numbers = AddNumbers(a=1, b=2)
+        add_numbers = AddNumbersMetrics(a=1, b=2)
 
     assert not add_numbers.state.loaded
 
     project.run(eager=eager)
     if not eager:
         add_numbers.load()
+        assert add_numbers.state.params == {"a": 1, "b": 2}
+
     assert add_numbers.c == 3
     assert add_numbers.state.loaded
+    assert add_numbers.name == "AddNumbersMetrics"
 
 
 def test_AddNumbers_remove_params(proj_path):
