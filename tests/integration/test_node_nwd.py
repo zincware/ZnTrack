@@ -14,18 +14,6 @@ class WriteToNWD(zntrack.Node):
         self.file[0].write_text(self.text)
 
 
-# class OutsAsNWD(zntrack.Node):
-#     text = zntrack.zn.params()
-#     outs: pathlib.Path = zntrack.dvc.outs(zntrack.nwd)
-
-#     def run(self):
-#         (self.outs / "test.txt").write_text(self.text)
-
-#     @property
-#     def file(self):
-#         return self.outs / "test.txt"
-
-
 class FileToOuts(zntrack.Node):
     # although, this is a file path, it has to be zn.deps
     file = zntrack.zn.deps()
@@ -51,6 +39,14 @@ def test_WriteToNWD(proj_path, eager):
 
     file_to_outs.load()
     assert file_to_outs.text == "Hello World"
+
+
+def test_OutAsNWD(proj_path):
+    with pytest.raises(ValueError):
+
+        class OutsAsNWD(zntrack.Node):
+            text = zntrack.zn.params()
+            outs: pathlib.Path = zntrack.dvc.outs(zntrack.nwd)
 
 
 # @pytest.mark.parametrize("eager", [True, False])

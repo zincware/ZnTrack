@@ -22,6 +22,12 @@ class DVCOption(Field):
 
     def __init__(self, *args, **kwargs):
         """Create a DVCOption field."""
+        if node_wd.nwd in args or node_wd.nwd in kwargs.values():
+            raise ValueError(
+                "Can not set `zntrack.nwd` as value for {self}. Please use"
+                " `zntrack.nwd/...` to create a path relative to the node working"
+                " directory."
+            )
         self.dvc_option = kwargs.pop("dvc_option")
         super().__init__(*args, **kwargs)
 
