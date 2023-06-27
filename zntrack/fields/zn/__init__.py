@@ -315,18 +315,36 @@ class Dependency(LazyField):
         if isinstance(value, tuple):
             value = list(value)
 
+        def get_all_connections(value):
+            connections = []
+            stack = [value]
+            while stack:
+                node = stack.pop()
+                if isinstance(node, znflow.CombinedConnections):
+                    stack.extend(node.connections)
+                elif isinstance(node, znflow.Connection):
+                    connections.append(node)
+            return connections
+
         others = []
         for node in value:
             if isinstance(node, znflow.CombinedConnections):
-                others.extend(node.connections)
+                others.extend(get_all_connections(node))
+            else:
+                others.append(node)
 
-        value.extend(others)
+        value = others
+
+        def _get_instance(node):
+            if isinstance(node, znflow.Connection):
+                node = node.instance
+            return _get_instance(node) if isinstance(node, znflow.Connection) else node
 
         for node in value:
             if node is None:
                 continue
-            if isinstance(node, znflow.Connection):
-                node = node.instance
+            node = _get_instance(node)
+            files.append(node.nwd / "uuid")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
                     # We do not want to depend on parameter files or
