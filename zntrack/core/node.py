@@ -305,6 +305,9 @@ def get_dvc_cmd(
     for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
         optionals += attr.get_optional_dvc_cmd(node)
+
+    field_cmds += ["--outs", f"nodes/{node.name}/uuid"]
+
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
