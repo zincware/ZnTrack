@@ -9,6 +9,7 @@ import logging
 import pathlib
 import time
 import typing
+import uuid
 
 import dvc.api
 import dvc.cli
@@ -166,8 +167,14 @@ class Node(zninit.ZnInit, znflow.Node):
             nwd.mkdir(parents=True)
         return nwd
 
-    def save(self, parameter: bool = True, results: bool = True) -> None:
+    def save(
+        self, parameter: bool = True, results: bool = True, uuid_only: bool = False
+    ) -> None:
         """Save the node's output to disk."""
+        if uuid_only:
+            (self.nwd / "uuid").write_text(str(uuid.uuid4()))
+            return
+
         # TODO have an option to save and run dvc commit afterwards.
 
         # TODO: check if there is a difference in saving

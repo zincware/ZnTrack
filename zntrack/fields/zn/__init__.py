@@ -467,7 +467,7 @@ class NodeField(Dependency):
                 name,
                 "--force",
                 "--outs",
-                f"nodes/{name}/hash",
+                f"nodes/{name}/uuid",
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
             ]
@@ -480,7 +480,7 @@ class NodeField(Dependency):
 
             _cmd += [
                 f"zntrack run {module}.{node.__class__.__name__} --name"
-                f" {name} --hash-only"
+                f" {name} --uuid-only"
             ]
 
             cmd.append(_cmd)
@@ -490,7 +490,7 @@ class NodeField(Dependency):
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         return [
-            pathlib.Path(f"nodes/{name}/hash") for name in self.get_node_names(instance)
+            pathlib.Path(f"nodes/{name}/uuid") for name in self.get_node_names(instance)
         ]
 
 
