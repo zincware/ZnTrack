@@ -278,6 +278,22 @@ class Plots(PlotsMixin, LazyField):
 _default = object()
 
 
+def _get_all_connections_and_instances(value) -> list["Node"]:
+    """Get Nodes from Connections and CombinedConnections."""
+    connections = []
+    stack = [value]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, znflow.CombinedConnections):
+            stack.extend(node.connections)
+        elif isinstance(node, znflow.Connection):
+            instance = node.instance
+            while isinstance(instance, znflow.Connection):
+                instance = instance.instance
+            connections.append(instance)
+    return connections
+
+
 class Dependency(LazyField):
     """A dependency field."""
 
@@ -315,35 +331,18 @@ class Dependency(LazyField):
         if isinstance(value, tuple):
             value = list(value)
 
-        def get_all_connections(value):
-            connections = []
-            stack = [value]
-            while stack:
-                node = stack.pop()
-                if isinstance(node, znflow.CombinedConnections):
-                    stack.extend(node.connections)
-                elif isinstance(node, znflow.Connection):
-                    connections.append(node)
-            return connections
-
         others = []
         for node in value:
-            if isinstance(node, znflow.CombinedConnections):
-                others.extend(get_all_connections(node))
+            if isinstance(node, (znflow.CombinedConnections, znflow.Connection)):
+                others.extend(_get_all_connections_and_instances(node))
             else:
                 others.append(node)
 
         value = others
 
-        def _get_instance(node):
-            if isinstance(node, znflow.Connection):
-                node = node.instance
-            return _get_instance(node) if isinstance(node, znflow.Connection) else node
-
         for node in value:
             if node is None:
                 continue
-            node = _get_instance(node)
             files.append(node.nwd / "uuid")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
