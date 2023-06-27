@@ -306,10 +306,10 @@ def get_dvc_cmd(
         field_cmds += attr.get_stage_add_argument(node)
         optionals += attr.get_optional_dvc_cmd(node)
 
-    field_cmds += ["--outs", f"nodes/{node.name}/uuid"]
-
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
+
+    cmd += ["--outs", f"nodes/{node.name}/uuid"]
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]
