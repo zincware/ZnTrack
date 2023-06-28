@@ -9,6 +9,7 @@ import logging
 import pathlib
 import time
 import typing
+import uuid
 
 import dvc.api
 import dvc.cli
@@ -226,6 +227,9 @@ class Node(zninit.ZnInit, znflow.Node):
         except KeyError as err:
             raise exceptions.NodeNotAvailableError(self) from err
 
+        with self.state.fs.open(self.nwd / "uuid") as f:
+            self._uuid = uuid.UUID(f.read().decode("utf-8"))
+
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
 
@@ -250,6 +254,8 @@ class Node(zninit.ZnInit, znflow.Node):
             #  the `__init__` might do something like self.param = kwargs["param"]
             #  and this would overwrite the loaded value.
             node.__init__()
+
+        node._in_construction = False
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
@@ -353,13 +359,7 @@ class NodeConverter(znjson.ConverterBase):
 
     def encode(self, obj: Node) -> dict:
         """Convert the Node object to dict."""
-        node_identifier = NodeIdentifier.from_node(obj)
-        if node_identifier.rev is not None:
-            raise NotImplementedError(
-                "Dependencies to other revisions are not supported yet"
-            )
-
-        return dataclasses.asdict(node_identifier)
+        return dataclasses.asdict(NodeIdentifier.from_node(obj))
 
     def decode(self, value: dict) -> Node:
         """Create Node object from dict."""
