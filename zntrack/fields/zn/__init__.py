@@ -278,6 +278,22 @@ class Plots(PlotsMixin, LazyField):
 _default = object()
 
 
+def _get_all_connections_and_instances(value) -> list["Node"]:
+    """Get Nodes from Connections and CombinedConnections."""
+    connections = []
+    stack = [value]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, znflow.CombinedConnections):
+            stack.extend(node.connections)
+        elif isinstance(node, znflow.Connection):
+            instance = node.instance
+            while isinstance(instance, znflow.Connection):
+                instance = instance.instance
+            connections.append(instance)
+    return connections
+
+
 class Dependency(LazyField):
     """A dependency field."""
 
@@ -317,16 +333,17 @@ class Dependency(LazyField):
 
         others = []
         for node in value:
-            if isinstance(node, znflow.CombinedConnections):
-                others.extend(node.connections)
+            if isinstance(node, (znflow.CombinedConnections, znflow.Connection)):
+                others.extend(_get_all_connections_and_instances(node))
+            else:
+                others.append(node)
 
-        value.extend(others)
+        value = others
 
         for node in value:
             if node is None:
                 continue
-            if isinstance(node, znflow.Connection):
-                node = node.instance
+            files.append(node.nwd / "uuid")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
                     # We do not want to depend on parameter files or
@@ -467,7 +484,7 @@ class NodeField(Dependency):
                 name,
                 "--force",
                 "--outs",
-                f"nodes/{name}/hash",
+                f"nodes/{name}/uuid",
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
             ]
@@ -480,7 +497,7 @@ class NodeField(Dependency):
 
             _cmd += [
                 f"zntrack run {module}.{node.__class__.__name__} --name"
-                f" {name} --hash-only"
+                f" {name} --uuid-only"
             ]
 
             cmd.append(_cmd)
@@ -490,7 +507,7 @@ class NodeField(Dependency):
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         return [
-            pathlib.Path(f"nodes/{name}/hash") for name in self.get_node_names(instance)
+            pathlib.Path(f"nodes/{name}/uuid") for name in self.get_node_names(instance)
         ]
 
 

@@ -4,7 +4,6 @@ import importlib.metadata
 import os
 import pathlib
 import sys
-import uuid
 
 import git
 import typer
@@ -47,7 +46,7 @@ def main(
 
 
 @app.command()
-def run(node: str, name: str = None, hash_only: bool = False) -> None:
+def run(node: str, name: str = None, uuid_only: bool = False) -> None:
     """Execute a ZnTrack Node.
 
     Use as 'zntrack run module.Node --name node_name'.
@@ -78,11 +77,10 @@ def run(node: str, name: str = None, hash_only: bool = False) -> None:
         cls(exec_func=True)
     elif issubclass(cls, Node):
         node: Node = cls.from_rev(name=name, results=False)
-        if hash_only:
-            (node.nwd / "hash").write_text(str(uuid.uuid4()))
-        else:
+        if not uuid_only:
             node.run()
             node.save(parameter=False)
+        node.save(uuid_only=True)
     else:
         raise ValueError(f"Node {node} is not a ZnTrack Node.")
 
