@@ -158,6 +158,8 @@ class NodeStatusResults(enum.Enum):
         the Node instance has finished running.
     FAILED : int
         the Node instance has failed to run.
+    AVAILABLE : int
+        the Node instance was loaded and results are available.
     """
 
     UNKNOWN = 0
@@ -165,6 +167,7 @@ class NodeStatusResults(enum.Enum):
     RUNNING = 2
     FINISHED = 3
     FAILED = 4
+    AVAILABLE = 5
 
 
 def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:

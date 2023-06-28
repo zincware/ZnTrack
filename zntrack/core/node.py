@@ -232,6 +232,7 @@ class Node(zninit.ZnInit, znflow.Node):
             #  this Node is available.
             with self.state.fs.open(self.nwd / "uuid") as f:
                 self._uuid = uuid.UUID(f.read().decode("utf-8"))
+                self.state.results = NodeStatusResults.AVAILABLE
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
 

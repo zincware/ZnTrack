@@ -2,6 +2,7 @@ import dvc.scm
 import pytest
 
 import zntrack
+from zntrack.utils import NodeStatusResults
 
 
 def test_module_not_installed():
@@ -31,3 +32,8 @@ def test_import_from_remote():
     assert node.max_number == 512
     assert node.random_number == 64
     assert node.name == "HelloWorld"
+    assert node.state.rev == "b9316bf"
+    assert node.state.remote == "https://github.com/PythonFZ/ZnTrackExamples.git"
+    assert (
+        node.state.results == NodeStatusResults.UNKNOWN
+    )  # We currently don't have a data remote set up

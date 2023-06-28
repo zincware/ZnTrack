@@ -343,13 +343,13 @@ class Dependency(LazyField):
         for node in value:
             if node is None:
                 continue
-            if node.state.rev is not None or node.state.remote is not None:
-                # TODO if the Node has a `rev` or `remote` attribute, we need to
-                #  get the UUID file of the respective Node through node.state.fs.open
-                # save that somewhere (can't use NWD, because we can now have multiple
-                # nodes with the same name...)
-                # and make the uuid a dependency of the node.
-                continue
+            # if node.state.rev is not None or node.state.remote is not None:
+            #     # TODO if the Node has a `rev` or `remote` attribute, we need to
+            #     #  get the UUID file of the respective Node through node.state.fs.open
+            #     # save that somewhere (can't use NWD, because we can now have multiple
+            #     # nodes with the same name...)
+            #     # and make the uuid a dependency of the node.
+            #     continue
             files.append(node.nwd / "uuid")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
