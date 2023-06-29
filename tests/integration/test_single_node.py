@@ -1,4 +1,7 @@
+import pathlib
+
 import pytest
+import yaml
 
 import zntrack
 
@@ -24,6 +27,39 @@ def test_AddNumbers(proj_path, eager):
         add_numbers.load()
     assert add_numbers.c == 3
     assert add_numbers.state.loaded
+
+
+def test_AddNumbers_remove_params(proj_path):
+    with zntrack.Project() as project:
+        add_numbers = AddNumbers(a=1, b=2)
+
+    assert not add_numbers.state.loaded
+
+    project.build()
+    project.repro()
+
+    params = pathlib.Path("params.yaml").read_text()
+    params = yaml.safe_load(params)
+    params[add_numbers.name] = {}
+    params = pathlib.Path("params.yaml").write_text(yaml.dump(params))
+
+    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
+        add_numbers.load()
+
+
+def test_znrack_from_rev(proj_path):
+    with zntrack.Project() as project:
+        add_numbers = AddNumbers(a=1, b=2)
+
+    assert not add_numbers.state.loaded
+
+    project.run()
+
+    node = zntrack.from_rev(add_numbers.name)
+    assert node.a == 1
+    assert node.b == 2
+    assert node.c == 3
+    assert node.state.loaded
 
 
 @pytest.mark.parametrize("eager", [True, False])

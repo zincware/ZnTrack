@@ -7,12 +7,20 @@ import typing
 
 import pandas as pd
 import yaml
+import znflow
 import znflow.utils
 import zninit
 import znjson
 from znflow import handler
 
-from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField
+from zntrack import exceptions
+from zntrack.fields.field import (
+    DataIsLazyError,
+    Field,
+    FieldGroup,
+    LazyField,
+    PlotsMixin,
+)
 from zntrack.utils import module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
@@ -38,6 +46,36 @@ class ConnectionConverter(znjson.ConverterBase):
         return znflow.Connection(**value)
 
 
+class CombinedConnectionsConverter(znjson.ConverterBase):
+    """Convert a znflow.Connection object to dict and back."""
+
+    level = 100
+    representation = "znflow.CombinedConnections"
+    instance = znflow.CombinedConnections
+
+    def encode(self, obj: znflow.CombinedConnections) -> dict:
+        """Convert the znflow.Connection object to dict."""
+        if obj.item is not None:
+            raise NotImplementedError(
+                "znflow.CombinedConnections getitem is not supported yet."
+            )
+        return dataclasses.asdict(obj)
+
+    def decode(self, value: str) -> znflow.CombinedConnections:
+        """Create znflow.Connection object from dict."""
+        connections = []
+        for item in value["connections"]:
+            if isinstance(item, dict):
+                # @nodify functions aren't support as 'zn.deps'
+                # Nodes directly aren't supported because they aren't lists
+                connections.append(znflow.Connection(**item))
+            else:
+                # For the case that item is already a znflow.Connection
+                connections.append(item)
+        value["connections"] = connections
+        return znflow.CombinedConnections(**value)
+
+
 class SliceConverter(znjson.ConverterBase):
     """Convert a znflow.Connection object to dict and back."""
 
@@ -51,7 +89,7 @@ class SliceConverter(znjson.ConverterBase):
 
     def decode(self, value: dict) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
-        return slice(*value.values())
+        return slice(value["start"], value["stop"], value["step"])
 
 
 znjson.config.register(SliceConverter)
@@ -106,8 +144,8 @@ class Params(Field):
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         file = self.get_files(instance)[0]
-        params_dict = yaml.safe_load(instance.state.get_file_system().read_text(file))
-        value = params_dict[instance.name].get(self.name, None)
+        params_dict = yaml.safe_load(instance.state.fs.read_text(file))
+        value = params_dict[instance.name][self.name]
         return json.loads(json.dumps(value), cls=znjson.ZnDecoder)
 
     def get_stage_add_argument(self, instance: "Node") -> typing.List[tuple]:
@@ -181,7 +219,7 @@ class Output(LazyField):
         """Get the value of the field from the file."""
         file = self.get_files(instance)[0]
         return json.loads(
-            instance.state.get_file_system().read_text(file.as_posix()),
+            instance.state.fs.read_text(file.as_posix()),
             cls=znjson.ZnDecoder,
         )
 
@@ -202,7 +240,7 @@ class Output(LazyField):
         return [(f"--{self.dvc_option}", file.as_posix())]
 
 
-class Plots(LazyField):
+class Plots(PlotsMixin, LazyField):
     """A field that is saved to disk."""
 
     dvc_option: str = "plots"
@@ -214,6 +252,7 @@ class Plots(LazyField):
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
+        super().save(instance)
         try:
             value = self.get_value_except_lazy(instance)
         except DataIsLazyError:
@@ -228,9 +267,7 @@ class Plots(LazyField):
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         file = self.get_files(instance)[0]
-        return pd.read_csv(
-            instance.state.get_file_system().open(file.as_posix()), index_col=0
-        )
+        return pd.read_csv(instance.state.fs.open(file.as_posix()), index_col=0)
 
     def get_stage_add_argument(self, instance) -> typing.List[tuple]:
         """Get the dvc command for this field."""
@@ -239,6 +276,22 @@ class Plots(LazyField):
 
 
 _default = object()
+
+
+def _get_all_connections_and_instances(value) -> list["Node"]:
+    """Get Nodes from Connections and CombinedConnections."""
+    connections = []
+    stack = [value]
+    while stack:
+        node = stack.pop()
+        if isinstance(node, znflow.CombinedConnections):
+            stack.extend(node.connections)
+        elif isinstance(node, znflow.Connection):
+            instance = node.instance
+            while isinstance(instance, znflow.Connection):
+                instance = instance.instance
+            connections.append(instance)
+    return connections
 
 
 class Dependency(LazyField):
@@ -269,15 +322,28 @@ class Dependency(LazyField):
         files = []
 
         value = getattr(instance, self.name)
+        # TODO use IterableHandler?
 
+        if isinstance(value, dict):
+            value = list(value.values())
         if not isinstance(value, (list, tuple)):
             value = [value]
+        if isinstance(value, tuple):
+            value = list(value)
+
+        others = []
+        for node in value:
+            if isinstance(node, (znflow.CombinedConnections, znflow.Connection)):
+                others.extend(_get_all_connections_and_instances(node))
+            else:
+                others.append(node)
+
+        value = others
 
         for node in value:
             if node is None:
                 continue
-            if isinstance(node, znflow.Connection):
-                node = node.instance
+            files.append(node.nwd / "uuid")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
                     # We do not want to depend on parameter files or
@@ -298,14 +364,14 @@ class Dependency(LazyField):
             value,
             instance,
             encoder=znjson.ZnEncoder.from_converters(
-                [ConnectionConverter], add_default=True
+                [ConnectionConverter, CombinedConnectionsConverter], add_default=True
             ),
         )
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
+            instance.state.fs.read_text("zntrack.json"),
         )
         value = zntrack_dict[instance.name][self.name]
 
@@ -313,7 +379,9 @@ class Dependency(LazyField):
 
         value = json.loads(
             json.dumps(value),
-            cls=znjson.ZnDecoder.from_converters(ConnectionConverter, add_default=True),
+            cls=znjson.ZnDecoder.from_converters(
+                [ConnectionConverter, CombinedConnectionsConverter], add_default=True
+            ),
         )
 
         # Up until here we have connection objects. Now we need
@@ -348,13 +416,17 @@ class NodeField(Dependency):
     """
 
     def __set__(self, instance, value):
-        """Disbale the _graph_ in the value 'Node'."""
+        """Disable the _graph_ in the value 'Node'."""
         if value is None:
             return super().__set__(instance, value)
 
         for entry in value if isinstance(value, (list, tuple)) else [value]:
             if hasattr(entry, "_graph_"):
                 entry._graph_ = None
+                if entry.uuid in instance._graph_:
+                    raise exceptions.ZnNodesOnGraphError(
+                        node=entry, field=self, instance=instance
+                    )
             else:
                 raise TypeError(f"The value must be a Node and not {entry}.")
         return super().__set__(instance, value)
@@ -412,7 +484,9 @@ class NodeField(Dependency):
                 name,
                 "--force",
                 "--outs",
-                f"nodes/{name}/hash",
+                f"nodes/{name}/uuid",
+                "--params",
+                f"zntrack.json:{instance.name}.{self.name}",
             ]
             field_cmds = []
             for attr in zninit.get_descriptors(Params, self=node):
@@ -423,7 +497,7 @@ class NodeField(Dependency):
 
             _cmd += [
                 f"zntrack run {module}.{node.__class__.__name__} --name"
-                f" {name} --hash-only"
+                f" {name} --uuid-only"
             ]
 
             cmd.append(_cmd)
@@ -433,7 +507,7 @@ class NodeField(Dependency):
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         return [
-            pathlib.Path(f"nodes/{name}/hash") for name in self.get_node_names(instance)
+            pathlib.Path(f"nodes/{name}/uuid") for name in self.get_node_names(instance)
         ]
 
 

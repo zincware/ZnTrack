@@ -30,7 +30,7 @@ def jupyter_class_to_file(nb_name, module_name):
 
     subprocess.run(
         ["jupyter", "nbconvert", "--to", "script", nb_name.as_posix()],
-        capture_output=config.log_level > logging.INFO,
+        capture_output=config.log_level > logging.DEBUG,
         check=True,
     )
 

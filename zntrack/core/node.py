@@ -1,21 +1,31 @@
-"""The Node class."""
+"""The ZnTrack Node class."""
 from __future__ import annotations
 
 import contextlib
 import dataclasses
+import functools
 import importlib
 import logging
 import pathlib
+import time
 import typing
 
 import dvc.api
 import dvc.cli
+import dvc.utils.strictyaml
 import znflow
 import zninit
 import znjson
 
+from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import NodeStatusResults, deprecated, module_handler, run_dvc_cmd
+from zntrack.utils import (
+    NodeStatusResults,
+    deprecated,
+    file_io,
+    module_handler,
+    run_dvc_cmd,
+)
 from zntrack.utils.config import config
 
 log = logging.getLogger(__name__)
@@ -47,10 +57,22 @@ class NodeStatus:
 
     def get_file_system(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
-        return dvc.api.DVCFileSystem(
-            url=self.remote,
-            rev=self.rev,
-        )
+        log.warning("Deprecated. Use 'state.fs' instead.")
+        return self.fs
+
+    @functools.cached_property
+    def fs(self) -> dvc.api.DVCFileSystem:
+        """Get the file system of the Node."""
+        for _ in range(10):
+            try:
+                return dvc.api.DVCFileSystem(
+                    url=self.remote,
+                    rev=self.rev,
+                )
+            except dvc.utils.strictyaml.YAMLValidationError as err:
+                log.debug(err)
+                time.sleep(0.1)
+        raise dvc.utils.strictyaml.YAMLValidationError
 
 
 class _NameDescriptor(zninit.Descriptor):
@@ -86,6 +108,17 @@ class Node(zninit.ZnInit, znflow.Node):
 
     name: str = _NameDescriptor(None)
     _name_ = None
+
+    _protected_ = znflow.Node._protected_ + ["name"]
+
+    @property
+    def _use_repr_(self) -> bool:
+        """Only use dataclass like __repr__ if outside the _graph_ to avoid recursion.
+
+        Due to modified behavior of '__getattribute__' inside the graph context,
+        a fallback to the python default '__repr__' is needed to avoid recursion.
+        """
+        return self._graph_ is None
 
     def _post_load_(self) -> None:
         """Post load hook.
@@ -133,14 +166,27 @@ class Node(zninit.ZnInit, znflow.Node):
             nwd.mkdir(parents=True)
         return nwd
 
-    def save(self, parameter: bool = True, results: bool = True) -> None:
+    def save(
+        self, parameter: bool = True, results: bool = True, uuid_only: bool = False
+    ) -> None:
         """Save the node's output to disk."""
+        if uuid_only:
+            (self.nwd / "uuid").write_text(str(self.uuid))
+            return
+
         # TODO have an option to save and run dvc commit afterwards.
+
+        # TODO: check if there is a difference in saving
+        # a loaded node vs a new node and why
         from zntrack.fields import Field, FieldGroup
 
         # Jupyter Notebook
         if config.nb_name:
             self.convert_notebook(config.nb_name)
+
+        if parameter:
+            file_io.clear_config_file(file="params.yaml", node_name=self.name)
+            file_io.clear_config_file(file="zntrack.json", node_name=self.name)
 
         for attr in zninit.get_descriptors(Field, self=self):
             if attr.group == FieldGroup.PARAMETER and parameter:
@@ -156,22 +202,37 @@ class Node(zninit.ZnInit, znflow.Node):
     def run(self) -> None:
         """Run the node's code."""
 
-    def load(self, lazy: bool = None) -> None:
-        """Load the node's output from disk."""
-        from zntrack.fields.field import Field
+    def load(self, lazy: bool = None, results: bool = True) -> None:
+        """Load the node's output from disk.
+
+        Attributes
+        ----------
+        lazy : bool, default = None
+            Whether to load the node lazily. If None, the value from the config is used.
+        results : bool, default = True
+            Whether to load the results. If False, only the parameters are loaded.
+        """
+        from zntrack.fields.field import Field, FieldGroup
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         self.state.loaded = True  # we assume loading will be successful.
-        with config.updated_config(**kwargs):
-            # TODO: it would be much nicer not to use a global config object here.
-            for attr in zninit.get_descriptors(Field, self=self):
-                attr.load(self)
+        try:
+            with config.updated_config(**kwargs):
+                # TODO: it would be much nicer not to use a global config object here.
+                for attr in zninit.get_descriptors(Field, self=self):
+                    if attr.group == FieldGroup.RESULT and not results:
+                        continue
+                    attr.load(self)
+        except KeyError as err:
+            raise exceptions.NodeNotAvailableError(self) from err
 
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
 
     @classmethod
-    def from_rev(cls, name=None, remote=None, rev=None, lazy: bool = None) -> Node:
+    def from_rev(
+        cls, name=None, remote=None, rev=None, lazy: bool = None, results: bool = True
+    ) -> Node:
         """Create a Node instance from an experiment."""
         node = cls.__new__(cls)
         node.name = name
@@ -192,7 +253,7 @@ class Node(zninit.ZnInit, znflow.Node):
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
-            node.load()
+            node.load(results=results)
 
         return node
 
@@ -243,8 +304,11 @@ def get_dvc_cmd(
     for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
         optionals += attr.get_optional_dvc_cmd(node)
+
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
+
+    cmd += ["--outs", f"nodes/{node.name}/uuid"]
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]

@@ -7,9 +7,7 @@ API Documentation
     :maxdepth: 2
 
     core
+    project
     cli
-    utils
-    dvc
-    zn
-    meta
-    metadata
+    exceptions
+    fields

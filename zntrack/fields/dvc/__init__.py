@@ -5,7 +5,7 @@ import typing
 
 import znjson
 
-from zntrack.fields.field import Field, FieldGroup
+from zntrack.fields.field import Field, FieldGroup, PlotsMixin
 from zntrack.utils import node_wd
 
 if typing.TYPE_CHECKING:
@@ -22,6 +22,12 @@ class DVCOption(Field):
 
     def __init__(self, *args, **kwargs):
         """Create a DVCOption field."""
+        if node_wd.nwd in args or node_wd.nwd in kwargs.values():
+            raise ValueError(
+                "Can not set `zntrack.nwd` as value for {self}. Please use"
+                " `zntrack.nwd/...` to create a path relative to the node working"
+                " directory."
+            )
         self.dvc_option = kwargs.pop("dvc_option")
         super().__init__(*args, **kwargs)
 
@@ -82,7 +88,7 @@ class DVCOption(Field):
             The value of the field from the configuration file.
         """
         zntrack_dict = json.loads(
-            instance.state.get_file_system().read_text("zntrack.json"),
+            instance.state.fs.read_text("zntrack.json"),
         )
         return json.loads(
             json.dumps(zntrack_dict[instance.name][self.name]), cls=znjson.ZnDecoder
@@ -130,6 +136,10 @@ class DVCOption(Field):
         return node_wd.ReplaceNWD()(value, nwd=instance.nwd)
 
 
+class PlotsOption(PlotsMixin, DVCOption):
+    """Field with DVC plots kwargs."""
+
+
 def outs(*args, **kwargs) -> DVCOption:
     """Create a outs field."""
     return DVCOption(*args, dvc_option="outs", **kwargs)
@@ -167,9 +177,9 @@ def metrics_no_cache(*args, **kwargs) -> DVCOption:
 
 def plots(*args, **kwargs) -> DVCOption:
     """Create a plots field."""
-    return DVCOption(*args, dvc_option="plots", **kwargs)
+    return PlotsOption(*args, dvc_option="plots", **kwargs)
 
 
 def plots_no_cache(*args, **kwargs) -> DVCOption:
     """Create a plots_no_cache field."""
-    return DVCOption(*args, dvc_option="plots-no-cache", **kwargs)
+    return PlotsOption(*args, dvc_option="plots-no-cache", **kwargs)
