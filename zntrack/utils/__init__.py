@@ -93,6 +93,7 @@ def run_dvc_cmd(script):
     ----------
     script: tuple[str]|list[str]
         A list of strings to pass the subprocess command
+
     Raises
     ------
     DVCProcessError:
@@ -177,6 +178,7 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
     ----------
     required_files: list, optional
         A list of optional files to be copied
+
     Returns
     -------
     temp_dir:
