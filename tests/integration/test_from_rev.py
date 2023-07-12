@@ -61,9 +61,6 @@ def test_connect_from_remote(proj_path):
         rev="35d35ff",
     )
 
-    node_a._external_ = True
-    node_b._external_ = True
-
     assert node_a.random_number == 123
     assert node_b.random_number == 126
 

@@ -263,6 +263,7 @@ class Node(zninit.ZnInit, znflow.Node):
             node.__init__()
 
         node._in_construction = False
+        node._external_ = True
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
