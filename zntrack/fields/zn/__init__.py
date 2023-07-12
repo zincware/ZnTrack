@@ -490,7 +490,7 @@ class NodeField(Dependency):
                 "--name",
                 name,
                 "--force",
-                "--metrics",
+                "--metrics-no-cache",
                 f"nodes/{name}/node-meta.json",
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
