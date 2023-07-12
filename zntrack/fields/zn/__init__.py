@@ -349,15 +349,17 @@ class Dependency(LazyField):
 
                 deps_file = f"{node.uuid}.json"
 
-                run_dvc_cmd(
-                    [
-                        "import",
-                        node.state.remote,
-                        (node.nwd / "node-meta.json").as_posix(),
-                        "-o",
-                        deps_file,
-                    ]
-                )
+                cmd = [
+                    "import",
+                    node.state.remote,
+                    (node.nwd / "node-meta.json").as_posix(),
+                    "-o",
+                    deps_file,
+                ]
+                if node.state.rev is not None:
+                    cmd.extend(["--rev", node.state.rev])
+                # TODO how can we test, that the loaded file truly is the correct one?
+                run_dvc_cmd(cmd)
                 files.append(deps_file)
                 # dvc import node-meta.json + add as dependency file
                 continue

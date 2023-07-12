@@ -68,17 +68,17 @@ def test_connect_from_remote(proj_path):
     assert node_b.random_number == 126
 
     with zntrack.Project() as project:
-        node2 = AddOne(number=node_a.random_number)
+        node = AddOne(number=node_a.random_number)
 
     project.run()
-    node2.load()
+    node.load()
 
-    assert node2.outs == node_a.random_number + 1
+    assert node.outs == node_a.random_number + 1
 
     with zntrack.Project() as project:
-        node2 = AddOne(number=node_b.random_number)
+        node = AddOne(number=node_b.random_number)
 
     project.run()
-    node2.load()
+    node.load()
 
-    assert node2.outs == node_b.random_number + 1
+    assert node.outs == node_b.random_number + 1
