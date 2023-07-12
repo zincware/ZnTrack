@@ -5,6 +5,7 @@ import contextlib
 import dataclasses
 import functools
 import importlib
+import json
 import logging
 import pathlib
 import time
@@ -168,11 +169,14 @@ class Node(zninit.ZnInit, znflow.Node):
         return nwd
 
     def save(
-        self, parameter: bool = True, results: bool = True, uuid_only: bool = False
+        self, parameter: bool = True, results: bool = True, meta_only: bool = False
     ) -> None:
         """Save the node's output to disk."""
-        if uuid_only:
-            (self.nwd / "uuid").write_text(str(self.uuid))
+        if meta_only:
+            # the meta data will only be written here.
+            import json
+
+            (self.nwd / "node-meta.json").write_text(json.dumps({"uuid": str(self.uuid)}))
             return
 
         # TODO have an option to save and run dvc commit afterwards.
@@ -230,8 +234,9 @@ class Node(zninit.ZnInit, znflow.Node):
         with contextlib.suppress(FileNotFoundError):
             # If the uuid is available, we can assume that all data for
             #  this Node is available.
-            with self.state.fs.open(self.nwd / "uuid") as f:
-                self._uuid = uuid.UUID(f.read().decode("utf-8"))
+            with self.state.fs.open(self.nwd / "node-meta.json") as f:
+                node_meta = json.load(f)
+                self._uuid = uuid.UUID(node_meta["uuid"])
                 self.state.results = NodeStatusResults.AVAILABLE
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
@@ -317,7 +322,7 @@ def get_dvc_cmd(
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
-    cmd += ["--outs", f"nodes/{node.name}/uuid"]
+    cmd += ["--metrics", f"{(node.nwd /'node-meta.json').as_posix()}"]
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]

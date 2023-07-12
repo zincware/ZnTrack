@@ -350,7 +350,7 @@ class Dependency(LazyField):
             #     # nodes with the same name...)
             #     # and make the uuid a dependency of the node.
             #     continue
-            files.append(node.nwd / "uuid")
+            files.append(node.nwd / "node-meta.json")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
                     # We do not want to depend on parameter files or
@@ -490,8 +490,8 @@ class NodeField(Dependency):
                 "--name",
                 name,
                 "--force",
-                "--outs",
-                f"nodes/{name}/uuid",
+                "--metrics",
+                f"nodes/{name}/node-meta.json",
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
             ]
@@ -504,7 +504,7 @@ class NodeField(Dependency):
 
             _cmd += [
                 f"zntrack run {module}.{node.__class__.__name__} --name"
-                f" {name} --uuid-only"
+                f" {name} --meta-only"
             ]
 
             cmd.append(_cmd)
@@ -514,7 +514,8 @@ class NodeField(Dependency):
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         return [
-            pathlib.Path(f"nodes/{name}/uuid") for name in self.get_node_names(instance)
+            pathlib.Path(f"nodes/{name}/node-meta.json")
+            for name in self.get_node_names(instance)
         ]
 
 
