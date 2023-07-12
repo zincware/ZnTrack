@@ -341,9 +341,44 @@ class Dependency(LazyField):
         value = others
 
         for node in value:
+            node: Node
             if node is None:
                 continue
-            files.append(node.nwd / "uuid")
+            if node._external_:
+                from zntrack.utils import run_dvc_cmd
+
+                # TODO save these files in a specific directory called `external`
+                # TODO the `dvc import cmd` should not run here but rather be a stage?
+
+                deps_file = pathlib.Path("external", f"{node.uuid}.json")
+                deps_file.parent.mkdir(exist_ok=True, parents=True)
+
+                # when combining with zn.nodes this should be used
+                # dvc stage add <name> --params params.yaml:<name>
+                # --outs nodes/<name>/node-meta.json zntrack run <name> --external
+
+                cmd = [
+                    "import",
+                    node.state.remote if node.state.remote is not None else ".",
+                    (node.nwd / "node-meta.json").as_posix(),
+                    "-o",
+                    deps_file.as_posix(),
+                ]
+                if node.state.rev is not None:
+                    cmd.extend(["--rev", node.state.rev])
+                # TODO how can we test, that the loaded file truly is the correct one?
+                run_dvc_cmd(cmd)
+                files.append(deps_file.as_posix())
+                # dvc import node-meta.json + add as dependency file
+                continue
+            # if node.state.rev is not None or node.state.remote is not None:
+            #     # TODO if the Node has a `rev` or `remote` attribute, we need to
+            #     #  get the UUID file of the respective Node through node.state.fs.open
+            #     # save that somewhere (can't use NWD, because we can now have multiple
+            #     # nodes with the same name...)
+            #     # and make the uuid a dependency of the node.
+            #     continue
+            files.append(node.nwd / "node-meta.json")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
                     # We do not want to depend on parameter files or
@@ -483,8 +518,8 @@ class NodeField(Dependency):
                 "--name",
                 name,
                 "--force",
-                "--outs",
-                f"nodes/{name}/uuid",
+                "--metrics-no-cache",
+                f"nodes/{name}/node-meta.json",
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
             ]
@@ -497,7 +532,7 @@ class NodeField(Dependency):
 
             _cmd += [
                 f"zntrack run {module}.{node.__class__.__name__} --name"
-                f" {name} --uuid-only"
+                f" {name} --meta-only"
             ]
 
             cmd.append(_cmd)
@@ -507,7 +542,8 @@ class NodeField(Dependency):
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         return [
-            pathlib.Path(f"nodes/{name}/uuid") for name in self.get_node_names(instance)
+            pathlib.Path(f"nodes/{name}/node-meta.json")
+            for name in self.get_node_names(instance)
         ]
 
 

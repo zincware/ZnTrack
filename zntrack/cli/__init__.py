@@ -46,7 +46,7 @@ def main(
 
 
 @app.command()
-def run(node: str, name: str = None, uuid_only: bool = False) -> None:
+def run(node: str, name: str = None, meta_only: bool = False) -> None:
     """Execute a ZnTrack Node.
 
     Use as 'zntrack run module.Node --name node_name'.
@@ -77,10 +77,10 @@ def run(node: str, name: str = None, uuid_only: bool = False) -> None:
         cls(exec_func=True)
     elif issubclass(cls, Node):
         node: Node = cls.from_rev(name=name, results=False)
-        if not uuid_only:
+        if not meta_only:
             node.run()
             node.save(parameter=False)
-        node.save(uuid_only=True)
+        node.save(meta_only=True)
     else:
         raise ValueError(f"Node {node} is not a ZnTrack Node.")
 

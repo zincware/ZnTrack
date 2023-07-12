@@ -4,11 +4,12 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import functools
-import importlib
+import json
 import logging
 import pathlib
 import time
 import typing
+import uuid
 
 import dvc.api
 import dvc.cli
@@ -167,11 +168,14 @@ class Node(zninit.ZnInit, znflow.Node):
         return nwd
 
     def save(
-        self, parameter: bool = True, results: bool = True, uuid_only: bool = False
+        self, parameter: bool = True, results: bool = True, meta_only: bool = False
     ) -> None:
         """Save the node's output to disk."""
-        if uuid_only:
-            (self.nwd / "uuid").write_text(str(self.uuid))
+        if meta_only:
+            # the meta data will only be written here.
+            import json
+
+            (self.nwd / "node-meta.json").write_text(json.dumps({"uuid": str(self.uuid)}))
             return
 
         # TODO have an option to save and run dvc commit afterwards.
@@ -226,6 +230,13 @@ class Node(zninit.ZnInit, znflow.Node):
         except KeyError as err:
             raise exceptions.NodeNotAvailableError(self) from err
 
+        with contextlib.suppress(FileNotFoundError):
+            # If the uuid is available, we can assume that all data for
+            #  this Node is available.
+            with self.state.fs.open(self.nwd / "node-meta.json") as f:
+                node_meta = json.load(f)
+                self._uuid = uuid.UUID(node_meta["uuid"])
+                self.state.results = NodeStatusResults.AVAILABLE
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
 
@@ -250,6 +261,9 @@ class Node(zninit.ZnInit, znflow.Node):
             #  the `__init__` might do something like self.param = kwargs["param"]
             #  and this would overwrite the loaded value.
             node.__init__()
+
+        node._in_construction = False
+        node._external_ = True
 
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
@@ -308,7 +322,7 @@ def get_dvc_cmd(
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
-    cmd += ["--outs", f"nodes/{node.name}/uuid"]
+    cmd += ["--metrics-no-cache", f"{(node.nwd /'node-meta.json').as_posix()}"]
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]
@@ -329,6 +343,7 @@ class NodeIdentifier:
     @classmethod
     def from_node(cls, node: Node):
         """Create a _NodeIdentifier from a Node object."""
+        # TODO module and cls are not needed (from_rev can handle name, rev, remote only)
         return cls(
             module=module_handler(node),
             cls=node.__class__.__name__,
@@ -339,9 +354,9 @@ class NodeIdentifier:
 
     def get_node(self) -> Node:
         """Get the node from the identifier."""
-        module = importlib.import_module(self.module)
-        cls = getattr(module, self.cls)
-        return cls.from_rev(name=self.name, remote=self.remote, rev=self.rev)
+        from zntrack import from_rev
+
+        return from_rev(name=self.name, remote=self.remote, rev=self.rev)
 
 
 class NodeConverter(znjson.ConverterBase):
@@ -353,13 +368,7 @@ class NodeConverter(znjson.ConverterBase):
 
     def encode(self, obj: Node) -> dict:
         """Convert the Node object to dict."""
-        node_identifier = NodeIdentifier.from_node(obj)
-        if node_identifier.rev is not None:
-            raise NotImplementedError(
-                "Dependencies to other revisions are not supported yet"
-            )
-
-        return dataclasses.asdict(node_identifier)
+        return dataclasses.asdict(NodeIdentifier.from_node(obj))
 
     def decode(self, value: dict) -> Node:
         """Create Node object from dict."""
