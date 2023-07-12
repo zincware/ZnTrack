@@ -120,6 +120,8 @@ class Project:
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
             if node.name in node_names:
+                if node._external_:
+                    continue
                 if self.automatic_node_names:
                     idx = 1
                     while f"{node.name}_{idx}" in node_names:

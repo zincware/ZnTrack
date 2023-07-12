@@ -353,9 +353,13 @@ class Dependency(LazyField):
                 deps_file = pathlib.Path("external", f"{node.uuid}.json")
                 deps_file.parent.mkdir(exist_ok=True, parents=True)
 
+                # when combining with zn.nodes this should be used
+                # dvc stage add <name> --params params.yaml:<name>
+                # --outs nodes/<name>/node-meta.json zntrack run <name> --external
+
                 cmd = [
                     "import",
-                    node.state.remote,
+                    node.state.remote if node.state.remote is not None else ".",
                     (node.nwd / "node-meta.json").as_posix(),
                     "-o",
                     deps_file.as_posix(),
