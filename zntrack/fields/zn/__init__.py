@@ -343,6 +343,8 @@ class Dependency(LazyField):
         for node in value:
             if node is None:
                 continue
+            if node._external_:
+                continue
             # if node.state.rev is not None or node.state.remote is not None:
             #     # TODO if the Node has a `rev` or `remote` attribute, we need to
             #     #  get the UUID file of the respective Node through node.state.fs.open

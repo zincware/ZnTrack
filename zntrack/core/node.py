@@ -4,7 +4,6 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import functools
-import importlib
 import json
 import logging
 import pathlib
@@ -353,9 +352,9 @@ class NodeIdentifier:
 
     def get_node(self) -> Node:
         """Get the node from the identifier."""
-        module = importlib.import_module(self.module)
-        cls = getattr(module, self.cls)
-        return cls.from_rev(name=self.name, remote=self.remote, rev=self.rev)
+        from zntrack import from_rev
+
+        return from_rev(name=self.name, remote=self.remote, rev=self.rev)
 
 
 class NodeConverter(znjson.ConverterBase):

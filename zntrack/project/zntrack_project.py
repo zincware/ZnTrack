@@ -191,6 +191,8 @@ class Project:
 
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
+            if node._external_:
+                continue
             if eager:
                 # update connectors
                 log.info(f"Running node {node}")
@@ -206,7 +208,7 @@ class Project:
                     run_dvc_cmd(x)
                 node.save(results=False)
         if not eager and repro:
-            run_dvc_cmd(["repro"])
+            self.repro()
             # TODO should we load the nodes here? Maybe, if lazy loading is implemented.
 
     def build(self, environment: dict = None, optional: dict = None) -> None:
@@ -216,6 +218,7 @@ class Project:
     def repro(self) -> None:
         """Run dvc repro."""
         run_dvc_cmd(["repro"])
+        # TODO load nodes afterwards!
 
     def _handle_environment(self, environment: dict):
         """Write global environment variables to the env.yaml file."""
