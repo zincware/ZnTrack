@@ -5386,13 +5386,13 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 
 [[package]]
 name = "znflow"
-version = "0.1.12"
+version = "0.1.13"
 description = "A general purpose framework for building and running computational graphs."
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "znflow-0.1.12-py3-none-any.whl", hash = "sha256:ea0e069069136cda8cbebdd7f8e43d13cabbd362b01586afef054a9c7dd44fec"},
-    {file = "znflow-0.1.12.tar.gz", hash = "sha256:d81bbbb4bd80fcc90ee7677b93a1e8d1dd3bcc69a5e577f1552a9b3bba3850ca"},
+    {file = "znflow-0.1.13-py3-none-any.whl", hash = "sha256:ca67858b4ecc1e4714339d8b6c47c03c8ba6065a9941f8a4a04e206284e25f03"},
+    {file = "znflow-0.1.13.tar.gz", hash = "sha256:b0e539fbebdbbef83ce5d24da4c335cda9491f6d3c64a33ee45fde91a68a9a09"},
 ]
 
 [package.dependencies]
@@ -5430,4 +5430,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "e025833c00525150fe08ea54afb23568c89e2be1b85b87e44840e446aa6acf21"
+content-hash = "c185e4c5834d63b92bb6199d69b6268ed8a6f712ac97de86afdc6306b216ebdf"
