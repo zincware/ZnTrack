@@ -341,9 +341,25 @@ class Dependency(LazyField):
         value = others
 
         for node in value:
+            node: Node
             if node is None:
                 continue
             if node._external_:
+                from zntrack.utils import run_dvc_cmd
+
+                deps_file = f"{node.uuid}.json"
+
+                run_dvc_cmd(
+                    [
+                        "import",
+                        node.state.remote,
+                        (node.nwd / "node-meta.json").as_posix(),
+                        "-o",
+                        deps_file,
+                    ]
+                )
+                files.append(deps_file)
+                # dvc import node-meta.json + add as dependency file
                 continue
             # if node.state.rev is not None or node.state.remote is not None:
             #     # TODO if the Node has a `rev` or `remote` attribute, we need to

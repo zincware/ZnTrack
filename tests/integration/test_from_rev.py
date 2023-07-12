@@ -49,18 +49,36 @@ def test_import_from_remote(proj_path):
 
 
 def test_connect_from_remote(proj_path):
-    node = zntrack.from_rev(
+    node_a = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
         rev="fbb6ada",
     )
 
-    node._external_ = True
+    node_b = zntrack.from_rev(
+        "HelloWorld",
+        remote="https://github.com/PythonFZ/ZnTrackExamples.git",
+        rev="35d35ff",
+    )
+
+    node_a._external_ = True
+    node_b._external_ = True
+
+    assert node_a.random_number == 123
+    assert node_b.random_number == 126
 
     with zntrack.Project() as project:
-        node2 = AddOne(number=node.random_number)
+        node2 = AddOne(number=node_a.random_number)
 
     project.run()
     node2.load()
 
-    assert node2.outs == 124
+    assert node2.outs == node_a.random_number + 1
+
+    with zntrack.Project() as project:
+        node2 = AddOne(number=node_b.random_number)
+
+    project.run()
+    node2.load()
+
+    assert node2.outs == node_b.random_number + 1

@@ -342,6 +342,7 @@ class NodeIdentifier:
     @classmethod
     def from_node(cls, node: Node):
         """Create a _NodeIdentifier from a Node object."""
+        # TODO module and cls are not needed (from_rev can handle name, rev, remote only)
         return cls(
             module=module_handler(node),
             cls=node.__class__.__name__,
