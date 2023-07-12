@@ -347,20 +347,24 @@ class Dependency(LazyField):
             if node._external_:
                 from zntrack.utils import run_dvc_cmd
 
-                deps_file = f"{node.uuid}.json"
+                # TODO save these files in a specific directory called `external`
+                # TODO the `dvc import cmd` should not run here but rather be a stage?
+
+                deps_file = pathlib.Path("external", f"{node.uuid}.json")
+                deps_file.parent.mkdir(exist_ok=True, parents=True)
 
                 cmd = [
                     "import",
                     node.state.remote,
                     (node.nwd / "node-meta.json").as_posix(),
                     "-o",
-                    deps_file,
+                    deps_file.as_posix(),
                 ]
                 if node.state.rev is not None:
                     cmd.extend(["--rev", node.state.rev])
                 # TODO how can we test, that the loaded file truly is the correct one?
                 run_dvc_cmd(cmd)
-                files.append(deps_file)
+                files.append(deps_file.as_posix())
                 # dvc import node-meta.json + add as dependency file
                 continue
             # if node.state.rev is not None or node.state.remote is not None:
