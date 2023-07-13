@@ -353,6 +353,9 @@ class Dependency(LazyField):
                 deps_file = pathlib.Path("external", f"{node.uuid}.json")
                 deps_file.parent.mkdir(exist_ok=True, parents=True)
 
+                # zntrack run node.name --external \
+                # --remote node.state.remote --rev node.state.rev
+
                 # when combining with zn.nodes this should be used
                 # dvc stage add <name> --params params.yaml:<name>
                 # --outs nodes/<name>/node-meta.json zntrack run <name> --external
@@ -367,7 +370,8 @@ class Dependency(LazyField):
                 if node.state.rev is not None:
                     cmd.extend(["--rev", node.state.rev])
                 # TODO how can we test, that the loaded file truly is the correct one?
-                run_dvc_cmd(cmd)
+                if not deps_file.exists():
+                    run_dvc_cmd(cmd)
                 files.append(deps_file.as_posix())
                 # dvc import node-meta.json + add as dependency file
                 continue

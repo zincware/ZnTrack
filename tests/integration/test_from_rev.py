@@ -76,6 +76,31 @@ def test_connect_from_remote(proj_path):
         node = AddOne(number=node_b.random_number)
 
     project.run()
-    node.load()
+    # We can not use node.load() here and build again,
+    # because it will convert connections to e.g. type int
+    # and then we can not connect to the node anymore.
+    # node.load()
 
-    assert node.outs == node_b.random_number + 1
+    assert zntrack.from_rev(node.name).outs == node_b.random_number + 1
+
+    project.build()
+
+
+def test_two_nodes_connect_external(proj_path):
+    node_a = zntrack.from_rev(
+        "HelloWorld",
+        remote="https://github.com/PythonFZ/ZnTrackExamples.git",
+        rev="fbb6ada",
+    )
+
+    with zntrack.Project(automatic_node_names=True) as project:
+        node1 = AddOne(number=node_a.random_number)
+        node2 = AddOne(number=node_a.random_number)
+
+    project.run()
+
+    node1.load()
+    node2.load()
+
+    assert node1.outs == node_a.random_number + 1
+    assert node2.outs == node_a.random_number + 1

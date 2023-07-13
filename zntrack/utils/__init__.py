@@ -114,7 +114,8 @@ def run_dvc_cmd(script):
     return_code = dvc.cli.main(script)
     if return_code != 0:
         raise DVCProcessError(
-            f"DVC CLI failed ({return_code}) for cmd: \n \"{' '.join(script)}\" "
+            f'DVC CLI failed ({return_code}) for cmd: \n "dvc'
+            f' {" ".join(x for x in script if x != "--quiet")}" '
         )
     # fix for https://github.com/iterative/dvc/issues/8631
     for logger_name, logger in logging.root.manager.loggerDict.items():
