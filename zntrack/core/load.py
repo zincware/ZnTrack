@@ -77,7 +77,7 @@ def from_rev(name, remote=".", rev=None, **kwargs) -> T:
 
     Parameters
     ----------
-    name : str
+    name : str|Node
         The name of the node.
     remote : str, optional
         The remote to load the node from. Defaults to workspace.
@@ -91,6 +91,8 @@ def from_rev(name, remote=".", rev=None, **kwargs) -> T:
     Node
         The loaded node.
     """
+    if isinstance(name, Node):
+        name = name.name
     stage = _get_stage(name, remote, rev)
 
     cmd = stage.cmd
