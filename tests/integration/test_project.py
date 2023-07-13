@@ -173,13 +173,13 @@ def test_automatic_node_names_True(tmp_path_2):
 
 def test_group_nodes(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
-        with project.group():
+        with project.group() as group_1:
             node_1 = WriteIO(inputs="Lorem Ipsum")
             node_2 = WriteIO(inputs="Dolor Sit")
-        with project.group():
+        with project.group() as group_2:
             node_3 = WriteIO(inputs="Amet Consectetur")
             node_4 = WriteIO(inputs="Adipiscing Elit")
-        with project.group(name="NamedGrp"):
+        with project.group(name="NamedGrp") as group_3:
             node_5 = WriteIO(inputs="Sed Do", name="NodeA")
             node_6 = WriteIO(inputs="Eiusmod Tempor", name="NodeB")
 
@@ -188,6 +188,18 @@ def test_group_nodes(tmp_path_2):
         node9 = WriteIO(inputs="I'm fine, thanks!", name="NodeC")
 
     project.run()
+
+    assert node_1 in group_1
+    assert node_2 in group_1
+    assert node_3 not in group_1
+    assert node_4 not in group_1
+    assert len(group_1) == 2
+    assert group_1.name == "Group1"
+
+    assert node_3 in group_2
+    assert node_4 in group_2
+    assert node_5 in group_3
+    assert node_6 in group_3
 
     assert node_1.name == "Group1_WriteIO"
     assert node_2.name == "Group1_WriteIO_1"
@@ -202,3 +214,65 @@ def test_group_nodes(tmp_path_2):
     assert node9.name == "NodeC"
 
     assert WriteIO.from_rev(name="NamedGrp_NodeA").inputs == "Sed Do"
+
+
+def test_build_certain_nodes(tmp_path_2):
+    # TODO support passing groups to project.build
+    with zntrack.Project(automatic_node_names=True) as project:
+        node_1 = WriteIO(inputs="Lorem Ipsum")
+        node_2 = WriteIO(inputs="Dolor Sit")
+    project.build(nodes=[node_1, node_2])
+    project.repro()
+
+    assert zntrack.from_rev(node_1).outputs == "Lorem Ipsum"
+    assert zntrack.from_rev(node_2).outputs == "Dolor Sit"
+
+    node_1.inputs = "ABC"
+    node_2.inputs = "DEF"
+
+    project.build(nodes=[node_1])
+    project.repro()
+
+    assert zntrack.from_rev(node_1).outputs == "ABC"
+    assert zntrack.from_rev(node_2).outputs == "Dolor Sit"
+
+    project.run(nodes=[node_2])
+
+    assert zntrack.from_rev(node_1).outputs == "ABC"
+    assert zntrack.from_rev(node_2).outputs == "DEF"
+
+
+def test_build_groups(tmp_path_2):
+    with zntrack.Project(automatic_node_names=True) as project:
+        with project.group() as group_1:
+            node_1 = WriteIO(inputs="Lorem Ipsum")
+            node_2 = WriteIO(inputs="Dolor Sit")
+        with project.group() as group_2:
+            node_3 = WriteIO(inputs="Amet Consectetur")
+            node_4 = WriteIO(inputs="Adipiscing Elit")
+
+    project.run(nodes=[group_1])
+
+    assert zntrack.from_rev(node_1).outputs == "Lorem Ipsum"
+    assert zntrack.from_rev(node_2).outputs == "Dolor Sit"
+
+    with pytest.raises(ValueError):
+        zntrack.from_rev(node_3)
+    with pytest.raises(ValueError):
+        zntrack.from_rev(node_4)
+
+    node_2.inputs = "DEF"
+
+    project.run(nodes=[group_2, node_2])
+
+    assert zntrack.from_rev(node_1).outputs == "Lorem Ipsum"
+
+    assert zntrack.from_rev(node_2).outputs == "DEF"
+    assert zntrack.from_rev(node_3).outputs == "Amet Consectetur"
+    assert zntrack.from_rev(node_4).outputs == "Adipiscing Elit"
+
+    with pytest.raises(TypeError):
+        project.run(nodes=42)
+
+    with pytest.raises(ValueError):
+        project.run(nodes=[42])

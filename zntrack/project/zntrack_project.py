@@ -148,13 +148,17 @@ class Project:
         self._groups.append(name)
 
         existing_nodes = self.graph.get_sorted_nodes()
+
+        group = NodeGroup(name=name, nodes=[])
+
         try:
-            yield
+            yield group
         finally:
             for node_uuid in self.graph.get_sorted_nodes():
                 node: Node = self.graph.nodes[node_uuid]["value"]
                 if node_uuid not in existing_nodes:
                     node.name = f"{name}_{node.name}"
+                    group.nodes.append(node)
 
     def run(
         self,
@@ -163,6 +167,7 @@ class Project:
         optional: dict = None,
         save: bool = True,
         environment: dict = None,
+        nodes: list = None,
     ):
         """Run the Project Graph.
 
@@ -182,6 +187,8 @@ class Project:
             Possible arg_names are e.g. 'always_changed: True'
         environment : dict, default = None
             A dictionary of environment variables for all nodes.
+        nodes : list, default = None
+            A list of node names to run. If None, run all nodes.
         """
         if not save and not eager:
             raise ValueError("Save can only be false if eager is True")
@@ -191,8 +198,23 @@ class Project:
         if optional is None:
             optional = {}
 
+        node_names = None
+        if nodes is not None:
+            node_names = []
+            for node in nodes:
+                if isinstance(node, str):
+                    node_names.append(node)
+                elif isinstance(node, Node):
+                    node_names.append(node.name)
+                elif isinstance(node, NodeGroup):
+                    node_names.extend([x.name for x in node.nodes])
+                else:
+                    raise ValueError(f"Unknown node type {type(node)}")
+
         for node_uuid in self.graph.get_sorted_nodes():
             node: Node = self.graph.nodes[node_uuid]["value"]
+            if node_names is not None and node.name not in node_names:
+                continue
             if node._external_:
                 continue
             if eager:
@@ -213,9 +235,11 @@ class Project:
             self.repro()
             # TODO should we load the nodes here? Maybe, if lazy loading is implemented.
 
-    def build(self, environment: dict = None, optional: dict = None) -> None:
+    def build(
+        self, environment: dict = None, optional: dict = None, nodes: list = None
+    ) -> None:
         """Build the project graph without running it."""
-        self.run(repro=False, environment=environment, optional=optional)
+        self.run(repro=False, environment=environment, optional=optional, nodes=nodes)
 
     def repro(self) -> None:
         """Run dvc repro."""
@@ -385,3 +409,19 @@ class Branch:
             node = self.graph.nodes[node_uuid]["value"]
             node.state.rev = name
         active_branch.checkout()
+
+
+@dataclasses.dataclass
+class NodeGroup:
+    """A group of nodes."""
+
+    name: str
+    nodes: list[Node]
+
+    def __contains__(self, item: Node) -> bool:
+        """Check if the Node is in the group."""
+        return item in self.nodes
+
+    def __len__(self) -> int:
+        """Get the number of nodes in the group."""
+        return len(self.nodes)
