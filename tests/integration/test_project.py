@@ -276,3 +276,22 @@ def test_build_groups(tmp_path_2):
 
     with pytest.raises(ValueError):
         project.run(nodes=[42])
+
+
+def test_groups_nwd(tmp_path_2):
+    with zntrack.Project(automatic_node_names=True) as project:
+        node_1 = WriteIO(inputs="Lorem Ipsum")
+        with project.group() as group_1:
+            node_2 = WriteIO(inputs="Dolor Sit")
+        with project.group(name="CustomGroup") as group_2:
+            node_3 = WriteIO(inputs="Adipiscing Elit")
+
+    project.build()
+
+    assert node_1.nwd == pathlib.Path("nodes", node_1.name)
+    assert node_2.nwd == pathlib.Path(
+        "nodes", group_1.name, node_2.name.replace(f"{group_1.name}_", "")
+    )
+    assert node_3.nwd == pathlib.Path(
+        "nodes", group_2.name, node_3.name.replace(f"{group_2.name}_", "")
+    )
