@@ -157,6 +157,7 @@ class Project:
             for node_uuid in self.graph.get_sorted_nodes():
                 node: Node = self.graph.nodes[node_uuid]["value"]
                 if node_uuid not in existing_nodes:
+                    node.__dict__["nwd"] = pathlib.Path("nodes", group.name, node.name)
                     node.name = f"{name}_{node.name}"
                     group.nodes.append(node)
 
