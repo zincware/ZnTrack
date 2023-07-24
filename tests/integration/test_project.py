@@ -15,6 +15,16 @@ class WriteIO(zntrack.Node):
         self.outputs = self.inputs
 
 
+class ZnNodesNode(zntrack.Node):
+    """Used zn.nodes"""
+
+    node = zntrack.zn.nodes()
+    result = zntrack.zn.outs()
+
+    def run(self) -> None:
+        self.result = self.node.inputs
+
+
 @pytest.mark.parametrize("assert_before_exp", [True, False])
 def test_WriteIO(tmp_path_2, assert_before_exp):
     """Test the WriteIO node."""
@@ -318,4 +328,24 @@ def test_groups_nwd(tmp_path_2):
     assert zntrack.from_rev(node_2).nwd == pathlib.Path("nodes", node_2.name)
     assert zntrack.from_rev(node_3).nwd == pathlib.Path(
         "nodes", group_2.name, node_3.name.replace(f"{group_2.name}_", "")
+    )
+
+
+def test_groups_nwd_zn_nodes(tmp_path_2):
+    node = WriteIO(inputs="Lorem Ipsum")
+    with zntrack.Project(automatic_node_names=True) as project:
+        node_1 = ZnNodesNode(node=node)
+        with project.group() as group_1:
+            node_2 = ZnNodesNode(node=node)
+        with project.group(name="CustomGroup") as group_2:
+            node_3 = ZnNodesNode(node=node)
+
+    project.build()
+
+    assert zntrack.from_rev(node_1).node.nwd == pathlib.Path("nodes/ZnNodesNode_node")
+    assert zntrack.from_rev(node_2).node.nwd == pathlib.Path(
+        "nodes", group_1.name, "ZnNodesNode_1_node"
+    )
+    assert zntrack.from_rev(node_3).node.nwd == pathlib.Path(
+        "nodes", group_2.name, "ZnNodesNode_1_node"
     )

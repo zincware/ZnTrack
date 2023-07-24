@@ -516,6 +516,17 @@ class NodeField(Dependency):
             node.name = name
             module = module_handler(node.__class__)
 
+            # get the name of the parent directory as string
+            # e.g. we have nodes/AL_0/AL_0_ASEMD_checker_list_0
+            # but want nodes/AL_0/ASEMD_checker_list_0
+            if name.startswith(instance.nwd.parent.name):
+                node_nwd: pathlib.Path = (
+                    instance.nwd.parent / name[len(instance.nwd.parent.name) + 1 :]
+                )
+            else:
+                node_nwd: pathlib.Path = instance.nwd.parent / name
+            node.__dict__["nwd"] = node_nwd
+
             _cmd = [
                 "stage",
                 "add",
@@ -523,7 +534,7 @@ class NodeField(Dependency):
                 name,
                 "--force",
                 "--metrics-no-cache",
-                f"nodes/{name}/node-meta.json",
+                (node_nwd / "node-meta.json").as_posix(),  # HOW DO I MOVE THIS TO GROUP ?
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
             ]
