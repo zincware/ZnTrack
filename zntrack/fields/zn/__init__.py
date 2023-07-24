@@ -500,6 +500,9 @@ class NodeField(Dependency):
 
     def _get_nwd(self, instance: "Node", name: str) -> pathlib.Path:
         """Get the node working directory."""
+        # get the name of the parent directory as string
+        # e.g. we have nodes/AL_0/AL_0_ASEMD_checker_list_0
+        # but want nodes/AL_0/ASEMD_checker_list_0
         if name.startswith(instance.nwd.parent.name):
             return instance.nwd.parent / name[len(instance.nwd.parent.name) + 1 :]
         else:
@@ -522,10 +525,6 @@ class NodeField(Dependency):
                 raise TypeError(f"The value must be a Node and not {node}.")
             node.name = name
             module = module_handler(node.__class__)
-
-            # get the name of the parent directory as string
-            # e.g. we have nodes/AL_0/AL_0_ASEMD_checker_list_0
-            # but want nodes/AL_0/ASEMD_checker_list_0
 
             nwd = self._get_nwd(instance, name)
             node.__dict__["nwd"] = nwd
