@@ -340,7 +340,7 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
         with project.group(name="CustomGroup") as group_2:
             node_3 = ZnNodesNode(node=node)
 
-    project.build()
+    project.run()
 
     assert zntrack.from_rev(node_1).node.nwd == pathlib.Path("nodes/ZnNodesNode_node")
     assert zntrack.from_rev(node_2).node.nwd == pathlib.Path(
@@ -349,3 +349,8 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert zntrack.from_rev(node_3).node.nwd == pathlib.Path(
         "nodes", group_2.name, "ZnNodesNode_1_node"
     )
+
+    project.load()
+    assert node_1.result == "Lorem Ipsum"
+    assert node_2.result == "Lorem Ipsum"
+    assert node_3.result == "Lorem Ipsum"

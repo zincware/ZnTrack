@@ -498,6 +498,13 @@ class NodeField(Dependency):
                 _SaveNodes()(node, name=name)
         super().save(instance)
 
+    def _get_nwd(self, instance: "Node", name: str) -> pathlib.Path:
+        """Get the node working directory."""
+        if name.startswith(instance.nwd.parent.name):
+            return instance.nwd.parent / name[len(instance.nwd.parent.name) + 1 :]
+        else:
+            return instance.nwd.parent / name
+
     def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[list]:
         """Get the dvc command for this field."""
         nodes = getattr(instance, self.name)
@@ -519,13 +526,9 @@ class NodeField(Dependency):
             # get the name of the parent directory as string
             # e.g. we have nodes/AL_0/AL_0_ASEMD_checker_list_0
             # but want nodes/AL_0/ASEMD_checker_list_0
-            if name.startswith(instance.nwd.parent.name):
-                node_nwd: pathlib.Path = (
-                    instance.nwd.parent / name[len(instance.nwd.parent.name) + 1 :]
-                )
-            else:
-                node_nwd: pathlib.Path = instance.nwd.parent / name
-            node.__dict__["nwd"] = node_nwd
+
+            nwd = self._get_nwd(instance, name)
+            node.__dict__["nwd"] = nwd
 
             _cmd = [
                 "stage",
@@ -534,7 +537,7 @@ class NodeField(Dependency):
                 name,
                 "--force",
                 "--metrics-no-cache",
-                (node_nwd / "node-meta.json").as_posix(),  # HOW DO I MOVE THIS TO GROUP ?
+                (nwd / "node-meta.json").as_posix(),  # HOW DO I MOVE THIS TO GROUP ?
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
             ]
@@ -557,7 +560,7 @@ class NodeField(Dependency):
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field."""
         return [
-            pathlib.Path(f"nodes/{name}/node-meta.json")
+            self._get_nwd(instance, name) / "node-meta.json"
             for name in self.get_node_names(instance)
         ]
 
