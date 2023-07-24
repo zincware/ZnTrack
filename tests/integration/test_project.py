@@ -1,3 +1,4 @@
+import json
 import pathlib
 
 import pytest
@@ -293,5 +294,28 @@ def test_groups_nwd(tmp_path_2):
         "nodes", group_1.name, node_2.name.replace(f"{group_1.name}_", "")
     )
     assert node_3.nwd == pathlib.Path(
+        "nodes", group_2.name, node_3.name.replace(f"{group_2.name}_", "")
+    )
+    # now load the Nodes and assert as well
+
+    assert zntrack.from_rev(node_1).nwd == pathlib.Path("nodes", node_1.name)
+    assert zntrack.from_rev(node_2).nwd == pathlib.Path(
+        "nodes", group_1.name, node_2.name.replace(f"{group_1.name}_", "")
+    )
+    assert zntrack.from_rev(node_3).nwd == pathlib.Path(
+        "nodes", group_2.name, node_3.name.replace(f"{group_2.name}_", "")
+    )
+
+    with open("zntrack.json") as f:
+        data = json.load(f)
+        data[node_1.name]["nwd"]["value"] = "test"
+        data[node_2.name].pop("nwd")
+
+    with open("zntrack.json", "w") as f:
+        json.dump(data, f)
+
+    assert zntrack.from_rev(node_1).nwd == pathlib.Path("test")
+    assert zntrack.from_rev(node_2).nwd == pathlib.Path("nodes", node_2.name)
+    assert zntrack.from_rev(node_3).nwd == pathlib.Path(
         "nodes", group_2.name, node_3.name.replace(f"{group_2.name}_", "")
     )

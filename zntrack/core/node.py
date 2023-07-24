@@ -166,10 +166,10 @@ class Node(zninit.ZnInit, znflow.Node):
             nwd = self.__dict__["nwd"]
         except KeyError:
             try:
-                zntrack_config = json.loads(pathlib.Path("zntrack.json").read_text())
-                nwd = pathlib.Path(
-                    zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
+                zntrack_config = json.loads(
+                    pathlib.Path("zntrack.json").read_text(), cls=znjson.ZnDecoder
                 )
+                nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
             except (FileNotFoundError, KeyError):
                 nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
         if not nwd.exists():
@@ -211,6 +211,13 @@ class Node(zninit.ZnInit, znflow.Node):
                     f"Field {attr} has no group. Please assign a group from"
                     f" '{FieldGroup.__module__}.{FieldGroup.__name__}'."
                 )
+        # save the nwd to zntrack.json
+        file_io.update_config_file(
+            file=pathlib.Path("zntrack.json"),
+            node_name=self.name,
+            value_name="nwd",
+            value=self.nwd,
+        )
 
     def run(self) -> None:
         """Run the node's code."""
