@@ -162,7 +162,16 @@ class Node(zninit.ZnInit, znflow.Node):
     @property
     def nwd(self) -> pathlib.Path:
         """Get the node working directory."""
-        nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
+        try:
+            nwd = self.__dict__["nwd"]
+        except KeyError:
+            try:
+                zntrack_config = json.loads(pathlib.Path("zntrack.json").read_text())
+                nwd = pathlib.Path(
+                    zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
+                )
+            except (FileNotFoundError, KeyError):
+                nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
         if not nwd.exists():
             nwd.mkdir(parents=True)
         return nwd
