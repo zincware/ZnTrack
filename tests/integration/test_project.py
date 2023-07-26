@@ -354,3 +354,12 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert node_1.result == "Lorem Ipsum"
     assert node_2.result == "Lorem Ipsum"
     assert node_3.result == "Lorem Ipsum"
+
+
+def test_groups_automatic_names(proj_path):
+    with zntrack.Project(automatic_node_names=True) as project:
+        with project.group(name="GroupA"):
+            node_1 = WriteIO(inputs="Lorem Ipsum")
+        with pytest.raises(ValueError):
+            with project.group(name="GroupA"):
+                node_2 = WriteIO(inputs="Dolor Sit")
