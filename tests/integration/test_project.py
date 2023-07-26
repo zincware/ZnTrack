@@ -356,6 +356,28 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert node_3.result == "Lorem Ipsum"
 
 
+def test_groups_nwd_zn_nodes(tmp_path_2):
+    node = WriteIO(inputs="Lorem Ipsum")
+    with zntrack.Project(automatic_node_names=True) as project:
+        with project.group() as group_1:
+            node_2 = ZnNodesNode(node=node)
+        with project.group(name="CustomGroup") as group_2:
+            node_3 = ZnNodesNode(node=node)
+
+    project.run()
+
+    assert zntrack.from_rev(node_2).node.nwd == pathlib.Path(
+        "nodes", group_1.name, "ZnNodesNode_node"
+    )
+    assert zntrack.from_rev(node_3).node.nwd == pathlib.Path(
+        "nodes", group_2.name, "ZnNodesNode_node"
+    )
+
+    project.load()
+    assert node_2.result == "Lorem Ipsum"
+    assert node_3.result == "Lorem Ipsum"
+
+
 def test_groups_automatic_names(proj_path):
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group(name="GroupA"):
