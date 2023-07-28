@@ -238,7 +238,9 @@ class Project:
                 node.state.loaded = True
             else:
                 log.info(f"Adding node {node}")
-                cmd = get_dvc_cmd(node, **optional.get(node.name, {}))
+                cmd = get_dvc_cmd(
+                    node, git_only_repo=self.git_only_repo, **optional.get(node.name, {})
+                )
                 for x in cmd:
                     run_dvc_cmd(x)
                 node.save(results=False)

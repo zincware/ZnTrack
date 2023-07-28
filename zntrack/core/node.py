@@ -292,7 +292,7 @@ class Node(zninit.ZnInit, znflow.Node):
     )
     def write_graph(self, run: bool = False, **kwargs):
         """Write the graph to dvc.yaml."""
-        cmd = get_dvc_cmd(self, **kwargs)
+        cmd = get_dvc_cmd(self, git_only_repo=True, **kwargs)
         for x in cmd:
             run_dvc_cmd(x)
         self.save()
@@ -303,6 +303,7 @@ class Node(zninit.ZnInit, znflow.Node):
 
 def get_dvc_cmd(
     node: Node,
+    git_only_repo: bool,
     quiet: bool = False,
     verbose: bool = False,
     force: bool = True,
@@ -332,12 +333,12 @@ def get_dvc_cmd(
     field_cmds = []
     for attr in zninit.get_descriptors(Field, self=node):
         field_cmds += attr.get_stage_add_argument(node)
-        optionals += attr.get_optional_dvc_cmd(node)
+        optionals += attr.get_optional_dvc_cmd(node, git_only_repo=git_only_repo)
 
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
-    if node._graph_.project.git_only_repo:
+    if git_only_repo:
         cmd += ["--metrics-no-cache", f"{(node.nwd /'node-meta.json').as_posix()}"]
     else:
         cmd += ["--outs", f"{(node.nwd /'node-meta.json').as_posix()}"]
