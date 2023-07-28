@@ -337,7 +337,10 @@ def get_dvc_cmd(
     for field_cmd in set(field_cmds):
         cmd += list(field_cmd)
 
-    cmd += ["--metrics-no-cache", f"{(node.nwd /'node-meta.json').as_posix()}"]
+    if node._graph_.project.git_only_repo:
+        cmd += ["--metrics-no-cache", f"{(node.nwd /'node-meta.json').as_posix()}"]
+    else:
+        cmd += ["--outs", f"{(node.nwd /'node-meta.json').as_posix()}"]
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]

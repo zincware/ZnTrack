@@ -535,7 +535,7 @@ class NodeField(Dependency):
                 "--name",
                 name,
                 "--force",
-                "--metrics-no-cache",
+                "--metrics-no-cache" if node._graph_.project.git_only_repo else "--outs",
                 (nwd / "node-meta.json").as_posix(),  # HOW DO I MOVE THIS TO GROUP ?
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
