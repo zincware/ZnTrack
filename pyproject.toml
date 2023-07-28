@@ -13,7 +13,7 @@ python = ">=3.8,<4.0.0"
 dvc = "^3.2.2"
 pyyaml = "^6.0"
 tqdm = "^4.64.0"
-pandas = "^1.4.3"
+pandas = "^2"
 typer = "^0.7.0"
 
 dot4dict = "^0.1.1"
