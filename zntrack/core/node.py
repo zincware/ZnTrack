@@ -245,13 +245,14 @@ class Node(zninit.ZnInit, znflow.Node):
         except KeyError as err:
             raise exceptions.NodeNotAvailableError(self) from err
 
-        with contextlib.suppress(FileNotFoundError):
-            # If the uuid is available, we can assume that all data for
-            #  this Node is available.
-            with self.state.fs.open(self.nwd / "node-meta.json") as f:
-                node_meta = json.load(f)
-                self._uuid = uuid.UUID(node_meta["uuid"])
-                self.state.results = NodeStatusResults.AVAILABLE
+        if results:
+            with contextlib.suppress(FileNotFoundError):
+                # If the uuid is available, we can assume that all data for
+                #  this Node is available.
+                with self.state.fs.open(self.nwd / "node-meta.json") as f:
+                    node_meta = json.load(f)
+                    self._uuid = uuid.UUID(node_meta["uuid"])
+                    self.state.results = NodeStatusResults.AVAILABLE
         # TODO: documentation about _post_init and _post_load_ and when they are called
         self._post_load_()
 
