@@ -142,24 +142,32 @@ class Project:
             node_names.append(node.name)
 
     @contextlib.contextmanager
-    def group(self, name: str = None):
+    def group(self, *names: typing.List[str]):
         """Group nodes together.
 
         Parameters
         ----------
-        name : str, optional
+        names : list[str], optional
             The name of the group. If None, the group will be named 'GroupX' where X is
-            the number of groups + 1.
+            the number of groups + 1. If more than one name is given, the groups will
+            be nested to 'nwd = name[0]/name[1]/.../name[-1]'
         """
-        if name is None:
-            name = f"Group{len(self._groups) + 1}"
-        elif name in self._groups:
-            raise ValueError(f"Group '{name}' already exists.")
-        self._groups.append(name)
+        if len(names) == 0:
+            # names = (f"Group{len(self._groups) + 1}",)
+            name = "Group1"
+            while pathlib.Path("nodes", name).exists():
+                name = f"Group{int(name[5:]) + 1}"
+            names = (name,)
+
+        nwd = pathlib.Path("nodes", *names)
+        if any(x.nwd == nwd for x in self._groups):
+            raise ValueError(f"Group {names} already exists.")
+
+        nwd.mkdir(parents=True, exist_ok=True)
 
         existing_nodes = self.graph.get_sorted_nodes()
 
-        group = NodeGroup(name=name, nodes=[])
+        group = NodeGroup(nwd=nwd, nodes=[])
 
         try:
             yield group
@@ -167,9 +175,10 @@ class Project:
             for node_uuid in self.graph.get_sorted_nodes():
                 node: Node = self.graph.nodes[node_uuid]["value"]
                 if node_uuid not in existing_nodes:
-                    node.__dict__["nwd"] = pathlib.Path("nodes", group.name, node.name)
-                    node.name = f"{name}_{node.name}"
+                    node.__dict__["nwd"] = group.nwd / node.name
+                    node.name = f"{'_'.join(names)}_{node.name}"
                     group.nodes.append(node)
+            self._groups.append(group)
 
     def run(
         self,
@@ -428,7 +437,7 @@ class Branch:
 class NodeGroup:
     """A group of nodes."""
 
-    name: str
+    nwd: pathlib.Path
     nodes: list[Node]
 
     def __contains__(self, item: Node) -> bool:
