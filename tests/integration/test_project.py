@@ -415,7 +415,12 @@ def test_nested_groups(proj_path):
             node_3 = WriteIO(inputs="Amet Consectetur")
 
     project.run()
+    project.load()
 
     assert node_1.nwd == pathlib.Path("nodes", "AL0", "WriteIO")
     assert node_2.nwd == pathlib.Path("nodes", "AL0", "CPU", "WriteIO")
     assert node_3.nwd == pathlib.Path("nodes", "AL0", "GPU", "WriteIO")
+
+    assert node_1.outputs == "Lorem Ipsum"
+    assert node_2.outputs == "Dolor Sit"
+    assert node_3.outputs == "Amet Consectetur"
