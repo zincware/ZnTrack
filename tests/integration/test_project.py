@@ -1,6 +1,7 @@
 import json
 import pathlib
 
+import git
 import pytest
 
 import zntrack
@@ -424,3 +425,23 @@ def test_nested_groups(proj_path):
     assert node_1.outputs == "Lorem Ipsum"
     assert node_2.outputs == "Dolor Sit"
     assert node_3.outputs == "Amet Consectetur"
+
+
+@pytest.mark.parametrize("git_only_repo", [True, False])
+def test_git_only_repo(proj_path, git_only_repo):
+    with zntrack.Project(git_only_repo=git_only_repo) as project:
+        WriteIO(inputs="Lorem Ipsum")
+
+    project.run()
+
+    # commit everything
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.index.commit("initial commit")
+
+    if git_only_repo:
+        # check if node-meta.json is in the repo index
+        assert ("nodes/WriteIO/node-meta.json", 0) in repo.index.entries.keys()
+    else:
+        # check if node-meta.json is not in the repo index
+        assert ("nodes/WriteIO/node-meta.json", 0) not in repo.index.entries.keys()
