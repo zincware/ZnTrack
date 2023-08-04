@@ -1,42 +1,15 @@
 import dvc.cli
 import pytest
 
-import zntrack
-
-
-class AddNumbers(zntrack.Node):
-    a = zntrack.zn.params()
-    b = zntrack.zn.params()
-    c = zntrack.zn.outs()
-
-    def run(self):
-        self.c = self.a + self.b
-
-
-class AddNodes(zntrack.Node):
-    a = zntrack.zn.deps()
-    b = zntrack.zn.deps()
-    c = zntrack.zn.outs()
-
-    def run(self):
-        self.c = self.a.c + self.b.c
-
-
-class AddNodeAttributes(zntrack.Node):
-    a = zntrack.zn.deps()
-    b = zntrack.zn.deps()
-    c = zntrack.zn.outs()
-
-    def run(self):
-        self.c = self.a + self.b
+import zntrack.examples
 
 
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNodes(proj_path, eager):
     with zntrack.Project() as project:
-        add_numbers_a = AddNumbers(a=1, b=2, name="AddNumbersA")
-        add_numbers_b = AddNumbers(a=1, b=3, name="AddNumbersB")
-        add_nodes = AddNodes(a=add_numbers_a, b=add_numbers_b)
+        add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")
+        add_numbers_b = zntrack.examples.AddNumbers(a=1, b=3, name="AddNumbersB")
+        add_nodes = zntrack.examples.AddNodes(a=add_numbers_a, b=add_numbers_b)
 
     assert not add_numbers_a.state.loaded
     assert not add_numbers_b.state.loaded
@@ -58,9 +31,11 @@ def test_AddNodes(proj_path, eager):
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNodeAttributes(proj_path, eager):
     with zntrack.Project() as project:
-        add_numbers_a = AddNumbers(a=1, b=2, name="AddNumbersA")
-        add_numbers_b = AddNumbers(a=1, b=3, name="AddNumbersB")
-        add_nodes = AddNodeAttributes(a=add_numbers_a.c, b=add_numbers_b.c)
+        add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")
+        add_numbers_b = zntrack.examples.AddNumbers(a=1, b=3, name="AddNumbersB")
+        add_nodes = zntrack.examples.AddNodeAttributes(
+            a=add_numbers_a.c, b=add_numbers_b.c
+        )
 
     assert not add_numbers_a.state.loaded
     assert not add_numbers_b.state.loaded
@@ -80,9 +55,11 @@ def test_AddNodeAttributes(proj_path, eager):
 
 
 def test_AddNodes_legacy(proj_path):
-    add_numbers_a = AddNumbers(a=1, b=2, name="AddNumbersA")
-    add_numbers_b = AddNumbers(a=1, b=3, name="AddNumbersB")
-    add_nodes = AddNodeAttributes(a=add_numbers_a @ "c", b=add_numbers_b @ "c")
+    add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")
+    add_numbers_b = zntrack.examples.AddNumbers(a=1, b=3, name="AddNumbersB")
+    add_nodes = zntrack.examples.AddNodeAttributes(
+        a=add_numbers_a @ "c", b=add_numbers_b @ "c"
+    )
 
     add_numbers_a.write_graph()
     add_numbers_b.write_graph()
@@ -106,9 +83,9 @@ def test_AddNodes_legacy(proj_path):
 
 
 def test_AddNodeAttributes_legacy(proj_path):
-    add_numbers_a = AddNumbers(a=1, b=2, name="AddNumbersA")
-    add_numbers_b = AddNumbers(a=1, b=3, name="AddNumbersB")
-    add_nodes = AddNodes(a=add_numbers_a, b=add_numbers_b)
+    add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")
+    add_numbers_b = zntrack.examples.AddNumbers(a=1, b=3, name="AddNumbersB")
+    add_nodes = zntrack.examples.AddNodes(a=add_numbers_a, b=add_numbers_b)
 
     add_numbers_a.write_graph()
     add_numbers_b.write_graph()

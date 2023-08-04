@@ -39,3 +39,39 @@ class WritePlots(zntrack.Node):
     def run(self):
         """Write plots."""
         self.plots = pd.DataFrame({"x": self.x, "y": self.y})
+
+
+class AddNumbers(zntrack.Node):
+    """Add two numbers."""
+
+    a = zntrack.zn.params()
+    b = zntrack.zn.params()
+    c = zntrack.zn.outs()
+
+    def run(self):
+        """Add two numbers."""
+        self.c = self.a + self.b
+
+
+class AddNodes(zntrack.Node):
+    """Add two nodes."""
+
+    a: AddNumbers = zntrack.zn.deps()
+    b: AddNumbers = zntrack.zn.deps()
+    c = zntrack.zn.outs()
+
+    def run(self):
+        """Add two nodes."""
+        self.c = self.a.c + self.b.c
+
+
+class AddNodeAttributes(zntrack.Node):
+    """Add two node attributes."""
+
+    a: float = zntrack.zn.deps()
+    b: float = zntrack.zn.deps()
+    c = zntrack.zn.outs()
+
+    def run(self):
+        """Add two node attributes."""
+        self.c = self.a + self.b
