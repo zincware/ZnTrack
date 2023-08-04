@@ -108,7 +108,9 @@ class Field(zninit.Descriptor, abc.ABC):
             for x in self.get_files(instance)
         ]
 
-    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[typing.List[str]]:
+    def get_optional_dvc_cmd(
+        self, instance: "Node", git_only_repo: bool
+    ) -> typing.List[typing.List[str]]:
         """Get optional dvc commands that will be executed beside the main dvc command.
 
         This could be 'plots modify ...' or 'stage add --name node_helper'
@@ -117,6 +119,8 @@ class Field(zninit.Descriptor, abc.ABC):
         ----------
         instance : Node
             The Node instance to get the optional dvc commands for.
+        git_only_repo : bool
+            Whether the repo is a git only repo or has a dvc remote.
 
         Returns
         -------
@@ -295,7 +299,9 @@ class PlotsMixin(Field):
         dvc_config["plots"] = plots
         dvc_file.write_text(yaml.dump(dvc_config))
 
-    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[typing.List[str]]:
+    def get_optional_dvc_cmd(
+        self, instance: "Node", git_only_repo: bool
+    ) -> typing.List[typing.List[str]]:
         """Add 'dvc plots modify' to this option."""
         if not self.use_global_plots:
             cmds = []

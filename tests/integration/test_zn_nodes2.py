@@ -61,9 +61,10 @@ def test_ExampleNode(proj_path, eager):
         assert node.params2.name == "ExampleNode_params2"
 
 
+@pytest.mark.parametrize("git_only_repo", [True, False])
 @pytest.mark.parametrize("eager", [True, False])
-def test_ExampleNodeLst(proj_path, eager):
-    project = Project()
+def test_ExampleNodeLst(proj_path, eager, git_only_repo):
+    project = Project(git_only_repo=git_only_repo)
     parameter_1 = NodeViaParams(param1=1)
     parameter_2 = NodeViaParams(param1=10)
 

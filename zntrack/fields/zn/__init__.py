@@ -508,7 +508,9 @@ class NodeField(Dependency):
         else:
             return instance.nwd.parent / name
 
-    def get_optional_dvc_cmd(self, instance: "Node") -> typing.List[list]:
+    def get_optional_dvc_cmd(
+        self, instance: "Node", git_only_repo: bool
+    ) -> typing.List[list]:
         """Get the dvc command for this field."""
         nodes = getattr(instance, self.name)
         if nodes is None:
@@ -535,7 +537,7 @@ class NodeField(Dependency):
                 "--name",
                 name,
                 "--force",
-                "--metrics-no-cache",
+                "--metrics-no-cache" if git_only_repo else "--outs",
                 (nwd / "node-meta.json").as_posix(),  # HOW DO I MOVE THIS TO GROUP ?
                 "--params",
                 f"zntrack.json:{instance.name}.{self.name}",
