@@ -1,25 +1,14 @@
-import pathlib
-import subprocess
-
 import pandas as pd
 import pandas.testing as pdt
 import pytest
-import yaml
 
-import zntrack
-
-
-class WritePlots(zntrack.Node):
-    plots: pd.DataFrame = zntrack.zn.plots()
-
-    def run(self):
-        self.plots = pd.DataFrame({"x": [1, 2, 3], "y": [4, 5, 6]})
+import zntrack.examples
 
 
 @pytest.mark.parametrize("eager", [True, False])
 def test_WritePlots(proj_path, eager):
     with zntrack.Project() as project:
-        plots = WritePlots()
+        plots = zntrack.examples.WritePlots()
 
     assert not plots.state.loaded
 
