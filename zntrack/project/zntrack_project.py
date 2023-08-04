@@ -71,13 +71,12 @@ class Project:
     automatic_node_names : bool, default = False
         If True, automatically add a number to the node name if the name is already
             used in the graph.
-    git_only_repo : bool, default = False
+    git_only_repo : bool, default = True
         The DVC graph relies on file outputs for connecting stages.
-        ZnTrack will use a '--outs' for each stage by default.
+        ZnTrack will use a '--metrics-no-cache' file output for each stage by default.
+        Contrary to '--outs-no-cache', this will keep the DVC run cache available.
+        If a project has a DVC remote available, '--outs' can be used instead.
         This will require a DVC remote to be setup.
-        If a project is not used with a DVC remote and strictly GIT,
-        this can be set to True and instead '--metrics-no-cache' will be used.
-        Metrics is used instead of 'outs-no-cache' to keep the DVC run cache.
     force : bool, default = False
         overwrite existing nodes.
     """
@@ -86,7 +85,7 @@ class Project:
     initialize: bool = True
     remove_existing_graph: bool = False
     automatic_node_names: bool = False
-    git_only_repo: bool = False
+    git_only_repo: bool = True
     force: bool = False
 
     _groups: list = dataclasses.field(default_factory=list, init=False, repr=False)
