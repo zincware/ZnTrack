@@ -4,16 +4,8 @@ import pathlib
 import git
 import pytest
 
-import zntrack
+import zntrack.examples
 from zntrack.project import Experiment
-
-
-class WriteIO(zntrack.Node):
-    inputs = zntrack.zn.params()
-    outputs = zntrack.zn.outs()
-
-    def run(self) -> None:
-        self.outputs = self.inputs
 
 
 class ZnNodesNode(zntrack.Node):
@@ -23,31 +15,31 @@ class ZnNodesNode(zntrack.Node):
     result = zntrack.zn.outs()
 
     def run(self) -> None:
-        self.result = self.node.inputs
+        self.result = self.node.params
 
 
 @pytest.mark.parametrize("assert_before_exp", [True, False])
 def test_WriteIO(tmp_path_2, assert_before_exp):
     """Test the WriteIO node."""
     with zntrack.Project() as project:
-        node = WriteIO(inputs="Hello World")
+        node = zntrack.examples.ParamsToOuts(params="Hello World")
 
     project.run()
     node.load()
     if assert_before_exp:
-        assert node.outputs == "Hello World"
+        assert node.outs == "Hello World"
 
     # write a non-tracked file using pathlib
     pathlib.Path("test.txt").write_text("Hello World")
 
     with project.create_experiment(name="exp1") as exp1:
-        node.inputs = "Hello World"
+        node.params = "Hello World"
 
     # check that the file is still there
     assert pathlib.Path("test.txt").read_text() == "Hello World"
 
     with project.create_experiment(name="exp2") as exp2:
-        node.inputs = "Lorem Ipsum"
+        node.params = "Lorem Ipsum"
 
     assert exp1.name == "exp1"
     assert exp2.name == "exp2"
@@ -57,21 +49,21 @@ def test_WriteIO(tmp_path_2, assert_before_exp):
     assert isinstance(project.experiments["exp1"], Experiment)
 
     project.run_exp()
-    assert node.from_rev(rev="exp1").inputs == "Hello World"
-    assert node.from_rev(rev="exp1").outputs == "Hello World"
+    assert node.from_rev(rev="exp1").params == "Hello World"
+    assert node.from_rev(rev="exp1").outs == "Hello World"
 
-    assert node.from_rev(rev="exp2").inputs == "Lorem Ipsum"
-    assert node.from_rev(rev="exp2").outputs == "Lorem Ipsum"
+    assert node.from_rev(rev="exp2").params == "Lorem Ipsum"
+    assert node.from_rev(rev="exp2").outs == "Lorem Ipsum"
 
     exp2.apply()
     assert (
-        zntrack.from_rev("WriteIO").inputs
-        == zntrack.from_rev("WriteIO", rev=exp2.name).inputs
+        zntrack.from_rev("ParamsToOuts").params
+        == zntrack.from_rev("ParamsToOuts", rev=exp2.name).params
     )
     exp1.apply()
     assert (
-        zntrack.from_rev("WriteIO").inputs
-        == zntrack.from_rev("WriteIO", rev=exp1.name).inputs
+        zntrack.from_rev("ParamsToOuts").params
+        == zntrack.from_rev("ParamsToOuts", rev=exp1.name).params
     )
 
 
@@ -79,125 +71,125 @@ def test_WriteIO(tmp_path_2, assert_before_exp):
 def test_WriteIO_no_name(tmp_path_2, assert_before_exp):
     """Test the WriteIO node."""
     with zntrack.Project() as project:
-        node = WriteIO(inputs="Hello World")
+        node = zntrack.examples.ParamsToOuts(params="Hello World")
 
     project.run()
     node.load()
     if assert_before_exp:
-        assert node.outputs == "Hello World"
+        assert node.outs == "Hello World"
 
     with project.create_experiment() as exp1:
-        node.inputs = "Hello World"
+        node.params = "Hello World"
 
     with project.create_experiment() as exp2:
-        node.inputs = "Lorem Ipsum"
+        node.params = "Lorem Ipsum"
 
     project.run_exp()
 
     exp1.load()
-    assert exp1.nodes["WriteIO"].inputs == "Hello World"
-    assert exp1.nodes["WriteIO"].outputs == "Hello World"
+    assert exp1.nodes["ParamsToOuts"].params == "Hello World"
+    assert exp1.nodes["ParamsToOuts"].outs == "Hello World"
 
-    assert exp1["WriteIO"].inputs == "Hello World"
-    assert exp1["WriteIO"].outputs == "Hello World"
+    assert exp1["ParamsToOuts"].params == "Hello World"
+    assert exp1["ParamsToOuts"].outs == "Hello World"
 
     exp2.load()
-    assert exp2.nodes["WriteIO"].inputs == "Lorem Ipsum"
-    assert exp2.nodes["WriteIO"].outputs == "Lorem Ipsum"
+    assert exp2.nodes["ParamsToOuts"].params == "Lorem Ipsum"
+    assert exp2.nodes["ParamsToOuts"].outs == "Lorem Ipsum"
 
-    assert exp2["WriteIO"].inputs == "Lorem Ipsum"
-    assert exp2["WriteIO"].outputs == "Lorem Ipsum"
+    assert exp2["ParamsToOuts"].params == "Lorem Ipsum"
+    assert exp2["ParamsToOuts"].outs == "Lorem Ipsum"
 
-    assert zntrack.from_rev("WriteIO", rev=exp1.name).inputs == "Hello World"
-    assert zntrack.from_rev("WriteIO", rev=exp1.name).outputs == "Hello World"
+    assert zntrack.from_rev("ParamsToOuts", rev=exp1.name).params == "Hello World"
+    assert zntrack.from_rev("ParamsToOuts", rev=exp1.name).outs == "Hello World"
 
-    assert zntrack.from_rev("WriteIO", rev=exp2.name).inputs == "Lorem Ipsum"
-    assert zntrack.from_rev("WriteIO", rev=exp2.name).outputs == "Lorem Ipsum"
+    assert zntrack.from_rev("ParamsToOuts", rev=exp2.name).params == "Lorem Ipsum"
+    assert zntrack.from_rev("ParamsToOuts", rev=exp2.name).outs == "Lorem Ipsum"
 
 
 def test_project_remove_graph(proj_path):
     with zntrack.Project() as project:
-        node = WriteIO(inputs="Hello World")
+        node = zntrack.examples.ParamsToOuts(params="Hello World")
     project.run()
     node.load()
-    assert node.outputs == "Hello World"
+    assert node.outs == "Hello World"
 
     with zntrack.Project(remove_existing_graph=True) as project:
-        node2 = WriteIO(inputs="Lorem Ipsum", name="node2")
+        node2 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum", name="node2")
     project.run()
     node2.load()
-    assert node2.outputs == "Lorem Ipsum"
+    assert node2.outs == "Lorem Ipsum"
     with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
         node.load()
 
 
 def test_project_repr_node(tmp_path_2):
     with zntrack.Project() as project:
-        node = WriteIO(inputs="Hello World")
+        node = zntrack.examples.ParamsToOuts(params="Hello World")
         print(node)
 
 
 def test_automatic_node_names_False(tmp_path_2):
     with pytest.raises(zntrack.exceptions.DuplicateNodeNameError):
         with zntrack.Project(automatic_node_names=False) as project:
-            _ = WriteIO(inputs="Hello World")
-            _ = WriteIO(inputs="Lorem Ipsum")
+            _ = zntrack.examples.ParamsToOuts(params="Hello World")
+            _ = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with pytest.raises(zntrack.exceptions.DuplicateNodeNameError):
         with zntrack.Project(automatic_node_names=False) as project:
-            _ = WriteIO(inputs="Hello World", name="NodeA")
-            _ = WriteIO(inputs="Lorem Ipsum", name="NodeA")
+            _ = zntrack.examples.ParamsToOuts(params="Hello World", name="NodeA")
+            _ = zntrack.examples.ParamsToOuts(params="Lorem Ipsum", name="NodeA")
 
 
 def test_automatic_node_names_default(tmp_path_2):
     with zntrack.Project(automatic_node_names=False) as project:
-        _ = WriteIO(inputs="Hello World")
-        _ = WriteIO(inputs="Lorem Ipsum", name="WriteIO2")
+        _ = zntrack.examples.ParamsToOuts(params="Hello World")
+        _ = zntrack.examples.ParamsToOuts(params="Lorem Ipsum", name="WriteIO2")
 
 
 def test_automatic_node_names_True(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
-        node = WriteIO(inputs="Hello World")
-        node2 = WriteIO(inputs="Lorem Ipsum")
-        assert node.name == "WriteIO"
-        assert node2.name == "WriteIO_1"
+        node = zntrack.examples.ParamsToOuts(params="Hello World")
+        node2 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+        assert node.name == "ParamsToOuts"
+        assert node2.name == "ParamsToOuts_1"
     project.run()
 
     with project:
-        node3 = WriteIO(inputs="Dolor Sit")
-        assert node3.name == "WriteIO_2"
+        node3 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+        assert node3.name == "ParamsToOuts_2"
 
     project.run()
 
-    assert node.name == "WriteIO"
-    assert node2.name == "WriteIO_1"
-    assert node3.name == "WriteIO_2"
+    assert node.name == "ParamsToOuts"
+    assert node2.name == "ParamsToOuts_1"
+    assert node3.name == "ParamsToOuts_2"
 
     project.run()
     project.load()
-    assert "WriteIO" in project.nodes
-    assert "WriteIO_1" in project.nodes
-    assert "WriteIO_2" in project.nodes
+    assert "ParamsToOuts" in project.nodes
+    assert "ParamsToOuts_1" in project.nodes
+    assert "ParamsToOuts_2" in project.nodes
 
-    assert node.outputs == "Hello World"
-    assert node2.outputs == "Lorem Ipsum"
-    assert node3.outputs == "Dolor Sit"
+    assert node.outs == "Hello World"
+    assert node2.outs == "Lorem Ipsum"
+    assert node3.outs == "Dolor Sit"
 
 
 def test_group_nodes(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group() as group_1:
-            node_1 = WriteIO(inputs="Lorem Ipsum")
-            node_2 = WriteIO(inputs="Dolor Sit")
+            node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+            node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
         with project.group() as group_2:
-            node_3 = WriteIO(inputs="Amet Consectetur")
-            node_4 = WriteIO(inputs="Adipiscing Elit")
+            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur")
+            node_4 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit")
         with project.group("NamedGrp") as group_3:
-            node_5 = WriteIO(inputs="Sed Do", name="NodeA")
-            node_6 = WriteIO(inputs="Eiusmod Tempor", name="NodeB")
+            node_5 = zntrack.examples.ParamsToOuts(params="Sed Do", name="NodeA")
+            node_6 = zntrack.examples.ParamsToOuts(params="Eiusmod Tempor", name="NodeB")
 
-        node7 = WriteIO(inputs="Hello World")
-        node8 = WriteIO(inputs="How are you?")
-        node9 = WriteIO(inputs="I'm fine, thanks!", name="NodeC")
+        node7 = zntrack.examples.ParamsToOuts(params="Hello World")
+        node8 = zntrack.examples.ParamsToOuts(params="How are you?")
+        node9 = zntrack.examples.ParamsToOuts(params="I'm fine, thanks!", name="NodeC")
 
     project.run()
 
@@ -212,75 +204,77 @@ def test_group_nodes(tmp_path_2):
     assert node_5 in group_3
     assert node_6 in group_3
 
-    assert node_1.name == "Group1_WriteIO"
-    assert node_2.name == "Group1_WriteIO_1"
-    assert node_3.name == "Group2_WriteIO"
-    assert node_4.name == "Group2_WriteIO_1"
+    assert node_1.name == "Group1_ParamsToOuts"
+    assert node_2.name == "Group1_ParamsToOuts_1"
+    assert node_3.name == "Group2_ParamsToOuts"
+    assert node_4.name == "Group2_ParamsToOuts_1"
 
     assert node_5.name == "NamedGrp_NodeA"
     assert node_6.name == "NamedGrp_NodeB"
 
-    assert node7.name == "WriteIO"
-    assert node8.name == "WriteIO_1"
+    assert node7.name == "ParamsToOuts"
+    assert node8.name == "ParamsToOuts_1"
     assert node9.name == "NodeC"
 
-    assert WriteIO.from_rev(name="NamedGrp_NodeA").inputs == "Sed Do"
+    assert (
+        zntrack.examples.ParamsToOuts.from_rev(name="NamedGrp_NodeA").params == "Sed Do"
+    )
 
 
 def test_build_certain_nodes(tmp_path_2):
     # TODO support passing groups to project.build
     with zntrack.Project(automatic_node_names=True) as project:
-        node_1 = WriteIO(inputs="Lorem Ipsum")
-        node_2 = WriteIO(inputs="Dolor Sit")
+        node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+        node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
     project.build(nodes=[node_1, node_2])
     project.repro()
 
-    assert zntrack.from_rev(node_1).outputs == "Lorem Ipsum"
-    assert zntrack.from_rev(node_2).outputs == "Dolor Sit"
+    assert zntrack.from_rev(node_1).outs == "Lorem Ipsum"
+    assert zntrack.from_rev(node_2).outs == "Dolor Sit"
 
-    node_1.inputs = "ABC"
-    node_2.inputs = "DEF"
+    node_1.params = "ABC"
+    node_2.params = "DEF"
 
     project.build(nodes=[node_1])
     project.repro()
 
-    assert zntrack.from_rev(node_1).outputs == "ABC"
-    assert zntrack.from_rev(node_2).outputs == "Dolor Sit"
+    assert zntrack.from_rev(node_1).outs == "ABC"
+    assert zntrack.from_rev(node_2).outs == "Dolor Sit"
 
     project.run(nodes=[node_2])
 
-    assert zntrack.from_rev(node_1).outputs == "ABC"
-    assert zntrack.from_rev(node_2).outputs == "DEF"
+    assert zntrack.from_rev(node_1).outs == "ABC"
+    assert zntrack.from_rev(node_2).outs == "DEF"
 
 
 def test_build_groups(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group() as group_1:
-            node_1 = WriteIO(inputs="Lorem Ipsum")
-            node_2 = WriteIO(inputs="Dolor Sit")
+            node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+            node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
         with project.group() as group_2:
-            node_3 = WriteIO(inputs="Amet Consectetur")
-            node_4 = WriteIO(inputs="Adipiscing Elit")
+            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur")
+            node_4 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit")
 
     project.run(nodes=[group_1])
 
-    assert zntrack.from_rev(node_1).outputs == "Lorem Ipsum"
-    assert zntrack.from_rev(node_2).outputs == "Dolor Sit"
+    assert zntrack.from_rev(node_1).outs == "Lorem Ipsum"
+    assert zntrack.from_rev(node_2).outs == "Dolor Sit"
 
     with pytest.raises(ValueError):
         zntrack.from_rev(node_3)
     with pytest.raises(ValueError):
         zntrack.from_rev(node_4)
 
-    node_2.inputs = "DEF"
+    node_2.params = "DEF"
 
     project.run(nodes=[group_2, node_2])
 
-    assert zntrack.from_rev(node_1).outputs == "Lorem Ipsum"
+    assert zntrack.from_rev(node_1).outs == "Lorem Ipsum"
 
-    assert zntrack.from_rev(node_2).outputs == "DEF"
-    assert zntrack.from_rev(node_3).outputs == "Amet Consectetur"
-    assert zntrack.from_rev(node_4).outputs == "Adipiscing Elit"
+    assert zntrack.from_rev(node_2).outs == "DEF"
+    assert zntrack.from_rev(node_3).outs == "Amet Consectetur"
+    assert zntrack.from_rev(node_4).outs == "Adipiscing Elit"
 
     with pytest.raises(TypeError):
         project.run(nodes=42)
@@ -291,11 +285,11 @@ def test_build_groups(tmp_path_2):
 
 def test_groups_nwd(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:
-        node_1 = WriteIO(inputs="Lorem Ipsum")
+        node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
         with project.group() as group_1:
-            node_2 = WriteIO(inputs="Dolor Sit")
+            node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
         with project.group("CustomGroup") as group_2:
-            node_3 = WriteIO(inputs="Adipiscing Elit")
+            node_3 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit")
 
     project.build()
 
@@ -332,7 +326,7 @@ def test_groups_nwd(tmp_path_2):
 
 
 def test_groups_nwd_zn_nodes(tmp_path_2):
-    node = WriteIO(inputs="Lorem Ipsum")
+    node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         node_1 = ZnNodesNode(node=node)
         with project.group() as group_1:
@@ -357,7 +351,7 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
 
 
 def test_groups_nwd_zn_nodes(tmp_path_2):
-    node = WriteIO(inputs="Lorem Ipsum")
+    node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group() as group_1:
             node_2 = ZnNodesNode(node=node)
@@ -381,10 +375,10 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
 def test_test_reopening_groups(proj_path):
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group("GroupA"):
-            node_1 = WriteIO(inputs="Lorem Ipsum")
+            node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
         with pytest.raises(ValueError):
             with project.group("GroupA"):
-                node_2 = WriteIO(inputs="Dolor Sit")
+                node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
 
 
 # def test_reopening_groups(proj_path):
@@ -409,28 +403,28 @@ def test_test_reopening_groups(proj_path):
 def test_nested_groups(proj_path):
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group("AL0") as al_0:
-            node_1 = WriteIO(inputs="Lorem Ipsum")
+            node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
         with project.group("AL0", "CPU") as al_0_cpu:
-            node_2 = WriteIO(inputs="Dolor Sit")
+            node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
         with project.group("AL0", "GPU") as al_0_gpu:
-            node_3 = WriteIO(inputs="Amet Consectetur")
+            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur")
 
     project.run()
     project.load()
 
-    assert node_1.nwd == pathlib.Path("nodes", "AL0", "WriteIO")
-    assert node_2.nwd == pathlib.Path("nodes", "AL0", "CPU", "WriteIO")
-    assert node_3.nwd == pathlib.Path("nodes", "AL0", "GPU", "WriteIO")
+    assert node_1.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts")
+    assert node_2.nwd == pathlib.Path("nodes", "AL0", "CPU", "ParamsToOuts")
+    assert node_3.nwd == pathlib.Path("nodes", "AL0", "GPU", "ParamsToOuts")
 
-    assert node_1.outputs == "Lorem Ipsum"
-    assert node_2.outputs == "Dolor Sit"
-    assert node_3.outputs == "Amet Consectetur"
+    assert node_1.outs == "Lorem Ipsum"
+    assert node_2.outs == "Dolor Sit"
+    assert node_3.outs == "Amet Consectetur"
 
 
 @pytest.mark.parametrize("git_only_repo", [True, False])
 def test_git_only_repo(proj_path, git_only_repo):
     with zntrack.Project(git_only_repo=git_only_repo) as project:
-        WriteIO(inputs="Lorem Ipsum")
+        zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
 
     project.run()
 
@@ -441,7 +435,7 @@ def test_git_only_repo(proj_path, git_only_repo):
 
     if git_only_repo:
         # check if node-meta.json is in the repo index
-        assert ("nodes/WriteIO/node-meta.json", 0) in repo.index.entries.keys()
+        assert ("nodes/ParamsToOuts/node-meta.json", 0) in repo.index.entries.keys()
     else:
         # check if node-meta.json is not in the repo index
-        assert ("nodes/WriteIO/node-meta.json", 0) not in repo.index.entries.keys()
+        assert ("nodes/ParamsToOuts/node-meta.json", 0) not in repo.index.entries.keys()
