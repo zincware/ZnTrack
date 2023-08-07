@@ -4,6 +4,7 @@ import pathlib
 import pytest
 from typer.testing import CliRunner
 
+import zntrack.examples
 from zntrack import Node, NodeConfig, nodify, zn
 from zntrack.cli import app
 
@@ -66,14 +67,6 @@ def test_init_force(tmp_path, runner, force):
         assert not pathlib.Path("README.md").exists()
 
 
-class InputsToOutputs(Node):
-    inputs = zn.params()
-    outputs = zn.outs()
-
-    def run(self):
-        self.outputs = self.inputs
-
-
 @nodify(outs="test.txt", params={"text": "Lorem Ipsum"})
 def example_func(cfg: NodeConfig) -> NodeConfig:
     out_file = pathlib.Path(cfg.outs)
@@ -82,13 +75,13 @@ def example_func(cfg: NodeConfig) -> NodeConfig:
 
 
 def test_run(proj_path, runner):
-    node = InputsToOutputs(inputs=15)
+    node = zntrack.examples.ParamsToOuts(params=15)
     node.write_graph()
-    result = runner.invoke(app, ["run", "test_cli.InputsToOutputs"])
+    result = runner.invoke(app, ["run", "zntrack.examples.ParamsToOuts"])
     assert result.exit_code == 0
 
     node.load()
-    assert node.outputs == 15
+    assert node.outs == 15
 
 
 def test_run_nodify(proj_path, runner):
@@ -99,10 +92,12 @@ def test_run_nodify(proj_path, runner):
 
 
 def test_run_w_name(proj_path, runner):
-    node = InputsToOutputs(inputs=15, name="TestNode")
+    node = zntrack.examples.ParamsToOuts(params=15, name="TestNode")
     node.write_graph()
-    result = runner.invoke(app, ["run", "test_cli.InputsToOutputs", "--name", "TestNode"])
+    result = runner.invoke(
+        app, ["run", "zntrack.examples.ParamsToOuts", "--name", "TestNode"]
+    )
     assert result.exit_code == 0
 
     node.load()
-    assert node.outputs == 15
+    assert node.outs == 15

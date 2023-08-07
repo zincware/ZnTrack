@@ -3,16 +3,8 @@ import uuid
 import dvc.scm
 import pytest
 
-import zntrack
+import zntrack.examples
 from zntrack.utils import NodeStatusResults
-
-
-class AddOne(zntrack.Node):
-    number: int = zntrack.zn.deps()
-    outs: int = zntrack.zn.outs()
-
-    def run(self) -> None:
-        self.outs = self.number + 1
 
 
 def test_module_not_installed():
@@ -65,7 +57,7 @@ def test_connect_from_remote(proj_path):
     assert node_b.random_number == 126
 
     with zntrack.Project() as project:
-        node = AddOne(number=node_a.random_number)
+        node = zntrack.examples.AddOne(number=node_a.random_number)
 
     project.run()
     node.load()
@@ -73,7 +65,7 @@ def test_connect_from_remote(proj_path):
     assert node.outs == node_a.random_number + 1
 
     with zntrack.Project() as project:
-        node = AddOne(number=node_b.random_number)
+        node = zntrack.examples.AddOne(number=node_b.random_number)
 
     project.run()
     # We can not use node.load() here and build again,
@@ -94,8 +86,8 @@ def test_two_nodes_connect_external(proj_path):
     )
 
     with zntrack.Project(automatic_node_names=True) as project:
-        node1 = AddOne(number=node_a.random_number)
-        node2 = AddOne(number=node_a.random_number)
+        node1 = zntrack.examples.AddOne(number=node_a.random_number)
+        node2 = zntrack.examples.AddOne(number=node_a.random_number)
 
     project.run()
 

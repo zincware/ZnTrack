@@ -75,3 +75,37 @@ class AddNodeAttributes(zntrack.Node):
     def run(self):
         """Add two node attributes."""
         self.c = self.a + self.b
+
+
+class AddNumbers(zntrack.Node):
+    """Add up all 'x.outs' from the dependencies."""
+
+    numbers: list = zntrack.zn.deps()
+    sum: int = zntrack.zn.outs()
+
+    def run(self):
+        """Add up all 'x.outs' from the dependencies."""
+        self.sum = sum(x.outs for x in self.numbers)
+
+
+class SumNodeAttributes(zntrack.Node):
+    """Sum a list of numbers."""
+
+    inputs: list = zntrack.zn.deps()
+    shift: int = zntrack.zn.params()
+    output: int = zntrack.zn.outs()
+
+    def run(self) -> None:
+        """Sum a list of numbers."""
+        self.output = sum(self.inputs) + self.shift
+
+
+class AddOne(zntrack.Node):
+    """Add one to the number."""
+
+    number: int = zntrack.zn.deps()
+    outs: int = zntrack.zn.outs()
+
+    def run(self) -> None:
+        """Add one to the number."""
+        self.outs = self.number + 1
