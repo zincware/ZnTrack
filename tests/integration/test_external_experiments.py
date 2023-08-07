@@ -29,7 +29,7 @@ def test_multiple_experiments(proj_path, automatic_node_names):
         assert node._external_
 
     with proj:  # test with / without automatic node names
-        node2 = zntrack.examples.AddNumbers(nodes)
+        node2 = zntrack.examples.AddNodeNumbers(nodes)
 
     proj.run()
     node2.load()

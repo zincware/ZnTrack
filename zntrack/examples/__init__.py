@@ -77,7 +77,7 @@ class AddNodeAttributes(zntrack.Node):
         self.c = self.a + self.b
 
 
-class AddNumbers(zntrack.Node):
+class AddNodeNumbers(zntrack.Node):
     """Add up all 'x.outs' from the dependencies."""
 
     numbers: list = zntrack.zn.deps()

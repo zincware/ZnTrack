@@ -28,7 +28,7 @@ def test_CollectOutputs(proj_path, lazy, eager):
         with zntrack.Project() as project:
             a = zntrack.examples.ParamsToOuts(params=17, name="a")
             b = zntrack.examples.ParamsToOuts(params=42, name="b")
-            node = zntrack.examples.AddNumbers(numbers=[a, b])
+            node = zntrack.examples.AddNodeNumbers(numbers=[a, b])
         project.run(eager=eager)
 
         if not eager:

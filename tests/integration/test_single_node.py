@@ -3,22 +3,13 @@ import pathlib
 import pytest
 import yaml
 
-import zntrack
-
-
-class AddNumbers(zntrack.Node):
-    a = zntrack.zn.params()
-    b = zntrack.zn.params()
-    c = zntrack.zn.outs()
-
-    def run(self):
-        self.c = self.a + self.b
+import zntrack.examples
 
 
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNumbers(proj_path, eager):
     with zntrack.Project() as project:
-        add_numbers = AddNumbers(a=1, b=2)
+        add_numbers = zntrack.examples.AddNumbers(a=1, b=2)
 
     assert not add_numbers.state.loaded
 
@@ -31,7 +22,7 @@ def test_AddNumbers(proj_path, eager):
 
 def test_AddNumbers_remove_params(proj_path):
     with zntrack.Project() as project:
-        add_numbers = AddNumbers(a=1, b=2)
+        add_numbers = zntrack.examples.AddNumbers(a=1, b=2)
 
     assert not add_numbers.state.loaded
 
@@ -49,7 +40,7 @@ def test_AddNumbers_remove_params(proj_path):
 
 def test_znrack_from_rev(proj_path):
     with zntrack.Project() as project:
-        add_numbers = AddNumbers(a=1, b=2)
+        add_numbers = zntrack.examples.AddNumbers(a=1, b=2)
 
     assert not add_numbers.state.loaded
 
@@ -65,8 +56,8 @@ def test_znrack_from_rev(proj_path):
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNumbers_named(proj_path, eager):
     with zntrack.Project() as project:
-        add_numbers_a = AddNumbers(a=1, b=2, name="NodeA")
-        add_numbers_b = AddNumbers(a=1, b=2, name="NodeB")
+        add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="NodeA")
+        add_numbers_b = zntrack.examples.AddNumbers(a=1, b=2, name="NodeB")
 
     assert not add_numbers_a.state.loaded
     assert not add_numbers_b.state.loaded
@@ -187,8 +178,8 @@ class NoOutsWritten(zntrack.Node):
 def test_outs_in_init(proj_path):
     with pytest.raises(TypeError):
         # outs can not be set
-        _ = AddNumbers(a=1, b=2, outs=3)
+        _ = zntrack.examples.AddNumbers(a=1, b=2, outs=3)
     with zntrack.Project() as project:
         with pytest.raises(TypeError):
             # outs can not be set
-            _ = AddNumbers(a=1, b=2, c=3)  # c is an output
+            _ = zntrack.examples.AddNumbers(a=1, b=2, c=3)  # c is an output
