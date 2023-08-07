@@ -6,7 +6,7 @@ from zntrack.utils import LazyOption
 
 @pytest.mark.parametrize("eager", [True, False])
 @pytest.mark.parametrize("lazy", [True, False])
-def test_WriteOutput(proj_path, lazy, eager):
+def test_ParamsToOuts(proj_path, lazy, eager):
     with zntrack.config.updated_config(lazy=lazy):
         with zntrack.Project() as project:
             node = zntrack.examples.ParamsToOuts(params=42)
@@ -18,7 +18,7 @@ def test_WriteOutput(proj_path, lazy, eager):
             assert node.__dict__["outs"] is LazyOption
         else:
             assert node.__dict__["outs"] is 42
-        assert node.output == 42
+        assert node.outs == 42
 
 
 @pytest.mark.parametrize("eager", [True, False])
