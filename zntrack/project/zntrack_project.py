@@ -14,6 +14,7 @@ import dvc.api
 import git
 import yaml
 import znflow
+from znflow.base import empty, get_graph
 from znflow.handler import UpdateConnectors
 
 from zntrack import exceptions
@@ -151,33 +152,44 @@ class Project:
             the number of groups + 1. If more than one name is given, the groups will
             be nested to 'nwd = name[0]/name[1]/.../name[-1]'
         """
-        if len(names) == 0:
-            # names = (f"Group{len(self._groups) + 1}",)
-            name = "Group1"
-            while pathlib.Path("nodes", name).exists():
-                name = f"Group{int(name[5:]) + 1}"
-            names = (name,)
 
-        nwd = pathlib.Path("nodes", *names)
-        if any(x.nwd == nwd for x in self._groups):
-            raise ValueError(f"Group {names} already exists.")
+        @contextlib.contextmanager
+        def _get_group(names):
+            if len(names) == 0:
+                # names = (f"Group{len(self._groups) + 1}",)
+                name = "Group1"
+                while pathlib.Path("nodes", name).exists():
+                    name = f"Group{int(name[5:]) + 1}"
+                names = (name,)
 
-        nwd.mkdir(parents=True, exist_ok=True)
+            nwd = pathlib.Path("nodes", *names)
+            if any(x.nwd == nwd for x in self._groups):
+                raise ValueError(f"Group {names} already exists.")
 
-        existing_nodes = self.graph.get_sorted_nodes()
+            nwd.mkdir(parents=True, exist_ok=True)
 
-        group = NodeGroup(nwd=nwd, nodes=[])
+            existing_nodes = self.graph.get_sorted_nodes()
 
-        try:
-            yield group
-        finally:
-            for node_uuid in self.graph.get_sorted_nodes():
-                node: Node = self.graph.nodes[node_uuid]["value"]
-                if node_uuid not in existing_nodes:
-                    node.__dict__["nwd"] = group.nwd / node.name
-                    node.name = f"{'_'.join(names)}_{node.name}"
-                    group.nodes.append(node)
-            self._groups.append(group)
+            group = NodeGroup(nwd=nwd, nodes=[])
+
+            try:
+                yield group
+            finally:
+                for node_uuid in self.graph.get_sorted_nodes():
+                    node: Node = self.graph.nodes[node_uuid]["value"]
+                    if node_uuid not in existing_nodes:
+                        node.__dict__["nwd"] = group.nwd / node.name
+                        node.name = f"{'_'.join(names)}_{node.name}"
+                        group.nodes.append(node)
+                self._groups.append(group)
+
+        if get_graph() is not empty:
+            with _get_group(names) as group:
+                yield group
+        else:
+            with self:
+                with _get_group(names) as group:
+                    yield group
 
     def run(
         self,
