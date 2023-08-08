@@ -421,6 +421,28 @@ def test_nested_groups(proj_path):
     assert node_3.outs == "Amet Consectetur"
 
 
+def test_nested_groups_direct_enter(proj_path):
+    project = zntrack.Project(automatic_node_names=True)
+
+    with project.group("AL0") as al_0:
+        node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+    with project.group("AL0", "CPU") as al_0_cpu:
+        node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+    with project.group("AL0", "GPU") as al_0_gpu:
+        node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur")
+
+    project.run()
+    project.load()
+
+    assert node_1.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts")
+    assert node_2.nwd == pathlib.Path("nodes", "AL0", "CPU", "ParamsToOuts")
+    assert node_3.nwd == pathlib.Path("nodes", "AL0", "GPU", "ParamsToOuts")
+
+    assert node_1.outs == "Lorem Ipsum"
+    assert node_2.outs == "Dolor Sit"
+    assert node_3.outs == "Amet Consectetur"
+
+
 @pytest.mark.parametrize("git_only_repo", [True, False])
 def test_git_only_repo(proj_path, git_only_repo):
     with zntrack.Project(git_only_repo=git_only_repo) as project:
