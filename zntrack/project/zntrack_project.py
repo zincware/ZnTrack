@@ -142,6 +142,36 @@ class Project:
             node_names.append(node.name)
 
     @contextlib.contextmanager
+    def _get_group(self, *names):
+        if len(names) == 0:
+            # names = (f"Group{len(self._groups) + 1}",)
+            name = "Group1"
+            while pathlib.Path("nodes", name).exists():
+                name = f"Group{int(name[5:]) + 1}"
+            names = (name,)
+
+        nwd = pathlib.Path("nodes", *names)
+        if any(x.nwd == nwd for x in self._groups):
+            raise ValueError(f"Group {names} already exists.")
+
+        nwd.mkdir(parents=True, exist_ok=True)
+
+        existing_nodes = self.graph.get_sorted_nodes()
+
+        group = NodeGroup(nwd=nwd, nodes=[])
+
+        try:
+            yield group
+        finally:
+            for node_uuid in self.graph.get_sorted_nodes():
+                node: Node = self.graph.nodes[node_uuid]["value"]
+                if node_uuid not in existing_nodes:
+                    node.__dict__["nwd"] = group.nwd / node.name
+                    node.name = f"{'_'.join(names)}_{node.name}"
+                    group.nodes.append(node)
+            self._groups.append(group)
+
+    @contextlib.contextmanager
     def group(self, *names: typing.List[str]):
         """Group nodes together.
 
@@ -153,64 +183,12 @@ class Project:
             be nested to 'nwd = name[0]/name[1]/.../name[-1]'
         """
         if get_graph() is not empty:
-            if len(names) == 0:
-                # names = (f"Group{len(self._groups) + 1}",)
-                name = "Group1"
-                while pathlib.Path("nodes", name).exists():
-                    name = f"Group{int(name[5:]) + 1}"
-                names = (name,)
-
-            nwd = pathlib.Path("nodes", *names)
-            if any(x.nwd == nwd for x in self._groups):
-                raise ValueError(f"Group {names} already exists.")
-
-            nwd.mkdir(parents=True, exist_ok=True)
-
-            existing_nodes = self.graph.get_sorted_nodes()
-
-            group = NodeGroup(nwd=nwd, nodes=[])
-
-            try:
+            with self._get_group(*names) as group:
                 yield group
-            finally:
-                for node_uuid in self.graph.get_sorted_nodes():
-                    node: Node = self.graph.nodes[node_uuid]["value"]
-                    if node_uuid not in existing_nodes:
-                        node.__dict__["nwd"] = group.nwd / node.name
-                        node.name = f"{'_'.join(names)}_{node.name}"
-                        group.nodes.append(node)
-                self._groups.append(group)
         else:
             with self:
-                if len(names) == 0:
-                    # names = (f"Group{len(self._groups) + 1}",)
-                    name = "Group1"
-                    while pathlib.Path("nodes", name).exists():
-                        name = f"Group{int(name[5:]) + 1}"
-                    names = (name,)
-
-                nwd = pathlib.Path("nodes", *names)
-                if any(x.nwd == nwd for x in self._groups):
-                    raise ValueError(f"Group {names} already exists.")
-
-                nwd.mkdir(parents=True, exist_ok=True)
-
-                existing_nodes = self.graph.get_sorted_nodes()
-
-                group = NodeGroup(nwd=nwd, nodes=[])
-
-                try:
+                with self._get_group(*names) as group:
                     yield group
-                finally:
-                    for node_uuid in self.graph.get_sorted_nodes():
-                        node: Node = self.graph.nodes[node_uuid]["value"]
-                        if node_uuid not in existing_nodes:
-                            node.__dict__["nwd"] = group.nwd / node.name
-                            node.name = f"{'_'.join(names)}_{node.name}"
-                            group.nodes.append(node)
-                    self._groups.append(group)
-
-        # yield _()
 
     def run(
         self,
