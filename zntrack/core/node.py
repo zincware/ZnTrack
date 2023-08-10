@@ -9,6 +9,7 @@ import logging
 import pathlib
 import time
 import typing
+import unittest.mock
 import uuid
 
 import dvc.api
@@ -74,6 +75,28 @@ class NodeStatus:
                 log.debug(err)
                 time.sleep(0.1)
         raise dvc.utils.strictyaml.YAMLValidationError
+
+    @contextlib.contextmanager
+    def patch_open(self) -> typing.ContextManager:
+        """Patch the open function to use the Node's file system."""
+        original_open = open
+
+        def _open(file, *args, **kwargs):
+            # if pathlib.Path.cwd() in pathlib.Path(file).resolve().parents:
+            #     return self.fs.open(file, *args, **kwargs)
+
+            if file == "params.yaml":
+                return original_open(file, *args, **kwargs)
+
+            if not pathlib.Path(file).is_absolute():
+                print("-----------------------")
+                print(pathlib.Path(file))
+                return self.fs.open(file, *args, **kwargs)
+
+            return original_open(file, *args, **kwargs)
+
+        with unittest.mock.patch("builtins.open", _open):
+            yield
 
 
 class _NameDescriptor(zninit.Descriptor):
