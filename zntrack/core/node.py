@@ -95,7 +95,9 @@ class NodeStatus:
             return original_open(file, *args, **kwargs)
 
         with unittest.mock.patch("builtins.open", _open):
-            yield
+            with unittest.mock.patch("__main__.open", _open):
+                # Jupyter Notebooks replace open with io.open
+                yield
 
 
 class _NameDescriptor(zninit.Descriptor):
