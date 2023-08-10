@@ -443,6 +443,20 @@ def test_nested_groups_direct_enter(proj_path):
     assert node_3.outs == "Amet Consectetur"
 
 
+def test_group_dvc_outs(proj_path):
+    project = zntrack.Project(automatic_node_names=True)
+
+    with project.group("GRP1") as grp1:
+        node = zntrack.examples.WriteDVCOuts(params="Hello World")
+
+    project.run()
+
+    assert node.outs == pathlib.Path("nodes", "GRP1", "WriteDVCOuts", "output.txt")
+    assert zntrack.examples.WriteDVCOuts.from_rev(node.name).outs == pathlib.Path(
+        "nodes", "GRP1", "WriteDVCOuts", "output.txt"
+    )
+
+
 @pytest.mark.parametrize("git_only_repo", [True, False])
 def test_git_only_repo(proj_path, git_only_repo):
     with zntrack.Project(git_only_repo=git_only_repo) as project:
