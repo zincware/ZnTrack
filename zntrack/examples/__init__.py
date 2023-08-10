@@ -109,3 +109,14 @@ class AddOne(zntrack.Node):
     def run(self) -> None:
         """Add one to the number."""
         self.outs = self.number + 1
+
+
+class WriteDVCOuts(zntrack.Node):
+    """Write an output file."""
+
+    params = zntrack.zn.params()
+    outs = zntrack.dvc.outs(zntrack.nwd / "output.txt")
+
+    def run(self):
+        """Write an output file."""
+        self.outs.write_text(str(self.params))

@@ -9,6 +9,7 @@ import logging
 import pathlib
 import time
 import typing
+import unittest.mock
 import uuid
 
 import dvc.api
@@ -74,6 +75,29 @@ class NodeStatus:
                 log.debug(err)
                 time.sleep(0.1)
         raise dvc.utils.strictyaml.YAMLValidationError
+
+    @contextlib.contextmanager
+    def patch_open(self) -> typing.ContextManager:
+        """Patch the open function to use the Node's file system.
+
+        Opening a relative path will use the Node's file system.
+        Opening an absolute path will use the local file system.
+        """
+        original_open = open
+
+        def _open(file, *args, **kwargs):
+            if file == "params.yaml":
+                return original_open(file, *args, **kwargs)
+
+            if not pathlib.Path(file).is_absolute():
+                return self.fs.open(file, *args, **kwargs)
+
+            return original_open(file, *args, **kwargs)
+
+        with unittest.mock.patch("builtins.open", _open):
+            with unittest.mock.patch("__main__.open", _open):
+                # Jupyter Notebooks replace open with io.open
+                yield
 
 
 class _NameDescriptor(zninit.Descriptor):
@@ -166,7 +190,8 @@ class Node(zninit.ZnInit, znflow.Node):
             nwd = self.__dict__["nwd"]
         except KeyError:
             try:
-                zntrack_config = json.loads(pathlib.Path("zntrack.json").read_text())
+                with self.state.fs.open("zntrack.json") as f:
+                    zntrack_config = json.load(f)
                 nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
                 nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
             except (FileNotFoundError, KeyError):
