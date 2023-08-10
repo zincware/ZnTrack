@@ -78,19 +78,18 @@ class NodeStatus:
 
     @contextlib.contextmanager
     def patch_open(self) -> typing.ContextManager:
-        """Patch the open function to use the Node's file system."""
+        """Patch the open function to use the Node's file system.
+
+        Opening a relative path will use the Node's file system.
+        Opening an absolute path will use the local file system.
+        """
         original_open = open
 
         def _open(file, *args, **kwargs):
-            # if pathlib.Path.cwd() in pathlib.Path(file).resolve().parents:
-            #     return self.fs.open(file, *args, **kwargs)
-
             if file == "params.yaml":
                 return original_open(file, *args, **kwargs)
 
             if not pathlib.Path(file).is_absolute():
-                print("-----------------------")
-                print(pathlib.Path(file))
                 return self.fs.open(file, *args, **kwargs)
 
             return original_open(file, *args, **kwargs)
