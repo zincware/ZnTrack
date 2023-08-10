@@ -190,7 +190,8 @@ class Node(zninit.ZnInit, znflow.Node):
             nwd = self.__dict__["nwd"]
         except KeyError:
             try:
-                zntrack_config = json.loads(pathlib.Path("zntrack.json").read_text())
+                with self.state.fs.open("zntrack.json") as f:
+                    zntrack_config = json.load(f)
                 nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
                 nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
             except (FileNotFoundError, KeyError):
