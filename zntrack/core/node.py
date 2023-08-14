@@ -105,9 +105,8 @@ class NodeStatus:
         with unittest.mock.patch("builtins.open", _open):
             with unittest.mock.patch("__main__.open", _open):
                 with unittest.mock.patch("os.listdir", _listdir):
-                    with unittest.mock.patch("gfile.listdir", _listdir):
-                        # Jupyter Notebooks replace open with io.open
-                        yield
+                    # Jupyter Notebooks replace open with io.open
+                    yield
 
 
 class _NameDescriptor(zninit.Descriptor):
