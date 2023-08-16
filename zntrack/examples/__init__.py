@@ -10,8 +10,8 @@ import zntrack
 class ParamsToOuts(zntrack.Node):
     """Save params to outs."""
 
-    params = zntrack.zn.params()
-    outs = zntrack.zn.outs()
+    params = zntrack.params()
+    outs = zntrack.outs()
 
     def run(self) -> None:
         """Save params to outs."""
@@ -21,8 +21,8 @@ class ParamsToOuts(zntrack.Node):
 class ParamsToMetrics(zntrack.Node):
     """Save params to metrics."""
 
-    params = zntrack.zn.params()
-    metrics = zntrack.zn.metrics()
+    params = zntrack.params()
+    metrics = zntrack.metrics()
 
     def run(self) -> None:
         """Save params to metrics."""
@@ -32,9 +32,9 @@ class ParamsToMetrics(zntrack.Node):
 class WritePlots(zntrack.Node):
     """Generate a plot."""
 
-    plots: pd.DataFrame = zntrack.zn.plots()
-    x: list = zntrack.zn.params([1, 2, 3])
-    y: list = zntrack.zn.params([4, 5, 6])
+    plots: pd.DataFrame = zntrack.plots()
+    x: list = zntrack.params([1, 2, 3])
+    y: list = zntrack.params([4, 5, 6])
 
     def run(self):
         """Write plots."""
@@ -44,9 +44,9 @@ class WritePlots(zntrack.Node):
 class AddNumbers(zntrack.Node):
     """Add two numbers."""
 
-    a = zntrack.zn.params()
-    b = zntrack.zn.params()
-    c = zntrack.zn.outs()
+    a = zntrack.params()
+    b = zntrack.params()
+    c = zntrack.outs()
 
     def run(self):
         """Add two numbers."""
@@ -56,9 +56,9 @@ class AddNumbers(zntrack.Node):
 class AddNodes(zntrack.Node):
     """Add two nodes."""
 
-    a: AddNumbers = zntrack.zn.deps()
-    b: AddNumbers = zntrack.zn.deps()
-    c = zntrack.zn.outs()
+    a: AddNumbers = zntrack.deps()
+    b: AddNumbers = zntrack.deps()
+    c = zntrack.outs()
 
     def run(self):
         """Add two nodes."""
@@ -68,9 +68,9 @@ class AddNodes(zntrack.Node):
 class AddNodeAttributes(zntrack.Node):
     """Add two node attributes."""
 
-    a: float = zntrack.zn.deps()
-    b: float = zntrack.zn.deps()
-    c = zntrack.zn.outs()
+    a: float = zntrack.deps()
+    b: float = zntrack.deps()
+    c = zntrack.outs()
 
     def run(self):
         """Add two node attributes."""
@@ -80,8 +80,8 @@ class AddNodeAttributes(zntrack.Node):
 class AddNodeNumbers(zntrack.Node):
     """Add up all 'x.outs' from the dependencies."""
 
-    numbers: list = zntrack.zn.deps()
-    sum: int = zntrack.zn.outs()
+    numbers: list = zntrack.deps()
+    sum: int = zntrack.outs()
 
     def run(self):
         """Add up all 'x.outs' from the dependencies."""
@@ -91,9 +91,9 @@ class AddNodeNumbers(zntrack.Node):
 class SumNodeAttributes(zntrack.Node):
     """Sum a list of numbers."""
 
-    inputs: list = zntrack.zn.deps()
-    shift: int = zntrack.zn.params()
-    output: int = zntrack.zn.outs()
+    inputs: list = zntrack.deps()
+    shift: int = zntrack.params()
+    output: int = zntrack.outs()
 
     def run(self) -> None:
         """Sum a list of numbers."""
@@ -103,8 +103,8 @@ class SumNodeAttributes(zntrack.Node):
 class AddOne(zntrack.Node):
     """Add one to the number."""
 
-    number: int = zntrack.zn.deps()
-    outs: int = zntrack.zn.outs()
+    number: int = zntrack.deps()
+    outs: int = zntrack.outs()
 
     def run(self) -> None:
         """Add one to the number."""
@@ -114,8 +114,8 @@ class AddOne(zntrack.Node):
 class WriteDVCOuts(zntrack.Node):
     """Write an output file."""
 
-    params = zntrack.zn.params()
-    outs = zntrack.dvc.outs(zntrack.nwd / "output.txt")
+    params = zntrack.params()
+    outs = zntrack.outs_path(zntrack.nwd / "output.txt")
 
     def run(self):
         """Write an output file."""
