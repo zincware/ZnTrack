@@ -48,7 +48,7 @@ def params(*data):
     return zn.params(*data)
 
 
-def deps(data):
+def deps(*data):
     """Define a Node Dependency.
 
     Parameters
