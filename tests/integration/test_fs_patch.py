@@ -1,4 +1,3 @@
-import io
 import os
 
 import git
@@ -45,18 +44,10 @@ def test_patch_list(proj_path):
     def func(self, path):
         return os.listdir(path)
 
-    def func2(self, path):
-        return io.listdir(path)
-
     type(node).list = func
-    type(node).list2 = func2
 
     with node.state.magic_patch():
         assert "nodes/HelloWorld/random_number.json" in node.list(node.nwd)
         assert "nodes/HelloWorld/node-meta.json" in node.list(node.nwd)
-
-    with node.state.magic_patch():
-        assert "nodes/HelloWorld/random_number.json" in node.list2(node.nwd)
-        assert "nodes/HelloWorld/node-meta.json" in node.list2(node.nwd)
 
     assert node.list(node.nwd) == []
