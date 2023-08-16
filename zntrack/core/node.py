@@ -6,6 +6,7 @@ import dataclasses
 import functools
 import json
 import logging
+import os
 import pathlib
 import time
 import typing
@@ -77,13 +78,14 @@ class NodeStatus:
         raise dvc.utils.strictyaml.YAMLValidationError
 
     @contextlib.contextmanager
-    def patch_open(self) -> typing.ContextManager:
+    def magic_patch(self) -> typing.ContextManager:
         """Patch the open function to use the Node's file system.
 
         Opening a relative path will use the Node's file system.
         Opening an absolute path will use the local file system.
         """
         original_open = open
+        original_listdir = os.listdir
 
         def _open(file, *args, **kwargs):
             if file == "params.yaml":
@@ -94,10 +96,17 @@ class NodeStatus:
 
             return original_open(file, *args, **kwargs)
 
+        def _listdir(path, *args, **kwargs):
+            if not pathlib.Path(path).is_absolute():
+                return self.fs.listdir(path, detail=False)
+
+            return original_listdir(path, *args, **kwargs)
+
         with unittest.mock.patch("builtins.open", _open):
             with unittest.mock.patch("__main__.open", _open):
-                # Jupyter Notebooks replace open with io.open
-                yield
+                with unittest.mock.patch("os.listdir", _listdir):
+                    # Jupyter Notebooks replace open with io.open
+                    yield
 
 
 class _NameDescriptor(zninit.Descriptor):
@@ -189,13 +198,20 @@ class Node(zninit.ZnInit, znflow.Node):
         try:
             nwd = self.__dict__["nwd"]
         except KeyError:
-            try:
-                with self.state.fs.open("zntrack.json") as f:
-                    zntrack_config = json.load(f)
-                nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
-                nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
-            except (FileNotFoundError, KeyError):
+            if (
+                self.state.remote is None
+                and self.state.rev is None
+                and not self.state.loaded
+            ):
                 nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
+            else:
+                try:
+                    with self.state.fs.open("zntrack.json") as f:
+                        zntrack_config = json.load(f)
+                    nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
+                    nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
+                except (FileNotFoundError, KeyError):
+                    nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
         if not nwd.exists():
             nwd.mkdir(parents=True)
         return nwd
