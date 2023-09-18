@@ -22,13 +22,7 @@ import znjson
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import (
-    NodeStatusResults,
-    deprecated,
-    file_io,
-    module_handler,
-    run_dvc_cmd,
-)
+from zntrack.utils import NodeStatusResults, file_io, module_handler
 from zntrack.utils.config import config
 
 log = logging.getLogger(__name__)
@@ -57,11 +51,6 @@ class NodeStatus:
     results: "NodeStatusResults"
     remote: str = None
     rev: str = None
-
-    def get_file_system(self) -> dvc.api.DVCFileSystem:
-        """Get the file system of the Node."""
-        log.warning("Deprecated. Use 'state.fs' instead.")
-        return self.fs
 
     @functools.cached_property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -327,20 +316,6 @@ class Node(zninit.ZnInit, znflow.Node):
             node.load(results=results)
 
         return node
-
-    @deprecated(
-        "Building a graph is now done using 'with zntrack.Project() as project: ...'",
-        version="0.6.0",
-    )
-    def write_graph(self, run: bool = False, **kwargs):
-        """Write the graph to dvc.yaml."""
-        cmd = get_dvc_cmd(self, git_only_repo=True, **kwargs)
-        for x in cmd:
-            run_dvc_cmd(x)
-        self.save()
-
-        if run:
-            run_dvc_cmd(["repro", self.name])
 
 
 def get_dvc_cmd(
