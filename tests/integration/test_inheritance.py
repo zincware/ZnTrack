@@ -50,7 +50,7 @@ class WriteDataParentInitWithInit(InOutsWInit):
     (WriteData, WriteDataWithInit, WriteDataParentInit, WriteDataParentInitWithInit),
 )
 def test_simple_inheritance(proj_path, cls):
-    with Project as project:
+    with Project() as project:
         node = cls(inputs="HelloWorld")
     project.run()
     node.load()
@@ -66,7 +66,7 @@ class WriteCustomData(InputsOutputs):
 
 
 def test_WriteCustomData(proj_path):
-    with Project as project:
+    with Project() as project:
         node = WriteCustomData(inputs="Hello", custom="World")
     project.run()
     node.load()

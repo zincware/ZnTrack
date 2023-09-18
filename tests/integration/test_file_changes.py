@@ -11,7 +11,7 @@ class ChangeParamsInRun(Node):
 
 
 def test_ChangeParamsInRun(proj_path):
-    with Project as proj:
+    with Project() as proj:
         ChangeParamsInRun(param="correct param")
     proj.run()
 
@@ -28,7 +28,7 @@ class ChangeJsonInRun(Node):
 
 
 def test_ChangeJsonInRun(proj_path):
-    with Project as proj:
+    with Project() as proj:
         ChangeJsonInRun()
     proj.run()
     assert ChangeJsonInRun.from_rev().outs == pathlib.Path("correct_out.txt")
