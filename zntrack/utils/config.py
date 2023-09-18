@@ -7,6 +7,20 @@ import typing
 from pathlib import Path
 
 
+@dataclasses.dataclass(frozen=True)
+class Files:
+    """Important File paths for ZnTrack to work.
+
+    Notes
+    -----
+    Currently frozen because changing the value is not tested.
+    """
+
+    zntrack: Path = Path("zntrack.json")
+    params: Path = Path("params.yaml")
+    dvc: Path = Path("dvc.yaml")
+
+
 @dataclasses.dataclass
 class Config:
     """Collection of Node configurations.
@@ -49,6 +63,7 @@ class Config:
     interpreter: typing.Union[str, Path] = Path(sys.executable).name
     dvc_api: bool = True
     disable_operating_directory: bool = False
+    files: Files = dataclasses.field(default_factory=Files)
     _log_level: int = dataclasses.field(default=logging.INFO, init=False, repr=True)
 
     @property
@@ -80,20 +95,6 @@ class Config:
         finally:
             for key, value in state.items():
                 setattr(self, key, value)
-
-
-@dataclasses.dataclass(frozen=True)
-class Files:
-    """Important File paths for ZnTrack to work.
-
-    Notes
-    -----
-    Currently frozen because changing the value is not tested.
-    """
-
-    zntrack: Path = Path("zntrack.json")
-    params: Path = Path("params.yaml")
-    dvc: Path = Path("dvc.yaml")
 
 
 config = Config()

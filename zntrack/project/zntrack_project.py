@@ -19,7 +19,7 @@ from znflow.handler import UpdateConnectors
 
 from zntrack import exceptions
 from zntrack.core.node import Node, get_dvc_cmd
-from zntrack.utils import run_dvc_cmd
+from zntrack.utils import config, run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
@@ -34,9 +34,9 @@ def _initalize():
         repo.init()
         run_dvc_cmd(["init", "--quiet"])
         # Create required files:
-        pathlib.Path("zntrack.json").write_text(json.dumps({}))
-        pathlib.Path("dvc.yaml").write_text(yaml.safe_dump({}))
-        pathlib.Path("params.yaml").write_text(yaml.safe_dump({}))
+        config.files.zntrack.write_text(json.dumps({}))
+        config.files.dvc.write_text(yaml.safe_dump({}))
+        config.files.params.write_text(yaml.safe_dump({}))
         repo.git.add(A=True)
         repo.index.commit("Project initialized.")
 
@@ -107,9 +107,9 @@ class Project:
             _initalize()
         if self.remove_existing_graph:
             # we remove the files that typically contain the graph definition
-            pathlib.Path("zntrack.json").unlink(missing_ok=True)
-            pathlib.Path("dvc.yaml").unlink(missing_ok=True)
-            pathlib.Path("params.yaml").unlink(missing_ok=True)
+            config.files.zntrack.unlink(missing_ok=True)
+            config.files.dvc.unlink(missing_ok=True)
+            config.files.params.unlink(missing_ok=True)
             shutil.rmtree("nodes", ignore_errors=True)
 
     def __enter__(self, *args, **kwargs):

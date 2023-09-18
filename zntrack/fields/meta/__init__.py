@@ -7,7 +7,7 @@ import yaml
 import znjson
 
 from zntrack.fields.field import Field, FieldGroup
-from zntrack.utils import file_io
+from zntrack.utils import config, file_io
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -27,9 +27,9 @@ class Text(Field):
     def save(self, instance):
         """Save the field to disk."""
         value = getattr(instance, self.name)
-        if pathlib.Path("dvc.yaml").exists() and self.use_dvc_yaml:
+        if config.files.dvc.exists() and self.use_dvc_yaml:
             file_io.update_meta(
-                file=pathlib.Path("dvc.yaml"),
+                file=config.files.dvc,
                 node_name=instance.name,
                 data={self.name: value},
             )
@@ -39,13 +39,13 @@ class Text(Field):
 
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
-        if pathlib.Path("dvc.yaml").exists() and self.use_dvc_yaml:
-            dvc_dict = yaml.safe_load(instance.state.fs.read_text("dvc.yaml"))
+        if config.files.dvc.exists() and self.use_dvc_yaml:
+            dvc_dict = yaml.safe_load(instance.state.fs.read_text(config.files.dvc))
             return dvc_dict["stages"][instance.name]["meta"].get(self.name, None)
         else:
             # load from zntrack.json
             zntrack_dict = json.loads(
-                instance.state.fs.read_text("zntrack.json"),
+                instance.state.fs.read_text(config.files.zntrack),
             )
             return json.loads(
                 json.dumps(zntrack_dict[instance.name][self.name]), cls=znjson.ZnDecoder

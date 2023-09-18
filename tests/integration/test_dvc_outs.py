@@ -36,8 +36,10 @@ class SingleNodeListOut(Node):
 
 
 def test_load_dvc_outs(proj_path):
-    node = SingleNode(path_x="test", name="1500")
-    node.write_graph(run=True)
+    with zntrack.Project() as proj:
+        node = SingleNode(path_x="test", name="1500")
+
+    proj.build()
 
     node.load()
     assert node.path1 == pathlib.Path("test.json")
@@ -46,9 +48,9 @@ def test_load_dvc_outs(proj_path):
 
 
 def test_multiple_outs(proj_path):
-    SingleNodeListOut(
-        paths=[pathlib.Path("test_1.txt"), pathlib.Path("test_2.txt")]
-    ).write_graph(run=True)
+    with zntrack.Project() as proj:
+        SingleNodeListOut(paths=[pathlib.Path("test_1.txt"), pathlib.Path("test_2.txt")])
+    proj.run()
 
     assert pathlib.Path("test_1.txt").read_text() == "Lorem Ipsum"
     assert pathlib.Path("test_2.txt").read_text() == "Lorem Ipsum"
@@ -70,7 +72,9 @@ class SingleNodeInNodeDir(Node):
 
 
 def test_SingleNodeInNodeDir(proj_path):
-    SingleNodeInNodeDir().write_graph(run=True)
+    with zntrack.Project() as proj:
+        SingleNodeInNodeDir()
+    proj.run()
 
     result = SingleNodeInNodeDir.from_rev()
     assert result.path == pathlib.Path("nodes", "SingleNodeInNodeDir", "test.json")
@@ -78,9 +82,9 @@ def test_SingleNodeInNodeDir(proj_path):
 
 
 def test_SingleNodeInNodeDirMulti(proj_path):
-    SingleNodeInNodeDir(
-        path=[nwd / "test.json", "file.txt"], name="TestNode"
-    ).write_graph(run=True)
+    with zntrack.Project() as proj:
+        SingleNodeInNodeDir(path=[nwd / "test.json", "file.txt"], name="TestNode")
+    proj.run()
 
     result = SingleNodeInNodeDir.from_rev(name="TestNode")
     assert result.path == [pathlib.Path("nodes", "TestNode", "test.json"), "file.txt"]

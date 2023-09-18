@@ -19,7 +19,9 @@ class MyNode(zntrack.Node):
 
 def test_func_node(proj_path):
     write_text()
-    MyNode().write_graph()
+    with zntrack.Project() as proj:
+        MyNode()
+    proj.run()
 
     run_dvc_cmd(["repro"])
 

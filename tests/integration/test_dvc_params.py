@@ -3,7 +3,8 @@ import pathlib
 import pytest
 import yaml
 
-from zntrack import Node, dvc, zn
+from zntrack import Node, Project, dvc, zn
+from zntrack.utils import config
 
 
 class SingleNode(Node):
@@ -19,11 +20,12 @@ def test_dvc_params(proj_path):
     file = pathlib.Path("my_params.yaml")
 
     file.write_text(yaml.safe_dump(params))
-
-    SingleNode(params_file=file).write_graph(run=True)
+    with Project() as proj:
+        SingleNode(params_file=file)
+    proj.run()
 
     assert SingleNode.from_rev().params_file == file
-    dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    dvc_file = yaml.safe_load(config.files.dvc.read_text())
     assert [{"my_params.yaml": None}] == dvc_file["stages"]["SingleNode"]["params"]
 
 
@@ -36,10 +38,12 @@ def test_dvc_params_list(proj_path):
     file1.write_text(yaml.safe_dump(params))
     file2.write_text(yaml.safe_dump(params))
 
-    SingleNode(params_file=[file1, file2]).write_graph(run=True)
+    with Project() as proj:
+        SingleNode(params_file=[file1, file2])
+    proj.run()
 
     assert SingleNode.from_rev().params_file == [file1, file2]
-    dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    dvc_file = yaml.safe_load(config.files.dvc.read_text())
     assert [{"my_params1.yaml": None}, {"my_params2.yaml": None}] == dvc_file["stages"][
         "SingleNode"
     ]["params"]
@@ -63,14 +67,14 @@ def test_dvc_mixed_params_list(proj_path):
     file1.write_text(yaml.safe_dump(params))
     file2.write_text(yaml.safe_dump(params))
 
-    MixedParams(
-        params_file1=[file1, file2], params_file2=file1, params={"a": 100}
-    ).write_graph(run=True)
+    with Project() as proj:
+        MixedParams(params_file1=[file1, file2], params_file2=file1, params={"a": 100})
+    proj.run()
 
     assert MixedParams.from_rev().params_file1 == [file1, file2]
     assert MixedParams.from_rev().params_file2 == file1
     assert MixedParams.from_rev().params == {"a": 100}
-    dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    dvc_file = yaml.safe_load(config.files.dvc.read_text())
     assert [
         "MixedParams",
         {"my_params1.yaml": None},
@@ -81,4 +85,6 @@ def test_dvc_mixed_params_list(proj_path):
 def test_dvc_params_error(proj_path):
     """Test serialized data as parameters"""
     with pytest.raises(ValueError):
-        SingleNode(params_file={"a": 100}).write_graph()
+        with Project() as proj:
+            SingleNode(params_file={"a": 100})
+        proj.build()

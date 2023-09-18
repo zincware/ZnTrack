@@ -21,7 +21,7 @@ from zntrack.fields.field import (
     LazyField,
     PlotsMixin,
 )
-from zntrack.utils import module_handler, update_key_val
+from zntrack.utils import config, module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -115,7 +115,7 @@ class Params(Field):
         list
             A list of file paths.
         """
-        return ["params.yaml"]
+        return [config.files.params]
 
     def save(self, instance: "Node"):
         """Save the field to disk.
@@ -410,7 +410,7 @@ class Dependency(LazyField):
     def get_data(self, instance: "Node") -> any:
         """Get the value of the field from the file."""
         zntrack_dict = json.loads(
-            instance.state.fs.read_text("zntrack.json"),
+            instance.state.fs.read_text(config.files.zntrack),
         )
         value = zntrack_dict[instance.name][self.name]
 
@@ -540,7 +540,7 @@ class NodeField(Dependency):
                 "--metrics-no-cache" if git_only_repo else "--outs",
                 (nwd / "node-meta.json").as_posix(),  # HOW DO I MOVE THIS TO GROUP ?
                 "--params",
-                f"zntrack.json:{instance.name}.{self.name}",
+                f"{config.files.zntrack}:{instance.name}.{self.name}",
             ]
             field_cmds = []
             for attr in zninit.get_descriptors(Params, self=node):

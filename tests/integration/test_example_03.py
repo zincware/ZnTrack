@@ -51,16 +51,14 @@ def test_repro(proj_path):
     """Test that a single DVC.deps() can take a list of dependencies"""
     project = zntrack.Project()
 
-    create_number = CreateNumbers()
-    create_number.write_graph()
+    with project:
+        create_number = CreateNumbers()
 
-    add_one = AddOne(inp=create_number)
-    add_one.write_graph()
-    subtract_one = SubtractOne(inp=create_number)
-    subtract_one.write_graph()
+        add_one = AddOne(inp=create_number)
+        subtract_one = SubtractOne(inp=create_number)
 
-    Summation(inp=[add_one, subtract_one]).write_graph()
-    SummationTuple(inp=(add_one, subtract_one)).write_graph()
+        Summation(inp=[add_one, subtract_one])
+        SummationTuple(inp=(add_one, subtract_one))
 
     project.run()
 

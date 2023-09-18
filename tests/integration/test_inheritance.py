@@ -1,6 +1,6 @@
 import pytest
 
-from zntrack import Node, zn
+from zntrack import Node, Project, zn
 
 
 class InputsOutputs(Node):
@@ -50,8 +50,9 @@ class WriteDataParentInitWithInit(InOutsWInit):
     (WriteData, WriteDataWithInit, WriteDataParentInit, WriteDataParentInitWithInit),
 )
 def test_simple_inheritance(proj_path, cls):
-    node = cls(inputs="HelloWorld")
-    node.write_graph(run=True)
+    with Project() as project:
+        node = cls(inputs="HelloWorld")
+    project.run()
     node.load()
     assert node.outputs == "HelloWorld"
     assert cls.from_rev().outputs == "HelloWorld"
@@ -65,8 +66,9 @@ class WriteCustomData(InputsOutputs):
 
 
 def test_WriteCustomData(proj_path):
-    node = WriteCustomData(inputs="Hello", custom="World")
-    node.write_graph(run=True)
+    with Project() as project:
+        node = WriteCustomData(inputs="Hello", custom="World")
+    project.run()
     node.load()
     assert node.outputs == "Hello World"
     assert WriteCustomData.from_rev().outputs == "Hello World"
