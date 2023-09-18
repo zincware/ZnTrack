@@ -87,11 +87,15 @@ def test_CombinedNodeWithMeta(proj_path):
         # should raise an error because author is missing as kwarg
         _ = CombinedNodeWithMeta()
 
-    CombinedNodeWithMeta(author="World").write_graph(run=True)
+    with zntrack.Project() as proj:
+        node = CombinedNodeWithMeta(author="World")
+    proj.run()
     assert CombinedNodeWithMeta.from_rev().output == "Hello World"
     assert CombinedNodeWithMeta.from_rev().author == "World"
 
-    CombinedNodeWithMeta(author="there").write_graph(run=True)
+    node.author = "there"
+    proj.run()
+
     # changing the 'meta.Text' should not trigger running the model again
     assert CombinedNodeWithMeta.from_rev().output == "Hello World"
     assert CombinedNodeWithMeta.from_rev().author == "there"

@@ -5,15 +5,14 @@ import zntrack.examples
 
 
 def test_list_deps(proj_path):
-    node1 = zntrack.examples.ParamsToOuts(params=1, name="node1")
-    node2 = zntrack.examples.ParamsToOuts(params=2, name="node2")
+    with zntrack.Project() as project:
+        node1 = zntrack.examples.ParamsToOuts(params=1, name="node1")
+        node2 = zntrack.examples.ParamsToOuts(params=2, name="node2")
 
-    data = [node1 @ "outs", node2 @ "outs"]
-    node3 = zntrack.examples.SumNodeAttributes(data, shift=10)
+        data = [node1.outs, node2.outs]
+        node3 = zntrack.examples.SumNodeAttributes(data, shift=10)
 
-    node1.write_graph()
-    node2.write_graph()
-    node3.write_graph()
+    project.run()
 
     assert dvc.cli.main(["repro"]) == 0
 

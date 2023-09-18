@@ -19,10 +19,10 @@ class HelloWorld(zntrack.Node):
 def test_basic_io_assertion(proj_path):
     """Make a simple input/output assertion test for the nodes with different names"""
     project = zntrack.Project()
-
-    HelloWorld(inputs=3).write_graph()
-    HelloWorld(name="Test01", inputs=17).write_graph()
-    HelloWorld(name="Test02", inputs=42).write_graph()
+    with project:
+        HelloWorld(inputs=3)
+        HelloWorld(name="Test01", inputs=17)
+        HelloWorld(name="Test02", inputs=42)
 
     project.run()
 

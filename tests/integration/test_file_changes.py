@@ -1,6 +1,6 @@
 import pathlib
 
-from zntrack import Node, dvc, zn
+from zntrack import Node, Project, dvc, zn
 
 
 class ChangeParamsInRun(Node):
@@ -11,7 +11,9 @@ class ChangeParamsInRun(Node):
 
 
 def test_ChangeParamsInRun(proj_path):
-    ChangeParamsInRun(param="correct param").write_graph(run=True)
+    with Project as proj:
+        ChangeParamsInRun(param="correct param")
+    proj.run()
 
     assert ChangeParamsInRun.from_rev().param == "correct param"
 
@@ -26,7 +28,9 @@ class ChangeJsonInRun(Node):
 
 
 def test_ChangeJsonInRun(proj_path):
-    ChangeJsonInRun().write_graph(run=True)
+    with Project as proj:
+        ChangeJsonInRun()
+    proj.run()
     assert ChangeJsonInRun.from_rev().outs == pathlib.Path("correct_out.txt")
 
 

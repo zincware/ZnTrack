@@ -222,8 +222,8 @@ class Node(zninit.ZnInit, znflow.Node):
         from zntrack.fields import Field, FieldGroup
 
         # Jupyter Notebook
-        if config.config.nb_name:
-            self.convert_notebook(config.config.nb_name)
+        if config.nb_name:
+            self.convert_notebook(config.nb_name)
 
         if parameter:
             file_io.clear_config_file(file=config.files.params, node_name=self.name)
@@ -265,7 +265,7 @@ class Node(zninit.ZnInit, znflow.Node):
         kwargs = {} if lazy is None else {"lazy": lazy}
         self.state.loaded = True  # we assume loading will be successful.
         try:
-            with config.config.updated_config(**kwargs):
+            with config.updated_config(**kwargs):
                 # TODO: it would be much nicer not to use a global config object here.
                 for attr in zninit.get_descriptors(Field, self=self):
                     if attr.group == FieldGroup.RESULT and not results:
@@ -311,7 +311,7 @@ class Node(zninit.ZnInit, znflow.Node):
         node._external_ = True
 
         kwargs = {} if lazy is None else {"lazy": lazy}
-        with config.config.updated_config(**kwargs):
+        with config.updated_config(**kwargs):
             node.load(results=results)
 
         return node

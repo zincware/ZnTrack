@@ -409,11 +409,9 @@ def nodify(
                 )
 
             # Jupyter Notebook
-            if config.config.nb_name is not None:
-                module = f"{config.config.nb_class_path}.{func.__name__}"
-                jupyter_class_to_file(
-                    nb_name=config.config.nb_name, module_name=func.__name__
-                )
+            if config.nb_name is not None:
+                module = f"{config.nb_class_path}.{func.__name__}"
+                jupyter_class_to_file(nb_name=config.nb_name, module_name=func.__name__)
             else:
                 module = module_handler(func)
 
@@ -434,7 +432,7 @@ def nodify(
                 node_name=func.__name__,
                 dvc_run_option=dvc_run_option,
                 custom_args=cfg.write_dvc_command(func.__name__),
-                nb_name=config.config.nb_name,
+                nb_name=config.nb_name,
                 module=module,
                 func_or_cls=func.__name__,
             )
