@@ -154,3 +154,5 @@ programming languages.
 - [Metaflow](https://metaflow.org/) - A framework for real-life data science.
 - [Hydra](https://hydra.cc/) - A framework for elegantly configuring complex
   applications
+- [Snakemake](https://snakemake.readthedocs.io/en/stable/) - Workflow management
+  system to create reproducible and scalable data analyses.
