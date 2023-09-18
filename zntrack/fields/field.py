@@ -143,7 +143,7 @@ class Field(zninit.Descriptor, abc.ABC):
 
         """
         try:
-            with open("zntrack.json", "r") as f:
+            with open(config.files.zntrack, "r") as f:
                 zntrack_dict = json.load(f)
         except FileNotFoundError:
             zntrack_dict = {}
@@ -152,7 +152,7 @@ class Field(zninit.Descriptor, abc.ABC):
             zntrack_dict[instance.name] = {}
         zntrack_dict[instance.name][self.name] = value
         # use the __dict__ to avoid the nwd replacement
-        with open("zntrack.json", "w") as f:
+        with open(config.files.zntrack, "w") as f:
             json.dump(zntrack_dict, f, indent=4, cls=encoder)
 
 
@@ -267,7 +267,7 @@ class PlotsMixin(Field):
         if not self.use_global_plots:
             return
 
-        dvc_file = pathlib.Path("dvc.yaml")
+        dvc_file = config.files.dvc
         if not dvc_file.exists():
             dvc_file.write_text(yaml.safe_dump({}))
         dvc_config = yaml.safe_load(dvc_file.read_text())

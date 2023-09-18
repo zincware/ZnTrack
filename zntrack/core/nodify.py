@@ -11,8 +11,7 @@ import znflow
 import znjson
 
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import file_io, module_handler, run_dvc_cmd
-from zntrack.utils.config import config
+from zntrack.utils import config, file_io, module_handler, run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
@@ -220,7 +219,7 @@ class NodeConfig:
         """
         script = []
         if self.params is not None and len(self.params) > 0:
-            script += ["--params", f"params.yaml:{node_name}"]
+            script += ["--params", f"{config.files.params}:{node_name}"]
         for datacls_field in dataclasses.fields(self):
             if datacls_field.name == "params":
                 continue
@@ -258,14 +257,14 @@ def save_node_config_to_files(cfg: NodeConfig, node_name: str):
     for value_name, value in dataclasses.asdict(cfg).items():
         if value_name == "params":
             file_io.update_config_file(
-                file=pathlib.Path("params.yaml"),
+                file=config.files.params,
                 node_name=node_name,
                 value_name=None,
                 value=value,
             )
         else:
             file_io.update_config_file(
-                file=pathlib.Path("zntrack.json"),
+                file=pathlib.Path(config.files.zntrack),
                 node_name=node_name,
                 value_name=value_name,
                 value=value,
@@ -297,9 +296,11 @@ def execute_function_call(func):
     """
     # TODO should exec_func always load from file or check if values
     #  are passed and then update the files?
-    cfg_file_content = file_io.read_file(pathlib.Path("zntrack.json"))[func.__name__]
+    cfg_file_content = file_io.read_file(pathlib.Path(config.files.zntrack))[
+        func.__name__
+    ]
     cfg_file_content = decode_dict(cfg_file_content)
-    params_file_content = file_io.read_file(pathlib.Path("params.yaml"))[func.__name__]
+    params_file_content = file_io.read_file(config.files.params)[func.__name__]
     cfg_file_content["params"] = params_file_content
 
     loaded_cfg = NodeConfig(**cfg_file_content)
@@ -408,9 +409,11 @@ def nodify(
                 )
 
             # Jupyter Notebook
-            if config.nb_name is not None:
-                module = f"{config.nb_class_path}.{func.__name__}"
-                jupyter_class_to_file(nb_name=config.nb_name, module_name=func.__name__)
+            if config.config.nb_name is not None:
+                module = f"{config.config.nb_class_path}.{func.__name__}"
+                jupyter_class_to_file(
+                    nb_name=config.config.nb_name, module_name=func.__name__
+                )
             else:
                 module = module_handler(func)
 
@@ -431,7 +434,7 @@ def nodify(
                 node_name=func.__name__,
                 dvc_run_option=dvc_run_option,
                 custom_args=cfg.write_dvc_command(func.__name__),
-                nb_name=config.nb_name,
+                nb_name=config.config.nb_name,
                 module=module,
                 func_or_cls=func.__name__,
             )

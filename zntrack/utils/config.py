@@ -97,3 +97,4 @@ class Files:
 
 
 config = Config()
+files = Files()

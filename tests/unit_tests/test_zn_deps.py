@@ -3,6 +3,7 @@ import pathlib
 import yaml
 
 import zntrack
+from zntrack.utils import config
 
 
 class NodeWithOuts(zntrack.Node):
@@ -24,7 +25,7 @@ def test_DependentNode(proj_path):
 
     proj.run(repro=False)
 
-    dvc_yaml = yaml.safe_load((proj_path / "dvc.yaml").read_text())
+    dvc_yaml = yaml.safe_load((proj_path / config.files.dvc).read_text())
     assert (
         dvc_yaml["stages"]["DependentNode"]["cmd"]
         == "zntrack run test_zn_deps.DependentNode --name DependentNode"

@@ -4,6 +4,7 @@ import pytest
 import yaml
 
 from zntrack import Node, dvc, zn
+from zntrack.utils import config
 
 
 class SingleNode(Node):
@@ -23,7 +24,7 @@ def test_dvc_params(proj_path):
     SingleNode(params_file=file).write_graph(run=True)
 
     assert SingleNode.from_rev().params_file == file
-    dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    dvc_file = yaml.safe_load(config.files.dvc.read_text())
     assert [{"my_params.yaml": None}] == dvc_file["stages"]["SingleNode"]["params"]
 
 
@@ -39,7 +40,7 @@ def test_dvc_params_list(proj_path):
     SingleNode(params_file=[file1, file2]).write_graph(run=True)
 
     assert SingleNode.from_rev().params_file == [file1, file2]
-    dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    dvc_file = yaml.safe_load(config.files.dvc.read_text())
     assert [{"my_params1.yaml": None}, {"my_params2.yaml": None}] == dvc_file["stages"][
         "SingleNode"
     ]["params"]
@@ -70,7 +71,7 @@ def test_dvc_mixed_params_list(proj_path):
     assert MixedParams.from_rev().params_file1 == [file1, file2]
     assert MixedParams.from_rev().params_file2 == file1
     assert MixedParams.from_rev().params == {"a": 100}
-    dvc_file = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    dvc_file = yaml.safe_load(config.files.dvc.read_text())
     assert [
         "MixedParams",
         {"my_params1.yaml": None},

@@ -6,6 +6,7 @@ import pytest
 
 import zntrack.examples
 from zntrack.project import Experiment
+from zntrack.utils import config
 
 
 class ZnNodesNode(zntrack.Node):
@@ -310,12 +311,12 @@ def test_groups_nwd(tmp_path_2):
         "nodes", "CustomGroup", node_3.name.replace(f"CustomGroup_", "")
     )
 
-    with open("zntrack.json") as f:
+    with open(config.files.zntrack) as f:
         data = json.load(f)
         data[node_1.name]["nwd"]["value"] = "test"
         data[node_2.name].pop("nwd")
 
-    with open("zntrack.json", "w") as f:
+    with open(config.files.zntrack, "w") as f:
         json.dump(data, f)
 
     assert zntrack.from_rev(node_1).nwd == pathlib.Path("test")

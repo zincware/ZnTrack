@@ -22,8 +22,7 @@ import znjson
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import NodeStatusResults, file_io, module_handler
-from zntrack.utils.config import config
+from zntrack.utils import NodeStatusResults, config, file_io, module_handler
 
 log = logging.getLogger(__name__)
 
@@ -77,7 +76,7 @@ class NodeStatus:
         original_listdir = os.listdir
 
         def _open(file, *args, **kwargs):
-            if file == "params.yaml":
+            if file == config.files.params:
                 return original_open(file, *args, **kwargs)
 
             if not pathlib.Path(file).is_absolute():
@@ -195,7 +194,7 @@ class Node(zninit.ZnInit, znflow.Node):
                 nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
             else:
                 try:
-                    with self.state.fs.open("zntrack.json") as f:
+                    with self.state.fs.open(config.files.zntrack) as f:
                         zntrack_config = json.load(f)
                     nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
                     nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
@@ -223,12 +222,12 @@ class Node(zninit.ZnInit, znflow.Node):
         from zntrack.fields import Field, FieldGroup
 
         # Jupyter Notebook
-        if config.nb_name:
-            self.convert_notebook(config.nb_name)
+        if config.config.nb_name:
+            self.convert_notebook(config.config.nb_name)
 
         if parameter:
-            file_io.clear_config_file(file="params.yaml", node_name=self.name)
-            file_io.clear_config_file(file="zntrack.json", node_name=self.name)
+            file_io.clear_config_file(file=config.files.params, node_name=self.name)
+            file_io.clear_config_file(file=config.files.zntrack, node_name=self.name)
 
         for attr in zninit.get_descriptors(Field, self=self):
             if attr.group == FieldGroup.PARAMETER and parameter:
@@ -242,7 +241,7 @@ class Node(zninit.ZnInit, znflow.Node):
                 )
         # save the nwd to zntrack.json
         file_io.update_config_file(
-            file=pathlib.Path("zntrack.json"),
+            file=config.files.zntrack,
             node_name=self.name,
             value_name="nwd",
             value=self.nwd,
@@ -266,7 +265,7 @@ class Node(zninit.ZnInit, znflow.Node):
         kwargs = {} if lazy is None else {"lazy": lazy}
         self.state.loaded = True  # we assume loading will be successful.
         try:
-            with config.updated_config(**kwargs):
+            with config.config.updated_config(**kwargs):
                 # TODO: it would be much nicer not to use a global config object here.
                 for attr in zninit.get_descriptors(Field, self=self):
                     if attr.group == FieldGroup.RESULT and not results:
@@ -312,7 +311,7 @@ class Node(zninit.ZnInit, znflow.Node):
         node._external_ = True
 
         kwargs = {} if lazy is None else {"lazy": lazy}
-        with config.updated_config(**kwargs):
+        with config.config.updated_config(**kwargs):
             node.load(results=results)
 
         return node
