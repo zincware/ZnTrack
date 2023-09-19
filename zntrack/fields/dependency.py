@@ -10,7 +10,6 @@ import zninit
 import znjson
 from znflow import handler
 
-from zntrack import exceptions
 from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField
 from zntrack.fields.zn import (
     CombinedConnectionsConverter,
@@ -232,15 +231,28 @@ class Dependency(LazyField):
         if value is None:
             return super().__set__(instance, value)
 
-        for entry in value if isinstance(value, (list, tuple)) else [value]:
-            if hasattr(entry, "_graph_"):
-                entry._graph_ = None
-                if entry.uuid in instance._graph_:
-                    raise exceptions.ZnNodesOnGraphError(
-                        node=entry, field=self, instance=instance
-                    )
-            else:
-                raise TypeError(f"The value must be a Node and not {entry}.")
+        # We need to update the node names, if they are not on the graph.
+        # TODO: raise error if '+' in name
+
+        if isinstance(value, dict):
+            for key, entry in value.items():
+                if hasattr(entry, "_graph_"):
+                    entry._graph_ = None
+                    if entry.uuid in instance._graph_:
+                        entry.name = f"{instance.name}+{self.name}+{key}"
+
+        elif isinstance(value, (list, tuple)):
+            for idx, entry in enumerate(value):
+                if hasattr(entry, "_graph_"):
+                    entry._graph_ = None
+                    if entry.uuid not in instance._graph_:
+                        entry.name = f"{instance.name}+{self.name}+{idx}"
+        else:
+            if hasattr(value, "_graph_"):
+                value._graph_ = None
+                if value.uuid in instance._graph_:
+                    value.name = f"{instance.name}+{self.name}"
+
         return super().__set__(instance, value)
 
     def _get_nodes_on_off_graph(self, instance) -> t.Tuple[list, list]:
@@ -278,11 +290,13 @@ class Dependency(LazyField):
         on_graph = []
         off_graph = []
         for entry in values:
-            if hasattr(entry, "_graph_"):
-                # if entry.uuid in instance._graph_:
-                #     on_graph.append(entry)
-                # else:
+            if "+" in entry.name:
+                # currently there is no other way to check if a node is on the graph
+                # a node which is not on the graph will have a node name containing a
+                # colon, which is not allowed in node names on the graph by DVC.
                 off_graph.append(entry)
+            else:
+                on_graph.append(entry)
         return on_graph, off_graph
 
     def get_files(self, instance) -> list:
@@ -350,6 +364,14 @@ class Dependency(LazyField):
         except DataIsLazyError:
             return
 
+        on_graph, off_graph = self._get_nodes_on_off_graph(instance)
+        print(f"{on_graph=}")
+        print(f"{off_graph=}")
+
+        for node in off_graph:
+            print(f"Saving off graph {node=}")
+            node.save(results=False)
+
         self._write_value_to_config(
             value,
             instance,
@@ -381,7 +403,35 @@ class Dependency(LazyField):
 
     def get_stage_add_argument(self, instance) -> t.List[tuple]:
         """Get the dvc command for this field."""
-        return [
+        cmd = [
             (f"--{self.dvc_option}", pathlib.Path(file).as_posix())
             for file in self.get_files(instance)
         ]
+
+        _, off_graph = self._get_nodes_on_off_graph(instance)
+
+        # TODO this is only for parameters via `zn.params`
+        # we need to also handle parameters via `dvc.params`
+
+        from zntrack.fields.zn import Params
+
+        # NO: we have to do this for each value and for instance
+
+        for node in off_graph:
+            for field in zninit.get_descriptors(Field, self=node):
+                if field.dvc_option == "params":
+                    files = field.get_files(node)
+                    for file in files:
+                        cmd.append(("--params", f"{file}:"))
+                if isinstance(field, Params):
+                    cmd += [("--params", f"{config.files.params}:{node.name}:")]
+
+        # if len(zninit.get_descriptors(Params, self=instance)) > 0:
+
+        # for option in zninit.get_descriptors(DVCOption, self=instance):
+        #     print(f"{option=}")
+        #     if option.dvc_option == "params":
+        #         files = option.get_files(instance)
+        #         for file in files:
+        #             cmd.append(("--params", f"{file}:"))
+        return cmd
