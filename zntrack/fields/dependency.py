@@ -287,9 +287,16 @@ class Dependency(LazyField):
         if not isinstance(values, list):
             values = [values]
 
+        nodes = []
+        for entry in values:
+            if isinstance(entry, (znflow.CombinedConnections, znflow.Connection)):
+                nodes.extend(_get_all_connections_and_instances(entry))
+            else:
+                nodes.append(entry)
+
         on_graph = []
         off_graph = []
-        for entry in values:
+        for entry in nodes:
             if "+" in entry.name:
                 # currently there is no other way to check if a node is on the graph
                 # a node which is not on the graph will have a node name containing a
