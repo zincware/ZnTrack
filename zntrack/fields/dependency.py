@@ -238,19 +238,25 @@ class Dependency(LazyField):
             for key, entry in value.items():
                 if hasattr(entry, "_graph_"):
                     entry._graph_ = None
-                    if entry.uuid in instance._graph_:
+                    if entry.state.rev is not None or entry.state.remote is not None:
+                        pass
+                    elif entry.uuid not in instance._graph_:
                         entry.name = f"{instance.name}+{self.name}+{key}"
 
         elif isinstance(value, (list, tuple)):
             for idx, entry in enumerate(value):
                 if hasattr(entry, "_graph_"):
                     entry._graph_ = None
-                    if entry.uuid not in instance._graph_:
+                    if entry.state.rev is not None or entry.state.remote is not None:
+                        pass
+                    elif entry.uuid not in instance._graph_:
                         entry.name = f"{instance.name}+{self.name}+{idx}"
         else:
             if hasattr(value, "_graph_"):
                 value._graph_ = None
-                if value.uuid in instance._graph_:
+                if value.state.rev is not None or value.state.remote is not None:
+                    pass
+                elif value.uuid not in instance._graph_:
                     value.name = f"{instance.name}+{self.name}"
 
         return super().__set__(instance, value)
@@ -297,13 +303,17 @@ class Dependency(LazyField):
         on_graph = []
         off_graph = []
         for entry in nodes:
-            if "+" in entry.name:
-                # currently there is no other way to check if a node is on the graph
-                # a node which is not on the graph will have a node name containing a
-                # colon, which is not allowed in node names on the graph by DVC.
-                off_graph.append(entry)
-            else:
-                on_graph.append(entry)
+            try:
+                if "+" in entry.name:
+                    # currently there is no other way to check if a node is on the graph
+                    # a node which is not on the graph will have a node name containing a
+                    # colon, which is not allowed in node names on the graph by DVC.
+                    off_graph.append(entry)
+                else:
+                    on_graph.append(entry)
+            except AttributeError:
+                # in eager mode the attribute does not have a name.
+                pass
         return on_graph, off_graph
 
     def get_files(self, instance) -> list:
@@ -396,6 +406,8 @@ class Dependency(LazyField):
 
         value = update_key_val(value, instance=instance)
 
+        print(f"value={json.dumps(value, indent=2)}")
+
         value = json.loads(
             json.dumps(value),
             cls=znjson.ZnDecoder.from_converters(
@@ -426,12 +438,13 @@ class Dependency(LazyField):
 
         for node in off_graph:
             for field in zninit.get_descriptors(Field, self=node):
-                if field.dvc_option == "params":
+                if isinstance(field, Params):
+                    # cmd += [("--params", f"{config.files.params}:{node.name}:")]
+                    cmd += [("--params", f"{config.files.params}:{node.name}")]
+                elif field.dvc_option == "params":
                     files = field.get_files(node)
                     for file in files:
                         cmd.append(("--params", f"{file}:"))
-                if isinstance(field, Params):
-                    cmd += [("--params", f"{config.files.params}:{node.name}:")]
 
         # if len(zninit.get_descriptors(Params, self=instance)) > 0:
 
@@ -441,4 +454,6 @@ class Dependency(LazyField):
         #         files = option.get_files(instance)
         #         for file in files:
         #             cmd.append(("--params", f"{file}:"))
+        print("-------------")
+        print(f"{cmd=}")
         return cmd
