@@ -163,10 +163,12 @@ class Node(zninit.ZnInit, znflow.Node):
     @property
     def _init_descriptors_(self):
         from zntrack import fields
+        from zntrack.fields.dependency import Dependency
 
         return [
             fields.zn.Params,
             fields.zn.Dependency,
+            Dependency,
             fields.meta.Text,
             fields.meta.Environment,
             fields.dvc.DVCOption,

@@ -2,6 +2,8 @@
 
 import zntrack.examples
 
+# TODO: change the parameters, rerun and see if it updates!
+
 
 def test_as_deps(proj_path):
     """Test for 'zntrack.deps' acting as `zntrack.zn.deps`-like field."""

@@ -1,5 +1,6 @@
 """Fields that are used to define Nodes."""
 from zntrack.fields import dvc, zn
+from zntrack.fields.dependency import Dependency
 
 # Serialized Fields
 
@@ -59,7 +60,7 @@ def deps(*data):
         It can not be an object that is not part of the Node graph.
         see https://dvc.org/doc/command-reference/stage/add#-d
     """
-    return zn.deps(*data)
+    return Dependency(*data)
 
 
 def plots(*data, **kwargs):
