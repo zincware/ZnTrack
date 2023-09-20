@@ -235,46 +235,52 @@ class Dependency(LazyField):
         # TODO: raise error if '+' in name
 
         graph = instance._graph_
+        if isinstance(graph, znflow.DiGraph):
+            with znflow.disable_graph():
+                if isinstance(value, dict):
+                    for key, entry in value.items():
+                        if hasattr(entry, "_graph_"):
+                            if isinstance(
+                                entry, (znflow.CombinedConnections, znflow.Connection)
+                            ):
+                                pass
+                            elif (
+                                entry.state.rev is not None
+                                or entry.state.remote is not None
+                            ):
+                                pass
+                            elif entry.uuid not in graph:
+                                entry._graph_ = None
+                                entry.name = f"{instance.name}+{self.name}+{key}"
 
-        with znflow.disable_graph():
-            if isinstance(value, dict):
-                for key, entry in value.items():
-                    if hasattr(entry, "_graph_"):
+                elif isinstance(value, (list, tuple)):
+                    for idx, entry in enumerate(value):
+                        if hasattr(entry, "_graph_"):
+                            if isinstance(
+                                entry, (znflow.CombinedConnections, znflow.Connection)
+                            ):
+                                pass
+                            elif (
+                                entry.state.rev is not None
+                                or entry.state.remote is not None
+                            ):
+                                pass
+                            elif entry.uuid not in graph:
+                                entry._graph_ = None
+                                entry.name = f"{instance.name}+{self.name}+{idx}"
+                else:
+                    if hasattr(value, "_graph_"):
                         if isinstance(
-                            entry, (znflow.CombinedConnections, znflow.Connection)
+                            value, (znflow.CombinedConnections, znflow.Connection)
                         ):
                             pass
                         elif (
-                            entry.state.rev is not None or entry.state.remote is not None
+                            value.state.rev is not None or value.state.remote is not None
                         ):
                             pass
-                        elif entry.uuid not in graph:
-                            entry._graph_ = None
-                            entry.name = f"{instance.name}+{self.name}+{key}"
-
-            elif isinstance(value, (list, tuple)):
-                for idx, entry in enumerate(value):
-                    if hasattr(entry, "_graph_"):
-                        if isinstance(
-                            entry, (znflow.CombinedConnections, znflow.Connection)
-                        ):
-                            pass
-                        elif (
-                            entry.state.rev is not None or entry.state.remote is not None
-                        ):
-                            pass
-                        elif entry.uuid not in graph:
-                            entry._graph_ = None
-                            entry.name = f"{instance.name}+{self.name}+{idx}"
-            else:
-                if hasattr(value, "_graph_"):
-                    if isinstance(value, (znflow.CombinedConnections, znflow.Connection)):
-                        pass
-                    elif value.state.rev is not None or value.state.remote is not None:
-                        pass
-                    elif value.uuid not in graph:
-                        value._graph_ = None
-                        value.name = f"{instance.name}+{self.name}"
+                        elif value.uuid not in graph:
+                            value._graph_ = None
+                            value.name = f"{instance.name}+{self.name}"
 
         return super().__set__(instance, value)
 
