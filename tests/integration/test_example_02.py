@@ -43,8 +43,8 @@ class ComputeB(zntrack.Node):
 class ComputeAB(zntrack.Node):
     """Node stage AB, depending on A&B"""
 
-    a: ComputeA = zntrack.zn.deps()
-    b: ComputeB = zntrack.zn.deps()
+    a: ComputeA = zntrack.deps()
+    b: ComputeB = zntrack.deps()
     out = zntrack.zn.outs()
     param = zntrack.zn.params("default")
 

@@ -9,7 +9,7 @@ class CreateNumbers(zntrack.Node):
 
 
 class AddOne(zntrack.Node):
-    inp = zntrack.zn.deps()
+    inp = zntrack.deps()
     number = zntrack.zn.outs()
 
     def run(self):
@@ -17,7 +17,7 @@ class AddOne(zntrack.Node):
 
 
 class SubtractOne(zntrack.Node):
-    inp = zntrack.zn.deps()
+    inp = zntrack.deps()
     number = zntrack.zn.outs()
 
     def run(self):
@@ -27,7 +27,7 @@ class SubtractOne(zntrack.Node):
 class Summation(zntrack.Node):
     """Stage that is actually tested, containing the multiple dependencies"""
 
-    inp = zntrack.zn.deps()
+    inp = zntrack.deps()
     number = zntrack.zn.outs()
 
     def run(self):
@@ -40,7 +40,7 @@ class SummationTuple(zntrack.Node):
     Additionally testing for tuple conversion here!
     """
 
-    inp = zntrack.zn.deps()
+    inp = zntrack.deps()
     number = zntrack.zn.outs()
 
     def run(self):

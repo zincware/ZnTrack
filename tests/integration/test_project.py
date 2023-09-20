@@ -12,7 +12,7 @@ from zntrack.utils import config
 class ZnNodesNode(zntrack.Node):
     """Used zn.nodes"""
 
-    node = zntrack.zn.nodes()
+    node = zntrack.deps()
     result = zntrack.zn.outs()
 
     def run(self) -> None:
@@ -326,7 +326,7 @@ def test_groups_nwd(tmp_path_2):
     )
 
 
-def test_groups_nwd_zn_nodes(tmp_path_2):
+def test_groups_nwd_zn_nodes_a(tmp_path_2):
     node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         node_1 = ZnNodesNode(node=node)
@@ -351,7 +351,7 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert node_3.result == "Lorem Ipsum"
 
 
-def test_groups_nwd_zn_nodes(tmp_path_2):
+def test_groups_nwd_zn_nodes_b(tmp_path_2):
     node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group() as group_1:
