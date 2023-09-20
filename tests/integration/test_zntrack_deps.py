@@ -27,6 +27,19 @@ def test_as_deps(proj_path):
     assert b.number == 10
     assert c.result == 11
 
+    a.write_params(min=1, max=5, seed=31415)
+    # b.write_params(min=5, max=10, seed=31415) # only change one of the two parameters
+
+    project.repro()
+
+    a.load()
+    b.load()
+    c.load()
+
+    assert a.number == 5
+    assert b.number == 10
+    assert c.result == 15
+
 
 def test_as_nodes(proj_path):
     """Test for 'zntrack.deps' acting as `zntrack.zn.nodes`-like field."""
@@ -52,6 +65,13 @@ def test_as_nodes(proj_path):
     c.load()
     assert c.result == 11
 
+    a.write_params(min=1, max=5, seed=31415)
+
+    project.repro()
+
+    c.load()
+    assert c.result == 15
+
 
 def test_mixed(proj_path):
     project = zntrack.Project(automatic_node_names=True)
@@ -72,3 +92,20 @@ def test_mixed(proj_path):
 
     assert b.number == 10
     assert c.result == 11
+
+    a.write_params(min=1, max=5, seed=31415)
+
+    project.repro()
+
+    c.load()
+    assert c.result == 15
+
+    b.write_params(min=5, max=10, seed=31415)
+
+    project.repro()
+
+    b.load()
+    c.load()
+
+    assert b.number == 9
+    assert c.result == 14
