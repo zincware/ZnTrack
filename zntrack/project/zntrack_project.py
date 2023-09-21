@@ -130,7 +130,7 @@ class Project:
             if node._external_:
                 continue
 
-            if node.name in node_names:
+            if node.name in node_names and not self.force:
                 raise exceptions.DuplicateNodeNameError(node)
 
             node_names.append(node.name)
