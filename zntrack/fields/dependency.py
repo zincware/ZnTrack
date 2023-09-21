@@ -407,12 +407,9 @@ class Dependency(LazyField):
         except DataIsLazyError:
             return
 
-        on_graph, off_graph = self._get_nodes_on_off_graph(instance)
-        print(f"{on_graph=}")
-        print(f"{off_graph=}")
+        _, off_graph = self._get_nodes_on_off_graph(instance)
 
         for node in off_graph:
-            print(f"Saving off graph {node=}")
             node.save(results=False)
 
         self._write_value_to_config(
@@ -431,8 +428,6 @@ class Dependency(LazyField):
         value = zntrack_dict[instance.name][self.name]
 
         value = update_key_val(value, instance=instance)
-
-        print(f"value={json.dumps(value, indent=2)}")
 
         value = json.loads(
             json.dumps(value),
@@ -471,15 +466,4 @@ class Dependency(LazyField):
                     files = field.get_files(node)
                     for file in files:
                         cmd.append(("--params", f"{file}:"))
-
-        # if len(zninit.get_descriptors(Params, self=instance)) > 0:
-
-        # for option in zninit.get_descriptors(DVCOption, self=instance):
-        #     print(f"{option=}")
-        #     if option.dvc_option == "params":
-        #         files = option.get_files(instance)
-        #         for file in files:
-        #             cmd.append(("--params", f"{file}:"))
-        print("-------------")
-        print(f"{cmd=}")
         return cmd
