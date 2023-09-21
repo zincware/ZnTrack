@@ -175,10 +175,11 @@ class Node(zninit.ZnInit, znflow.Node):
     def _init_descriptors_(self):
         from zntrack import fields
         from zntrack.fields.dependency import Dependency
+        from zntrack.fields.zn import options as zn_options
 
         return [
-            fields.zn.Params,
-            fields.zn.Dependency,
+            zn_options.Params,
+            zn_options.Dependency,
             Dependency,
             fields.meta.Text,
             fields.meta.Environment,

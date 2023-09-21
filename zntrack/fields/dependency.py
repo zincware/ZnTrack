@@ -11,7 +11,7 @@ import znjson
 from znflow import handler
 
 from zntrack.fields.field import DataIsLazyError, Field, FieldGroup, LazyField
-from zntrack.fields.zn import (
+from zntrack.fields.zn.options import (
     CombinedConnectionsConverter,
     ConnectionConverter,
     _default,
@@ -458,7 +458,7 @@ class Dependency(LazyField):
         # TODO this is only for parameters via `zn.params`
         # we need to also handle parameters via `dvc.params`
 
-        from zntrack.fields.zn import Params
+        from zntrack.fields.zn.options import Params
 
         # NO: we have to do this for each value and for instance
 
