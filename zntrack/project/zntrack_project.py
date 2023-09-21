@@ -14,12 +14,11 @@ import dvc.api
 import git
 import yaml
 import znflow
-from znflow.base import empty, get_graph
 from znflow.handler import UpdateConnectors
 
 from zntrack import exceptions
 from zntrack.core.node import Node, get_dvc_cmd
-from zntrack.utils import config, run_dvc_cmd
+from zntrack.utils import NodeName, config, run_dvc_cmd
 
 log = logging.getLogger(__name__)
 
@@ -46,14 +45,16 @@ class ZnTrackGraph(znflow.DiGraph):
 
     project: Project = None
 
-    def add_node(self, node_for_adding, **attr):
+    def add_node(self, node_for_adding: Node, **attr):
         """Rename Nodes if required."""
-        value = super().add_node(node_for_adding, **attr)
-        self.project.update_node_names(check=False)
-        # this is called in __new__ and therefore,
-        # the name might not be set correctly.
-        # update node names only works, if name is not set.
-        return value
+        if self.active_group is not None:
+            name = NodeName(self.active_group, node_for_adding.name)
+        else:
+            name = NodeName(None, node_for_adding.name)
+
+        node_for_adding.name = name
+
+        super().add_node(node_for_adding, **attr)
 
 
 @dataclasses.dataclass
@@ -82,14 +83,16 @@ class Project:
         overwrite existing nodes.
     """
 
-    graph: znflow.DiGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
+    graph: ZnTrackGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
     initialize: bool = True
     remove_existing_graph: bool = False
     automatic_node_names: bool = False
     git_only_repo: bool = True
     force: bool = False
 
-    _groups: list = dataclasses.field(default_factory=list, init=False, repr=False)
+    _groups: dict[str, NodeGroup] = dataclasses.field(
+        default_factory=dict, init=False, repr=False
+    )
 
     def __post_init__(self):
         """Initialize the Project.
@@ -120,25 +123,16 @@ class Project:
     def __exit__(self, *args, **kwargs):
         """Exit the graph context."""
         self.graph.__exit__(*args, **kwargs)
-        self.update_node_names()
 
-    def update_node_names(self, check=True):
-        """Update the node names to be unique."""
         node_names = []
-        for node_uuid in self.graph.get_sorted_nodes():
-            node: Node = self.graph.nodes[node_uuid]["value"]
-            if node.name in node_names:
-                if node._external_:
-                    continue
-                if self.automatic_node_names:
-                    idx = 1
-                    while f"{node.name}_{idx}" in node_names:
-                        idx += 1
-                    node.name = f"{node.name}_{idx}"
-                    log.debug(f"Updating {node.name = }")
+        for node_uuid in self.graph.nodes:
+            node = self.graph.nodes[node_uuid]["value"]
+            if node._external_:
+                continue
 
-                elif not self.force and check:
-                    raise exceptions.DuplicateNodeNameError(node)
+            if node.name in node_names:
+                raise exceptions.DuplicateNodeNameError(node)
+
             node_names.append(node.name)
 
     @contextlib.contextmanager
@@ -152,44 +146,30 @@ class Project:
             the number of groups + 1. If more than one name is given, the groups will
             be nested to 'nwd = name[0]/name[1]/.../name[-1]'
         """
+        if len(names) == 0:
+            # names = (f"Group{len(self._groups) + 1}",)
+            name = "Group1"
+            while pathlib.Path("nodes", name).exists():
+                name = f"Group{int(name[5:]) + 1}"
+            names = (name,)
 
-        @contextlib.contextmanager
-        def _get_group(names):
-            if len(names) == 0:
-                # names = (f"Group{len(self._groups) + 1}",)
-                name = "Group1"
-                while pathlib.Path("nodes", name).exists():
-                    name = f"Group{int(name[5:]) + 1}"
-                names = (name,)
-
+        try:
+            grp = self._groups[names]
+        except KeyError:
             nwd = pathlib.Path("nodes", *names)
-            if any(x.nwd == nwd for x in self._groups):
-                raise ValueError(f"Group {names} already exists.")
-
             nwd.mkdir(parents=True, exist_ok=True)
+            grp = NodeGroup(name="_".join(names), nwd=nwd, nodes=[])
+            self._groups[names] = grp
 
-            existing_nodes = self.graph.get_sorted_nodes()
+        with self.graph.group(names):
+            yield grp
+        # TODO: do we even need the group object?
+        #  self.graph.get_group() should be sufficient.
+        grp.nodes = [self.graph.nodes[x]["value"] for x in self.graph.get_group(names)]
+        # we need to update the nwd for al lnew nodes
 
-            group = NodeGroup(nwd=nwd, nodes=[])
-
-            try:
-                yield group
-            finally:
-                for node_uuid in self.graph.get_sorted_nodes():
-                    node: Node = self.graph.nodes[node_uuid]["value"]
-                    if node_uuid not in existing_nodes:
-                        node.__dict__["nwd"] = group.nwd / node.name
-                        node.name = f"{'_'.join(names)}_{node.name}"
-                        group.nodes.append(node)
-                self._groups.append(group)
-
-        if get_graph() is not empty:
-            with _get_group(names) as group:
-                yield group
-        else:
-            with self:
-                with _get_group(names) as group:
-                    yield group
+        for node in grp.nodes:
+            node.__dict__["nwd"] = grp.nwd / node._name_.get_name_without_groups()
 
     def run(
         self,
@@ -448,6 +428,7 @@ class Branch:
 class NodeGroup:
     """A group of nodes."""
 
+    name: tuple[str]
     nwd: pathlib.Path
     nodes: list[Node]
 
