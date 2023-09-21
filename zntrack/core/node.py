@@ -121,7 +121,6 @@ class _NameDescriptor(zninit.Descriptor):
         else:
             # This should only happen if an instance is loaded.
             instance._name_ = value
-            # name is set from auto_init, can we use in_construction?
 
 
 class Node(zninit.ZnInit, znflow.Node):
