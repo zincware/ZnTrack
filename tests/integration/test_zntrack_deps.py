@@ -109,3 +109,22 @@ def test_mixed(proj_path):
 
     assert b.number == 9
     assert c.result == 14
+
+
+def test_named_parent(proj_path):
+    project = zntrack.Project(automatic_node_names=True)
+
+    a = zntrack.examples.ComputeRandomNumber(params_file="a.json")
+    b = zntrack.examples.ComputeRandomNumber(params_file="b.json")
+
+    with project:
+        c = zntrack.examples.SumRandomNumbersNamed([a, b], name="c")
+
+    a.write_params(min=1, max=5, seed=42)
+    b.write_params(min=5, max=10, seed=42)
+
+    project.run()
+
+    c.load()
+    assert c.name == "c"
+    assert c.result == 11

@@ -142,6 +142,7 @@ class Node(zninit.ZnInit, znflow.Node):
     _name_ = None
 
     _protected_ = znflow.Node._protected_ + ["name"]
+    _priority_kwargs_ = ["name"]
 
     @property
     def _use_repr_(self) -> bool:

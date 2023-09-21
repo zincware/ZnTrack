@@ -152,6 +152,12 @@ class ComputeRandomNumber(zntrack.Node):
         self.params_file.write_text(json.dumps({"min": min, "max": max, "seed": seed}))
 
 
+class ComputeRandomNumberNamed(ComputeRandomNumber):
+    """Same as ComputeRandomNumber but with a custom name."""
+
+    _name_ = "custom_ComputeRandomNumber"
+
+
 class SumRandomNumbers(zntrack.Node):
     """Sum a list of random numbers."""
 
@@ -161,3 +167,9 @@ class SumRandomNumbers(zntrack.Node):
     def run(self):
         """Sum a list of random numbers."""
         self.result = sum(x.get_random_number() for x in self.numbers)
+
+
+class SumRandomNumbersNamed(SumRandomNumbers):
+    """Same as SumRandomNumbers but with a custom name."""
+
+    _name_ = "custom_SumRandomNumbers"

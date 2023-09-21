@@ -5508,13 +5508,13 @@ dask = ["bokeh (>=2.4.2,<3.0.0)", "dask (>=2022.12.1,<2023.0.0)", "dask-jobqueue
 
 [[package]]
 name = "zninit"
-version = "0.1.10"
+version = "0.1.11"
 description = "Descriptor based dataclass implementation"
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "zninit-0.1.10-py3-none-any.whl", hash = "sha256:a019f47b33bb27822694f4c076dcb679f8e90c55712602508c42d99d84de0b37"},
-    {file = "zninit-0.1.10.tar.gz", hash = "sha256:c00366581901f3f73573c50d7396fadc781e94d70e4450e489e85939d4903c24"},
+    {file = "zninit-0.1.11-py3-none-any.whl", hash = "sha256:78e5c7e1d0d50c131cf8efab58aad4a213446a1c38f38360731bf11b778e29e1"},
+    {file = "zninit-0.1.11.tar.gz", hash = "sha256:fc14a55bd85a38f8f1411bd319cac541c2e6e16ab402f3f11a94e182b0681965"},
 ]
 
 [package.extras]
@@ -5534,4 +5534,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8,<4.0.0"
-content-hash = "4c1d2a547d8848de688353b32ce86d53043cab1d33c79cfa33a3aba51022b20c"
+content-hash = "7d787bc3f767e051b188aa81732499fce9e294aa0b899e2369cb69dc51c72a0c"
