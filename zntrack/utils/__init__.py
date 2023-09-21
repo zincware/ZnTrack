@@ -233,7 +233,7 @@ class NodeName:
         """Get the node name without the groups."""
         name = self.name
         if self.suffix > 0:
-            name += str(self.suffix)
+            name += f"_{self.suffix}"
         return name
 
     def update_suffix(self, project: "Project", node: "Node") -> None:

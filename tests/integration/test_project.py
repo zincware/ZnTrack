@@ -377,33 +377,22 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert node_3.result == "Lorem Ipsum"
 
 
-# This is allowed now
-# def test_test_reopening_groups(proj_path):
-#     with zntrack.Project(automatic_node_names=True) as project:
-#         with project.group("GroupA"):
-#             node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
-#         with pytest.raises(ValueError):
-#             with project.group("GroupA"):
-#                 node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+def test_reopening_groups(proj_path):
+    with zntrack.Project(automatic_node_names=True) as project:
+        with project.group("AL0") as al_0:
+            node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+            node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur")
+        with project.group("AL0") as al_0:
+            node_4 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit")
 
+    project.run()
 
-# def test_reopening_groups(proj_path):
-#  This is currently not allowed
-#     with zntrack.Project(automatic_node_names=True) as project:
-#         with project.group("AL0") as al_0:
-#             node_1 = WriteIO(inputs="Lorem Ipsum")
-#             node_2 = WriteIO(inputs="Dolor Sit")
-#             node_3 = WriteIO(inputs="Amet Consectetur")
-#         with project.group("AL0") as al_0:
-#             node_4 = WriteIO(inputs="Adipiscing Elit")
+    assert node_1.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts")
+    assert node_2.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts_1")
+    assert node_3.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts_2")
 
-#     project.run()
-
-#     assert node_1.nwd == pathlib.Path("nodes", "AL0", "WriteIO")
-#     assert node_2.nwd == pathlib.Path("nodes", "AL0", "WriteIO_1")
-#     assert node_3.nwd == pathlib.Path("nodes", "AL0", "WriteIO_2")
-
-#     assert node_4.nwd == pathlib.Path("nodes", "AL0", "WriteIO_3")
+    assert node_4.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts_3")
 
 
 def test_nested_groups(proj_path):
