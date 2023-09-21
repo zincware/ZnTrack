@@ -111,7 +111,8 @@ class _NameDescriptor(zninit.Descriptor):
         if value is None:
             return
         if isinstance(value, NodeName):
-            value.update_suffix(instance._graph_.project, instance)
+            if not instance._external_:
+                value.update_suffix(instance._graph_.project, instance)
             instance._name_ = value
         elif isinstance(getattr(instance, "_name_"), NodeName):
             instance._name_.name = value
