@@ -22,7 +22,7 @@ import znjson
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import NodeStatusResults, config, file_io, module_handler
+from zntrack.utils import NodeName, NodeStatusResults, config, file_io, module_handler
 
 log = logging.getLogger(__name__)
 
@@ -104,13 +104,23 @@ class _NameDescriptor(zninit.Descriptor):
         if instance is None:
             return self
         if getattr(instance, "_name_") is None:
-            instance._name_ = instance.__class__.__name__
-        return getattr(instance, "_name_")
+            return instance.__class__.__name__
+        return str(getattr(instance, "_name_"))
 
     def __set__(self, instance, value):
         if value is None:
             return
-        instance._name_ = value
+        if isinstance(value, NodeName):
+            if not instance._external_:
+                value.update_suffix(instance._graph_.project, instance)
+            instance._name_ = value
+        elif isinstance(getattr(instance, "_name_"), NodeName):
+            instance._name_.name = value
+            instance._name_.suffix = 0
+            instance._name_.update_suffix(instance._graph_.project, instance)
+        else:
+            # This should only happen if an instance is loaded.
+            instance._name_ = value
 
 
 class Node(zninit.ZnInit, znflow.Node):
