@@ -141,8 +141,7 @@ class Project:
             the number of groups + 1. If more than one name is given, the groups will
             be nested to 'nwd = name[0]/name[1]/.../name[-1]'
         """
-        if len(names) == 0:
-            # names = (f"Group{len(self._groups) + 1}",)
+        if not names:
             name = "Group1"
             while pathlib.Path("nodes", name).exists():
                 name = f"Group{int(name[5:]) + 1}"
@@ -159,10 +158,10 @@ class Project:
         with self.graph.group(names):
             yield grp
         # TODO: do we even need the group object?
-        #  self.graph.get_group() should be sufficient.
         grp.nodes = [self.graph.nodes[x]["value"] for x in self.graph.get_group(names)]
-        # we need to update the nwd for al lnew nodes
 
+        # we update the nwd when closing the context manager
+        # changing the name is no longer possible after this
         for node in grp.nodes:
             node.__dict__["nwd"] = grp.nwd / node._name_.get_name_without_groups()
 
