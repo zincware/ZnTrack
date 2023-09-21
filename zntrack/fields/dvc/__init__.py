@@ -3,6 +3,7 @@ import json
 import pathlib
 import typing
 
+import typing_extensions as tyex
 import znjson
 
 from zntrack.fields.field import Field, FieldGroup, PlotsMixin
@@ -140,46 +141,55 @@ class PlotsOption(PlotsMixin, DVCOption):
     """Field with DVC plots kwargs."""
 
 
+@tyex.deprecated("Use 'zntrack.outs_path' instead.")
 def outs(*args, **kwargs) -> DVCOption:
     """Create a outs field."""
     return DVCOption(*args, dvc_option="outs", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.params_path' instead.")
 def params(*args, **kwargs) -> DVCOption:
     """Create a params field."""
     return DVCOption(*args, dvc_option="params", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.deps_path' instead.")
 def deps(*args, **kwargs) -> DVCOption:
     """Create a deps field."""
     return DVCOption(*args, dvc_option="deps", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.outs_path' instead.")
 def outs_no_cache(*args, **kwargs) -> DVCOption:
     """Create a outs_no_cache field."""
     return DVCOption(*args, dvc_option="outs-no-cache", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.outs_path' instead.")
 def outs_persistent(*args, **kwargs) -> DVCOption:
     """Create a outs_persistent field."""
     return DVCOption(*args, dvc_option="outs-persistent", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.metrics_path' instead.")
 def metrics(*args, **kwargs) -> DVCOption:
     """Create a metrics field."""
     return DVCOption(*args, dvc_option="metrics", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.metrics_path' instead.")
 def metrics_no_cache(*args, **kwargs) -> DVCOption:
     """Create a metrics_no_cache field."""
     return DVCOption(*args, dvc_option="metrics-no-cache", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.plots_path' instead.")
 def plots(*args, **kwargs) -> DVCOption:
     """Create a plots field."""
     return PlotsOption(*args, dvc_option="plots", **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.plots_path' instead.")
 def plots_no_cache(*args, **kwargs) -> DVCOption:
     """Create a plots_no_cache field."""
     return PlotsOption(*args, dvc_option="plots-no-cache", **kwargs)

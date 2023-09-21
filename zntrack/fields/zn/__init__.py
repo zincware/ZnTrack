@@ -6,6 +6,7 @@ import pathlib
 import typing
 
 import pandas as pd
+import typing_extensions as tyex
 import yaml
 import znflow
 import znflow.utils
@@ -566,31 +567,37 @@ class NodeField(Dependency):
         ]
 
 
+@tyex.deprecated("Use 'zntrack.params' instead.")
 def params(*args, **kwargs) -> Params:
     """Create a params field."""
     return Params(*args, **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.deps' instead.")
 def deps(*args, **kwargs) -> Dependency:
     """Create a dependency field."""
     return Dependency(*args, **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.outs' instead.")
 def outs() -> Output:
     """Create an output field."""
     return Output(dvc_option="outs", use_repr=False)
 
 
+@tyex.deprecated("Use 'zntrack.metrics' instead.")
 def metrics() -> Output:
     """Create a metrics output field."""
     return Output(dvc_option="metrics-no-cache")
 
 
+@tyex.deprecated("Use 'zntrack.plots' instead.")
 def plots(*args, **kwargs) -> Plots:
     """Create a metrics output field."""
     return Plots(*args, **kwargs)
 
 
+@tyex.deprecated("Use 'zntrack.deps' instead.")
 def nodes(*args, **kwargs) -> NodeField:
     """Create a node field."""
     return NodeField(*args, **kwargs)

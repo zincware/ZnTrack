@@ -20,6 +20,7 @@ dot4dict = "^0.1.1"
 zninit = "^0.1.11"
 znjson = "^0.2.2"
 znflow = "^0.1.14"
+typing-extensions = "^4.8.0"
 
 
 [tool.poetry.urls]
