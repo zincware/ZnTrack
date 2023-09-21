@@ -340,16 +340,10 @@ def test_groups_nwd_zn_nodes_a(tmp_path_2):
             node_3 = ZnNodesNode(node=node)
 
     assert node_1.name == "ZnNodesNode"
-    # assert node_1.node.name == "ZnNodesNode+node"
-
-    # TODO: using the same node multiple times,
-    #  the name of the Node is currently not set correctly
-    #  because the Node is not copied for each use
-    #  but the same instance is used multiple times
-    #  therefore, the name is set to the latest usage.
+    assert node_1.node.name == "ZnNodesNode+node"
 
     assert node_2.name == "Group1_ZnNodesNode"
-    # assert node_2.node.name == "Group1_ZnNodesNode+node"
+    assert node_2.node.name == "Group1_ZnNodesNode+node"
 
     assert node_3.name == "CustomGroup_ZnNodesNode"
     assert node_3.node.name == "CustomGroup_ZnNodesNode+node"

@@ -152,6 +152,25 @@ class ComputeRandomNumber(zntrack.Node):
         self.params_file.write_text(json.dumps({"min": min, "max": max, "seed": seed}))
 
 
+class ComputeRandomNumberWithParams(zntrack.Node):
+    """Compute a random number."""
+
+    min: int = zntrack.params()
+    max: int = zntrack.params()
+    seed: int = zntrack.params()
+
+    number = zntrack.outs()
+
+    def run(self):
+        """Compute a random number."""
+        self.number = self.get_random_number()
+
+    def get_random_number(self):
+        """Compute a random number."""
+        random.seed(self.seed)
+        return random.randint(self.min, self.max)
+
+
 class ComputeRandomNumberNamed(ComputeRandomNumber):
     """Same as ComputeRandomNumber but with a custom name."""
 

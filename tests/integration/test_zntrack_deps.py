@@ -128,3 +128,87 @@ def test_named_parent(proj_path):
     c.load()
     assert c.name == "c"
     assert c.result == 11
+
+
+def test_many_to_one(proj_path):
+    project = zntrack.Project(automatic_node_names=True)
+
+    a = zntrack.examples.ComputeRandomNumber(params_file="a.json")
+
+    with project:
+        b = zntrack.examples.SumRandomNumbers([a])
+        c = zntrack.examples.SumRandomNumbers([a])
+
+    a.write_params(min=1, max=5, seed=42)
+    # here we have one parameter file for both b and c
+    # so a change in 'a.json' will affect both 'b' and 'c
+
+    project.run()
+
+    b.load()
+    c.load()
+
+    assert b.result == 1
+    assert c.result == 1
+
+    a.write_params(min=1, max=5, seed=31415)
+
+    project.repro()
+
+    b.load()
+    c.load()
+
+    assert b.result == 5
+    assert c.result == 5
+
+
+def test_many_to_one_params(proj_path):
+    project = zntrack.Project(automatic_node_names=True)
+
+    a = zntrack.examples.ComputeRandomNumberWithParams(min=1, max=5, seed=42)
+
+    with project:
+        b = zntrack.examples.SumRandomNumbers([a])
+        c = zntrack.examples.SumRandomNumbers([a])
+
+    # here we create a deepcopy of 'a' for both 'b' and 'c'
+    # so a change in 'a' will not affect 'b' and 'c'
+    # and we can change the parameters in b.numbers[0] and c.numbers[0] independently
+
+    project.run()
+
+    b.load()
+    c.load()
+
+    assert b.result == 1
+    assert c.result == 1
+
+    assert b.name == "SumRandomNumbers"
+    assert c.name == "SumRandomNumbers_1"
+
+    assert b.numbers[0].name == f"{b.name}+numbers+0"
+    assert c.numbers[0].name == f"{c.name}+numbers+0"
+
+    b.numbers[0].min = 5
+    b.numbers[0].max = 10
+    b.numbers[0].seed = 42
+
+    project.run()
+
+    b.load()
+    c.load()
+
+    assert b.result == 10
+    assert c.result == 1
+
+    c.numbers[0].min = 5
+    c.numbers[0].max = 10
+    c.numbers[0].seed = 42
+
+    project.run()
+
+    b.load()
+    c.load()
+
+    assert b.result == 10
+    assert c.result == 10
