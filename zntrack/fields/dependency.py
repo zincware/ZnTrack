@@ -61,58 +61,19 @@ class Dependency(LazyField):
         if isinstance(graph, znflow.DiGraph):
             with znflow.disable_graph():
                 if isinstance(value, dict):
-                    new_entries = {}
-                    for key, entry in value.items():
-                        if hasattr(entry, "_graph_"):
-                            if isinstance(
-                                entry, (znflow.CombinedConnections, znflow.Connection)
-                            ):
-                                pass
-                            elif (
-                                entry.state.rev is not None
-                                or entry.state.remote is not None
-                            ):
-                                pass
-                            elif entry.uuid not in graph:
-                                entry._graph_ = None
-                                entry = copy.deepcopy(entry)
-                                entry.name = f"{instance.name}+{self.name}+{key}"
-                        new_entries[key] = entry
+                    new_entries = {
+                        key: self._update_node_name(entry, instance, graph, key=key)
+                        for key, entry in value.items()
+                    }
                     value = new_entries
-
                 elif isinstance(value, (list, tuple)):
-                    new_entries = []
-                    for idx, entry in enumerate(value):
-                        if hasattr(entry, "_graph_"):
-                            if isinstance(
-                                entry, (znflow.CombinedConnections, znflow.Connection)
-                            ):
-                                pass
-                            elif (
-                                entry.state.rev is not None
-                                or entry.state.remote is not None
-                            ):
-                                pass
-                            elif entry.uuid not in graph:
-                                entry._graph_ = None
-                                entry = copy.deepcopy(entry)
-                                entry.name = f"{instance.name}+{self.name}+{idx}"
-                        new_entries.append(entry)
+                    new_entries = [
+                        self._update_node_name(entry, instance, graph, key=idx)
+                        for idx, entry in enumerate(value)
+                    ]
                     value = new_entries
                 else:
-                    if hasattr(value, "_graph_"):
-                        if isinstance(
-                            value, (znflow.CombinedConnections, znflow.Connection)
-                        ):
-                            pass
-                        elif (
-                            value.state.rev is not None or value.state.remote is not None
-                        ):
-                            pass
-                        elif value.uuid not in graph:
-                            value._graph_ = None
-                            value = copy.deepcopy(value)
-                            value.name = f"{instance.name}+{self.name}"
+                    value = self._update_node_name(value, instance, graph)
 
         return super().__set__(instance, value)
 
@@ -296,3 +257,43 @@ class Dependency(LazyField):
                     for file in files:
                         cmd.append(("--params", f"{file}:"))
         return cmd
+
+    def _update_node_name(self, entry, instance, graph, key=None):
+        """Update the node name if it is used as 'zn.nodes'.
+
+        Attributes
+        ----------
+            self : Dependency
+                The Dependency field, used to gather the attribute name.
+            entry : list[nodes]|dict[str, nodes]|nodes
+                The entries to update.
+            instance : Node
+                The parent Node instance the 'zn.nodes' is connected to
+            graph : znflow.DiGraph
+                The active graph.
+            key : str|int
+                The key or index of the entry.
+
+        Returns
+        -------
+            entry : list[nodes]|dict[str, nodes]|nodes
+                A deepcopy of the entries with updated names.
+
+        """
+        if isinstance(entry, (znflow.CombinedConnections, znflow.Connection)):
+            # we currently do not support CombinedConnections or Connection
+            return entry
+
+        if entry.state.rev is not None or entry.state.remote is not None:
+            # This indicates a loaded node which we do not want to change.
+            return entry
+
+        if entry.uuid not in graph:
+            entry._graph_ = None
+            entry = copy.deepcopy(entry)
+            entry_name = f"{instance.name}+{self.name}"
+            if key is not None:
+                entry_name += f"+{key}"
+            entry.name = entry_name
+
+        return entry
