@@ -1,6 +1,5 @@
 """Dependency field."""
 
-import copy
 import json
 import logging
 import pathlib
@@ -251,8 +250,8 @@ class Dependency(LazyField):
                             ):
                                 pass
                             elif entry.uuid not in graph:
-                                entry = copy.deepcopy(entry)
                                 entry._graph_ = None
+                                # entry = copy.deepcopy(entry)
                                 entry.name = f"{instance.name}+{self.name}+{key}"
 
                 elif isinstance(value, (list, tuple)):
@@ -268,8 +267,8 @@ class Dependency(LazyField):
                             ):
                                 pass
                             elif entry.uuid not in graph:
-                                entry = copy.deepcopy(entry)
                                 entry._graph_ = None
+                                # entry = copy.deepcopy(entry)
                                 entry.name = f"{instance.name}+{self.name}+{idx}"
                 else:
                     if hasattr(value, "_graph_"):
@@ -282,8 +281,8 @@ class Dependency(LazyField):
                         ):
                             pass
                         elif value.uuid not in graph:
-                            value = copy.deepcopy(value)
                             value._graph_ = None
+                            # value = copy.deepcopy(value)
                             value.name = f"{instance.name}+{self.name}"
 
         return super().__set__(instance, value)
