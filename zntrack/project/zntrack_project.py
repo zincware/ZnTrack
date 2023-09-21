@@ -180,6 +180,8 @@ class Project:
                     if node_uuid not in existing_nodes:
                         node.__dict__["nwd"] = group.nwd / node.name
                         node.name = f"{'_'.join(names)}_{node.name}"
+                        # TODO: this does not update Nodes that are not on the graph,
+                        #  e.g. new zntrack.deps implementation of 'zn.nodes()'`
                         group.nodes.append(node)
                 self._groups.append(group)
 

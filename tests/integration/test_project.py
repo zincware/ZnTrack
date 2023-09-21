@@ -335,6 +335,17 @@ def test_groups_nwd_zn_nodes_a(tmp_path_2):
         with project.group("CustomGroup") as group_2:
             node_3 = ZnNodesNode(node=node)
 
+    assert node_1.name == "ZnNodesNode"
+    assert node_1.node.name == "ZnNodesNode_1+node"
+
+    assert node_2.name == "Group1_ZnNodesNode_1"
+    assert node_2.node.name == "Group1_ZnNodesNode_1+node"
+
+    assert node_3.name == "CustomGroup_ZnNodesNode_1"
+    assert node_3.node.name == "CustomGroup_ZnNodesNode_1+node"
+
+    # assert node.name == "ZnNodesNode_1+node"
+
     project.run()
 
     assert zntrack.from_rev(node_1).node.nwd == pathlib.Path("nodes/ZnNodesNode_node")
