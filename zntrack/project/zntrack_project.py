@@ -47,12 +47,7 @@ class ZnTrackGraph(znflow.DiGraph):
 
     def add_node(self, node_for_adding: Node, **attr):
         """Rename Nodes if required."""
-        if self.active_group is not None:
-            name = NodeName(self.active_group, node_for_adding.name)
-        else:
-            name = NodeName(None, node_for_adding.name)
-
-        node_for_adding.name = name
+        node_for_adding.name = NodeName(self.active_group, node_for_adding.name)
 
         super().add_node(node_for_adding, **attr)
 
