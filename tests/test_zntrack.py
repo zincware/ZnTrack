@@ -4,4 +4,4 @@ from zntrack import __version__
 
 def test_version():
     """Test 'ZnTrack' version."""
-    assert __version__ == "0.6.3"
+    assert __version__ == "0.7.0"
