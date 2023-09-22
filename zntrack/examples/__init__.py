@@ -58,6 +58,18 @@ class AddNumbers(zntrack.Node):
         self.c = self.a + self.b
 
 
+class AddNumbersProperty(zntrack.Node):
+    """Add two numbers."""
+
+    a = zntrack.params()
+    b = zntrack.params()
+
+    @property
+    def c(self):
+        """Add two numbers."""
+        return self.a + self.b
+
+
 class AddNodes(zntrack.Node):
     """Add two nodes."""
 

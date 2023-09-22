@@ -130,7 +130,7 @@ def test_named_parent(proj_path):
     assert c.result == 11
 
 
-def test_many_to_one(proj_path):
+def test_one_to_many(proj_path):
     project = zntrack.Project(automatic_node_names=True)
 
     a = zntrack.examples.ComputeRandomNumber(params_file="a.json")
@@ -162,7 +162,7 @@ def test_many_to_one(proj_path):
     assert c.result == 5
 
 
-def test_many_to_one_params(proj_path):
+def test_one_to_many_params(proj_path):
     project = zntrack.Project(automatic_node_names=True)
 
     a = zntrack.examples.ComputeRandomNumberWithParams(min=1, max=5, seed=42)
@@ -212,3 +212,21 @@ def test_many_to_one_params(proj_path):
 
     assert b.result == 10
     assert c.result == 10
+
+
+# Currently this is neither tested nor supported.
+# A Node not on Graph error is raised. # TODO better error messages
+# def test_one_to_many_params_property(proj_path):
+#     project = zntrack.Project(automatic_node_names=True)
+
+#     a = zntrack.examples.AddNumbersProperty(a=1, b=2)
+#     b = zntrack.examples.AddNumbersProperty(a=3, b=4)
+
+#     with project:
+#         c = zntrack.examples.AddNodeAttributes(a.c, b.c)
+
+#     project.run()
+
+#     c.load()
+
+#     assert c.c == 10
