@@ -4,6 +4,7 @@ import yaml
 import znflow
 
 import zntrack
+from zntrack.utils import config
 
 
 class NodeWithProperty(zntrack.Node):
@@ -42,14 +43,14 @@ def test_SwitchNode(proj_path):
         NodeA(name="Node")
     proj.run(repro=False)
 
-    params = yaml.safe_load(pathlib.Path("params.yaml").read_text())
+    params = yaml.safe_load(config.files.params.read_text())
     assert params["Node"] == {"params1": 1}
 
     with zntrack.Project() as proj:
         NodeB(name="Node")
     proj.run(repro=False)
 
-    params = yaml.safe_load(pathlib.Path("params.yaml").read_text())
+    params = yaml.safe_load(config.files.params.read_text())
     assert params["Node"] == {"params2": 2}
 
 
@@ -62,7 +63,7 @@ def test_CustomModule(proj_path):
         CustomModule()
     proj.run(repro=False)
 
-    dvc = yaml.safe_load(pathlib.Path("dvc.yaml").read_text())
+    dvc = yaml.safe_load(config.files.dvc.read_text())
     assert (
         dvc["stages"]["CustomModule"]["cmd"]
         == "zntrack run zntrack.nodes.CustomModule --name CustomModule"

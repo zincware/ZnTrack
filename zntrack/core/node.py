@@ -22,14 +22,7 @@ import znjson
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import (
-    NodeStatusResults,
-    deprecated,
-    file_io,
-    module_handler,
-    run_dvc_cmd,
-)
-from zntrack.utils.config import config
+from zntrack.utils import NodeName, NodeStatusResults, config, file_io, module_handler
 
 log = logging.getLogger(__name__)
 
@@ -58,11 +51,6 @@ class NodeStatus:
     remote: str = None
     rev: str = None
 
-    def get_file_system(self) -> dvc.api.DVCFileSystem:
-        """Get the file system of the Node."""
-        log.warning("Deprecated. Use 'state.fs' instead.")
-        return self.fs
-
     @functools.cached_property
     def fs(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
@@ -90,7 +78,7 @@ class NodeStatus:
         original_listdir = os.listdir
 
         def _open(file, *args, **kwargs):
-            if file == "params.yaml":
+            if file == config.files.params:
                 return original_open(file, *args, **kwargs)
 
             if not pathlib.Path(file).is_absolute():
@@ -130,13 +118,23 @@ class _NameDescriptor(zninit.Descriptor):
         if instance is None:
             return self
         if getattr(instance, "_name_") is None:
-            instance._name_ = instance.__class__.__name__
-        return getattr(instance, "_name_")
+            return instance.__class__.__name__
+        return str(getattr(instance, "_name_"))
 
     def __set__(self, instance, value):
         if value is None:
             return
-        instance._name_ = value
+        if isinstance(value, NodeName):
+            if not instance._external_:
+                value.update_suffix(instance._graph_.project, instance)
+            instance._name_ = value
+        elif isinstance(getattr(instance, "_name_"), NodeName):
+            instance._name_.name = value
+            instance._name_.suffix = 0
+            instance._name_.update_suffix(instance._graph_.project, instance)
+        else:
+            # This should only happen if an instance is loaded.
+            instance._name_ = value
 
 
 class Node(zninit.ZnInit, znflow.Node):
@@ -158,6 +156,7 @@ class Node(zninit.ZnInit, znflow.Node):
     _name_ = None
 
     _protected_ = znflow.Node._protected_ + ["name"]
+    _priority_kwargs_ = ["name"]
 
     @property
     def _use_repr_(self) -> bool:
@@ -189,10 +188,13 @@ class Node(zninit.ZnInit, znflow.Node):
     @property
     def _init_descriptors_(self):
         from zntrack import fields
+        from zntrack.fields.dependency import Dependency
+        from zntrack.fields.zn import options as zn_options
 
         return [
-            fields.zn.Params,
-            fields.zn.Dependency,
+            zn_options.Params,
+            zn_options.Dependency,
+            Dependency,
             fields.meta.Text,
             fields.meta.Environment,
             fields.dvc.DVCOption,
@@ -220,7 +222,7 @@ class Node(zninit.ZnInit, znflow.Node):
                 nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
             else:
                 try:
-                    with self.state.fs.open("zntrack.json") as f:
+                    with self.state.fs.open(config.files.zntrack) as f:
                         zntrack_config = json.load(f)
                     nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
                     nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
@@ -252,8 +254,8 @@ class Node(zninit.ZnInit, znflow.Node):
             self.convert_notebook(config.nb_name)
 
         if parameter:
-            file_io.clear_config_file(file="params.yaml", node_name=self.name)
-            file_io.clear_config_file(file="zntrack.json", node_name=self.name)
+            file_io.clear_config_file(file=config.files.params, node_name=self.name)
+            file_io.clear_config_file(file=config.files.zntrack, node_name=self.name)
 
         for attr in zninit.get_descriptors(Field, self=self):
             if attr.group == FieldGroup.PARAMETER and parameter:
@@ -267,7 +269,7 @@ class Node(zninit.ZnInit, znflow.Node):
                 )
         # save the nwd to zntrack.json
         file_io.update_config_file(
-            file=pathlib.Path("zntrack.json"),
+            file=config.files.zntrack,
             node_name=self.name,
             value_name="nwd",
             value=self.nwd,
@@ -342,20 +344,6 @@ class Node(zninit.ZnInit, znflow.Node):
 
         return node
 
-    @deprecated(
-        "Building a graph is now done using 'with zntrack.Project() as project: ...'",
-        version="0.6.0",
-    )
-    def write_graph(self, run: bool = False, **kwargs):
-        """Write the graph to dvc.yaml."""
-        cmd = get_dvc_cmd(self, git_only_repo=True, **kwargs)
-        for x in cmd:
-            run_dvc_cmd(x)
-        self.save()
-
-        if run:
-            run_dvc_cmd(["repro", self.name])
-
 
 def get_dvc_cmd(
     node: Node,
@@ -407,7 +395,7 @@ def get_dvc_cmd(
 
 @dataclasses.dataclass
 class NodeIdentifier:
-    """All information that uniquly identifies a node."""
+    """All information that uniquely identifies a node."""
 
     module: str
     cls: str
@@ -418,7 +406,7 @@ class NodeIdentifier:
     @classmethod
     def from_node(cls, node: Node):
         """Create a _NodeIdentifier from a Node object."""
-        # TODO module and cls are not needed (from_rev can handle name, rev, remote only)
+        # TODO module and cls are only required for `zn.nodes`
         return cls(
             module=module_handler(node),
             cls=node.__class__.__name__,

@@ -6,12 +6,13 @@ import pytest
 
 import zntrack.examples
 from zntrack.project import Experiment
+from zntrack.utils import config
 
 
 class ZnNodesNode(zntrack.Node):
     """Used zn.nodes"""
 
-    node = zntrack.zn.nodes()
+    node = zntrack.deps()
     result = zntrack.zn.outs()
 
     def run(self) -> None:
@@ -204,6 +205,10 @@ def test_group_nodes(tmp_path_2):
     assert node_5 in group_3
     assert node_6 in group_3
 
+    assert group_1.name == "Group1"
+    assert group_2.name == "Group2"
+    assert group_3.name == "NamedGrp"
+
     assert node_1.name == "Group1_ParamsToOuts"
     assert node_2.name == "Group1_ParamsToOuts_1"
     assert node_3.name == "Group2_ParamsToOuts"
@@ -310,12 +315,12 @@ def test_groups_nwd(tmp_path_2):
         "nodes", "CustomGroup", node_3.name.replace(f"CustomGroup_", "")
     )
 
-    with open("zntrack.json") as f:
+    with open(config.files.zntrack) as f:
         data = json.load(f)
         data[node_1.name]["nwd"]["value"] = "test"
         data[node_2.name].pop("nwd")
 
-    with open("zntrack.json", "w") as f:
+    with open(config.files.zntrack, "w") as f:
         json.dump(data, f)
 
     assert zntrack.from_rev(node_1).nwd == pathlib.Path("test")
@@ -325,7 +330,7 @@ def test_groups_nwd(tmp_path_2):
     )
 
 
-def test_groups_nwd_zn_nodes(tmp_path_2):
+def test_groups_nwd_zn_nodes_a(tmp_path_2):
     node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         node_1 = ZnNodesNode(node=node)
@@ -334,14 +339,21 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
         with project.group("CustomGroup") as group_2:
             node_3 = ZnNodesNode(node=node)
 
+    assert node_1.name == "ZnNodesNode"
+    assert node_1.node.name == "ZnNodesNode+node"
+
+    assert node_2.name == "Group1_ZnNodesNode"
+    assert node_2.node.name == "Group1_ZnNodesNode+node"
+
+    assert node_3.name == "CustomGroup_ZnNodesNode"
+    assert node_3.node.name == "CustomGroup_ZnNodesNode+node"
+
     project.run()
 
-    assert zntrack.from_rev(node_1).node.nwd == pathlib.Path("nodes/ZnNodesNode_node")
-    assert zntrack.from_rev(node_2).node.nwd == pathlib.Path(
-        "nodes", "Group1", "ZnNodesNode_1_node"
-    )
-    assert zntrack.from_rev(node_3).node.nwd == pathlib.Path(
-        "nodes", "CustomGroup", "ZnNodesNode_1_node"
+    assert zntrack.from_rev(node_1).nwd == pathlib.Path("nodes/ZnNodesNode")
+    assert zntrack.from_rev(node_2).nwd == pathlib.Path("nodes", "Group1", "ZnNodesNode")
+    assert zntrack.from_rev(node_3).nwd == pathlib.Path(
+        "nodes", "CustomGroup", "ZnNodesNode"
     )
 
     project.load()
@@ -350,7 +362,7 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert node_3.result == "Lorem Ipsum"
 
 
-def test_groups_nwd_zn_nodes(tmp_path_2):
+def test_groups_nwd_zn_nodes_b(tmp_path_2):
     node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group() as group_1:
@@ -360,11 +372,9 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
 
     project.run()
 
-    assert zntrack.from_rev(node_2).node.nwd == pathlib.Path(
-        "nodes", "Group1", "ZnNodesNode_node"
-    )
-    assert zntrack.from_rev(node_3).node.nwd == pathlib.Path(
-        "nodes", "CustomGroup", "ZnNodesNode_node"
+    assert zntrack.from_rev(node_2).nwd == pathlib.Path("nodes", "Group1", "ZnNodesNode")
+    assert zntrack.from_rev(node_3).nwd == pathlib.Path(
+        "nodes", "CustomGroup", "ZnNodesNode"
     )
 
     project.load()
@@ -372,32 +382,22 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert node_3.result == "Lorem Ipsum"
 
 
-def test_test_reopening_groups(proj_path):
+def test_reopening_groups(proj_path):
     with zntrack.Project(automatic_node_names=True) as project:
-        with project.group("GroupA"):
+        with project.group("AL0") as al_0:
             node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
-        with pytest.raises(ValueError):
-            with project.group("GroupA"):
-                node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+            node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur")
+        with project.group("AL0") as al_0:
+            node_4 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit")
 
+    project.run()
 
-# def test_reopening_groups(proj_path):
-#  This is currently not allowed
-#     with zntrack.Project(automatic_node_names=True) as project:
-#         with project.group("AL0") as al_0:
-#             node_1 = WriteIO(inputs="Lorem Ipsum")
-#             node_2 = WriteIO(inputs="Dolor Sit")
-#             node_3 = WriteIO(inputs="Amet Consectetur")
-#         with project.group("AL0") as al_0:
-#             node_4 = WriteIO(inputs="Adipiscing Elit")
+    assert node_1.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts")
+    assert node_2.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts_1")
+    assert node_3.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts_2")
 
-#     project.run()
-
-#     assert node_1.nwd == pathlib.Path("nodes", "AL0", "WriteIO")
-#     assert node_2.nwd == pathlib.Path("nodes", "AL0", "WriteIO_1")
-#     assert node_3.nwd == pathlib.Path("nodes", "AL0", "WriteIO_2")
-
-#     assert node_4.nwd == pathlib.Path("nodes", "AL0", "WriteIO_3")
+    assert node_4.nwd == pathlib.Path("nodes", "AL0", "ParamsToOuts_3")
 
 
 def test_nested_groups(proj_path):

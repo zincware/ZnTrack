@@ -14,8 +14,8 @@ class CreateList(zntrack.Node):
 
 
 class AddList(zntrack.Node):
-    a = zntrack.zn.deps()
-    b = zntrack.zn.deps()
+    a = zntrack.deps()
+    b = zntrack.deps()
 
     output = zntrack.zn.outs()
 

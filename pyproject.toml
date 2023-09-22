@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "ZnTrack"
-version = "0.6.3"
+version = "0.7.0"
 description = "Create, Run and Benchmark DVC Pipelines in Python"
 authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
@@ -17,9 +17,10 @@ pandas = "^2"
 typer = "^0.7.0"
 
 dot4dict = "^0.1.1"
-zninit = "^0.1.9"
+zninit = "^0.1.11"
 znjson = "^0.2.2"
-znflow = "^0.1.13"
+znflow = "^0.1.14"
+typing-extensions = "^4.8.0"
 
 
 [tool.poetry.urls]
@@ -38,10 +39,10 @@ matplotlib = "^3.5.2"
 ase = "^3.22.1"
 pre-commit = ">=2.20,<4.0"
 coverage = "^6.4"
-nbmake = "^1.3.3"
 pytest-xdist = "^2.5.0"
 optuna = "^3.1.1"
 scikit-learn = "^1.2.2"
+nbmake = "1.4.3"
 
 [tool.poetry.group.notebook.dependencies]
 jupyterlab = "^3.4.3"

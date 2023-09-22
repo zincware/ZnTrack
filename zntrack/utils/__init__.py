@@ -1,4 +1,5 @@
 """Standard python init file for the utils directory."""
+import dataclasses
 import enum
 import logging
 import os
@@ -6,6 +7,7 @@ import pathlib
 import shutil
 import sys
 import tempfile
+import typing as t
 
 import dvc.cli
 
@@ -17,6 +19,9 @@ __all__ = [
     "node_wd",
     "config",
 ]
+
+if t.TYPE_CHECKING:
+    from zntrack import Node, Project
 
 
 class LazyOption:
@@ -204,3 +209,43 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
     os.chdir(temp_dir.name)
 
     return temp_dir
+
+
+@dataclasses.dataclass
+class NodeName:
+    """The name of a node."""
+
+    groups: list[str]
+    name: str
+    suffix: int = 0
+
+    def __str__(self) -> str:
+        """Get the node name."""
+        name = []
+        if self.groups is not None:
+            name.extend(self.groups)
+        name.append(self.name)
+        if self.suffix > 0:
+            name.append(str(self.suffix))
+        return "_".join(name)
+
+    def get_name_without_groups(self) -> str:
+        """Get the node name without the groups."""
+        name = self.name
+        if self.suffix > 0:
+            name += f"_{self.suffix}"
+        return name
+
+    def update_suffix(self, project: "Project", node: "Node") -> None:
+        """Update the suffix."""
+        node_names = [x["value"].name for x in project.graph.nodes.values()]
+
+        node_names = []
+        for node_uuid in project.graph.nodes:
+            if node_uuid == node.uuid:
+                continue
+            node_names.append(project.graph.nodes[node_uuid]["value"].name)
+
+        if project.automatic_node_names:
+            while str(self) in node_names:
+                self.suffix += 1

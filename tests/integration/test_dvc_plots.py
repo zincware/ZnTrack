@@ -5,7 +5,7 @@ import pytest
 import yaml
 
 import zntrack
-from zntrack.utils import run_dvc_cmd
+from zntrack.utils import config, run_dvc_cmd
 
 
 class NodeWithPlotsDVC(zntrack.Node):
@@ -106,7 +106,7 @@ def test_NodeWithPlots(proj_path, eager, cls):
 
     if not eager:
         node.load()
-        dvc_dict = yaml.safe_load((proj_path / "dvc.yaml").read_text())
+        dvc_dict = yaml.safe_load((proj_path / config.files.dvc).read_text())
 
         plots = {
             "x": "x",
@@ -140,7 +140,7 @@ def test_NodeWithPlotsGlobal(proj_path, eager, cls):
 
     if not eager:
         node.load()
-        dvc_dict = yaml.safe_load((proj_path / "dvc.yaml").read_text())
+        dvc_dict = yaml.safe_load((proj_path / config.files.dvc).read_text())
 
         plots = {
             "x": "x",

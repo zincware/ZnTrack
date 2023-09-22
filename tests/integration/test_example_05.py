@@ -21,7 +21,8 @@ def test_stage_addition(proj_path):
     """Check that the dvc repro works"""
     project = zntrack.Project()
 
-    ComputeA(inp=np.arange(5)).write_graph()
+    with project:
+        ComputeA(inp=np.arange(5))
 
     project.run()
     finished_stage = ComputeA.from_rev()
