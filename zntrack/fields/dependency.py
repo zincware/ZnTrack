@@ -284,16 +284,21 @@ class Dependency(LazyField):
             # we currently do not support CombinedConnections or Connection
             return entry
 
-        if entry.state.rev is not None or entry.state.remote is not None:
-            # This indicates a loaded node which we do not want to change.
-            return entry
+        if hasattr(entry, "_graph_"):
+            if (
+                entry.state.rev is not None
+                or entry.state.remote is not None
+                or entry._external_
+            ):
+                # This indicates a loaded node which we do not want to change.
+                return entry
 
-        if entry.uuid not in graph:
-            entry._graph_ = None
-            entry = copy.deepcopy(entry)
-            entry_name = f"{instance.name}+{self.name}"
-            if key is not None:
-                entry_name += f"+{key}"
-            entry.name = entry_name
+            if entry.uuid not in graph:
+                entry._graph_ = None
+                entry = copy.deepcopy(entry)
+                entry_name = f"{instance.name}+{self.name}"
+                if key is not None:
+                    entry_name += f"+{key}"
+                entry.name = entry_name
 
         return entry
