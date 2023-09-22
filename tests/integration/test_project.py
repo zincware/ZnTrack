@@ -12,7 +12,7 @@ from zntrack.utils import config
 class ZnNodesNode(zntrack.Node):
     """Used zn.nodes"""
 
-    node = zntrack.zn.nodes()
+    node = zntrack.deps()
     result = zntrack.zn.outs()
 
     def run(self) -> None:
@@ -330,7 +330,7 @@ def test_groups_nwd(tmp_path_2):
     )
 
 
-def test_groups_nwd_zn_nodes(tmp_path_2):
+def test_groups_nwd_zn_nodes_a(tmp_path_2):
     node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         node_1 = ZnNodesNode(node=node)
@@ -339,14 +339,21 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
         with project.group("CustomGroup") as group_2:
             node_3 = ZnNodesNode(node=node)
 
+    assert node_1.name == "ZnNodesNode"
+    assert node_1.node.name == "ZnNodesNode+node"
+
+    assert node_2.name == "Group1_ZnNodesNode"
+    assert node_2.node.name == "Group1_ZnNodesNode+node"
+
+    assert node_3.name == "CustomGroup_ZnNodesNode"
+    assert node_3.node.name == "CustomGroup_ZnNodesNode+node"
+
     project.run()
 
-    assert zntrack.from_rev(node_1).node.nwd == pathlib.Path("nodes/ZnNodesNode_node")
-    assert zntrack.from_rev(node_2).node.nwd == pathlib.Path(
-        "nodes", "Group1", "ZnNodesNode_1_node"
-    )
-    assert zntrack.from_rev(node_3).node.nwd == pathlib.Path(
-        "nodes", "CustomGroup", "ZnNodesNode_1_node"
+    assert zntrack.from_rev(node_1).nwd == pathlib.Path("nodes/ZnNodesNode")
+    assert zntrack.from_rev(node_2).nwd == pathlib.Path("nodes", "Group1", "ZnNodesNode")
+    assert zntrack.from_rev(node_3).nwd == pathlib.Path(
+        "nodes", "CustomGroup", "ZnNodesNode"
     )
 
     project.load()
@@ -355,7 +362,7 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
     assert node_3.result == "Lorem Ipsum"
 
 
-def test_groups_nwd_zn_nodes(tmp_path_2):
+def test_groups_nwd_zn_nodes_b(tmp_path_2):
     node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group() as group_1:
@@ -365,11 +372,9 @@ def test_groups_nwd_zn_nodes(tmp_path_2):
 
     project.run()
 
-    assert zntrack.from_rev(node_2).node.nwd == pathlib.Path(
-        "nodes", "Group1", "ZnNodesNode_node"
-    )
-    assert zntrack.from_rev(node_3).node.nwd == pathlib.Path(
-        "nodes", "CustomGroup", "ZnNodesNode_node"
+    assert zntrack.from_rev(node_2).nwd == pathlib.Path("nodes", "Group1", "ZnNodesNode")
+    assert zntrack.from_rev(node_3).nwd == pathlib.Path(
+        "nodes", "CustomGroup", "ZnNodesNode"
     )
 
     project.load()

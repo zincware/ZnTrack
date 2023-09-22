@@ -142,6 +142,7 @@ class Node(zninit.ZnInit, znflow.Node):
     _name_ = None
 
     _protected_ = znflow.Node._protected_ + ["name"]
+    _priority_kwargs_ = ["name"]
 
     @property
     def _use_repr_(self) -> bool:
@@ -173,10 +174,13 @@ class Node(zninit.ZnInit, znflow.Node):
     @property
     def _init_descriptors_(self):
         from zntrack import fields
+        from zntrack.fields.dependency import Dependency
+        from zntrack.fields.zn import options as zn_options
 
         return [
-            fields.zn.Params,
-            fields.zn.Dependency,
+            zn_options.Params,
+            zn_options.Dependency,
+            Dependency,
             fields.meta.Text,
             fields.meta.Environment,
             fields.dvc.DVCOption,
@@ -377,7 +381,7 @@ def get_dvc_cmd(
 
 @dataclasses.dataclass
 class NodeIdentifier:
-    """All information that uniquly identifies a node."""
+    """All information that uniquely identifies a node."""
 
     module: str
     cls: str
@@ -388,7 +392,7 @@ class NodeIdentifier:
     @classmethod
     def from_node(cls, node: Node):
         """Create a _NodeIdentifier from a Node object."""
-        # TODO module and cls are not needed (from_rev can handle name, rev, remote only)
+        # TODO module and cls are only required for `zn.nodes`
         return cls(
             module=module_handler(node),
             cls=node.__class__.__name__,

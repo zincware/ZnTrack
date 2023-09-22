@@ -16,7 +16,7 @@ class WriteToNWD(zntrack.Node):
 
 class FileToOuts(zntrack.Node):
     # although, this is a file path, it has to be zn.deps
-    file = zntrack.zn.deps()
+    file = zntrack.deps()
     text = zntrack.zn.outs()
 
     def run(self):

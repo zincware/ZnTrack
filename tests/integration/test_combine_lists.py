@@ -12,7 +12,7 @@ class GenerateList(zntrack.Node):
 
 
 class AddOneToList(zntrack.Node):
-    data = zntrack.zn.deps()
+    data = zntrack.deps()
     outs = zntrack.zn.outs()
 
     def run(self) -> None:
@@ -20,7 +20,7 @@ class AddOneToList(zntrack.Node):
 
 
 class AddOneToDict(zntrack.Node):
-    data = zntrack.zn.deps()
+    data = zntrack.deps()
     outs = zntrack.zn.outs()
 
     def run(self) -> None:

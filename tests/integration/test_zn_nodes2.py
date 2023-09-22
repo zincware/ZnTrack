@@ -2,6 +2,7 @@ import shutil
 
 import pytest
 
+import zntrack
 from zntrack import Node, Project, exceptions, zn
 
 
@@ -14,8 +15,8 @@ class NodeViaParams(Node):
 
 
 class ExampleNode(Node):
-    params1: NodeViaParams = zn.nodes()
-    params2: NodeViaParams = zn.nodes()
+    params1: NodeViaParams = zntrack.deps()
+    params2: NodeViaParams = zntrack.deps()
 
     outs = zn.outs()
 
@@ -24,7 +25,7 @@ class ExampleNode(Node):
 
 
 class ExampleNodeLst(Node):
-    params: list = zn.nodes()
+    params: list = zntrack.deps()
     outs = zn.outs()
 
     def run(self):
@@ -47,8 +48,8 @@ def test_ExampleNode(proj_path, eager):
     assert node.params2.param1 == 10
     assert node.outs == 11
 
-    assert node.params1.name == "ExampleNode_params1"
-    assert node.params2.name == "ExampleNode_params2"
+    assert node.params1.name == "ExampleNode+params1"
+    assert node.params2.name == "ExampleNode+params2"
 
     if not eager:
         # Check new instance also works
@@ -57,8 +58,8 @@ def test_ExampleNode(proj_path, eager):
         assert node.params2.param1 == 10
         assert node.outs == 11
 
-        assert node.params1.name == "ExampleNode_params1"
-        assert node.params2.name == "ExampleNode_params2"
+        assert node.params1.name == "ExampleNode+params1"
+        assert node.params2.name == "ExampleNode+params2"
 
 
 @pytest.mark.parametrize("git_only_repo", [True, False])
@@ -78,8 +79,8 @@ def test_ExampleNodeLst(proj_path, eager, git_only_repo):
     assert node.params[1].param1 == 10
     assert node.outs == 11
 
-    assert node.params[0].name == "ExampleNodeLst_params_0"
-    assert node.params[1].name == "ExampleNodeLst_params_1"
+    assert node.params[0].name == "ExampleNodeLst+params+0"
+    assert node.params[1].name == "ExampleNodeLst+params+1"
 
     if not eager:
         # Check new instance also works
@@ -87,8 +88,8 @@ def test_ExampleNodeLst(proj_path, eager, git_only_repo):
         assert nodex.params[0].param1 == 1
         assert nodex.params[1].param1 == 10
         assert nodex.outs == 11
-        assert nodex.params[0].name == "ExampleNodeLst_params_0"
-        assert nodex.params[1].name == "ExampleNodeLst_params_1"
+        assert nodex.params[0].name == "ExampleNodeLst+params+0"
+        assert nodex.params[1].name == "ExampleNodeLst+params+1"
 
     parameter_1.param1 = 2  # Change parameter
     assert isinstance(parameter_1, NodeViaParams)
@@ -111,26 +112,17 @@ def test_ExampleNodeLst(proj_path, eager, git_only_repo):
         assert node.outs == 12
 
 
-def test_znodes_on_graph(proj_path):
-    project = Project(force=True)
-    with project:
-        with pytest.raises(exceptions.ZnNodesOnGraphError):
-            _ = ExampleNodeLst(params=NodeViaParams(param1=1))
-
-    with project:
-        with pytest.raises(exceptions.ZnNodesOnGraphError):
-            _ = ExampleNodeLst(params=[NodeViaParams(param1=1)])
-
-
 class RandomNumberGen(Node):
     def get_rnd(self):
         import random
+
+        random.seed(42)
 
         return random.random()
 
 
 class ExampleNodeWithRandomNumberGen(Node):
-    rnd: RandomNumberGen = zn.nodes()
+    rnd: RandomNumberGen = zntrack.deps()
 
     outs = zn.outs()
 

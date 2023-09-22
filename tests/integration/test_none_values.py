@@ -6,7 +6,7 @@ import zntrack
 
 
 class LoadFromDeps(zntrack.Node):
-    data = zntrack.zn.deps()
+    data = zntrack.deps()
     file: pathlib.Path = zntrack.dvc.deps()
 
     result = zntrack.zn.outs()

@@ -3,6 +3,7 @@
 import contextlib
 import importlib
 import importlib.util
+import json
 import pathlib
 import sys
 import tempfile
@@ -14,6 +15,7 @@ import dvc.repo
 import dvc.stage
 
 from zntrack.core.node import Node
+from zntrack.utils import config
 
 T = typing.TypeVar("T", bound=Node)
 
@@ -93,14 +95,40 @@ def from_rev(name, remote=".", rev=None, **kwargs) -> T:
     """
     if isinstance(name, Node):
         name = name.name
-    stage = _get_stage(name, remote, rev)
+    if "+" in name:
+        fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
 
-    cmd = stage.cmd
-    run_str = cmd.split()[2]
-    name = cmd.split()[4]
+        components = name.split("+")
 
-    package_and_module, cls_name = run_str.rsplit(".", 1)
-    module = None
+        if len(components) == 3:
+            parent, attribute, key = components
+        else:
+            parent, attribute = components
+            key = None
+
+        with fs.open(config.files.zntrack) as fs:
+            zntrack_config = json.load(fs)
+            data = zntrack_config[parent][attribute]
+            if key is not None:
+                try:
+                    data = data[int(key)]
+                except (ValueError, KeyError):
+                    data = data[key]
+            assert (
+                data["_type"] == "zntrack.Node"
+            ), f"Expected zntrack.Node, got {data['_type']}"
+            package_and_module = data["value"]["module"]
+            cls_name = data["value"]["cls"]
+            module = None
+    else:
+        stage = _get_stage(name, remote, rev)
+
+        cmd = stage.cmd
+        run_str = cmd.split()[2]
+        name = cmd.split()[4]
+
+        package_and_module, cls_name = run_str.rsplit(".", 1)
+        module = None
     try:
         module = importlib.import_module(package_and_module)
     except ModuleNotFoundError:

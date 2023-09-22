@@ -12,7 +12,7 @@ class NodeWithOuts(zntrack.Node):
 
 
 class DependentNode(zntrack.Node):
-    deps = zntrack.zn.deps()
+    deps = zntrack.deps()
 
     def run(self):
         pass
