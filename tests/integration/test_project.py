@@ -287,6 +287,12 @@ def test_build_groups(tmp_path_2):
     with pytest.raises(ValueError):
         project.run(nodes=[42])
 
+    # assert that the only directories in "nodes/" are "Group1" and "Group2"
+    assert set(path.name for path in (tmp_path_2 / "nodes").iterdir()) == {
+        "Group1",
+        "Group2",
+    }
+
 
 def test_groups_nwd(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as project:

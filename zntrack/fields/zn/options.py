@@ -22,7 +22,7 @@ from zntrack.fields.field import (
     LazyField,
     PlotsMixin,
 )
-from zntrack.utils import config, module_handler, update_key_val
+from zntrack.utils import config, get_nwd, module_handler, update_key_val
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -197,7 +197,7 @@ class Output(LazyField):
         list
             A list containing the path of the file.
         """
-        return [instance.nwd / f"{self.name}.json"]
+        return [get_nwd(instance) / f"{self.name}.json"]
 
     def save(self, instance: "Node"):
         """Save the field to disk.
@@ -249,7 +249,7 @@ class Plots(PlotsMixin, LazyField):
 
     def get_files(self, instance) -> list:
         """Get the path of the file in the node directory."""
-        return [instance.nwd / f"{self.name}.csv"]
+        return [get_nwd(instance) / f"{self.name}.csv"]
 
     def save(self, instance: "Node"):
         """Save the field to disk."""
@@ -364,7 +364,7 @@ class Dependency(LazyField):
                 cmd = [
                     "import",
                     node.state.remote if node.state.remote is not None else ".",
-                    (node.nwd / "node-meta.json").as_posix(),
+                    (get_nwd(node) / "node-meta.json").as_posix(),
                     "-o",
                     deps_file.as_posix(),
                 ]
@@ -383,7 +383,7 @@ class Dependency(LazyField):
             #     # nodes with the same name...)
             #     # and make the uuid a dependency of the node.
             #     continue
-            files.append(node.nwd / "node-meta.json")
+            files.append(get_nwd(node) / "node-meta.json")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
                     # We do not want to depend on parameter files or
@@ -504,10 +504,12 @@ class NodeField(Dependency):
         # get the name of the parent directory as string
         # e.g. we have nodes/AL_0/AL_0_ASEMD_checker_list_0
         # but want nodes/AL_0/ASEMD_checker_list_0
-        if name.startswith(instance.nwd.parent.name):
-            return instance.nwd.parent / name[len(instance.nwd.parent.name) + 1 :]
+        if name.startswith(get_nwd(instance).parent.name):
+            return (
+                get_nwd(instance).parent / name[len(get_nwd(instance).parent.name) + 1 :]
+            )
         else:
-            return instance.nwd.parent / name
+            return get_nwd(instance).parent / name
 
     def get_optional_dvc_cmd(
         self, instance: "Node", git_only_repo: bool

@@ -18,7 +18,7 @@ from zntrack.fields.zn.options import (
     _default,
     _get_all_connections_and_instances,
 )
-from zntrack.utils import config, update_key_val
+from zntrack.utils import config, get_nwd, update_key_val
 
 log = logging.getLogger(__name__)
 
@@ -161,7 +161,7 @@ class Dependency(LazyField):
                 cmd = [
                     "import",
                     node.state.remote if node.state.remote is not None else ".",
-                    (node.nwd / "node-meta.json").as_posix(),
+                    (get_nwd(node) / "node-meta.json").as_posix(),
                     "-o",
                     deps_file.as_posix(),
                 ]
@@ -180,7 +180,7 @@ class Dependency(LazyField):
             #     # nodes with the same name...)
             #     # and make the uuid a dependency of the node.
             #     continue
-            files.append(node.nwd / "node-meta.json")
+            files.append(get_nwd(node) / "node-meta.json")
             for field in zninit.get_descriptors(Field, self=node):
                 if field.dvc_option in ["params", "deps"]:
                     # We do not want to depend on parameter files or

@@ -22,7 +22,14 @@ import znjson
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
-from zntrack.utils import NodeName, NodeStatusResults, config, file_io, module_handler
+from zntrack.utils import (
+    NodeName,
+    NodeStatusResults,
+    config,
+    file_io,
+    get_nwd,
+    module_handler,
+)
 
 log = logging.getLogger(__name__)
 
@@ -197,26 +204,7 @@ class Node(zninit.ZnInit, znflow.Node):
     @property
     def nwd(self) -> pathlib.Path:
         """Get the node working directory."""
-        try:
-            nwd = self.__dict__["nwd"]
-        except KeyError:
-            if (
-                self.state.remote is None
-                and self.state.rev is None
-                and not self.state.loaded
-            ):
-                nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
-            else:
-                try:
-                    with self.state.fs.open(config.files.zntrack) as f:
-                        zntrack_config = json.load(f)
-                    nwd = zntrack_config[znflow.get_attribute(self, "name")]["nwd"]
-                    nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
-                except (FileNotFoundError, KeyError):
-                    nwd = pathlib.Path("nodes", znflow.get_attribute(self, "name"))
-        if not nwd.exists():
-            nwd.mkdir(parents=True)
-        return nwd
+        return get_nwd(self, mkdir=True)
 
     def save(
         self, parameter: bool = True, results: bool = True, meta_only: bool = False
@@ -258,7 +246,7 @@ class Node(zninit.ZnInit, znflow.Node):
             file=config.files.zntrack,
             node_name=self.name,
             value_name="nwd",
-            value=self.nwd,
+            value=get_nwd(self),
         )
 
     def run(self) -> None:
@@ -292,7 +280,7 @@ class Node(zninit.ZnInit, znflow.Node):
             with contextlib.suppress(FileNotFoundError):
                 # If the uuid is available, we can assume that all data for
                 #  this Node is available.
-                with self.state.fs.open(self.nwd / "node-meta.json") as f:
+                with self.state.fs.open(get_nwd(self) / "node-meta.json") as f:
                     node_meta = json.load(f)
                     self._uuid = uuid.UUID(node_meta["uuid"])
                     self.state.results = NodeStatusResults.AVAILABLE
@@ -369,9 +357,9 @@ def get_dvc_cmd(
         cmd += list(field_cmd)
 
     if git_only_repo:
-        cmd += ["--metrics-no-cache", f"{(node.nwd /'node-meta.json').as_posix()}"]
+        cmd += ["--metrics-no-cache", f"{(get_nwd(node) /'node-meta.json').as_posix()}"]
     else:
-        cmd += ["--outs", f"{(node.nwd /'node-meta.json').as_posix()}"]
+        cmd += ["--outs", f"{(get_nwd(node) /'node-meta.json').as_posix()}"]
 
     module = module_handler(node.__class__)
     cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]
