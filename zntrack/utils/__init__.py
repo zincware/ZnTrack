@@ -1,6 +1,7 @@
 """Standard python init file for the utils directory."""
 import dataclasses
 import enum
+import json
 import logging
 import os
 import pathlib
@@ -10,6 +11,8 @@ import tempfile
 import typing as t
 
 import dvc.cli
+import znflow
+import znjson
 
 from zntrack.utils import cli
 from zntrack.utils.config import config
@@ -249,3 +252,36 @@ class NodeName:
         if project.automatic_node_names:
             while str(self) in node_names:
                 self.suffix += 1
+
+
+def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
+    """Get the node working directory.
+
+    This is used instead of `node.nwd` because it allows
+    for parameters to define if the nwd should be created.
+
+    Attributes
+    ----------
+    node: Node
+        The node instance for which the nwd should be returned.
+    mkdir: bool, optional
+        If True, the nwd is created if it does not exist.
+
+    """
+    try:
+        nwd = node.__dict__["nwd"]
+    except KeyError:
+        if node.state.remote is None and node.state.rev is None and not node.state.loaded:
+            nwd = pathlib.Path("nodes", znflow.get_attribute(node, "name"))
+        else:
+            try:
+                with node.state.fs.open(config.files.zntrack) as f:
+                    zntrack_config = json.load(f)
+                nwd = zntrack_config[znflow.get_attribute(node, "name")]["nwd"]
+                nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
+            except (FileNotFoundError, KeyError):
+                nwd = pathlib.Path("nodes", znflow.get_attribute(node, "name"))
+
+    if mkdir:
+        nwd.mkdir(parents=True, exist_ok=True)
+    return nwd

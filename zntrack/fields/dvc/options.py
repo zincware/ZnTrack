@@ -7,7 +7,7 @@ import typing
 import znjson
 
 from zntrack.fields.field import Field, FieldGroup, PlotsMixin
-from zntrack.utils import node_wd
+from zntrack.utils import get_nwd, node_wd
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -134,7 +134,7 @@ class DVCOption(Field):
         if instance is None:
             return self
         value = super().__get__(instance, owner)
-        return node_wd.ReplaceNWD()(value, nwd=instance.nwd)
+        return node_wd.ReplaceNWD()(value, nwd=get_nwd(instance))
 
 
 class PlotsOption(PlotsMixin, DVCOption):

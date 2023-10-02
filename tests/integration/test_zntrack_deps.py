@@ -125,6 +125,11 @@ def test_named_parent(proj_path):
 
     project.run()
 
+    # assert that the only directory in ./nodes is 'c'
+    assert set(path.name for path in (proj_path / "nodes").iterdir()) == {
+        "c",
+    }
+
     c.load()
     assert c.name == "c"
     assert c.result == 11
