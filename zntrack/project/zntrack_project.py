@@ -220,6 +220,7 @@ class Project:
             node: Node = self.graph.nodes[node_uuid]["value"]
             if node_names is not None and node.name not in node_names:
                 continue
+            node.nwd  # create the node working directory (property-access will create it)
             if node._external_:
                 continue
             if eager:
