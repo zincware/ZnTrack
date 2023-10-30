@@ -3,6 +3,7 @@
 This module provides additional tools for ZnTrack.
 This includes decorators to time method runtimes.
 """
+
 import functools
 from time import time
 

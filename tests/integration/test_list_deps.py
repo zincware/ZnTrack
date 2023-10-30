@@ -1,4 +1,5 @@
 """Test for [NodeAttribute] as 'zn.deps'."""
+
 import dvc.cli
 
 import zntrack.examples

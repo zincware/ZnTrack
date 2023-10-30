@@ -1,4 +1,5 @@
 """Test 'ZnTrack' version."""
+
 from zntrack import __version__
 
 

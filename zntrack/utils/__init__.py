@@ -1,4 +1,5 @@
 """Standard python init file for the utils directory."""
+
 import dataclasses
 import enum
 import json

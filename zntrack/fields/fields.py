@@ -1,4 +1,5 @@
 """Fields that are used to define Nodes."""
+
 from zntrack.fields.dependency import Dependency
 from zntrack.fields.dvc.options import DVCOption, PlotsOption
 from zntrack.fields.zn.options import Output, Params, Plots

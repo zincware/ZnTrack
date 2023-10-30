@@ -1,4 +1,5 @@
 """Description: Configuration File for ZnTrack."""
+
 import contextlib
 import dataclasses
 import logging

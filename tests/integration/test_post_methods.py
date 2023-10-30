@@ -4,6 +4,7 @@ _post_load_ is called after the node is loaded from disk.
 _post_init_ is called after the node is initialized (loaded values are not available).
 _post_init_ is NOT called after Node.from_rev().
 """
+
 import pathlib
 
 import pytest

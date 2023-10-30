@@ -1,4 +1,5 @@
 """The ZnTrack CLI."""
+
 import contextlib
 import importlib.metadata
 import os

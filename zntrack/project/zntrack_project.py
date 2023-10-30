@@ -1,4 +1,5 @@
 """The class for the ZnTrackProject."""
+
 from __future__ import annotations
 
 import contextlib
