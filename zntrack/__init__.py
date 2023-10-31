@@ -2,6 +2,7 @@
 
 GitHub: https://github.com/zincware/ZnTrack
 """
+
 import importlib.metadata
 
 from zntrack import exceptions, tools

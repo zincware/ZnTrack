@@ -1,4 +1,5 @@
 """ZnTrack Jupyer Notebook interface."""
+
 import logging
 import pathlib
 import re

@@ -1,4 +1,5 @@
 """ZnTrack file I/O."""
+
 import json
 import logging
 import pathlib

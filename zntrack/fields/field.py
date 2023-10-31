@@ -1,4 +1,5 @@
 """The base class for all fields."""
+
 import abc
 import contextlib
 import enum

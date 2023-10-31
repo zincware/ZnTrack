@@ -1,6 +1,5 @@
 """All ZnTrack exceptions."""
 
-
 class NodeNotAvailableError(Exception):
     """Raised when a node is not available."""
 

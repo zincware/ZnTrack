@@ -1,4 +1,5 @@
 """The @nodify decorator."""
+
 import copy
 import dataclasses
 import json
