@@ -13,6 +13,7 @@ import typing
 
 import dvc.api
 import git
+import tqdm
 import yaml
 import znflow
 from znflow.handler import UpdateConnectors
@@ -217,7 +218,13 @@ class Project:
                 else:
                     raise ValueError(f"Unknown node type {type(node)}")
 
-        for node_uuid in self.graph.get_sorted_nodes():
+        sorted_nodes = self.graph.get_sorted_nodes()
+
+        _tqdm_disabled = True if eager or len(sorted_nodes) <= 5 else False
+
+        tbar = tqdm.tqdm(self.graph.get_sorted_nodes(), ncols=140, disable=_tqdm_disabled)
+
+        for node_uuid in tbar:
             node: Node = self.graph.nodes[node_uuid]["value"]
             if node_names is not None and node.name not in node_names:
                 continue
@@ -238,7 +245,10 @@ class Project:
                     node, git_only_repo=self.git_only_repo, **optional.get(node.name, {})
                 )
                 for x in cmd:
-                    run_dvc_cmd(x)
+                    stdout = None
+                    if not _tqdm_disabled:
+                        stdout = tbar.set_description
+                    run_dvc_cmd(x, stdout=stdout)
                 node.save(results=False)
         if not eager and repro:
             self.repro()
