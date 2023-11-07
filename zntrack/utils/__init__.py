@@ -95,13 +95,16 @@ class DVCProcessError(Exception):
     """DVC specific message for CalledProcessError."""
 
 
-def run_dvc_cmd(script):
+def run_dvc_cmd(script, stdout=None):
     """Run the DVC script via subprocess calls.
 
     Parameters
     ----------
     script: tuple[str]|list[str]
         A list of strings to pass the subprocess command
+    stdout: callable, optional
+        A callable to which the stdout is passed. If None, the stdout is
+        passed to log.warning.
 
     Raises
     ------
@@ -111,7 +114,9 @@ def run_dvc_cmd(script):
     dvc_short_string = " ".join(script[:5])
     if len(script) > 5:
         dvc_short_string += " ..."
-    log.warning(f"Running DVC command: '{dvc_short_string}'")
+    if stdout is None:
+        stdout = log.warning
+    stdout(f"Running DVC command: '{dvc_short_string}'")
     # do not display the output if log.log_level > logging.INFO
     show_log = config.log_level < logging.INFO
     if not show_log:
