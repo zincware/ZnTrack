@@ -5,7 +5,7 @@ import pytest
 from typer.testing import CliRunner
 
 import zntrack.examples
-from zntrack import Node, NodeConfig, nodify, utils, zn
+from zntrack import Node, NodeConfig, get_nodes, nodify, utils, zn
 from zntrack.cli import app
 
 
@@ -154,5 +154,5 @@ def test_list_groups(proj_path):
         ],
     }
 
-    groups = utils.cli.get_groups(remote=proj_path, rev=None)
+    groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
     assert groups == true_groups

@@ -16,6 +16,7 @@ import dvc.stage
 
 from zntrack.core.node import Node
 from zntrack.utils import config
+from zntrack.utils.cli import get_groups
 
 T = typing.TypeVar("T", bound=Node)
 
@@ -145,3 +146,9 @@ def from_rev(name, remote=".", rev=None, **kwargs) -> T:
     cls = getattr(module, cls_name)
 
     return cls.from_rev(name, remote, rev, **kwargs)
+
+
+def get_nodes(remote=".", rev=None) -> dict[str, Node]:
+    """Load all nodes from the given remote and revision."""
+    _, node_names = get_groups(remote, rev)
+    return {node_name: from_rev(node_name, remote, rev) for node_name in node_names}
