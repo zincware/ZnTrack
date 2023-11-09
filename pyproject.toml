@@ -120,3 +120,8 @@ exclude = [
 
 [tool.codespell]
 skip = "poetry.lock,examples/*"
+
+[tool.pytest.ini_options]
+markers = [
+    "needs_internet: marks tests which need internet access (deselect with '-m \"not needs_internet\"')",
+]
