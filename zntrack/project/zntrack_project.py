@@ -49,7 +49,10 @@ class ZnTrackGraph(znflow.DiGraph):
 
     def add_node(self, node_for_adding: Node, **attr):
         """Rename Nodes if required."""
-        node_for_adding.name = NodeName(self.active_group, node_for_adding.name)
+        if node_for_adding._external_:
+            node_for_adding.name = NodeName(None, node_for_adding.name)
+        else:
+            node_for_adding.name = NodeName(self.active_group, node_for_adding.name)
 
         super().add_node(node_for_adding, **attr)
 
@@ -165,7 +168,8 @@ class Project:
         # we update the nwd when closing the context manager
         # changing the name is no longer possible after this
         for node in grp.nodes:
-            node.__dict__["nwd"] = grp.nwd / node._name_.get_name_without_groups()
+            if not node._external_:
+                node.__dict__["nwd"] = grp.nwd / node._name_.get_name_without_groups()
 
     def run(
         self,
