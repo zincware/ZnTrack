@@ -102,7 +102,10 @@ def init(
 
 
 @app.command()
-def list(remote: str = ".", rev: str = None):
+def list(
+    remote: str = typer.Argument(".", help="The path/url to the repository"),
+    rev: str = typer.Argument(None, help="The revision to list (default: HEAD)"),
+):
     """List all Nodes in the Project."""
     groups, _ = utils.cli.get_groups(remote, rev)
     print(yaml.dump(groups))
