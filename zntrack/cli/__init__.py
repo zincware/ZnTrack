@@ -99,3 +99,28 @@ def init(
     """Initialize a new ZnTrack Project."""
     initializer = utils.cli.Initializer(name=name, gitignore=gitignore, force=force)
     initializer.run()
+
+
+@app.command()
+def list(remote: str = ".", rev: str = None):
+    """List all Nodes in the Project."""
+    groups = utils.cli.get_groups(remote, rev)
+    print(yaml.dump(groups))
+
+    # print(f"{node_name} -> {node_config['nwd']['value']}")
+
+    # with tempfile.TemporaryDirectory() as tmpdir:
+    #     # clone repo
+    #     repo = git.Repo.clone_from(remote, tmpdir)
+    #     # checkout revision, if not None
+    #     if rev is not None:
+    #         repo.git.checkout(rev)
+
+    #     with dvc.repo.Repo(tmpdir) as repo:
+    #         for node in repo.index.graph:
+    #             try:
+    #                 path, name = node.addressing.split(":")
+    #                 print(f"{path} -> {name}")
+    #             except ValueError:
+    #                 # if the "node" is not a stage but e.g. a file, there is only a path
+    #                 pass

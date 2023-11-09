@@ -5,7 +5,7 @@ import pytest
 from typer.testing import CliRunner
 
 import zntrack.examples
-from zntrack import Node, NodeConfig, nodify, zn
+from zntrack import Node, NodeConfig, nodify, utils, zn
 from zntrack.cli import app
 
 
@@ -106,3 +106,53 @@ def test_run_w_name(proj_path, runner):
 
     node.load()
     assert node.outs == 15
+
+
+def test_list_groups(proj_path):
+    with zntrack.Project(automatic_node_names=True) as proj:
+        _ = zntrack.examples.ParamsToOuts(params=15)
+        _ = zntrack.examples.ParamsToOuts(params=15)
+
+    with proj.group("example1"):
+        _ = zntrack.examples.ParamsToOuts(params=15)
+        _ = zntrack.examples.ParamsToOuts(params=15)
+
+    # TODO: This is not working yet
+    # with proj.group("nested"):
+    #     _ = zntrack.examples.ParamsToOuts(params=15)
+    #     _ = zntrack.examples.ParamsToOuts(params=15)
+
+    with proj.group("nested", "GRP1"):
+        _ = zntrack.examples.ParamsToOuts(params=15)
+        _ = zntrack.examples.ParamsToOuts(params=15)
+    with proj.group("nested", "GRP2"):
+        _ = zntrack.examples.ParamsToOuts(params=15)
+        _ = zntrack.examples.ParamsToOuts(params=15)
+
+    proj.build()
+
+    true_groups = {
+        "example1": [
+            "ParamsToOuts -> example1_ParamsToOuts",
+            "ParamsToOuts_1 -> example1_ParamsToOuts_1",
+        ],
+        "nodes": [
+            "ParamsToOuts",
+            "ParamsToOuts_1",
+        ],
+        "nested": [
+            {
+                "GRP1": [
+                    "ParamsToOuts -> nested_GRP1_ParamsToOuts",
+                    "ParamsToOuts_1 -> nested_GRP1_ParamsToOuts_1",
+                ],
+                "GRP2": [
+                    "ParamsToOuts -> nested_GRP2_ParamsToOuts",
+                    "ParamsToOuts_1 -> nested_GRP2_ParamsToOuts_1",
+                ],
+            }
+        ],
+    }
+
+    groups = utils.cli.get_groups(remote=proj_path, rev=None)
+    assert groups == true_groups

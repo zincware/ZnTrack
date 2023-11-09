@@ -1,11 +1,13 @@
 """CLI Helpers."""
 
 import dataclasses
+import json
 import pathlib
 import subprocess
 import urllib.request
 
 import typer
+from dvc.api import DVCFileSystem
 
 
 @dataclasses.dataclass
@@ -71,3 +73,43 @@ class Initializer:
         """Initialize the repository."""
         subprocess.check_call(["git", "init"])
         subprocess.check_call(["dvc", "init"])
+
+
+def get_groups(remote, rev) -> dict:
+    """Get the group names and the nodes in each group from the remote.
+
+    Arguments:
+    ---------
+    remote : str
+        The remote to get the group names from.
+    rev : str
+        The revision to use.
+    """
+    fs = DVCFileSystem(url=remote, rev=rev)
+    with fs.open("zntrack.json") as f:
+        config = json.load(f)
+
+    true_groups = {}
+
+    def add_to_group(groups, grp_names, node_name):
+        if len(grp_names) == 1:
+            if grp_names[0] not in groups:
+                groups[grp_names[0]] = []
+            groups[grp_names[0]].append(node_name)
+        else:
+            if grp_names[0] not in groups:
+                groups[grp_names[0]] = [{}]
+            add_to_group(groups[grp_names[0]][0], grp_names[1:], node_name)
+
+    for node_name, node_config in config.items():
+        nwd = pathlib.Path(node_config["nwd"]["value"])
+        grp_names = nwd.parent.as_posix().split("/")[1:]
+        if len(grp_names) == 0:
+            grp_names = ["nodes"]
+        else:
+            for grp_name in grp_names:
+                node_name = node_name.replace(f"{grp_name}_", "")
+            node_name = f"{node_name} -> {'_'.join(grp_names)}_{node_name}"
+        add_to_group(true_groups, grp_names, node_name)
+
+    return true_groups
