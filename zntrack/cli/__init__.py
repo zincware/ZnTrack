@@ -99,3 +99,13 @@ def init(
     """Initialize a new ZnTrack Project."""
     initializer = utils.cli.Initializer(name=name, gitignore=gitignore, force=force)
     initializer.run()
+
+
+@app.command()
+def list(
+    remote: str = typer.Argument(".", help="The path/url to the repository"),
+    rev: str = typer.Argument(None, help="The revision to list (default: HEAD)"),
+):
+    """List all Nodes in the Project."""
+    groups, _ = utils.cli.get_groups(remote, rev)
+    print(yaml.dump(groups))

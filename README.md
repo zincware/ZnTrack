@@ -86,7 +86,7 @@ print(hello_world.random_number)
 > node = zntrack.from_rev(
 >     "HelloWorld",
 >     remote="https://github.com/PythonFZ/ZnTrackExamples.git",
->     rev="fbb6ada",
+>     rev="890c714",
 > )
 > ```
 >
