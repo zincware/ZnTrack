@@ -137,12 +137,12 @@ class WriteDVCOuts(zntrack.Node):
 
     def run(self):
         """Write an output file."""
-        self.outs.write_text(str(self.params))
+        pathlib.Path(self.outs).write_text(str(self.params))
 
     def get_outs_content(self):
         """Get the output file."""
         with self.state.use_tmp_paths():
-            return self.outs.read_text()
+            return pathlib.Path(self.outs).read_text()
 
 
 class WriteDVCOutsPath(zntrack.Node):
@@ -153,18 +153,13 @@ class WriteDVCOutsPath(zntrack.Node):
 
     def run(self):
         """Write an output file."""
-        self.outs.mkdir(parents=True, exist_ok=True)
-        (self.outs / "file.txt").write_text(str(self.params))
+        pathlib.Path(self.outs).mkdir(parents=True, exist_ok=True)
+        (pathlib.Path(self.outs) / "file.txt").write_text(str(self.params))
 
     def get_outs_content(self):
         """Get the output file."""
         with self.state.use_tmp_paths():
-            try:
-                return (self.outs / "file.txt").read_text()
-            except FileNotFoundError:
-                # print all files in the directory
-                files = list(self.outs.iterdir())
-                raise FileNotFoundError(f"File not found. Files in directory: {files}")
+            return (pathlib.Path(self.outs) / "file.txt").read_text()
 
 
 class ComputeRandomNumber(zntrack.Node):

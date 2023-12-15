@@ -138,14 +138,16 @@ class DVCOption(Field):
         if instance.state.tmp_path is not None:
             # update nwd
             # move data to temp_path
-            if instance.state.fs.isdir(path.as_posix()):
+            if instance.state.fs.isdir(pathlib.Path(path).as_posix()):
                 instance.state.fs.get(
-                    path.as_posix(), instance.state.tmp_path.as_posix(), recursive=True
+                    pathlib.Path(path).as_posix(),
+                    instance.state.tmp_path.as_posix(),
+                    recursive=True,
                 )
-                return instance.state.tmp_path / path.name
+                return instance.state.tmp_path / pathlib.Path(path).name
             else:
-                temp_file = instance.state.tmp_path / path.name
-                instance.state.fs.get(path.as_posix(), temp_file.as_posix())
+                temp_file = instance.state.tmp_path / pathlib.Path(path).name
+                instance.state.fs.get(pathlib.Path(path).as_posix(), temp_file.as_posix())
                 return temp_file
         else:
             return path

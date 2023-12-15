@@ -105,19 +105,28 @@ def test_SingleNodeDefaultNWD(proj_path):
 
 
 def test_use_tmp_paths(proj_path):
-    with zntrack.Project() as proj:
+    with zntrack.Project(automatic_node_names=True) as proj:
         node = zntrack.examples.WriteDVCOuts(params="test")
         node2 = zntrack.examples.WriteDVCOutsPath(params="test2")
+
+        node3 = zntrack.examples.WriteDVCOuts(params="test", outs="result.txt")
+        # node4 = zntrack.examples.WriteDVCOutsPath(params="test2", outs="results")
 
     proj.run()
 
     node.get_outs_content() == "test"
     node2.get_outs_content() == "test2"
+    node3.get_outs_content() == "test"
+    # node4.get_outs_content() == "test2"
 
     assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
     assert node2.outs == pathlib.Path("nodes", "WriteDVCOutsPath", "data")
+    assert node3.outs == "result.txt"
+    # assert node4.outs == "results"
 
     with node.state.use_tmp_paths():
         assert node.outs == node.state.tmp_path / "output.txt"
     with node2.state.use_tmp_paths():
         assert node2.outs == node2.state.tmp_path / "data"
+    with node3.state.use_tmp_paths():
+        assert node3.outs == node3.state.tmp_path / "result.txt"
