@@ -134,7 +134,21 @@ class DVCOption(Field):
         if instance is None:
             return self
         value = super().__get__(instance, owner)
-        return node_wd.ReplaceNWD()(value, nwd=get_nwd(instance))
+        path = node_wd.ReplaceNWD()(value, nwd=get_nwd(instance))
+        if instance.state.tmp_path is not None:
+            # update nwd
+            # move data to temp_path
+            if instance.state.fs.isdir(path.as_posix()):
+                instance.state.fs.get(
+                    path.as_posix(), instance.state.tmp_path.as_posix(), recursive=True
+                )
+                return instance.state.tmp_path / path.name
+            else:
+                temp_file = instance.state.tmp_path / path.name
+                instance.state.fs.get(path.as_posix(), temp_file.as_posix())
+                return temp_file
+        else:
+            return path
 
 
 class PlotsOption(PlotsMixin, DVCOption):

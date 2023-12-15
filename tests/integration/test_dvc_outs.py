@@ -1,7 +1,7 @@
 import pathlib
 import typing
 
-import zntrack
+import zntrack.examples
 from zntrack import Node, dvc, nwd
 
 
@@ -102,3 +102,22 @@ def test_SingleNodeDefaultNWD(proj_path):
     assert SingleNodeDefaultNWD.from_rev(name="SampleNode").path1 == pathlib.Path(
         "nodes", "SampleNode", "test.json"
     )
+
+
+def test_use_tmp_paths(proj_path):
+    with zntrack.Project() as proj:
+        node = zntrack.examples.WriteDVCOuts(params="test")
+        node2 = zntrack.examples.WriteDVCOutsPath(params="test2")
+
+    proj.run()
+
+    node.get_outs_content() == "test"
+    node2.get_outs_content() == "test2"
+
+    assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
+    assert node2.outs == pathlib.Path("nodes", "WriteDVCOutsPath", "data")
+
+    with node.state.use_tmp_paths():
+        assert node.outs == node.state.tmp_path / "output.txt"
+    with node2.state.use_tmp_paths():
+        assert node2.outs == node2.state.tmp_path / "data"

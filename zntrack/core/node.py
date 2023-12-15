@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import pathlib
+import tempfile
 import time
 import typing
 import unittest.mock
@@ -58,6 +59,7 @@ class NodeStatus:
     results: "NodeStatusResults"
     remote: str = None
     rev: str = None
+    tmp_path: pathlib.Path = dataclasses.field(default=None, init=False, repr=False)
 
     @functools.cached_property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -103,6 +105,23 @@ class NodeStatus:
                 with unittest.mock.patch("os.listdir", _listdir):
                     # Jupyter Notebooks replace open with io.open
                     yield
+
+    @contextlib.contextmanager
+    def use_tmp_paths(self, path: pathlib.Path = None) -> typing.ContextManager:
+        """Load the data for '*_path' into a temporary directory.
+
+        If you can not use 'node.state.fs.open' you can use
+        this as an alternative. This will load the data into
+        a temporary directory and then delete it afterwards.
+        The respective paths 'node.*_path' will be replaced
+        automatically inside the context manager.
+        """
+        if path is not None:
+            raise NotImplementedError("Custom paths are not implemented yet.")
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.tmp_path = pathlib.Path(tmpdir)
+            yield
+            self.tmp_path = None
 
 
 class _NameDescriptor(zninit.Descriptor):
