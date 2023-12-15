@@ -159,7 +159,11 @@ class WriteDVCOutsPath(zntrack.Node):
     def get_outs_content(self):
         """Get the output file."""
         with self.state.use_tmp_paths():
-            return (pathlib.Path(self.outs) / "file.txt").read_text()
+            try:
+                return (pathlib.Path(self.outs) / "file.txt").read_text()
+            except FileNotFoundError:
+                files = list(pathlib.Path(self.outs).iterdir())
+                raise ValueError(f"Expected {self.outs } file, found {files}.")
 
 
 class ComputeRandomNumber(zntrack.Node):

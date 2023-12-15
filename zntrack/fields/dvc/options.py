@@ -144,11 +144,17 @@ class DVCOption(Field):
                     instance.state.tmp_path.as_posix(),
                     recursive=True,
                 )
-                return instance.state.tmp_path / pathlib.Path(path).name
+                _path = instance.state.tmp_path / pathlib.Path(path).name
             else:
                 temp_file = instance.state.tmp_path / pathlib.Path(path).name
                 instance.state.fs.get(pathlib.Path(path).as_posix(), temp_file.as_posix())
-                return temp_file
+                _path = temp_file
+
+            if isinstance(value, pathlib.PurePath):
+                # TODO: support for lists/tuples/...
+                return _path
+            else:
+                return _path.as_posix()
         else:
             return path
 
