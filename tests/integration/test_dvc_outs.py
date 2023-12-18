@@ -188,3 +188,44 @@ def test_use_tmp_paths_sequence(proj_path):
             assert pathlib.Path(outs).parent == node.state.tmp_path
 
     assert node.get_outs_content() == ["Lorem", "Ipsum", "Dolor"]
+
+
+def test_use_tmp_paths_exp(tmp_path_2):
+    with zntrack.Project(automatic_node_names=True) as proj:
+        node = zntrack.examples.WriteDVCOuts(params="test")
+
+    proj.run()
+
+    with proj.create_experiment() as exp1:
+        node.params = "test1"
+
+    with proj.create_experiment() as exp2:
+        node.params = "test2"
+
+    proj.run_exp()
+
+    exp1.load()
+    node1 = exp1["WriteDVCOuts"]
+    assert node1.get_outs_content() == "test1"
+
+    with node1.state.use_tmp_paths():
+        assert node1.outs == node1.state.tmp_path / "output.txt"
+        assert isinstance(node1.outs, pathlib.PurePath)
+        assert pathlib.Path(node1.outs).read_text() == "test1"
+
+    exp2.load()
+    node2 = exp2["WriteDVCOuts"]
+    assert node2.get_outs_content() == "test2"
+
+    with node2.state.use_tmp_paths():
+        assert node2.outs == node2.state.tmp_path / "output.txt"
+        assert isinstance(node2.outs, pathlib.PurePath)
+        assert pathlib.Path(node2.outs).read_text() == "test2"
+
+    assert node.get_outs_content() == "test"
+    assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
+
+    with node.state.use_tmp_paths():
+        assert node.outs == node.state.tmp_path / "output.txt"
+        assert isinstance(node.outs, pathlib.PurePath)
+        assert pathlib.Path(node.outs).read_text() == "test"
