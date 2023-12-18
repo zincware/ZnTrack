@@ -145,6 +145,26 @@ class WriteDVCOuts(zntrack.Node):
             return pathlib.Path(self.outs).read_text()
 
 
+class WriteDVCOutsSequence(zntrack.Node):
+    """Write an output file."""
+
+    params: list = zntrack.params()
+    outs: list | tuple | set | dict = zntrack.outs_path()
+
+    def run(self):
+        """Write an output file."""
+        for value, path in zip(self.params, self.outs):
+            pathlib.Path(path).write_text(str(value))
+
+    def get_outs_content(self):
+        """Get the output file."""
+        data = []
+        with self.state.use_tmp_paths():
+            for path in self.outs:
+                data.append(pathlib.Path(path).read_text())
+        return data
+
+
 class WriteDVCOutsPath(zntrack.Node):
     """Write an output file."""
 

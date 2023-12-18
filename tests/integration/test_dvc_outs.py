@@ -161,3 +161,30 @@ def test_use_tmp_paths_multi(proj_path):
         assert pathlib.Path(node.outs1).read_text() == "Lorem"
         assert pathlib.Path(node.outs2).read_text() == "Ipsum"
         assert (pathlib.Path(node.outs3) / "file.txt").read_text() == "Dolor"
+
+
+def test_use_tmp_paths_sequence(proj_path):
+    with zntrack.Project(automatic_node_names=True) as proj:
+        node = zntrack.examples.WriteDVCOutsSequence(
+            params=["Lorem", "Ipsum", "Dolor"],
+            outs=[zntrack.nwd / x for x in ["output.txt", "output2.txt", "output3.txt"]],
+        )
+
+    proj.run()
+
+    assert node.outs == [
+        pathlib.Path("nodes", "WriteDVCOutsSequence", "output.txt"),
+        pathlib.Path("nodes", "WriteDVCOutsSequence", "output2.txt"),
+        pathlib.Path("nodes", "WriteDVCOutsSequence", "output3.txt"),
+    ]
+
+    for outs in node.outs:
+        assert pathlib.Path(outs).exists()
+
+    with node.state.use_tmp_paths():
+        for outs in node.outs:
+            assert pathlib.Path(outs).exists()
+            assert pathlib.Path(outs).read_text() in ("Lorem", "Ipsum", "Dolor")
+            assert pathlib.Path(outs).parent == node.state.tmp_path
+
+    assert node.get_outs_content() == ["Lorem", "Ipsum", "Dolor"]
