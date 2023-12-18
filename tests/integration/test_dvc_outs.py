@@ -139,3 +139,25 @@ def test_use_tmp_paths(proj_path):
     with node4.state.use_tmp_paths():
         assert node4.outs == (node4.state.tmp_path / "data").as_posix()
         assert isinstance(node4.outs, str)
+
+
+def test_use_tmp_paths_multi(proj_path):
+    with zntrack.Project(automatic_node_names=True) as proj:
+        node = zntrack.examples.WriteMultipleDVCOuts(params=["Lorem", "Ipsum", "Dolor"])
+
+    proj.run()
+
+    assert node.get_outs_content() == ("Lorem", "Ipsum", "Dolor")
+
+    assert node.outs1 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output.txt")
+    assert node.outs2 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output2.txt")
+    assert node.outs3 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "data")
+
+    with node.state.use_tmp_paths():
+        assert node.outs1 == (node.state.tmp_path / "output.txt")
+        assert node.outs2 == (node.state.tmp_path / "output2.txt")
+        assert node.outs3 == (node.state.tmp_path / "data")
+
+        assert pathlib.Path(node.outs1).read_text() == "Lorem"
+        assert pathlib.Path(node.outs2).read_text() == "Ipsum"
+        assert (pathlib.Path(node.outs3) / "file.txt").read_text() == "Dolor"

@@ -166,6 +166,30 @@ class WriteDVCOutsPath(zntrack.Node):
                 raise ValueError(f"Expected {self.outs } file, found {files}.")
 
 
+class WriteMultipleDVCOuts(zntrack.Node):
+    """Write an output file."""
+
+    params = zntrack.params()
+    outs1 = zntrack.outs_path(zntrack.nwd / "output.txt")
+    outs2 = zntrack.outs_path(zntrack.nwd / "output2.txt")
+    outs3 = zntrack.outs_path(zntrack.nwd / "data")
+
+    def run(self):
+        """Write an output file."""
+        pathlib.Path(self.outs1).write_text(str(self.params[0]))
+        pathlib.Path(self.outs2).write_text(str(self.params[1]))
+        pathlib.Path(self.outs3).mkdir(parents=True, exist_ok=True)
+        (pathlib.Path(self.outs3) / "file.txt").write_text(str(self.params[2]))
+
+    def get_outs_content(self) -> t.Tuple[str, str, str]:
+        """Get the output file."""
+        with self.state.use_tmp_paths():
+            outs1_content = pathlib.Path(self.outs1).read_text()
+            outs2_content = pathlib.Path(self.outs2).read_text()
+            outs3_content = (pathlib.Path(self.outs3) / "file.txt").read_text()
+            return outs1_content, outs2_content, outs3_content
+
+
 class ComputeRandomNumber(zntrack.Node):
     """Compute a random number."""
 
