@@ -183,10 +183,9 @@ class Project:
             if node_name not in graph_node_names:
                 if "+" in node_name:
                     # currently there is no way to remove the zntrack.deps Nodes correctly
-                    parent_node = node_name.split("+")[0]
-                    if parent_node not in graph_node_names:
-                        nodes_to_remove.append(node_name)
-                        # print(f"Removing {node_name} from dvc.yaml")
+                    # so we check for the parent node, if that is not available, we remove
+                    # the node
+                    continue
                 else:
                     nodes_to_remove.append(node_name)
 
@@ -197,7 +196,7 @@ class Project:
                 run_dvc_cmd(["remove", node_name, "--outs"])
                 _ = zntrack_config.pop(node_name, None)
 
-            config.files.zntrack.write_text(json.dumps(zntrack_config))
+            config.files.zntrack.write_text(json.dumps(zntrack_config, indent=4))
 
         if remove_empty_dirs:
             # remove all empty directories inside "nodes"
