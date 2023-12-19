@@ -128,6 +128,35 @@ def test_use_tmp_paths(proj_path):
     assert node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
 
     with node.state.use_tmp_paths():
+        assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
+    with node2.state.use_tmp_paths():
+        assert node2.outs == pathlib.Path("nodes", "WriteDVCOutsPath", "data")
+    with node3.state.use_tmp_paths():
+        assert node3.outs == "result.txt"
+        assert isinstance(node3.outs, str)
+    with node4.state.use_tmp_paths():
+        assert (
+            node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
+        )
+
+    # fake remote by passing the current directory
+    node = node.from_rev(node.name, remote=".")
+    node2 = node2.from_rev(node2.name, remote=".")
+    node3 = node3.from_rev(node3.name, remote=".")
+    node4 = node4.from_rev(node4.name, remote=".")
+
+    node.get_outs_content() == "test"
+    node2.get_outs_content() == "test2"
+    node3.get_outs_content() == "test"
+    node4.get_outs_content() == "test2"
+
+    assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
+    assert node2.outs == pathlib.Path("nodes", "WriteDVCOutsPath", "data")
+    assert node3.outs == "result.txt"
+    assert isinstance(node4.outs, str)
+    assert node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
+
+    with node.state.use_tmp_paths():
         assert node.outs == node.state.tmp_path / "output.txt"
         assert isinstance(node.outs, pathlib.PurePath)
     with node2.state.use_tmp_paths():
@@ -152,6 +181,17 @@ def test_use_tmp_paths_multi(proj_path):
     assert node.outs1 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output.txt")
     assert node.outs2 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output2.txt")
     assert node.outs3 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "data")
+
+    with node.state.use_tmp_paths():
+        assert node.outs1 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output.txt")
+        assert node.outs2 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output2.txt")
+        assert node.outs3 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "data")
+
+        assert pathlib.Path(node.outs1).read_text() == "Lorem"
+        assert pathlib.Path(node.outs2).read_text() == "Ipsum"
+        assert (pathlib.Path(node.outs3) / "file.txt").read_text() == "Dolor"
+
+    node = node.from_rev(remote=".")  # fake remote by passing the current directory
 
     with node.state.use_tmp_paths():
         assert node.outs1 == (node.state.tmp_path / "output.txt")
@@ -180,6 +220,18 @@ def test_use_tmp_paths_sequence(proj_path):
 
     for outs in node.outs:
         assert pathlib.Path(outs).exists()
+
+    with node.state.use_tmp_paths():
+        for outs in node.outs:
+            assert pathlib.Path(outs).exists()
+            assert pathlib.Path(outs).read_text() in ("Lorem", "Ipsum", "Dolor")
+            assert pathlib.Path(outs).parent == pathlib.Path(
+                "nodes", "WriteDVCOutsSequence"
+            )
+
+    assert node.get_outs_content() == ["Lorem", "Ipsum", "Dolor"]
+
+    node = node.from_rev(remote=".")  # fake remote by passing the current directory
 
     with node.state.use_tmp_paths():
         for outs in node.outs:
@@ -226,6 +278,5 @@ def test_use_tmp_paths_exp(tmp_path_2):
     assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
 
     with node.state.use_tmp_paths():
-        assert node.outs == node.state.tmp_path / "output.txt"
-        assert isinstance(node.outs, pathlib.PurePath)
+        assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
         assert pathlib.Path(node.outs).read_text() == "test"

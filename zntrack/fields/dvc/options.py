@@ -8,7 +8,7 @@ import znflow.utils
 import znjson
 
 from zntrack.fields.field import Field, FieldGroup, PlotsMixin
-from zntrack.utils import get_nwd, node_wd
+from zntrack.utils import DISABLE_TMP_PATH, get_nwd, node_wd
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
@@ -159,7 +159,7 @@ class DVCOption(Field):
             return self
         value = super().__get__(instance, owner)
         path = node_wd.ReplaceNWD()(value, nwd=get_nwd(instance))
-        if instance.state.tmp_path is not None:
+        if instance.state.tmp_path not in [None, DISABLE_TMP_PATH]:
             loader = _LoadIntoTmpPath()
             return loader(path, instance=instance)
         else:
