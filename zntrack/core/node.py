@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import pathlib
+import tempfile
 import time
 import typing
 import unittest.mock
@@ -24,6 +25,7 @@ import znjson
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
 from zntrack.utils import (
+    DISABLE_TMP_PATH,
     NodeName,
     NodeStatusResults,
     config,
@@ -52,12 +54,19 @@ class NodeStatus:
         a "remote" location, such as a git repository.
     rev : str, default = None
         The revision of the Node. This could be the current "HEAD" or a specific revision.
+    tmp_path : pathlib.Path, default = DISABLE_TMP_PATH|None
+        The temporary path used for loading the data.
+        This is only set within the context manager 'use_tmp_path'.
+        If neither 'remote' nor 'rev' are set, tmp_path will not be used.
     """
 
     loaded: bool
     results: "NodeStatusResults"
     remote: str = None
     rev: str = None
+    tmp_path: pathlib.Path = dataclasses.field(
+        default=DISABLE_TMP_PATH, init=False, repr=False
+    )
 
     @functools.cached_property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -103,6 +112,37 @@ class NodeStatus:
                 with unittest.mock.patch("os.listdir", _listdir):
                     # Jupyter Notebooks replace open with io.open
                     yield
+
+    @contextlib.contextmanager
+    def use_tmp_path(self, path: pathlib.Path = None) -> typing.ContextManager:
+        """Load the data for '*_path' into a temporary directory.
+
+        If you can not use 'node.state.fs.open' you can use
+        this as an alternative. This will load the data into
+        a temporary directory and then delete it afterwards.
+        The respective paths 'node.*_path' will be replaced
+        automatically inside the context manager.
+
+        This is only set, if either 'remote' or 'rev' are set.
+        Otherwise, the data will be loaded from the current directory.
+        """
+        if path is not None:
+            raise NotImplementedError("Custom paths are not implemented yet.")
+
+        if self.tmp_path is DISABLE_TMP_PATH:
+            yield
+        else:
+            with tempfile.TemporaryDirectory() as tmpdir:
+                self.tmp_path = pathlib.Path(tmpdir)
+                log.debug(f"Using temporary directory {self.tmp_path}")
+                try:
+                    yield
+                finally:
+                    files = list(self.tmp_path.glob("**/*"))
+                    log.debug(
+                        f"Deleting temporary directory {self.tmp_path} containing {files}"
+                    )
+                    self.tmp_path = None
 
 
 class _NameDescriptor(zninit.Descriptor):
@@ -316,6 +356,11 @@ class Node(zninit.ZnInit, znflow.Node):
         kwargs = {} if lazy is None else {"lazy": lazy}
         with config.updated_config(**kwargs):
             node.load(results=results)
+
+        if remote is not None or rev is not None:
+            # by default, tmp_path is disabled.
+            # if remote or rev is set, we enable it.
+            node.state.tmp_path = None
 
         return node
 

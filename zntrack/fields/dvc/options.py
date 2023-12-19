@@ -4,13 +4,37 @@ import json
 import pathlib
 import typing
 
+import znflow.utils
 import znjson
 
 from zntrack.fields.field import Field, FieldGroup, PlotsMixin
-from zntrack.utils import get_nwd, node_wd
+from zntrack.utils import DISABLE_TMP_PATH, get_nwd, node_wd
 
 if typing.TYPE_CHECKING:
     from zntrack import Node
+
+
+class _LoadIntoTmpPath(znflow.utils.IterableHandler):
+    def default(self, value, **kwargs):
+        instance = kwargs["instance"]
+        path = value
+
+        if instance.state.fs.isdir(pathlib.Path(path).as_posix()):
+            instance.state.fs.get(
+                pathlib.Path(path).as_posix(),
+                instance.state.tmp_path.as_posix(),
+                recursive=True,
+            )
+            _path = instance.state.tmp_path / pathlib.Path(path).name
+        else:
+            temp_file = instance.state.tmp_path / pathlib.Path(path).name
+            instance.state.fs.get(pathlib.Path(path).as_posix(), temp_file.as_posix())
+            _path = temp_file
+
+        if isinstance(path, pathlib.PurePath):
+            return _path
+        else:
+            return _path.as_posix()
 
 
 class DVCOption(Field):
@@ -134,7 +158,12 @@ class DVCOption(Field):
         if instance is None:
             return self
         value = super().__get__(instance, owner)
-        return node_wd.ReplaceNWD()(value, nwd=get_nwd(instance))
+        path = node_wd.ReplaceNWD()(value, nwd=get_nwd(instance))
+        if instance.state.tmp_path not in [None, DISABLE_TMP_PATH]:
+            loader = _LoadIntoTmpPath()
+            return loader(path, instance=instance)
+        else:
+            return path
 
 
 class PlotsOption(PlotsMixin, DVCOption):
