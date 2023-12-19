@@ -16,12 +16,13 @@ import znflow
 import znjson
 
 from zntrack.utils import cli
-from zntrack.utils.config import config
+from zntrack.utils.config import DISABLE_TMP_PATH, config
 
 __all__ = [
     "cli",
     "node_wd",
     "config",
+    "DISABLE_TMP_PATH",
 ]
 
 if t.TYPE_CHECKING:

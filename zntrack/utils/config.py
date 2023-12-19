@@ -99,3 +99,19 @@ class Config:
 
 
 config = Config()
+
+
+class DISABLE_TMP_PATH:
+    """Identifier for disabling loading data into a temporary directory."""
+
+    def __init__(self) -> None:
+        """Prohibit instantiation."""
+        raise NotImplementedError("This class can not be instantiated.")
+
+    def __repr__(self) -> str:
+        """Provide better representation."""
+        return "DISABLE_TMP_PATH"
+
+    def __str__(self) -> str:
+        """Provide better representation."""
+        return "DISABLE_TMP_PATH"

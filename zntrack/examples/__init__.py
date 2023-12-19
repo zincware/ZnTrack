@@ -137,7 +137,77 @@ class WriteDVCOuts(zntrack.Node):
 
     def run(self):
         """Write an output file."""
-        self.outs.write_text(str(self.params))
+        pathlib.Path(self.outs).write_text(str(self.params))
+
+    def get_outs_content(self):
+        """Get the output file."""
+        with self.state.use_tmp_path():
+            return pathlib.Path(self.outs).read_text()
+
+
+class WriteDVCOutsSequence(zntrack.Node):
+    """Write an output file."""
+
+    params: list = zntrack.params()
+    outs: list | tuple | set | dict = zntrack.outs_path()
+
+    def run(self):
+        """Write an output file."""
+        for value, path in zip(self.params, self.outs):
+            pathlib.Path(path).write_text(str(value))
+
+    def get_outs_content(self):
+        """Get the output file."""
+        data = []
+        with self.state.use_tmp_path():
+            for path in self.outs:
+                data.append(pathlib.Path(path).read_text())
+        return data
+
+
+class WriteDVCOutsPath(zntrack.Node):
+    """Write an output file."""
+
+    params = zntrack.params()
+    outs = zntrack.outs_path(zntrack.nwd / "data")
+
+    def run(self):
+        """Write an output file."""
+        pathlib.Path(self.outs).mkdir(parents=True, exist_ok=True)
+        (pathlib.Path(self.outs) / "file.txt").write_text(str(self.params))
+
+    def get_outs_content(self):
+        """Get the output file."""
+        with self.state.use_tmp_path():
+            try:
+                return (pathlib.Path(self.outs) / "file.txt").read_text()
+            except FileNotFoundError:
+                files = list(pathlib.Path(self.outs).iterdir())
+                raise ValueError(f"Expected {self.outs } file, found {files}.")
+
+
+class WriteMultipleDVCOuts(zntrack.Node):
+    """Write an output file."""
+
+    params = zntrack.params()
+    outs1 = zntrack.outs_path(zntrack.nwd / "output.txt")
+    outs2 = zntrack.outs_path(zntrack.nwd / "output2.txt")
+    outs3 = zntrack.outs_path(zntrack.nwd / "data")
+
+    def run(self):
+        """Write an output file."""
+        pathlib.Path(self.outs1).write_text(str(self.params[0]))
+        pathlib.Path(self.outs2).write_text(str(self.params[1]))
+        pathlib.Path(self.outs3).mkdir(parents=True, exist_ok=True)
+        (pathlib.Path(self.outs3) / "file.txt").write_text(str(self.params[2]))
+
+    def get_outs_content(self) -> t.Tuple[str, str, str]:
+        """Get the output file."""
+        with self.state.use_tmp_path():
+            outs1_content = pathlib.Path(self.outs1).read_text()
+            outs2_content = pathlib.Path(self.outs2).read_text()
+            outs3_content = (pathlib.Path(self.outs3) / "file.txt").read_text()
+            return outs1_content, outs2_content, outs3_content
 
 
 class ComputeRandomNumber(zntrack.Node):
