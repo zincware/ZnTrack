@@ -120,8 +120,15 @@ class NodeStatus:
             raise NotImplementedError("Custom paths are not implemented yet.")
         with tempfile.TemporaryDirectory() as tmpdir:
             self.tmp_path = pathlib.Path(tmpdir)
-            yield
-            self.tmp_path = None
+            log.debug(f"Using temporary directory {self.tmp_path}")
+            try:
+                yield
+            finally:
+                files = list(self.tmp_path.glob("**/*"))
+                log.debug(
+                    f"Deleting temporary directory {self.tmp_path} containing {files}"
+                )
+                self.tmp_path = None
 
 
 class _NameDescriptor(zninit.Descriptor):

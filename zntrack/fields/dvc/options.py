@@ -32,7 +32,6 @@ class _LoadIntoTmpPath(znflow.utils.IterableHandler):
             _path = temp_file
 
         if isinstance(path, pathlib.PurePath):
-            # TODO: support for lists/tuples/...
             return _path
         else:
             return _path.as_posix()
