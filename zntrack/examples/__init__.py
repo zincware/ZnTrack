@@ -141,7 +141,7 @@ class WriteDVCOuts(zntrack.Node):
 
     def get_outs_content(self):
         """Get the output file."""
-        with self.state.use_tmp_paths():
+        with self.state.use_tmp_path():
             return pathlib.Path(self.outs).read_text()
 
 
@@ -159,7 +159,7 @@ class WriteDVCOutsSequence(zntrack.Node):
     def get_outs_content(self):
         """Get the output file."""
         data = []
-        with self.state.use_tmp_paths():
+        with self.state.use_tmp_path():
             for path in self.outs:
                 data.append(pathlib.Path(path).read_text())
         return data
@@ -178,7 +178,7 @@ class WriteDVCOutsPath(zntrack.Node):
 
     def get_outs_content(self):
         """Get the output file."""
-        with self.state.use_tmp_paths():
+        with self.state.use_tmp_path():
             try:
                 return (pathlib.Path(self.outs) / "file.txt").read_text()
             except FileNotFoundError:
@@ -203,7 +203,7 @@ class WriteMultipleDVCOuts(zntrack.Node):
 
     def get_outs_content(self) -> t.Tuple[str, str, str]:
         """Get the output file."""
-        with self.state.use_tmp_paths():
+        with self.state.use_tmp_path():
             outs1_content = pathlib.Path(self.outs1).read_text()
             outs2_content = pathlib.Path(self.outs2).read_text()
             outs3_content = (pathlib.Path(self.outs3) / "file.txt").read_text()

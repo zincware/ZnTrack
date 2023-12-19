@@ -104,7 +104,7 @@ def test_SingleNodeDefaultNWD(proj_path):
     )
 
 
-def test_use_tmp_paths(proj_path):
+def test_use_tmp_path(proj_path):
     with zntrack.Project(automatic_node_names=True) as proj:
         node = zntrack.examples.WriteDVCOuts(params="test")
         node2 = zntrack.examples.WriteDVCOutsPath(params="test2")
@@ -127,14 +127,14 @@ def test_use_tmp_paths(proj_path):
     assert isinstance(node4.outs, str)
     assert node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
 
-    with node.state.use_tmp_paths():
+    with node.state.use_tmp_path():
         assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
-    with node2.state.use_tmp_paths():
+    with node2.state.use_tmp_path():
         assert node2.outs == pathlib.Path("nodes", "WriteDVCOutsPath", "data")
-    with node3.state.use_tmp_paths():
+    with node3.state.use_tmp_path():
         assert node3.outs == "result.txt"
         assert isinstance(node3.outs, str)
-    with node4.state.use_tmp_paths():
+    with node4.state.use_tmp_path():
         assert (
             node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
         )
@@ -156,21 +156,21 @@ def test_use_tmp_paths(proj_path):
     assert isinstance(node4.outs, str)
     assert node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
 
-    with node.state.use_tmp_paths():
+    with node.state.use_tmp_path():
         assert node.outs == node.state.tmp_path / "output.txt"
         assert isinstance(node.outs, pathlib.PurePath)
-    with node2.state.use_tmp_paths():
+    with node2.state.use_tmp_path():
         assert node2.outs == node2.state.tmp_path / "data"
         assert isinstance(node2.outs, pathlib.PurePath)
-    with node3.state.use_tmp_paths():
+    with node3.state.use_tmp_path():
         assert node3.outs == (node3.state.tmp_path / "result.txt").as_posix()
         assert isinstance(node3.outs, str)
-    with node4.state.use_tmp_paths():
+    with node4.state.use_tmp_path():
         assert node4.outs == (node4.state.tmp_path / "data").as_posix()
         assert isinstance(node4.outs, str)
 
 
-def test_use_tmp_paths_multi(proj_path):
+def test_use_tmp_path_multi(proj_path):
     with zntrack.Project(automatic_node_names=True) as proj:
         node = zntrack.examples.WriteMultipleDVCOuts(params=["Lorem", "Ipsum", "Dolor"])
 
@@ -182,7 +182,7 @@ def test_use_tmp_paths_multi(proj_path):
     assert node.outs2 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output2.txt")
     assert node.outs3 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "data")
 
-    with node.state.use_tmp_paths():
+    with node.state.use_tmp_path():
         assert node.outs1 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output.txt")
         assert node.outs2 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "output2.txt")
         assert node.outs3 == pathlib.Path("nodes", "WriteMultipleDVCOuts", "data")
@@ -193,7 +193,7 @@ def test_use_tmp_paths_multi(proj_path):
 
     node = node.from_rev(remote=".")  # fake remote by passing the current directory
 
-    with node.state.use_tmp_paths():
+    with node.state.use_tmp_path():
         assert node.outs1 == (node.state.tmp_path / "output.txt")
         assert node.outs2 == (node.state.tmp_path / "output2.txt")
         assert node.outs3 == (node.state.tmp_path / "data")
@@ -203,7 +203,7 @@ def test_use_tmp_paths_multi(proj_path):
         assert (pathlib.Path(node.outs3) / "file.txt").read_text() == "Dolor"
 
 
-def test_use_tmp_paths_sequence(proj_path):
+def test_use_tmp_path_sequence(proj_path):
     with zntrack.Project(automatic_node_names=True) as proj:
         node = zntrack.examples.WriteDVCOutsSequence(
             params=["Lorem", "Ipsum", "Dolor"],
@@ -221,7 +221,7 @@ def test_use_tmp_paths_sequence(proj_path):
     for outs in node.outs:
         assert pathlib.Path(outs).exists()
 
-    with node.state.use_tmp_paths():
+    with node.state.use_tmp_path():
         for outs in node.outs:
             assert pathlib.Path(outs).exists()
             assert pathlib.Path(outs).read_text() in ("Lorem", "Ipsum", "Dolor")
@@ -233,7 +233,7 @@ def test_use_tmp_paths_sequence(proj_path):
 
     node = node.from_rev(remote=".")  # fake remote by passing the current directory
 
-    with node.state.use_tmp_paths():
+    with node.state.use_tmp_path():
         for outs in node.outs:
             assert pathlib.Path(outs).exists()
             assert pathlib.Path(outs).read_text() in ("Lorem", "Ipsum", "Dolor")
@@ -242,7 +242,7 @@ def test_use_tmp_paths_sequence(proj_path):
     assert node.get_outs_content() == ["Lorem", "Ipsum", "Dolor"]
 
 
-def test_use_tmp_paths_exp(tmp_path_2):
+def test_use_tmp_path_exp(tmp_path_2):
     with zntrack.Project(automatic_node_names=True) as proj:
         node = zntrack.examples.WriteDVCOuts(params="test")
 
@@ -260,7 +260,7 @@ def test_use_tmp_paths_exp(tmp_path_2):
     node1 = exp1["WriteDVCOuts"]
     assert node1.get_outs_content() == "test1"
 
-    with node1.state.use_tmp_paths():
+    with node1.state.use_tmp_path():
         assert node1.outs == node1.state.tmp_path / "output.txt"
         assert isinstance(node1.outs, pathlib.PurePath)
         assert pathlib.Path(node1.outs).read_text() == "test1"
@@ -269,7 +269,7 @@ def test_use_tmp_paths_exp(tmp_path_2):
     node2 = exp2["WriteDVCOuts"]
     assert node2.get_outs_content() == "test2"
 
-    with node2.state.use_tmp_paths():
+    with node2.state.use_tmp_path():
         assert node2.outs == node2.state.tmp_path / "output.txt"
         assert isinstance(node2.outs, pathlib.PurePath)
         assert pathlib.Path(node2.outs).read_text() == "test2"
@@ -277,6 +277,6 @@ def test_use_tmp_paths_exp(tmp_path_2):
     assert node.get_outs_content() == "test"
     assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
 
-    with node.state.use_tmp_paths():
+    with node.state.use_tmp_path():
         assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
         assert pathlib.Path(node.outs).read_text() == "test"

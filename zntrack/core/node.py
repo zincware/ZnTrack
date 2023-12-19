@@ -56,7 +56,7 @@ class NodeStatus:
         The revision of the Node. This could be the current "HEAD" or a specific revision.
     tmp_path : pathlib.Path, default = DISABLE_TMP_PATH|None
         The temporary path used for loading the data.
-        This is only set within the context manager 'use_tmp_paths'.
+        This is only set within the context manager 'use_tmp_path'.
         If neither 'remote' nor 'rev' are set, tmp_path will not be used.
     """
 
@@ -114,7 +114,7 @@ class NodeStatus:
                     yield
 
     @contextlib.contextmanager
-    def use_tmp_paths(self, path: pathlib.Path = None) -> typing.ContextManager:
+    def use_tmp_path(self, path: pathlib.Path = None) -> typing.ContextManager:
         """Load the data for '*_path' into a temporary directory.
 
         If you can not use 'node.state.fs.open' you can use
