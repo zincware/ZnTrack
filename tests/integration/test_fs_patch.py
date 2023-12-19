@@ -38,7 +38,7 @@ def test_patch_list(proj_path):
     node = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="fbb6ada",
+        rev="890c714",
     )
 
     def func(self, path):

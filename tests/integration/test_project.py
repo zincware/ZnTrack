@@ -481,3 +481,29 @@ def test_git_only_repo(proj_path, git_only_repo):
     else:
         # check if node-meta.json is not in the repo index
         assert ("nodes/ParamsToOuts/node-meta.json", 0) not in repo.index.entries.keys()
+
+
+def test_auto_remove(proj_path):
+    with zntrack.Project(automatic_node_names=True) as project:
+        n1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+        n2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+
+    project.run()
+
+    n1 = zntrack.examples.ParamsToOuts.from_rev(n1.name)
+    n2 = zntrack.examples.ParamsToOuts.from_rev(n2.name)
+    assert n1.outs == "Lorem Ipsum"
+    assert n2.outs == "Dolor Sit"
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.index.commit("initial commit")
+
+    with zntrack.Project(automatic_node_names=True) as project:
+        n1 = zntrack.examples.ParamsToOuts(params="Hello World")
+
+    project.run(auto_remove=True)
+
+    n1 = zntrack.examples.ParamsToOuts.from_rev(n1.name)
+    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
+        n2 = zntrack.examples.ParamsToOuts.from_rev(n2.name)
