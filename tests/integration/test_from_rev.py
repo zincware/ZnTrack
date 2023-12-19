@@ -29,12 +29,12 @@ def test_import_from_remote(proj_path):
     node = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="fbb6ada",
+        rev="890c714",
     )
     assert node.max_number == 512
     assert node.random_number == 123
     assert node.name == "HelloWorld"
-    assert node.state.rev == "fbb6ada"
+    assert node.state.rev == "890c714"
     assert node.state.remote == "https://github.com/PythonFZ/ZnTrackExamples.git"
     assert node.state.results == NodeStatusResults.AVAILABLE
     assert node.uuid == uuid.UUID("1d2d5eef-c42b-4ff4-aa1f-837638fdf090")
@@ -44,13 +44,13 @@ def test_connect_from_remote(proj_path):
     node_a = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="fbb6ada",
+        rev="890c714",
     )
 
     node_b = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="35d35ff",
+        rev="369fe8f",
     )
 
     assert node_a.random_number == 123
@@ -82,7 +82,7 @@ def test_two_nodes_connect_external(proj_path):
     node_a = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="fbb6ada",
+        rev="890c714",
     )
 
     with zntrack.Project(automatic_node_names=True) as project:

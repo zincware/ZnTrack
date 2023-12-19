@@ -21,7 +21,7 @@ def test_external(proj_path):
     node = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="fbb6ada",
+        rev="890c714",
     )
 
     with zntrack.Project() as proj:
@@ -37,7 +37,7 @@ def test_external_grp(proj_path):
     node = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="fbb6ada",
+        rev="890c714",
     )
 
     proj = zntrack.Project()

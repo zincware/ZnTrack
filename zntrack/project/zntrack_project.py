@@ -21,6 +21,7 @@ from znflow.handler import UpdateConnectors
 from zntrack import exceptions
 from zntrack.core.node import Node, get_dvc_cmd
 from zntrack.utils import NodeName, config, run_dvc_cmd
+from zntrack.utils.cli import get_groups
 
 log = logging.getLogger(__name__)
 
@@ -171,6 +172,39 @@ class Project:
             if not node._external_:
                 node.__dict__["nwd"] = grp.nwd / node._name_.get_name_without_groups()
 
+    def auto_remove(self, remove_empty_dirs=True):
+        """Remove all nodes from 'dvc.yaml' that are not in the graph."""
+        _, dvc_node_names = get_groups(None, None)
+        graph_node_names = [self.graph.nodes[x]["value"].name for x in self.graph.nodes]
+
+        nodes_to_remove = []
+
+        for node_name in dvc_node_names:
+            if node_name not in graph_node_names:
+                if "+" in node_name:
+                    # currently there is no way to remove the zntrack.deps Nodes correctly
+                    parent_node = node_name.split("+")[0]
+                    if parent_node not in graph_node_names:
+                        nodes_to_remove.append(node_name)
+                        # print(f"Removing {node_name} from dvc.yaml")
+                else:
+                    nodes_to_remove.append(node_name)
+
+        if len(nodes_to_remove):
+            zntrack_config = json.loads(config.files.zntrack.read_text())
+
+            for node_name in tqdm.tqdm(nodes_to_remove):
+                run_dvc_cmd(["remove", node_name, "--outs"])
+                _ = zntrack_config.pop(node_name, None)
+
+            config.files.zntrack.write_text(json.dumps(zntrack_config))
+
+        if remove_empty_dirs:
+            # remove all empty directories inside "nodes"
+            for path in pathlib.Path("nodes").glob("**/*"):
+                if path.is_dir() and not any(path.iterdir()):
+                    path.rmdir()
+
     def run(
         self,
         eager=False,
@@ -179,6 +213,7 @@ class Project:
         save: bool = True,
         environment: dict = None,
         nodes: list = None,
+        auto_remove: bool = False,
     ):
         """Run the Project Graph.
 
@@ -200,6 +235,9 @@ class Project:
             A dictionary of environment variables for all nodes.
         nodes : list, default = None
             A list of node names to run. If None, run all nodes.
+        auto_remove : bool, default = False
+            If True, remove all nodes from 'dvc.yaml' that are not in the graph.
+            This is the same as calling 'project.auto_remove()'
         """
         if not save and not eager:
             raise ValueError("Save can only be false if eager is True")
@@ -258,11 +296,12 @@ class Project:
             self.repro()
             # TODO should we load the nodes here? Maybe, if lazy loading is implemented.
 
-    def build(
-        self, environment: dict = None, optional: dict = None, nodes: list = None
-    ) -> None:
+        if auto_remove:
+            self.auto_remove()
+
+    def build(self, **kwargs) -> None:
         """Build the project graph without running it."""
-        self.run(repro=False, environment=environment, optional=optional, nodes=nodes)
+        self.run(repro=False, **kwargs)
 
     def repro(self) -> None:
         """Run dvc repro."""

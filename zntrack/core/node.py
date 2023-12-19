@@ -326,6 +326,12 @@ class Node(zninit.ZnInit, znflow.Node):
                     self._uuid = uuid.UUID(node_meta["uuid"])
                     self.state.results = NodeStatusResults.AVAILABLE
         # TODO: documentation about _post_init and _post_load_ and when they are called
+
+        zntrack_config = json.loads(self.state.fs.read_text(config.files.zntrack))
+
+        if self.name not in zntrack_config:
+            raise exceptions.NodeNotAvailableError(self)
+
         self._post_load_()
 
     @classmethod
