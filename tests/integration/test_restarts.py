@@ -9,12 +9,14 @@ def test_no_restart(tmp_path_2):
     with project:
         node = zntrack.examples.NodeWithRestart(start=0)
 
+    assert node.state.run_count == 0
+
     project.run()
 
     node.load()
     assert node.count == 1
     assert node.state.run_count == 1
-    assert node.state.restart is False
+    assert node.state.restarted is False
 
 
 def test_restarts(tmp_path_2):
