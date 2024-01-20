@@ -270,8 +270,6 @@ class Node(zninit.ZnInit, znflow.Node):
             # the meta data will only be written here.
             import json
 
-            print(f"Saving meta data for {self.name} with {self.state.run_count} runs.")
-
             (self.nwd / "node-meta.json").write_text(
                 json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
             )
@@ -392,6 +390,7 @@ class Node(zninit.ZnInit, znflow.Node):
             # if a node is loaded without results and saved afterwards,
             #  we count this as a run.
             node.state._increment_run_count()
+            log.debug(f"Setting run count to {node.state.run_count} for {node}")
 
         return node
 
