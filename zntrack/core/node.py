@@ -342,7 +342,8 @@ class Node(zninit.ZnInit, znflow.Node):
             with self.state.fs.open(get_nwd(self) / "node-meta.json") as f:
                 node_meta = json.load(f)
                 self._uuid = uuid.UUID(node_meta["uuid"])
-                self.state._run_count = node_meta["run_count"]
+                self.state._run_count = node_meta.get("run_count", -1)
+                # in older versions, the run_count was not saved.
                 self.state.results = NodeStatusResults.AVAILABLE
         # TODO: documentation about _post_init and _post_load_ and when they are called
 
