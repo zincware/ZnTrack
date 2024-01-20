@@ -3,8 +3,9 @@
 Getting started
 ===============
 
-ZnTrack is designed to build workflows, track parameters and keep track of the associated outputs and metrics. Workflows are defined through Python script and human readable yaml files. The following sections will guide you through the basic concepts of ZnTrack and how to use it.
-
+ZnTrack is designed to build workflows, track parameters, and keep a record of associated outputs and metrics.
+Workflows are defined through Python scripts and human-readable YAML files.
+The following sections will guide you through the basic concepts of ZnTrack and how to use it.
 
 .. toctree::
     :maxdepth: 0
