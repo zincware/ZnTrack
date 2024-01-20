@@ -141,18 +141,16 @@ def test_list_groups(proj_path, runner):
             "ParamsToOuts",
             "ParamsToOuts_1",
         ],
-        "nested": [
-            {
-                "GRP1": [
-                    "ParamsToOuts -> nested_GRP1_ParamsToOuts",
-                    "ParamsToOuts_1 -> nested_GRP1_ParamsToOuts_1",
-                ],
-                "GRP2": [
-                    "ParamsToOuts -> nested_GRP2_ParamsToOuts",
-                    "ParamsToOuts_1 -> nested_GRP2_ParamsToOuts_1",
-                ],
-            }
-        ],
+        "nested": [{
+            "GRP1": [
+                "ParamsToOuts -> nested_GRP1_ParamsToOuts",
+                "ParamsToOuts_1 -> nested_GRP1_ParamsToOuts_1",
+            ],
+            "GRP2": [
+                "ParamsToOuts -> nested_GRP2_ParamsToOuts",
+                "ParamsToOuts_1 -> nested_GRP2_ParamsToOuts_1",
+            ],
+        }],
     }
 
     groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
