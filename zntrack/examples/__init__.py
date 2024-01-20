@@ -275,3 +275,24 @@ class SumRandomNumbersNamed(SumRandomNumbers):
     """Same as SumRandomNumbers but with a custom name."""
 
     _name_ = "custom_SumRandomNumbers"
+
+
+class NodeWithRestart(zntrack.Node):
+    """Node that restarts."""
+
+    start: int = zntrack.params()
+    raise_exception_until: int = zntrack.params(0)
+
+    count: int = zntrack.outs()
+
+    def run(self) -> None:
+        """Run the node.
+
+        Increments the count by one, for each run.
+        Check that the restart flag is set.
+        """
+        self.count = self.start + self.state.run_count
+        if self.state.run_count > 1:
+            assert self.state.restarted
+        if self.state.run_count < self.raise_exception_until:
+            raise ValueError("This is a test exception, simulating killing the Node.")

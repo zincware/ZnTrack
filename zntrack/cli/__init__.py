@@ -78,10 +78,10 @@ def run(node: str, name: str = None, meta_only: bool = False) -> None:
         cls(exec_func=True)
     elif issubclass(cls, Node):
         node: Node = cls.from_rev(name=name, results=False)
+        node.save(meta_only=True)
         if not meta_only:
             node.run()
             node.save(parameter=False)
-        node.save(meta_only=True)
     else:
         raise ValueError(f"Node {node} is not a ZnTrack Node.")
 
