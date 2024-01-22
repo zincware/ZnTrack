@@ -6,7 +6,7 @@
 [![code-style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black/)
 [![Documentation](https://readthedocs.org/projects/zntrack/badge/?version=latest)](https://zntrack.readthedocs.io/en/latest/?badge=latest)
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/zincware/ZnTrack/HEAD)
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6472850.svg)](https://doi.org/10.5281/zenodo.6472850)
+[![DOI](https://img.shields.io/badge/arXiv-arXiv:2401.10603-red)](https://arxiv.org/abs/2401.10603)
 [![ZnTrack](https://img.shields.io/badge/Powered%20by-ZnTrack-%23007CB0)](https://zntrack.readthedocs.io/en/latest/)
 [![zincware](https://img.shields.io/badge/Powered%20by-zincware-darkcyan)](https://github.com/zincware)
 
@@ -134,6 +134,20 @@ config files, defining outputs in the `dvc.yaml` as well as in the script and
 much more.
 
 For more information on DVC visit their [homepage](https://dvc.org/doc).
+
+# References
+If you use this code in your research and find it helpful you can cite us.
+
+```bibtex
+@misc{zillsZnTrackDataCode2024,
+  title = {{{ZnTrack}} - {{Data}} as {{Code}}},
+  author = {Zills, Fabian and Sch{\"a}fer, Moritz and Tovey, Samuel and K{\"a}stner, Johannes and Holm, Christian},
+  year = {2024},
+  month = jan,
+  number = {arXiv:2401.10603},
+  publisher = {{arXiv}},
+}
+```
 
 # Copyright
 
