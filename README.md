@@ -141,13 +141,12 @@ If you use this code in your research and find it helpful you can cite us.
 
 ```bibtex
 @misc{zillsZnTrackDataCode2024,
-  title = {{{ZnTrack}} - {{Data}} as {{Code}}},
+  title = {ZnTrack -- Data as Code},
   author = {Zills, Fabian and Sch{\"a}fer, Moritz and Tovey, Samuel and K{\"a}stner, Johannes and Holm, Christian},
   year = {2024},
-  month = jan,
-  number = {arXiv:2401.10603},
-  publisher = {{arXiv}},
-}
+  eprint={2401.10603},
+  archivePrefix={arXiv},
+} 
 ```
 
 # Copyright
