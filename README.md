@@ -146,7 +146,7 @@ If you use this code in your research and find it helpful you can cite us.
   year = {2024},
   eprint={2401.10603},
   archivePrefix={arXiv},
-} 
+}
 ```
 
 # Copyright
