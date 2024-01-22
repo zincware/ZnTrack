@@ -137,7 +137,7 @@ For more information on DVC visit their [homepage](https://dvc.org/doc).
 
 # References
 
-If you use this code in your research and find it helpful you can cite us.
+If you use ZnTrack in your research and find it helpful please cite us.
 
 ```bibtex
 @misc{zillsZnTrackDataCode2024,
