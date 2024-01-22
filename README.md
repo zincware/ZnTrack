@@ -141,7 +141,7 @@ If you use ZnTrack in your research and find it helpful please cite us.
 
 ```bibtex
 @misc{zillsZnTrackDataCode2024,
-  title = {ZnTrack -- Data as Code},
+  title = {{{ZnTrack}} -- {{Data}} as {{Code}}},
   author = {Zills, Fabian and Sch{\"a}fer, Moritz and Tovey, Samuel and K{\"a}stner, Johannes and Holm, Christian},
   year = {2024},
   eprint={2401.10603},
