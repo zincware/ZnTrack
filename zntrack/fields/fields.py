@@ -1,7 +1,5 @@
 """Fields that are used to define Nodes."""
 
-from typing import Any
-
 from zntrack.fields.dependency import Dependency
 from zntrack.fields.dvc.options import DVCOption, PlotsOption
 from zntrack.fields.zn.options import Output, Params, Plots
@@ -9,7 +7,7 @@ from zntrack.fields.zn.options import Output, Params, Plots
 # Serialized Fields
 
 
-def outs() -> Any:
+def outs():
     """Define a Node Output.
 
     Parameters
