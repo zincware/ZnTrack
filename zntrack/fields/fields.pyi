@@ -1,14 +1,14 @@
 import os
 from typing import Any, Callable, Optional, TypeVar, Union, overload
 
+import pandas as pd
 from zninit.descriptor import Empty
 
 _T = TypeVar("_T")
 _P = TypeVar("_P", bound=Union[str, bytes, os.PathLike])
 
 def outs() -> Any: ...
-
-# TODO: metricts
+def metrics() -> dict[str, Any]: ...
 @overload
 def params(
     default: Empty = ...,
@@ -35,9 +35,13 @@ def params(
     frozen: bool = False,
     on_setattr: Optional[Callable] = ...,
 ) -> _T: ...
-
-# TODO: deps
-# TODO: plots
+@overload
+def deps() -> Any: ...
+@overload
+def deps(data: _T) -> _T: ...
+@overload
+def deps(data1: _T, *data: _T) -> tuple[_T, ...]: ...
+def plots(*data, **kwargs) -> pd.DataFrame: ...
 @overload
 def outs_path(dvc_option: str = ..., **kwargs) -> Any: ...
 @overload
