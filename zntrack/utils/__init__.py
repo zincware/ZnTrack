@@ -15,7 +15,7 @@ import dvc.cli
 import znflow
 import znjson
 
-from zntrack.utils import cli
+from zntrack.utils import cli, misc
 from zntrack.utils.config import DISABLE_TMP_PATH, config
 
 __all__ = [
@@ -23,6 +23,7 @@ __all__ = [
     "node_wd",
     "config",
     "DISABLE_TMP_PATH",
+    "misc"
 ]
 
 if t.TYPE_CHECKING:

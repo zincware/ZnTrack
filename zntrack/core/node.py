@@ -33,6 +33,7 @@ from zntrack.utils import (
     get_nwd,
     module_handler,
 )
+from zntrack import utils
 
 log = logging.getLogger(__name__)
 
@@ -234,6 +235,15 @@ class Node(zninit.ZnInit, znflow.Node):
             fields.dvc.DVCOption,
             _NameDescriptor,
         ]
+    
+
+    def citation(self) -> str:
+        """Cite the node."""
+        return None
+
+    def license(self) -> str:
+        """License of the node."""
+        return None
 
     @property
     def state(self) -> NodeStatus:
@@ -332,6 +342,9 @@ class Node(zninit.ZnInit, znflow.Node):
         if self.name not in zntrack_config:
             raise exceptions.NodeNotAvailableError(self)
 
+        msg = utils.misc.get_init_msg(self)
+        if msg:
+            print(msg)
         self._post_load_()
 
     @classmethod
