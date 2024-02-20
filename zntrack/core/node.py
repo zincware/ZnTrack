@@ -22,7 +22,7 @@ import znflow
 import zninit
 import znjson
 
-from zntrack import exceptions
+from zntrack import exceptions, utils
 from zntrack.notebooks.jupyter import jupyter_class_to_file
 from zntrack.utils import (
     DISABLE_TMP_PATH,
@@ -33,7 +33,6 @@ from zntrack.utils import (
     get_nwd,
     module_handler,
 )
-from zntrack import utils
 
 log = logging.getLogger(__name__)
 
@@ -235,7 +234,6 @@ class Node(zninit.ZnInit, znflow.Node):
             fields.dvc.DVCOption,
             _NameDescriptor,
         ]
-    
 
     def citation(self) -> str:
         """Cite the node."""
