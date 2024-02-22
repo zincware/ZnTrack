@@ -213,6 +213,10 @@ def test_group_nodes(tmp_path_2):
     assert "Group2_ParamsToOuts_1" in group_2
     assert "NamedGrp_NodeA" in group_3
     assert "NamedGrp_NodeB" in group_3
+    assert "NamedGrp_NodeA" not in group_1
+    assert "NamedGrp_NodeB" not in group_1
+    assert "NamedGrp_NodeA" not in group_2
+    assert "NamedGrp_NodeB" not in group_2
 
     # test without group prefix
     assert "ParamsToOuts" in group_1
@@ -222,6 +226,21 @@ def test_group_nodes(tmp_path_2):
     assert "NodeA" in group_3
     assert "NodeB" in group_3
 
+    # test getitem with node name
+    assert group_1["ParamsToOuts"] == node_1
+    assert group_1["ParamsToOuts_1"] == node_2
+    assert group_2["ParamsToOuts"] == node_3
+    assert group_2["ParamsToOuts_1"] == node_4
+    assert group_3["NodeA"] == node_5
+    assert group_3["NodeB"] == node_6
+
+    with pytest.raises(KeyError):
+        group_1["NodeA"]
+    
+    # test iter group
+    assert list(group_1) == [node_1, node_2]
+    assert list(group_2) == [node_3, node_4]
+    assert list(group_3) == [node_5, node_6]
 
 
     assert group_1.name == "Group1"

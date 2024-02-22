@@ -480,13 +480,31 @@ class NodeGroup:
     nwd: pathlib.Path
     nodes: list[Node]
 
+    def _get_name_with_prefix(self, name: str) -> str:
+        """Get the name with the group prefix."""
+        if name.startswith(self.name):
+            return name
+        return f"{self.name}_{name}"
+
     def __contains__(self, item: typing.Union[Node, str]) -> bool:
         """Check if the Node is in the group."""
         if isinstance(item, Node):
             item = item.name
-        if not item.startswith(self.name):
-            item = f"{self.name}_{item}"
+        else:
+            item = self._get_name_with_prefix(item)
         return item in [node.name for node in self.nodes]
+    
+    def __iter__(self) -> typing.Iterator[Node]:
+        """Iterate over the nodes in the group."""
+        return iter(self.nodes)
+    
+    def __getitem__(self, name: int) -> Node:
+        """Get the Node from the group."""
+        name = self._get_name_with_prefix(name)
+        for node in self.nodes:
+            if node.name == name:
+                return node
+        raise KeyError(f"Node {name} not in group {self.name}")
 
     def __len__(self) -> int:
         """Get the number of nodes in the group."""
