@@ -82,6 +82,11 @@ class Project:
         This will require a DVC remote to be setup.
     force : bool, default = False
         overwrite existing nodes.
+    magic_names : bool, default = False
+        If True, use magic names for the nodes. This will use the variable name of the
+        node as the node name. E.g. `node = Node()` will result in a node name of 'node'.
+        If used within a group, the group name will be added to the node name. E.g.
+        `group.name = Grp1` and `model = Node()` will result in a name of 'Grp1_model'.
     """
 
     graph: ZnTrackGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
@@ -90,6 +95,7 @@ class Project:
     automatic_node_names: bool = True
     git_only_repo: bool = True
     force: bool = False
+    magic_names: bool = False
 
     _groups: dict[str, NodeGroup] = dataclasses.field(
         default_factory=dict, init=False, repr=False
@@ -115,6 +121,11 @@ class Project:
             config.files.dvc.unlink(missing_ok=True)
             config.files.params.unlink(missing_ok=True)
             shutil.rmtree("nodes", ignore_errors=True)
+
+        if self.automatic_node_names and self.magic_names:
+            raise ValueError(
+                "automatic_node_names and magic_names can not be True at the same time"
+            )
 
     def __enter__(self, *args, **kwargs):
         """Enter the graph context."""

@@ -552,3 +552,35 @@ def test_auto_remove(proj_path):
     n1 = zntrack.examples.ParamsToOuts.from_rev(n1.name)
     with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
         n2 = zntrack.examples.ParamsToOuts.from_rev(n2.name)
+
+
+def test_magic_names(proj_path):
+    node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+    assert node.name == "ParamsToOuts"
+    with pytest.raises(ValueError):
+        project = zntrack.Project(magic_names=True, automatic_node_names=True)
+
+    project = zntrack.Project(magic_names=True, automatic_node_names=False)
+    with project:
+        node01 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+        node02 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+        node03 = zntrack.examples.ParamsToOuts(params="Test01")
+    assert node01.name == "node01"
+    assert node02.name == "node02"
+    assert node03.name == "node03"
+
+    with project.group("Grp01"):
+        node01 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
+        node02 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
+        grp_node03 = zntrack.examples.ParamsToOuts(params="Test02")
+
+    assert node01.name == "Grp01_node01"
+    assert node02.name == "Grp01_node02"
+    assert grp_node03.name == "Grp01_grp_node03"
+
+    project.run()
+
+    zntrack.from_rev(node01.name).outs == "Lorem Ipsum"
+    zntrack.from_rev(node02.name).outs == "Dolor Sit"
+    zntrack.from_rev(node03.name).outs == "Test01"
+    zntrack.from_rev(grp_node03.name).outs == "Test02"
