@@ -21,7 +21,7 @@ import dvc.utils.strictyaml
 import znflow
 import zninit
 import znjson
-from varname import varname, VarnameException
+from varname import VarnameException, varname
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
