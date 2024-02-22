@@ -234,6 +234,15 @@ def test_group_nodes(tmp_path_2):
     assert group_3["NodeA"] == node_5
     assert group_3["NodeB"] == node_6
 
+    # test getitem with full name
+    assert group_1["Group1_ParamsToOuts"] == node_1
+    assert group_1["Group1_ParamsToOuts_1"] == node_2
+    assert group_2["Group2_ParamsToOuts"] == node_3
+    assert group_2["Group2_ParamsToOuts_1"] == node_4
+    assert group_3["NamedGrp_NodeA"] == node_5
+    assert group_3["NamedGrp_NodeB"] == node_6
+    
+
     with pytest.raises(KeyError):
         group_1["NodeA"]
     
