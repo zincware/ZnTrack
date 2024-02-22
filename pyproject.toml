@@ -21,6 +21,7 @@ zninit = "^0.1.11"
 znjson = "^0.2.2"
 znflow = "^0.1.14"
 typing-extensions = "^4.8.0"
+varname = "^0.13.0"
 
 
 [tool.poetry.urls]

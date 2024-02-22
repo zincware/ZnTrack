@@ -14,6 +14,8 @@ import time
 import typing
 import unittest.mock
 import uuid
+from varname import varname, ImproperUseError
+
 
 import dvc.api
 import dvc.cli
@@ -161,8 +163,10 @@ class _NameDescriptor(zninit.Descriptor):
         if isinstance(value, NodeName):
             if not instance._external_:
                 value.update_suffix(instance._graph_.project, instance)
+            value.varname = varname(frame=4)
             instance._name_ = value
         elif isinstance(getattr(instance, "_name_"), NodeName):
+            instance._name_.varname = varname(frame=4)
             instance._name_.name = value
             instance._name_.suffix = 0
             instance._name_.update_suffix(instance._graph_.project, instance)
@@ -191,7 +195,7 @@ class Node(zninit.ZnInit, znflow.Node):
 
     _protected_ = znflow.Node._protected_ + ["name"]
     _priority_kwargs_ = ["name"]
-
+    
     @property
     def _use_repr_(self) -> bool:
         """Only use dataclass like __repr__ if outside the _graph_ to avoid recursion.
