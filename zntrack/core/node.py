@@ -162,16 +162,12 @@ class _NameDescriptor(zninit.Descriptor):
         if isinstance(value, NodeName):
             if not instance._external_:
                 value.update_suffix(instance._graph_.project, instance)
-            try:
+            with contextlib.suppress(VarnameException):
                 value.varname = varname(frame=4)
-            except VarnameException:
-                pass
             instance._name_ = value
         elif isinstance(getattr(instance, "_name_"), NodeName):
-            try:
+            with contextlib.suppress(VarnameException):
                 instance._name_.varname = varname(frame=4)
-            except VarnameException:
-                pass
             instance._name_.name = value
             instance._name_.suffix = 0
             instance._name_.update_suffix(instance._graph_.project, instance)
