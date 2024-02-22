@@ -149,7 +149,7 @@ class WriteDVCOutsSequence(zntrack.Node):
     """Write an output file."""
 
     params: list = zntrack.params()
-    outs: list | tuple | set | dict = zntrack.outs_path()
+    outs: t.Union[list, tuple, set, dict] = zntrack.outs_path()
 
     def run(self):
         """Write an output file."""
