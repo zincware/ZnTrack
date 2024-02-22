@@ -21,6 +21,7 @@ import dvc.utils.strictyaml
 import znflow
 import zninit
 import znjson
+from varname import VarnameException, varname
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
@@ -67,6 +68,7 @@ class NodeStatus:
     tmp_path: pathlib.Path = dataclasses.field(
         default=DISABLE_TMP_PATH, init=False, repr=False
     )
+    _run_count: int = dataclasses.field(default=0, init=False, repr=False)
 
     @functools.cached_property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -144,6 +146,20 @@ class NodeStatus:
                     )
                     self.tmp_path = None
 
+    def _increment_run_count(self) -> None:
+        """Increment the run count."""
+        self._run_count += 1
+
+    @property
+    def run_count(self) -> int:
+        """Get the run count."""
+        return self._run_count
+
+    @property
+    def restarted(self) -> bool:
+        """Whether the node was restarted."""
+        return self._run_count > 1
+
 
 class _NameDescriptor(zninit.Descriptor):
     """A descriptor for the name attribute."""
@@ -161,8 +177,12 @@ class _NameDescriptor(zninit.Descriptor):
         if isinstance(value, NodeName):
             if not instance._external_:
                 value.update_suffix(instance._graph_.project, instance)
+            with contextlib.suppress(VarnameException):
+                value.varname = varname(frame=4)
             instance._name_ = value
         elif isinstance(getattr(instance, "_name_"), NodeName):
+            with contextlib.suppress(VarnameException):
+                instance._name_.varname = varname(frame=4)
             instance._name_.name = value
             instance._name_.suffix = 0
             instance._name_.update_suffix(instance._graph_.project, instance)
@@ -255,7 +275,9 @@ class Node(zninit.ZnInit, znflow.Node):
             # the meta data will only be written here.
             import json
 
-            (self.nwd / "node-meta.json").write_text(json.dumps({"uuid": str(self.uuid)}))
+            (self.nwd / "node-meta.json").write_text(
+                json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
+            )
             return
 
         # TODO have an option to save and run dvc commit afterwards.
@@ -317,14 +339,15 @@ class Node(zninit.ZnInit, znflow.Node):
         except KeyError as err:
             raise exceptions.NodeNotAvailableError(self) from err
 
-        if results:
-            with contextlib.suppress(FileNotFoundError):
-                # If the uuid is available, we can assume that all data for
-                #  this Node is available.
-                with self.state.fs.open(get_nwd(self) / "node-meta.json") as f:
-                    node_meta = json.load(f)
-                    self._uuid = uuid.UUID(node_meta["uuid"])
-                    self.state.results = NodeStatusResults.AVAILABLE
+        with contextlib.suppress(FileNotFoundError):
+            # If the uuid is available, we can assume that all data for
+            #  this Node is available.
+            with self.state.fs.open(get_nwd(self) / "node-meta.json") as f:
+                node_meta = json.load(f)
+                self._uuid = uuid.UUID(node_meta["uuid"])
+                self.state._run_count = node_meta.get("run_count", -1)
+                # in older versions, the run_count was not saved.
+                self.state.results = NodeStatusResults.AVAILABLE
         # TODO: documentation about _post_init and _post_load_ and when they are called
 
         zntrack_config = json.loads(self.state.fs.read_text(config.files.zntrack))
@@ -367,6 +390,12 @@ class Node(zninit.ZnInit, znflow.Node):
             # by default, tmp_path is disabled.
             # if remote or rev is set, we enable it.
             node.state.tmp_path = None
+
+        if not results:
+            # if a node is loaded without results and saved afterwards,
+            #  we count this as a run.
+            node.state._increment_run_count()
+            log.debug(f"Setting run count to {node.state.run_count} for {node}")
 
         return node
 

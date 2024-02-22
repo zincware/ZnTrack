@@ -71,7 +71,7 @@ class Project:
     remove_existing_graph : bool, default = False
         If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
             before writing new nodes.
-    automatic_node_names : bool, default = False
+    automatic_node_names : bool, default = True
         If True, automatically add a number to the node name if the name is already
             used in the graph.
     git_only_repo : bool, default = True
@@ -82,14 +82,20 @@ class Project:
         This will require a DVC remote to be setup.
     force : bool, default = False
         overwrite existing nodes.
+    magic_names : bool, default = False
+        If True, use magic names for the nodes. This will use the variable name of the
+        node as the node name. E.g. `node = Node()` will result in a node name of 'node'.
+        If used within a group, the group name will be added to the node name. E.g.
+        `group.name = Grp1` and `model = Node()` will result in a name of 'Grp1_model'.
     """
 
     graph: ZnTrackGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
     initialize: bool = True
     remove_existing_graph: bool = False
-    automatic_node_names: bool = False
+    automatic_node_names: bool = True
     git_only_repo: bool = True
     force: bool = False
+    magic_names: bool = False
 
     _groups: dict[str, NodeGroup] = dataclasses.field(
         default_factory=dict, init=False, repr=False
@@ -115,6 +121,11 @@ class Project:
             config.files.dvc.unlink(missing_ok=True)
             config.files.params.unlink(missing_ok=True)
             shutil.rmtree("nodes", ignore_errors=True)
+
+        if self.automatic_node_names and self.magic_names:
+            raise ValueError(
+                "automatic_node_names and magic_names can not be True at the same time"
+            )
 
     def __enter__(self, *args, **kwargs):
         """Enter the graph context."""
@@ -480,9 +491,31 @@ class NodeGroup:
     nwd: pathlib.Path
     nodes: list[Node]
 
-    def __contains__(self, item: Node) -> bool:
+    def _get_name_with_prefix(self, name: str) -> str:
+        """Get the name with the group prefix."""
+        if name.startswith(self.name):
+            return name
+        return f"{self.name}_{name}"
+
+    def __contains__(self, item: typing.Union[Node, str]) -> bool:
         """Check if the Node is in the group."""
-        return item in self.nodes
+        if isinstance(item, Node):
+            item = item.name
+        else:
+            item = self._get_name_with_prefix(item)
+        return item in [node.name for node in self.nodes]
+
+    def __iter__(self) -> typing.Iterator[Node]:
+        """Iterate over the nodes in the group."""
+        return iter(self.nodes)
+
+    def __getitem__(self, name: int) -> Node:
+        """Get the Node from the group."""
+        name = self._get_name_with_prefix(name)
+        for node in self.nodes:
+            if node.name == name:
+                return node
+        raise KeyError(f"Node {name} not in group {self.name}")
 
     def __len__(self) -> int:
         """Get the number of nodes in the group."""
