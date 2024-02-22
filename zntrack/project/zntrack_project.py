@@ -85,7 +85,7 @@ class Project:
     magic_names : bool, default = False
         If True, use magic names for the nodes. This will use the variable name of the
         node as the node name. E.g. `node = Node()` will result in a node name of 'node'.
-        If used within a group, the group name will be added to the node name. E.g. 
+        If used within a group, the group name will be added to the node name. E.g.
         `group.name = Grp1` and `model = Node()` will result in a name of 'Grp1_model'.
     """
 
