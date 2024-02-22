@@ -71,7 +71,7 @@ class Project:
     remove_existing_graph : bool, default = False
         If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
             before writing new nodes.
-    automatic_node_names : bool, default = False
+    automatic_node_names : bool, default = True
         If True, automatically add a number to the node name if the name is already
             used in the graph.
     git_only_repo : bool, default = True
@@ -87,7 +87,7 @@ class Project:
     graph: ZnTrackGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
     initialize: bool = True
     remove_existing_graph: bool = False
-    automatic_node_names: bool = False
+    automatic_node_names: bool = True
     git_only_repo: bool = True
     force: bool = False
 
