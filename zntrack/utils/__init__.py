@@ -227,21 +227,28 @@ class NodeName:
 
     groups: list[str]
     name: str
+    varname: str = None
     suffix: int = 0
+    use_varname: bool = False
 
     def __str__(self) -> str:
         """Get the node name."""
         name = []
         if self.groups is not None:
             name.extend(self.groups)
-        name.append(self.name)
+        if self.use_varname:
+            name.append(self.varname)
+        else:
+            name.append(self.name)
+        if self.suffix > 0 and self.use_varname:
+            raise ValueError("Suffixes are not supported for magic names (varnames).")
         if self.suffix > 0:
             name.append(str(self.suffix))
         return "_".join(name)
 
     def get_name_without_groups(self) -> str:
         """Get the node name without the groups."""
-        name = self.name
+        name = self.varname if self.use_varname else self.name
         if self.suffix > 0:
             name += f"_{self.suffix}"
         return name
@@ -249,6 +256,7 @@ class NodeName:
     def update_suffix(self, project: "Project", node: "Node") -> None:
         """Update the suffix."""
         node_names = [x["value"].name for x in project.graph.nodes.values()]
+        self.use_varname = project.magic_names
 
         node_names = []
         for node_uuid in project.graph.nodes:
