@@ -22,7 +22,7 @@ import znflow
 import zninit
 import znjson
 
-from zntrack import exceptions
+from zntrack import exceptions, utils
 from zntrack.notebooks.jupyter import jupyter_class_to_file
 from zntrack.utils import (
     DISABLE_TMP_PATH,
@@ -235,6 +235,14 @@ class Node(zninit.ZnInit, znflow.Node):
             _NameDescriptor,
         ]
 
+    def citation(self) -> str:
+        """Cite the node."""
+        return None
+
+    def license(self) -> str:
+        """License of the node."""
+        return None
+
     @property
     def state(self) -> NodeStatus:
         """Get the state of the node."""
@@ -332,6 +340,9 @@ class Node(zninit.ZnInit, znflow.Node):
         if self.name not in zntrack_config:
             raise exceptions.NodeNotAvailableError(self)
 
+        msg = utils.misc.get_init_msg(self)
+        if msg:
+            print(msg)
         self._post_load_()
 
     @classmethod
