@@ -10,17 +10,16 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0.0"
-dvc = "^3.2.2"
-pyyaml = "^6.0"
-tqdm = "^4.64.0"
+dvc = "^3.3"
+pyyaml = "^6"
+tqdm = "^4"
 pandas = "^2"
-typer = "^0.7.0"
+typer = "^0.7"
 
-dot4dict = "^0.1.1"
-zninit = "^0.1.11"
-znjson = "^0.2.2"
-znflow = "^0.1.14"
-typing-extensions = "^4.8.0"
+dot4dict = "^0.1"
+zninit = "^0.1"
+znjson = "^0.2"
+znflow = "^0.1"
 
 
 [tool.poetry.urls]
@@ -32,27 +31,27 @@ repository = "https://github.com/zincware/ZnTrack"
 zntrack = "zntrack.cli:app"
 
 [tool.poetry.group.dev.dependencies]
-pytest-benchmark = "^3.4.1"
-pytest = "^7.1.2"
-numpy = "^1.23"
-matplotlib = "^3.5.2"
-ase = "^3.22.1"
-pre-commit = ">=2.20,<4.0"
-coverage = "^6.4"
-pytest-xdist = "^2.5.0"
-optuna = "^3.1.1"
-scikit-learn = "^1.2.2"
-nbmake = "1.4.3"
+pytest-benchmark = "^3"
+pytest = "^7"
+numpy = "^1"
+matplotlib = "^3"
+ase = "^3"
+pre-commit = "^2"
+coverage = "^6"
+pytest-xdist = "^2"
+optuna = "^3"
+scikit-learn = "^1"
+nbmake = "^1"
 
 [tool.poetry.group.notebook.dependencies]
-jupyterlab = "^3.4.3"
+jupyterlab = "^3"
 
 [tool.poetry.group.docs.dependencies]
-furo = "^2022.12.7"
-sphinx-copybutton = "^0.5.1"
-sphinx = "^6.1.3"
-nbsphinx = "^0.8.12"
-nbsphinx-link = "^1.3.0"
+furo = "^2022"
+sphinx-copybutton = "^0.5"
+sphinx = "^6"
+nbsphinx = "^0.8"
+nbsphinx-link = "^1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
