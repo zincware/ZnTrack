@@ -557,7 +557,10 @@ def test_auto_remove(proj_path):
 def test_magic_names(proj_path):
     node = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
     assert node.name == "ParamsToOuts"
-    project = zntrack.Project(magic_names=True)
+    with pytest.raises(ValueError):
+        project = zntrack.Project(magic_names=True, automatic_node_names=True)
+
+    project = zntrack.Project(magic_names=True, automatic_node_names=False)
     with project:
         node01 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
         node02 = zntrack.examples.ParamsToOuts(params="Dolor Sit")

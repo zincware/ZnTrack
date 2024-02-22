@@ -121,6 +121,9 @@ class Project:
             config.files.dvc.unlink(missing_ok=True)
             config.files.params.unlink(missing_ok=True)
             shutil.rmtree("nodes", ignore_errors=True)
+        
+        if self.automatic_node_names and self.magic_names:
+            raise ValueError("automatic_node_names and magic_names can not be True at the same time")
 
     def __enter__(self, *args, **kwargs):
         """Enter the graph context."""
