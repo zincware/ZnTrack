@@ -14,8 +14,6 @@ import time
 import typing
 import unittest.mock
 import uuid
-from varname import varname, ImproperUseError
-
 
 import dvc.api
 import dvc.cli
@@ -23,6 +21,7 @@ import dvc.utils.strictyaml
 import znflow
 import zninit
 import znjson
+from varname import varname
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
@@ -195,7 +194,7 @@ class Node(zninit.ZnInit, znflow.Node):
 
     _protected_ = znflow.Node._protected_ + ["name"]
     _priority_kwargs_ = ["name"]
-    
+
     @property
     def _use_repr_(self) -> bool:
         """Only use dataclass like __repr__ if outside the _graph_ to avoid recursion.
