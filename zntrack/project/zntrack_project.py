@@ -493,11 +493,11 @@ class NodeGroup:
         else:
             item = self._get_name_with_prefix(item)
         return item in [node.name for node in self.nodes]
-    
+
     def __iter__(self) -> typing.Iterator[Node]:
         """Iterate over the nodes in the group."""
         return iter(self.nodes)
-    
+
     def __getitem__(self, name: int) -> Node:
         """Get the Node from the group."""
         name = self._get_name_with_prefix(name)
