@@ -27,14 +27,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Install Poetry
-        run: |
-          pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'poetry'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
       - name: Install package
         run: |
           poetry install --no-interaction
@@ -45,6 +46,7 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
+          poetry run python --version
           poetry run coverage run -m pytest --benchmark-autosave -vv
           poetry run coverage xml
           poetry run coverage lcov
@@ -64,14 +66,15 @@ jobs:
     needs: [ pytest ]
     steps:
       - uses: actions/checkout@v2
-      - name: Install Poetry
-        run: |
-          pipx install poetry
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v3
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
-          cache: 'poetry'
+          python-version: "3.11"
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
       - name: Install package
         run: |
           poetry install
@@ -89,14 +92,15 @@ jobs:
     needs: [ pytest, nbtest ]
     steps:
       - uses: actions/checkout@v2
-      - name: Install Poetry
-        run: |
-          pipx install poetry
       - name: Set up Python 3.11
-        uses: actions/setup-python@v3
+        uses: actions/setup-python@v4
         with:
           python-version: "3.11"
-          cache: 'poetry'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
       - name: Install package
         run: |
           sudo apt install pandoc
