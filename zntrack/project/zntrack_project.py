@@ -480,9 +480,13 @@ class NodeGroup:
     nwd: pathlib.Path
     nodes: list[Node]
 
-    def __contains__(self, item: Node) -> bool:
+    def __contains__(self, item: typing.Union[Node, str]) -> bool:
         """Check if the Node is in the group."""
-        return item in self.nodes
+        if isinstance(item, Node):
+            item = item.name
+        if not item.startswith(self.name):
+            item = f"{self.name}_{item}"
+        return item in [node.name for node in self.nodes]
 
     def __len__(self) -> int:
         """Get the number of nodes in the group."""

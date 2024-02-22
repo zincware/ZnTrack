@@ -194,6 +194,7 @@ def test_group_nodes(tmp_path_2):
 
     project.run()
 
+    # test nodes in groups
     assert node_1 in group_1
     assert node_2 in group_1
     assert node_3 not in group_1
@@ -204,6 +205,24 @@ def test_group_nodes(tmp_path_2):
     assert node_4 in group_2
     assert node_5 in group_3
     assert node_6 in group_3
+
+    # test node_names in project
+    assert "Group1_ParamsToOuts" in group_1
+    assert "Group1_ParamsToOuts_1" in group_1
+    assert "Group2_ParamsToOuts" in group_2
+    assert "Group2_ParamsToOuts_1" in group_2
+    assert "NamedGrp_NodeA" in group_3
+    assert "NamedGrp_NodeB" in group_3
+
+    # test without group prefix
+    assert "ParamsToOuts" in group_1
+    assert "ParamsToOuts_1" in group_1
+    assert "ParamsToOuts" in group_2
+    assert "ParamsToOuts_1" in group_2
+    assert "NodeA" in group_3
+    assert "NodeB" in group_3
+
+
 
     assert group_1.name == "Group1"
     assert group_2.name == "Group2"
