@@ -229,7 +229,7 @@ class NodeName:
     name: str
     varname: str = None
     suffix: int = 0
-    use_varname: bool = True
+    use_varname: bool = False
 
     def __str__(self) -> str:
         """Get the node name."""

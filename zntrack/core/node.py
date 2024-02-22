@@ -21,7 +21,7 @@ import dvc.utils.strictyaml
 import znflow
 import zninit
 import znjson
-from varname import varname
+from varname import varname, VarnameException
 
 from zntrack import exceptions
 from zntrack.notebooks.jupyter import jupyter_class_to_file
@@ -162,10 +162,16 @@ class _NameDescriptor(zninit.Descriptor):
         if isinstance(value, NodeName):
             if not instance._external_:
                 value.update_suffix(instance._graph_.project, instance)
-            value.varname = varname(frame=4)
+            try:
+                value.varname = varname(frame=4)
+            except VarnameException:
+                pass
             instance._name_ = value
         elif isinstance(getattr(instance, "_name_"), NodeName):
-            instance._name_.varname = varname(frame=4)
+            try:
+                instance._name_.varname = varname(frame=4)
+            except VarnameException:
+                pass
             instance._name_.name = value
             instance._name_.suffix = 0
             instance._name_.update_suffix(instance._graph_.project, instance)
