@@ -20,6 +20,8 @@ dot4dict = "^0.1"
 zninit = "^0.1"
 znjson = "^0.2"
 znflow = "^0.1"
+# for Python3.12 compatibliity
+pyzmq = "^25"
 
 
 [tool.poetry.urls]
