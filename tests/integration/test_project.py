@@ -525,7 +525,7 @@ def test_magic_names(proj_path):
         node01 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
         node02 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
         grp_node03 = zntrack.examples.ParamsToOuts(params="Test02")
-    
+
     assert node01.name == "Grp01_node01"
     assert node02.name == "Grp01_node02"
     assert grp_node03.name == "Grp01_grp_node03"
