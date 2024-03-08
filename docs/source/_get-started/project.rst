@@ -10,15 +10,15 @@ Let's assume the following two nodes:
     import zntrack
 
     class AddOne(zntrack.Node):
-        parameter: int = zntrack.zn.params()
-        outputs: int = zntrack.zn.outputs()
+        parameter: int = zntrack.params()
+        outputs: int = zntrack.outputs()
 
         def run(self):
             self.outputs = self.parameter + 1
 
     class SubtractOne(zntrack.Node):
-        parameter: int = zntrack.zn.deps()
-        outputs: int = zntrack.zn.outputs()
+        parameter: int = zntrack.deps()
+        outputs: int = zntrack.outputs()
 
         def run(self):
             self.outputs = self.parameter - 1
