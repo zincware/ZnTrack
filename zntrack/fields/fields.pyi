@@ -1,8 +1,7 @@
 import os
-from typing import Any, Callable, Optional, TypeVar, Union, overload, Literal
+from typing import Any, Callable, Literal, Optional, TypeVar, Union, overload
 
 import pandas as pd
-
 from zninit.descriptor import _Empty_TYPE
 
 _T = TypeVar("_T")
