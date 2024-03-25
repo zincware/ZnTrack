@@ -17,6 +17,7 @@ def outs():
             The object is serialized and deserialized by ZnTrack
             and stored in the node working directory.
             see https://dvc.org/doc/command-reference/stage/add#-o
+
     """
     return Output(dvc_option="outs", use_repr=False)
 
@@ -49,6 +50,7 @@ def params(*args, **kwargs):
         see https://dvc.org/doc/command-reference/stage/add#-p
     kwargs: dict
         Additional keyword arguments.
+
     """
     return Params(*args, **kwargs)
 
@@ -63,6 +65,7 @@ def deps(*data):
         This can either be a Node or an attribute of a Node.
         It can not be an object that is not part of the Node graph.
         see https://dvc.org/doc/command-reference/stage/add#-d
+
     """
     return Dependency(*data)
 
@@ -132,6 +135,7 @@ def params_path(*args, **kwargs):
         see https://dvc.org/doc/command-reference/stage/add#-p
     kwargs: dict
         Additional keyword arguments.
+
     """
     return DVCOption(*args, dvc_option="params", **kwargs)
 
@@ -163,5 +167,6 @@ def plots_path(*args, dvc_option="plots", **kwargs):
         The DVC option to use for this field.
     kwargs: dict
         Additional keyword arguments that are used for plotting.
+
     """
     return PlotsOption(*args, dvc_option=dvc_option, **kwargs)

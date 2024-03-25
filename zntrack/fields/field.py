@@ -36,6 +36,7 @@ class Field(zninit.Descriptor, abc.ABC):
     ----------
     dvc_option : str
         The dvc command option for this field.
+
     """
 
     dvc_option: str = None
@@ -49,6 +50,7 @@ class Field(zninit.Descriptor, abc.ABC):
         ----------
         instance : Node
             The Node instance to save the field for.
+
         """
         raise NotImplementedError
 
@@ -70,6 +72,7 @@ class Field(zninit.Descriptor, abc.ABC):
         -------
         list
             The affected files.
+
         """
         raise NotImplementedError
 
@@ -83,6 +86,7 @@ class Field(zninit.Descriptor, abc.ABC):
         lazy : bool, optional
             Whether to load the field lazily.
             This only applies to 'LazyField' classes.
+
         """
         try:
             instance.__dict__[self.name] = self.get_data(instance)
@@ -103,6 +107,7 @@ class Field(zninit.Descriptor, abc.ABC):
         -------
         typing.List[tuple]
             The stage add argument for this field.
+
         """
         return [
             (f"--{self.dvc_option}", pathlib.Path(x).as_posix())
@@ -127,6 +132,7 @@ class Field(zninit.Descriptor, abc.ABC):
         -------
         typing.List[str]
             The optional dvc commands.
+
         """
         return []
 
@@ -173,6 +179,7 @@ class LazyField(Field):
         ------
         DataIsLazyError
             If the value is lazy.
+
         """
         with contextlib.suppress(KeyError):
             if instance.__dict__[self.name] is LazyOption:
@@ -198,6 +205,7 @@ class LazyField(Field):
             The Node instance to load the field for.
         lazy : bool, optional
             Whether to load the field lazily, by default 'zntrack.config.lazy'.
+
         """
         if lazy in {None, True} and config.lazy:
             instance.__dict__[self.name] = LazyOption
@@ -226,6 +234,7 @@ class PlotsMixin(Field):
         ----------
         use_global_plots : bool
             Save the plots config not in 'stages' but in 'plots' in the dvc.yaml file.
+
         """
         super().__init__(*args, **kwargs)
         self.plots_options = {}
