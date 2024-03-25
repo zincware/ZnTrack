@@ -103,6 +103,7 @@ class Params(Field):
     ----------
     dvc_option: str
         The DVC option to use. Default is "params".
+
     """
 
     dvc_option: str = "params"
@@ -115,6 +116,7 @@ class Params(Field):
         -------
         list
             A list of file paths.
+
         """
         return [config.files.params]
 
@@ -125,6 +127,7 @@ class Params(Field):
         ----------
         instance : Node
             The node instance associated with this field.
+
         """
         file = self.get_files(instance)[0]
 
@@ -161,6 +164,7 @@ class Params(Field):
         -------
         list
             A list of tuples containing the DVC option and the file path.
+
         """
         file = self.get_files(instance)[0]
         return [(f"--{self.dvc_option}", f"{file}:{instance.name}")]
@@ -180,6 +184,7 @@ class Output(LazyField):
             The DVC option used to specify the output file.
         **kwargs
             Additional arguments to pass to the parent constructor.
+
         """
         self.dvc_option = dvc_option
         super().__init__(**kwargs)
@@ -196,6 +201,7 @@ class Output(LazyField):
         -------
         list
             A list containing the path of the file.
+
         """
         return [get_nwd(instance) / f"{self.name}.json"]
 
@@ -206,6 +212,7 @@ class Output(LazyField):
         ----------
         instance : Node
             The node instance.
+
         """
         try:
             value = self.get_value_except_lazy(instance)
@@ -236,6 +243,7 @@ class Output(LazyField):
         -------
         list
             A list containing the DVC command for this field.
+
         """
         file = self.get_files(instance)[0]
         return [(f"--{self.dvc_option}", file.as_posix())]

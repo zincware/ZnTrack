@@ -111,6 +111,7 @@ class DVCOption(Field):
         -------
         any
             The value of the field from the configuration file.
+
         """
         zntrack_dict = json.loads(
             instance.state.fs.read_text("zntrack.json"),

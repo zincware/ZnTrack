@@ -35,6 +35,7 @@ class DVCRunOptions:
     References
     ----------
     https://dvc.org/doc/command-reference/run#options.
+
     """
 
     no_commit: bool
@@ -51,6 +52,7 @@ class DVCRunOptions:
         -------
         list: A list of strings for the subprocess call, e.g.:
             ["--no-commit", "--external"].
+
         """
         out = []
         for datacls_field in dataclasses.fields(self):
@@ -97,6 +99,7 @@ def prepare_dvc_script(
     -------
     list[str]
         The list to be passed to the subprocess call.
+
     """
     script = ["stage", "add", "-n", node_name]
     script += dvc_run_option.dvc_args
@@ -134,6 +137,7 @@ def check_type(
         accept None even if not in types.
     allow_dict:
         allow for {key: types}
+
     """
     if isinstance(obj, (list, tuple, set)) and allow_iterable:
         for value in obj:
@@ -254,6 +258,7 @@ def save_node_config_to_files(cfg: NodeConfig, node_name: str):
         The NodeConfig object which should be serialized to zntrack.json / params.yaml
     node_name: str
         The name of the node, usually func.__name__.
+
     """
     for value_name, value in dataclasses.asdict(cfg).items():
         if value_name == "params":
@@ -339,6 +344,7 @@ def nodify(
     References
     ----------
     https://dvc.org/doc/command-reference/run#options
+
     """
     cfg_ = NodeConfig(
         outs=outs,

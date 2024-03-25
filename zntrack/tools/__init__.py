@@ -21,6 +21,7 @@ def timeit(field: str):
     field : str
         The field to store the time in.
         The value is stored as {func_name: time} or {func_name: [time1, time2, ...]}
+
     """
 
     def decorator(func):

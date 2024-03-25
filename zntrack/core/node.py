@@ -59,6 +59,7 @@ class NodeStatus:
         The temporary path used for loading the data.
         This is only set within the context manager 'use_tmp_path'.
         If neither 'remote' nor 'rev' are set, tmp_path will not be used.
+
     """
 
     loaded: bool
@@ -202,6 +203,7 @@ class Node(zninit.ZnInit, znflow.Node):
         information about the state of the Node.
     nwd : pathlib.Path
         the node working directory.
+
     """
 
     _state: NodeStatus = None
@@ -235,6 +237,7 @@ class Node(zninit.ZnInit, znflow.Node):
         ----------
         nb_name: str
             Notebook name when not using config.nb_name (this is not recommended)
+
         """
         # TODO this should not be a class method, but a function.
         jupyter_class_to_file(nb_name=nb_name, module_name=cls.__name__)
@@ -324,6 +327,7 @@ class Node(zninit.ZnInit, znflow.Node):
             Whether to load the node lazily. If None, the value from the config is used.
         results : bool, default = True
             Whether to load the results. If False, only the parameters are loaded.
+
         """
         from zntrack.fields.field import Field, FieldGroup
 

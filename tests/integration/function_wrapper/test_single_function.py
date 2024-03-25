@@ -24,18 +24,20 @@ def test_example_func(proj_path):
 
 def test_example_func_dry_run(proj_path):
     script = example_func(dry_run=True)
-    assert " ".join(script) == " ".join([
-        "stage",
-        "add",
-        "-n",
-        "example_func",
-        "--force",
-        "--params",
-        "params.yaml:example_func",
-        "--outs",
-        "test.txt",
-        "zntrack run test_single_function.example_func",
-    ])
+    assert " ".join(script) == " ".join(
+        [
+            "stage",
+            "add",
+            "-n",
+            "example_func",
+            "--force",
+            "--params",
+            "params.yaml:example_func",
+            "--outs",
+            "test.txt",
+            "zntrack run test_single_function.example_func",
+        ]
+    )
 
 
 @zntrack.nodify(outs=[pathlib.Path("test.txt")], params={"text": "Lorem Ipsum"})
