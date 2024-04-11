@@ -255,7 +255,6 @@ class NodeName:
 
     def update_suffix(self, project: "Project", node: "Node") -> None:
         """Update the suffix."""
-        # node_names = [x["value"].name for x in project.graph.nodes.values()]
         self.use_varname = project.magic_names
 
         node_names = []
