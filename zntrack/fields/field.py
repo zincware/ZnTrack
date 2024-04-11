@@ -50,7 +50,7 @@ class Field(zninit.Descriptor, abc.ABC):
         ----------
         instance : Node
             The Node instance to save the field for.
-            
+
         """
         raise NotImplementedError
 
@@ -162,7 +162,6 @@ class Field(zninit.Descriptor, abc.ABC):
         with open(config.files.zntrack, "w") as f:
             json.dump(zntrack_dict, f, indent=4, cls=encoder)
 
-
     def get_zntrack_data(self, instance: "Node") -> dict:
         """Get the data that will be written to the zntrack config file."""
         return {}
@@ -170,10 +169,11 @@ class Field(zninit.Descriptor, abc.ABC):
     def get_dvc_data(self, instance: "Node") -> dict:
         """Get the data that will be written to the dvc config file."""
         return {}
-    
+
     def get_params_data(self, instance: "Node") -> dict:
         """Get the data that will be written to the params file."""
         return {}
+
 
 class DataIsLazyError(Exception):
     """Exception to raise when a field is accessed that contains lazy data."""

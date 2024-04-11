@@ -302,8 +302,7 @@ class Dependency(LazyField):
                 entry.name = entry_name
 
         return entry
-    
-            
+
     def get_dvc_data(self, instance: "Node") -> dict:
         """Get the DVC data."""
         return {"deps": [x.as_posix() for x in self.get_files(instance)]}

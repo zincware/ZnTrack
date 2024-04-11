@@ -274,7 +274,7 @@ class Plots(PlotsMixin, LazyField):
     def get_dvc_data(self, instance: "Node") -> dict:
         """Get the DVC data."""
         return {"plots": [x.as_posix() for x in self.get_files(instance)]}
-    
+
     def get_zntrack_data(self, instance: "Node") -> dict:
         """Get the zntrack data."""
         return {self.name: pathlib.Path(f"$nwd$/{self.name}.csv")}
