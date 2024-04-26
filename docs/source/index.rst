@@ -3,6 +3,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. _DVC: https://dvc.org/
+
 ZnTrack's documentation!
 ========================
 
@@ -15,7 +17,9 @@ ZnTrack's documentation!
    <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
    <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=fork&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
 
-ZnTrack is `zincware's <https://github.com/zincware>`_ first developer package and in fact, the first released on PyPi, so we are glad you are here. ZnTrack is built to help you write code that can easily be shared and reproduced.
+Welcome to ZnTrack, the first developer package from zincware <https://github.com/zincware>_.
+We're excited to have you on board!
+ZnTrack is designed to simplify code sharing and reproducibility.
 
 - :ref:`userdoc-get-started`
 - :ref:`userdoc-examples`
@@ -26,9 +30,23 @@ ZnTrack is `zincware's <https://github.com/zincware>`_ first developer package a
 Example
 ==========
 
-Here are two examples of how ZnTrack Nodes can look like.
-ZnTrack supports function and class based Nodes, as well as the combination of both.
-For more information, refer to the :ref:`userdoc-get-started` section.
+With ZnTrack, you can construct a reproducible workflow using Nodes.
+A Node, in this context, is a Python class or function with well-defined:
+
+* **Inputs:** Parameters and dependencies.
+* **Outputs:** Files, metrics, and plots.
+* **Code:** Function or class run method.
+
+
+Nodes are connected by passing one node instance or attribute to another, similar to regular Python objects.
+Unlike executing standard Python objects, ZnTrack enables you to define the workflow first, and the code is executed in a subsequent step.
+
+ZnTrack offers node tracking using DVC_, a Git-like version control system for data.
+This feature provides automatic checkpoints, caching, and facilitates the effortless sharing of your workflow.
+
+Here are two examples illustrating what ZnTrack Nodes can look like.
+ZnTrack supports both function and class-based Nodes, as well as a combination of both.
+For detailed information, check out the :ref:userdoc-get-started section.
 
 Class based Node
 ----------------
@@ -37,10 +55,10 @@ Class based Node
    import zntrack
 
    class AddNumbers(zntrack.Node):
-      number1 = zntrack.zn.params()
-      number2 = zntrack.zn.params()
+      number1 = zntrack.params()
+      number2 = zntrack.params()
 
-      result = zntrack.zn.outs()
+      result = zntrack.outs()
 
       def run(self):
          self.result = self.number1 + self.number2

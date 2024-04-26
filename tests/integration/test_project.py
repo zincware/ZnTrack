@@ -580,7 +580,7 @@ def test_magic_names(proj_path):
 
     project.run()
 
-    zntrack.from_rev(node01.name).outs == "Lorem Ipsum"
-    zntrack.from_rev(node02.name).outs == "Dolor Sit"
-    zntrack.from_rev(node03.name).outs == "Test01"
-    zntrack.from_rev(grp_node03.name).outs == "Test02"
+    assert zntrack.from_rev(node01.name).outs == "Lorem Ipsum"
+    assert zntrack.from_rev(node02.name).outs == "Dolor Sit"
+    assert zntrack.from_rev(node03.name).outs == "Test01"
+    assert zntrack.from_rev(grp_node03.name).outs == "Test02"

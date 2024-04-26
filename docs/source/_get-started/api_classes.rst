@@ -14,30 +14,30 @@ Compared to the function-based approach, the class-based approach has several ad
 - Parameters, inputs, and outputs are handled as class attributes, simplifying the creation of new Nodes.
 
 To define a custom Node, simply inherit from the Node class. Parameters and outputs can be defined in two ways.
-The ``from zntrack import zn`` module enables seamless integration with your existing workflows, allowing Python objects to be automatically serialized.
-
+The ``zntrack.<field>`` enables seamless integration with your existing workflows, allowing Python objects to be automatically serialized.
+Alternatively, you can use the ``zntrack.params_path()`` and ``zntrack.outs_path()`` to define the paths to the respective files.
 
 ..  code-block:: python
 
-    from zntrack import Node, zn, Project
+    import zntrack
 
-    class SumValues(Node):
+    class SumValues(zntrack.Node):
         """Node to compute the sum of two parameters."""
-        a = zn.params()
-        b = zn.params()
+        a = zntrack.params()
+        b = zntrack.params()
 
-        result = zn.outs()
+        result = zntrack.outs()
 
         def run(self):
             """Compute the sum of two parameters."""
             self.result = self.a + self.b
 
     if __name__ == "__main__":
-        with Project() as project:
+        with zntrack.Project() as project:
             node = SumValues(a=1, b=2)
         project.run(repro=False)
 
-We define our parameter using ``zn.params()`` and define the respective output using ``zn.outs()``.
+We define our parameter using ``zntrack.params()`` and define the respective output using ``zntrack.outs()``.
 
 Gather results
 --------------
@@ -70,7 +70,7 @@ Explanation
 
 The same files as in the previous ``@nodify`` example are created.
 The main difference is the ``outs`` of our Node ``SumValues``.
-Using the `zntrack.zn` module will store results in the Node Working Directory (``nwd``),
+Using the `zntrack.outs` will store results in the Node Working Directory (``nwd``),
 It is typically set as ``nodes/<nodename>``.
 The ``outs.json`` file is used, when calling ``node.load()`` to gather the results.
 
