@@ -104,3 +104,20 @@ def test_AddNodeAttributes_legacy(proj_path):
     assert add_numbers_b.state.loaded
     assert add_nodes.c == 7
     assert add_nodes.state.loaded
+
+
+def test_OptionalDeps(proj_path):
+    with zntrack.Project() as proj:
+        add_numbers = zntrack.examples.AddNumbers(a=1, b=2)
+        add_none = zntrack.examples.OptionalDeps()
+        add_value = zntrack.examples.OptionalDeps(value=add_numbers.c)
+
+    proj.run()
+
+    add_numbers.load()
+    add_none.load()
+    add_value.load()
+
+    assert add_numbers.c == 3
+    assert add_none.result == 0.0
+    assert add_value.result == 3.0
