@@ -296,3 +296,14 @@ class NodeWithRestart(zntrack.Node):
             assert self.state.restarted
         if self.state.run_count < self.raise_exception_until:
             raise ValueError("This is a test exception, simulating killing the Node.")
+
+
+class OptionalDeps(zntrack.Node):
+    """Node with optional dependencies."""
+
+    value: float = zntrack.deps(None)
+    result: float = zntrack.outs()
+
+    def run(self) -> None:
+        """Run the node."""
+        self.result = self.value or 0.0
