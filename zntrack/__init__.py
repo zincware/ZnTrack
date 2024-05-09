@@ -13,12 +13,12 @@ from zntrack.fields import Field, FieldGroup, LazyField, dvc, meta, zn
 from zntrack.fields.fields import (
     deps,
     deps_path,
+    local_config,
     metrics,
     metrics_path,
     outs,
     outs_path,
     params,
-    local_config,
     params_path,
     plots,
     plots_path,

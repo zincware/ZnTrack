@@ -165,6 +165,7 @@ class Params(Field):
         file = self.get_files(instance)[0]
         return [(f"--{self.dvc_option}", f"{file}:{instance.name}")]
 
+
 class LocalConfig(Params):
     def get_files(self, instance: "Node") -> list:
         """Get the list of files affected by this field.
