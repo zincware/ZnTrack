@@ -165,6 +165,7 @@ class Params(Field):
         file = self.get_files(instance)[0]
         return [(f"--{self.dvc_option}", f"{file}:{instance.name}")]
 
+
 class LocalParams(Params):
     def get_files(self, instance: "Node") -> list:
         """Get the list of files affected by this field.
@@ -175,6 +176,7 @@ class LocalParams(Params):
             A list of file paths.
         """
         return [config.files.local_zntrack]
+
 
 class Output(LazyField):
     """A field that is saved to disk."""

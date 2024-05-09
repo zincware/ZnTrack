@@ -2,7 +2,7 @@
 
 from zntrack.fields.dependency import Dependency
 from zntrack.fields.dvc.options import DVCOption, PlotsOption
-from zntrack.fields.zn.options import Output, Params, LocalParams, Plots
+from zntrack.fields.zn.options import LocalParams, Output, Params, Plots
 
 # Serialized Fields
 
@@ -51,6 +51,7 @@ def params(*args, **kwargs):
         Additional keyword arguments.
     """
     return Params(*args, **kwargs)
+
 
 def local_params(*args, **kwargs):
     """Define a Node Parameter.
