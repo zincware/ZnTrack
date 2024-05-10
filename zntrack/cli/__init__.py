@@ -71,6 +71,7 @@ def run(node: str, name: str = None, meta_only: bool = False) -> None:
 
     package_and_module, cls = node.rsplit(".", 1)
     module = importlib.import_module(package_and_module)
+    notification_handler = utils.NotificationHandler.from_config(".zntrack/config.local")
 
     cls = getattr(module, cls)
 
@@ -84,7 +85,8 @@ def run(node: str, name: str = None, meta_only: bool = False) -> None:
             node.save(parameter=False)
     else:
         raise ValueError(f"Node {node} is not a ZnTrack Node.")
-
+    
+    notification_handler.send(f"Node {name} executed successfully.")
 
 @app.command()
 def init(

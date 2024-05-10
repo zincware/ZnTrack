@@ -17,12 +17,14 @@ import znjson
 
 from zntrack.utils import cli
 from zntrack.utils.config import DISABLE_TMP_PATH, config
+from zntrack.utils.notification import NotificationHandler
 
 __all__ = [
     "cli",
     "node_wd",
     "config",
     "DISABLE_TMP_PATH",
+    "NotificationHandler",
 ]
 
 if t.TYPE_CHECKING:
