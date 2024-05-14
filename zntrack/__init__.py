@@ -23,7 +23,7 @@ from zntrack.fields.fields import (
     plots_path,
 )
 from zntrack.project import Project
-from zntrack.utils import config
+from zntrack.utils import apply, config
 from zntrack.utils.node_wd import nwd
 
 __version__ = importlib.metadata.version("zntrack")
@@ -45,6 +45,7 @@ __all__ = [
     "exceptions",
     "from_rev",
     "get_nodes",
+    "apply",
 ]
 
 __all__ += [

@@ -47,7 +47,9 @@ def main(
 
 
 @app.command()
-def run(node: str, name: str = None, meta_only: bool = False) -> None:
+def run(
+    node: str, name: str = None, meta_only: bool = False, method: str = "run"
+) -> None:
     """Execute a ZnTrack Node.
 
     Use as 'zntrack run module.Node --name node_name'.
@@ -80,7 +82,8 @@ def run(node: str, name: str = None, meta_only: bool = False) -> None:
         node: Node = cls.from_rev(name=name, results=False)
         node.save(meta_only=True)
         if not meta_only:
-            node.run()
+            # dynamic version of node.run()
+            getattr(node, method)()
             node.save(parameter=False)
     else:
         raise ValueError(f"Node {node} is not a ZnTrack Node.")
