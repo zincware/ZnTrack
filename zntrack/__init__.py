@@ -23,7 +23,8 @@ from zntrack.fields.fields import (
     plots_path,
 )
 from zntrack.project import Project
-from zntrack.utils import apply, config
+from zntrack.utils import config
+from zntrack.utils.apply import apply
 from zntrack.utils.node_wd import nwd
 
 __version__ = importlib.metadata.version("zntrack")

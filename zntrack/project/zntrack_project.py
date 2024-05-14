@@ -287,7 +287,10 @@ class Project:
                 # update connectors
                 log.info(f"Running node {node}")
                 self.graph._update_node_attributes(node, UpdateConnectors())
-                node.run()
+                if hasattr(node, "_method"):
+                    getattr(node, node._method)()
+                else:
+                    node.run()
                 if save:
                     node.save()
                 node.state.loaded = True

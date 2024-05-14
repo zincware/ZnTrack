@@ -1,9 +1,12 @@
 """Test the apply function."""
 
+import pytest
+
 import zntrack.examples
 
 
-def test_apply(proj_path) -> None:
+@pytest.mark.parametrize("eager", [True, False])
+def test_apply(proj_path, eager) -> None:
     """Test the "zntrack.apply" function."""
     project = zntrack.Project()
 
@@ -14,7 +17,7 @@ def test_apply(proj_path) -> None:
         b = JoinedParamsToOuts(params=["a", "b"])
         c = zntrack.apply(zntrack.examples.ParamsToOuts, "join")(params=["a", "b", "c"])
 
-    project.run()
+    project.run(eager=eager)
 
     a.load()
     b.load()
