@@ -8,10 +8,16 @@ o = t.TypeVar("o")
 def apply(obj: o, method: str) -> o:
     """Return a new object like "o" which has the method string attached."""
 
-    class _(obj):
+    class MockInheritanceClass(obj):
+        """Copy of the original class with the new method attribute.
+
+        We can not set the method directly on the original class, because
+        it would be used by all the other instances of the class as well.
+        """
+
         _method = method
 
-    _.__module__ = obj.__module__
-    _.__name__ = obj.__name__
+    MockInheritanceClass.__module__ = obj.__module__
+    MockInheritanceClass.__name__ = obj.__name__
 
-    return _
+    return MockInheritanceClass
