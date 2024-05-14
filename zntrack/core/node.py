@@ -443,7 +443,13 @@ def get_dvc_cmd(
         cmd += ["--outs", f"{(get_nwd(node) /'node-meta.json').as_posix()}"]
 
     module = module_handler(node.__class__)
-    cmd += [f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"]
+
+    zntrack_run = f"zntrack run {module}.{node.__class__.__name__} --name {node.name}"
+    if hasattr(node, "_method"):
+        zntrack_run += f" --method {node._method}"
+
+    cmd += [zntrack_run]
+
     optionals = [x for x in optionals if x]  # remove empty entries []
     return [cmd] + optionals
 

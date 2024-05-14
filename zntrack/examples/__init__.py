@@ -23,6 +23,10 @@ class ParamsToOuts(zntrack.Node):
         """Save params to outs."""
         self.outs = self.params
 
+    def join(self) -> None:
+        """Join the results."""
+        self.outs = "-".join(self.params)
+
 
 class ParamsToMetrics(zntrack.Node):
     """Save params to metrics."""
