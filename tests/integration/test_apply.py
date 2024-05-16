@@ -35,6 +35,8 @@ def test_deps_apply(proj_path, eager):
 
     JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")
 
+    assert issubclass(JoinedParamsToOuts, zntrack.Node)
+
     with project:
         a = zntrack.examples.ParamsToOuts(params=["a", "b"])
         b = JoinedParamsToOuts(params=["a", "b"])
@@ -45,5 +47,10 @@ def test_deps_apply(proj_path, eager):
     project.run(eager=eager)
 
     x3.load()
+    
+    assert isinstance(a, zntrack.Node)
+    assert isinstance(b, zntrack.Node)
+    assert isinstance(c, zntrack.Node)
+    assert isinstance(x3, zntrack.Node)
 
     assert x3.c == 'a-ba-b-c'
