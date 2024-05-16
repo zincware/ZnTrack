@@ -26,3 +26,24 @@ def test_apply(proj_path, eager) -> None:
     assert a.outs == ["a", "b"]
     assert b.outs == "a-b"
     assert c.outs == "a-b-c"
+
+@pytest.mark.parametrize("eager", [True, False])
+def test_deps_apply(proj_path, eager):
+    """Test connecting applied nodes to other nodes."""
+
+    project = zntrack.Project()
+
+    JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")
+
+    with project:
+        a = zntrack.examples.ParamsToOuts(params=["a", "b"])
+        b = JoinedParamsToOuts(params=["a", "b"])
+        c = zntrack.apply(zntrack.examples.ParamsToOuts, "join")(params=["a", "b", "c"])
+
+        x3 = zntrack.examples.AddNumbers(a=b.outs, b=c.outs)
+
+    project.run(eager=eager)
+
+    x3.load()
+
+    assert x3.c == 'a-ba-b-c'
