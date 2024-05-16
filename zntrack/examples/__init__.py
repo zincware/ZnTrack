@@ -86,6 +86,17 @@ class AddNodes(zntrack.Node):
         """Add two nodes."""
         self.c = self.a.c + self.b.c
 
+class AddNodes2(zntrack.Node):
+    """Add two nodes."""
+
+    a: AddNumbers = zntrack.deps()
+    b: AddNumbers = zntrack.deps()
+    c = zntrack.outs()
+
+    def run(self):
+        """Add two nodes."""
+        self.c = self.a.outs + self.b.outs
+
 
 class AddNodeAttributes(zntrack.Node):
     """Add two node attributes."""
