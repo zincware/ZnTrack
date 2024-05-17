@@ -27,6 +27,7 @@ def test_apply(proj_path, eager) -> None:
     assert b.outs == "a-b"
     assert c.outs == "a-b-c"
 
+
 @pytest.mark.parametrize("attribute", [True, False])
 @pytest.mark.parametrize("eager", [True, False])
 def test_deps_apply(proj_path, eager, attribute):
@@ -57,5 +58,4 @@ def test_deps_apply(proj_path, eager, attribute):
     assert isinstance(c, zntrack.Node)
     assert isinstance(x3, zntrack.Node)
 
-    assert x3.c == 'a-ba-b-c'
-
+    assert x3.c == "a-ba-b-c"

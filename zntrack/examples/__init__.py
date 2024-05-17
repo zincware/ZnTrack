@@ -86,6 +86,7 @@ class AddNodes(zntrack.Node):
         """Add two nodes."""
         self.c = self.a.c + self.b.c
 
+
 class AddNodes2(zntrack.Node):
     """Add two nodes."""
 
