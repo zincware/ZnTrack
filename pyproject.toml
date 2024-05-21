@@ -21,8 +21,6 @@ zninit = "^0.1"
 znjson = "^0.2"
 znflow = "^0.1"
 varname = "^0.13"
-# for Python3.12 compatibliity
-pyzmq = "^25"
 
 
 [tool.poetry.urls]
