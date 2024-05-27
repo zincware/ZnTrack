@@ -14,15 +14,13 @@ dvc = "^3.3"
 pyyaml = "^6"
 tqdm = "^4"
 pandas = "^2"
-typer = "^0.7"
 
 dot4dict = "^0.1"
 zninit = "^0.1"
 znjson = "^0.2"
 znflow = "^0.1"
 varname = "^0.13"
-# for Python3.12 compatibliity
-pyzmq = "^25"
+typer = "^0"
 
 
 [tool.poetry.urls]
