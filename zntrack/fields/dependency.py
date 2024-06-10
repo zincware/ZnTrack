@@ -96,6 +96,7 @@ class Dependency(LazyField):
             The nodes that are on the graph.
         off_graph : list
             The nodes that are off the graph.
+
         """
         values = getattr(instance, self.name)
         # TODO use IterableHandler?

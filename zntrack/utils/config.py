@@ -15,6 +15,7 @@ class Files:
     Notes
     -----
     Currently frozen because changing the value is not tested.
+
     """
 
     zntrack: Path = Path("zntrack.json")
@@ -55,6 +56,7 @@ class Config:
         Use the `dvc.cli.main` function instead of subprocess
     disable_operating_directory: bool, default = False
         Global config to disable operating directory context manager.
+
     """
 
     nb_name: str = None
@@ -86,6 +88,7 @@ class Config:
         Yields
         ------
             Environment with temporarily changed config.
+
         """
         state = {}
         for key, value in kwargs.items():

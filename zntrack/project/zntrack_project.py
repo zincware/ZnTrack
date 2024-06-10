@@ -87,6 +87,7 @@ class Project:
         node as the node name. E.g. `node = Node()` will result in a node name of 'node'.
         If used within a group, the group name will be added to the node name. E.g.
         `group.name = Grp1` and `model = Node()` will result in a name of 'Grp1_model'.
+
     """
 
     graph: ZnTrackGraph = dataclasses.field(default_factory=ZnTrackGraph, init=False)
@@ -111,6 +112,7 @@ class Project:
         remove_existing_graph : bool, default = False
             If True, remove 'dvc.yaml', 'zntrack.json' and 'params.yaml'
               before writing new nodes.
+
         """
         self.graph.project = self
         if self.initialize:
@@ -157,6 +159,7 @@ class Project:
             The name of the group. If None, the group will be named 'GroupX' where X is
             the number of groups + 1. If more than one name is given, the groups will
             be nested to 'nwd = name[0]/name[1]/.../name[-1]'
+
         """
         if not names:
             name = "Group1"
@@ -248,6 +251,7 @@ class Project:
         auto_remove : bool, default = False
             If True, remove all nodes from 'dvc.yaml' that are not in the graph.
             This is the same as calling 'project.auto_remove()'
+
         """
         if not save and not eager:
             raise ValueError("Save can only be false if eager is True")

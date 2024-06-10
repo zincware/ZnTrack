@@ -58,6 +58,7 @@ def _import_from_tempfile(package_and_module: str, remote, rev):
         If the module could not be found.
     FileNotFoundError
         If the file could not be found.
+
     """
     file = pathlib.Path(*package_and_module.split(".")).with_suffix(".py")
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
@@ -93,6 +94,7 @@ def from_rev(name, remote=".", rev=None, **kwargs) -> T:
     -------
     Node
         The loaded node.
+
     """
     if isinstance(name, Node):
         name = name.name

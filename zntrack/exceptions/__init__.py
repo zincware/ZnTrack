@@ -11,6 +11,7 @@ class NodeNotAvailableError(Exception):
         ----------
         arg : str|Node
             Custom Error message or Node that is not available.
+
         """
         if isinstance(arg, str):
             super().__init__(arg)
@@ -33,6 +34,7 @@ class ZnNodesOnGraphError(Exception):
             The 'zn.nodes' field
         instance : Node
             The node that contains the 'zn.nodes' field
+
         """
         msg = (
             f"Can not set '{field.name}' of Node<'{instance.name}'> to"
@@ -59,6 +61,7 @@ class DuplicateNodeNameError(Exception):
         ----------
         node: Node
             The node that is already on the graph.
+
         """
         msg = (
             f"Node name '{node.name}' is already used in the graph. Please use"

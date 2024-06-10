@@ -28,6 +28,7 @@ def read_file(file: pathlib.Path) -> dict:
     -------
     dict:
         Content of the json/yaml file
+
     """
     if file.suffix in [".yaml", ".yml"]:
         file_content = yaml.safe_load(file.read_text())
@@ -51,6 +52,7 @@ def write_file(file: pathlib.Path, value: dict, mkdir: bool = True):
         Any serializable data to save
     mkdir: bool
         Create a parent directory if necessary
+
     """
     if mkdir:
         file.parent.mkdir(exist_ok=True, parents=True)
@@ -72,6 +74,7 @@ def clear_config_file(file: typing.Union[pathlib.Path, str], node_name: str):
         The file to read from, e.g. params.yaml / zntrack.json
     node_name: str
         The name of the Node
+
     """
     file = pathlib.Path(file)
     try:
@@ -107,6 +110,7 @@ def update_config_file(
         be {node_name: value}.
     value:
         The value to write to the file
+
     """
     # Read file
     if node_name is None and value_name is None:
