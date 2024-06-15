@@ -40,6 +40,7 @@ class Initializer:
         Raises
         ------
         typer.Exit: if the directory is not empty and force is false
+
         """
         is_empty = not any(pathlib.Path(".").iterdir())
         if not is_empty and not self.force:
@@ -92,6 +93,7 @@ def get_groups(remote, rev) -> (dict, list):
         values. Contains "short-name -> long-name" if inside a group.
     node_names: list
         A list of all node names in the project.
+
     """
     fs = DVCFileSystem(url=remote, rev=rev)
     with fs.open("zntrack.json") as f:

@@ -39,6 +39,7 @@ class LazyOption:
         ------
         NotImplementedError:
             This class is not meant to be instantiated.
+
         """
         raise NotImplementedError("This class is not meant to be instantiated.")
 
@@ -60,6 +61,7 @@ def module_handler(obj) -> str:
     ----------
     obj:
         Any object that implements __module__
+
     """
     if config.nb_name:
         try:
@@ -111,6 +113,7 @@ def run_dvc_cmd(script, stdout=None):
     ------
     DVCProcessError:
         if the dvc cli command fails.
+
     """
     dvc_short_string = " ".join(script[:5])
     if len(script) > 5:
@@ -177,6 +180,7 @@ class NodeStatusResults(enum.Enum):
         the Node instance has failed to run.
     AVAILABLE : int
         the Node instance was loaded and results are available.
+
     """
 
     UNKNOWN = 0
@@ -202,6 +206,7 @@ def cwd_temp_dir(required_files=None) -> tempfile.TemporaryDirectory:
     -------
     temp_dir:
         The temporary  directory file. Close with temp_dir.cleanup() at the end.
+
     """
     temp_dir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
     # add ignore_cleanup_errors=True in Py3.10?
