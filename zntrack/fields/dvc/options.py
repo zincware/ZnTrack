@@ -56,6 +56,44 @@ class DVCOption(Field):
         self.dvc_option = kwargs.pop("dvc_option")
         super().__init__(*args, **kwargs)
 
+    def get_dvc_data(self, instance: "Node") -> dict:
+        """Get the data to be saved to the dvc.yaml file.
+
+        Parameters
+        ----------
+        instance : Node
+            The node instance to get the data for.
+
+        Returns
+        -------
+        dict
+            The data to be saved to the dvc.yaml file.
+
+        """
+        return {self.dvc_option: self.get_files(instance)}
+
+    def get_zntrack_data(self, instance: "Node") -> dict:
+        """Get the data to be saved to the zntrack.json file.
+
+        Parameters
+        ----------
+        instance : Node
+            The node instance to get the data for.
+
+        Returns
+        -------
+        dict
+            The data to be saved to the zntrack.json file.
+
+        """
+        try:
+            value = instance.__dict__[self.name]
+        except KeyError:
+            # Taken from DVCOption.save.
+            # TODO: Should we return an empty dict if getattr fails?
+            value = getattr(instance, self.name)
+        return {self.name: {"_type": _get_import_path(value), "value": value}}
+
     def get_files(self, instance: "Node") -> list:
         """Get the files affected by this field.
 
@@ -168,3 +206,9 @@ class DVCOption(Field):
 
 class PlotsOption(PlotsMixin, DVCOption):
     """Field with DVC plots kwargs."""
+
+
+# TODO: How was this done previously?
+def _get_import_path(obj):
+    obj_type = type(obj)
+    return f"{obj_type.__module__}.{obj_type.__qualname__}"
