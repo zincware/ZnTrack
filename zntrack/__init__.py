@@ -1,16 +1,5 @@
-"""ZnTrack - Create, visualize, run & benchmark DVC pipelines in Python.
-
-GitHub: https://github.com/zincware/ZnTrack
-"""
-
-import importlib.metadata
-
-from zntrack import exceptions, tools
-from zntrack.core.load import from_rev, get_nodes
-from zntrack.core.node import Node
-from zntrack.core.nodify import NodeConfig, nodify
-from zntrack.fields import Field, FieldGroup, LazyField, dvc, meta, zn
-from zntrack.fields.fields import (
+from .node import Node
+from .options import (
     deps,
     deps_path,
     metrics,
@@ -22,42 +11,17 @@ from zntrack.fields.fields import (
     plots,
     plots_path,
 )
-from zntrack.project import Project
-from zntrack.utils import config
-from zntrack.utils.apply import apply
-from zntrack.utils.node_wd import nwd
-
-__version__ = importlib.metadata.version("zntrack")
 
 __all__ = [
-    "Node",
-    "dvc",
-    "zn",
-    "Project",
-    "nwd",
-    "meta",
-    "config",
-    "Field",
-    "LazyField",
-    "FieldGroup",
-    "nodify",
-    "NodeConfig",
-    "tools",
-    "exceptions",
-    "from_rev",
-    "get_nodes",
-    "apply",
-]
-
-__all__ += [
-    "outs",
-    "metrics",
     "params",
     "deps",
+    "outs",
     "plots",
-    "outs_path",
-    "metrics_path",
+    "metrics",
     "params_path",
     "deps_path",
+    "outs_path",
     "plots_path",
+    "metrics_path",
+    "Node",
 ]
