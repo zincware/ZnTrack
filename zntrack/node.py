@@ -12,11 +12,11 @@ class Node(znflow.Node, znfields.Base):
 
     def __init_subclass__(cls):
         return dataclasses.dataclass(cls)
-    
+
     @property
     def name(self) -> str:
         return self.uuid.hex[:4]
-    
+
     @property
     def nwd(self) -> pathlib.Path:
         return pathlib.Path(f"nodes/{self.name}/")

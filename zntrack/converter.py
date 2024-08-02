@@ -1,9 +1,9 @@
-import znjson
-from .node import Node
-import znflow
-import pathlib
 import dataclasses
 
+import znflow
+import znjson
+
+from .node import Node
 
 
 class NodeConverter(znjson.ConverterBase):
@@ -16,11 +16,13 @@ class NodeConverter(znjson.ConverterBase):
             "name": obj.name,
             "class": None,
             "remove": None,
-            "rev": None
+            "rev": None,
         }
+
     def decode(self, s: str) -> None:
         return None
-    
+
+
 class ConnectionConverter(znjson.ConverterBase):
     """Convert a znflow.Connection object to dict and back."""
 
@@ -42,7 +44,8 @@ class ConnectionConverter(znjson.ConverterBase):
     def decode(self, value: dict) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
         return znflow.Connection(**value)
-    
+
+
 # zntrack.json
 
 
@@ -54,16 +57,21 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
             "nwd": node.nwd,
         }
         for field in dataclasses.fields(node):
-            if field.metadata.get("zntrack.option") in ["params", "outs", "plots", "metrics"]:
+            if field.metadata.get("zntrack.option") in [
+                "params",
+                "outs",
+                "plots",
+                "metrics",
+            ]:
                 continue
             data[node.name][field.name] = getattr(node, field.name)
     return data
 
 
-# dvc.yaml    
+# dvc.yaml
 def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
     stages = {}
-    plots =  {}
+    plots = {}
     for node_uuid in obj:
         node: Node = obj.nodes[node_uuid]["value"]
         stages[node.name] = {}
@@ -82,7 +90,9 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
             if field.metadata.get("zntrack.option") == "outs":
                 if "outs" not in stages[node.name]:
                     stages[node.name]["outs"] = []
-                stages[node.name]["outs"].append((node.nwd / field.name).with_suffix(".json").as_posix())
+                stages[node.name]["outs"].append(
+                    (node.nwd / field.name).with_suffix(".json").as_posix()
+                )
 
         # ensure no duplicates
         if "params" in stages[node.name]:
@@ -90,10 +100,10 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
         if "outs" in stages[node.name]:
             # TODO: handle pathlib, lists, dicts, etc.
             pass
-                
+
     return {"stages": stages, "plots": plots}
 
-    
+
 # params.yaml
 def convert_graph_to_parameter(obj: znflow.DiGraph) -> dict:
     data = {}

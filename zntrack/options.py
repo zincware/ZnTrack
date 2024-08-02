@@ -8,7 +8,6 @@ _ZNTRACK_OPTION = "zntrack.option"
 _ZNTRACK_DEFAULT = object()
 
 
-
 @functools.wraps(znfields.field)
 def params(default=dataclasses.MISSING, **kwargs):
     # TODO: check types, do not allow e.g. connections or anything that can not be serialized
