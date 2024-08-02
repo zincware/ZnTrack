@@ -74,7 +74,9 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
     plots = {}
     for node_uuid in obj:
         node: Node = obj.nodes[node_uuid]["value"]
-        stages[node.name] = {}
+        stages[node.name] = {
+            "cmd": f"zntrack run module.{node.name} --name {node.name}",
+        }
         for field in dataclasses.fields(node):
             if field.metadata.get("zntrack.option") == "params":
                 if "params" not in stages[node.name]:
