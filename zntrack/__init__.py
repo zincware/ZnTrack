@@ -1,5 +1,4 @@
 from .node import Node
-from .project import Project
 from .options import (
     deps,
     deps_path,
@@ -12,6 +11,7 @@ from .options import (
     plots,
     plots_path,
 )
+from .project import Project
 
 __all__ = [
     "params",
