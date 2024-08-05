@@ -1,3 +1,6 @@
+import logging
+import sys
+
 from .node import Node
 from .options import (
     deps,
@@ -12,8 +15,6 @@ from .options import (
     plots_path,
 )
 from .project import Project
-import logging
-import sys
 
 __all__ = [
     "params",

@@ -1,18 +1,19 @@
+import logging
+
 import yaml
 import znflow
 import znjson
 
 from . import config, converter
 
-import logging
-
 log = logging.getLogger(__name__)
+
 
 class Project(znflow.DiGraph):
 
     def add_node(self, node_for_adding, **attr):
         return super().add_node(node_for_adding, **attr)
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         # need to fix the node names
         all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]

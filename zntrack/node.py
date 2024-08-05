@@ -10,7 +10,8 @@ import znflow
 @dataclasses.dataclass(kw_only=True)
 class Node(znflow.Node, znfields.Base):
     """A Node."""
-    name: str|None = None
+
+    name: str | None = None
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name"]
 

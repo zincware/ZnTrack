@@ -1,8 +1,8 @@
 import dataclasses
+import typing as t
 
 import znflow
 import znjson
-import typing as t
 
 from .node import Node
 from .utils import module_handler
@@ -14,6 +14,7 @@ class NodeDict(t.TypedDict):
     cls: str
     remote: t.Optional[t.Any]
     rev: t.Optional[t.Any]
+
 
 class NodeConverter(znjson.ConverterBase):
     instance = Node
@@ -118,9 +119,11 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
                 if isinstance(data, list):
                     for con in data:
                         # we need a good way to find the things we actually want to depend on:
-                        # either just the `node-meta` which is sufficient 
+                        # either just the `node-meta` which is sufficient
                         # or specify specifig outs to avoid re-running stage
-                        stages[node.name]["deps"].extend(node_to_output_paths(con.instance))
+                        stages[node.name]["deps"].extend(
+                            node_to_output_paths(con.instance)
+                        )
 
         # ensure no duplicates
         if "params" in stages[node.name]:
