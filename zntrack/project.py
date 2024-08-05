@@ -4,6 +4,9 @@ import znjson
 
 from . import config, converter
 
+import logging
+
+log = logging.getLogger(__name__)
 
 class Project(znflow.DiGraph):
 
@@ -28,12 +31,15 @@ class Project(znflow.DiGraph):
         return super().__exit__(exc_type, exc_val, exc_tb)
 
     def build(self) -> None:
+        log.info(f"Saving {config.PARAMS_FILE_PATH}")
         config.PARAMS_FILE_PATH.write_text(
             yaml.safe_dump(converter.convert_graph_to_parameter(self))
         )
+        log.info(f"Saving {config.DVC_FILE_PATH}")
         config.DVC_FILE_PATH.write_text(
             yaml.safe_dump(converter.convert_graph_to_dvc_config(self))
         )
+        log.info(f"Saving {config.ZNTRACK_FILE_PATH}")
         config.ZNTRACK_FILE_PATH.write_text(
             znjson.dumps(
                 converter.convert_graph_to_zntrack_config(self),

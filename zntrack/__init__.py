@@ -12,6 +12,8 @@ from .options import (
     plots_path,
 )
 from .project import Project
+import logging
+import sys
 
 __all__ = [
     "params",
@@ -27,3 +29,15 @@ __all__ = [
     "Node",
     "Project",
 ]
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Formatter for advanced logging
+formatter = logging.Formatter("%(asctime)s - %(levelname)s: %(message)s")
+
+channel = logging.StreamHandler(sys.stdout)
+channel.setLevel(logging.INFO)
+channel.setFormatter(formatter)
+
+logger.addHandler(channel)

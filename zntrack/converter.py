@@ -107,6 +107,20 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
                 stages[node.name]["outs"].append(
                     (node.nwd / field.name).with_suffix(".json").as_posix()
                 )
+            if field.metadata.get("zntrack.option") == "deps_path":
+                if "deps" not in stages[node.name]:
+                    stages[node.name]["deps"] = []
+                stages[node.name]["deps"].append(getattr(node, field.name))
+            if field.metadata.get("zntrack.option") == "deps":
+                if "deps" not in stages[node.name]:
+                    stages[node.name]["deps"] = []
+                data = getattr(node, field.name)
+                if isinstance(data, list):
+                    for con in data:
+                        # we need a good way to find the things we actually want to depend on:
+                        # either just the `node-meta` which is sufficient 
+                        # or specify specifig outs to avoid re-running stage
+                        stages[node.name]["deps"].extend(node_to_output_paths(con.instance))
 
         # ensure no duplicates
         if "params" in stages[node.name]:
@@ -129,3 +143,12 @@ def convert_graph_to_parameter(obj: znflow.DiGraph) -> dict:
                     data[node.name] = {}
                 data[node.name][field.name] = getattr(node, field.name)
     return data
+
+
+def node_to_output_paths(node: Node) -> t.List[str]:
+    """Get all output paths for a node."""
+    paths = []
+    for field in dataclasses.fields(node):
+        if field.metadata.get("zntrack.option") == "outs":
+            paths.append((node.nwd / field.name).with_suffix(".json").as_posix())
+    return paths
