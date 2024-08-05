@@ -2,20 +2,30 @@ import dataclasses
 
 import znflow
 import znjson
+import typing as t
 
 from .node import Node
+from .utils import module_handler
 
+
+class NodeDict(t.TypedDict):
+    module: str
+    name: str
+    remote: t.Optional[t.Any]
+    rev: t.Optional[t.Any]
+
+NodeDict.__annotations__['class'] = str
 
 class NodeConverter(znjson.ConverterBase):
     instance = Node
     representation = "src.Node"
 
-    def encode(self, obj: Node) -> dict:
+    def encode(self, obj: Node) -> NodeDict:
         return {
-            "module": None,
+            "module": module_handler(obj),
             "name": obj.name,
-            "class": None,
-            "remove": None,
+            "class": obj.__class__.__name__,
+            "remote": None,
             "rev": None,
         }
 
@@ -74,8 +84,11 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
     plots = {}
     for node_uuid in obj:
         node: Node = obj.nodes[node_uuid]["value"]
+
+        node_dict = NodeConverter().encode(node)
+
         stages[node.name] = {
-            "cmd": f"zntrack run module.{node.name} --name {node.name}",
+            "cmd": f"zntrack run {node_dict['module']}.{node_dict['class']} --name {node_dict['name']}",
         }
         for field in dataclasses.fields(node):
             if field.metadata.get("zntrack.option") == "params":
