@@ -1,0 +1,5 @@
+stages:
+  MyNode:
+    cmd: zntrack run test_basic.MyNode --name MyNode
+    params:
+    - MyNode

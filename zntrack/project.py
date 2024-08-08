@@ -44,7 +44,7 @@ class Project(znflow.DiGraph):
         config.ZNTRACK_FILE_PATH.write_text(
             znjson.dumps(
                 converter.convert_graph_to_zntrack_config(self),
-                indent=2,
+                indent=4,
                 cls=znjson.ZnEncoder.from_converters(
                     [converter.ConnectionConverter, converter.NodeConverter],
                     add_default=True,
