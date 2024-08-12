@@ -1,17 +1,22 @@
 import dataclasses
 import functools
-
-import znfields
-import pathlib
-import yaml
 import json
+import pathlib
+
+import yaml
+import znfields
+import znflow
 import znjson
 
-_ZNTRACK_OPTION = "zntrack.option"
-_ZNTRACK_CACHE = "zntrack.cache"
-
-_ZNTRACK_DEFAULT = object()
-_ZNTRACK_LAZY_VALUE = object()
+from .config import (
+    PARAMS_FILE_PATH,
+    ZNTRACK_CACHE,
+    ZNTRACK_DEFAULT,
+    ZNTRACK_FILE_PATH,
+    ZNTRACK_LAZY_VALUE,
+    ZNTRACK_OPTION,
+)
+from .converter import ConnectionConverter, NodeConverter
 
 # TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
 # raise an error if passed to `metrics_path` etc.
@@ -20,20 +25,20 @@ _ZNTRACK_LAZY_VALUE = object()
 
 def _params_getter(self, name):
     if name in self.__dict__:
-        if self.__dict__[name] is not _ZNTRACK_LAZY_VALUE:
+        if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
     # TODO: DVCFileSystem
-    with pathlib.Path("params.yaml").open("r") as f:
+    with PARAMS_FILE_PATH.open("r") as f:
         self.__dict__[name] = yaml.safe_load(f)[self.name][name]
         return getattr(self, name)
 
 
 def _paths_getter(self, name):
     if name in self.__dict__:
-        if self.__dict__[name] is not _ZNTRACK_LAZY_VALUE:
+        if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
     # TODO: DVCFileSystem
-    with pathlib.Path("zntrack.json").open("r") as f:
+    with ZNTRACK_FILE_PATH.open("r") as f:
         content = json.load(f)[self.name][name]
         # TODO: replace nwd
         content = znjson.loads(json.dumps(content))
@@ -43,11 +48,35 @@ def _paths_getter(self, name):
 
 def _outs_getter(self, name):
     if name in self.__dict__:
-        if self.__dict__[name] is not _ZNTRACK_LAZY_VALUE:
+        if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
     # TODO: DVCFileSystem
     with pathlib.Path(self.nwd / name).with_suffix(".json").open("r") as f:
         self.__dict__[name] = json.load(f)
+    return getattr(self, name)
+
+
+def _deps_getter(self, name):
+    if name in self.__dict__:
+        if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
+            return self.__dict__[name]
+    with ZNTRACK_FILE_PATH.open("r") as f:
+        content = json.load(f)[self.name][name]
+        content = znjson.loads(
+            json.dumps(content),
+            cls=znjson.ZnDecoder.from_converters(
+                [NodeConverter, ConnectionConverter], add_default=True
+            ),
+        )
+        # if any connection in conent, resolve it
+        # TODO: use znflow.utils.IteratorHelper
+        if isinstance(content, list):
+            content = [
+                c.result if isinstance(c, znflow.Connection) else c for c in content
+            ]
+        if isinstance(content, znflow.Connection):
+            content = content.result
+        self.__dict__[name] = content
     return getattr(self, name)
 
 
@@ -56,7 +85,7 @@ def params(default=dataclasses.MISSING, **kwargs):
     # TODO: check types, do not allow e.g. connections or anything that can not be serialized
     return znfields.field(
         default=default,
-        metadata={_ZNTRACK_OPTION: "params"},
+        metadata={ZNTRACK_OPTION: "params"},
         getter=_params_getter,
         **kwargs,
     )
@@ -64,68 +93,70 @@ def params(default=dataclasses.MISSING, **kwargs):
 
 @functools.wraps(znfields.field)
 def deps(default=dataclasses.MISSING, **kwargs):
-    return znfields.field(default=default, metadata={_ZNTRACK_OPTION: "deps"}, **kwargs)
+    return znfields.field(
+        default=default, metadata={ZNTRACK_OPTION: "deps"}, getter=_deps_getter, **kwargs
+    )
 
 
 @functools.wraps(znfields.field)
 def outs(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "outs"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
-    return znfields.field(default=_ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
+    kwargs["metadata"][ZNTRACK_OPTION] = "outs"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
+    return znfields.field(default=ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
 def plots(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "plots"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
-    return znfields.field(default=_ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
+    kwargs["metadata"][ZNTRACK_OPTION] = "plots"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
+    return znfields.field(default=ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
 def metrics(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "metrics"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
-    return znfields.field(default=_ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
+    kwargs["metadata"][ZNTRACK_OPTION] = "metrics"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
+    return znfields.field(default=ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
 def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "params_path"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_OPTION] = "params_path"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_paths_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
 def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "deps_path"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_OPTION] = "deps_path"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_paths_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
 def outs_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "outs_path"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_OPTION] = "outs_path"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_paths_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
 def plots_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "plots_path"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_OPTION] = "plots_path"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_paths_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
 def metrics_path(default=dataclasses.MISSING, *, cache: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][_ZNTRACK_OPTION] = "metrics_path"
-    kwargs["metadata"][_ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_OPTION] = "metrics_path"
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_paths_getter, **kwargs)

@@ -5,7 +5,7 @@ import typing as t
 import znfields
 import znflow
 
-from .options import _ZNTRACK_LAZY_VALUE
+from .config import ZNTRACK_LAZY_VALUE
 
 
 @t.dataclass_transform()
@@ -25,12 +25,18 @@ class Node(znflow.Node, znfields.Base):
         return pathlib.Path(f"nodes/{self.name}/")
 
     @classmethod
-    def from_rev(cls, name: str | None = None, remote=".", rev=None, **kwargs) -> "Node":
+    def from_rev(
+        cls,
+        name: str | None = None,
+        remote: str | None = None,
+        rev: str | None = None,
+        **kwargs,
+    ) -> "Node":
         if name is None:
             name = cls.__name__
         lazy_values = {}
         for field in dataclasses.fields(cls):
-            lazy_values[field.name] = _ZNTRACK_LAZY_VALUE
+            lazy_values[field.name] = ZNTRACK_LAZY_VALUE
 
         lazy_values["name"] = name
 

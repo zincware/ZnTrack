@@ -1,16 +1,15 @@
 import dataclasses
+import importlib
 import pathlib
 import typing as t
+from collections import defaultdict
 
 import znflow
 import znjson
-from collections import defaultdict
-import pathlib
-import dataclasses
 
 from .node import Node
+from .options import ZNTRACK_CACHE, ZNTRACK_OPTION
 from .utils import get_attr_always_list, module_handler, replace_nwd_placeholder
-from .options import _ZNTRACK_OPTION, _ZNTRACK_CACHE
 
 
 class NodeDict(t.TypedDict):
@@ -34,8 +33,10 @@ class NodeConverter(znjson.ConverterBase):
             "rev": None,
         }
 
-    def decode(self, s: str) -> None:
-        return None
+    def decode(self, s: dict) -> Node:
+        module = importlib.import_module(s["module"])
+        cls = getattr(module, s["cls"])
+        return cls.from_rev(name=s["name"], remote=s["remote"], rev=s["rev"])
 
 
 class ConnectionConverter(znjson.ConverterBase):
@@ -72,7 +73,7 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
             "nwd": node.nwd,
         }
         for field in dataclasses.fields(node):
-            if field.metadata.get(_ZNTRACK_OPTION) in [
+            if field.metadata.get(ZNTRACK_OPTION) in [
                 "params",
                 "outs",
                 "plots",
@@ -100,8 +101,8 @@ def handle_field_metadata(
     field: dataclasses.Field, node: Node, stages: dict, without_cache: dict, plots: dict
 ):
     """Process the field metadata to populate stages, without_cache, and plots."""
-    field_option = field.metadata.get(_ZNTRACK_OPTION)
-    field_cached = field.metadata.get(_ZNTRACK_CACHE)
+    field_option = field.metadata.get(ZNTRACK_OPTION)
+    field_cached = field.metadata.get(ZNTRACK_CACHE)
 
     if field_option == "params":
         stages[node.name].setdefault("params", []).append(node.name)
@@ -224,7 +225,7 @@ def convert_graph_to_parameter(obj: znflow.DiGraph) -> dict:
     for node_uuid in obj:
         node: Node = obj.nodes[node_uuid]["value"]
         for field in dataclasses.fields(node):
-            if field.metadata.get(_ZNTRACK_OPTION) == "params":
+            if field.metadata.get(ZNTRACK_OPTION) == "params":
                 if node.name not in data:
                     data[node.name] = {}
                 data[node.name][field.name] = getattr(node, field.name)
