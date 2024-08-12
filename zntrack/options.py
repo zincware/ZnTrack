@@ -4,6 +4,7 @@ import functools
 import znfields
 
 _ZNTRACK_OPTION = "zntrack.option"
+_ZNTRACK_CACHE = "zntrack.cache"
 
 _ZNTRACK_DEFAULT = object()
 
@@ -23,56 +24,80 @@ def deps(default=dataclasses.MISSING, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def outs(**kwargs):
+def outs(*, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "outs"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=_ZNTRACK_DEFAULT, metadata={_ZNTRACK_OPTION: "outs"}, **kwargs
+        default=_ZNTRACK_DEFAULT, **kwargs
     )
 
 
 @functools.wraps(znfields.field)
-def plots(**kwargs):
+def plots(*, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "plots"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=_ZNTRACK_DEFAULT, metadata={_ZNTRACK_OPTION: "plots"}, **kwargs
+        default=_ZNTRACK_DEFAULT, **kwargs
     )
 
 
 @functools.wraps(znfields.field)
-def metrics(**kwargs):
+def metrics(*, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "metrics"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=_ZNTRACK_DEFAULT, metadata={_ZNTRACK_OPTION: "metrics"}, **kwargs
+        default=_ZNTRACK_DEFAULT, **kwargs
     )
 
 
 @functools.wraps(znfields.field)
-def params_path(default=dataclasses.MISSING, **kwargs):
+def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "params_path"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=default, metadata={_ZNTRACK_OPTION: "params_path"}, **kwargs
+        default=default, **kwargs
     )
 
 
 @functools.wraps(znfields.field)
-def deps_path(default=dataclasses.MISSING, **kwargs):
+def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "deps_path"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=default, metadata={_ZNTRACK_OPTION: "deps_path"}, **kwargs
+        default=default, **kwargs
     )
 
 
 @functools.wraps(znfields.field)
-def outs_path(default=dataclasses.MISSING, **kwargs):
+def outs_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "outs_path"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=default, metadata={_ZNTRACK_OPTION: "outs_path"}, **kwargs
+        default=default, **kwargs
     )
 
 
 @functools.wraps(znfields.field)
-def plots_path(default=dataclasses.MISSING, **kwargs):
+def plots_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "plots_path"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=default, metadata={_ZNTRACK_OPTION: "plots_path"}, **kwargs
+        default=default, **kwargs
     )
 
 
 @functools.wraps(znfields.field)
-def metrics_path(default=dataclasses.MISSING, **kwargs):
+def metrics_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][_ZNTRACK_OPTION] = "metrics_path"
+    kwargs["metadata"][_ZNTRACK_CACHE] = cache
     return znfields.field(
-        default=default, metadata={_ZNTRACK_OPTION: "metrics_path"}, **kwargs
+        default=default, **kwargs
     )

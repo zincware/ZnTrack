@@ -7,6 +7,7 @@ import znjson
 
 from .node import Node
 from .utils import get_attr_always_list, module_handler, replace_nwd_placeholder
+from .options import _ZNTRACK_OPTION, _ZNTRACK_CACHE
 
 
 class NodeDict(t.TypedDict):
@@ -68,7 +69,7 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
             "nwd": node.nwd,
         }
         for field in dataclasses.fields(node):
-            if field.metadata.get("zntrack.option") in [
+            if field.metadata.get(_ZNTRACK_OPTION) in [
                 "params",
                 "outs",
                 "plots",
@@ -102,66 +103,66 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
 
         for field in dataclasses.fields(node):
 
-            if field.metadata.get("zntrack.option") == "params":
+            if field.metadata.get(_ZNTRACK_OPTION) == "params":
                 if "params" not in stages[node.name]:
                     stages[node.name]["params"] = []
                 stages[node.name]["params"].append(node.name)
 
-            if field.metadata.get("zntrack.option") == "params_path":
+            if field.metadata.get(_ZNTRACK_OPTION) == "params_path":
                 if "params" not in stages[node.name]:
                     stages[node.name]["params"] = []
                 content = get_attr_always_list(node, field.name)
                 content = [replace_nwd_placeholder(c, node.nwd) for c in content]
                 stages[node.name]["params"].extend(content)
 
-            if field.metadata.get("zntrack.option") == "outs_path":
+            if field.metadata.get(_ZNTRACK_OPTION) == "outs_path":
                 if "outs" not in stages[node.name]:
                     stages[node.name]["outs"] = []
                 # TODO: handle pathlib, lists, dicts, etc.
                 content = get_attr_always_list(node, field.name)
                 content = [replace_nwd_placeholder(c, node.nwd) for c in content]
                 stages[node.name]["outs"].extend(content)
-                if field.metadata.get("zntrack.no_cache"):
+                if not field.metadata.get(_ZNTRACK_CACHE):
                     without_cache[node.name].extend(content)
 
-            if field.metadata.get("zntrack.option") == "plots_path":
+            if field.metadata.get(_ZNTRACK_OPTION) == "plots_path":
                 if "outs" not in stages[node.name]:
                     stages[node.name]["outs"] = []
                 content = get_attr_always_list(node, field.name)
                 content = [replace_nwd_placeholder(c, node.nwd) for c in content]
                 stages[node.name]["outs"].extend(content)
-                if field.metadata.get("zntrack.no_cache"):
+                if not field.metadata.get(_ZNTRACK_CACHE):
                     without_cache[node.name].extend(content)
 
                 plots.extend(content)  # update plots options
 
-            if field.metadata.get("zntrack.option") == "metrics_path":
+            if field.metadata.get(_ZNTRACK_OPTION) == "metrics_path":
                 if "metrics" not in stages[node.name]:
                     stages[node.name]["metrics"] = []
                 content = get_attr_always_list(node, field.name)
                 content = [replace_nwd_placeholder(c, node.nwd) for c in content]
                 stages[node.name]["metrics"].extend(content)
-                if field.metadata.get("zntrack.no_cache"):
+                if not field.metadata.get(_ZNTRACK_CACHE):
                     without_cache[node.name].extend(content)
 
-            if field.metadata.get("zntrack.option") == "metrics":
+            if field.metadata.get(_ZNTRACK_OPTION) == "metrics":
                 if "metrics" not in stages[node.name]:
                     stages[node.name]["metrics"] = []
                 stages[node.name]["metrics"].append(
                     pathlib.Path(node.nwd, "metrics.json").as_posix()
                 )
 
-            if field.metadata.get("zntrack.option") == "outs":
+            if field.metadata.get(_ZNTRACK_OPTION) == "outs":
                 if "outs" not in stages[node.name]:
                     stages[node.name]["outs"] = []
                 stages[node.name]["outs"].append(
                     (node.nwd / field.name).with_suffix(".json").as_posix()
                 )
-            if field.metadata.get("zntrack.option") == "deps_path":
+            if field.metadata.get(_ZNTRACK_OPTION) == "deps_path":
                 if "deps" not in stages[node.name]:
                     stages[node.name]["deps"] = []
                 stages[node.name]["deps"].append(getattr(node, field.name))
-            if field.metadata.get("zntrack.option") == "deps":
+            if field.metadata.get(_ZNTRACK_OPTION) == "deps":
                 if "deps" not in stages[node.name]:
                     stages[node.name]["deps"] = []
                 data = getattr(node, field.name)
