@@ -169,7 +169,7 @@ def handle_field_metadata(
         content = get_attr_always_list(node, field.name)
         paths = [node_to_output_paths(con.instance) for con in content]
         stages[node.name].setdefault("deps", []).extend(
-            sum(paths, []) # flatten the list
+            sum(paths, [])  # flatten the list
         )
 
 
