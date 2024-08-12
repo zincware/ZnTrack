@@ -31,9 +31,11 @@ def test_basic():
             parameter_path="parameter.yaml",
             deps_path="deps.yaml",
             outs_path=["outs.yaml"],
-            metrics_path=zntrack.nwd / "metrics.json",
-            plots_path=[zntrack.nwd / "plots.csv"],
+            metrics_path=zntrack.nwd / "my_metrics.json",
+            plots_path=[zntrack.nwd / "my_plots.csv"],
         )
+
+    # dvc stage add --name MyNode --force --params parameter.yaml: --outs nodes/MyNode/my_plots.csv --params params.yaml:MyNode --metrics-no-cache nodes/MyNode/metrics.json --outs nodes/MyNode/outs.json --metrics nodes/MyNode/my_metrics.json --outs outs.yaml --deps deps.yaml --metrics-no-cache nodes/MyNode/node-meta.json zntrack run test_basic.MyNode --name MyNode
     
     # TODO: outs
     # TODO: metrics

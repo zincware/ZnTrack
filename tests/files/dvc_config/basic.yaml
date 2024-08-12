@@ -3,12 +3,16 @@ stages:
     cmd: zntrack run test_basic.MyNode --name MyNode
     deps:
     - deps.yaml
-    outs:
-    - outs.yaml
-    - nodes/MyNode/outs.json
     params:
     - MyNode
+    - parameter.yaml:
+    outs:
+    - nodes/MyNode/my_plots.csv
+    - nodes/MyNode/outs.json
+    - outs.yaml
     metrics:
     - nodes/MyNode/metrics.json:
         cache: false
-    
+    - nodes/MyNode/my_metrics.json
+    - nodes/MyNode/node-meta.json:
+        cache: false

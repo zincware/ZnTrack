@@ -12,12 +12,12 @@
         ],
         "metrics_path": {
             "_type": "pathlib.Path",
-            "value": "$nwd$/metrics.json"
+            "value": "$nwd$/my_metrics.json"
         },
         "plots_path": [
             {
                 "_type": "pathlib.Path",
-                "value": "$nwd$/plots.csv"
+                "value": "$nwd$/my_plots.csv"
             }
         ]
     }

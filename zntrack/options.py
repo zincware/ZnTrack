@@ -7,6 +7,8 @@ _ZNTRACK_OPTION = "zntrack.option"
 
 _ZNTRACK_DEFAULT = object()
 
+# TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
+# raise an error if passed to `metrics_path` etc.
 
 @functools.wraps(znfields.field)
 def params(default=dataclasses.MISSING, **kwargs):
