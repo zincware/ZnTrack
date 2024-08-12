@@ -95,7 +95,7 @@ def plots_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def metrics_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def metrics_path(default=dataclasses.MISSING, *, cache: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][_ZNTRACK_OPTION] = "metrics_path"
     kwargs["metadata"][_ZNTRACK_CACHE] = cache

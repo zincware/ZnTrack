@@ -19,6 +19,8 @@ class MyNode(zntrack.Node):
     plots_path: list[pathlib.Path] = zntrack.plots_path()
 
     outs_path_no_cache: list[pathlib.Path] = zntrack.outs_path(cache=False)
+    plots_path_no_cache: list[pathlib.Path|str] = zntrack.plots_path(cache=False)
+    metrics_path_cache: pathlib.Path = zntrack.metrics_path(cache=True)
 
     outs: int = zntrack.outs()
     metrics: dict = zntrack.metrics()
@@ -38,9 +40,9 @@ def test_basic(proj_path):
             metrics_path=zntrack.nwd / "my_metrics.json",
             plots_path=[zntrack.nwd / "my_plots.csv"],
             outs_path_no_cache=[zntrack.nwd / "no-cache-outs.json"],
+            plots_path_no_cache=[zntrack.nwd / "no-cache-plots.csv", "no-cache-plots.json"],
+            metrics_path_cache=zntrack.nwd / "metrics-cache.json",
         )
-
-    # dvc stage add --name MyNode --force --params parameter.yaml: --outs nodes/MyNode/my_plots.csv --params params.yaml:MyNode --metrics-no-cache nodes/MyNode/metrics.json --outs nodes/MyNode/outs.json --metrics nodes/MyNode/my_metrics.json --outs outs.yaml --deps deps.yaml --metrics-no-cache nodes/MyNode/node-meta.json zntrack run test_basic.MyNode --name MyNode
 
     # TODO: outs
     # TODO: metrics

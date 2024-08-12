@@ -4,14 +4,20 @@ stages:
     deps:
     - deps.yaml
     metrics:
+    - nodes/MyNode/metrics-cache.json
     - nodes/MyNode/metrics.json:
         cache: false
-    - nodes/MyNode/my_metrics.json
+    - nodes/MyNode/my_metrics.json:
+        cache: false
     - nodes/MyNode/node-meta.json:
         cache: false
     outs:
+    - no-cache-plots.json:
+        cache: false
     - nodes/MyNode/my_plots.csv
     - nodes/MyNode/no-cache-outs.json:
+        cache: false
+    - nodes/MyNode/no-cache-plots.csv:
         cache: false
     - nodes/MyNode/outs.json
     - outs.yaml
