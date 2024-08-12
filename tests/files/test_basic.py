@@ -36,7 +36,7 @@ def test_basic():
         )
 
     # dvc stage add --name MyNode --force --params parameter.yaml: --outs nodes/MyNode/my_plots.csv --params params.yaml:MyNode --metrics-no-cache nodes/MyNode/metrics.json --outs nodes/MyNode/outs.json --metrics nodes/MyNode/my_metrics.json --outs outs.yaml --deps deps.yaml --metrics-no-cache nodes/MyNode/node-meta.json zntrack run test_basic.MyNode --name MyNode
-    
+
     # TODO: outs
     # TODO: metrics
     # TODO: plots
