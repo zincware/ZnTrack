@@ -141,6 +141,12 @@ def handle_field_metadata(
         if not field_cached:
             without_cache[node.name].extend(content)
 
+    elif field_option == "deps_path":
+        content = [
+            pathlib.Path(c).as_posix() for c in get_attr_always_list(node, field.name)
+        ]
+        stages[node.name].setdefault("deps", []).extend(content)
+
     elif field_option == "metrics":
         content = pathlib.Path(node.nwd, field.name).with_suffix(".json").as_posix()
         stages[node.name].setdefault("metrics", []).append(content)
@@ -158,9 +164,6 @@ def handle_field_metadata(
         stages[node.name].setdefault("outs", []).append(content)
         if not field_cached:
             without_cache[node.name].append(content)
-
-    elif field_option == "deps_path":
-        stages[node.name].setdefault("deps", []).append(getattr(node, field.name))
 
     elif field_option == "deps":
         data = getattr(node, field.name)

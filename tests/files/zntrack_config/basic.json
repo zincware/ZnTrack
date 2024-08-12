@@ -7,6 +7,12 @@
         "name": "MyNode",
         "parameter_path": "parameter.yaml",
         "deps_path": "deps.yaml",
+        "deps2_paths": [
+            {
+                "_type": "pathlib.Path",
+                "value": "deps2.yaml"
+            }
+        ],
         "outs_path": [
             "outs.yaml"
         ],

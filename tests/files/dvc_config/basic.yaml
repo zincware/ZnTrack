@@ -3,6 +3,7 @@ stages:
     cmd: zntrack run test_basic.MyNode --name MyNode
     deps:
     - deps.yaml
+    - deps2.yaml
     metrics:
     - nodes/MyNode/metrics-cache.json
     - nodes/MyNode/metrics.json:
