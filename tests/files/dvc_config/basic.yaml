@@ -11,8 +11,10 @@ stages:
         cache: false
     outs:
     - nodes/MyNode/my_plots.csv
+    - nodes/MyNode/no-cache-outs.json:
+        cache: false
     - nodes/MyNode/outs.json
     - outs.yaml
     params:
     - MyNode
-    - parameter.yaml:
+    - parameter.yaml: null
