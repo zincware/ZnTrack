@@ -108,7 +108,11 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
                 stages[node.name]["params"].append(node.name)
 
             if field.metadata.get("zntrack.option") == "params_path":
-                pass  # `file:` or `file:key`
+                if "params" not in stages[node.name]:
+                    stages[node.name]["params"] = []
+                content = get_attr_always_list(node, field.name)
+                content = [replace_nwd_placeholder(c, node.nwd) for c in content]
+                stages[node.name]["params"].extend(content)
 
             if field.metadata.get("zntrack.option") == "outs_path":
                 if "outs" not in stages[node.name]:
@@ -171,10 +175,14 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
                         )
 
         # ensure no duplicates
-        # if "params" in stages[node.name]:
-        # stages[node.name]["params"] = list(set(stages[node.name]["params"]))
-
-        stages[node.name]["params"].append({"parameter.yaml": None})
+        if "params" in stages[node.name]:
+            content = list(set(stages[node.name]["params"]))
+            stages[node.name]["params"] = []
+            for path in sorted(content):
+                if path == node.name:
+                    stages[node.name]["params"].append(path)
+                else:
+                    stages[node.name]["params"].append({path: None})
 
         if "outs" in stages[node.name]:
             content = set(stages[node.name]["outs"])
