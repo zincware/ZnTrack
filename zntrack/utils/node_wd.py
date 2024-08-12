@@ -5,8 +5,6 @@ import os
 import pathlib
 import shutil
 
-from znflow.utils import IterableHandler
-
 log = logging.getLogger(__name__)
 
 
@@ -28,13 +26,11 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
     shutil.rmtree(target)
 
 
-def replace_nwd_placeholder(value: str|pathlib.Path, node_wd: pathlib.Path) -> str:
+def replace_nwd_placeholder(value: str | pathlib.Path, node_wd: pathlib.Path) -> str:
     """Replace the nwd placeholder with the actual nwd."""
     if isinstance(value, str):
         return value.replace(nwd, node_wd.as_posix())
     elif isinstance(value, pathlib.Path):
         return value.as_posix().replace(nwd, node_wd.as_posix())
     else:
-        raise ValueError(
-            f"replace_nwd_placeholder is not implemented for {type(value)}"
-        )
+        raise ValueError(f"replace_nwd_placeholder is not implemented for {type(value)}")
