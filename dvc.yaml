@@ -4,11 +4,7 @@ stages:
     deps:
     - deps.yaml
     outs:
-    - outs.yaml
+    - - outs.yaml
     - nodes/MyNode/outs.json
     params:
     - MyNode
-    metrics:
-    - nodes/MyNode/metrics.json:
-        cache: false
-    

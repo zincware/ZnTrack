@@ -31,6 +31,10 @@ def test_basic():
             plots_path=[zntrack.nwd / "plots.csv"],
         )
     
+    # TODO: outs
+    # TODO: metrics
+    # TODO: plots
+
     project.build()
 
     assert (CWD / "zntrack_config" / "basic.json").read_text() == (proj_path / "zntrack.json").read_text()

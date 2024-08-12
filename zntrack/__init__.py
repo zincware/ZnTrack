@@ -15,6 +15,7 @@ from .options import (
     plots_path,
 )
 from .project import Project
+from .utils import nwd
 
 __all__ = [
     "params",
@@ -29,6 +30,7 @@ __all__ = [
     "metrics_path",
     "Node",
     "Project",
+    "nwd",
 ]
 
 logger = logging.getLogger(__name__)
