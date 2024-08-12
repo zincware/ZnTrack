@@ -32,7 +32,6 @@ def test_apply(proj_path, eager) -> None:
 @pytest.mark.parametrize("eager", [True, False])
 def test_deps_apply(proj_path, eager, attribute):
     """Test connecting applied nodes to other nodes."""
-
     project = zntrack.Project()
 
     JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")

@@ -1,5 +1,4 @@
 import pathlib
-import subprocess
 
 import zntrack
 from zntrack.utils import run_dvc_cmd

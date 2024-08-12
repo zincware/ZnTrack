@@ -1,8 +1,5 @@
-import pathlib
-import subprocess
 
 import pytest
-import yaml
 
 import zntrack
 

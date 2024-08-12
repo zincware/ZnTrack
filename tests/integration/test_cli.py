@@ -6,7 +6,7 @@ import yaml
 from typer.testing import CliRunner
 
 import zntrack.examples
-from zntrack import Node, NodeConfig, get_nodes, nodify, utils, zn
+from zntrack import NodeConfig, nodify, utils
 from zntrack.cli import app
 
 

@@ -3,7 +3,6 @@ import pathlib
 import pytest
 
 import zntrack
-from zntrack.utils import run_dvc_cmd
 
 
 @zntrack.nodify(outs="test.txt", params={"text": "Lorem Ipsum"})

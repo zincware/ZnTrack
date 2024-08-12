@@ -17,7 +17,7 @@ def test_ParamsToOuts(proj_path, lazy, eager):
         if lazy and not eager:
             assert node.__dict__["outs"] is LazyOption
         else:
-            assert node.__dict__["outs"] is 42
+            assert node.__dict__["outs"] == 42
         assert node.outs == 42
 
 
@@ -39,7 +39,7 @@ def test_CollectOutputs(proj_path, lazy, eager):
             assert node.numbers[0].__dict__["outs"] is LazyOption
             assert node.numbers[1].__dict__["outs"] is LazyOption
         else:
-            assert node.__dict__["sum"] is 59
+            assert node.__dict__["sum"] == 59
             assert node.__dict__["numbers"][0].name == "a"
             assert node.__dict__["numbers"][1].name == "b"
 
@@ -50,6 +50,6 @@ def test_CollectOutputs(proj_path, lazy, eager):
         if not eager:
             # Check that non-lazy loading works
             node = node.from_rev(lazy=False)
-            assert node.__dict__["sum"] is 59
+            assert node.__dict__["sum"] == 59
             assert node.__dict__["numbers"][0].name == "a"
             assert node.__dict__["numbers"][1].name == "b"

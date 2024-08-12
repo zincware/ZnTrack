@@ -3,7 +3,7 @@ import shutil
 import pytest
 
 import zntrack
-from zntrack import Node, Project, exceptions, zn
+from zntrack import Node, Project, zn
 
 
 class NodeViaParams(Node):

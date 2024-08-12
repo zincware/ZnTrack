@@ -20,7 +20,6 @@ class StageIO(zntrack.Node):
 
     def run(self):
         """Actual computation"""
-
         with open(self.deps, "r") as f:
             file_content = f.readlines()
 
