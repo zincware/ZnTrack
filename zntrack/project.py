@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 
 class Project(znflow.DiGraph):
-
     def add_node(self, node_for_adding, **attr):
         return super().add_node(node_for_adding, **attr)
 
