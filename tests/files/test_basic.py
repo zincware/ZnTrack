@@ -26,6 +26,10 @@ class MyNode(zntrack.Node):
     metrics: dict = zntrack.metrics()
     plots: pd.DataFrame = zntrack.plots()
 
+    outs_no_cache: int = zntrack.outs(cache=False)
+    metrics_cache: dict = zntrack.metrics(cache=True)
+    plots_no_cache: pd.DataFrame = zntrack.plots(cache=False)
+
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
