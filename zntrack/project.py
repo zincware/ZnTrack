@@ -32,6 +32,7 @@ class Project(znflow.DiGraph):
 
     def build(self) -> None:
         log.info(f"Saving {config.PARAMS_FILE_PATH}")
+        # TODO: update file or overwrite?
         config.PARAMS_FILE_PATH.write_text(
             yaml.safe_dump(converter.convert_graph_to_parameter(self))
         )

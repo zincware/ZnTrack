@@ -51,10 +51,6 @@ def test_basic(proj_path):
             metrics_path_cache=zntrack.nwd / "metrics-cache.json",
         )
 
-    # TODO: outs
-    # TODO: metrics
-    # TODO: plots
-
     project.build()
 
     assert json.loads((CWD / "zntrack_config" / "basic.json").read_text()) == json.loads(
