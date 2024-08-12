@@ -130,7 +130,7 @@ def handle_field_metadata(
         stages[node.name].setdefault("outs", []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
-        plots[node.name] = None # TODO
+        plots[node.name] = None  # TODO
 
     elif field_option == "metrics_path":
         content = [
