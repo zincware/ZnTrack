@@ -3,9 +3,10 @@ import typing as t
 
 import znflow
 import znjson
+import pathlib
 
 from .node import Node
-from .utils import module_handler
+from .utils import module_handler, get_attr_always_list, replace_nwd_placeholder
 
 
 class NodeDict(t.TypedDict):
@@ -82,25 +83,69 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
 def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
     stages = {}
     plots = []
+    without_cache: dict[str, list[str]] = {} # paths that should use --no-cache
     for node_uuid in obj:
         node: Node = obj.nodes[node_uuid]["value"]
+        without_cache[node.name] = [
+            # (node.nwd / "outs.json").as_posix(),
+            (node.nwd / "metrics.json").as_posix(),
+            # (node.nwd / "plots.csv").as_posix(),
+            (node.nwd / "node-meta.json").as_posix(),
+        ]
 
         node_dict = NodeConverter().encode(node)
 
         stages[node.name] = {
             "cmd": f"zntrack run {node_dict['module']}.{node_dict['cls']} --name {node_dict['name']}",
         }
+        stages[node.name]["metrics"] = [(node.nwd / "node-meta.json").as_posix()]
+
         for field in dataclasses.fields(node):
+
+
             if field.metadata.get("zntrack.option") == "params":
                 if "params" not in stages[node.name]:
                     stages[node.name]["params"] = []
                 stages[node.name]["params"].append(node.name)
+            
+            if field.metadata.get("zntrack.option") == "params_path":
+                pass # `file:` or `file:key`
 
             if field.metadata.get("zntrack.option") == "outs_path":
                 if "outs" not in stages[node.name]:
                     stages[node.name]["outs"] = []
                 # TODO: handle pathlib, lists, dicts, etc.
-                stages[node.name]["outs"].append(getattr(node, field.name))
+                content = get_attr_always_list(node, field.name)
+                content = [replace_nwd_placeholder(c, node.nwd) for c in content]
+                stages[node.name]["outs"].extend(content)
+                if field.metadata.get("zntrack.no_cache"):
+                    without_cache[node.name].extend(content)
+            
+            if field.metadata.get("zntrack.option") == "plots_path":
+                if "outs" not in stages[node.name]:
+                    stages[node.name]["outs"] = []
+                content = get_attr_always_list(node, field.name)
+                content = [replace_nwd_placeholder(c, node.nwd) for c in content]
+                stages[node.name]["outs"].extend(content)
+                if field.metadata.get("zntrack.no_cache"):
+                    without_cache[node.name].extend(content)
+                
+                plots.extend(content) # update plots options
+
+            
+            if field.metadata.get("zntrack.option") == "metrics_path":
+                if "metrics" not in stages[node.name]:
+                    stages[node.name]["metrics"] = []
+                content = get_attr_always_list(node, field.name)
+                content = [replace_nwd_placeholder(c, node.nwd) for c in content]
+                stages[node.name]["metrics"].extend(content)
+                if field.metadata.get("zntrack.no_cache"):
+                    without_cache[node.name].extend(content)
+
+            if field.metadata.get("zntrack.option") == "metrics":
+                if "metrics" not in stages[node.name]:
+                    stages[node.name]["metrics"] = []
+                stages[node.name]["metrics"].append(pathlib.Path(node.nwd, "metrics.json").as_posix())
 
             if field.metadata.get("zntrack.option") == "outs":
                 if "outs" not in stages[node.name]:
@@ -126,12 +171,28 @@ def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
                         )
 
         # ensure no duplicates
-        if "params" in stages[node.name]:
-            stages[node.name]["params"] = list(set(stages[node.name]["params"]))
-        if "outs" in stages[node.name]:
-            # TODO: handle pathlib, lists, dicts, etc.
-            pass
+        # if "params" in stages[node.name]:
+            # stages[node.name]["params"] = list(set(stages[node.name]["params"]))
 
+        stages[node.name]["params"].append({"parameter.yaml": None})
+        
+        if "outs" in stages[node.name]:
+            content = set(stages[node.name]["outs"])
+            stages[node.name]["outs"] = []
+            for path in sorted(content):
+                if path in without_cache[node.name]:
+                    stages[node.name]["outs"].append({path:{"cache": False}})
+                else:
+                    stages[node.name]["outs"].append(path)
+        if "metrics" in stages[node.name]:
+            content = set(stages[node.name]["metrics"])
+            stages[node.name]["metrics"] = []
+            for path in sorted(content):
+                if path in without_cache[node.name]:
+                    stages[node.name]["metrics"].append({path:{"cache": False}})
+                else:
+                    stages[node.name]["metrics"].append(path)
+    
     return {"stages": stages}
 
 

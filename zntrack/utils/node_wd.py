@@ -28,23 +28,13 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
     shutil.rmtree(target)
 
 
-class ReplaceNWD(IterableHandler):
+def replace_nwd_placeholder(value: str|pathlib.Path, node_wd: pathlib.Path) -> str:
     """Replace the nwd placeholder with the actual nwd."""
-
-    def default(self, value, **kwargs):
-        """Replace the nwd placeholder with the actual nwd."""
-        if isinstance(value, str):
-            if value == nwd:
-                # nwd is of type str but will be converted to pathlib.Path
-                return pathlib.Path(kwargs["nwd"])
-            return value.replace(nwd, pathlib.Path(kwargs["nwd"]).as_posix())
-        elif isinstance(value, pathlib.Path):
-            return pathlib.Path(
-                value.as_posix().replace(nwd, pathlib.Path(kwargs["nwd"]).as_posix())
-            )
-        elif value is None:
-            return value
-        else:
-            raise ValueError(
-                f"replace_nwd_placeholder is not implemented for {type(value)}"
-            )
+    if isinstance(value, str):
+        return value.replace(nwd, node_wd.as_posix())
+    elif isinstance(value, pathlib.Path):
+        return value.as_posix().replace(nwd, node_wd.as_posix())
+    else:
+        raise ValueError(
+            f"replace_nwd_placeholder is not implemented for {type(value)}"
+        )

@@ -1,6 +1,8 @@
 import pathlib
 
 import pandas as pd
+import yaml
+import json
 
 import zntrack
 
@@ -24,7 +26,7 @@ class MyNode(zntrack.Node):
 CWD = pathlib.Path(__file__).parent.resolve()
 
 
-def test_basic():
+def test_basic(proj_path):
     with zntrack.Project() as project:
         _ = MyNode(
             parameter=1,
@@ -43,12 +45,12 @@ def test_basic():
 
     project.build()
 
-    assert (CWD / "zntrack_config" / "basic.json").read_text() == (
+    assert json.loads((CWD / "zntrack_config" / "basic.json").read_text()) == json.loads((
         proj_path / "zntrack.json"
-    ).read_text()
-    assert (CWD / "dvc_config" / "basic.yaml").read_text() == (
+    ).read_text())
+    assert yaml.safe_load((CWD / "dvc_config" / "basic.yaml").read_text()) == yaml.safe_load((
         proj_path / "dvc.yaml"
-    ).read_text()
+    ).read_text())
     assert (CWD / "params_config" / "basic.yaml").read_text() == (
         proj_path / "params.yaml"
     ).read_text()
