@@ -4,6 +4,9 @@ import typing as t
 
 import znflow
 import znjson
+from collections import defaultdict
+import pathlib
+import dataclasses
 
 from .node import Node
 from .utils import get_attr_always_list, module_handler, replace_nwd_placeholder
@@ -81,9 +84,6 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
 
 
 # dvc.yaml
-from collections import defaultdict
-import pathlib
-import dataclasses
 
 
 def collect_paths(node, without_cache):
@@ -96,7 +96,7 @@ def collect_paths(node, without_cache):
     return paths
 
 
-def handle_field_metadata(field, node, stages, without_cache, plots):
+def handle_field_metadata(field: dataclasses.Field, node: Node, stages: dict, without_cache: dict, plots: dict):
     """Process the field metadata to populate stages, without_cache, and plots."""
     field_option = field.metadata.get(_ZNTRACK_OPTION)
     field_cached = field.metadata.get(_ZNTRACK_CACHE)
@@ -105,14 +105,15 @@ def handle_field_metadata(field, node, stages, without_cache, plots):
         stages[node.name].setdefault("params", []).append(node.name)
 
     elif field_option == "params_path":
-        stages[node.name].setdefault("params", []).extend(
-            [
+        content = [
                 replace_nwd_placeholder(c, node.nwd)
                 for c in get_attr_always_list(node, field.name)
             ]
+        stages[node.name].setdefault("params", []).extend(
+            content
         )
 
-    elif field_option in {"outs_path", "plots_path"}:
+    elif field_option == "outs_path":
         content = [
             replace_nwd_placeholder(c, node.nwd)
             for c in get_attr_always_list(node, field.name)
@@ -120,8 +121,16 @@ def handle_field_metadata(field, node, stages, without_cache, plots):
         stages[node.name].setdefault("outs", []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
-        if field_option == "plots_path":
-            plots.extend(content)
+
+    elif field_option == "plots_path":
+        content = [
+            replace_nwd_placeholder(c, node.nwd)
+            for c in get_attr_always_list(node, field.name)
+        ]
+        stages[node.name].setdefault("outs", []).extend(content)
+        if not field_cached:
+            without_cache[node.name].extend(content)
+        plots.extend(content)
 
     elif field_option == "metrics_path":
         content = [
