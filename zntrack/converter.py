@@ -166,9 +166,10 @@ def handle_field_metadata(
             without_cache[node.name].append(content)
 
     elif field_option == "deps":
-        data = getattr(node, field.name)
+        content = get_attr_always_list(node, field.name)
+        paths = [node_to_output_paths(con.instance) for con in content]
         stages[node.name].setdefault("deps", []).extend(
-            node_to_output_paths(con.instance) for con in data if isinstance(data, list)
+            sum(paths, []) # flatten the list
         )
 
 
@@ -223,7 +224,7 @@ def convert_graph_to_parameter(obj: znflow.DiGraph) -> dict:
     for node_uuid in obj:
         node: Node = obj.nodes[node_uuid]["value"]
         for field in dataclasses.fields(node):
-            if field.metadata.get("zntrack.option") == "params":
+            if field.metadata.get(_ZNTRACK_OPTION) == "params":
                 if node.name not in data:
                     data[node.name] = {}
                 data[node.name][field.name] = getattr(node, field.name)
@@ -232,8 +233,10 @@ def convert_graph_to_parameter(obj: znflow.DiGraph) -> dict:
 
 def node_to_output_paths(node: Node) -> t.List[str]:
     """Get all output paths for a node."""
-    paths = []
-    for field in dataclasses.fields(node):
-        if field.metadata.get("zntrack.option") == "outs":
-            paths.append((node.nwd / field.name).with_suffix(".json").as_posix())
-    return paths
+    # What do we actually want as dependency?
+    # paths = []
+    # for field in dataclasses.fields(node):
+    #     if field.metadata.get(_ZNTRACK_OPTION) == "outs":
+    #         paths.append((node.nwd / field.name).with_suffix(".json").as_posix())
+    # return paths
+    return [(node.nwd / "node-meta.json").as_posix()]
