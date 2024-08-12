@@ -20,6 +20,7 @@ stages:
     - nodes/MyNode/no-cache-plots.csv:
         cache: false
     - nodes/MyNode/outs.json
+    - nodes/MyNode/plots.csv
     - outs.yaml
     params:
     - MyNode

@@ -96,7 +96,9 @@ def collect_paths(node, without_cache):
     return paths
 
 
-def handle_field_metadata(field: dataclasses.Field, node: Node, stages: dict, without_cache: dict, plots: dict):
+def handle_field_metadata(
+    field: dataclasses.Field, node: Node, stages: dict, without_cache: dict, plots: dict
+):
     """Process the field metadata to populate stages, without_cache, and plots."""
     field_option = field.metadata.get(_ZNTRACK_OPTION)
     field_cached = field.metadata.get(_ZNTRACK_CACHE)
@@ -106,12 +108,10 @@ def handle_field_metadata(field: dataclasses.Field, node: Node, stages: dict, wi
 
     elif field_option == "params_path":
         content = [
-                replace_nwd_placeholder(c, node.nwd)
-                for c in get_attr_always_list(node, field.name)
-            ]
-        stages[node.name].setdefault("params", []).extend(
-            content
-        )
+            replace_nwd_placeholder(c, node.nwd)
+            for c in get_attr_always_list(node, field.name)
+        ]
+        stages[node.name].setdefault("params", []).extend(content)
 
     elif field_option == "outs_path":
         content = [
@@ -130,7 +130,7 @@ def handle_field_metadata(field: dataclasses.Field, node: Node, stages: dict, wi
         stages[node.name].setdefault("outs", []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
-        plots.extend(content)
+        plots[node.name] = None # TODO
 
     elif field_option == "metrics_path":
         content = [
@@ -142,14 +142,22 @@ def handle_field_metadata(field: dataclasses.Field, node: Node, stages: dict, wi
             without_cache[node.name].extend(content)
 
     elif field_option == "metrics":
-        stages[node.name].setdefault("metrics", []).append(
-            pathlib.Path(node.nwd, "metrics.json").as_posix()
-        )
+        content = pathlib.Path(node.nwd, field.name).with_suffix(".json").as_posix()
+        stages[node.name].setdefault("metrics", []).append(content)
+        if not field_cached:
+            without_cache[node.name].append(content)
 
     elif field_option == "outs":
-        stages[node.name].setdefault("outs", []).append(
-            (node.nwd / field.name).with_suffix(".json").as_posix()
-        )
+        content = (node.nwd / field.name).with_suffix(".json").as_posix()
+        stages[node.name].setdefault("outs", []).append(content)
+        if not field_cached:
+            without_cache[node.name].append(content)
+
+    elif field_option == "plots":
+        content = (node.nwd / field.name).with_suffix(".csv").as_posix()
+        stages[node.name].setdefault("outs", []).append(content)
+        if not field_cached:
+            without_cache[node.name].append(content)
 
     elif field_option == "deps_path":
         stages[node.name].setdefault("deps", []).append(getattr(node, field.name))
@@ -186,7 +194,7 @@ def deduplicate_and_sort(stages, without_cache):
 def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:
     """Build the stages dictionary from the given object."""
     stages = {}
-    plots = []
+    plots = {}
     without_cache = defaultdict(list)
 
     for node_uuid in obj:
