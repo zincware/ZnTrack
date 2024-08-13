@@ -1,7 +1,6 @@
 import dataclasses
 import functools
 import json
-import pathlib
 
 import yaml
 import znfields
@@ -17,28 +16,27 @@ from .config import (
     ZNTRACK_OPTION,
 )
 from .converter import ConnectionConverter, NodeConverter
+from .node import Node
 
 # TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
 # raise an error if passed to `metrics_path` etc.
 # TODO: zntrack.outs() and zntrack.outs(cache=False) needs different files!
 
 
-def _params_getter(self, name):
+def _params_getter(self: Node, name: str):
     if name in self.__dict__:
         if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
-    # TODO: DVCFileSystem
-    with PARAMS_FILE_PATH.open("r") as f:
+    with self.state.fs.open(PARAMS_FILE_PATH) as f:
         self.__dict__[name] = yaml.safe_load(f)[self.name][name]
         return getattr(self, name)
 
 
-def _paths_getter(self, name):
+def _paths_getter(self: Node, name: str):
     if name in self.__dict__:
         if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
-    # TODO: DVCFileSystem
-    with ZNTRACK_FILE_PATH.open("r") as f:
+    with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
         content = json.load(f)[self.name][name]
         # TODO: replace nwd
         content = znjson.loads(json.dumps(content))
@@ -46,22 +44,23 @@ def _paths_getter(self, name):
         return getattr(self, name)
 
 
-def _outs_getter(self, name):
+def _outs_getter(self: Node, name: str):
     if name in self.__dict__:
         if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
-    # TODO: DVCFileSystem
-    with pathlib.Path(self.nwd / name).with_suffix(".json").open("r") as f:
+    with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
         self.__dict__[name] = json.load(f)
     return getattr(self, name)
 
 
-def _deps_getter(self, name):
+def _deps_getter(self: Node, name: str):
     if name in self.__dict__:
         if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
-    with ZNTRACK_FILE_PATH.open("r") as f:
+    
+    with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
         content = json.load(f)[self.name][name]
+        # TODO: when loading deps, make sure they are loaded from the correct revision!
         content = znjson.loads(
             json.dumps(content),
             cls=znjson.ZnDecoder.from_converters(
