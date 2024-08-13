@@ -5,8 +5,9 @@ import typing as t
 import dvc.api
 import znfields
 import znflow
+import znjson
 
-from .config import ZNTRACK_LAZY_VALUE
+from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_OPTION, ZNTRACK_SAVE_FUNC
 
 
 @dataclasses.dataclass(frozen=True)
@@ -38,12 +39,24 @@ class Node(znflow.Node, znfields.Base):
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name"]
 
+    def run(self):
+        raise NotImplementedError
+    
+    def save(self):
+        for field in dataclasses.fields(self):
+            func = field.metadata.get(ZNTRACK_SAVE_FUNC, None)
+            if callable(func):
+                func(self, field.name)
+
     def __init_subclass__(cls):
         return dataclasses.dataclass(cls)
 
     @property
     def nwd(self) -> pathlib.Path:
-        return pathlib.Path(f"nodes/{self.name}/")
+        node_wd = pathlib.Path(f"nodes/{self.name}/")
+        if not node_wd.exists():
+            node_wd.mkdir(parents=True)
+        return node_wd
 
     @classmethod
     def from_rev(

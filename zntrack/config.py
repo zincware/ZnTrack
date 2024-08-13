@@ -6,6 +6,7 @@ ZNTRACK_FILE_PATH = pathlib.Path("zntrack.json")
 
 ZNTRACK_OPTION = "zntrack.option"
 ZNTRACK_CACHE = "zntrack.cache"
+ZNTRACK_SAVE_FUNC = "zntrack.save_func"
 
 ZNTRACK_DEFAULT = object()
 ZNTRACK_LAZY_VALUE = object()

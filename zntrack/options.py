@@ -14,6 +14,7 @@ from .config import (
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
+    ZNTRACK_SAVE_FUNC,
 )
 from .converter import ConnectionConverter, NodeConverter
 from .node import Node
@@ -51,6 +52,15 @@ def _outs_getter(self: Node, name: str):
     with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
         self.__dict__[name] = json.load(f)
     return getattr(self, name)
+
+def _outs_save_func(self: Node, name: str):
+    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+
+def _metrics_save_func(self: Node, name: str):
+    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+
+def _plots_save_func(self: Node, name: str):
+    (self.nwd / name).with_suffix(".csv").write_text(getattr(self, name).to_csv())
 
 
 def _deps_getter(self: Node, name: str):
@@ -102,6 +112,7 @@ def outs(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = "outs"
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_SAVE_FUNC] = _outs_save_func
     return znfields.field(default=ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
 
 
@@ -110,6 +121,7 @@ def plots(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = "plots"
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_SAVE_FUNC] = _plots_save_func
     return znfields.field(default=ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
 
 
@@ -118,6 +130,7 @@ def metrics(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = "metrics"
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_SAVE_FUNC] = _metrics_save_func
     return znfields.field(default=ZNTRACK_DEFAULT, getter=_outs_getter, **kwargs)
 
 
