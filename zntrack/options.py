@@ -57,7 +57,7 @@ def _deps_getter(self: Node, name: str):
     if name in self.__dict__:
         if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
-    
+
     with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
         content = json.load(f)[self.name][name]
         # TODO: when loading deps, make sure they are loaded from the correct revision!

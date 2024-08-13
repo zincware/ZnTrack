@@ -2,31 +2,31 @@ import dataclasses
 import pathlib
 import typing as t
 
+import dvc.api
 import znfields
 import znflow
-import dvc.api
 
 from .config import ZNTRACK_LAZY_VALUE
+
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
     remote: str = "."
-    rev: str| None = None
+    rev: str | None = None
     run_counter: int = 0
 
     @property
     def fs(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
         return dvc.api.DVCFileSystem(
-                    url=self.remote,
-                    rev=self.rev,
-                )
-    
+            url=self.remote,
+            rev=self.rev,
+        )
+
     @property
     def restarted(self) -> bool:
         """Whether the node was restarted."""
         return self.run_counter > 1
-
 
 
 @t.dataclass_transform()
@@ -65,7 +65,7 @@ class Node(znflow.Node, znfields.Base):
         # TODO: try reading node-meta, if available set run_counter
 
         return instance
-    
+
     @property
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:

@@ -1,10 +1,13 @@
-import zntrack
-import pytest
 import dataclasses
+
 import dvc.api
+import pytest
+
+import zntrack
+
 
 class MyNode(zntrack.Node):
-    
+
     def run(self):
         pass
 
@@ -12,7 +15,7 @@ class MyNode(zntrack.Node):
 def test_state_get(proj_path):
     with zntrack.Project() as project:
         n = MyNode()
-    
+
     project.build()
     assert n.state.remote == "."
     assert n.state.rev is None
@@ -21,10 +24,11 @@ def test_state_get(proj_path):
 
     assert isinstance(n.state.fs, dvc.api.DVCFileSystem)
 
+
 def test_state_set(proj_path):
     with zntrack.Project() as project:
         n = MyNode()
-    
+
     project.build()
     with pytest.raises(dataclasses.FrozenInstanceError):
         n.state.remote = "remote"
