@@ -53,11 +53,14 @@ def _outs_getter(self: Node, name: str):
         self.__dict__[name] = json.load(f)
     return getattr(self, name)
 
+
 def _outs_save_func(self: Node, name: str):
     (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
 
+
 def _metrics_save_func(self: Node, name: str):
     (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+
 
 def _plots_save_func(self: Node, name: str):
     (self.nwd / name).with_suffix(".csv").write_text(getattr(self, name).to_csv())

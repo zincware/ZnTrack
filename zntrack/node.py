@@ -5,9 +5,8 @@ import typing as t
 import dvc.api
 import znfields
 import znflow
-import znjson
 
-from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_OPTION, ZNTRACK_SAVE_FUNC
+from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC
 
 
 @dataclasses.dataclass(frozen=True)
@@ -41,7 +40,7 @@ class Node(znflow.Node, znfields.Base):
 
     def run(self):
         raise NotImplementedError
-    
+
     def save(self):
         for field in dataclasses.fields(self):
             func = field.metadata.get(ZNTRACK_SAVE_FUNC, None)
