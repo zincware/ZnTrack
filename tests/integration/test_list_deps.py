@@ -21,7 +21,6 @@ def test_list_deps(proj_path):
 
     assert dvc.cli.main(["repro"]) == 0
 
-
     node1 = node1.from_rev(name=node1.name)
     node2 = node2.from_rev(name=node2.name)
     node3 = node3.from_rev(name=node3.name)
