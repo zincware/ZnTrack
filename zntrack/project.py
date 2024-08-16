@@ -5,11 +5,18 @@ import znflow
 import znjson
 
 from . import config, converter
+from .deployment import ZnTrackDeployment
 
 log = logging.getLogger(__name__)
 
 
 class Project(znflow.DiGraph):
+
+    def __init__(self, *args, disable=False, immutable_nodes=True, deployment=None, **kwargs):
+        if deployment is None:
+            deployment = ZnTrackDeployment()
+        super().__init__(*args, disable=disable, immutable_nodes=immutable_nodes, deployment=deployment, **kwargs)
+
     def add_node(self, node_for_adding, **attr):
         return super().add_node(node_for_adding, **attr)
 

@@ -48,6 +48,8 @@ class Node(znflow.Node, znfields.Base):
             func = field.metadata.get(ZNTRACK_SAVE_FUNC, None)
             if callable(func):
                 func(self, field.name)
+        # we assume that after one calls "save" the node is finished
+        self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
 
     def __init_subclass__(cls):
         return dataclasses.dataclass(cls)
@@ -63,7 +65,7 @@ class Node(znflow.Node, znfields.Base):
     def from_rev(
         cls,
         name: str | None = None,
-        remote: str | None = None,
+        remote: str | None = ".",
         rev: str | None = None,
         running: bool = False,
         **kwargs,
@@ -102,7 +104,13 @@ class Node(znflow.Node, znfields.Base):
         return NodeStatus(**self.__dict__["state"])
 
     def update_run_count(self):
-        self.__dict__["state"]["run_count"] += 1
+        try:
+            self.__dict__["state"]["run_count"] += 1
+        except KeyError:
+            self.__dict__["state"] = {"run_count": 1, "state": NodeStatusEnum.RUNNING, "remote": ".", "rev": None}
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )
+        
+    def load(self):
+        raise NotImplementedError
