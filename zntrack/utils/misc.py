@@ -1,7 +1,9 @@
-import typing as t
-from ..config import ENV_FILE_PATH
 import os
+import typing as t
+
 import yaml
+
+from ..config import ENV_FILE_PATH
 
 
 def get_attr_always_list(obj: t.Any, attr: str) -> list:
@@ -9,6 +11,7 @@ def get_attr_always_list(obj: t.Any, attr: str) -> list:
     if not isinstance(value, list):
         value = [value]
     return value
+
 
 def load_env_vars(name: str):
     if ENV_FILE_PATH.exists():

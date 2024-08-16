@@ -1,5 +1,5 @@
-import pathlib
 import enum
+import pathlib
 
 DVC_FILE_PATH = pathlib.Path("dvc.yaml")
 PARAMS_FILE_PATH = pathlib.Path("params.yaml")
@@ -12,6 +12,7 @@ ZNTRACK_SAVE_FUNC = "zntrack.save_func"
 
 ZNTRACK_DEFAULT = object()
 ZNTRACK_LAZY_VALUE = object()
+
 
 class NodeStatusEnum(enum.Enum):
     CREATED = 0

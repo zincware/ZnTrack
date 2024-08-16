@@ -1,11 +1,11 @@
 import dataclasses
+import json
 import pathlib
 import typing as t
 
 import dvc.api
 import znfields
 import znflow
-import json
 
 from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC, NodeStatusEnum
 
@@ -13,7 +13,7 @@ from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC, NodeStatusEnum
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
     remote: str = "."
-    rev: str|None = None
+    rev: str | None = None
     run_count: int = 0
     state: NodeStatusEnum = NodeStatusEnum.CREATED
 
@@ -85,7 +85,12 @@ class Node(znflow.Node, znfields.Base):
             run_count = 0
 
         # TODO: check if the node is finished or not.
-        instance.__dict__["state"] = {"remote": remote, "rev": rev, "run_count": run_count, "state": NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED}
+        instance.__dict__["state"] = {
+            "remote": remote,
+            "rev": rev,
+            "run_count": run_count,
+            "state": NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
+        }
         # TODO: try reading node-meta, if available set run_count
 
         return instance
@@ -95,7 +100,7 @@ class Node(znflow.Node, znfields.Base):
         if "state" not in self.__dict__:
             self.__dict__["state"] = {}
         return NodeStatus(**self.__dict__["state"])
-    
+
     def update_run_count(self):
         self.__dict__["state"]["run_count"] += 1
         (self.nwd / "node-meta.json").write_text(

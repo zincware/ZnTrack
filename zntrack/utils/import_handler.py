@@ -1,14 +1,14 @@
+import importlib
 import logging
 import pathlib
 import sys
-import importlib
 
 log = logging.getLogger(__name__)
 
 
 def import_handler(node_path: str) -> object:
     """Import a module from a string.
-    
+
     node_path : str
         The full path to the Node, e.g. `ipsuite.nodes.SmilesToAtoms`
     """

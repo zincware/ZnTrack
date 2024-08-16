@@ -2,7 +2,6 @@
 
 import contextlib
 import importlib.metadata
-import os
 import pathlib
 import sys
 
@@ -66,7 +65,6 @@ def run(
         The method to run on the node.
 
     """
-
     utils.misc.load_env_vars(name)
     sys.path.append(pathlib.Path.cwd().as_posix())
 
@@ -87,8 +85,6 @@ def run(
     #         node.save(parameter=False)
     # else:
     #     raise ValueError(f"Node {node} is not a ZnTrack Node.")
-    
-
 
 
 @app.command()
