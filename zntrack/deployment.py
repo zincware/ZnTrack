@@ -10,5 +10,5 @@ class ZnTrackDeployment(VanillaDeployment):
         super()._run_node(node_uuid)
 
         node.save()
-    
+
     # TODO: when finished all Nodes, commit all changes

@@ -6,6 +6,7 @@ import pytest
 import zntrack
 from zntrack.config import NodeStatusEnum
 
+
 class MyNode(zntrack.Node):
 
     def run(self):
@@ -48,6 +49,7 @@ def test_state_get_after_run(proj_path):
     assert n.state.run_count == 1
     assert not n.state.restarted
     assert n.state.state == NodeStatusEnum.FINISHED
+
 
 def test_state_set(proj_path):
     with zntrack.Project() as project:

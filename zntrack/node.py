@@ -107,10 +107,15 @@ class Node(znflow.Node, znfields.Base):
         try:
             self.__dict__["state"]["run_count"] += 1
         except KeyError:
-            self.__dict__["state"] = {"run_count": 1, "state": NodeStatusEnum.RUNNING, "remote": ".", "rev": None}
+            self.__dict__["state"] = {
+                "run_count": 1,
+                "state": NodeStatusEnum.RUNNING,
+                "remote": ".",
+                "rev": None,
+            }
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )
-        
+
     def load(self):
         raise NotImplementedError
