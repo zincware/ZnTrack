@@ -173,17 +173,25 @@ def deduplicate_and_sort(stages, without_cache):
         if "params" in stage:
             paths = set(stage["params"])
             paths = {pathlib.Path(p).as_posix() for p in paths}
-            stage["params"] = [path if path == stage_name else {path: None} for path in sorted(paths)]
+            stage["params"] = [
+                path if path == stage_name else {path: None} for path in sorted(paths)
+            ]
 
         if "outs" in stage:
             paths = set(stage["outs"])
             paths = {pathlib.Path(p).as_posix() for p in paths}
-            stage["outs"] = [{path: {"cache": False}} if path in without_caches else path for path in sorted(paths)]
+            stage["outs"] = [
+                {path: {"cache": False}} if path in without_caches else path
+                for path in sorted(paths)
+            ]
 
         if "metrics" in stage:
             paths = set(stage["metrics"])
             paths = {pathlib.Path(p).as_posix() for p in paths}
-            stage["metrics"] = [{path: {"cache": False}} if path in without_caches else path for path in sorted(paths)]
+            stage["metrics"] = [
+                {path: {"cache": False}} if path in without_caches else path
+                for path in sorted(paths)
+            ]
 
 
 def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:

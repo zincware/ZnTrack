@@ -1,12 +1,13 @@
 """Helpers for the Node Working Directory (NWD)."""
 
+import json
 import logging
 import os
 import pathlib
 import shutil
+
 import znflow.utils
 import znjson
-import json
 
 from .. import config
 
@@ -30,6 +31,7 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
     shutil.copytree(target, destination, copy_function=os.link)
     shutil.rmtree(target)
 
+
 def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
     """Get the node working directory.
 
@@ -49,7 +51,11 @@ def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
     except KeyError:
         if node.name is None:
             raise ValueError("Unable to determine node name.")
-        if node.state.remote is None and node.state.rev is None and node.state.state == config.NodeStatusEnum.FINISHED:
+        if (
+            node.state.remote is None
+            and node.state.rev is None
+            and node.state.state == config.NodeStatusEnum.FINISHED
+        ):
             nwd = pathlib.Path("nodes", node.name)
         else:
             try:
@@ -62,6 +68,7 @@ def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
     if mkdir:
         nwd.mkdir(parents=True, exist_ok=True)
     return nwd
+
 
 class NWDReplaceHandler(znflow.utils.IterableHandler):
     """Replace the nwd placeholder with the actual nwd."""

@@ -1,13 +1,13 @@
+import contextlib
 import dataclasses
 import json
 import pathlib
+import tempfile
 import typing as t
 
 import dvc.api
 import znfields
 import znflow
-import contextlib
-import tempfile
 
 from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC, NodeStatusEnum
 from .utils.node_wd import get_nwd
@@ -21,7 +21,9 @@ class NodeStatus:
     state: NodeStatusEnum = NodeStatusEnum.CREATED
     lazy_evaluation: bool = True
     tmp_path: pathlib.Path | None = None
-    node: "Node|None" = dataclasses.field(default=None, repr=False, compare=False, hash=False)
+    node: "Node|None" = dataclasses.field(
+        default=None, repr=False, compare=False, hash=False
+    )
 
     @property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -35,10 +37,9 @@ class NodeStatus:
     def restarted(self) -> bool:
         """Whether the node was restarted."""
         return self.run_count > 1
-    
 
     @contextlib.contextmanager
-    def use_tmp_path(self, path: pathlib.Path|None = None) -> t.Iterator[None]:
+    def use_tmp_path(self, path: pathlib.Path | None = None) -> t.Iterator[None]:
         """Load the data for '*_path' into a temporary directory.
 
         If you can not use 'node.state.fs.open' you can use
@@ -52,7 +53,7 @@ class NodeStatus:
         """
         if path is not None:
             raise NotImplementedError("Custom paths are not implemented yet.")
-        
+
         with tempfile.TemporaryDirectory() as tmpdir:
             self.node.__dict__["state"]["tmp_path"] = pathlib.Path(tmpdir)
             try:
