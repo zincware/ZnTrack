@@ -15,7 +15,7 @@ pyyaml = "^6"
 tqdm = "^4"
 
 znjson = "^0.2"
-znflow = "^0.1"
+znflow = "^0.2"
 varname = "^0.13"
 typer = "^0"
 znfields = "^0.1.0"
@@ -41,6 +41,7 @@ pytest-xdist = "^2"
 optuna = "^3"
 scikit-learn = "^1"
 nbmake = "^1"
+pandas = "^2.2.2"
 
 [tool.poetry.group.notebook.dependencies]
 jupyterlab = "^3"
