@@ -19,6 +19,8 @@ from .config import (
 )
 from .converter import ConnectionConverter, NodeConverter
 from .node import Node
+from .utils.misc import TempPathLoader
+from .utils.node_wd import NWDReplaceHandler
 
 # TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
 # raise an error if passed to `metrics_path` etc.
@@ -35,15 +37,21 @@ def _params_getter(self: Node, name: str):
 
 
 def _paths_getter(self: Node, name: str):
+    nwd_handler = NWDReplaceHandler()
     if name in self.__dict__:
         if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
+            if self.state.state == NodeStatusEnum.RUNNING:
+                return nwd_handler(self.__dict__[name], nwd=self.nwd)
             return self.__dict__[name]
     with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
+
         content = json.load(f)[self.name][name]
-        # TODO: replace nwd
         content = znjson.loads(json.dumps(content))
-        self.__dict__[name] = content
-        return getattr(self, name)
+
+        if self.state.tmp_path is not None:
+            loader = TempPathLoader()
+            return loader(name, instance=self)
+        return nwd_handler(content, nwd=self.nwd)
 
 
 def _outs_getter(self: Node, name: str):

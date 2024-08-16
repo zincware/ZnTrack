@@ -9,7 +9,8 @@ import znjson
 
 from .node import Node
 from .options import ZNTRACK_CACHE, ZNTRACK_OPTION
-from .utils import get_attr_always_list, module_handler, replace_nwd_placeholder
+from .utils import get_attr_always_list, module_handler
+from .utils.node_wd import NWDReplaceHandler
 
 
 class NodeDict(t.TypedDict):
@@ -104,40 +105,30 @@ def handle_field_metadata(
     field_option = field.metadata.get(ZNTRACK_OPTION)
     field_cached = field.metadata.get(ZNTRACK_CACHE)
 
+    nwd_handler = NWDReplaceHandler()
+
     if field_option == "params":
         stages[node.name].setdefault("params", []).append(node.name)
 
     elif field_option == "params_path":
-        content = [
-            replace_nwd_placeholder(c, node.nwd)
-            for c in get_attr_always_list(node, field.name)
-        ]
+        content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
         stages[node.name].setdefault("params", []).extend(content)
 
     elif field_option == "outs_path":
-        content = [
-            replace_nwd_placeholder(c, node.nwd)
-            for c in get_attr_always_list(node, field.name)
-        ]
+        content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
         stages[node.name].setdefault("outs", []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
 
     elif field_option == "plots_path":
-        content = [
-            replace_nwd_placeholder(c, node.nwd)
-            for c in get_attr_always_list(node, field.name)
-        ]
+        content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
         stages[node.name].setdefault("outs", []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
         plots[node.name] = None  # TODO
 
     elif field_option == "metrics_path":
-        content = [
-            replace_nwd_placeholder(c, node.nwd)
-            for c in get_attr_always_list(node, field.name)
-        ]
+        content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
         stages[node.name].setdefault("metrics", []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
@@ -177,23 +168,22 @@ def handle_field_metadata(
 def deduplicate_and_sort(stages, without_cache):
     """Ensure no duplicate paths and sort entries in stages."""
     for stage_name, stage in stages.items():
+        without_caches = [pathlib.Path(x).as_posix() for x in without_cache[stage_name]]
+
         if "params" in stage:
-            stage["params"] = [
-                path if path == stage_name else {path: None}
-                for path in sorted(set(stage["params"]))
-            ]
+            paths = set(stage["params"])
+            paths = {pathlib.Path(p).as_posix() for p in paths}
+            stage["params"] = [path if path == stage_name else {path: None} for path in sorted(paths)]
 
         if "outs" in stage:
-            stage["outs"] = [
-                {path: {"cache": False}} if path in without_cache[stage_name] else path
-                for path in sorted(set(stage["outs"]))
-            ]
+            paths = set(stage["outs"])
+            paths = {pathlib.Path(p).as_posix() for p in paths}
+            stage["outs"] = [{path: {"cache": False}} if path in without_caches else path for path in sorted(paths)]
 
         if "metrics" in stage:
-            stage["metrics"] = [
-                {path: {"cache": False}} if path in without_cache[stage_name] else path
-                for path in sorted(set(stage["metrics"]))
-            ]
+            paths = set(stage["metrics"])
+            paths = {pathlib.Path(p).as_posix() for p in paths}
+            stage["metrics"] = [{path: {"cache": False}} if path in without_caches else path for path in sorted(paths)]
 
 
 def convert_graph_to_dvc_config(obj: znflow.DiGraph) -> dict:

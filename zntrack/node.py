@@ -6,8 +6,11 @@ import typing as t
 import dvc.api
 import znfields
 import znflow
+import contextlib
+import tempfile
 
 from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC, NodeStatusEnum
+from .utils.node_wd import get_nwd
 
 
 @dataclasses.dataclass(frozen=True)
@@ -17,6 +20,8 @@ class NodeStatus:
     run_count: int = 0
     state: NodeStatusEnum = NodeStatusEnum.CREATED
     lazy_evaluation: bool = True
+    tmp_path: pathlib.Path | None = None
+    node: "Node|None" = dataclasses.field(default=None, repr=False, compare=False, hash=False)
 
     @property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -30,6 +35,30 @@ class NodeStatus:
     def restarted(self) -> bool:
         """Whether the node was restarted."""
         return self.run_count > 1
+    
+
+    @contextlib.contextmanager
+    def use_tmp_path(self, path: pathlib.Path|None = None) -> t.Iterator[None]:
+        """Load the data for '*_path' into a temporary directory.
+
+        If you can not use 'node.state.fs.open' you can use
+        this as an alternative. This will load the data into
+        a temporary directory and then delete it afterwards.
+        The respective paths 'node.*_path' will be replaced
+        automatically inside the context manager.
+
+        This is only set, if either 'remote' or 'rev' are set.
+        Otherwise, the data will be loaded from the current directory.
+        """
+        if path is not None:
+            raise NotImplementedError("Custom paths are not implemented yet.")
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            self.node.__dict__["state"]["tmp_path"] = pathlib.Path(tmpdir)
+            try:
+                yield
+            finally:
+                self.node.__dict__["state"].pop("tmp_path")
 
 
 @t.dataclass_transform()
@@ -50,6 +79,7 @@ class Node(znflow.Node, znfields.Base):
             if callable(func):
                 func(self, field.name)
         # we assume that after one calls "save" the node is finished
+        _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
 
     def __init_subclass__(cls):
@@ -57,10 +87,7 @@ class Node(znflow.Node, znfields.Base):
 
     @property
     def nwd(self) -> pathlib.Path:
-        node_wd = pathlib.Path(f"nodes/{self.name}/")
-        if not node_wd.exists():
-            node_wd.mkdir(parents=True)
-        return node_wd
+        return get_nwd(self, mkdir=True)
 
     @classmethod
     def from_rev(
@@ -107,7 +134,7 @@ class Node(znflow.Node, znfields.Base):
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
             self.__dict__["state"] = {}
-        return NodeStatus(**self.__dict__["state"])
+        return NodeStatus(**self.__dict__["state"], node=self)
 
     def update_run_count(self):
         try:
