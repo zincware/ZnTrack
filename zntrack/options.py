@@ -15,6 +15,7 @@ from .config import (
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
     ZNTRACK_SAVE_FUNC,
+    NodeStatusEnum,
 )
 from .converter import ConnectionConverter, NodeConverter
 from .node import Node
@@ -49,6 +50,9 @@ def _outs_getter(self: Node, name: str):
     if name in self.__dict__:
         if self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
             return self.__dict__[name]
+    
+    if self.state.state == NodeStatusEnum.RUNNING:
+        return ZNTRACK_LAZY_VALUE
     with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
         self.__dict__[name] = json.load(f)
     return getattr(self, name)

@@ -19,7 +19,7 @@ def test_state_get(proj_path):
     project.build()
     assert n.state.remote == "."
     assert n.state.rev is None
-    assert n.state.run_counter == 0
+    assert n.state.run_count == 0
     assert not n.state.restarted
 
     assert isinstance(n.state.fs, dvc.api.DVCFileSystem)
@@ -35,4 +35,4 @@ def test_state_set(proj_path):
     with pytest.raises(dataclasses.FrozenInstanceError):
         n.state.rev = "rev"
     with pytest.raises(dataclasses.FrozenInstanceError):
-        n.state.run_counter = 1
+        n.state.run_count = 1

@@ -5,15 +5,17 @@ import typing as t
 import dvc.api
 import znfields
 import znflow
+import json
 
-from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC
+from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC, NodeStatusEnum
 
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
     remote: str = "."
-    rev: str | None = None
-    run_counter: int = 0
+    rev: str|None = None
+    run_count: int = 0
+    state: NodeStatusEnum = NodeStatusEnum.CREATED
 
     @property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -26,7 +28,7 @@ class NodeStatus:
     @property
     def restarted(self) -> bool:
         """Whether the node was restarted."""
-        return self.run_counter > 1
+        return self.run_count > 1
 
 
 @t.dataclass_transform()
@@ -63,6 +65,7 @@ class Node(znflow.Node, znfields.Base):
         name: str | None = None,
         remote: str | None = None,
         rev: str | None = None,
+        running: bool = False,
         **kwargs,
     ) -> "Node":
         if name is None:
@@ -73,8 +76,17 @@ class Node(znflow.Node, znfields.Base):
 
         lazy_values["name"] = name
         instance = cls(**lazy_values)
-        instance.__dict__["state"] = {"remote": remote, "rev": rev}
-        # TODO: try reading node-meta, if available set run_counter
+
+        try:
+            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
+                content = json.load(f)
+                run_count = content["run_count"]
+        except FileNotFoundError:
+            run_count = 0
+
+        # TODO: check if the node is finished or not.
+        instance.__dict__["state"] = {"remote": remote, "rev": rev, "run_count": run_count, "state": NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED}
+        # TODO: try reading node-meta, if available set run_count
 
         return instance
 
@@ -83,3 +95,9 @@ class Node(znflow.Node, znfields.Base):
         if "state" not in self.__dict__:
             self.__dict__["state"] = {}
         return NodeStatus(**self.__dict__["state"])
+    
+    def update_run_count(self):
+        self.__dict__["state"]["run_count"] += 1
+        (self.nwd / "node-meta.json").write_text(
+            json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
+        )
