@@ -2,11 +2,15 @@ import importlib
 import logging
 import pathlib
 import sys
+import typing as t
+
+if t.TYPE_CHECKING:
+    from ..node import Node
 
 log = logging.getLogger(__name__)
 
 
-def import_handler(node_path: str) -> object:
+def import_handler(node_path: str) -> t.Type["Node"]:
     """Import a module from a string.
 
     node_path : str
