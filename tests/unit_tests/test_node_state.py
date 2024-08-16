@@ -8,7 +8,6 @@ from zntrack.config import NodeStatusEnum
 
 
 class MyNode(zntrack.Node):
-
     def run(self):
         pass
 
@@ -40,6 +39,7 @@ def test_state_get_after_run(proj_path):
     assert n.state.run_count == 1
     assert not n.state.restarted
     assert n.state.state == NodeStatusEnum.FINISHED
+    assert n.state.lazy_evaluation is True
 
     # now test the loaded node
     n = n.from_rev()
@@ -49,6 +49,11 @@ def test_state_get_after_run(proj_path):
     assert n.state.run_count == 1
     assert not n.state.restarted
     assert n.state.state == NodeStatusEnum.FINISHED
+    assert n.state.lazy_evaluation is True
+
+    # again just for lazy_evaluation=False
+    n = n.from_rev(lazy_evaluation=False)
+    assert n.state.lazy_evaluation is False
 
 
 def test_state_set(proj_path):
@@ -64,3 +69,7 @@ def test_state_set(proj_path):
         n.state.run_count = 1
     with pytest.raises(dataclasses.FrozenInstanceError):
         n.state.state = NodeStatusEnum.RUNNING
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        n.state.restarted = True
+    with pytest.raises(dataclasses.FrozenInstanceError):
+        n.state.lazy_evaluation = False

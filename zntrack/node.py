@@ -16,6 +16,7 @@ class NodeStatus:
     rev: str | None = None
     run_count: int = 0
     state: NodeStatusEnum = NodeStatusEnum.CREATED
+    lazy_evaluation: bool = True
 
     @property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -68,6 +69,7 @@ class Node(znflow.Node, znfields.Base):
         remote: str | None = ".",
         rev: str | None = None,
         running: bool = False,
+        lazy_evaluation: bool = True,
         **kwargs,
     ) -> "Node":
         if name is None:
@@ -92,8 +94,12 @@ class Node(znflow.Node, znfields.Base):
             "rev": rev,
             "run_count": run_count,
             "state": NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
+            "lazy_evaluation": lazy_evaluation,
         }
-        # TODO: try reading node-meta, if available set run_count
+
+        if not instance.state.lazy_evaluation:
+            for field in dataclasses.fields(cls):
+                _ = getattr(instance, field.name)
 
         return instance
 

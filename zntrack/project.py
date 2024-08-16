@@ -11,7 +11,6 @@ log = logging.getLogger(__name__)
 
 
 class Project(znflow.DiGraph):
-
     def __init__(
         self, *args, disable=False, immutable_nodes=True, deployment=None, **kwargs
     ):
