@@ -8,7 +8,7 @@ import znflow
 import znjson
 
 from .node import Node
-from .options import ZNTRACK_CACHE, ZNTRACK_OPTION
+from .options import ZNTRACK_CACHE, ZNTRACK_OPTION, ZnTrackOptionEnum
 from .utils import get_attr_always_list, module_handler
 from .utils.node_wd import NWDReplaceHandler
 
@@ -75,10 +75,10 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
         }
         for field in dataclasses.fields(node):
             if field.metadata.get(ZNTRACK_OPTION) in [
-                "params",
-                "outs",
-                "plots",
-                "metrics",
+                ZnTrackOptionEnum.PARAMS,
+                ZnTrackOptionEnum.OUTS,
+                ZnTrackOptionEnum.PLOTS,
+                ZnTrackOptionEnum.METRICS,
             ]:
                 continue
             data[node.name][field.name] = getattr(node, field.name)
@@ -107,60 +107,60 @@ def handle_field_metadata(
 
     nwd_handler = NWDReplaceHandler()
 
-    if field_option == "params":
-        stages[node.name].setdefault("params", []).append(node.name)
+    if field_option == ZnTrackOptionEnum.PARAMS:
+        stages[node.name].setdefault(ZnTrackOptionEnum.PARAMS.value, []).append(node.name)
 
-    elif field_option == "params_path":
+    elif field_option == ZnTrackOptionEnum.PARAMS_PATH:
         content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
-        stages[node.name].setdefault("params", []).extend(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.PARAMS.value, []).extend(content)
 
-    elif field_option == "outs_path":
+    elif field_option == ZnTrackOptionEnum.OUTS_PATH:
         content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
-        stages[node.name].setdefault("outs", []).extend(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
 
-    elif field_option == "plots_path":
+    elif field_option == ZnTrackOptionEnum.PLOTS_PATH:
         content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
-        stages[node.name].setdefault("outs", []).extend(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
         plots[node.name] = None  # TODO
 
-    elif field_option == "metrics_path":
+    elif field_option == ZnTrackOptionEnum.METRICS_PATH:
         content = nwd_handler(get_attr_always_list(node, field.name), nwd=node.nwd)
-        stages[node.name].setdefault("metrics", []).extend(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.METRICS.value, []).extend(content)
         if not field_cached:
             without_cache[node.name].extend(content)
 
-    elif field_option == "deps_path":
+    elif field_option == ZnTrackOptionEnum.DEPS_PATH:
         content = [
             pathlib.Path(c).as_posix() for c in get_attr_always_list(node, field.name)
         ]
-        stages[node.name].setdefault("deps", []).extend(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(content)
 
-    elif field_option == "metrics":
+    elif field_option == ZnTrackOptionEnum.METRICS:
         content = pathlib.Path(node.nwd, field.name).with_suffix(".json").as_posix()
-        stages[node.name].setdefault("metrics", []).append(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.METRICS.value, []).append(content)
         if not field_cached:
             without_cache[node.name].append(content)
 
-    elif field_option == "outs":
+    elif field_option == ZnTrackOptionEnum.OUTS:
         content = (node.nwd / field.name).with_suffix(".json").as_posix()
-        stages[node.name].setdefault("outs", []).append(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.OUTS.value, []).append(content)
         if not field_cached:
             without_cache[node.name].append(content)
 
-    elif field_option == "plots":
+    elif field_option == ZnTrackOptionEnum.PLOTS:
         content = (node.nwd / field.name).with_suffix(".csv").as_posix()
-        stages[node.name].setdefault("outs", []).append(content)
+        stages[node.name].setdefault(ZnTrackOptionEnum.OUTS.value, []).append(content)
         if not field_cached:
             without_cache[node.name].append(content)
 
-    elif field_option == "deps":
+    elif field_option == ZnTrackOptionEnum.DEPS:
         content = get_attr_always_list(node, field.name)
         paths = [node_to_output_paths(con.instance) for con in content]
-        stages[node.name].setdefault("deps", []).extend(
+        stages[node.name].setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(
             sum(paths, [])  # flatten the list
         )
 
@@ -170,25 +170,25 @@ def deduplicate_and_sort(stages, without_cache):
     for stage_name, stage in stages.items():
         without_caches = [pathlib.Path(x).as_posix() for x in without_cache[stage_name]]
 
-        if "params" in stage:
-            paths = set(stage["params"])
+        if ZnTrackOptionEnum.PARAMS in stage:
+            paths = set(stage[ZnTrackOptionEnum.PARAMS])
             paths = {pathlib.Path(p).as_posix() for p in paths}
-            stage["params"] = [
+            stage[ZnTrackOptionEnum.PARAMS] = [
                 path if path == stage_name else {path: None} for path in sorted(paths)
             ]
 
-        if "outs" in stage:
-            paths = set(stage["outs"])
+        if ZnTrackOptionEnum.OUTS in stage:
+            paths = set(stage[ZnTrackOptionEnum.OUTS])
             paths = {pathlib.Path(p).as_posix() for p in paths}
-            stage["outs"] = [
+            stage[ZnTrackOptionEnum.OUTS] = [
                 {path: {"cache": False}} if path in without_caches else path
                 for path in sorted(paths)
             ]
 
-        if "metrics" in stage:
-            paths = set(stage["metrics"])
+        if ZnTrackOptionEnum.METRICS in stage:
+            paths = set(stage[ZnTrackOptionEnum.METRICS])
             paths = {pathlib.Path(p).as_posix() for p in paths}
-            stage["metrics"] = [
+            stage[ZnTrackOptionEnum.METRICS] = [
                 {path: {"cache": False}} if path in without_caches else path
                 for path in sorted(paths)
             ]
@@ -223,7 +223,7 @@ def convert_graph_to_parameter(obj: znflow.DiGraph) -> dict:
     for node_uuid in obj:
         node: Node = obj.nodes[node_uuid]["value"]
         for field in dataclasses.fields(node):
-            if field.metadata.get(ZNTRACK_OPTION) == "params":
+            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 if node.name not in data:
                     data[node.name] = {}
                 data[node.name][field.name] = getattr(node, field.name)

@@ -18,3 +18,16 @@ class NodeStatusEnum(enum.Enum):
     CREATED = 0
     RUNNING = 2
     FINISHED = 3
+
+class ZnTrackOptionEnum(str, enum.Enum):
+    DEPS = "deps"
+    PARAMS = "params"
+    OUTS = "outs"
+    PLOTS = "plots"
+    METRICS = "metrics"
+
+    PARAMS_PATH = "params_path"
+    DEPS_PATH = "deps_path"
+    OUTS_PATH = "outs_path"
+    PLOTS_PATH = "plots_path"
+    METRICS_PATH = "metrics_path"

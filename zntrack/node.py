@@ -107,6 +107,8 @@ class Node(znflow.Node, znfields.Base):
             func = field.metadata.get(ZNTRACK_SAVE_FUNC, None)
             if callable(func):
                 func(self, field.name)
+            # for plugin in self.state.plugins:
+            #     plugin.save(self, field.metadata.get(ZNTRACK_OPTION, None))
         # we assume that after one calls "save" the node is finished
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
