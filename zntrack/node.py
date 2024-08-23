@@ -9,6 +9,7 @@ import dvc.api
 import dvc.repo
 import dvc.stage
 import dvc.stage.serialize
+from dvc.utils import dict_sha256
 import znfields
 import znflow
 
@@ -79,6 +80,14 @@ class NodeStatus:
         """Access to the internal dvc.repo api."""
         stage = self.get_stage()
         return dvc.stage.serialize.to_single_stage_lockfile(stage)
+    
+    def get_stage_hash(self, include_outs: bool = False) -> str:
+        """Get the hash of the stage."""
+        if include_outs:
+            raise NotImplementedError("Include outs is not implemented yet.")
+        stage_lock = self.get_stage_lock()
+        filtered_lock = {k: v for k, v in stage_lock.items() if k in ["cmd", "deps", "params"]}
+        return dict_sha256(filtered_lock)
     
 
 @t.dataclass_transform()
