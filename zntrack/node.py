@@ -6,6 +6,9 @@ import tempfile
 import typing as t
 
 import dvc.api
+import dvc.repo
+import dvc.stage
+import dvc.stage.serialize
 import znfields
 import znflow
 
@@ -15,8 +18,9 @@ from .utils.node_wd import get_nwd
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
-    remote: str = "."
-    rev: str | None = None
+    name: str
+    remote: str
+    rev: str | None
     run_count: int = 0
     state: NodeStatusEnum = NodeStatusEnum.CREATED
     lazy_evaluation: bool = True
@@ -24,6 +28,7 @@ class NodeStatus:
     node: "Node|None" = dataclasses.field(
         default=None, repr=False, compare=False, hash=False
     )
+    # TODO: move node name and nwd to here as well
 
     @property
     def fs(self) -> dvc.api.DVCFileSystem:
@@ -61,6 +66,20 @@ class NodeStatus:
             finally:
                 self.node.__dict__["state"].pop("tmp_path")
 
+
+    def get_stage(self) -> dvc.stage.PipelineStage: 
+        """Access to the internal dvc.repo api."""
+        remote = self.remote if self.remote != "." else None
+        with dvc.repo.Repo(remote=remote, rev=self.rev) as repo:
+            stage = repo.stage.collect(self.name)[0]
+            stage.save(allow_missing=True)
+            return stage
+    
+    def get_stage_lock(self) -> dict:
+        """Access to the internal dvc.repo api."""
+        stage = self.get_stage()
+        return dvc.stage.serialize.to_single_stage_lockfile(stage)
+    
 
 @t.dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
@@ -118,6 +137,7 @@ class Node(znflow.Node, znfields.Base):
 
         # TODO: check if the node is finished or not.
         instance.__dict__["state"] = {
+            "name": name,
             "remote": remote,
             "rev": rev,
             "run_count": run_count,
@@ -134,7 +154,7 @@ class Node(znflow.Node, znfields.Base):
     @property
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
-            self.__dict__["state"] = {}
+            self.__dict__["state"] = {"name": self.name, "remote": ".", "rev": None}
         return NodeStatus(**self.__dict__["state"], node=self)
 
     def update_run_count(self):
@@ -146,6 +166,7 @@ class Node(znflow.Node, znfields.Base):
                 "state": NodeStatusEnum.RUNNING,
                 "remote": ".",
                 "rev": None,
+                "name": self.name,
             }
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
