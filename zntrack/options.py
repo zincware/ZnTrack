@@ -118,7 +118,10 @@ def params(default=dataclasses.MISSING, **kwargs):
 @functools.wraps(znfields.field)
 def deps(default=dataclasses.MISSING, **kwargs):
     return znfields.field(
-        default=default, metadata={ZNTRACK_OPTION: ZnTrackOptionEnum.DEPS}, getter=_deps_getter, **kwargs
+        default=default,
+        metadata={ZNTRACK_OPTION: ZnTrackOptionEnum.DEPS},
+        getter=_deps_getter,
+        **kwargs,
     )
 
 

@@ -19,6 +19,7 @@ class NodeStatusEnum(enum.Enum):
     RUNNING = 2
     FINISHED = 3
 
+
 class ZnTrackOptionEnum(str, enum.Enum):
     DEPS = "deps"
     PARAMS = "params"
