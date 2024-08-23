@@ -37,7 +37,10 @@ def test_state_get_after_run(proj_path):
     project.run()
 
     assert n.state.get_stage().addressing == "MyNode"
-    assert n.state.get_stage_lock()["cmd"] == "zntrack run test_node_state.MyNode --name MyNode"
+    assert (
+        n.state.get_stage_lock()["cmd"]
+        == "zntrack run test_node_state.MyNode --name MyNode"
+    )
     assert "deps" not in n.state.get_stage_lock()
     assert len(n.state.get_stage_lock()["outs"]) == 1
     assert n.state.get_stage_lock()["outs"][0]["hash"] == "md5"
