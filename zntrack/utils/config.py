@@ -22,6 +22,11 @@ class Files:
     params: Path = Path("params.yaml")
     dvc: Path = Path("dvc.yaml")
 
+    @property
+    def local_config(self) -> Path:
+        Path(".zntrack/").mkdir(parents=True, exist_ok=True)
+        return Path(".zntrack/config.local")
+
 
 @dataclasses.dataclass
 class Config:

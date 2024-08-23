@@ -170,6 +170,18 @@ class Params(Field):
         return [(f"--{self.dvc_option}", f"{file}:{instance.name}")]
 
 
+class LocalConfig(Params):
+    def get_files(self, instance: "Node") -> list:
+        """Get the list of files affected by this field.
+
+        Returns
+        -------
+        list
+            A list of file paths.
+        """
+        return [config.files.local_config]
+
+
 class Output(LazyField):
     """A field that is saved to disk."""
 

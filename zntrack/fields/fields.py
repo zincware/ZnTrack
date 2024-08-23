@@ -2,7 +2,7 @@
 
 from zntrack.fields.dependency import Dependency
 from zntrack.fields.dvc.options import DVCOption, PlotsOption
-from zntrack.fields.zn.options import Output, Params, Plots
+from zntrack.fields.zn.options import LocalConfig, Output, Params, Plots
 
 # Serialized Fields
 
@@ -53,6 +53,23 @@ def params(*args, **kwargs):
 
     """
     return Params(*args, **kwargs)
+
+
+def local_config(*args, **kwargs):
+    """Define a Node Parameter.
+
+    Parameters
+    ----------
+    args: any
+        A data object that is used as a parameter.
+        Typically, this should be a string or number.
+        The object is serialized and deserialized by ZnTrack
+        and stored in params.yaml.
+        see https://dvc.org/doc/command-reference/stage/add#-p
+    kwargs: dict
+        Additional keyword arguments.
+    """
+    return LocalConfig(*args, **kwargs)
 
 
 def deps(*data):

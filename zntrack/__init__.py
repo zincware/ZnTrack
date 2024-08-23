@@ -13,6 +13,7 @@ from zntrack.fields import Field, FieldGroup, LazyField, dvc, meta, zn
 from zntrack.fields.fields import (
     deps,
     deps_path,
+    local_config,
     metrics,
     metrics_path,
     outs,
@@ -53,6 +54,7 @@ __all__ += [
     "outs",
     "metrics",
     "params",
+    "local_config",
     "deps",
     "plots",
     "outs_path",
