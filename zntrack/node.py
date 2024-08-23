@@ -67,15 +67,14 @@ class NodeStatus:
             finally:
                 self.node.__dict__["state"].pop("tmp_path")
 
-
-    def get_stage(self) -> dvc.stage.PipelineStage: 
+    def get_stage(self) -> dvc.stage.PipelineStage:
         """Access to the internal dvc.repo api."""
         remote = self.remote if self.remote != "." else None
         with dvc.repo.Repo(remote=remote, rev=self.rev) as repo:
             stage = repo.stage.collect(self.name)[0]
             stage.save(allow_missing=True)
             return stage
-    
+
     def get_stage_lock(self) -> dict:
         """Access to the internal dvc.repo api."""
         stage = self.get_stage()
@@ -89,6 +88,7 @@ class NodeStatus:
         filtered_lock = {k: v for k, v in stage_lock.items() if k in ["cmd", "deps", "params"]}
         return dict_sha256(filtered_lock)
     
+
 
 @t.dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
