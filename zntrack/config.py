@@ -6,13 +6,49 @@ PARAMS_FILE_PATH = pathlib.Path("params.yaml")
 ZNTRACK_FILE_PATH = pathlib.Path("zntrack.json")
 ENV_FILE_PATH = pathlib.Path("env.yaml")
 
-ZNTRACK_OPTION = "zntrack.option"
-ZNTRACK_CACHE = "zntrack.cache"
-ZNTRACK_SAVE_FUNC = "zntrack.save_func"
 
-ZNTRACK_DEFAULT = object()
-ZNTRACK_LAZY_VALUE = object()
-PLUGIN_EMPTY_RETRUN_VALUE = object()
+# Use sentinel object for zntrack specific configurations. Use
+# a class to give it a better repr.
+class _ZNTRACK_OPTION_TYPE:
+    pass
+
+
+ZNTRACK_OPTION = _ZNTRACK_OPTION_TYPE()
+
+
+class _ZNTRACK_CACHE_TYPE:
+    pass
+
+
+ZNTRACK_CACHE = _ZNTRACK_CACHE_TYPE()
+
+
+class _ZNTRACK_SAVE_FUNC_TYPE:
+    pass
+
+
+ZNTRACK_SAVE_FUNC = _ZNTRACK_SAVE_FUNC_TYPE()
+
+
+class _ZNTRACK_DEFAULT_TYPE:
+    pass
+
+
+ZNTRACK_DEFAULT = _ZNTRACK_DEFAULT_TYPE()
+
+
+class _ZNTRACK_LAZY_VALUE_TYPE:
+    pass
+
+
+ZNTRACK_LAZY_VALUE = _ZNTRACK_LAZY_VALUE_TYPE()
+
+
+class _ZNTRACK_EMPTY_RETRUN_VALUE_TYPE:
+    pass
+
+
+PLUGIN_EMPTY_RETRUN_VALUE = _ZNTRACK_EMPTY_RETRUN_VALUE_TYPE()
 
 
 class NodeStatusEnum(enum.Enum):
