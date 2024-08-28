@@ -111,15 +111,9 @@ class Node(znflow.Node, znfields.Base):
         raise NotImplementedError
 
     def save(self):
-        for field in dataclasses.fields(self):
-            func = field.metadata.get(ZNTRACK_SAVE_FUNC, None)
-            if callable(func):
-                func(self, field.name)
-            # for plugin in self.state.plugins:
-            #     plugin.save(self, field.metadata.get(ZNTRACK_OPTION, None))
-            # TODO: do we also want to allow custom fields / serialization?
-            # YES! e.g. atoms field
-        # we assume that after one calls "save" the node is finished
+        for plugin in self.state.plugins:
+            for field in dataclasses.fields(self):
+                plugin.save(self, field)
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
 

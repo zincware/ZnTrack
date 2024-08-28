@@ -13,6 +13,7 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     NodeStatusEnum,
     ZnTrackOptionEnum,
+    ZNTRACK_SAVE_FUNC,
 )
 from zntrack.converter import ConnectionConverter, NodeConverter
 from zntrack.utils.misc import TempPathLoader
@@ -117,3 +118,8 @@ class DVCPlugin:
             return _paths_getter(node, field.name)
 
         raise ValueError(f"Unknown field metadata: {field.metadata}")
+    
+    def save(self, node: "Node", field: dataclasses.Field) -> None:
+        func = field.metadata.get(ZNTRACK_SAVE_FUNC, None)
+        if callable(func):
+            func(node, field.name)
