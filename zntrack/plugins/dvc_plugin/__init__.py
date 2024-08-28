@@ -15,6 +15,7 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 from zntrack.converter import ConnectionConverter, NodeConverter
+from zntrack.plugins import ZnTrackPlugin
 from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
@@ -105,7 +106,7 @@ def _outs_getter(self: "Node", name: str):
 
 
 @dataclasses.dataclass
-class DVCPlugin:
+class DVCPlugin(ZnTrackPlugin):
     def getter(self, node: "Node", field: dataclasses.Field) -> t.Any:
         option = field.metadata.get(ZNTRACK_OPTION)
 
