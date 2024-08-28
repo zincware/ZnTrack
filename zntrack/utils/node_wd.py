@@ -5,11 +5,16 @@ import logging
 import os
 import pathlib
 import shutil
+import typing as t
 
 import znflow.utils
 import znjson
 
 from .. import config
+
+if t.TYPE_CHECKING:
+    from zntrack import Node
+
 
 log = logging.getLogger(__name__)
 

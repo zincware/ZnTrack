@@ -12,6 +12,7 @@ ZNTRACK_SAVE_FUNC = "zntrack.save_func"
 
 ZNTRACK_DEFAULT = object()
 ZNTRACK_LAZY_VALUE = object()
+PLUGIN_EMPTY_RETRUN_VALUE = object()
 
 
 class NodeStatusEnum(enum.Enum):

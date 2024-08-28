@@ -90,6 +90,13 @@ class NodeStatus:
         }
         return dict_sha256(filtered_lock)
 
+    @property
+    def plugins(self) -> list:
+        """Get the plugins of the node."""
+        from zntrack.plugins.dvc_plugin import DVCPlugin
+
+        return [DVCPlugin()]
+
 
 @t.dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
@@ -110,6 +117,8 @@ class Node(znflow.Node, znfields.Base):
                 func(self, field.name)
             # for plugin in self.state.plugins:
             #     plugin.save(self, field.metadata.get(ZNTRACK_OPTION, None))
+            # TODO: do we also want to allow custom fields / serialization?
+            # YES! e.g. atoms field
         # we assume that after one calls "save" the node is finished
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
