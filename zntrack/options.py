@@ -2,14 +2,12 @@ import dataclasses
 import functools
 
 import znfields
-import znjson
 
 from .config import (
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
     ZNTRACK_DEFAULT,
     ZNTRACK_OPTION,
-    ZNTRACK_SAVE_FUNC,
     ZnTrackOptionEnum,
 )
 from .node import Node
@@ -17,18 +15,6 @@ from .node import Node
 # TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
 # raise an error if passed to `metrics_path` etc.
 # TODO: zntrack.outs() and zntrack.outs(cache=False) needs different files!
-
-
-def _outs_save_func(self: Node, name: str):
-    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
-
-
-def _metrics_save_func(self: Node, name: str):
-    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
-
-
-def _plots_save_func(self: Node, name: str):
-    (self.nwd / name).with_suffix(".csv").write_text(getattr(self, name).to_csv())
 
 
 def _plugin_getter(self: Node, name: str):
@@ -73,7 +59,6 @@ def outs(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_SAVE_FUNC] = _outs_save_func
     return znfields.field(default=ZNTRACK_DEFAULT, getter=_plugin_getter, **kwargs)
 
 
@@ -82,7 +67,6 @@ def plots(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_SAVE_FUNC] = _plots_save_func
     return znfields.field(default=ZNTRACK_DEFAULT, getter=_plugin_getter, **kwargs)
 
 
@@ -91,7 +75,6 @@ def metrics(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_SAVE_FUNC] = _metrics_save_func
     return znfields.field(default=ZNTRACK_DEFAULT, getter=_plugin_getter, **kwargs)
 
 

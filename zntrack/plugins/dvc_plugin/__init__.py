@@ -13,7 +13,6 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     NodeStatusEnum,
     ZnTrackOptionEnum,
-    ZNTRACK_SAVE_FUNC,
 )
 from zntrack.converter import ConnectionConverter, NodeConverter
 from zntrack.utils.misc import TempPathLoader
@@ -21,6 +20,18 @@ from zntrack.utils.node_wd import NWDReplaceHandler
 
 if t.TYPE_CHECKING:
     from zntrack import Node
+
+
+def _outs_save_func(self: "Node", name: str):
+    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+
+
+def _metrics_save_func(self: "Node", name: str):
+    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+
+
+def _plots_save_func(self: "Node", name: str):
+    (self.nwd / name).with_suffix(".csv").write_text(getattr(self, name).to_csv())
 
 
 def _deps_getter(self: "Node", name: str):
@@ -118,8 +129,11 @@ class DVCPlugin:
             return _paths_getter(node, field.name)
 
         raise ValueError(f"Unknown field metadata: {field.metadata}")
-    
+
     def save(self, node: "Node", field: dataclasses.Field) -> None:
-        func = field.metadata.get(ZNTRACK_SAVE_FUNC, None)
-        if callable(func):
-            func(node, field.name)
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:
+            _outs_save_func(node, field.name)
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
+            _plots_save_func(node, field.name)
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
+            _metrics_save_func(node, field.name)

@@ -13,7 +13,7 @@ import znfields
 import znflow
 from dvc.utils import dict_sha256
 
-from .config import ZNTRACK_LAZY_VALUE, ZNTRACK_SAVE_FUNC, NodeStatusEnum
+from .config import ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.node_wd import get_nwd
 
 
