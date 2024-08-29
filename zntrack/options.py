@@ -4,9 +4,9 @@ import functools
 import znfields
 
 from .config import (
+    NOT_AVAILABLE,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
-    ZNTRACK_DEFAULT,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
@@ -59,7 +59,7 @@ def outs(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    return znfields.field(default=ZNTRACK_DEFAULT, getter=_plugin_getter, **kwargs)
+    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
@@ -67,7 +67,7 @@ def plots(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    return znfields.field(default=ZNTRACK_DEFAULT, getter=_plugin_getter, **kwargs)
+    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
@@ -75,7 +75,7 @@ def metrics(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    return znfields.field(default=ZNTRACK_DEFAULT, getter=_plugin_getter, **kwargs)
+    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)

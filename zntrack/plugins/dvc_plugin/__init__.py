@@ -15,6 +15,7 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 from zntrack.converter import ConnectionConverter, NodeConverter
+from zntrack.exceptions import NodeNotAvailableError
 from zntrack.plugins import ZnTrackPlugin
 from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
@@ -39,25 +40,28 @@ def _deps_getter(self: "Node", name: str):
     if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
         return self.__dict__[name]
 
-    with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
-        content = json.load(f)[self.name][name]
-        # TODO: Ensure deps are loaded from the correct revision
-        content = znjson.loads(
-            json.dumps(content),
-            cls=znjson.ZnDecoder.from_converters(
-                [NodeConverter, ConnectionConverter], add_default=True
-            ),
-        )
+    try:
+        with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
+            content = json.load(f)[self.name][name]
+            # TODO: Ensure deps are loaded from the correct revision
+            content = znjson.loads(
+                json.dumps(content),
+                cls=znjson.ZnDecoder.from_converters(
+                    [NodeConverter, ConnectionConverter], add_default=True
+                ),
+            )
 
-        # Resolve any connections in content
-        if isinstance(content, list):
-            content = [
-                c.result if isinstance(c, znflow.Connection) else c for c in content
-            ]
-        elif isinstance(content, znflow.Connection):
-            content = content.result
+            # Resolve any connections in content
+            if isinstance(content, list):
+                content = [
+                    c.result if isinstance(c, znflow.Connection) else c for c in content
+                ]
+            elif isinstance(content, znflow.Connection):
+                content = content.result
 
-        self.__dict__[name] = content
+            self.__dict__[name] = content
+    except FileNotFoundError:
+        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
 
     return getattr(self, name)
 
@@ -65,9 +69,11 @@ def _deps_getter(self: "Node", name: str):
 def _params_getter(self: "Node", name: str):
     if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
         return self.__dict__[name]
-
-    with self.state.fs.open(PARAMS_FILE_PATH) as f:
-        self.__dict__[name] = yaml.safe_load(f)[self.name][name]
+    try:
+        with self.state.fs.open(PARAMS_FILE_PATH) as f:
+            self.__dict__[name] = yaml.safe_load(f)[self.name][name]
+    except FileNotFoundError:
+        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
 
     return getattr(self, name)
 
@@ -76,20 +82,20 @@ def _paths_getter(self: "Node", name: str):
     nwd_handler = NWDReplaceHandler()
 
     if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
-        if self.state.state == NodeStatusEnum.RUNNING:
-            return nwd_handler(self.__dict__[name], nwd=self.nwd)
-        return self.__dict__[name]
+        return nwd_handler(self.__dict__[name], nwd=self.nwd)
+    try:
+        with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
+            content = json.load(f)[self.name][name]
+            content = znjson.loads(json.dumps(content))
+            content = nwd_handler(content, nwd=self.nwd)
 
-    with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
-        content = json.load(f)[self.name][name]
-        content = znjson.loads(json.dumps(content))
-        content = nwd_handler(content, nwd=self.nwd)
+            if self.state.tmp_path is not None:
+                loader = TempPathLoader()
+                return loader(content, instance=self)
 
-        if self.state.tmp_path is not None:
-            loader = TempPathLoader()
-            return loader(content, instance=self)
-
-        return content
+            return content
+    except FileNotFoundError:
+        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
 
 
 def _outs_getter(self: "Node", name: str):
@@ -98,9 +104,11 @@ def _outs_getter(self: "Node", name: str):
 
     if self.state.state == NodeStatusEnum.RUNNING:
         return ZNTRACK_LAZY_VALUE
-
-    with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
-        self.__dict__[name] = json.load(f)
+    try:
+        with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
+            self.__dict__[name] = json.load(f)
+    except FileNotFoundError:
+        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
 
     return getattr(self, name)
 

@@ -9,12 +9,15 @@ import dvc.api
 import dvc.repo
 import dvc.stage
 import dvc.stage.serialize
+import typing_extensions as te
 import znfields
 import znflow
 from dvc.utils import dict_sha256
 
 from .config import ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.node_wd import get_nwd
+
+T = t.TypeVar("T", bound="Node")
 
 
 @dataclasses.dataclass(frozen=True)
@@ -126,14 +129,14 @@ class Node(znflow.Node, znfields.Base):
 
     @classmethod
     def from_rev(
-        cls,
+        cls: t.Type[T],
         name: str | None = None,
         remote: str | None = ".",
         rev: str | None = None,
         running: bool = False,
         lazy_evaluation: bool = True,
         **kwargs,
-    ) -> "Node":
+    ) -> T:
         if name is None:
             name = cls.__name__
         lazy_values = {}
@@ -187,5 +190,6 @@ class Node(znflow.Node, znfields.Base):
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )
 
+    @te.deprecated("loading is handled automatically via lazy evaluation")
     def load(self):
-        raise NotImplementedError
+        pass

@@ -81,7 +81,7 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
                 ZnTrackOptionEnum.METRICS,
             ]:
                 continue
-            data[node.name][field.name] = getattr(node, field.name)
+            data[node.name][field.name] = node.__dict__[field.name]
     return data
 
 
