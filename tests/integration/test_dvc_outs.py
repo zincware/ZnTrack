@@ -126,10 +126,10 @@ def test_use_tmp_path(proj_path):
     proj.build()
     proj.run()
 
-#     node = node.from_rev(node.name)
-#     node2 = node2.from_rev(node2.name)
-#     node3 = node3.from_rev(node3.name)
-#     node4 = node4.from_rev(node4.name)
+    #     node = node.from_rev(node.name)
+    #     node2 = node2.from_rev(node2.name)
+    #     node3 = node3.from_rev(node3.name)
+    #     node4 = node4.from_rev(node4.name)
 
     assert node.get_outs_content() == "test"
     assert node2.get_outs_content() == "test2"
@@ -142,8 +142,8 @@ def test_use_tmp_path(proj_path):
     assert isinstance(node4.outs, str)
     assert node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
 
-#     # DOES THIS EVEN MAKE SENSE?
-#     # IDEA: do only use tmp_path if rev or remote is passed
+    #     # DOES THIS EVEN MAKE SENSE?
+    #     # IDEA: do only use tmp_path if rev or remote is passed
     with node.state.use_tmp_path():
         assert node.outs == pathlib.Path("nodes", "WriteDVCOuts", "output.txt")
     with node2.state.use_tmp_path():
@@ -156,7 +156,7 @@ def test_use_tmp_path(proj_path):
             node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
         )
 
-#     # fake remote by passing the current directory
+    #     # fake remote by passing the current directory
     node = node.from_rev(node.name, remote=".")
     node2 = node2.from_rev(node2.name, remote=".")
     node3 = node3.from_rev(node3.name, remote=".")
