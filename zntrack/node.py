@@ -125,7 +125,11 @@ class Node(znflow.Node, znfields.Base):
 
     def __post_init__(self):
         if self.name is None:
-            self.name = self.__class__.__name__
+            # We only need this __post_init__ if we are not in a graph context
+            # otherwise, the name will be set in the graph and this will
+            # overwrite it.
+            if not znflow.get_graph() is not znflow.empty_graph:
+                self.name = self.__class__.__name__
 
     def run(self):
         raise NotImplementedError

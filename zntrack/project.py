@@ -25,6 +25,13 @@ class Project(znflow.DiGraph):
         )
 
     def add_node(self, node_for_adding, **attr):
+        from zntrack import Node
+
+        if not isinstance(node_for_adding, Node):
+            raise ValueError(
+                f"Node must be an instance of 'zntrack.Node', not {type(node_for_adding)}"
+            )
+        
         return super().add_node(node_for_adding, **attr)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
