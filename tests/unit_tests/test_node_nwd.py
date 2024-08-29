@@ -18,9 +18,7 @@ def test_node_nwd(proj_path):
 
 
 def test_no_node_name(proj_path):
-    # if the node was not created inside a graph context, it will not have an assigned name
-    with pytest.raises(ValueError, match="Unable to determine node name."):
-        zntrack.Node().nwd
+    assert zntrack.Node().nwd == pathlib.Path("nodes", "Node")
 
     # it has to be given explicitly
     n = zntrack.Node(name="SomeNode")

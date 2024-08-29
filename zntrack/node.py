@@ -110,6 +110,10 @@ class Node(znflow.Node, znfields.Base):
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name"]
 
+    def __post_init__(self):
+        if self.name is None:
+            self.name = self.__class__.__name__
+
     def run(self):
         raise NotImplementedError
 
