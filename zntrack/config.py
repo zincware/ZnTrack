@@ -31,7 +31,6 @@ ZNTRACK_SAVE_FUNC = _ZNTRACK_SAVE_FUNC_TYPE()
 
 
 class _NOT_AVAILABLE_TYPE:
-    
     def __repr__(self) -> str:
         return "NOT_AVAILABLE"
 
