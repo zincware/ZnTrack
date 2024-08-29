@@ -128,13 +128,12 @@ class Node(znflow.Node, znfields.Base):
 
     name: str | None = None
 
-    _protected_ = znflow.Node._protected_ + ["nwd", "name"]
+    _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
 
     def __post_init__(self):
         if self.name is None:
-            # We only need this __post_init__ if we are not in a graph context
-            # otherwise, the name will be set in the graph and this will
-            # overwrite it.
+            # automatic node names expectes the name to be None when
+            # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
 

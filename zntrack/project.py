@@ -1,4 +1,6 @@
+import contextlib
 import logging
+import pathlib
 
 import yaml
 import znflow
@@ -35,6 +37,13 @@ class Project(znflow.DiGraph):
         return super().add_node(node_for_adding, **attr)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        for group in self.groups:
+            for node in self.groups[group]:
+                # we need to access the `state` attribute to initialize
+                # the property, so the `log.debug` is necessary!
+                log.debug(self.nodes[node]["value"].state)
+                self.nodes[node]["value"].__dict__["state"]["group"] = group
+
         # need to fix the node names
         all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
         for node in all_nodes:
@@ -72,3 +81,24 @@ class Project(znflow.DiGraph):
                 ),
             )
         )
+
+    @contextlib.contextmanager
+    def group(self, *names: str):
+        """Group nodes together.
+
+        Parameters
+        ----------
+        names : list[str], optional
+            The name of the group. If None, the group will be named 'GroupX' where X is
+            the number of groups + 1. If more than one name is given, the groups will
+            be nested to 'nwd = name[0]/name[1]/.../name[-1]'
+
+        """
+        if not names:
+            name = "Group1"
+            while pathlib.Path("nodes", name).exists():
+                name = f"Group{int(name[5:]) + 1}"
+            names = (name,)
+
+        with super().group(*names) as group:
+            yield group
