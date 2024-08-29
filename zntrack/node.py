@@ -35,8 +35,8 @@ T = t.TypeVar("T", bound="Node")
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
-    name: str
-    remote: str
+    name: str | None
+    remote: str | None
     rev: str | None
     run_count: int = 0
     state: NodeStatusEnum = NodeStatusEnum.CREATED
@@ -45,6 +45,7 @@ class NodeStatus:
     node: "Node|None" = dataclasses.field(
         default=None, repr=False, compare=False, hash=False
     )
+    group: tuple[str] | None = None
     # TODO: move node name and nwd to here as well
 
     @property
@@ -113,6 +114,12 @@ class NodeStatus:
 
         return [DVCPlugin()]
 
+    def to_dict(self) -> dict:
+        """Convert the NodeStatus to a dictionary."""
+        content = dataclasses.asdict(self)
+        content.pop("node")
+        return content
+
 
 @dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
@@ -175,14 +182,15 @@ class Node(znflow.Node, znfields.Base):
             run_count = 0
 
         # TODO: check if the node is finished or not.
-        instance.__dict__["state"] = {
-            "name": name,
-            "remote": remote,
-            "rev": rev,
-            "run_count": run_count,
-            "state": NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
-            "lazy_evaluation": lazy_evaluation,
-        }
+        instance.__dict__["state"] = NodeStatus(
+            name=name,
+            remote=remote,
+            rev=rev,
+            run_count=run_count,
+            state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
+            lazy_evaluation=lazy_evaluation,
+            node=None,
+        ).to_dict()
 
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
@@ -193,20 +201,31 @@ class Node(znflow.Node, znfields.Base):
     @property
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
-            self.__dict__["state"] = {"name": self.name, "remote": ".", "rev": None}
+            self.__dict__["state"] = NodeStatus(
+                name=self.name,
+                remote=".",
+                rev=None,
+                run_count=0,
+                state=NodeStatusEnum.CREATED,
+                lazy_evaluation=True,
+                node=None,
+            ).to_dict()
+
         return NodeStatus(**self.__dict__["state"], node=self)
 
     def update_run_count(self):
         try:
             self.__dict__["state"]["run_count"] += 1
         except KeyError:
-            self.__dict__["state"] = {
-                "run_count": 1,
-                "state": NodeStatusEnum.RUNNING,
-                "remote": ".",
-                "rev": None,
-                "name": self.name,
-            }
+            self.__dict__["state"] = NodeStatus(
+                name=self.name,
+                remote=".",
+                rev=None,
+                run_count=1,
+                state=NodeStatusEnum.RUNNING,
+                lazy_evaluation=True,
+                node=None,
+            ).to_dict()
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )
