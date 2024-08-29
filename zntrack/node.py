@@ -17,6 +17,19 @@ from dvc.utils import dict_sha256
 from .config import ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.node_wd import get_nwd
 
+try:
+    from typing import dataclass_transform
+except ImportError:
+    # https://peps.python.org/pep-0681/ was added in 3.11
+    # support for 3.10 and below
+
+    def dataclass_transform():
+        def inner(cls):
+            return cls
+
+        return inner
+
+
 T = t.TypeVar("T", bound="Node")
 
 
@@ -101,7 +114,7 @@ class NodeStatus:
         return [DVCPlugin()]
 
 
-@t.dataclass_transform()
+@dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
 class Node(znflow.Node, znfields.Base):
     """A Node."""
