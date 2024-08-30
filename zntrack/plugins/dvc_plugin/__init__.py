@@ -1,19 +1,18 @@
 import dataclasses
 import json
 import typing as t
-import pandas as pd
 
+import pandas as pd
 import yaml
 import znflow
 import znjson
 
 from zntrack.config import (
+    NOT_AVAILABLE,
     PARAMS_FILE_PATH,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
-    NOT_AVAILABLE,
-    NodeStatusEnum,
     ZnTrackOptionEnum,
 )
 from zntrack.converter import ConnectionConverter, NodeConverter

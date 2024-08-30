@@ -1,6 +1,8 @@
-import zntrack
-import pandas as pd
 import subprocess
+
+import pandas as pd
+
+import zntrack
 
 
 class PandasPlotNode(zntrack.Node):
