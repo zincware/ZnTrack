@@ -20,15 +20,7 @@ from .utils.node_wd import get_nwd
 try:
     from typing import dataclass_transform
 except ImportError:
-    # https://peps.python.org/pep-0681/ was added in 3.11
-    # support for 3.10 and below
-
-    def dataclass_transform():
-        def inner(cls):
-            return cls
-
-        return inner
-
+    from typing_extensions import dataclass_transform
 
 T = t.TypeVar("T", bound="Node")
 
