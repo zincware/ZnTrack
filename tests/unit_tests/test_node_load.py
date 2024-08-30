@@ -1,6 +1,6 @@
 import pathlib
 
-import dvc.cli
+import subprocess
 import pytest
 
 import zntrack.config
@@ -58,7 +58,7 @@ def test_load_ParamsToOuts_from_rev(proj_path):
         _ = node.outs
 
     project.build()
-    dvc.cli.main(["repro"])
+    subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
 
     assert node.params == 42
     assert node.outs == 42
@@ -80,7 +80,7 @@ def test_load_WriteDVCOuts_from_rev(proj_path):
         _ = node.outs
 
     project.build()
-    dvc.cli.main(["repro"])
+    subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
 
     assert node.params == 42
     assert node.outs == pathlib.Path("nodes/WriteDVCOuts/output.txt")

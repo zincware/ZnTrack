@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import typing as t
+import pandas as pd
 
 import yaml
 import znflow
@@ -11,6 +12,7 @@ from zntrack.config import (
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
+    NOT_AVAILABLE,
     NodeStatusEnum,
     ZnTrackOptionEnum,
 )
@@ -36,48 +38,6 @@ def _plots_save_func(self: "Node", name: str):
     (self.nwd / name).with_suffix(".csv").write_text(getattr(self, name).to_csv())
 
 
-def _deps_getter(self: "Node", name: str):
-    if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
-        return self.__dict__[name]
-
-    try:
-        with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
-            content = json.load(f)[self.name][name]
-            # TODO: Ensure deps are loaded from the correct revision
-            content = znjson.loads(
-                json.dumps(content),
-                cls=znjson.ZnDecoder.from_converters(
-                    [NodeConverter, ConnectionConverter], add_default=True
-                ),
-            )
-
-            # Resolve any connections in content
-            if isinstance(content, list):
-                content = [
-                    c.result if isinstance(c, znflow.Connection) else c for c in content
-                ]
-            elif isinstance(content, znflow.Connection):
-                content = content.result
-
-            self.__dict__[name] = content
-    except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
-
-    return getattr(self, name)
-
-
-def _params_getter(self: "Node", name: str):
-    if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
-        return self.__dict__[name]
-    try:
-        with self.state.fs.open(PARAMS_FILE_PATH) as f:
-            self.__dict__[name] = yaml.safe_load(f)[self.name][name]
-    except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
-
-    return getattr(self, name)
-
-
 def _paths_getter(self: "Node", name: str):
     nwd_handler = NWDReplaceHandler()
 
@@ -98,19 +58,63 @@ def _paths_getter(self: "Node", name: str):
         raise NodeNotAvailableError(f"Node '{self.name}' is not available")
 
 
-def _outs_getter(self: "Node", name: str):
-    if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
+def base_getter(self: "Node", name: str, func: t.Callable):
+    if (
+        name in self.__dict__
+        and self.__dict__[name] is not ZNTRACK_LAZY_VALUE
+        and self.__dict__[name] is not NOT_AVAILABLE
+    ):
         return self.__dict__[name]
 
-    if self.state.state == NodeStatusEnum.RUNNING:
-        return ZNTRACK_LAZY_VALUE
+    if self.__dict__[name] is NOT_AVAILABLE:
+        try:
+            func(self, name)
+        except FileNotFoundError:
+            return NOT_AVAILABLE
+
     try:
-        with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
-            self.__dict__[name] = json.load(f)
+        func(self, name)
     except FileNotFoundError:
         raise NodeNotAvailableError(f"Node '{self.name}' is not available")
 
     return getattr(self, name)
+
+
+def _deps_getter(self: "Node", name: str):
+    with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
+        content = json.load(f)[self.name][name]
+        # TODO: Ensure deps are loaded from the correct revision
+        content = znjson.loads(
+            json.dumps(content),
+            cls=znjson.ZnDecoder.from_converters(
+                [NodeConverter, ConnectionConverter], add_default=True
+            ),
+        )
+
+        # Resolve any connections in content
+        if isinstance(content, list):
+            content = [
+                c.result if isinstance(c, znflow.Connection) else c for c in content
+            ]
+        elif isinstance(content, znflow.Connection):
+            content = content.result
+
+        self.__dict__[name] = content
+
+
+def _params_getter(self: "Node", name: str):
+    with self.state.fs.open(PARAMS_FILE_PATH) as f:
+        self.__dict__[name] = yaml.safe_load(f)[self.name][name]
+
+
+def _outs_getter(self: "Node", name: str):
+    with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
+        self.__dict__[name] = json.load(f)
+
+
+def _plots_getter(self: "Node", name: str):
+    with self.state.fs.open((self.nwd / name).with_suffix(".csv")) as f:
+        self.__dict__[name] = pd.read_csv(f)
 
 
 @dataclasses.dataclass
@@ -119,15 +123,16 @@ class DVCPlugin(ZnTrackPlugin):
         option = field.metadata.get(ZNTRACK_OPTION)
 
         if option == ZnTrackOptionEnum.DEPS:
-            return _deps_getter(node, field.name)
+            return base_getter(node, field.name, _deps_getter)
         elif option == ZnTrackOptionEnum.PARAMS:
-            return _params_getter(node, field.name)
+            return base_getter(node, field.name, _params_getter)
+        elif option == ZnTrackOptionEnum.PLOTS:
+            return base_getter(node, field.name, _plots_getter)
         elif option in {
             ZnTrackOptionEnum.OUTS,
-            ZnTrackOptionEnum.PLOTS,
             ZnTrackOptionEnum.METRICS,
         }:
-            return _outs_getter(node, field.name)
+            return base_getter(node, field.name, _outs_getter)
         elif option in {
             ZnTrackOptionEnum.PARAMS_PATH,
             ZnTrackOptionEnum.DEPS_PATH,
