@@ -4,11 +4,7 @@ import typing as t
 
 import aim
 
-from zntrack.config import (
-    PLUGIN_EMPTY_RETRUN_VALUE,
-    ZNTRACK_OPTION,
-    ZnTrackOptionEnum,
-)
+from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
 from zntrack.plugins import ZnTrackPlugin
 
 if t.TYPE_CHECKING:
