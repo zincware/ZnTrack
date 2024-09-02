@@ -1,6 +1,7 @@
 import contextlib
 import dataclasses
 import json
+import os
 import pathlib
 import tempfile
 import typing as t
@@ -15,6 +16,7 @@ import znflow
 from dvc.utils import dict_sha256
 
 from .config import ZNTRACK_LAZY_VALUE, NodeStatusEnum
+from .utils.import_handler import import_handler
 from .utils.node_wd import get_nwd
 
 try:
@@ -102,9 +104,12 @@ class NodeStatus:
     @property
     def plugins(self) -> list:
         """Get the plugins of the node."""
-        from zntrack.plugins.dvc_plugin import DVCPlugin
+        plugins = os.environ.get(
+            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+        )
+        plugins = plugins.split(",")
 
-        return [DVCPlugin()]
+        return [import_handler(plugin)() for plugin in plugins]
 
     def to_dict(self) -> dict:
         """Convert the NodeStatus to a dictionary."""

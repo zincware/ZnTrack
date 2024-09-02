@@ -8,8 +8,8 @@ import znflow
 import znjson
 
 from zntrack.config import (
-    NOT_AVAILABLE,
     PARAMS_FILE_PATH,
+    PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
@@ -17,7 +17,7 @@ from zntrack.config import (
 )
 from zntrack.converter import ConnectionConverter, NodeConverter
 from zntrack.exceptions import NodeNotAvailableError
-from zntrack.plugins import ZnTrackPlugin
+from zntrack.plugins import ZnTrackPlugin, base_getter
 from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
@@ -55,28 +55,6 @@ def _paths_getter(self: "Node", name: str):
             return content
     except FileNotFoundError:
         raise NodeNotAvailableError(f"Node '{self.name}' is not available")
-
-
-def base_getter(self: "Node", name: str, func: t.Callable):
-    if (
-        name in self.__dict__
-        and self.__dict__[name] is not ZNTRACK_LAZY_VALUE
-        and self.__dict__[name] is not NOT_AVAILABLE
-    ):
-        return self.__dict__[name]
-
-    if self.__dict__[name] is NOT_AVAILABLE:
-        try:
-            func(self, name)
-        except FileNotFoundError:
-            return NOT_AVAILABLE
-
-    try:
-        func(self, name)
-    except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
-
-    return getattr(self, name)
 
 
 def _deps_getter(self: "Node", name: str):
@@ -141,7 +119,7 @@ class DVCPlugin(ZnTrackPlugin):
         }:
             return _paths_getter(node, field.name)
 
-        raise ValueError(f"Unknown field metadata: {field.metadata}")
+        return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, node: "Node", field: dataclasses.Field) -> None:
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:

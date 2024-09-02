@@ -1,3 +1,3 @@
-from .base import ZnTrackPlugin
+from .base import ZnTrackPlugin, base_getter
 
-__all__ = ["ZnTrackPlugin"]
+__all__ = ["ZnTrackPlugin", "base_getter"]
