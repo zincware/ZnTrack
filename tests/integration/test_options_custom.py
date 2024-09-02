@@ -24,18 +24,18 @@ def _text_getter(self: zntrack.Node, name: str):
 
 
 class TextPlugin(ZnTrackPlugin):
-    def getter(self, node: zntrack.Node, field: dataclasses.Field) -> t.Any:
+    def getter(self, field: dataclasses.Field) -> t.Any:
         if field.metadata.get(ZNTRACK_OPTION) == "TextPlugin.text":
-            return base_getter(node, field.name, _text_getter)
+            return base_getter(self.node, field.name, _text_getter)
 
         return PLUGIN_EMPTY_RETRUN_VALUE
 
-    def save(self, node: zntrack.Node, field: dataclasses.Field) -> None:
+    def save(self, field: dataclasses.Field) -> None:
         if field.metadata.get(ZNTRACK_OPTION) == "TextPlugin.text":
-            if not pathlib.Path(node.nwd).exists():
-                pathlib.Path(node.nwd).mkdir(parents=True)
-            with open(node.nwd / f"{field.name}.txt", "w") as f:
-                f.write(getattr(node, field.name))
+            if not pathlib.Path(self.node.nwd).exists():
+                pathlib.Path(self.node.nwd).mkdir(parents=True)
+            with open(self.node.nwd / f"{field.name}.txt", "w") as f:
+                f.write(getattr(self.node, field.name))
 
 
 @functools.wraps(znfields.field)
@@ -56,9 +56,9 @@ class TextNode(zntrack.Node):
 
 
 def test_simple_text(proj_path):
-    os.environ["ZNTRACK_PLUGINS"] = (
-        "tests.integration.test_options_custom.TextPlugin,zntrack.plugins.dvc_plugin.DVCPlugin"
-    )
+    os.environ[
+        "ZNTRACK_PLUGINS"
+    ] = "tests.integration.test_options_custom.TextPlugin,zntrack.plugins.dvc_plugin.DVCPlugin"
 
     with zntrack.Project() as proj:
         node = TextNode(user="Max")

@@ -22,8 +22,8 @@ def _plugin_getter(self: Node, name: str):
     fields = dataclasses.fields(self)
     field = [_field for _field in fields if _field.name == name][0]
 
-    for plugin in self.state.plugins:
-        getter_value = plugin.getter(self, field)
+    for plugin in self.state.plugins.values():
+        getter_value = plugin.getter(field)
         if getter_value is not PLUGIN_EMPTY_RETRUN_VALUE:
             if value is not PLUGIN_EMPTY_RETRUN_VALUE:
                 raise ValueError(

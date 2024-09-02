@@ -96,20 +96,20 @@ def _plots_getter(self: "Node", name: str):
 
 @dataclasses.dataclass
 class DVCPlugin(ZnTrackPlugin):
-    def getter(self, node: "Node", field: dataclasses.Field) -> t.Any:
+    def getter(self, field: dataclasses.Field) -> t.Any:
         option = field.metadata.get(ZNTRACK_OPTION)
 
         if option == ZnTrackOptionEnum.DEPS:
-            return base_getter(node, field.name, _deps_getter)
+            return base_getter(self.node, field.name, _deps_getter)
         elif option == ZnTrackOptionEnum.PARAMS:
-            return base_getter(node, field.name, _params_getter)
+            return base_getter(self.node, field.name, _params_getter)
         elif option == ZnTrackOptionEnum.PLOTS:
-            return base_getter(node, field.name, _plots_getter)
+            return base_getter(self.node, field.name, _plots_getter)
         elif option in {
             ZnTrackOptionEnum.OUTS,
             ZnTrackOptionEnum.METRICS,
         }:
-            return base_getter(node, field.name, _outs_getter)
+            return base_getter(self.node, field.name, _outs_getter)
         elif option in {
             ZnTrackOptionEnum.PARAMS_PATH,
             ZnTrackOptionEnum.DEPS_PATH,
@@ -117,14 +117,13 @@ class DVCPlugin(ZnTrackPlugin):
             ZnTrackOptionEnum.PLOTS_PATH,
             ZnTrackOptionEnum.METRICS_PATH,
         }:
-            return _paths_getter(node, field.name)
-
+            return _paths_getter(self.node, field.name)
         return PLUGIN_EMPTY_RETRUN_VALUE
 
-    def save(self, node: "Node", field: dataclasses.Field) -> None:
+    def save(self, field: dataclasses.Field) -> None:
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:
-            _outs_save_func(node, field.name)
+            _outs_save_func(self.node, field.name)
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
-            _plots_save_func(node, field.name)
+            _plots_save_func(self.node, field.name)
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
-            _metrics_save_func(node, field.name)
+            _metrics_save_func(self.node, field.name)

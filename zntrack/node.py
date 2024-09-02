@@ -102,14 +102,16 @@ class NodeStatus:
         return dict_sha256(filtered_lock)
 
     @property
-    def plugins(self) -> list:
+    def plugins(self) -> dict:
         """Get the plugins of the node."""
         plugins = os.environ.get(
             "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
         )
         plugins = plugins.split(",")
 
-        return [import_handler(plugin)() for plugin in plugins]
+        plugins = [import_handler(plugin) for plugin in plugins]
+
+        return {plugin.__name__: plugin(self.node) for plugin in plugins}
 
     def to_dict(self) -> dict:
         """Convert the NodeStatus to a dictionary."""
@@ -138,9 +140,9 @@ class Node(znflow.Node, znfields.Base):
         raise NotImplementedError
 
     def save(self):
-        for plugin in self.state.plugins:
+        for plugin in self.state.plugins.values():
             for field in dataclasses.fields(self):
-                plugin.save(self, field)
+                plugin.save(field)
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
 

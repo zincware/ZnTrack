@@ -11,16 +11,19 @@ if t.TYPE_CHECKING:
     from zntrack import Node
 
 
+@dataclasses.dataclass
 class ZnTrackPlugin(abc.ABC):
     """ABC for writing zntrack plugins."""
 
+    node: "Node"
+
     @abc.abstractmethod
-    def getter(self, node: "Node", field: dataclasses.Field) -> t.Any:
+    def getter(self, field: dataclasses.Field) -> t.Any:
         """ZnField getter for zntrack options."""
         pass
 
     @abc.abstractmethod
-    def save(self, node: "Node", field: dataclasses.Field) -> None:
+    def save(self, field: dataclasses.Field) -> None:
         """Save method for zntrack options."""
         pass
 
