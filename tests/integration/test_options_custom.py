@@ -56,9 +56,9 @@ class TextNode(zntrack.Node):
 
 
 def test_simple_text(proj_path):
-    os.environ[
-        "ZNTRACK_PLUGINS"
-    ] = "tests.integration.test_options_custom.TextPlugin,zntrack.plugins.dvc_plugin.DVCPlugin"
+    os.environ["ZNTRACK_PLUGINS"] = (
+        "tests.integration.test_options_custom.TextPlugin,zntrack.plugins.dvc_plugin.DVCPlugin"
+    )
 
     with zntrack.Project() as proj:
         node = TextNode(user="Max")
