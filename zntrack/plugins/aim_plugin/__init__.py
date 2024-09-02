@@ -44,6 +44,6 @@ class AIMPlugin(ZnTrackPlugin):
         run = aim.Run(run_hash=run_hash)
         if run_hash is None:
             run["dvc_stage_hash"] = uid
-            run.log_info("Run created by ZnTrack")
-            run.log_info(f"running {self.node}")
+            run["name"] = self.node.name
+            run["__module__"] = self.node.__module__
         return run
