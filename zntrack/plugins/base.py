@@ -28,16 +28,13 @@ class ZnTrackPlugin(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def convert_to_zntrack_json(self) -> t.Any:
-        ...
+    def convert_to_zntrack_json(self) -> t.Any: ...
 
     @abc.abstractmethod
-    def convert_to_dvc_yaml(self) -> t.Any:
-        ...
+    def convert_to_dvc_yaml(self) -> t.Any: ...
 
     @abc.abstractmethod
-    def convert_to_params_yaml(self) -> t.Any:
-        ...
+    def convert_to_params_yaml(self) -> t.Any: ...
 
 
 def base_getter(self: "Node", name: str, func: t.Callable):
