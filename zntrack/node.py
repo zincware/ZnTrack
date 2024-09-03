@@ -142,7 +142,8 @@ class Node(znflow.Node, znfields.Base):
     def save(self):
         for plugin in self.state.plugins.values():
             for field in dataclasses.fields(self):
-                if getattr(self, field.name) in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]:
+                value = getattr(self, field.name)
+                if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
                     raise ValueError(
                         f"Field '{field.name}' is not set. Please set it before saving."
                     )
