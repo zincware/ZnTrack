@@ -1,8 +1,9 @@
+import subprocess
+
 import pytest
+import znflow
 
 import zntrack
-import znflow
-import subprocess
 
 
 class GenerateList(zntrack.Node):
@@ -31,6 +32,7 @@ class AddOneToDict(zntrack.Node):
         #  and in contrary to other tests, here it fails because
         #  it is a lazy option and it tries to evaluate it.
         self.outs = {k: [x + 1 for x in v] for k, v in self.data.items()}
+
 
 # TODO: combinedconnections need tests in files
 @pytest.mark.parametrize("eager", [True, False])

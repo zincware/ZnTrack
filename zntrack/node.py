@@ -15,7 +15,7 @@ import znfields
 import znflow
 from dvc.utils import dict_sha256
 
-from .config import ZNTRACK_LAZY_VALUE, NodeStatusEnum, NOT_AVAILABLE
+from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.import_handler import import_handler
 from .utils.node_wd import get_nwd
 

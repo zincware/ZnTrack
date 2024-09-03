@@ -63,7 +63,7 @@ class ConnectionConverter(znjson.ConverterBase):
     def decode(self, value: dict) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
         return znflow.Connection(**value)
-    
+
 
 class CombinedConnectionsConverter(znjson.ConverterBase):
     """Convert a znflow.Connection object to dict and back."""
@@ -108,6 +108,7 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
                 continue
             data[node.name][field.name] = node.__dict__[field.name]
     import warnings
+
     warnings.warn(f"saving {data}")
     return data
 

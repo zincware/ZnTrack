@@ -6,7 +6,6 @@ import yaml
 import znflow
 import znjson.converter
 
-
 from . import config, converter
 from .deployment import ZnTrackDeployment
 
@@ -77,7 +76,12 @@ class Project(znflow.DiGraph):
                 converter.convert_graph_to_zntrack_config(self),
                 indent=4,
                 cls=znjson.ZnEncoder.from_converters(
-                    [converter.ConnectionConverter, converter.NodeConverter, converter.CombinedConnectionsConverter, znjson.converter.PathlibConverter],
+                    [
+                        converter.ConnectionConverter,
+                        converter.NodeConverter,
+                        converter.CombinedConnectionsConverter,
+                        znjson.converter.PathlibConverter,
+                    ],
                     add_default=False,
                 ),
             )

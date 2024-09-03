@@ -2,9 +2,9 @@ import json
 import pathlib
 
 import yaml
+import znflow
 
 import zntrack.config
-import znflow
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -28,7 +28,6 @@ def test_deps(proj_path):
         a1 = NodeA()
         a2 = NodeA()
         b = NodeB(input=a1.results + a2.results)
-
 
     assert isinstance(b.input, znflow.CombinedConnections)
     assert b.input.connections[0].instance == a1
