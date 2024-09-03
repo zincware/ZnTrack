@@ -28,7 +28,11 @@ from zntrack.converter import (
 )
 from zntrack.exceptions import NodeNotAvailableError
 from zntrack.plugins import ZnTrackPlugin, base_getter
-from zntrack.utils.misc import TempPathLoader, get_attr_always_list, sort_and_deduplicate
+from zntrack.utils.misc import (
+    TempPathLoader,
+    get_attr_always_list,
+    sort_and_deduplicate,
+)
 from zntrack.utils.node_wd import NWDReplaceHandler
 
 if t.TYPE_CHECKING:
