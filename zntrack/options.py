@@ -9,6 +9,7 @@ from .config import (
     ZNTRACK_CACHE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
+    ZNTRACK_UNIQUE_OUTPUT_TYPE,
 )
 from .node import Node
 
@@ -55,26 +56,29 @@ def deps(default=dataclasses.MISSING, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def outs(*, cache: bool = True, **kwargs):
+def outs(*, cache: bool = True, unique: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_UNIQUE_OUTPUT_TYPE] = unique
     return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
-def plots(*, cache: bool = True, **kwargs):
+def plots(*, cache: bool = True, unique: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_UNIQUE_OUTPUT_TYPE] = unique
     return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
-def metrics(*, cache: bool = False, **kwargs):
+def metrics(*, cache: bool = False, unique:bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_UNIQUE_OUTPUT_TYPE] = unique
     return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
 
 
@@ -95,24 +99,27 @@ def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def outs_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def outs_path(default=dataclasses.MISSING, *, cache: bool = True, unique: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_UNIQUE_OUTPUT_TYPE] = unique
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
-def plots_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def plots_path(default=dataclasses.MISSING, *, cache: bool = True, unique: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_UNIQUE_OUTPUT_TYPE] = unique
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
 @functools.wraps(znfields.field)
-def metrics_path(default=dataclasses.MISSING, *, cache: bool = False, **kwargs):
+def metrics_path(default=dataclasses.MISSING, *, cache: bool = False, unique: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_UNIQUE_OUTPUT_TYPE] = unique
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
