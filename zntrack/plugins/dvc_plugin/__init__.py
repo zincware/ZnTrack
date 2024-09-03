@@ -28,7 +28,7 @@ from zntrack.converter import (
 )
 from zntrack.exceptions import NodeNotAvailableError
 from zntrack.plugins import ZnTrackPlugin, base_getter
-from zntrack.utils.misc import TempPathLoader, get_attr_always_list
+from zntrack.utils.misc import TempPathLoader, get_attr_always_list, sort_and_deduplicate
 from zntrack.utils.node_wd import NWDReplaceHandler
 
 if t.TYPE_CHECKING:
@@ -224,21 +224,13 @@ class DVCPlugin(ZnTrackPlugin):
                 ]
                 stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(content)
 
-        def sort_key(item):
-            """Custom sorting key function to handle both string and dictionary types."""
-            if isinstance(item, str):
-                return item
-            elif isinstance(item, dict):
-                # For dictionaries, sort by their first (and only) key's string representation
-                return list(item.keys())[0]
-
         for key in stages:
             if key == "cmd":
                 continue
-            stages[key] = sorted(stages[key], key=sort_key)
+            stages[key] = sort_and_deduplicate(stages[key])
 
         for key in plots:
-            plots[key] = sorted(plots[key], key=sort_key)
+            plots[key] = sort_and_deduplicate(plots[key])
 
         return {"stages": stages, "plots": plots}
 

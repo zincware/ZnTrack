@@ -54,3 +54,42 @@ class TempPathLoader(znflow.utils.IterableHandler):
             return _path
         else:
             return _path.as_posix()
+
+
+def sort_key(item):
+    """Custom sorting key function to handle both string and dictionary types."""
+    if isinstance(item, str):
+        return item
+    elif isinstance(item, dict):
+        # For dictionaries, sort by their first (and only) key's string representation
+        return list(item.keys())[0]
+
+
+def sort_and_deduplicate(data: list[str | dict[str, dict]]):
+    """Sort and deduplicate a list of strings and dictionaries."""
+    data = sorted(data, key=sort_key)
+
+    new_data = []
+    for key in data:
+        if key not in new_data:
+            if isinstance(key, dict):
+                if next(iter(key.keys())) in new_data:
+                    raise ValueError(
+                        f"Duplicate key with different parameters found: {key}"
+                    )
+                for other_key in new_data:
+                    if isinstance(other_key, dict):
+                        if next(iter(other_key.keys())) == next(iter(key.keys())):
+                            if other_key != key:
+                                raise ValueError(
+                                    f"Duplicate key with different parameters found: {key}"
+                                )
+            if isinstance(key, str):
+                for other_key in new_data:
+                    if isinstance(other_key, dict) and key in other_key.keys():
+                        raise ValueError(
+                            f"Duplicate key with different parameters found: {key}"
+                        )
+            new_data.append(key)
+
+    return new_data
