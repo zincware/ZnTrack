@@ -6,6 +6,8 @@ import typing as t
 import pandas as pd
 import yaml
 import znflow
+import znflow.handler
+import znflow.utils
 import znjson
 
 from zntrack import converter
@@ -76,19 +78,7 @@ def _deps_getter(self: "Node", name: str):
                 add_default=True,
             ),
         )
-
-        # Resolve any connections in content
-        if isinstance(content, list):
-            content = [
-                (
-                    c.result
-                    if isinstance(c, (znflow.Connection, znflow.CombinedConnections))
-                    else c
-                )
-                for c in content
-            ]
-        elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
-            content = content.result
+        content = znflow.handler.UpdateConnectors()(content)
 
         self.__dict__[name] = content
 

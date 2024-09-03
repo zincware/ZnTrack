@@ -28,9 +28,8 @@ class AddOneToDict(zntrack.Node):
     outs: dict = zntrack.outs()
 
     def run(self) -> None:
-        # The issue is, the self.outs getter is called
-        #  and in contrary to other tests, here it fails because
-        #  it is a lazy option and it tries to evaluate it.
+        assert isinstance(self.data, dict)
+        assert all(isinstance(v, list) for v in self.data.values())
         self.outs = {k: [x + 1 for x in v] for k, v in self.data.items()}
 
 
