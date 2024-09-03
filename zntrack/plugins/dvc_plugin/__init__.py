@@ -255,16 +255,18 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_zntrack_json(self) -> dict | object:
         data = {
             "nwd": self.node.nwd,
+            "name": self.node.name,
         }
         for field in dataclasses.fields(self.node):
             if field.metadata.get(ZNTRACK_OPTION) in [
-                ZnTrackOptionEnum.PARAMS,
-                ZnTrackOptionEnum.OUTS,
-                ZnTrackOptionEnum.PLOTS,
-                ZnTrackOptionEnum.METRICS,
+                ZnTrackOptionEnum.PARAMS_PATH,
+                ZnTrackOptionEnum.DEPS_PATH,
+                ZnTrackOptionEnum.OUTS_PATH,
+                ZnTrackOptionEnum.PLOTS_PATH,
+                ZnTrackOptionEnum.METRICS_PATH,
+                ZnTrackOptionEnum.DEPS,
             ]:
-                continue
-            data[field.name] = self.node.__dict__[field.name]
+                data[field.name] = self.node.__dict__[field.name]
 
         data = znjson.dumps(
             data,
