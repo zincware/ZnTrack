@@ -8,8 +8,8 @@ from .config import (
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
     ZNTRACK_OPTION,
-    ZnTrackOptionEnum,
     ZNTRACK_UNIQUE_OUTPUT_TYPE,
+    ZnTrackOptionEnum,
 )
 from .node import Node
 
@@ -74,7 +74,7 @@ def plots(*, cache: bool = True, unique: bool = False, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def metrics(*, cache: bool = False, unique:bool = False, **kwargs):
+def metrics(*, cache: bool = False, unique: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -99,7 +99,9 @@ def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def outs_path(default=dataclasses.MISSING, *, cache: bool = True, unique: bool = False, **kwargs):
+def outs_path(
+    default=dataclasses.MISSING, *, cache: bool = True, unique: bool = False, **kwargs
+):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -108,7 +110,9 @@ def outs_path(default=dataclasses.MISSING, *, cache: bool = True, unique: bool =
 
 
 @functools.wraps(znfields.field)
-def plots_path(default=dataclasses.MISSING, *, cache: bool = True, unique: bool = False, **kwargs):
+def plots_path(
+    default=dataclasses.MISSING, *, cache: bool = True, unique: bool = False, **kwargs
+):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -117,7 +121,9 @@ def plots_path(default=dataclasses.MISSING, *, cache: bool = True, unique: bool 
 
 
 @functools.wraps(znfields.field)
-def metrics_path(default=dataclasses.MISSING, *, cache: bool = False, unique: bool = False, **kwargs):
+def metrics_path(
+    default=dataclasses.MISSING, *, cache: bool = False, unique: bool = False, **kwargs
+):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
