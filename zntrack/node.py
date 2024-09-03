@@ -15,7 +15,7 @@ import znfields
 import znflow
 from dvc.utils import dict_sha256
 
-from .config import ZNTRACK_LAZY_VALUE, NodeStatusEnum
+from .config import ZNTRACK_LAZY_VALUE, NodeStatusEnum, NOT_AVAILABLE
 from .utils.import_handler import import_handler
 from .utils.node_wd import get_nwd
 
@@ -142,6 +142,10 @@ class Node(znflow.Node, znfields.Base):
     def save(self):
         for plugin in self.state.plugins.values():
             for field in dataclasses.fields(self):
+                if getattr(self, field.name) in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]:
+                    raise ValueError(
+                        f"Field '{field.name}' is not set. Please set it before saving."
+                    )
                 plugin.save(field)
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED

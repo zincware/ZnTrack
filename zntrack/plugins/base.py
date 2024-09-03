@@ -36,7 +36,7 @@ def base_getter(self: "Node", name: str, func: t.Callable):
     ):
         return self.__dict__[name]
 
-    if self.__dict__[name] is NOT_AVAILABLE:
+    if name in self.__dict__ and self.__dict__[name] is NOT_AVAILABLE:
         try:
             func(self, name)
         except FileNotFoundError:

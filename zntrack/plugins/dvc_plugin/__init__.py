@@ -15,7 +15,7 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
-from zntrack.converter import ConnectionConverter, NodeConverter
+from zntrack.converter import ConnectionConverter, NodeConverter, CombinedConnectionsConverter
 from zntrack.exceptions import NodeNotAvailableError
 from zntrack.plugins import ZnTrackPlugin, base_getter
 from zntrack.utils.misc import TempPathLoader
@@ -64,16 +64,16 @@ def _deps_getter(self: "Node", name: str):
         content = znjson.loads(
             json.dumps(content),
             cls=znjson.ZnDecoder.from_converters(
-                [NodeConverter, ConnectionConverter], add_default=True
+                [NodeConverter, ConnectionConverter,CombinedConnectionsConverter ], add_default=True
             ),
         )
 
         # Resolve any connections in content
         if isinstance(content, list):
             content = [
-                c.result if isinstance(c, znflow.Connection) else c for c in content
+                c.result if isinstance(c, (znflow.Connection, znflow.CombinedConnections)) else c for c in content
             ]
-        elif isinstance(content, znflow.Connection):
+        elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
             content = content.result
 
         self.__dict__[name] = content

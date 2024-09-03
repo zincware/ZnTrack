@@ -22,6 +22,8 @@ class NodeDict(t.TypedDict):
 
 
 class NodeConverter(znjson.ConverterBase):
+
+    level = 100
     instance = Node
     representation = "zntrack.Node"
 
@@ -61,6 +63,29 @@ class ConnectionConverter(znjson.ConverterBase):
     def decode(self, value: dict) -> znflow.Connection:
         """Create znflow.Connection object from dict."""
         return znflow.Connection(**value)
+    
+
+class CombinedConnectionsConverter(znjson.ConverterBase):
+    """Convert a znflow.Connection object to dict and back."""
+
+    level = 100
+    representation = "znflow.CombinedConnections"
+    instance = znflow.CombinedConnections
+
+    def encode(self, obj: znflow.CombinedConnections) -> dict:
+        """Convert the znflow.Connection object to dict."""
+        if obj.item is not None:
+            raise NotImplementedError(
+                "znflow.CombinedConnections getitem is not supported yet."
+            )
+        return {
+            "connections": obj.connections,
+            "item": obj.item,
+        }
+
+    def decode(self, value: dict) -> znflow.CombinedConnections:
+        """Create znflow.Connection object from dict."""
+        return znflow.CombinedConnections(**value)
 
 
 # zntrack.json
@@ -82,6 +107,8 @@ def convert_graph_to_zntrack_config(obj: znflow.DiGraph) -> dict:
             ]:
                 continue
             data[node.name][field.name] = node.__dict__[field.name]
+    import warnings
+    warnings.warn(f"saving {data}")
     return data
 
 
@@ -159,10 +186,15 @@ def handle_field_metadata(
 
     elif field_option == ZnTrackOptionEnum.DEPS:
         content = get_attr_always_list(node, field.name)
-        paths = [node_to_output_paths(con.instance) for con in content]
-        stages[node.name].setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(
-            sum(paths, [])  # flatten the list
-        )
+        paths = []
+        for con in content:
+            if isinstance(con, (znflow.Connection)):
+                paths.extend(node_to_output_paths(con.instance))
+            elif isinstance(con, (znflow.CombinedConnections)):
+                for _con in con.connections:
+                    paths.extend(node_to_output_paths(_con.instance))
+
+        stages[node.name].setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
 
 
 def deduplicate_and_sort(stages, without_cache):

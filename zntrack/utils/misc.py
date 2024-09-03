@@ -10,6 +10,8 @@ from ..config import ENV_FILE_PATH
 
 def get_attr_always_list(obj: t.Any, attr: str) -> list:
     value = getattr(obj, attr)
+    if isinstance(value, dict):
+        return list(value.values())
     if not isinstance(value, list):
         value = [value]
     return value
