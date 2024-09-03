@@ -37,6 +37,15 @@ class TextPlugin(ZnTrackPlugin):
             with open(self.node.nwd / f"{field.name}.txt", "w") as f:
                 f.write(getattr(self.node, field.name))
 
+    def convert_to_zntrack_json(self):
+        return PLUGIN_EMPTY_RETRUN_VALUE
+
+    def convert_to_dvc_yaml(self):
+        return PLUGIN_EMPTY_RETRUN_VALUE
+
+    def convert_to_params_yaml(self):
+        return PLUGIN_EMPTY_RETRUN_VALUE
+
 
 @functools.wraps(znfields.field)
 def text(*, cache: bool = True, **kwargs):
@@ -56,23 +65,25 @@ class TextNode(zntrack.Node):
 
 
 def test_simple_text(proj_path):
-    os.environ["ZNTRACK_PLUGINS"] = (
-        "tests.integration.test_options_custom.TextPlugin,zntrack.plugins.dvc_plugin.DVCPlugin"
-    )
+    os.environ[
+        "ZNTRACK_PLUGINS"
+    ] = "tests.integration.test_options_custom.TextPlugin,zntrack.plugins.dvc_plugin.DVCPlugin"
+    try:
+        with zntrack.Project() as proj:
+            node = TextNode(user="Max")
 
-    with zntrack.Project() as proj:
-        node = TextNode(user="Max")
+        proj.build()
+        subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
 
-    proj.build()
-    subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
+        with open(node.nwd / "comment.txt") as f:
+            comment = f.read()
 
-    with open(node.nwd / "comment.txt") as f:
-        comment = f.read()
+        assert comment == "Hello, Max!"
 
-    assert comment == "Hello, Max!"
+        assert node.comment == "Hello, Max!"
 
-    assert node.comment == "Hello, Max!"
+        node = node.from_rev()
 
-    node = node.from_rev()
-
-    assert node.comment == "Hello, Max!"
+        assert node.comment == "Hello, Max!"
+    finally:
+        del os.environ["ZNTRACK_PLUGINS"]

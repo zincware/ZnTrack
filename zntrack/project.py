@@ -1,12 +1,12 @@
 import contextlib
+import json
 import logging
 import pathlib
 
 import yaml
 import znflow
-import znjson.converter
 
-from . import config, converter
+from . import config
 from .deployment import ZnTrackDeployment
 
 log = logging.getLogger(__name__)
@@ -62,30 +62,36 @@ class Project(znflow.DiGraph):
 
     def build(self) -> None:
         log.info(f"Saving {config.PARAMS_FILE_PATH}")
+        params_dict = {}
+        dvc_dict = {"stages": {}, "plots": {}}
+        zntrack_dict = {}
+        for node_uuid in self:
+            node = self.nodes[node_uuid]["value"]
+            for plugin in node.state.plugins.values():
+                # TODO: combine all params into one dict
+                if (
+                    value := plugin.convert_to_params_yaml()
+                ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
+                    params_dict[node.name] = value
+                if (
+                    value := plugin.convert_to_dvc_yaml()
+                ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
+                    dvc_dict["stages"][node.name] = value["stages"]
+                    if len(value["plots"]) > 0:
+                        dvc_dict["plots"][node.name] = value["plots"]
+                if (
+                    value := plugin.convert_to_zntrack_json()
+                ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
+                    zntrack_dict[node.name] = value
+
+        if len(dvc_dict["plots"]) == 0:
+            del dvc_dict["plots"]
+
+        config.PARAMS_FILE_PATH.write_text(yaml.safe_dump(params_dict))
+        config.DVC_FILE_PATH.write_text(yaml.safe_dump(dvc_dict))
+        config.ZNTRACK_FILE_PATH.write_text(json.dumps(zntrack_dict, indent=4))
+
         # TODO: update file or overwrite?
-        config.PARAMS_FILE_PATH.write_text(
-            yaml.safe_dump(converter.convert_graph_to_parameter(self))
-        )
-        log.info(f"Saving {config.DVC_FILE_PATH}")
-        config.DVC_FILE_PATH.write_text(
-            yaml.safe_dump(converter.convert_graph_to_dvc_config(self))
-        )
-        log.info(f"Saving {config.ZNTRACK_FILE_PATH}")
-        config.ZNTRACK_FILE_PATH.write_text(
-            znjson.dumps(
-                converter.convert_graph_to_zntrack_config(self),
-                indent=4,
-                cls=znjson.ZnEncoder.from_converters(
-                    [
-                        converter.ConnectionConverter,
-                        converter.NodeConverter,
-                        converter.CombinedConnectionsConverter,
-                        znjson.converter.PathlibConverter,
-                    ],
-                    add_default=False,
-                ),
-            )
-        )
 
     @contextlib.contextmanager
     def group(self, *names: str):

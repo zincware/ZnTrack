@@ -64,3 +64,7 @@ def test_basic(proj_path):
     assert (CWD / "params_config" / "basic.yaml").read_text() == (
         proj_path / "params.yaml"
     ).read_text()
+
+
+if __name__ == "__main__":
+    test_basic(None)

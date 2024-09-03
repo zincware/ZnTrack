@@ -71,7 +71,7 @@ def plots(*, cache: bool = True, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def metrics(*, cache: bool = True, **kwargs):
+def metrics(*, cache: bool = False, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
