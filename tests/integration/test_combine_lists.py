@@ -55,19 +55,19 @@ def test_combined_connection(proj_path, eager):
     assert added.outs == [1] + [1, 2] + [1, 2, 3]
 
 
-# @pytest.mark.parametrize("eager", [True, False])
-# def test_combine_dict(proj_path, eager):
-#     with zntrack.Project() as proj:
-#         a = GenerateList(size=1, name="a")
-#         b = GenerateList(size=2, name="b")
-#         c = GenerateList(size=3, name="c")
+@pytest.mark.parametrize("eager", [True, False])
+def test_combine_dict(proj_path, eager):
+    with zntrack.Project() as proj:
+        a = GenerateList(size=1, name="a")
+        b = GenerateList(size=2, name="b")
+        c = GenerateList(size=3, name="c")
 
-#         added = AddOneToDict(data={x.name: x.outs for x in [a, b, c]})
+        added = AddOneToDict(data={x.name: x.outs for x in [a, b, c]})
 
-#     proj.build()
-#     if eager:
-#         proj.run()
-#     else:
-#         subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
+    proj.build()
+    if eager:
+        proj.run()
+    else:
+        subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
 
-#     assert added.outs == {"a": [1], "b": [1, 2], "c": [1, 2, 3]}
+    assert added.outs == {"a": [1], "b": [1, 2], "c": [1, 2, 3]}
