@@ -95,7 +95,11 @@ class AIMPlugin(ZnTrackPlugin):
             commit_message = repo.commit(rev).message
 
         # get the default remote for the current branch
-        remote = repo.remote()
+        try:
+            remote_url = repo.remote().url
+        except ValueError:
+            # ValueError: Remote named 'origin' didn't exist
+            remote_url = None
 
         node_names = []
         with dvc.repo.Repo(rev=rev) as repo:
@@ -107,4 +111,5 @@ class AIMPlugin(ZnTrackPlugin):
             run = plugin.get_aim_run()
             run["git_hash"] = commit_hash
             run["git_commit_message"] = commit_message
-            run["git_remote"] = remote.url
+            if remote_url is not None:
+                run["git_remote"] = remote_url
