@@ -78,7 +78,7 @@ class AIMPlugin(ZnTrackPlugin):
         rev : str, optional
             The git revision to use. If None, 'HEAD' will be used.
         path_to_aim : str, optional
-            The path to the aim repository. Default is '.'.   
+            The path to the aim repository. Default is '.'.
 
         Example:
         -------
