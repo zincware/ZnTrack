@@ -31,9 +31,9 @@ class AIMPlugin(ZnTrackPlugin):
             for key, value in getattr(self.node, field.name).items():
                 run.track(value, name=f"{field.name}.{key}")
 
-    def get_aim_run(self) -> aim.Run:
+    def get_aim_run(self, path: str = ".") -> aim.Run:
         uid = self.node.state.get_stage_hash()
-        repo = aim.Repo(path=".")
+        repo = aim.Repo(path=path)
         run_hash = None
 
         with contextlib.suppress(Exception):
@@ -44,7 +44,7 @@ class AIMPlugin(ZnTrackPlugin):
             ).iter():
                 run_hash = run_metrics_col.run.hash
                 break
-        run = aim.Run(run_hash=run_hash)
+        run = aim.Run(run_hash=run_hash, repo=repo)
         if run_hash is None:
             run["dvc_stage_hash"] = uid
             run["git_remote"] = pathlib.Path.cwd().as_posix()
@@ -67,7 +67,7 @@ class AIMPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     @classmethod
-    def finalize(cls, rev: str | None = None):
+    def finalize(cls, rev: str | None = None, path_to_aim: str = "."):
         """Update the aim run to include the correct commit data.
 
         Run this, once you have created a commit for your DVC experiment.
@@ -77,6 +77,8 @@ class AIMPlugin(ZnTrackPlugin):
         ----------
         rev : str, optional
             The git revision to use. If None, 'HEAD' will be used.
+        path_to_aim : str, optional
+            The path to the aim repository. Default is '.'.   
 
         Example:
         -------
@@ -108,7 +110,7 @@ class AIMPlugin(ZnTrackPlugin):
         for node_name in node_names:
             node = zntrack.from_rev(node_name, rev=rev)
             plugin = cls(node)
-            run = plugin.get_aim_run()
+            run = plugin.get_aim_run(path=path_to_aim)
             run["git_hash"] = commit_hash
             run["git_commit_message"] = commit_message
             if remote_url is not None:
