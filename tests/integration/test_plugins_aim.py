@@ -25,9 +25,9 @@ class MetricsNode(zntrack.Node):
 
 @pytest.mark.skipif(aim is None, reason="Aim is not installed.")
 def test_aim_metrics(proj_path):
-    os.environ[
-        "ZNTRACK_PLUGINS"
-    ] = "zntrack.plugins.dvc_plugin.DVCPlugin,zntrack.plugins.aim_plugin.AIMPlugin"
+    os.environ["ZNTRACK_PLUGINS"] = (
+        "zntrack.plugins.dvc_plugin.DVCPlugin,zntrack.plugins.aim_plugin.AIMPlugin"
+    )
 
     subprocess.run(["aim", "init"], cwd=proj_path, check=True)
 
