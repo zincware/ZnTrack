@@ -1,6 +1,7 @@
 import logging
 import sys
 
+from .from_rev import from_rev
 from .node import Node
 from .options import (
     deps,
@@ -31,6 +32,7 @@ __all__ = [
     "Node",
     "Project",
     "nwd",
+    "from_rev",
 ]
 
 logger = logging.getLogger(__name__)

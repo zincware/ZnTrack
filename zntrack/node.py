@@ -83,7 +83,10 @@ class NodeStatus:
         remote = self.remote if self.remote != "." else None
         with dvc.repo.Repo(remote=remote, rev=self.rev) as repo:
             stage = repo.stage.collect(self.name)[0]
-            stage.save(allow_missing=True)
+            if self.rev is None:
+                # If the rev is not None, we don't need this but get:
+                # AttributeError: 'Repo' object has no attribute 'stage_cache'
+                stage.save(allow_missing=True)
             return stage
 
     def get_stage_lock(self) -> dict:
