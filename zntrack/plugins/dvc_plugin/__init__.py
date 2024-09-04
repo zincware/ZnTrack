@@ -94,7 +94,7 @@ def _params_getter(self: "Node", name: str):
 
 def _outs_getter(self: "Node", name: str):
     with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
-        self.__dict__[name] = json.load(f)
+        self.__dict__[name] = json.load(f, cls=znjson.ZnDecoder)
 
 
 def _plots_getter(self: "Node", name: str):

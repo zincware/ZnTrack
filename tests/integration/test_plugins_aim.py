@@ -23,12 +23,18 @@ class MetricsNode(zntrack.Node):
         self.data = {"age": self.age}
 
 
-@pytest.mark.skipif(aim is None, reason="Aim is not installed.")
-def test_aim_metrics(proj_path):
-    os.environ["ZNTRACK_PLUGINS"] = (
-        "zntrack.plugins.dvc_plugin.DVCPlugin,zntrack.plugins.aim_plugin.AIMPlugin"
-    )
+# fixture to set the os.env before the test and remove if after the test
+@pytest.fixture
+def use_aim_plugin():
+    os.environ[
+        "ZNTRACK_PLUGINS"
+    ] = "zntrack.plugins.dvc_plugin.DVCPlugin,zntrack.plugins.aim_plugin.AIMPlugin"
+    yield
+    del os.environ["ZNTRACK_PLUGINS"]
 
+
+@pytest.mark.skipif(aim is None, reason="Aim is not installed.")
+def test_aim_metrics(proj_path, use_aim_plugin):
     subprocess.run(["aim", "init"], cwd=proj_path, check=True)
 
     with zntrack.Project() as proj:
