@@ -30,6 +30,9 @@ class AIMPlugin(ZnTrackPlugin):
 
             for key, value in getattr(self.node, field.name).items():
                 run.track(value, name=f"{field.name}.{key}")
+            
+            # TODO: run.finalize_run() needs to be called once everything is tracked
+            # might need another plugin callback.
 
     def get_aim_run(self, path: str = ".") -> aim.Run:
         uid = self.node.state.get_stage_hash()
@@ -115,3 +118,6 @@ class AIMPlugin(ZnTrackPlugin):
             run["git_commit_message"] = commit_message
             if remote_url is not None:
                 run["git_remote"] = remote_url
+            run.experiment = commit_hash
+            # what if the experiment is already set?
+            # update or keep?
