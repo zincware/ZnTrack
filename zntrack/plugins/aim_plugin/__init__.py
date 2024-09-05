@@ -30,7 +30,7 @@ class AIMPlugin(ZnTrackPlugin):
 
             for key, value in getattr(self.node, field.name).items():
                 run.track(value, name=f"{field.name}.{key}")
-            
+
             # TODO: run.finalize_run() needs to be called once everything is tracked
             # might need another plugin callback.
 
