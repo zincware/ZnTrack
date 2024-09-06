@@ -26,9 +26,9 @@ class MetricsNode(zntrack.Node):
 # fixture to set the os.env before the test and remove if after the test
 @pytest.fixture
 def use_aim_plugin():
-    os.environ[
-        "ZNTRACK_PLUGINS"
-    ] = "zntrack.plugins.dvc_plugin.DVCPlugin,zntrack.plugins.aim_plugin.AIMPlugin"
+    os.environ["ZNTRACK_PLUGINS"] = (
+        "zntrack.plugins.dvc_plugin.DVCPlugin,zntrack.plugins.aim_plugin.AIMPlugin"
+    )
     yield
     del os.environ["ZNTRACK_PLUGINS"]
 

@@ -87,7 +87,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         """Example:
         -------
         python -c "from zntrack.plugins.mlflow_plugin import MLFlowPlugin; MLFlowPlugin.finalize()"
-        
+
         """
         # TODO: with the dependency on the file this does not support revs
         # We could add all dvc_stage_hashes to the tags of the parent run
