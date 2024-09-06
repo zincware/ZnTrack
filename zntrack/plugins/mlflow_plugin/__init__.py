@@ -97,6 +97,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         if rev is not None:
             raise NotImplementedError("rev is not supported yet")
         import zntrack
+
         load_env_vars("")
 
         repo = git.Repo(".")
