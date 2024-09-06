@@ -20,7 +20,19 @@ def get_attr_always_list(obj: t.Any, attr: str) -> list:
 def load_env_vars(name: str):
     if ENV_FILE_PATH.exists():
         env = yaml.safe_load(ENV_FILE_PATH.read_text())
-        os.environ.update(env.get("global", {}))
+        global_config = env.get("global", {})
+        for key, val in global_config.items():
+            if isinstance(val, list):
+                global_config[key] = ",".join(val)
+            elif isinstance(val, str):
+                pass
+            elif val is None:
+                pass
+            else:
+                raise ValueError(
+                    f"variable '{key}' has an invalid value '{val}' ({type(val)})"
+                )
+        os.environ.update(global_config)
 
         for key, value in env.get("stages", {}).get(name, {}).items():
             if isinstance(value, str):
@@ -30,7 +42,9 @@ def load_env_vars(name: str):
             elif value is None:
                 pass
             else:
-                raise ValueError(f"Unknown value for env variable {key}: {value}")
+                raise ValueError(
+                    f"variable '{key}' has an invalid value '{val}' ({type(val)})"
+                )
 
 
 class TempPathLoader(znflow.utils.IterableHandler):
