@@ -72,7 +72,9 @@ class MLFlowPlugin(ZnTrackPlugin):
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 mlflow.log_param(field.name, getattr(self.node, field.name))
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
-                mlflow.log_metric(field.name, getattr(self.node, field.name))
+                metrics = getattr(self.node, field.name)
+                for key, value in metrics.items():
+                    mlflow.log_metric(f"{field.name}.{key}", value)
 
     def convert_to_dvc_yaml(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
