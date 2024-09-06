@@ -41,6 +41,21 @@ class MLFlowPlugin(ZnTrackPlugin):
                 pathlib.Path(".mlflow_parent_run_id").write_text(parent_run_id)
                 yield
 
+    def get_run_info(self) -> dict:
+        with self.get_mlflow_child_run():
+            # get the name of the current run
+            run_info = mlflow.active_run().info
+            experiment_id = run_info.experiment_id
+            # run_name = run_info.run_name
+            try:
+                run_name = mlflow.get_run(run_info.run_id).data.tags["mlflow.runName"]
+            except KeyError:
+                run_name = run_info.run_name
+            run_id = run_info.run_id
+            host_url = mlflow.get_tracking_uri()
+            uri = f"{host_url}/#/experiments/{experiment_id}/runs/{run_id}"
+            return {"name": run_name, "uri": uri, "id": run_id}
+
     @contextlib.contextmanager
     def get_mlflow_child_run(self):
         stage_hash = self.node.state.get_stage_hash()
