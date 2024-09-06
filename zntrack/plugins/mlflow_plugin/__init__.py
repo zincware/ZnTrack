@@ -14,6 +14,7 @@ from zntrack.utils.misc import load_env_vars
 # TODO: if this plugin fails, there should only be a warning, not an error
 # so that the results are not lost
 
+
 @dataclass
 class MLFlowPlugin(ZnTrackPlugin):
 
