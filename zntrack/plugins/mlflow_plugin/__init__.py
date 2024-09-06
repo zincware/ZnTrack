@@ -1,6 +1,6 @@
 import contextlib
 import pathlib
-from dataclasses import Field
+from dataclasses import Field, dataclass
 from typing import Any
 
 import dvc.repo
@@ -14,8 +14,12 @@ from zntrack.utils.misc import load_env_vars
 # TODO: if this plugin fails, there should only be a warning, not an error
 # so that the results are not lost
 
-
+@dataclass
 class MLFlowPlugin(ZnTrackPlugin):
+
+    def __post_init__(self):
+        load_env_vars("")
+
     def gitignore_file(self, path: str) -> bool:
         """Add a path to the .gitignore file if it is not already there."""
         with open(".gitignore", "r") as f:
@@ -114,8 +118,6 @@ class MLFlowPlugin(ZnTrackPlugin):
         if rev is not None:
             raise NotImplementedError("rev is not supported yet")
         import zntrack
-
-        load_env_vars("")
 
         repo = git.Repo(".")
 
