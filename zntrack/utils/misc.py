@@ -18,6 +18,7 @@ def get_attr_always_list(obj: t.Any, attr: str) -> list:
 
 
 def load_env_vars(name: str):
+    # TODO: this should also use DVCFileSystem!
     if ENV_FILE_PATH.exists():
         env = yaml.safe_load(ENV_FILE_PATH.read_text())
         global_config = env.get("global", {})

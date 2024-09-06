@@ -9,6 +9,7 @@ import mlflow
 
 from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
 from zntrack.plugins import ZnTrackPlugin
+from zntrack.utils.misc import load_env_vars
 
 # TODO: if this plugin fails, there should only be a warning, not an error
 # so that the results are not lost
@@ -96,6 +97,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         if rev is not None:
             raise NotImplementedError("rev is not supported yet")
         import zntrack
+        load_env_vars("")
 
         repo = git.Repo(".")
 
