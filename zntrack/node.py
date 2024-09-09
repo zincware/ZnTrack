@@ -100,7 +100,15 @@ class NodeStatus:
         """Get the hash of the stage."""
         if include_outs:
             raise NotImplementedError("Include outs is not implemented yet.")
-        stage_lock = self.get_stage_lock()
+        try:
+            # I do not understand what is goind on here?
+            (self.node.nwd / "node-meta.json").touch() # REMOVE!!!! node-meta might exist, do not remove!!
+            stage_lock = self.get_stage_lock()
+        finally:
+            content = (self.node.nwd / "node-meta.json").read_text()
+            if content == "":
+                (self.node.nwd / "node-meta.json").unlink()
+
         filtered_lock = {
             k: v for k, v in stage_lock.items() if k in ["cmd", "deps", "params"]
         }
@@ -126,6 +134,11 @@ class NodeStatus:
 
     def extend_plots(self, attribute: str, data: dict):
         # if isintance(target, str): ...
+        # TODO: how to check if something has already been written when using extend_plot on
+        # some plots but not on others in the final saving step?
+
+        # TODO: check that the stage hash is the same if metrics are set or not
+        # TODO: test get_stage_hash with params / metrics / plots / outs / out_path / ...
         import pandas as pd
 
         try:
