@@ -2,6 +2,7 @@ import contextlib
 import json
 import logging
 import pathlib
+import tqdm
 
 import yaml
 import znflow
@@ -46,17 +47,22 @@ class Project(znflow.DiGraph):
 
         # need to fix the node names
         all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
-        for node in all_nodes:
+        all_node_names = [node.name for node in all_nodes]
+        # TODO: accessing `node.name` should be instant, so this workaround
+        # should not be required! Find and fix why it is slow!
+        for node in tqdm.tqdm(all_nodes, desc="Collecting node names"):
             if node.name is None:
                 node_name = node.__class__.__name__
-                if node_name not in [n.name for n in all_nodes]:
+                if node_name not in all_node_names:
                     node.name = node_name
+                    all_node_names.append(node_name)
                 else:
                     i = 0
                     while True:
                         i += 1
-                        if f"{node_name}_{i}" not in [n.name for n in all_nodes]:
+                        if f"{node_name}_{i}" not in all_node_names:
                             node.name = f"{node_name}_{i}"
+                            all_node_names.append(f"{node_name}_{i}")
                             break
         return super().__exit__(exc_type, exc_val, exc_tb)
 
@@ -65,7 +71,7 @@ class Project(znflow.DiGraph):
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": {}}
         zntrack_dict = {}
-        for node_uuid in self:
+        for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
             for plugin in node.state.plugins.values():
                 # TODO: combine all params into one dict

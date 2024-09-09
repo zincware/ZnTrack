@@ -108,6 +108,13 @@ class MLFlowPlugin(ZnTrackPlugin):
 
     def convert_to_zntrack_json(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
+    
+    def extend_plots(self, attribute: str, data: dict, reference):
+        step = len(reference)
+        new_data = {f"{attribute}.{key}": value for key, value in data.items()}
+        with self.get_mlflow_child_run():
+            mlflow.log_metrics(new_data, step=step)
+
 
     @classmethod
     def finalize(cls, rev: str | None = None):
@@ -173,8 +180,9 @@ class MLFlowPlugin(ZnTrackPlugin):
         print(f"found {len(child_runs)} child runs in exp: '{active_experiment_id}'")
         for node_name in node_names:
             if node_name in child_runs["tags.dvc_stage_name"].values:
+                pass
                 # TODO: set git commit message and hash and remote.
-            else node_name not in child_runs["tags.dvc_stage_name"].values:
+            else:
                 print(f"missing {node_name}")
                 node = zntrack.from_rev(node_name, rev=rev)
                 stage_hash = node.state.get_stage_hash()

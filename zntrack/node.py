@@ -18,6 +18,7 @@ from dvc.utils import dict_sha256
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.import_handler import import_handler
 from .utils.node_wd import get_nwd
+from zntrack.exceptions import NodeNotAvailableError
 
 try:
     from typing import dataclass_transform
@@ -121,6 +122,22 @@ class NodeStatus:
         content = dataclasses.asdict(self)
         content.pop("node")
         return content
+    
+    def extend_plots(self, attribute: str, data: dict):
+        # if isintance(target, str): ...
+        import pandas as pd
+        try:
+            target = getattr(self.node, attribute)
+        except NodeNotAvailableError:
+            target = pd.DataFrame()
+        if target is ZNTRACK_LAZY_VALUE or target is NOT_AVAILABLE:
+            # TODO: accessing data in a node that is not loaded will not raise NodeNotAvailableErrors!
+            target = pd.DataFrame()
+        print(target)
+        df = pd.concat([target, pd.DataFrame([data])], ignore_index=True)
+        setattr(self.node, attribute, df)
+        for plugin in self.plugins.values():
+            plugin.extend_plots(attribute, data, reference=df)
 
 
 @dataclass_transform()

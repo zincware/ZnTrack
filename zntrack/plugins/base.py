@@ -4,7 +4,7 @@ import abc
 import dataclasses
 import typing as t
 
-from zntrack.config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE
+from zntrack.config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, PLUGIN_EMPTY_RETRUN_VALUE
 from zntrack.exceptions import NodeNotAvailableError
 
 if t.TYPE_CHECKING:
@@ -35,6 +35,9 @@ class ZnTrackPlugin(abc.ABC):
 
     @abc.abstractmethod
     def convert_to_params_yaml(self) -> t.Any: ...
+
+    def extend_plots(self, attribute: str, data: dict, reference):
+        return PLUGIN_EMPTY_RETRUN_VALUE
 
 
 def base_getter(self: "Node", name: str, func: t.Callable):
