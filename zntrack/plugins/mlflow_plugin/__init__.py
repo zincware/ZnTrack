@@ -1,17 +1,17 @@
 import contextlib
 import pathlib
+import warnings
 from dataclasses import Field, dataclass
 from typing import Any
 
 import dvc.repo
 import git
 import mlflow
+from mlflow.utils import mlflow_tags
 
 from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
 from zntrack.plugins import ZnTrackPlugin
 from zntrack.utils.misc import load_env_vars
-from mlflow.utils import  mlflow_tags
-import warnings
 
 # TODO: if this plugin fails, there should only be a warning, not an error
 # so that the results are not lost
@@ -55,7 +55,9 @@ class MLFlowPlugin(ZnTrackPlugin):
             experiment_id = run_info.experiment_id
             # run_name = run_info.run_name
             try:
-                run_name = mlflow.get_run(run_info.run_id).data.tags[mlflow_tags.MLFLOW_RUN_NAME]
+                run_name = mlflow.get_run(run_info.run_id).data.tags[
+                    mlflow_tags.MLFLOW_RUN_NAME
+                ]
             except KeyError:
                 run_name = run_info.run_name
             run_id = run_info.run_id
@@ -108,13 +110,12 @@ class MLFlowPlugin(ZnTrackPlugin):
 
     def convert_to_zntrack_json(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
-    
+
     def extend_plots(self, attribute: str, data: dict, reference):
         step = len(reference)
         new_data = {f"{attribute}.{key}": value for key, value in data.items()}
         with self.get_mlflow_child_run():
             mlflow.log_metrics(new_data, step=step)
-
 
     @classmethod
     def finalize(cls, rev: str | None = None):
@@ -132,7 +133,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         if rev is not None:
             raise NotImplementedError("rev is not supported yet")
         load_env_vars("")
-        
+
         if not pathlib.Path(".mlflow_parent_run_id").exists():
             raise ValueError("Unable to find '.mlflow_parent_run_id' file")
         import zntrack
@@ -172,7 +173,7 @@ class MLFlowPlugin(ZnTrackPlugin):
                 parent_run_id = mlflow.active_run().info.run_id
                 active_experiment_id = mlflow.active_run().info.experiment_id
             break
-        
+
         child_runs = mlflow.search_runs(
             experiment_ids=[active_experiment_id],
             filter_string=f"tags.{mlflow_tags.MLFLOW_PARENT_RUN_ID} = '{parent_run_id}'",
@@ -188,14 +189,16 @@ class MLFlowPlugin(ZnTrackPlugin):
                 stage_hash = node.state.get_stage_hash()
                 original_runs = mlflow.search_runs(
                     experiment_ids=[active_experiment_id],
-                    filter_string=f"tags.dvc_stage_hash = '{stage_hash}'"
+                    filter_string=f"tags.dvc_stage_hash = '{stage_hash}'",
                 )
                 print(f"searching for original run {stage_hash=}")
                 if len(original_runs) == 0:
                     warnings.warn(f"no original run found for {node_name} - skipping")
                     continue
                 if len(original_runs) > 1:
-                    warnings.warn(f"multiple original runs found for {node_name} - skipping")
+                    warnings.warn(
+                        f"multiple original runs found for {node_name} - skipping"
+                    )
                     continue
                 print(f"found original run for {node_name} - {original_runs}")
                 original_run_id = original_runs.iloc[0].run_id
@@ -220,6 +223,8 @@ class MLFlowPlugin(ZnTrackPlugin):
                         if remote_url is not None:
                             mlflow.set_tag("git_remote", remote_url)
 
-                        mlflow.set_tag("original_dvc_stage_hash", node.state.get_stage_hash())
+                        mlflow.set_tag(
+                            "original_dvc_stage_hash", node.state.get_stage_hash()
+                        )
                         mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
         pathlib.Path(".mlflow_parent_run_id").unlink()

@@ -4,7 +4,7 @@ import abc
 import dataclasses
 import typing as t
 
-from zntrack.config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, PLUGIN_EMPTY_RETRUN_VALUE
+from zntrack.config import NOT_AVAILABLE, PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_LAZY_VALUE
 from zntrack.exceptions import NodeNotAvailableError
 
 if t.TYPE_CHECKING:

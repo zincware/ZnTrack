@@ -2,8 +2,8 @@ import contextlib
 import json
 import logging
 import pathlib
-import tqdm
 
+import tqdm
 import yaml
 import znflow
 
