@@ -102,7 +102,9 @@ class NodeStatus:
             raise NotImplementedError("Include outs is not implemented yet.")
         try:
             # I do not understand what is goind on here?
-            (self.node.nwd / "node-meta.json").touch() # REMOVE!!!! node-meta might exist, do not remove!!
+            (
+                self.node.nwd / "node-meta.json"
+            ).touch()  # REMOVE!!!! node-meta might exist, do not remove!!
             stage_lock = self.get_stage_lock()
         finally:
             content = (self.node.nwd / "node-meta.json").read_text()
