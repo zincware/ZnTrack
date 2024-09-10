@@ -1,14 +1,10 @@
-import os
-import pathlib
 
 import pytest
-import yaml
 from typer.testing import CliRunner
 
-from zntrack import utils
-import zntrack.examples
 import zntrack
-from zntrack import Node, cli
+import zntrack.examples
+from zntrack import utils
 from zntrack.cli import app
 
 
@@ -20,7 +16,6 @@ def runner() -> CliRunner:
 def test_version(runner):
     result = runner.invoke(app, ["--version"])
     assert "ZnTrack " in result.stdout  # ZnTrack v.x.y
-
 
 
 def test_run(proj_path, runner):
@@ -98,6 +93,7 @@ def test_list_groups(proj_path, runner):
     # assert groups == true_groups
 
     # assert result.exit_code == 0
+
 
 if __name__ == "__main__":
     test_list_groups(None, None)

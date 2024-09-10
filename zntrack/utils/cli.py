@@ -3,6 +3,7 @@ import pathlib
 from typing import Tuple
 
 from dvc.api import DVCFileSystem
+
 from zntrack.config import ZNTRACK_FILE_PATH
 
 
@@ -28,7 +29,6 @@ def get_groups(remote, rev) -> Tuple[dict, list]:
     fs = DVCFileSystem(url=remote, rev=rev)
     with fs.open(ZNTRACK_FILE_PATH) as f:
         config = json.load(f)
-
 
     true_groups = {}
     node_names = []
