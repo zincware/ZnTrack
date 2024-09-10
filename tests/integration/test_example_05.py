@@ -1,7 +1,7 @@
 import os
+import typing as t
 
 import pytest
-import typing as t
 
 # from zntrack import Node, zn
 import zntrack

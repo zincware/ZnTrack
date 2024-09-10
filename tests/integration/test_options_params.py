@@ -11,7 +11,6 @@ class ComputeA(zntrack.Node):
     inp: np.ndarray = zntrack.params()
     out: np.ndarray = zntrack.outs()
 
-
     def run(self):
         self.out = np.power(2, self.inp)
 

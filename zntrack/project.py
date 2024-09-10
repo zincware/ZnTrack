@@ -99,7 +99,7 @@ class Project(znflow.DiGraph):
         config.ZNTRACK_FILE_PATH.write_text(json.dumps(zntrack_dict, indent=4))
 
         # TODO: update file or overwrite?
-    
+
     def repro(self):
         subprocess.check_call(["dvc", "repro"])
 

@@ -1,10 +1,9 @@
+
 import zntrack
-import typing as t
 
 
 class HasNumber(zntrack.Node):
     number: int = zntrack.outs()
-
 
 
 class CreateNumbers(HasNumber):
