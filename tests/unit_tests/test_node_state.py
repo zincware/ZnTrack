@@ -5,6 +5,7 @@ import pytest
 
 import zntrack
 from zntrack.config import NodeStatusEnum
+from zntrack.state import NodeStatus
 
 
 class MyNode(zntrack.Node):
@@ -17,11 +18,13 @@ def test_state_get(proj_path):
         n = MyNode()
 
     project.build()
+    assert isinstance(n.state, NodeStatus)
     assert n.state.remote == "."
     assert n.state.rev is None
     assert n.state.run_count == 0
     assert not n.state.restarted
     assert n.state.state == NodeStatusEnum.CREATED
+    assert n.name == "MyNode"
     assert n.state.name == "MyNode"
 
     assert isinstance(n.state.fs, dvc.api.DVCFileSystem)

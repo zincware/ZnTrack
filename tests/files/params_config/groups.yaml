@@ -1,0 +1,10 @@
+Grp_B_MyNode:
+  parameter: 5
+Grp_MyNode:
+  parameter: 2
+Grp_MyNode_1:
+  parameter: 3
+Grp_MyNode_2:
+  parameter: 4
+MyNode:
+  parameter: 1

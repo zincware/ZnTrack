@@ -87,7 +87,6 @@ class Node(znflow.Node, znfields.Base):
 
         # TODO: check if the node is finished or not.
         instance.__dict__["state"] = NodeStatus(
-            name=name,
             remote=remote,
             rev=rev,
             run_count=run_count,
@@ -106,7 +105,6 @@ class Node(znflow.Node, znfields.Base):
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
             self.__dict__["state"] = NodeStatus(
-                name=self.name,
                 remote=".",
                 rev=None,
                 run_count=0,
@@ -122,7 +120,6 @@ class Node(znflow.Node, znfields.Base):
             self.__dict__["state"]["run_count"] += 1
         except KeyError:
             self.__dict__["state"] = NodeStatus(
-                name=self.name,
                 remote=".",
                 rev=None,
                 run_count=1,
