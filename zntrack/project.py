@@ -8,6 +8,7 @@ import tqdm
 import yaml
 import znflow
 
+from zntrack.config import NWD_PATH
 from zntrack.group import Group
 
 from . import config
@@ -127,7 +128,7 @@ class Project(znflow.DiGraph):
         # This context manager also open self.__enter__ in the `super`
         if not names:
             name = "Group1"
-            while pathlib.Path("nodes", name).exists():
+            while pathlib.Path(NWD_PATH, name).exists():
                 name = f"Group{int(name[5:]) + 1}"
             names = (name,)
 

@@ -3,6 +3,8 @@ import typing as t
 
 import znflow
 
+from zntrack.config import NWD_PATH
+
 if t.TYPE_CHECKING:
     from zntrack import Node
 
@@ -12,7 +14,7 @@ def _extract_group_from_nwd(path: pathlib.Path) -> tuple | None:
     parts = list(path.parts)
 
     # Check if the path starts with 'nodes'
-    if parts[0] != "nodes":
+    if parts[0] != NWD_PATH:
         raise ValueError("Path must start with 'nodes'")
 
     # Check the length of the path to determine the output

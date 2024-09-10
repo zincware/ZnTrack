@@ -5,6 +5,7 @@ DVC_FILE_PATH = pathlib.Path("dvc.yaml")
 PARAMS_FILE_PATH = pathlib.Path("params.yaml")
 ZNTRACK_FILE_PATH = pathlib.Path("zntrack.json")
 ENV_FILE_PATH = pathlib.Path("env.yaml")
+NWD_PATH = pathlib.Path("nodes")
 
 
 # Use sentinel object for zntrack specific configurations. Use
