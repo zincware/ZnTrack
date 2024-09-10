@@ -19,7 +19,6 @@ from zntrack.utils.misc import load_env_vars
 
 @dataclass
 class MLFlowPlugin(ZnTrackPlugin):
-
     def __post_init__(self):
         load_env_vars("")
 

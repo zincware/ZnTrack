@@ -88,7 +88,7 @@ class NodeStatus:
             if self.rev is None:
                 # If the rev is not None, we don't need this but get:
                 # AttributeError: 'Repo' object has no attribute 'stage_cache'
-                stage.save(allow_missing=True)
+                stage.save(allow_missing=True, run_cache=False)
             return stage
 
     def get_stage_lock(self) -> dict:
