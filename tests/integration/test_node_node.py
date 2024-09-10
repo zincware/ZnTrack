@@ -1,8 +1,8 @@
 import dvc.cli
 import pytest
 
-from zntrack.config import NodeStatusEnum
 import zntrack.examples
+from zntrack.config import NodeStatusEnum
 
 
 @pytest.mark.parametrize("eager", [True, False])
@@ -20,7 +20,7 @@ def test_AddNodes(proj_path, eager):
         project.run()
     else:
         project.repro(build=True)
-  
+
     assert add_numbers_a.c == 3
     assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
