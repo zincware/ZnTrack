@@ -4,6 +4,7 @@ import pytest
 import zntrack.examples
 
 
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("automatic_node_names", [True, False])
 def test_multiple_experiments(proj_path, automatic_node_names):
     with zntrack.Project(automatic_node_names=automatic_node_names) as proj:

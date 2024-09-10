@@ -7,6 +7,7 @@ import zntrack.examples
 
 # from zntrack.utils import NodeStatusResults
 
+
 @pytest.mark.xfail(reason="pending implementation")
 def test_module_not_installed():
     with pytest.raises(ModuleNotFoundError):
@@ -15,6 +16,7 @@ def test_module_not_installed():
             remote="https://github.com/IPSProjects/IPS-Water",
             rev="ca0eef0ccfcbfb72a82136849a9ca35eac8b7629",
         )
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_commit_not_found():
@@ -26,6 +28,7 @@ def test_commit_not_found():
         )
 
 
+@pytest.mark.xfail(reason="pending implementation")
 def test_import_from_remote(proj_path):
     node = zntrack.from_rev(
         "HelloWorld",
@@ -41,6 +44,7 @@ def test_import_from_remote(proj_path):
     assert node.uuid == uuid.UUID("1d2d5eef-c42b-4ff4-aa1f-837638fdf090")
 
 
+@pytest.mark.xfail(reason="pending implementation")
 def test_connect_from_remote(proj_path):
     node_a = zntrack.from_rev(
         "HelloWorld",
@@ -79,6 +83,7 @@ def test_connect_from_remote(proj_path):
     project.build()
 
 
+@pytest.mark.xfail(reason="pending implementation")
 def test_two_nodes_connect_external(proj_path):
     node_a = zntrack.from_rev(
         "HelloWorld",

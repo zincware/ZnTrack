@@ -1,8 +1,10 @@
 import subprocess
+
 import pytest
+
 import zntrack.examples
 
-@pytest.mark.xfail(reason="pending implementation")
+
 def test_no_restart(tmp_path_2):
     project = zntrack.Project()
 
@@ -17,6 +19,7 @@ def test_no_restart(tmp_path_2):
     assert node.count == 1
     assert node.state.run_count == 1
     assert node.state.restarted is False
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_restarts(tmp_path_2):

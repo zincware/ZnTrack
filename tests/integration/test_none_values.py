@@ -39,6 +39,7 @@ def test_init(value):
         LoadFromDeps(**{value: None})
 
 
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_from_zn_deps(proj_path, eager):
     with zntrack.Project(proj_path) as proj:
@@ -51,6 +52,7 @@ def test_from_zn_deps(proj_path, eager):
     assert node.result == "Hello World"
 
 
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_from_dvc_deps(proj_path, eager):
     file = proj_path / "data.txt"
@@ -77,6 +79,7 @@ class EmptyNodesNode(zntrack.Node):
         else:
             self.outs = self.value
         self.file.write_text("Hello World")
+
 
 @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])

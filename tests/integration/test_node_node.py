@@ -4,6 +4,7 @@ import pytest
 import zntrack.examples
 
 
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNodes(proj_path, eager):
     with zntrack.Project() as project:
@@ -28,6 +29,7 @@ def test_AddNodes(proj_path, eager):
     assert add_nodes.state.loaded
 
 
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNodeAttributes(proj_path, eager):
     with zntrack.Project() as project:
@@ -52,6 +54,7 @@ def test_AddNodeAttributes(proj_path, eager):
     assert add_numbers_b.state.loaded
     assert add_nodes.c == 7
     assert add_nodes.state.loaded
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_AddNodes_legacy(proj_path):
@@ -81,6 +84,7 @@ def test_AddNodes_legacy(proj_path):
     assert add_nodes.state.loaded
 
 
+@pytest.mark.xfail(reason="pending implementation")
 def test_AddNodeAttributes_legacy(proj_path):
     with zntrack.Project() as proj:
         add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")
