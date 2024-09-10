@@ -127,4 +127,4 @@ class Project(znflow.DiGraph):
         with super().group(*names) as znflow_grp:
             group = Group(name=znflow_grp.names)
             yield group
-        group.nodes = znflow_grp.nodes
+        group._nodes = znflow_grp.nodes

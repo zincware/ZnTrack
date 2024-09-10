@@ -52,6 +52,12 @@ def test_groups_io(proj_path):
     for node in d.state.group:
         assert node == d
 
+    with pytest.raises(AttributeError):
+        b.state.group.name = "Hello"
+    
+    with pytest.raises(AttributeError):
+        b.state.group.nodes = []
+
 
 def test_nested_groups(proj_path):
     # disabled from within znflow
