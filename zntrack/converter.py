@@ -1,13 +1,28 @@
+import dataclasses
 import importlib
+import pathlib
 import typing as t
 
 import znflow
 import znjson
 
-from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
+from zntrack.config import (
+    ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
+    ZNTRACK_OPTION,
+    ZnTrackOptionEnum,
+)
 
 from .node import Node
 from .utils import module_handler
+
+
+def _enforce_str_list(content) -> list[str]:
+    if isinstance(content, (str, pathlib.Path)):
+        return [pathlib.Path(content).as_posix()]
+    elif isinstance(content, (list, tuple)):
+        return [pathlib.Path(x).as_posix() for x in content]
+    else:
+        raise ValueError(f"found unsupported content type '{content}'")
 
 
 class NodeDict(t.TypedDict):
@@ -86,17 +101,44 @@ class CombinedConnectionsConverter(znjson.ConverterBase):
 
 def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
     """Get all output paths for a node."""
-    # What do we actually want as dependency?
-    # paths = []
-    # for field in dataclasses.fields(node):
-    #     if field.metadata.get(_ZNTRACK_OPTION) == "outs":
-    #         paths.append((node.nwd / field.name).with_suffix(".json").as_posix())
-    # return paths
-    if not node._unique_output_:
-        return [(node.nwd / "node-meta.json").as_posix()]
+    # TODO: this should be a part of the DVCPlugin!
+    if attribute is None:
+        fields = dataclasses.fields(node)
     else:
-        field = node.state.get_field(attribute)
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:
-            return [(node.nwd / f"{attribute}.json").as_posix()]
-        else:
-            raise NotImplementedError("Unique currently only implemented for outs")
+        fields = [node.state.get_field(attribute)]
+    paths = []
+    for field in fields:
+        option_type = field.metadata.get(ZNTRACK_OPTION)
+
+        if any(
+            option_type is x
+            for x in [
+                ZnTrackOptionEnum.PARAMS,
+                ZnTrackOptionEnum.PARAMS,
+                ZnTrackOptionEnum.DEPS,
+                ZnTrackOptionEnum.DEPS_PATH,
+                None,
+            ]
+        ):
+            continue
+        if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) == True:
+            paths.append((node.nwd / "node-meta.json").as_posix())
+        if option_type == ZnTrackOptionEnum.OUTS:
+            paths.append((node.nwd / f"{field.name}.json").as_posix())
+        elif option_type == ZnTrackOptionEnum.PLOTS:
+            paths.append((node.nwd / f"{field.name}.csv").as_posix())
+        elif option_type == ZnTrackOptionEnum.METRICS:
+            paths.append((node.nwd / f"{field.name}.json").as_posix())
+        elif option_type == ZnTrackOptionEnum.OUTS_PATH:
+            paths.extend(_enforce_str_list(getattr(node, field.name)))
+        elif option_type == ZnTrackOptionEnum.PLOTS_PATH:
+            paths.extend(_enforce_str_list(getattr(node, field.name)))
+        elif option_type == ZnTrackOptionEnum.METRICS_PATH:
+            paths.extend(_enforce_str_list(getattr(node, field.name)))
+
+        if len(paths) == 0:
+            raise ValueError(
+                f"Unable to determine outputs for '{node.name}.{field.name}'."
+            )
+
+    return paths
