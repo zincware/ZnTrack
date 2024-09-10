@@ -20,8 +20,8 @@ from .node import Node
 
 def _plugin_getter(self: Node, name: str):
     value = PLUGIN_EMPTY_RETRUN_VALUE
-    fields = dataclasses.fields(self)
-    field = [_field for _field in fields if _field.name == name][0]
+
+    field = self.state.get_field(name)
 
     for plugin in self.state.plugins.values():
         getter_value = plugin.getter(field)

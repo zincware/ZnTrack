@@ -15,6 +15,8 @@ from zntrack.utils.misc import load_env_vars
 
 # TODO: if this plugin fails, there should only be a warning, not an error
 # so that the results are not lost
+# TODO: have the mlflow run active over the entire run method to avoid searching for it over again.
+# TODO: in finalize have the parent run active (if not already)
 
 
 @dataclass

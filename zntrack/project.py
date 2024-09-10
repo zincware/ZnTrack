@@ -8,6 +8,8 @@ import tqdm
 import yaml
 import znflow
 
+from zntrack.group import Group
+
 from . import config
 from .deployment import ZnTrackDeployment
 
@@ -39,12 +41,14 @@ class Project(znflow.DiGraph):
         return super().add_node(node_for_adding, **attr)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for group in self.groups:
-            for node in self.groups[group]:
+        for group in self.groups.values():
+            for node_uuid in group.uuids:
                 # we need to access the `state` attribute to initialize
                 # the property, so the `log.debug` is necessary!
-                log.debug(self.nodes[node]["value"].state)
-                self.nodes[node]["value"].__dict__["state"]["group"] = group
+                log.debug(self.nodes[node_uuid]["value"].state)
+                self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
+                    Group.from_znflow_group(group)
+                )
 
         # need to fix the node names
         all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
@@ -53,7 +57,10 @@ class Project(znflow.DiGraph):
         # should not be required! Find and fix why it is slow!
         for node in tqdm.tqdm(all_nodes, desc="Collecting node names"):
             if node.name is None:
-                node_name = node.__class__.__name__
+                if node.state.group is None:
+                    node_name = node.__class__.__name__
+                else:
+                    node_name = node.state.group.get_node_name(node)
                 if node_name not in all_node_names:
                     node.name = node_name
                     all_node_names.append(node_name)
@@ -117,11 +124,14 @@ class Project(znflow.DiGraph):
             be nested to 'nwd = name[0]/name[1]/.../name[-1]'
 
         """
+        # This context manager also open self.__enter__ in the `super`
         if not names:
             name = "Group1"
             while pathlib.Path("nodes", name).exists():
                 name = f"Group{int(name[5:]) + 1}"
             names = (name,)
 
-        with super().group(*names) as group:
+        with super().group(*names) as znflow_grp:
+            group = Group(name=znflow_grp.names)
             yield group
+        group._nodes = znflow_grp.nodes

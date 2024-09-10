@@ -15,6 +15,14 @@ class NodeA(zntrack.Node):
         pass
 
 
+class NodeA2(zntrack.Node):
+    results: int = zntrack.outs()
+    _unique_output_ = True
+
+    def run(self):
+        pass
+
+
 class NodeB(zntrack.Node):
     input: int = zntrack.deps()
 

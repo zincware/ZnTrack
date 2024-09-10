@@ -4,6 +4,8 @@ import typing as t
 import znflow
 import znjson
 
+from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
+
 from .node import Node
 from .utils import module_handler
 
@@ -82,7 +84,7 @@ class CombinedConnectionsConverter(znjson.ConverterBase):
         return znflow.CombinedConnections(**value)
 
 
-def node_to_output_paths(node: Node) -> t.List[str]:
+def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
     """Get all output paths for a node."""
     # What do we actually want as dependency?
     # paths = []
@@ -90,4 +92,11 @@ def node_to_output_paths(node: Node) -> t.List[str]:
     #     if field.metadata.get(_ZNTRACK_OPTION) == "outs":
     #         paths.append((node.nwd / field.name).with_suffix(".json").as_posix())
     # return paths
-    return [(node.nwd / "node-meta.json").as_posix()]
+    if not node._unique_output_:
+        return [(node.nwd / "node-meta.json").as_posix()]
+    else:
+        field = node.state.get_field(attribute)
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:
+            return [(node.nwd / f"{attribute}.json").as_posix()]
+        else:
+            raise NotImplementedError("Unique currently only implemented for outs")
