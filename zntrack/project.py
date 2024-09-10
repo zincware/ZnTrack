@@ -118,6 +118,7 @@ class Project(znflow.DiGraph):
             be nested to 'nwd = name[0]/name[1]/.../name[-1]'
 
         """
+        # This context manager also open self.__enter__ in the `super`
         if not names:
             name = "Group1"
             while pathlib.Path("nodes", name).exists():

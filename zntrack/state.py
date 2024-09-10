@@ -30,7 +30,6 @@ PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
-    name: str | None
     remote: str | None
     rev: str | None
     run_count: int = 0
@@ -42,6 +41,10 @@ class NodeStatus:
     )
     group: Group | None = None
     # TODO: move node name and nwd to here as well
+
+    @property
+    def name(self) -> str:
+        return self.node.name
 
     @property
     def fs(self) -> dvc.api.DVCFileSystem:
