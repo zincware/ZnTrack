@@ -1,9 +1,25 @@
+import pathlib
 import typing as t
 
 import znflow
 
 if t.TYPE_CHECKING:
     from zntrack import Node
+
+
+def _extract_group_from_nwd(path: pathlib.Path) -> tuple | None:
+    # Convert the path to a list of parts
+    parts = list(path.parts)
+
+    # Check if the path starts with 'nodes'
+    if parts[0] != "nodes":
+        raise ValueError("Path must start with 'nodes'")
+
+    # Check the length of the path to determine the output
+    if len(parts) == 2:  # no groups
+        return None
+    else:  # groups
+        return tuple(parts[1:-1])
 
 
 class Group:
@@ -60,3 +76,10 @@ class Group:
         if node.name is None:
             return f"{'_'.join(self._name)}_{node.__class__.__name__}"
         return f"{'_'.join(self._name)}_{node.name}"
+
+    @classmethod
+    def from_nwd(cls, nwd: pathlib.Path) -> "Group|None":
+        names = _extract_group_from_nwd(nwd)
+        if names is None:
+            return None
+        return cls(name=names)
