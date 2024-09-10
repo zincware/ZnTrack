@@ -83,5 +83,3 @@ def test_AddList_slice(proj_path, eager):
     else:
         with pytest.raises(znflow.exceptions.ConnectionAttributeError):
             project.repro(build=True)
-
-
