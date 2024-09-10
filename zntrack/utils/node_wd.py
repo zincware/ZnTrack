@@ -10,7 +10,7 @@ import typing as t
 import znflow.utils
 import znjson
 
-from .. import config
+from zntrack.config import NWD_PATH, ZNTRACK_FILE_PATH, NodeStatusEnum
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -59,17 +59,24 @@ def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
         if (
             node.state.remote is None
             and node.state.rev is None
-            and node.state.state == config.NodeStatusEnum.FINISHED
+            and node.state.state == NodeStatusEnum.FINISHED
         ):
-            nwd = pathlib.Path("nodes", node.name)
+            nwd = pathlib.Path(NWD_PATH, node.name)
         else:
             try:
-                with node.state.fs.open(config.ZNTRACK_FILE_PATH) as f:
+                with node.state.fs.open(ZNTRACK_FILE_PATH) as f:
                     zntrack_config = json.load(f)
                 nwd = zntrack_config[node.name]["nwd"]
                 nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
             except (FileNotFoundError, KeyError):
-                nwd = pathlib.Path("nodes", node.name)
+                nwd = pathlib.Path(NWD_PATH, node.name)
+
+    if node.state.group is not None:
+        # strip the groups from node_name
+        to_replace = "_".join(node.state.group.name) + "_"
+        replacement = "/".join(node.state.group.name) + "/"
+        nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
+
     if mkdir:
         nwd.mkdir(parents=True, exist_ok=True)
     return nwd

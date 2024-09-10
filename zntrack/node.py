@@ -7,6 +7,7 @@ import typing_extensions as te
 import znfields
 import znflow
 
+from zntrack.group import Group
 from zntrack.state import NodeStatus
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
@@ -93,6 +94,7 @@ class Node(znflow.Node, znfields.Base):
             state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
             lazy_evaluation=lazy_evaluation,
             node=None,
+            group=Group.from_nwd(instance.nwd),
         ).to_dict()
 
         if not instance.state.lazy_evaluation:

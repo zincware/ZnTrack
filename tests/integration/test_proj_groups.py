@@ -5,6 +5,11 @@ import pytest
 import zntrack.examples
 
 
+class NodeInGroup(zntrack.Node):
+    def run(self):
+        assert self.state.group.name == ("MyGrp",)
+
+
 def test_groups_io(proj_path):
     project = zntrack.Project()
 
@@ -67,3 +72,16 @@ def test_nested_groups(proj_path):
         with pytest.raises(TypeError):
             with project.group("B"):
                 pass
+
+
+def test_node_in_group(proj_path):
+    project = zntrack.Project()
+    with project.group("MyGrp"):
+        n = NodeInGroup()
+
+    project.repro()
+    assert n.state.group.name == ("MyGrp",)
+
+
+if __name__ == "__main__":
+    test_groups_io(None)
