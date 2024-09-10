@@ -4,9 +4,10 @@ import typing as t
 import znflow
 import znjson
 
+from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
+
 from .node import Node
 from .utils import module_handler
-from zntrack.config import ZnTrackOptionEnum, ZNTRACK_OPTION
 
 
 class NodeDict(t.TypedDict):
@@ -99,4 +100,3 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
             return [(node.nwd / f"{attribute}.json").as_posix()]
         else:
             raise NotImplementedError("Unique currently only implemented for outs")
-

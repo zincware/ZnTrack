@@ -1,8 +1,8 @@
 import pandas as pd
 import pytest
-from zntrack.exceptions import InvalidOptionError
 
 import zntrack
+from zntrack.exceptions import InvalidOptionError
 
 
 class MyNode(zntrack.Node):
@@ -18,8 +18,10 @@ class MyNode(zntrack.Node):
 
 class NodeWrongAttr(zntrack.Node):
     metrics: dict = zntrack.metrics()
+
     def run(self):
         self.state.extend_plots("metrics", {"metric": 1})
+
 
 class MissingAttr(zntrack.Node):
     def run(self):
@@ -29,9 +31,11 @@ class MissingAttr(zntrack.Node):
 def test_extend_plots():
     MyNode().run()
 
+
 def test_extend_plots_wrong_attr():
     with pytest.raises(InvalidOptionError):
         NodeWrongAttr().run()
+
 
 def test_extend_plots_missing_attr():
     with pytest.raises(InvalidOptionError):

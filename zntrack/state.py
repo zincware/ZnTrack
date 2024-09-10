@@ -8,13 +8,18 @@ import typing as t
 import dvc.api
 import dvc.repo
 import dvc.stage.serialize
-
 from dvc.utils import dict_sha256
 
-from zntrack.config import NodeStatusEnum, ZNTRACK_LAZY_VALUE, NOT_AVAILABLE, ZNTRACK_OPTION, ZnTrackOptionEnum
-from zntrack.exceptions import NodeNotAvailableError, InvalidOptionError
-from zntrack.utils.import_handler import import_handler
+from zntrack.config import (
+    NOT_AVAILABLE,
+    ZNTRACK_LAZY_VALUE,
+    ZNTRACK_OPTION,
+    NodeStatusEnum,
+    ZnTrackOptionEnum,
+)
+from zntrack.exceptions import InvalidOptionError, NodeNotAvailableError
 from zntrack.plugins import ZnTrackPlugin
+from zntrack.utils.import_handler import import_handler
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -141,7 +146,9 @@ class NodeStatus:
                 if option_type == ZnTrackOptionEnum.PLOTS:
                     break
                 else:
-                    raise InvalidOptionError(f"Can not use self.{attribute} with type {option_type} for 'plots'.")
+                    raise InvalidOptionError(
+                        f"Can not use self.{attribute} with type {option_type} for 'plots'."
+                    )
         else:
             raise InvalidOptionError(f"Unable to find 'self.{attribute}' in {self.node}.")
 
@@ -157,7 +164,6 @@ class NodeStatus:
         setattr(self.node, attribute, df)
         for plugin in self.plugins.values():
             plugin.extend_plots(attribute, data, reference=df)
-
 
     def get_field(self, attribute: str) -> dataclasses.Field:
         fields = dataclasses.fields(self.node)
