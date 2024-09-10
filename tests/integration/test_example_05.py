@@ -1,9 +1,7 @@
-import os
 import typing as t
 
 import pytest
 
-# from zntrack import Node, zn
 import zntrack
 
 
@@ -45,9 +43,9 @@ def fix_empty_list() -> list:
 )
 def test_params(arg, proj_path):
     project = zntrack.Project()
-    with project: 
+    with project:
         node = CheckType(params=arg)
-    
+
     project.build()
 
     assert node.params == arg
