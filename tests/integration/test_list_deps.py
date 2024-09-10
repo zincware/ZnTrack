@@ -11,7 +11,7 @@ def test_list_deps(proj_path):
         node2 = zntrack.examples.ParamsToOuts(params=2, name="node2")
 
         data = [node1.outs, node2.outs]
-        node3 = zntrack.examples.SumNodeAttributes(data, shift=10)
+        node3 = zntrack.examples.SumNodeAttributes(inputs=data, shift=10)
 
     project.build()
 
