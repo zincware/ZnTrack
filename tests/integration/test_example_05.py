@@ -2,7 +2,6 @@ import typing as t
 
 import pytest
 
-# from zntrack import Node, zn
 import zntrack
 
 
