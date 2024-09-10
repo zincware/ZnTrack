@@ -1,10 +1,17 @@
 {
-    "NodeA": {
+    "NodeA1": {
         "nwd": {
             "_type": "pathlib.Path",
-            "value": "nodes/NodeA"
+            "value": "nodes/NodeA1"
         },
-        "name": "NodeA"
+        "name": "NodeA1"
+    },
+    "NodeA2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeA2"
+        },
+        "name": "NodeA2"
     },
     "NodeB": {
         "nwd": {
@@ -12,22 +19,41 @@
             "value": "nodes/NodeB"
         },
         "name": "NodeB",
-        "input": {
-            "_type": "znflow.Connection",
-            "value": {
-                "instance": {
-                    "_type": "zntrack.Node",
-                    "value": {
-                        "module": "test_dependencies",
-                        "name": "NodeA",
-                        "cls": "NodeA",
-                        "remote": null,
-                        "rev": null
-                    }
-                },
-                "attribute": "results",
-                "item": null
+        "input": [
+            {
+                "_type": "znflow.Connection",
+                "value": {
+                    "instance": {
+                        "_type": "zntrack.Node",
+                        "value": {
+                            "module": "test_dependencies",
+                            "name": "NodeA1",
+                            "cls": "NodeA1",
+                            "remote": null,
+                            "rev": null
+                        }
+                    },
+                    "attribute": "results",
+                    "item": null
+                }
+            },
+            {
+                "_type": "znflow.Connection",
+                "value": {
+                    "instance": {
+                        "_type": "zntrack.Node",
+                        "value": {
+                            "module": "test_dependencies",
+                            "name": "NodeA2",
+                            "cls": "NodeA2",
+                            "remote": null,
+                            "rev": null
+                        }
+                    },
+                    "attribute": "results",
+                    "item": null
+                }
             }
-        }
+        ]
     }
 }

@@ -8,7 +8,7 @@ import zntrack
 CWD = pathlib.Path(__file__).parent.resolve()
 
 
-class NodeA(zntrack.Node):
+class NodeA1(zntrack.Node):
     results: int = zntrack.outs()
 
     def run(self):
@@ -16,15 +16,14 @@ class NodeA(zntrack.Node):
 
 
 class NodeA2(zntrack.Node):
-    results: int = zntrack.outs()
-    _unique_output_ = True
+    results: int = zntrack.outs(independent=True)
 
     def run(self):
         pass
 
 
 class NodeB(zntrack.Node):
-    input: int = zntrack.deps()
+    input: list[int] = zntrack.deps()
 
     def run(self):
         pass
@@ -32,8 +31,9 @@ class NodeB(zntrack.Node):
 
 def test_deps(proj_path):
     with zntrack.Project() as project:
-        a = NodeA()
-        _ = NodeB(input=a.results)
+        a = NodeA1()
+        b = NodeA2()
+        _ = NodeB(input=[a.results, b.results])
 
     project.build()
 

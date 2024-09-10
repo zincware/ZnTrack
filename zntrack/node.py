@@ -28,7 +28,6 @@ class Node(znflow.Node, znfields.Base):
 
     name: str | None = None
 
-    _unique_output_ = False
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
 
     def __post_init__(self):

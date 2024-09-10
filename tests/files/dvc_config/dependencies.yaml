@@ -1,15 +1,24 @@
 stages:
-  NodeA:
-    cmd: zntrack run test_dependencies.NodeA --name NodeA
+  NodeA1:
+    cmd: zntrack run test_dependencies.NodeA1 --name NodeA1
     metrics:
-    - nodes/NodeA/node-meta.json:
+    - nodes/NodeA1/node-meta.json:
         cache: false
     outs:
-    - nodes/NodeA/results.json
+    - nodes/NodeA1/results.json
+  NodeA2:
+    cmd: zntrack run test_dependencies.NodeA2 --name NodeA2
+    metrics:
+    - nodes/NodeA2/node-meta.json:
+        cache: false
+    outs:
+    - nodes/NodeA2/results.json
   NodeB:
     cmd: zntrack run test_dependencies.NodeB --name NodeB
     deps:
-    - nodes/NodeA/node-meta.json
+    - nodes/NodeA1/results.json
+    - nodes/NodeA2/node-meta.json
+    - nodes/NodeA2/results.json
     metrics:
     - nodes/NodeB/node-meta.json:
         cache: false
