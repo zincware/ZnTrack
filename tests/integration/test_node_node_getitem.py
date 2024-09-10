@@ -58,13 +58,13 @@ def test_AddList_getitem(proj_path, eager):
 
     if eager:
         project.run()
+
+        assert create_list_a.output == list(range(10))
+        assert create_list_b.output == list(range(10))
+        assert add_list.output == 10  # 1 + 9
     else:
         with pytest.raises(znflow.exceptions.ConnectionAttributeError):
             project.repro(build=True)
-
-            assert create_list_a.output == list(range(10))
-            assert create_list_b.output == list(range(10))
-            assert add_list.output == 10  # 1 + 9
 
 
 @pytest.mark.parametrize("eager", [True, False])
@@ -76,10 +76,12 @@ def test_AddList_slice(proj_path, eager):
 
     if eager:
         project.run()
+
+        assert create_list_a.output == list(range(10))
+        assert create_list_b.output == list(range(10))
+        assert add_list.output == list(range(10))[::2] + list(range(10))[2:7]
     else:
         with pytest.raises(znflow.exceptions.ConnectionAttributeError):
             project.repro(build=True)
 
-            assert create_list_a.output == list(range(10))
-            assert create_list_b.output == list(range(10))
-            assert add_list.output == list(range(10))[::2] + list(range(10))[2:7]
+
