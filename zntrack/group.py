@@ -14,8 +14,8 @@ def _extract_group_from_nwd(path: pathlib.Path) -> tuple | None:
     parts = list(path.parts)
 
     # Check if the path starts with 'nodes'
-    if parts[0] != NWD_PATH:
-        raise ValueError("Path must start with 'nodes'")
+    if parts[0] != str(NWD_PATH):
+        raise ValueError(f"Path must start with 'nodes', found {parts}")
 
     # Check the length of the path to determine the output
     if len(parts) == 2:  # no groups
