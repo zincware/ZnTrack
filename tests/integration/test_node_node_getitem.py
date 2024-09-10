@@ -39,11 +39,10 @@ def test_AddList(proj_path, eager):
     assert add_list.a.attribute == "output"
     assert add_list.b.attribute == "output"
 
-    project.run(eager=eager)
-    # if not eager:
-    #     create_list_a.load()
-    #     create_list_b.load()
-    #     add_list.load()
+    if eager:
+        project.run()
+    else:
+        project.repro(build=True)
 
     assert create_list_a.output == list(range(10))
     assert create_list_b.output == list(range(10))
@@ -57,20 +56,15 @@ def test_AddList_getitem(proj_path, eager):
         create_list_b = CreateList(name="CreateListB")
         add_list = AddList(a=create_list_a.output[1], b=create_list_b.output[-1])
 
-    if not eager:
-        with pytest.raises(NotImplementedError):
-            # Currently not supported
-            project.run(eager=eager)
+    if eager:
+        project.run()
     else:
-        project.run(eager=eager)
-        # if not eager:
-        #     create_list_a.load()
-        #     create_list_b.load()
-        #     add_list.load()
+        with pytest.raises(znflow.exceptions.ConnectionAttributeError):
+            project.repro(build=True)
 
-        assert create_list_a.output == list(range(10))
-        assert create_list_b.output == list(range(10))
-        assert add_list.output == 10  # 1 + 9
+            assert create_list_a.output == list(range(10))
+            assert create_list_b.output == list(range(10))
+            assert add_list.output == 10  # 1 + 9
 
 
 @pytest.mark.parametrize("eager", [True, False])
@@ -80,17 +74,12 @@ def test_AddList_slice(proj_path, eager):
         create_list_b = CreateList(name="CreateListB")
         add_list = AddList(a=create_list_a.output[::2], b=create_list_b.output[2:7])
 
-    if not eager:
-        with pytest.raises(NotImplementedError):
-            # Currently not supported
-            project.run(eager=eager)
+    if eager:
+        project.run()
     else:
-        project.run(eager=eager)
-        if not eager:
-            create_list_a.load()
-            create_list_b.load()
-            add_list.load()
+        with pytest.raises(znflow.exceptions.ConnectionAttributeError):
+            project.repro(build=True)
 
-        assert create_list_a.output == list(range(10))
-        assert create_list_b.output == list(range(10))
-        assert add_list.output == list(range(10))[::2] + list(range(10))[2:7]
+            assert create_list_a.output == list(range(10))
+            assert create_list_b.output == list(range(10))
+            assert add_list.output == list(range(10))[::2] + list(range(10))[2:7]
