@@ -20,6 +20,7 @@ from zntrack.config import (
 from zntrack.exceptions import InvalidOptionError, NodeNotAvailableError
 from zntrack.plugins import ZnTrackPlugin
 from zntrack.utils.import_handler import import_handler
+from zntrack.group import Group
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -39,7 +40,7 @@ class NodeStatus:
     node: "Node|None" = dataclasses.field(
         default=None, repr=False, compare=False, hash=False
     )
-    group: tuple[str] | None = None
+    group: Group | None = None
     # TODO: move node name and nwd to here as well
 
     @property
