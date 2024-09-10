@@ -19,9 +19,8 @@ def test_numpy_params(proj_path):
     """Check that the dvc repro works"""
     project = zntrack.Project()
 
-    with pytest.raises(yaml.representer.RepresenterError):
-        with project:
-            ComputeA(inp=np.arange(5))
+    with project:
+        ComputeA(inp=np.arange(5))
 
-        project.build()
+    with pytest.raises(yaml.representer.RepresenterError):
         project.repro()

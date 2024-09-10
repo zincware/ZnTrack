@@ -69,6 +69,7 @@ def test_stage_io(proj_path):
 
     assert stage_io.deps == deps
     assert stage_io.param == 1
+    assert stage_io.name == "Node"
     project.build()
 
     assert stage_io.param == 1

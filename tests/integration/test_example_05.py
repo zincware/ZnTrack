@@ -43,8 +43,12 @@ def fix_empty_list() -> list:
 @pytest.mark.parametrize(
     "arg", ["fix_list", "fix_int", "fix_dict", "fix_empty_list"], indirect=True
 )
-def test_params(arg, tmp_path):
-    os.chdir(tmp_path)
+def test_params(arg, proj_path):
+    project = zntrack.Project()
+    with project: 
+        node = CheckType(params=arg)
+    
+    project.build()
 
-    node = CheckType(params=arg)
     assert node.params == arg
+    assert CheckType.from_rev().params == arg
