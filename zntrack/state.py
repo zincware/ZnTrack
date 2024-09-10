@@ -9,7 +9,6 @@ import dvc.api
 import dvc.repo
 import dvc.stage.serialize
 
-# import dvc.stage.serialize
 from dvc.utils import dict_sha256
 
 from zntrack.config import NodeStatusEnum, ZNTRACK_LAZY_VALUE, NOT_AVAILABLE, ZNTRACK_OPTION, ZnTrackOptionEnum
@@ -158,3 +157,12 @@ class NodeStatus:
         setattr(self.node, attribute, df)
         for plugin in self.plugins.values():
             plugin.extend_plots(attribute, data, reference=df)
+
+
+    def get_field(self, attribute: str) -> dataclasses.Field:
+        fields = dataclasses.fields(self.node)
+        for field in fields:
+            if field.name == attribute:
+                return field
+        else:
+            raise AttributeError(f"Unable to locate '{attribute}' in {self.node}.")

@@ -216,10 +216,10 @@ class DVCPlugin(ZnTrackPlugin):
                 paths = []
                 for con in content:
                     if isinstance(con, (znflow.Connection)):
-                        paths.extend(node_to_output_paths(con.instance))
+                        paths.extend(node_to_output_paths(con.instance, con.attribute))
                     elif isinstance(con, (znflow.CombinedConnections)):
                         for _con in con.connections:
-                            paths.extend(node_to_output_paths(_con.instance))
+                            paths.extend(node_to_output_paths(_con.instance, _con.attribute))
                 stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS_PATH:
                 content = [
