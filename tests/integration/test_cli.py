@@ -1,5 +1,5 @@
-
 import pytest
+import yaml
 from typer.testing import CliRunner
 
 import zntrack
@@ -85,14 +85,14 @@ def test_list_groups(proj_path, runner):
     }
 
     groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
-    # assert groups == true_groups
+    assert groups == true_groups
 
-    # result = runner.invoke(app, ["list", proj_path.as_posix()])
-    # # test stdout == yaml.dump of true_groups
-    # groups = yaml.safe_load(result.stdout)
-    # assert groups == true_groups
+    result = runner.invoke(app, ["list", proj_path.as_posix()])
+    # test stdout == yaml.dump of true_groups
+    groups = yaml.safe_load(result.stdout)
+    assert groups == true_groups
 
-    # assert result.exit_code == 0
+    assert result.exit_code == 0
 
 
 if __name__ == "__main__":
