@@ -189,7 +189,7 @@ class Node(znflow.Node, znfields.Base):
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
 
     def __init_subclass__(cls):
-        return dataclasses.dataclass(cls)
+        return dataclasses.dataclass(cls, kw_only=True)
 
     @property
     def nwd(self) -> pathlib.Path:
