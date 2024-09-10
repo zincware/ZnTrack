@@ -54,7 +54,7 @@ def test_groups_io(proj_path):
 
     with pytest.raises(AttributeError):
         b.state.group.name = "Hello"
-    
+
     with pytest.raises(AttributeError):
         b.state.group.nodes = []
 
