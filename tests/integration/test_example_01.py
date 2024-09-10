@@ -14,7 +14,6 @@ class StageIO(zntrack.Node):
 
     def run(self):
         """Actual computation"""
-
         with open(self.deps, "r") as f:
             file_content = f.readlines()
 
@@ -38,10 +37,7 @@ class StageAddition(zntrack.Node):
         Path(self.outs).write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
 
 
-@pytest.mark.xfail(
-    reason="Experiments not yet supported",
-    strict=True
-)
+@pytest.mark.xfail(reason="Experiments not yet supported", strict=True)
 def test_stage_addition(tmp_path_2):
     """Check that the dvc repro works"""
     project = zntrack.Project()
