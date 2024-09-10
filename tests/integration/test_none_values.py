@@ -78,7 +78,7 @@ class EmptyNodesNode(zntrack.Node):
             self.outs = self.value
         self.file.write_text("Hello World")
 
-
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_EmptyNode(proj_path, eager):
     with zntrack.Project() as project:

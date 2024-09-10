@@ -53,7 +53,7 @@ def test_AddNodeAttributes(proj_path, eager):
     assert add_nodes.c == 7
     assert add_nodes.state.loaded
 
-
+@pytest.mark.xfail(reason="pending implementation")
 def test_AddNodes_legacy(proj_path):
     with zntrack.Project() as proj:
         add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")

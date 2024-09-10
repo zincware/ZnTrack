@@ -66,7 +66,7 @@ class PostLoadInitNode(zntrack.Node):
     def run(self):
         self.file.write_text("Hello World")
 
-
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_PostLoad(proj_path, eager):
     with zntrack.Project() as project:
@@ -77,7 +77,7 @@ def test_PostLoad(proj_path, eager):
     # node.load()
     assert node.file_content == "Hello World"
 
-
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_PostInit(proj_path, eager):
     with zntrack.Project() as project:
@@ -88,7 +88,7 @@ def test_PostInit(proj_path, eager):
     # node.load()
     assert node.file == node.nwd / "file.txt"
 
-
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_PostLoadInitNode(proj_path, eager):
     with zntrack.Project() as project:

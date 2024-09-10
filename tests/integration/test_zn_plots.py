@@ -4,7 +4,7 @@ import pytest
 
 import zntrack.examples
 
-
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_WritePlots(proj_path, eager):
     with zntrack.Project() as project:

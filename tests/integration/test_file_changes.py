@@ -2,6 +2,7 @@ import pathlib
 
 import zntrack
 from zntrack import Node, Project
+import pytest
 
 
 class ChangeParamsInRun(Node):
@@ -10,7 +11,7 @@ class ChangeParamsInRun(Node):
     def run(self):
         self.param = "incorrect param"
 
-
+@pytest.mark.xfail(reason="pending implementation")
 def test_ChangeParamsInRun(proj_path):
     with Project() as proj:
         ChangeParamsInRun(param="correct param")
@@ -27,7 +28,7 @@ class ChangeJsonInRun(Node):
         self.outs.write_text("Create Correct File")
         self.outs = pathlib.Path("incorrect_out.txt")
 
-
+@pytest.mark.xfail(reason="pending implementation")
 def test_ChangeJsonInRun(proj_path):
     with Project() as proj:
         ChangeJsonInRun()

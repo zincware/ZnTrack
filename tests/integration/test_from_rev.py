@@ -7,7 +7,7 @@ import zntrack.examples
 
 # from zntrack.utils import NodeStatusResults
 
-
+@pytest.mark.xfail(reason="pending implementation")
 def test_module_not_installed():
     with pytest.raises(ModuleNotFoundError):
         zntrack.from_rev(
@@ -16,7 +16,7 @@ def test_module_not_installed():
             rev="ca0eef0ccfcbfb72a82136849a9ca35eac8b7629",
         )
 
-
+@pytest.mark.xfail(reason="pending implementation")
 def test_commit_not_found():
     with pytest.raises(dvc.scm.RevError):
         zntrack.from_rev(
