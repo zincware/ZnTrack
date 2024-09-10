@@ -38,6 +38,20 @@ def test_groups_io(proj_path):
     assert c.name == "A_AddOne_1"
     assert d.name == "A_B_AddOne"
 
+    assert len(b.state.group) == 2
+    assert a not in b.state.group
+    assert b in b.state.group
+    assert c in b.state.group
+    assert d not in b.state.group
+
+    assert b.state.group["A_AddOne"] == b
+
+    with pytest.raises(KeyError):
+        b.state.group["NotExisting"]
+
+    for node in d.state.group:
+        assert node == d
+
 
 def test_nested_groups(proj_path):
     # disabled from within znflow

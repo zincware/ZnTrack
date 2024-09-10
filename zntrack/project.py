@@ -45,9 +45,9 @@ class Project(znflow.DiGraph):
                 # we need to access the `state` attribute to initialize
                 # the property, so the `log.debug` is necessary!
                 log.debug(self.nodes[node_uuid]["value"].state)
-                self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
-                    Group.from_znflow_group(group)
-                )
+                self.nodes[node_uuid]["value"].__dict__["state"][
+                    "group"
+                ] = Group.from_znflow_group(group)
 
         # need to fix the node names
         all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]

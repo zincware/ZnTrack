@@ -21,10 +21,12 @@ class Group:
         """Iterate over the nodes in the group."""
         return iter(self.nodes)
 
-    def __getitem__(self, name: int) -> "Node":
+    def __getitem__(self, name: str) -> "Node":
         """Get the Node from the group."""
-        raise NotImplementedError
-        raise KeyError(f"Node {name} not in group {self.name}")
+        for node in self.nodes:
+            if node.name == name:
+                return node
+        raise KeyError(f"Node {name} not found.")
 
     def __len__(self) -> int:
         """Get the number of nodes in the group."""
