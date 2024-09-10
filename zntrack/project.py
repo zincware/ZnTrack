@@ -100,7 +100,9 @@ class Project(znflow.DiGraph):
 
         # TODO: update file or overwrite?
 
-    def repro(self):
+    def repro(self, build: bool = True):
+        if build:
+            self.build()
         subprocess.check_call(["dvc", "repro"])
 
     @contextlib.contextmanager
