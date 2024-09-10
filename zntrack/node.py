@@ -105,6 +105,7 @@ class Node(znflow.Node, znfields.Base):
 
     @property
     def state(self) -> NodeStatus:
+
         if "state" not in self.__dict__:
             self.__dict__["state"] = NodeStatus(
                 remote=".",
@@ -115,6 +116,8 @@ class Node(znflow.Node, znfields.Base):
                 node=None,
             ).to_dict()
 
+        if self.__dict__["state"]["state"] == NodeStatusEnum.CREATED:
+            pass
         return NodeStatus(**self.__dict__["state"], node=self)
 
     def update_run_count(self):

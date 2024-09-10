@@ -1,6 +1,7 @@
 import dvc.cli
 import pytest
 
+from zntrack.config import NodeStatusEnum
 import zntrack.examples
 
 
@@ -11,21 +12,21 @@ def test_AddNodes(proj_path, eager):
         add_numbers_b = zntrack.examples.AddNumbers(a=1, b=3, name="AddNumbersB")
         add_nodes = zntrack.examples.AddNodes(a=add_numbers_a, b=add_numbers_b)
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert add_numbers_b.state.state == NodeStatusEnum.CREATED
+    assert add_nodes.state.state == NodeStatusEnum.CREATED
 
-    project.run(eager=eager)
-    # if not eager:
-    #     add_numbers_a.load()
-    #     add_numbers_b.load()
-    #     add_nodes.load()
+    if eager:
+        project.run()
+    else:
+        project.repro(build=True)
+  
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
 @pytest.mark.parametrize("eager", [True, False])
@@ -37,21 +38,21 @@ def test_AddNodeAttributes(proj_path, eager):
             a=add_numbers_a.c, b=add_numbers_b.c
         )
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert add_numbers_b.state.state == NodeStatusEnum.CREATED
+    assert add_nodes.state.state == NodeStatusEnum.CREATED
 
-    project.run(eager=eager)
-    # if not eager:
-    #     add_numbers_a.load()
-    #     add_numbers_b.load()
-    #     add_nodes.load()
+    if eager:
+        project.run()
+    else:
+        project.repro(build=True)
+
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
 def test_AddNodes_legacy(proj_path):
@@ -64,21 +65,18 @@ def test_AddNodes_legacy(proj_path):
 
     proj.build()
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert add_numbers_b.state.state == NodeStatusEnum.CREATED
+    assert add_nodes.state.state == NodeStatusEnum.CREATED
 
     assert dvc.cli.main(["repro"]) == 0
 
-    # add_numbers_a.load()
-    # add_numbers_b.load()
-    # add_nodes.load()
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
 def test_AddNodeAttributes_legacy(proj_path):
@@ -89,21 +87,18 @@ def test_AddNodeAttributes_legacy(proj_path):
 
     proj.build()
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
+    assert not add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert not add_numbers_b.state.state == NodeStatusEnum.CREATED
+    assert not add_nodes.state.state == NodeStatusEnum.CREATED
 
     assert dvc.cli.main(["repro"]) == 0
 
-    # add_numbers_a.load()
-    # add_numbers_b.load()
-    # add_nodes.load()
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
 def test_OptionalDeps(proj_path):
@@ -113,10 +108,6 @@ def test_OptionalDeps(proj_path):
         add_value = zntrack.examples.OptionalDeps(value=add_numbers.c)
 
     proj.run()
-
-    # add_numbers.load()
-    # add_none.load()
-    # add_value.load()
 
     assert add_numbers.c == 3
     assert add_none.result == 0.0
