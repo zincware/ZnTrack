@@ -6,6 +6,7 @@ import git
 import pytest
 
 import zntrack.examples
+
 # from zntrack.project import Experiment
 # from zntrack.utils import config
 
@@ -352,19 +353,19 @@ def test_groups_nwd(tmp_path_2):
 
     assert node_1.nwd == pathlib.Path("nodes", node_1.name)
     assert node_2.nwd == pathlib.Path(
-        "nodes", "Group1", node_2.name.replace(f"Group1_", "")
+        "nodes", "Group1", node_2.name.replace("Group1_", "")
     )
     assert node_3.nwd == pathlib.Path(
-        "nodes", "CustomGroup", node_3.name.replace(f"CustomGroup_", "")
+        "nodes", "CustomGroup", node_3.name.replace("CustomGroup_", "")
     )
     # now load the Nodes and assert as well
 
     assert zntrack.from_rev(node_1).nwd == pathlib.Path("nodes", node_1.name)
     assert zntrack.from_rev(node_2).nwd == pathlib.Path(
-        "nodes", "Group1", node_2.name.replace(f"Group1_", "")
+        "nodes", "Group1", node_2.name.replace("Group1_", "")
     )
     assert zntrack.from_rev(node_3).nwd == pathlib.Path(
-        "nodes", "CustomGroup", node_3.name.replace(f"CustomGroup_", "")
+        "nodes", "CustomGroup", node_3.name.replace("CustomGroup_", "")
     )
 
     with open(config.files.zntrack) as f:
@@ -378,7 +379,7 @@ def test_groups_nwd(tmp_path_2):
     assert zntrack.from_rev(node_1).nwd == pathlib.Path("test")
     assert zntrack.from_rev(node_2).nwd == pathlib.Path("nodes", node_2.name)
     assert zntrack.from_rev(node_3).nwd == pathlib.Path(
-        "nodes", "CustomGroup", node_3.name.replace(f"CustomGroup_", "")
+        "nodes", "CustomGroup", node_3.name.replace("CustomGroup_", "")
     )
 
 

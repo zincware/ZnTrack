@@ -4,7 +4,7 @@ import typing as t
 import pytest
 
 import zntrack
-from zntrack import Node, Project, exceptions
+from zntrack import Node, Project
 
 
 class NodeViaParams(Node):

@@ -7,6 +7,7 @@ import zntrack
 
 # TODO UNCLEAR ERROR, __file__ atribute is not the same as the test file we want to collect
 
+
 class WriteToNWD(zntrack.Node):
     text: str = zntrack.params()
     file: pathlib.Path = zntrack.outs_path(zntrack.nwd / "test.txt")

@@ -1,8 +1,6 @@
-import pathlib
-import subprocess
 import typing as t
+
 import pytest
-import yaml
 
 import zntrack
 
