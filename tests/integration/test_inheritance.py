@@ -1,8 +1,9 @@
-import pytest
 import typing as t
 
-from zntrack import Node, Project
+import pytest
+
 import zntrack
+from zntrack import Node, Project
 
 
 class InputsOutputs(Node):
