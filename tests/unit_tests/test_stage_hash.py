@@ -27,10 +27,12 @@ class NodeWithMetricsAndPlots(zntrack.Node):
     metric: int = zntrack.metrics()
     plot: int = zntrack.plots()
 
+
 class NodeWithMetricsAndPlotsAndParams(zntrack.Node):
     metric: int = zntrack.metrics()
     plot: int = zntrack.plots()
     param: int = zntrack.params(default=1)
+
 
 # TODO: test outside DVC repo
 
