@@ -32,6 +32,7 @@ class ExampleNodeLst(Node):
     def run(self):
         self.outs = sum(p for p in self.params)
 
+
 @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_ExampleNode(proj_path, eager):
@@ -61,6 +62,7 @@ def test_ExampleNode(proj_path, eager):
 
         assert node.params1.name == "ExampleNode+params1"
         assert node.params2.name == "ExampleNode+params2"
+
 
 @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("git_only_repo", [True, False])
@@ -129,6 +131,7 @@ class ExampleNodeWithRandomNumberGen(Node):
 
     def run(self):
         self.outs = self.rnd.get_rnd()
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_znodes_with_random_number_gen(proj_path):

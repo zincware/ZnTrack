@@ -1,9 +1,11 @@
 """Tests for 'zntrack.deps'-field which can be used as both `zntrack.zn.deps` and `zntrack.zn.nodes`."""
 
-import zntrack.examples
 import pytest
 
+import zntrack.examples
+
 # TODO: change the parameters, rerun and see if it updates!
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_as_deps(proj_path):
@@ -41,6 +43,7 @@ def test_as_deps(proj_path):
     assert b.number == 10
     assert c.result == 15
 
+
 @pytest.mark.xfail(reason="pending implementation")
 def test_as_nodes(proj_path):
     """Test for 'zntrack.deps' acting as `zntrack.zn.nodes`-like field."""
@@ -72,6 +75,7 @@ def test_as_nodes(proj_path):
 
     # c.load()
     assert c.result == 15
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_mixed(proj_path):
@@ -111,6 +115,7 @@ def test_mixed(proj_path):
     assert b.number == 9
     assert c.result == 14
 
+
 @pytest.mark.xfail(reason="pending implementation")
 def test_named_parent(proj_path):
     project = zntrack.Project(automatic_node_names=True)
@@ -134,6 +139,7 @@ def test_named_parent(proj_path):
     # c.load()
     assert c.name == "c"
     assert c.result == 11
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_one_to_many(proj_path):
@@ -166,6 +172,7 @@ def test_one_to_many(proj_path):
 
     assert b.result == 5
     assert c.result == 5
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_one_to_many_params(proj_path):

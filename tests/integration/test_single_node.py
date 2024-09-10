@@ -6,6 +6,7 @@ import yaml
 
 import zntrack.examples
 
+
 @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNumbers(proj_path, eager):
@@ -19,6 +20,7 @@ def test_AddNumbers(proj_path, eager):
     #     add_numbers.load()
     assert add_numbers.c == 3
     assert add_numbers.state.loaded
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_AddNumbers_remove_params(proj_path):
@@ -38,6 +40,7 @@ def test_AddNumbers_remove_params(proj_path):
     # with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
     #     add_numbers.load()
 
+
 @pytest.mark.xfail(reason="pending implementation")
 def test_zntrack_from_rev(proj_path):
     with zntrack.Project() as project:
@@ -52,6 +55,7 @@ def test_zntrack_from_rev(proj_path):
     assert node.b == 2
     assert node.c == 3
     assert node.state.loaded
+
 
 @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
@@ -100,6 +104,7 @@ class NodeWithPostInit(zntrack.Node):
     def run(self) -> None:
         self.outs = self.params
 
+
 @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_NodeWithInit(proj_path, eager):
@@ -112,6 +117,7 @@ def test_NodeWithInit(proj_path, eager):
     node = NodeWithInit.from_rev()
     assert node.value == 42
     assert node.outs == 10
+
 
 @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
@@ -174,6 +180,7 @@ class NoOutsWritten(zntrack.Node):
 
 #     node = NoOutsWritten.from_rev()
 #     assert node.outs is None
+
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_outs_in_init(proj_path):
