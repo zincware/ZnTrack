@@ -2,6 +2,7 @@ import contextlib
 import json
 import logging
 import pathlib
+import subprocess
 
 import tqdm
 import yaml
@@ -105,6 +106,11 @@ class Project(znflow.DiGraph):
         config.ZNTRACK_FILE_PATH.write_text(json.dumps(zntrack_dict, indent=4))
 
         # TODO: update file or overwrite?
+
+    def repro(self, build: bool = True):
+        if build:
+            self.build()
+        subprocess.check_call(["dvc", "repro"])
 
     @contextlib.contextmanager
     def group(self, *names: str):
