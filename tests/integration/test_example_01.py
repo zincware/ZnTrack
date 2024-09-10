@@ -22,7 +22,7 @@ class StageIO(zntrack.Node):
 
 
 class StageAddition(zntrack.Node):
-    n_1: int = zntrack.params()  # seems optional now
+    n_1: int = zntrack.params()
     n_2: int = zntrack.params()
 
     sum: int = zntrack.outs()
