@@ -70,6 +70,13 @@ def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
                 nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
             except (FileNotFoundError, KeyError):
                 nwd = pathlib.Path("nodes", node.name)
+
+    if node.state.group is not None:
+        # strip the groups from node_name
+        to_replace = "_".join(node.state.group.name) + "_"
+        replacement = "/".join(node.state.group.name) + "/"
+        nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
+
     if mkdir:
         nwd.mkdir(parents=True, exist_ok=True)
     return nwd
