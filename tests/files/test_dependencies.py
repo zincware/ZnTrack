@@ -52,6 +52,16 @@ class NodeC(zntrack.Node):
         pass
 
 
+class NodeWithProperty(zntrack.Node):
+
+    @property
+    def results(self):
+        return 1
+
+    def run(self):
+        pass
+
+
 def test_deps(proj_path):
     with zntrack.Project() as project:
         a = NodeA1(
@@ -81,6 +91,11 @@ def test_deps(proj_path):
         _ = NodeC(deps=b.outs_path)
         _ = NodeC(deps=b.metrics_paths)
         _ = NodeC(deps=b.plots_path)
+
+    with project.group("property"):
+        nwp = NodeWithProperty()
+        _ = NodeC(deps=nwp.results)
+        _ = NodeC(deps=nwp)
 
     project.build()
 
