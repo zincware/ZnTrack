@@ -17,7 +17,7 @@ def get_attr_always_list(obj: t.Any, attr: str) -> list:
     return value
 
 
-def load_env_vars(name: str):
+def load_env_vars(name: str | None = None) -> None:
     # TODO: this should also use DVCFileSystem!
     if ENV_FILE_PATH.exists():
         env = yaml.safe_load(ENV_FILE_PATH.read_text())
