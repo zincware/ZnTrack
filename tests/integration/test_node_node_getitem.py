@@ -63,7 +63,7 @@ def test_AddList_getitem(proj_path, eager):
         assert create_list_b.output == list(range(10))
         assert add_list.output == 10  # 1 + 9
     else:
-        with pytest.raises(znflow.exceptions.ConnectionAttributeError):
+        with pytest.raises(NotImplementedError):
             project.repro(build=True)
 
 
@@ -81,5 +81,5 @@ def test_AddList_slice(proj_path, eager):
         assert create_list_b.output == list(range(10))
         assert add_list.output == list(range(10))[::2] + list(range(10))[2:7]
     else:
-        with pytest.raises(znflow.exceptions.ConnectionAttributeError):
+        with pytest.raises(NotImplementedError):
             project.repro(build=True)
