@@ -115,14 +115,8 @@ class Node(znflow.Node, znfields.Base):
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
-    def update_run_count(self):
-        # try:
-        self.__dict__["state"]["run_count"] += 1
-        # except KeyError:
-        #     self.__dict__["state"] = NodeStatus(
-        #         run_count=1,
-        #         state=NodeStatusEnum.RUNNING,
-        #     ).to_dict()
+    def increment_run_count(self):
+        self.__dict__["state"]["run_count"] = self.state.run_count + 1
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )
