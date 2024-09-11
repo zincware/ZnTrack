@@ -1,3 +1,4 @@
+import contextlib
 import dataclasses
 import json
 import pathlib
@@ -78,22 +79,24 @@ class Node(znflow.Node, znfields.Base):
         lazy_values["name"] = name
         instance = cls(**lazy_values)
 
-        try:
-            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
-                content = json.load(f)
-                run_count = content["run_count"]
-        except FileNotFoundError:
-            run_count = 0
-
         # TODO: check if the node is finished or not.
         instance.__dict__["state"] = NodeStatus(
             remote=remote,
             rev=rev,
-            run_count=run_count,
             state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
             lazy_evaluation=lazy_evaluation,
             group=Group.from_nwd(instance.nwd),
         ).to_dict()
+
+        with contextlib.suppress(FileNotFoundError):
+            # need to update run_count after the state is set
+            # TODO: do we want to set the UUID as well?
+            # TODO: test that run_count is correct, when using from_rev from another
+            #  commit
+            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
+                content = json.load(f)
+                run_count = content["run_count"]
+                instance.__dict__["state"]["run_count"] = run_count
 
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
