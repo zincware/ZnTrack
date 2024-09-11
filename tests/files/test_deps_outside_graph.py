@@ -23,7 +23,7 @@ def test_deps_outside_graph(proj_path):
     # TODO: assert that node.name when setting can not include a "+" character
     # The thermostat does not appear in the dvc.yaml, but only in `params:MD+thermostat`
     # how to handle deps going into the thermostat node?
-    
+
     assert thermostat.name == "MD+thermostat"
     assert md.name == "MD"
     assert md.thermostat.name == "MD+thermostat"
