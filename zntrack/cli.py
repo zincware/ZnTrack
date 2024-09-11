@@ -11,6 +11,7 @@ import typer
 import yaml
 
 from zntrack import Node, utils
+from zntrack.config import EXP_INFO_PATH
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
 
@@ -110,3 +111,4 @@ def finalize():
     plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
     for plugin in plugins:
         plugin.finalize()
+    EXP_INFO_PATH.unlink(missing_ok=True)

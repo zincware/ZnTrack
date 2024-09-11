@@ -4,11 +4,41 @@ import abc
 import dataclasses
 import typing as t
 
-from zntrack.config import NOT_AVAILABLE, PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_LAZY_VALUE
+import yaml
+
+from zntrack.config import (
+    EXP_INFO_PATH,
+    NOT_AVAILABLE,
+    PLUGIN_EMPTY_RETRUN_VALUE,
+    ZNTRACK_LAZY_VALUE,
+)
 from zntrack.exceptions import NodeNotAvailableError
 
 if t.TYPE_CHECKING:
     from zntrack import Node
+
+
+def _gitignore_file(path: str) -> bool:
+    """Add a path to the .gitignore file if it is not already there."""
+    # TODO: move to misc
+    with open(".gitignore", "r") as f:
+        for line in f:
+            if line.strip() == path:
+                return False
+    with open(".gitignore", "a") as f:
+        f.write(path + "\n")
+    return True
+
+
+def get_exp_info() -> dict:
+    if EXP_INFO_PATH.exists():
+        return yaml.safe_load(EXP_INFO_PATH.read_text())
+    return {}
+
+
+def set_exp_info(data: dict) -> None:
+    EXP_INFO_PATH.write_text(yaml.safe_dump(data))
+    _gitignore_file(EXP_INFO_PATH.as_posix())
 
 
 # TODO: have a dataclass for the base metrics, like hash, name, module, ...
@@ -17,6 +47,7 @@ class ZnTrackPlugin(abc.ABC):
     """ABC for writing zntrack plugins."""
 
     node: "Node"
+    _continue_on_error_ = False
 
     @abc.abstractmethod
     def getter(self, field: dataclasses.Field) -> t.Any:
@@ -29,7 +60,7 @@ class ZnTrackPlugin(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def convert_to_zntrack_json(self) -> t.Any: ...
+    def convert_to_zntrack_json(self, graph) -> t.Any: ...
 
     @abc.abstractmethod
     def convert_to_dvc_yaml(self) -> t.Any: ...

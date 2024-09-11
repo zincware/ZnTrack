@@ -7,10 +7,16 @@ from typing import Any
 import dvc.repo
 import git
 import mlflow
+import yaml
 from mlflow.utils import mlflow_tags
 
-from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
-from zntrack.plugins import ZnTrackPlugin
+from zntrack.config import (
+    EXP_INFO_PATH,
+    PLUGIN_EMPTY_RETRUN_VALUE,
+    ZNTRACK_OPTION,
+    ZnTrackOptionEnum,
+)
+from zntrack.plugins import ZnTrackPlugin, get_exp_info, set_exp_info
 from zntrack.utils.misc import load_env_vars
 
 # TODO: if this plugin fails, there should only be a warning, not an error
@@ -21,32 +27,26 @@ from zntrack.utils.misc import load_env_vars
 
 @dataclass
 class MLFlowPlugin(ZnTrackPlugin):
+
+    _continue_on_error_ = True
+
     def __post_init__(self):
         load_env_vars("")
-
-    def gitignore_file(self, path: str) -> bool:
-        """Add a path to the .gitignore file if it is not already there."""
-        with open(".gitignore", "r") as f:
-            for line in f:
-                if line.strip() == path:
-                    return False
-        with open(".gitignore", "a") as f:
-            f.write(path + "\n")
-        return True
 
     @contextlib.contextmanager
     def get_mlflow_parent_run(self):
         # Can I get rid of this by using cwd and machine_id?
-        self.gitignore_file(".mlflow_parent_run_id")
-        if pathlib.Path(".mlflow_parent_run_id").exists():
-            parent_run_id = pathlib.Path(".mlflow_parent_run_id").read_text().strip()
+
+        exp_info = get_exp_info()
+        try:
+            parent_run_id = exp_info["parent_run_id"]
             with mlflow.start_run(run_id=parent_run_id):
                 yield
-        else:
+        except KeyError:
             with mlflow.start_run() as run:
                 parent_run_id = run.info.run_id
-                mlflow.set_tag("git_remote", pathlib.Path.cwd().as_posix())
-                pathlib.Path(".mlflow_parent_run_id").write_text(parent_run_id)
+                exp_info["parent_run_id"] = parent_run_id
+                set_exp_info(exp_info)
                 yield
 
     def get_run_info(self) -> dict:
@@ -93,6 +93,9 @@ class MLFlowPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: Field) -> None:
+        exp_info = get_exp_info()
+        tags = exp_info.get("tags", {})
+
         with self.get_mlflow_child_run():
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 mlflow.log_param(field.name, getattr(self.node, field.name))
@@ -100,8 +103,10 @@ class MLFlowPlugin(ZnTrackPlugin):
                 metrics = getattr(self.node, field.name)
                 for key, value in metrics.items():
                     mlflow.log_metric(f"{field.name}.{key}", value)
-                    # TODO: plots
-                    # TODO: define tags for all experiments in a parent run
+            for tag_key, tag_value in tags.items():
+                mlflow.set_tag(tag_key, tag_value)
+                # TODO: plots
+                # TODO: define tags for all experiments in a parent run
 
     def convert_to_dvc_yaml(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
@@ -109,7 +114,12 @@ class MLFlowPlugin(ZnTrackPlugin):
     def convert_to_params_yaml(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
-    def convert_to_zntrack_json(self):
+    def convert_to_zntrack_json(self, graph):
+        exp_info = get_exp_info()
+        if len(graph.tags) > 0:
+            exp_info["tags"] = graph.tags
+            set_exp_info(exp_info)
+
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def extend_plots(self, attribute: str, data: dict, reference):
@@ -135,9 +145,12 @@ class MLFlowPlugin(ZnTrackPlugin):
             raise NotImplementedError("rev is not supported yet")
         load_env_vars("")
 
-        if not pathlib.Path(".mlflow_parent_run_id").exists():
-            raise ValueError("Unable to find '.mlflow_parent_run_id' file")
+        exp_info = get_exp_info()
+        if "parent_run_id" not in exp_info:
+            raise ValueError("Unable to find parent run id")
         import zntrack
+
+        tags = exp_info.get("tags", {})
 
         repo = git.Repo(".")
         if repo.is_dirty():
@@ -232,4 +245,5 @@ class MLFlowPlugin(ZnTrackPlugin):
                             "original_dvc_stage_hash", node.state.get_stage_hash()
                         )
                         mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
-        pathlib.Path(".mlflow_parent_run_id").unlink()
+                        for tag_key, tag_value in tags.items():
+                            mlflow.set_tag(tag_key, tag_value)

@@ -2,6 +2,7 @@ import dataclasses
 import json
 import pathlib
 import typing as t
+import warnings
 
 import typing_extensions as te
 import znfields
@@ -48,7 +49,16 @@ class Node(znflow.Node, znfields.Base):
                     raise ValueError(
                         f"Field '{field.name}' is not set. Please set it before saving."
                     )
-                plugin.save(field)
+                try:
+                    plugin.save(field)
+                except Exception as err:  # noqa: E722
+                    if plugin._continue_on_error_:
+                        warnings.warn(
+                            f"Plugin {plugin.__class__.__name__} failed to save field {field.name}."
+                        )
+                    else:
+                        raise err
+
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
 

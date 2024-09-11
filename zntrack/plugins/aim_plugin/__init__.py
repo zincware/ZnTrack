@@ -8,18 +8,23 @@ import dvc.repo
 import git
 
 from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
-from zntrack.plugins import ZnTrackPlugin
+from zntrack.plugins import ZnTrackPlugin, get_exp_info
 
 if t.TYPE_CHECKING:
     pass
 
 
 class AIMPlugin(ZnTrackPlugin):
+
+    _continue_on_error_ = True
+
     def getter(self, field: dataclasses.Field) -> t.Any:
         # The AIM plugin relies on others, e.g. DVCPlugin for loading/saving data
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
+        exp_info = get_exp_info()
+        tags = exp_info.get("tags", {})
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
             run = self.get_aim_run()
             run[field.name] = getattr(self.node, field.name)
@@ -31,8 +36,11 @@ class AIMPlugin(ZnTrackPlugin):
             for key, value in getattr(self.node, field.name).items():
                 run.track(value, name=f"{field.name}.{key}")
 
-            # TODO: run.finalize_run() needs to be called once everything is tracked
-            # might need another plugin callback.
+        if field.name == "name":
+            # every node has this field once
+            run = self.get_aim_run()
+            for tag_name, tag_value in tags.items():
+                run.add_tag(f"{tag_name}={tag_value}")
 
     def get_aim_run(self, path: str = ".") -> aim.Run:
         uid = self.node.state.get_stage_hash()
@@ -66,7 +74,7 @@ class AIMPlugin(ZnTrackPlugin):
     def convert_to_params_yaml(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
-    def convert_to_zntrack_json(self):
+    def convert_to_zntrack_json(self, graph):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def extend_plots(self, attribute: str, data: dict, reference):

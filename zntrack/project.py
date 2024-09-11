@@ -10,6 +10,7 @@ import znflow
 
 from zntrack.config import NWD_PATH
 from zntrack.group import Group
+from zntrack.utils.misc import load_env_vars
 
 from . import config
 from .deployment import ZnTrackDeployment
@@ -19,10 +20,17 @@ log = logging.getLogger(__name__)
 
 class Project(znflow.DiGraph):
     def __init__(
-        self, *args, disable=False, immutable_nodes=True, deployment=None, **kwargs
+        self,
+        *args,
+        disable=False,
+        immutable_nodes=True,
+        deployment=None,
+        tags: dict | None = None,
+        **kwargs,
     ):
         if deployment is None:
             deployment = ZnTrackDeployment()
+        self.tags = tags or {}
         super().__init__(
             *args,
             disable=disable,
@@ -80,6 +88,7 @@ class Project(znflow.DiGraph):
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": {}}
         zntrack_dict = {}
+        load_env_vars()
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
             for plugin in node.state.plugins.values():
@@ -95,7 +104,7 @@ class Project(znflow.DiGraph):
                     if len(value["plots"]) > 0:
                         dvc_dict["plots"][node.name] = value["plots"]
                 if (
-                    value := plugin.convert_to_zntrack_json()
+                    value := plugin.convert_to_zntrack_json(graph=self)
                 ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
                     zntrack_dict[node.name] = value
 

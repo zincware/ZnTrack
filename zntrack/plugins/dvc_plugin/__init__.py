@@ -240,7 +240,7 @@ class DVCPlugin(ZnTrackPlugin):
 
         return {"stages": stages, "plots": plots}
 
-    def convert_to_zntrack_json(self) -> dict | object:
+    def convert_to_zntrack_json(self, graph) -> dict | object:
         data = {
             "nwd": self.node.nwd,
             "name": self.node.name,
