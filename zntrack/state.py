@@ -1,6 +1,5 @@
 import contextlib
 import dataclasses
-import os
 import pathlib
 import tempfile
 import typing as t
@@ -22,12 +21,31 @@ from zntrack.config import (
 from zntrack.exceptions import InvalidOptionError, NodeNotAvailableError
 from zntrack.group import Group
 from zntrack.plugins import ZnTrackPlugin
-from zntrack.utils.import_handler import import_handler
 
 if t.TYPE_CHECKING:
     from zntrack import Node
 
 PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
+
+
+# def _plugin_factory(node: "Node") -> dict:
+#     plugins_paths = os.environ.get(
+#         "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+#     )
+#     plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
+
+#     return {plugin.__name__: plugin(node) for plugin in plugins}
+
+
+# @property
+# def plugins(self) -> dict:
+#     """Get the plugins of the node."""
+#     plugins_paths = os.environ.get(
+#         "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+#     )
+#     plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
+
+#     return {plugin.__name__: plugin(self.node) for plugin in plugins}
 
 
 @dataclasses.dataclass(frozen=True)
@@ -41,6 +59,7 @@ class NodeStatus:
     node: "Node|None" = dataclasses.field(
         default=None, repr=False, compare=False, hash=False
     )
+    plugins: dict = dataclasses.field(default_factory=dict, repr=False, compare=False)
     group: Group | None = None
     # TODO: move node name and nwd to here as well
 
@@ -120,16 +139,6 @@ class NodeStatus:
             k: v for k, v in stage_lock.items() if k in ["cmd", "deps", "params"]
         }
         return dict_sha256(filtered_lock)
-
-    @property
-    def plugins(self) -> dict:
-        """Get the plugins of the node."""
-        plugins_paths = os.environ.get(
-            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
-        )
-        plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
-
-        return {plugin.__name__: plugin(self.node) for plugin in plugins}
 
     def to_dict(self) -> dict:
         """Convert the NodeStatus to a dictionary."""

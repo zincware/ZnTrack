@@ -88,6 +88,18 @@ class Node(znflow.Node, znfields.Base):
             group=Group.from_nwd(instance.nwd),
         ).to_dict()
 
+        import os
+
+        from zntrack.utils.import_handler import import_handler
+
+        plugins_paths = os.environ.get(
+            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+        )
+        plugins = [import_handler(p) for p in plugins_paths.split(",")]
+        instance.__dict__["state"]["plugins"] = {
+            plugin.__name__: plugin(instance) for plugin in plugins
+        }
+
         with contextlib.suppress(FileNotFoundError):
             # need to update run_count after the state is set
             # TODO: do we want to set the UUID as well?
@@ -108,17 +120,28 @@ class Node(znflow.Node, znfields.Base):
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
             self.__dict__["state"] = NodeStatus().to_dict()
+            import os
+
+            from zntrack.utils.import_handler import import_handler
+
+            plugins_paths = os.environ.get(
+                "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+            )
+            plugins = [import_handler(p) for p in plugins_paths.split(",")]
+            self.__dict__["state"]["plugins"] = {
+                plugin.__name__: plugin(self) for plugin in plugins
+            }
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
     def update_run_count(self):
-        try:
-            self.__dict__["state"]["run_count"] += 1
-        except KeyError:
-            self.__dict__["state"] = NodeStatus(
-                run_count=1,
-                state=NodeStatusEnum.RUNNING,
-            ).to_dict()
+        # try:
+        self.__dict__["state"]["run_count"] += 1
+        # except KeyError:
+        #     self.__dict__["state"] = NodeStatus(
+        #         run_count=1,
+        #         state=NodeStatusEnum.RUNNING,
+        #     ).to_dict()
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )
