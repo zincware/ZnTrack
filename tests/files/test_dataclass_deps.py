@@ -15,7 +15,7 @@ class Thermostat:
 
 
 class MD(zntrack.Node):
-    thermostat: Thermostat = zntrack.deps()
+    thermostat: Thermostat | list[Thermostat] = zntrack.deps()
     steps: int = zntrack.params()
 
 
@@ -24,6 +24,11 @@ def test_deps_outside_graph(proj_path):
 
     with zntrack.Project() as project:
         md = MD(thermostat=thermostat, steps=100)
+
+    with project.group("multiple_deps"):
+        t1 = Thermostat(temperature=300)
+        t2 = Thermostat(temperature=400)
+        md2 = MD(thermostat=[t1, t2], steps=100)
 
     project.build()
 

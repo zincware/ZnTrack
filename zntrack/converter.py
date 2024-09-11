@@ -191,4 +191,8 @@ class DataclassConverter(znjson.ConverterBase):
 
     def __eq__(self, other) -> bool:
         # TODO: this should not trigger for nodes!
-        return dataclasses.is_dataclass(other)
+        if dataclasses.is_dataclass(other) and not isinstance(
+            other, (Node, znflow.Connection, znflow.CombinedConnections)
+        ):
+            return True
+        return False

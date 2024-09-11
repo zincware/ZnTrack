@@ -27,6 +27,9 @@ from zntrack.converter import (
     node_to_output_paths,
 )
 from zntrack.exceptions import NodeNotAvailableError
+
+# if t.TYPE_CHECKING:
+from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, base_getter
 from zntrack.utils.misc import (
     TempPathLoader,
@@ -34,9 +37,6 @@ from zntrack.utils.misc import (
     sort_and_deduplicate,
 )
 from zntrack.utils.node_wd import NWDReplaceHandler
-
-if t.TYPE_CHECKING:
-    from zntrack import Node
 
 
 def _outs_save_func(self: "Node", name: str):
@@ -151,9 +151,11 @@ class DVCPlugin(ZnTrackPlugin):
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
-                # TODO: handle iterables
+                #     # TODO: handle iterables
                 content = getattr(self.node, field.name)
-                if dataclasses.is_dataclass(content):
+                if dataclasses.is_dataclass(content) and not isinstance(
+                    content, (Node, znflow.Connection, znflow.CombinedConnections)
+                ):
                     data[field.name] = dataclasses.asdict(content)
         if len(data) > 0:
             return data
@@ -244,7 +246,8 @@ class DVCPlugin(ZnTrackPlugin):
                             paths.extend(
                                 node_to_output_paths(_con.instance, _con.attribute)
                             )
-                stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
+                if len(paths) > 0:
+                    stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS_PATH:
                 content = [
                     pathlib.Path(c).as_posix()
