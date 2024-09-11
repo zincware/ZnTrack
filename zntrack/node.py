@@ -1,3 +1,4 @@
+import contextlib
 import dataclasses
 import json
 import pathlib
@@ -10,6 +11,7 @@ import znflow
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
+from zntrack.utils.misc import get_plugins_from_env
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.node_wd import get_nwd
@@ -73,7 +75,7 @@ class Node(znflow.Node, znfields.Base):
     def from_rev(
         cls: t.Type[T],
         name: str | None = None,
-        remote: str | None = ".",
+        remote: str | None = None,
         rev: str | None = None,
         running: bool = False,
         lazy_evaluation: bool = True,
@@ -88,23 +90,26 @@ class Node(znflow.Node, znfields.Base):
         lazy_values["name"] = name
         instance = cls(**lazy_values)
 
-        try:
-            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
-                content = json.load(f)
-                run_count = content["run_count"]
-        except FileNotFoundError:
-            run_count = 0
-
         # TODO: check if the node is finished or not.
         instance.__dict__["state"] = NodeStatus(
             remote=remote,
             rev=rev,
-            run_count=run_count,
             state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
             lazy_evaluation=lazy_evaluation,
-            node=None,
             group=Group.from_nwd(instance.nwd),
         ).to_dict()
+
+        instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
+
+        with contextlib.suppress(FileNotFoundError):
+            # need to update run_count after the state is set
+            # TODO: do we want to set the UUID as well?
+            # TODO: test that run_count is correct, when using from_rev from another
+            #  commit
+            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
+                content = json.load(f)
+                run_count = content["run_count"]
+                instance.__dict__["state"]["run_count"] = run_count
 
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
@@ -115,29 +120,13 @@ class Node(znflow.Node, znfields.Base):
     @property
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
-            self.__dict__["state"] = NodeStatus(
-                remote=".",
-                rev=None,
-                run_count=0,
-                state=NodeStatusEnum.CREATED,
-                lazy_evaluation=True,
-                node=None,
-            ).to_dict()
+            self.__dict__["state"] = NodeStatus().to_dict()
+            self.__dict__["state"]["plugins"] = get_plugins_from_env(self)
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
-    def update_run_count(self):
-        try:
-            self.__dict__["state"]["run_count"] += 1
-        except KeyError:
-            self.__dict__["state"] = NodeStatus(
-                remote=".",
-                rev=None,
-                run_count=1,
-                state=NodeStatusEnum.RUNNING,
-                lazy_evaluation=True,
-                node=None,
-            ).to_dict()
+    def increment_run_count(self):
+        self.__dict__["state"]["run_count"] = self.state.run_count + 1
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )

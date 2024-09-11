@@ -102,6 +102,8 @@ class CombinedConnectionsConverter(znjson.ConverterBase):
 def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
     """Get all output paths for a node."""
     # TODO: this should be a part of the DVCPlugin!
+    if not isinstance(node, Node):
+        raise ValueError(f"Expected a Node object, got {type(node)}")
     if attribute is None:
         fields = dataclasses.fields(node)
     else:

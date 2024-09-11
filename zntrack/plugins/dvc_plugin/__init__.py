@@ -216,9 +216,17 @@ class DVCPlugin(ZnTrackPlugin):
                 paths = []
                 for con in content:
                     if isinstance(con, (znflow.Connection)):
+                        if con.item is not None:
+                            raise NotImplementedError(
+                                "znflow.Connection getitem is not supported yet."
+                            )
                         paths.extend(node_to_output_paths(con.instance, con.attribute))
                     elif isinstance(con, (znflow.CombinedConnections)):
                         for _con in con.connections:
+                            if con.item is not None:
+                                raise NotImplementedError(
+                                    "znflow.Connection getitem is not supported yet."
+                                )
                             paths.extend(
                                 node_to_output_paths(_con.instance, _con.attribute)
                             )
