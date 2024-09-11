@@ -69,7 +69,6 @@ def _deps_getter(self: "Node", name: str):
     with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
         content = json.load(f)[self.name][name]
         # TODO: Ensure deps are loaded from the correct revision
-        # TODO: if we create a dataclas, we also need to read from params.yaml
         content = znjson.loads(
             json.dumps(content),
             cls=znjson.ZnDecoder.from_converters(
@@ -82,9 +81,19 @@ def _deps_getter(self: "Node", name: str):
                 add_default=True,
             ),
         )
-        # TODO: use handler
         if isinstance(content, converter.DataclassContainer):
             content = content.get_with_params(self.name, name)
+        if isinstance(content, list):
+            new_content = []
+            idx = 0
+            for val in content:
+                if isinstance(val, converter.DataclassContainer):
+                    new_content.append(val.get_with_params(self.name, name, idx))
+                    idx += 1
+                else:
+                    new_content.append(val)
+            content = new_content
+
         content = znflow.handler.UpdateConnectors()(content)
 
         self.__dict__[name] = content
@@ -145,8 +154,20 @@ class DVCPlugin(ZnTrackPlugin):
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
-                #     # TODO: handle iterables
                 content = getattr(self.node, field.name)
+                if isinstance(content, (list, tuple)):
+                    new_content = []
+                    for val in content:
+                        if dataclasses.is_dataclass(val) and not isinstance(
+                            val, (Node, znflow.Connection, znflow.CombinedConnections)
+                        ):
+                            new_content.append(dataclasses.asdict(val))
+                        else:
+                            pass
+                    if len(new_content) > 0:
+                        data[field.name] = {
+                            f"part_{idx}": val for idx, val in enumerate(new_content)
+                        }
                 if dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):

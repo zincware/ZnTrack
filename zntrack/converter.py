@@ -22,8 +22,10 @@ class DataclassContainer:
     def __init__(self, cls):
         self.cls = cls
 
-    def get_with_params(self, node_name, attr_name):
+    def get_with_params(self, node_name, attr_name, index: int | None = None):
         all_params = yaml.safe_load(PARAMS_FILE_PATH.read_text())
+        if index is not None:
+            return self.cls(**all_params[node_name][attr_name][f"part_{index}"])
         return self.cls(**all_params[node_name][attr_name])
 
 
@@ -175,7 +177,6 @@ class DataclassConverter(znjson.ConverterBase):
         """Convert the znflow.Connection object to dict."""
         module = module_handler(obj)
         cls = obj.__class__.__name__
-        # TODO: values need to come from the params.yaml file
 
         return {
             "module": module,
@@ -186,11 +187,9 @@ class DataclassConverter(znjson.ConverterBase):
         """Create znflow.Connection object from dict."""
         module = importlib.import_module(value["module"])
         cls = getattr(module, value["cls"])
-        # TODO: use some sort of container object and in the getter check how to fill the values
         return DataclassContainer(cls)
 
     def __eq__(self, other) -> bool:
-        # TODO: this should not trigger for nodes!
         if dataclasses.is_dataclass(other) and not isinstance(
             other, (Node, znflow.Connection, znflow.CombinedConnections)
         ):

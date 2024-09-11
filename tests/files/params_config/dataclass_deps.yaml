@@ -2,3 +2,12 @@ MD:
   steps: 100
   thermostat:
     temperature: 300
+multiple_deps_MD:
+  steps: 100
+  thermostat:
+    part_0:
+      temperature: 300
+    part_1:
+      temperature: 400
+multiple_deps_MLThermostat:
+  temp: 300
