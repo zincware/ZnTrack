@@ -31,6 +31,7 @@ class Project(znflow.DiGraph):
         if deployment is None:
             deployment = ZnTrackDeployment()
         self.tags = tags or {}
+        load_env_vars()
         super().__init__(
             *args,
             disable=disable,
@@ -88,7 +89,6 @@ class Project(znflow.DiGraph):
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": {}}
         zntrack_dict = {}
-        load_env_vars()
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
             for plugin in node.state.plugins.values():

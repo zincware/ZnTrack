@@ -8,7 +8,7 @@ import dvc.repo
 import git
 
 from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
-from zntrack.plugins import ZnTrackPlugin, get_exp_info
+from zntrack.plugins import ZnTrackPlugin, get_exp_info, set_exp_info
 
 if t.TYPE_CHECKING:
     pass
@@ -82,6 +82,11 @@ class AIMPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def convert_to_zntrack_json(self, graph):
+        exp_info = get_exp_info()
+        if len(graph.tags) > 0:
+            exp_info["tags"] = graph.tags
+            set_exp_info(exp_info)
+
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def extend_plots(self, attribute: str, data: dict, reference):

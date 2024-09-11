@@ -250,3 +250,7 @@ class MLFlowPlugin(ZnTrackPlugin):
                         mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
                         for tag_key, tag_value in tags.items():
                             mlflow.set_tag(tag_key, tag_value)
+
+        # remove the parent run id exp_info
+        exp_info.pop("parent_run_id")
+        set_exp_info(exp_info)
