@@ -10,7 +10,7 @@ from zntrack.utils.import_handler import import_handler
 from ..config import ENV_FILE_PATH
 
 
-def _get_plugins(self):
+def get_plugins_from_env(self):
     plugins_paths = os.environ.get(
         "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
     )

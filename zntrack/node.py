@@ -10,7 +10,7 @@ import znflow
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
-from zntrack.utils.misc import _get_plugins
+from zntrack.utils.misc import get_plugins_from_env
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.node_wd import get_nwd
@@ -89,7 +89,7 @@ class Node(znflow.Node, znfields.Base):
             group=Group.from_nwd(instance.nwd),
         ).to_dict()
 
-        instance.__dict__["state"]["plugins"] = _get_plugins(instance)
+        instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
 
         with contextlib.suppress(FileNotFoundError):
             # need to update run_count after the state is set
@@ -111,7 +111,7 @@ class Node(znflow.Node, znfields.Base):
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
             self.__dict__["state"] = NodeStatus().to_dict()
-            self.__dict__["state"]["plugins"] = _get_plugins(self)
+            self.__dict__["state"]["plugins"] = get_plugins_from_env(self)
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
