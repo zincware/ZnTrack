@@ -39,7 +39,7 @@ class NodeStatus:
     node: "Node|None" = dataclasses.field(
         default=None, repr=False, compare=False, hash=False
     )
-    plugins: dict = dataclasses.field(default_factory=dict, repr=False, compare=False)
+    plugins: dict = dataclasses.field(default_factory=dict, compare=False)
     group: Group | None = None
     # TODO: move node name and nwd to here as well
 
