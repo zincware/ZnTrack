@@ -1,6 +1,8 @@
 import json
 import pathlib
+import typing as t
 
+import pandas as pd
 import yaml
 
 import zntrack
@@ -8,23 +10,43 @@ import zntrack
 CWD = pathlib.Path(__file__).parent.resolve()
 
 
-class NodeA(zntrack.Node):
+class NodeA1(zntrack.Node):
+    metrics_paths: list[pathlib.Path] = zntrack.metrics_path()
+    plots_path: list[pathlib.Path] = zntrack.plots_path()
+    outs_path: pathlib.Path = zntrack.outs_path(zntrack.nwd / "my_output.txt")
+
     results: int = zntrack.outs()
+    metrics: dict = zntrack.metrics()
+    plots: pd.DataFrame = zntrack.plots()
 
     def run(self):
         pass
 
 
 class NodeA2(zntrack.Node):
-    results: int = zntrack.outs()
-    _unique_output_ = True
+    outs_path: pathlib.Path = zntrack.outs_path(
+        zntrack.nwd / "my_output.txt", independent=True
+    )
+    metrics_paths: list[pathlib.Path] = zntrack.metrics_path(independent=True)
+    plots_path: list[pathlib.Path] = zntrack.plots_path(independent=True)
+
+    results: int = zntrack.outs(independent=True)
+    metrics: dict = zntrack.metrics(independent=True)
+    plots: pd.DataFrame = zntrack.plots(independent=True)
 
     def run(self):
         pass
 
 
 class NodeB(zntrack.Node):
-    input: int = zntrack.deps()
+    input: list[int] = zntrack.deps()
+
+    def run(self):
+        pass
+
+
+class NodeC(zntrack.Node):
+    deps: zntrack.Node | t.Any = zntrack.deps()
 
     def run(self):
         pass
@@ -32,8 +54,33 @@ class NodeB(zntrack.Node):
 
 def test_deps(proj_path):
     with zntrack.Project() as project:
-        a = NodeA()
-        _ = NodeB(input=a.results)
+        a = NodeA1(
+            metrics_paths=[zntrack.nwd / "a.json", zntrack.nwd / "b.json"],
+            plots_path=[zntrack.nwd / "p1.csv", zntrack.nwd / "p2.csv"],
+        )
+        b = NodeA2(
+            metrics_paths=[zntrack.nwd / "a.json", zntrack.nwd / "b.json"],
+            plots_path=[zntrack.nwd / "p1.csv", zntrack.nwd / "p2.csv"],
+        )
+        _ = NodeB(input=[a.results, b.results])
+
+    with project.group("dependent"):
+        _ = NodeC(deps=a)
+        _ = NodeC(deps=a.results)
+        _ = NodeC(deps=a.metrics)
+        _ = NodeC(deps=a.plots)
+        _ = NodeC(deps=a.outs_path)
+        _ = NodeC(deps=a.metrics_paths)
+        _ = NodeC(deps=a.plots_path)
+
+    with project.group("independent"):
+        _ = NodeC(deps=b)
+        _ = NodeC(deps=b.results)
+        _ = NodeC(deps=b.metrics)
+        _ = NodeC(deps=b.plots)
+        _ = NodeC(deps=b.outs_path)
+        _ = NodeC(deps=b.metrics_paths)
+        _ = NodeC(deps=b.plots_path)
 
     project.build()
 

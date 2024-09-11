@@ -16,8 +16,8 @@ stages:
   NodeB:
     cmd: zntrack run test_combined_dependencies.NodeB --name NodeB
     deps:
-    - nodes/NodeA/node-meta.json
-    - nodes/NodeA_1/node-meta.json
+    - nodes/NodeA/results.json
+    - nodes/NodeA_1/results.json
     metrics:
     - nodes/NodeB/node-meta.json:
         cache: false

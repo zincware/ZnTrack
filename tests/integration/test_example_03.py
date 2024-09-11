@@ -6,7 +6,6 @@ class HasNumber(zntrack.Node):
 
 
 class CreateNumbers(HasNumber):
-
     def run(self):
         self.number = 42
 
