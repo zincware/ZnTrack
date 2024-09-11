@@ -2,6 +2,7 @@ import dataclasses
 
 import dvc.api
 import pytest
+from fsspec.implementations.local import LocalFileSystem
 
 import zntrack
 from zntrack.config import NodeStatusEnum
@@ -27,6 +28,10 @@ def test_state_get(proj_path):
     assert n.name == "MyNode"
     assert n.state.name == "MyNode"
 
+    assert isinstance(n.state.fs, LocalFileSystem)
+
+    n = n.from_rev(remote=".")  # fake a remote by using the current directory
+    assert n.state.remote == "."
     assert isinstance(n.state.fs, dvc.api.DVCFileSystem)
 
 
