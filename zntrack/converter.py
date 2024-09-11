@@ -108,7 +108,7 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         try:
             fields = [node.state.get_field(attribute)]
         except AttributeError:
-            # if you e.g. pass a property, we can not 
+            # if you e.g. pass a property, we can not
             # determine what data is used and need
             # to assume all fields are used.
             # TODO: tests
