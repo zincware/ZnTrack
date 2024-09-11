@@ -7,7 +7,7 @@ multiple_deps_MD:
   thermostat:
     part_0:
       temperature: 300
-    part_1:
+    part_2:
       temperature: 400
 multiple_deps_MLThermostat:
   temp: 300

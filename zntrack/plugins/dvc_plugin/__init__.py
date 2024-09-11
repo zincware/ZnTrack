@@ -85,11 +85,9 @@ def _deps_getter(self: "Node", name: str):
             content = content.get_with_params(self.name, name)
         if isinstance(content, list):
             new_content = []
-            idx = 0
-            for val in content:
+            for idx, val in enumerate(content):
                 if isinstance(val, converter.DataclassContainer):
                     new_content.append(val.get_with_params(self.name, name, idx))
-                    idx += 1
                 else:
                     new_content.append(val)
             content = new_content
@@ -156,18 +154,16 @@ class DVCPlugin(ZnTrackPlugin):
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
                 content = getattr(self.node, field.name)
                 if isinstance(content, (list, tuple)):
-                    new_content = []
-                    for val in content:
+                    new_content = {}
+                    for idx, val in enumerate(content):
                         if dataclasses.is_dataclass(val) and not isinstance(
                             val, (Node, znflow.Connection, znflow.CombinedConnections)
                         ):
-                            new_content.append(dataclasses.asdict(val))
+                            new_content[f"part_{idx}"] = dataclasses.asdict(val)
                         else:
                             pass
                     if len(new_content) > 0:
-                        data[field.name] = {
-                            f"part_{idx}": val for idx, val in enumerate(new_content)
-                        }
+                        data[field.name] = new_content
                 if dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
