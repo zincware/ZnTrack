@@ -165,3 +165,22 @@ stages:
     metrics:
     - nodes/independent/NodeC_6/node-meta.json:
         cache: false
+  property_NodeC:
+    cmd: zntrack run test_dependencies.NodeC --name property_NodeC
+    deps:
+    - nodes/property/NodeWithProperty/node-meta.json
+    metrics:
+    - nodes/property/NodeC/node-meta.json:
+        cache: false
+  property_NodeC_1:
+    cmd: zntrack run test_dependencies.NodeC --name property_NodeC_1
+    deps:
+    - nodes/property/NodeWithProperty/node-meta.json
+    metrics:
+    - nodes/property/NodeC_1/node-meta.json:
+        cache: false
+  property_NodeWithProperty:
+    cmd: zntrack run test_dependencies.NodeWithProperty --name property_NodeWithProperty
+    metrics:
+    - nodes/property/NodeWithProperty/node-meta.json:
+        cache: false

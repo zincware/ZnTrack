@@ -144,9 +144,8 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         elif option_type == ZnTrackOptionEnum.METRICS_PATH:
             paths.extend(_enforce_str_list(getattr(node, field.name)))
 
-        if len(paths) == 0:
-            raise ValueError(
-                f"Unable to determine outputs for '{node.name}.{field.name}'."
-            )
+    if len(paths) == 0:
+        # for nodes with no outputs, we rely on 'node-meta.json'
+        paths.append((node.nwd / "node-meta.json").as_posix())
 
     return paths
