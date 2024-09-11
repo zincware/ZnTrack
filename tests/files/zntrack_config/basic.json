@@ -4,7 +4,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/MyNode"
         },
-        "name": "MyNode",
         "parameter_path": "parameter.yaml",
         "deps_path": "deps.yaml",
         "deps2_paths": [

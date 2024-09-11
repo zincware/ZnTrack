@@ -4,7 +4,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/NodeA1"
         },
-        "name": "NodeA1",
         "metrics_paths": [
             {
                 "_type": "pathlib.Path",
@@ -35,7 +34,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/NodeA2"
         },
-        "name": "NodeA2",
         "outs_path": {
             "_type": "pathlib.Path",
             "value": "$nwd$/my_output.txt"
@@ -66,7 +64,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/NodeB"
         },
-        "name": "NodeB",
         "input": [
             {
                 "_type": "znflow.Connection",
@@ -109,7 +106,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/dependent/NodeC"
         },
-        "name": "dependent_NodeC",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -133,7 +129,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/dependent/NodeC_1"
         },
-        "name": "dependent_NodeC_1",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -157,7 +152,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/dependent/NodeC_2"
         },
-        "name": "dependent_NodeC_2",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -181,7 +175,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/dependent/NodeC_3"
         },
-        "name": "dependent_NodeC_3",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -205,7 +198,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/dependent/NodeC_4"
         },
-        "name": "dependent_NodeC_4",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -229,7 +221,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/dependent/NodeC_5"
         },
-        "name": "dependent_NodeC_5",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -253,7 +244,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/dependent/NodeC_6"
         },
-        "name": "dependent_NodeC_6",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -277,7 +267,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/independent/NodeC"
         },
-        "name": "independent_NodeC",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -301,7 +290,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/independent/NodeC_1"
         },
-        "name": "independent_NodeC_1",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -325,7 +313,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/independent/NodeC_2"
         },
-        "name": "independent_NodeC_2",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -349,7 +336,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/independent/NodeC_3"
         },
-        "name": "independent_NodeC_3",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -373,7 +359,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/independent/NodeC_4"
         },
-        "name": "independent_NodeC_4",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -397,7 +382,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/independent/NodeC_5"
         },
-        "name": "independent_NodeC_5",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -421,7 +405,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/independent/NodeC_6"
         },
-        "name": "independent_NodeC_6",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -444,15 +427,13 @@
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/property/NodeWithProperty"
-        },
-        "name": "property_NodeWithProperty"
+        }
     },
     "property_NodeC": {
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/property/NodeC"
         },
-        "name": "property_NodeC",
         "deps": {
             "_type": "znflow.Connection",
             "value": {
@@ -476,7 +457,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/property/NodeC_1"
         },
-        "name": "property_NodeC_1",
         "deps": {
             "_type": "znflow.Connection",
             "value": {

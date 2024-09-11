@@ -254,7 +254,6 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_zntrack_json(self) -> dict | object:
         data = {
             "nwd": self.node.nwd,
-            "name": self.node.name,
         }
         for field in dataclasses.fields(self.node):
             if field.metadata.get(ZNTRACK_OPTION) in [
