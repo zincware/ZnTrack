@@ -32,8 +32,8 @@ PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
-    remote: str | None
-    rev: str | None
+    remote: str | None = None
+    rev: str | None = None
     run_count: int = 0
     state: NodeStatusEnum = NodeStatusEnum.CREATED
     lazy_evaluation: bool = True

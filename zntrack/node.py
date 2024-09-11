@@ -92,7 +92,6 @@ class Node(znflow.Node, znfields.Base):
             run_count=run_count,
             state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
             lazy_evaluation=lazy_evaluation,
-            node=None,
             group=Group.from_nwd(instance.nwd),
         ).to_dict()
 
@@ -105,14 +104,7 @@ class Node(znflow.Node, znfields.Base):
     @property
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
-            self.__dict__["state"] = NodeStatus(
-                remote=None,
-                rev=None,
-                run_count=0,
-                state=NodeStatusEnum.CREATED,
-                lazy_evaluation=True,
-                node=None,
-            ).to_dict()
+            self.__dict__["state"] = NodeStatus().to_dict()
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
@@ -121,12 +113,8 @@ class Node(znflow.Node, znfields.Base):
             self.__dict__["state"]["run_count"] += 1
         except KeyError:
             self.__dict__["state"] = NodeStatus(
-                remote=None,
-                rev=None,
                 run_count=1,
                 state=NodeStatusEnum.RUNNING,
-                lazy_evaluation=True,
-                node=None,
             ).to_dict()
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
