@@ -28,26 +28,6 @@ if t.TYPE_CHECKING:
 PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
 
 
-# def _plugin_factory(node: "Node") -> dict:
-#     plugins_paths = os.environ.get(
-#         "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
-#     )
-#     plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
-
-#     return {plugin.__name__: plugin(node) for plugin in plugins}
-
-
-# @property
-# def plugins(self) -> dict:
-#     """Get the plugins of the node."""
-#     plugins_paths = os.environ.get(
-#         "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
-#     )
-#     plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
-
-#     return {plugin.__name__: plugin(self.node) for plugin in plugins}
-
-
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
     remote: str | None = None

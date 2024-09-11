@@ -10,6 +10,7 @@ import znflow
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
+from zntrack.utils.misc import _get_plugins
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.node_wd import get_nwd
@@ -88,17 +89,7 @@ class Node(znflow.Node, znfields.Base):
             group=Group.from_nwd(instance.nwd),
         ).to_dict()
 
-        import os
-
-        from zntrack.utils.import_handler import import_handler
-
-        plugins_paths = os.environ.get(
-            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
-        )
-        plugins = [import_handler(p) for p in plugins_paths.split(",")]
-        instance.__dict__["state"]["plugins"] = {
-            plugin.__name__: plugin(instance) for plugin in plugins
-        }
+        instance.__dict__["state"]["plugins"] = _get_plugins(instance)
 
         with contextlib.suppress(FileNotFoundError):
             # need to update run_count after the state is set
@@ -120,17 +111,7 @@ class Node(znflow.Node, znfields.Base):
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
             self.__dict__["state"] = NodeStatus().to_dict()
-            import os
-
-            from zntrack.utils.import_handler import import_handler
-
-            plugins_paths = os.environ.get(
-                "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
-            )
-            plugins = [import_handler(p) for p in plugins_paths.split(",")]
-            self.__dict__["state"]["plugins"] = {
-                plugin.__name__: plugin(self) for plugin in plugins
-            }
+            self.__dict__["state"]["plugins"] = _get_plugins(self)
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
