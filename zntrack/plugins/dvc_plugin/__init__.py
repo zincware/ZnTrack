@@ -20,12 +20,6 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
-from zntrack.converter import (
-    CombinedConnectionsConverter,
-    ConnectionConverter,
-    NodeConverter,
-    node_to_output_paths,
-)
 from zntrack.exceptions import NodeNotAvailableError
 
 # if t.TYPE_CHECKING:
@@ -80,9 +74,9 @@ def _deps_getter(self: "Node", name: str):
             json.dumps(content),
             cls=znjson.ZnDecoder.from_converters(
                 [
-                    NodeConverter,
-                    ConnectionConverter,
-                    CombinedConnectionsConverter,
+                    converter.NodeConverter,
+                    converter.ConnectionConverter,
+                    converter.CombinedConnectionsConverter,
                     converter.DataclassConverter,
                 ],
                 add_default=True,
@@ -162,7 +156,7 @@ class DVCPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def convert_to_dvc_yaml(self) -> dict | object:
-        node_dict = NodeConverter().encode(self.node)
+        node_dict = converter.NodeConverter().encode(self.node)
 
         stages = {
             "cmd": f"zntrack run {node_dict['module']}.{node_dict['cls']} --name {node_dict['name']}",
@@ -236,7 +230,9 @@ class DVCPlugin(ZnTrackPlugin):
                             raise NotImplementedError(
                                 "znflow.Connection getitem is not supported yet."
                             )
-                        paths.extend(node_to_output_paths(con.instance, con.attribute))
+                        paths.extend(
+                            converter.node_to_output_paths(con.instance, con.attribute)
+                        )
                     elif isinstance(con, (znflow.CombinedConnections)):
                         for _con in con.connections:
                             if con.item is not None:
@@ -244,7 +240,9 @@ class DVCPlugin(ZnTrackPlugin):
                                     "znflow.Connection getitem is not supported yet."
                                 )
                             paths.extend(
-                                node_to_output_paths(_con.instance, _con.attribute)
+                                converter.node_to_output_paths(
+                                    _con.instance, _con.attribute
+                                )
                             )
                 if len(paths) > 0:
                     stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
