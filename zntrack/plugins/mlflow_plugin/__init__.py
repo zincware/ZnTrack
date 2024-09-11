@@ -173,7 +173,10 @@ class MLFlowPlugin(ZnTrackPlugin):
         node_names = []
         with dvc.repo.Repo(rev=rev) as repo:
             for stage in repo.index.stages:
-                node_names.append(stage.name)
+                with contextlib.suppress(AttributeError):
+                    # only PipelineStages have a name attribute
+                    #  we do not need data stages
+                    node_names.append(stage.name)
 
         for node_name in node_names:
             node = zntrack.from_rev(node_name, rev=rev)
