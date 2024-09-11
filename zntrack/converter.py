@@ -3,10 +3,12 @@ import importlib
 import pathlib
 import typing as t
 
+import yaml
 import znflow
 import znjson
 
 from zntrack.config import (
+    PARAMS_FILE_PATH,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
@@ -14,6 +16,15 @@ from zntrack.config import (
 
 from .node import Node
 from .utils import module_handler
+
+
+class DataclassContainer:
+    def __init__(self, cls):
+        self.cls = cls
+
+    def get_with_params(self, node_name, attr_name):
+        all_params = yaml.safe_load(PARAMS_FILE_PATH.read_text())
+        return self.cls(**all_params[node_name][attr_name])
 
 
 def _enforce_str_list(content) -> list[str]:
@@ -151,3 +162,32 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         paths.append((node.nwd / "node-meta.json").as_posix())
 
     return paths
+
+
+class DataclassConverter(znjson.ConverterBase):
+    """Convert a znflow.Connection object to dict and back."""
+
+    level = 20
+    representation = "@dataclasses.dataclass"
+    instance = object
+
+    def encode(self, obj: object) -> dict:
+        """Convert the znflow.Connection object to dict."""
+        module = module_handler(obj)
+        cls = obj.__class__.__name__
+        # TODO: values need to come from the params.yaml file
+
+        return {
+            "module": module,
+            "cls": cls,
+        }
+
+    def decode(self, value: dict) -> DataclassContainer:
+        """Create znflow.Connection object from dict."""
+        module = importlib.import_module(value["module"])
+        cls = getattr(module, value["cls"])
+        # TODO: use some sort of container object and in the getter check how to fill the values
+        return DataclassContainer(cls)
+
+    def __eq__(self, other) -> bool:
+        return dataclasses.is_dataclass(other)

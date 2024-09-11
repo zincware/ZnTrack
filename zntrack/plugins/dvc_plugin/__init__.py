@@ -75,13 +75,22 @@ def _deps_getter(self: "Node", name: str):
     with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
         content = json.load(f)[self.name][name]
         # TODO: Ensure deps are loaded from the correct revision
+        # TODO: if we create a dataclas, we also need to read from params.yaml
         content = znjson.loads(
             json.dumps(content),
             cls=znjson.ZnDecoder.from_converters(
-                [NodeConverter, ConnectionConverter, CombinedConnectionsConverter],
+                [
+                    NodeConverter,
+                    ConnectionConverter,
+                    CombinedConnectionsConverter,
+                    converter.DataclassConverter,
+                ],
                 add_default=True,
             ),
         )
+        # TODO: use handler
+        if isinstance(content, converter.DataclassContainer):
+            content = content.get_with_params(self.name, name)
         content = znflow.handler.UpdateConnectors()(content)
 
         self.__dict__[name] = content
@@ -141,6 +150,11 @@ class DVCPlugin(ZnTrackPlugin):
         for field in dataclasses.fields(self.node):
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
+            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+                # TODO: handle iterables
+                content = getattr(self.node, field.name)
+                if dataclasses.is_dataclass(content):
+                    data[field.name] = dataclasses.asdict(content)
         if len(data) > 0:
             return data
         return PLUGIN_EMPTY_RETRUN_VALUE
@@ -273,6 +287,7 @@ class DVCPlugin(ZnTrackPlugin):
                     converter.NodeConverter,
                     converter.CombinedConnectionsConverter,
                     znjson.converter.PathlibConverter,
+                    converter.DataclassConverter,
                 ],
                 add_default=False,
             ),
