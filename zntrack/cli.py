@@ -10,6 +10,9 @@ import typer
 import yaml
 
 from zntrack import Node, utils
+from zntrack.utils.import_handler import import_handler
+from zntrack.state import PLUGIN_LIST
+import os
 
 app = typer.Typer()
 
@@ -95,3 +98,15 @@ def list(
     """List all Nodes in the Project."""
     groups, _ = utils.cli.get_groups(remote, rev)
     print(yaml.dump(groups))
+
+
+@app.command()
+def finalize():
+    """Post-commit step for plugin integration."""
+    utils.misc.load_env_vars()
+    plugins_paths = os.environ.get(
+            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+        )
+    plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
+    for plugin in plugins:
+        plugin.finalize()

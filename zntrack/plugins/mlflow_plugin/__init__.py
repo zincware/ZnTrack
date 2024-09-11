@@ -182,8 +182,14 @@ class MLFlowPlugin(ZnTrackPlugin):
         print(f"found {len(child_runs)} child runs in exp: '{active_experiment_id}'")
         for node_name in node_names:
             if node_name in child_runs["tags.dvc_stage_name"].values:
-                pass
-                # TODO: set git commit message and hash and remote.
+                node = zntrack.from_rev(node_name, rev=rev)
+                with node.state.plugins[
+                    "MLFlowPlugin"
+                ].get_mlflow_child_run():
+                    mlflow.set_tag("git_hash", commit_hash)
+                    mlflow.set_tag("git_commit_message", commit_message)
+                    if remote_url is not None:
+                        mlflow.set_tag("git_remote", remote_url)
             else:
                 print(f"missing {node_name}")
                 node = zntrack.from_rev(node_name, rev=rev)
