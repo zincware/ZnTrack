@@ -53,8 +53,8 @@ class AIMPlugin(ZnTrackPlugin):
             run["git_remote"] = pathlib.Path.cwd().as_posix()
             run["git_hash"] = None
             run["git_commit_message"] = None
-            run["dvc_node"] = f"{self.node.__module__}.{self.node.__class__.__name__}"
-            run["dvc_name"] = self.node.name
+            run["zntrack_node"] = f"{self.node.__module__}.{self.node.__class__.__name__}"
+            run["dvc_stage_name"] = self.node.name
             # add a tag for the node
             run.add_tag(self.node.__class__.__name__)
 
@@ -68,6 +68,12 @@ class AIMPlugin(ZnTrackPlugin):
 
     def convert_to_zntrack_json(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
+
+    def extend_plots(self, attribute: str, data: dict, reference):
+        step = len(reference)
+        run = self.get_aim_run()
+        for key, value in data.items():
+            run.track(value, name=f"{attribute}.{key}", step=step)
 
     @classmethod
     def finalize(cls, rev: str | None = None, path_to_aim: str = "."):
@@ -109,7 +115,10 @@ class AIMPlugin(ZnTrackPlugin):
         node_names = []
         with dvc.repo.Repo(rev=rev) as repo:
             for stage in repo.index.stages:
-                node_names.append(stage.name)
+                with contextlib.suppress(AttributeError):
+                    # only PipelineStages have a name attribute
+                    # we do not need e.g. data stages
+                    node_names.append(stage.name)
         for node_name in node_names:
             node = zntrack.from_rev(node_name, rev=rev)
             plugin = cls(node)

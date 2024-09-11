@@ -1,3 +1,4 @@
+import contextlib
 import importlib
 import pathlib
 import sys
@@ -8,9 +9,11 @@ import dvc.repo
 def from_rev(name: str, remote: str | None = None, rev: str | None = None):
     with dvc.repo.Repo(remote=remote, rev=rev) as repo:
         for stage in repo.index.stages:
-            if stage.name == name:
-                cmd = stage.cmd
-                break
+            with contextlib.suppress(AttributeError):
+                # only PipelineStages have a name attribute
+                if stage.name == name:
+                    cmd = stage.cmd
+                    break
         else:
             raise ValueError(f"Stage {name} not found in {repo}")
 

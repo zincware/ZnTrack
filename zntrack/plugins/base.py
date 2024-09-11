@@ -11,6 +11,7 @@ if t.TYPE_CHECKING:
     from zntrack import Node
 
 
+# TODO: have a dataclass for the base metrics, like hash, name, module, ...
 @dataclasses.dataclass
 class ZnTrackPlugin(abc.ABC):
     """ABC for writing zntrack plugins."""
@@ -38,6 +39,10 @@ class ZnTrackPlugin(abc.ABC):
 
     def extend_plots(self, attribute: str, data: dict, reference):
         return PLUGIN_EMPTY_RETRUN_VALUE
+
+    @classmethod
+    def finalize(cls, rev: str | None = None, path_to_aim: str = ".") -> None:
+        return
 
 
 def base_getter(self: "Node", name: str, func: t.Callable):
