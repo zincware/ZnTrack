@@ -35,29 +35,36 @@ class AIMPlugin(ZnTrackPlugin):
             # might need another plugin callback.
 
     def get_aim_run(self, path: str = ".") -> aim.Run:
-        uid = self.node.state.get_stage_hash()
-        repo = aim.Repo(path=path)
-        run_hash = None
+        try:
+            return self.aim_run
+        except AttributeError:
 
-        with contextlib.suppress(Exception):
-            # if aim throws some error, we assuem the run does not exist
-            # and we create a new one with `run_hash = None`
-            for run_metrics_col in repo.query_metrics(
-                f"run.dvc_stage_hash == '{uid}'"
-            ).iter():
-                run_hash = run_metrics_col.run.hash
-                break
-        run = aim.Run(run_hash=run_hash, repo=repo)
-        if run_hash is None:
-            run["dvc_stage_hash"] = uid
-            run["git_remote"] = pathlib.Path.cwd().as_posix()
-            run["git_hash"] = None
-            run["git_commit_message"] = None
-            run["zntrack_node"] = f"{self.node.__module__}.{self.node.__class__.__name__}"
-            run["dvc_stage_name"] = self.node.name
-            # add a tag for the node
-            run.add_tag(self.node.__class__.__name__)
+            uid = self.node.state.get_stage_hash()
+            repo = aim.Repo(path=path)
+            run_hash = None
 
+            with contextlib.suppress(Exception):
+                # if aim throws some error, we assuem the run does not exist
+                # and we create a new one with `run_hash = None`
+                for run_metrics_col in repo.query_metrics(
+                    f"run.dvc_stage_hash == '{uid}'"
+                ).iter():
+                    run_hash = run_metrics_col.run.hash
+                    break
+            run = aim.Run(run_hash=run_hash, repo=repo)
+            if run_hash is None:
+                run["dvc_stage_hash"] = uid
+                run["git_remote"] = pathlib.Path.cwd().as_posix()
+                run["git_hash"] = None
+                run["git_commit_message"] = None
+                run["zntrack_node"] = (
+                    f"{self.node.__module__}.{self.node.__class__.__name__}"
+                )
+                run["dvc_stage_name"] = self.node.name
+                # add a tag for the node
+                run.add_tag(self.node.__class__.__name__)
+
+            self.aim_run = run
         return run
 
     def convert_to_dvc_yaml(self):
