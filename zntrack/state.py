@@ -53,9 +53,6 @@ class NodeStatus:
         """Get the file system of the Node."""
         if self.remote is None and self.rev is None:
             return LocalFileSystem()
-        raise ValueError(
-            f"Remote '{self.remote}' and rev '{self.rev}' are not supported."
-        )
         return dvc.api.DVCFileSystem(
             url=self.remote,
             rev=self.rev,

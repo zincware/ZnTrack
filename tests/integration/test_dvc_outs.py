@@ -157,10 +157,10 @@ def test_use_tmp_path(proj_path):
         )
 
     #     # fake remote by passing the current directory
-    node = node.from_rev(node.name, remote=".")
-    node2 = node2.from_rev(node2.name, remote=".")
-    node3 = node3.from_rev(node3.name, remote=".")
-    node4 = node4.from_rev(node4.name, remote=".")
+    node = node.from_rev(node.name)
+    node2 = node2.from_rev(node2.name)
+    node3 = node3.from_rev(node3.name)
+    node4 = node4.from_rev(node4.name)
 
     assert node.get_outs_content() == "test"
     assert node2.get_outs_content() == "test2"
