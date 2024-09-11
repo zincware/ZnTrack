@@ -1,0 +1,16 @@
+{
+    "MD": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/MD"
+        },
+        "name": "MD",
+        "thermostat": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_deps",
+                "cls": "Thermostat"
+            }
+        }
+    }
+}

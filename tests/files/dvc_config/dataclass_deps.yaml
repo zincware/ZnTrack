@@ -1,0 +1,8 @@
+stages:
+  MD:
+    cmd: zntrack run test_dataclass_deps.MD --name MD
+    metrics:
+    - nodes/MD/node-meta.json:
+        cache: false
+    params:
+    - MD

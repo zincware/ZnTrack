@@ -190,4 +190,5 @@ class DataclassConverter(znjson.ConverterBase):
         return DataclassContainer(cls)
 
     def __eq__(self, other) -> bool:
+        # TODO: this should not trigger for nodes!
         return dataclasses.is_dataclass(other)
