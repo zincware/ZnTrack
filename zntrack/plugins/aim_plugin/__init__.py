@@ -23,8 +23,6 @@ class AIMPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
-        exp_info = get_exp_info()
-        tags = exp_info.get("tags", {})
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
             run = self.get_aim_run()
             run[field.name] = getattr(self.node, field.name)
@@ -35,12 +33,6 @@ class AIMPlugin(ZnTrackPlugin):
 
             for key, value in getattr(self.node, field.name).items():
                 run.track(value, name=f"{field.name}.{key}")
-
-        if field.name == "name":
-            # every node has this field once
-            run = self.get_aim_run()
-            for tag_name, tag_value in tags.items():
-                run.add_tag(f"{tag_name}={tag_value}")
 
     def get_aim_run(self, path: str = ".") -> aim.Run:
         try:
@@ -61,6 +53,9 @@ class AIMPlugin(ZnTrackPlugin):
                     break
             run = aim.Run(run_hash=run_hash, repo=repo)
             if run_hash is None:
+                exp_info = get_exp_info()
+                tags = exp_info.get("tags", {})
+
                 run["dvc_stage_hash"] = uid
                 run["git_remote"] = pathlib.Path.cwd().as_posix()
                 run["git_hash"] = None
@@ -71,6 +66,8 @@ class AIMPlugin(ZnTrackPlugin):
                 run["dvc_stage_name"] = self.node.name
                 # add a tag for the node
                 run.add_tag(self.node.__class__.__name__)
+                for tag_name, tag_value in tags.items():
+                    run.add_tag(f"{tag_name}={tag_value}")
 
             self.aim_run = run
         return run

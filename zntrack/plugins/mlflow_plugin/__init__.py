@@ -75,6 +75,9 @@ class MLFlowPlugin(ZnTrackPlugin):
         if len(runs_df) == 0:
             with self.get_mlflow_parent_run():
                 with mlflow.start_run(nested=True):
+                    exp_info = get_exp_info()
+                    tags = exp_info.get("tags", {})
+
                     mlflow.set_tag("dvc_stage_hash", stage_hash)
                     mlflow.set_tag("dvc_stage_name", self.node.name)
                     # TODO: do we want to include the name of the parent run?
@@ -83,6 +86,8 @@ class MLFlowPlugin(ZnTrackPlugin):
                         "zntrack_node",
                         f"{self.node.__module__}.{self.node.__class__.__name__}",
                     )
+                    for tag_key, tag_value in tags.items():
+                        mlflow.set_tag(tag_key, tag_value)
                     yield
         else:
             print("found existing run")
@@ -93,9 +98,6 @@ class MLFlowPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: Field) -> None:
-        exp_info = get_exp_info()
-        tags = exp_info.get("tags", {})
-
         with self.get_mlflow_child_run():
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 mlflow.log_param(field.name, getattr(self.node, field.name))
@@ -103,8 +105,6 @@ class MLFlowPlugin(ZnTrackPlugin):
                 metrics = getattr(self.node, field.name)
                 for key, value in metrics.items():
                     mlflow.log_metric(f"{field.name}.{key}", value)
-            for tag_key, tag_value in tags.items():
-                mlflow.set_tag(tag_key, tag_value)
                 # TODO: plots
                 # TODO: define tags for all experiments in a parent run
 
