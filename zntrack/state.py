@@ -9,6 +9,8 @@ import dvc.api
 import dvc.repo
 import dvc.stage.serialize
 from dvc.utils import dict_sha256
+from fsspec.implementations.local import LocalFileSystem
+from fsspec.spec import AbstractFileSystem
 
 from zntrack.config import (
     NOT_AVAILABLE,
@@ -47,8 +49,13 @@ class NodeStatus:
         return self.node.name
 
     @property
-    def fs(self) -> dvc.api.DVCFileSystem:
+    def fs(self) -> AbstractFileSystem:
         """Get the file system of the Node."""
+        if self.remote is None and self.rev is None:
+            return LocalFileSystem()
+        raise ValueError(
+            f"Remote '{self.remote}' and rev '{self.rev}' are not supported."
+        )
         return dvc.api.DVCFileSystem(
             url=self.remote,
             rev=self.rev,
@@ -84,8 +91,7 @@ class NodeStatus:
 
     def get_stage(self) -> dvc.stage.PipelineStage:
         """Access to the internal dvc.repo api."""
-        remote = self.remote if self.remote != "." else None
-        with dvc.repo.Repo(remote=remote, rev=self.rev) as repo:
+        with dvc.repo.Repo(remote=self.remote, rev=self.rev) as repo:
             stage = repo.stage.collect(self.name)[0]
             if self.rev is None:
                 # If the rev is not None, we don't need this but get:
@@ -163,8 +169,7 @@ class NodeStatus:
         if target is ZNTRACK_LAZY_VALUE or target is NOT_AVAILABLE:
             # TODO: accessing data in a node that is not loaded will not raise NodeNotAvailableErrors!
             target = pd.DataFrame()
-        print(target)
-        df = pd.concat([target, pd.DataFrame([data])], ignore_index=True)
+        df = pd.concat([target, pd.DataFrame([data])], ignore_index=True, axis=0)
         setattr(self.node, attribute, df)
         for plugin in self.plugins.values():
             plugin.extend_plots(attribute, data, reference=df)

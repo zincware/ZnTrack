@@ -63,7 +63,7 @@ class Node(znflow.Node, znfields.Base):
     def from_rev(
         cls: t.Type[T],
         name: str | None = None,
-        remote: str | None = ".",
+        remote: str | None = None,
         rev: str | None = None,
         running: bool = False,
         lazy_evaluation: bool = True,
@@ -106,7 +106,7 @@ class Node(znflow.Node, znfields.Base):
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
             self.__dict__["state"] = NodeStatus(
-                remote=".",
+                remote=None,
                 rev=None,
                 run_count=0,
                 state=NodeStatusEnum.CREATED,
@@ -121,7 +121,7 @@ class Node(znflow.Node, znfields.Base):
             self.__dict__["state"]["run_count"] += 1
         except KeyError:
             self.__dict__["state"] = NodeStatus(
-                remote=".",
+                remote=None,
                 rev=None,
                 run_count=1,
                 state=NodeStatusEnum.RUNNING,
