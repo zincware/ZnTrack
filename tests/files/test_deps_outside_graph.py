@@ -14,6 +14,8 @@ def test_deps_outside_graph(proj_path):
     thermostat = Thermostat(temperature=300)
 
     with zntrack.Project() as project:
+        # in the main branch, the setter of the thermostat
+        #  is creating a deepcopy of the thermostat and updating its name
         md = MD(thermostat=thermostat, steps=100)
 
     project.build()
