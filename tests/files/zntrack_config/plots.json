@@ -1,0 +1,9 @@
+{
+    "Plotting": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/Plotting"
+        },
+        "name": "Plotting"
+    }
+}

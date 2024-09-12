@@ -18,6 +18,7 @@ from zntrack.config import (
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
+    ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
 from zntrack.converter import (
@@ -154,7 +155,7 @@ class DVCPlugin(ZnTrackPlugin):
                 {(self.node.nwd / "node-meta.json").as_posix(): {"cache": False}}
             ],
         }
-        plots = {}
+        plots = []
 
         nwd_handler = NWDReplaceHandler()
 
@@ -204,8 +205,16 @@ class DVCPlugin(ZnTrackPlugin):
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
-                # cache
-                # plots[self.node.name] = None
+                if ZNTRACK_OPTION_PLOTS_CONFIG in field.metadata:
+                    file_path = (
+                        (self.node.nwd / field.name).with_suffix(".csv").as_posix()
+                    )
+                    plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG]
+                    if "x" in plots_config:
+                        plots_config["x"] = {file_path: plots_config["x"]}
+                    if "y" in plots_config:
+                        plots_config["y"] = {file_path: plots_config["y"]}
+                    plots.append({f"{self.node.name}_{field.name}": plots_config})
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
                 content = [(self.node.nwd / field.name).with_suffix(".json").as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
@@ -242,9 +251,6 @@ class DVCPlugin(ZnTrackPlugin):
             if key == "cmd":
                 continue
             stages[key] = sort_and_deduplicate(stages[key])
-
-        for key in plots:
-            plots[key] = sort_and_deduplicate(plots[key])
 
         return {"stages": stages, "plots": plots}
 
