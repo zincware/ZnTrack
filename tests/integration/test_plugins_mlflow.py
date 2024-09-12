@@ -134,3 +134,8 @@ def test_mlflow_plotting(mlflow_proj_path):
 
     assert run.data.tags["git_commit_message"] == "test"
     assert run.data.tags["git_hash"] == repo.head.commit.hexsha
+
+
+# TODO: test multiple nodes
+# TODO: test changes within one but not both nodes between commits
+# TODO: test plots via extend_plots and via setting them at the end
