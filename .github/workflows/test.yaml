@@ -23,6 +23,15 @@ jobs:
           - 3.9
         os:
           - ubuntu-latest
+    
+    services:
+      # Label used to access the service container
+      mlflow:
+        # Docker Hub image
+        image: ghcr.io/mlflow/mlflow:v2.16.0
+        ports:
+          # Maps port 6379 on service container to the host
+          - 5000:5000
 
     steps:
       - uses: actions/checkout@v2
