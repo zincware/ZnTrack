@@ -28,12 +28,9 @@ jobs:
       # Label used to access the service container
       mlflow:
         # Docker Hub image
-        image: ghcr.io/mlflow/mlflow:v2.16.0
+        image: pythonf/mlflow
         ports:
-          # Maps port 6379 on service container to the host
           - 5000:5000
-        options: >-
-          mlflow ui --host 0.0.0.0
 
     steps:
       - uses: actions/checkout@v2
