@@ -180,11 +180,25 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
 
 
 class DataclassConverter(znjson.ConverterBase):
-    """Convert a znflow.Connection object to dict and back."""
+    """Convert a python dataclass object to dict and back.
+
+    This converter does not return an instance, but
+    only the class inside a DataclassContainer.
+    Saving the values must be done separately.
+
+    Attributes
+    ----------
+    representation: str
+        representation inside the dict for deserialization.
+    level: int
+        The level in which the encoding should be applied. A higher number means it will
+        try this first. E.g. test small numpy conversion before pickle
+        first.
+
+    """
 
     level = 20
     representation = "@dataclasses.dataclass"
-    instance = object
 
     def encode(self, obj: object) -> dict:
         """Convert the znflow.Connection object to dict."""
