@@ -23,7 +23,7 @@ jobs:
           - 3.9
         os:
           - ubuntu-latest
-    
+
     services:
       # Label used to access the service container
       mlflow:

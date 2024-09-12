@@ -36,8 +36,6 @@ class MLFlowPlugin(ZnTrackPlugin):
         self.parent_run_id = None
         self.child_run_id = None
 
-
-
     @contextlib.contextmanager
     def get_mlflow_parent_run(self):
         # Can I get rid of this by using cwd and machine_id?
