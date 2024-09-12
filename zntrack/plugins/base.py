@@ -75,12 +75,16 @@ class ZnTrackPlugin(abc.ABC):
     def extend_plots(self, attribute: str, data: dict, reference):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
+    def __enter__(self):
+        self.setup()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def setup(self):
-        # called at the beginning of the run
         return
 
     def close(self):
-        # called at the end of the run
         return
 
     @classmethod

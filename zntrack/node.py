@@ -45,23 +45,22 @@ class Node(znflow.Node, znfields.Base):
 
     def save(self):
         for plugin in self.state.plugins.values():
-            plugin.setup()  # consider a context manager
-            for field in dataclasses.fields(self):
-                value = getattr(self, field.name)
-                if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
-                    raise ValueError(
-                        f"Field '{field.name}' is not set. Please set it before saving."
-                    )
-                try:
-                    plugin.save(field)
-                except Exception as err:  # noqa: E722
-                    if plugin._continue_on_error_:
-                        warnings.warn(
-                            f"Plugin {plugin.__class__.__name__} failed to save field {field.name}."
+            with plugin:
+                for field in dataclasses.fields(self):
+                    value = getattr(self, field.name)
+                    if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
+                        raise ValueError(
+                            f"Field '{field.name}' is not set. Please set it before saving."
                         )
-                    else:
-                        raise err
-            plugin.close()
+                    try:
+                        plugin.save(field)
+                    except Exception as err:  # noqa: E722
+                        if plugin._continue_on_error_:
+                            warnings.warn(
+                                f"Plugin {plugin.__class__.__name__} failed to save field {field.name}."
+                            )
+                        else:
+                            raise err
 
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED

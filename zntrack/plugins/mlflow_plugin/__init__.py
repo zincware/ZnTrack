@@ -94,8 +94,6 @@ class MLFlowPlugin(ZnTrackPlugin):
         )
 
     def get_run_info(self) -> dict:
-        # self.setup()
-
         # get the name of the current run
         run_info = mlflow.active_run().info
         experiment_id = run_info.experiment_id
@@ -146,8 +144,6 @@ class MLFlowPlugin(ZnTrackPlugin):
     def extend_plots(self, attribute: str, data: dict, reference):
         step = len(reference)
         new_data = {f"{attribute}.{key}": value for key, value in data.items()}
-        # self.setup()
-
         mlflow.log_metrics(new_data, step=step)
 
     @classmethod
@@ -204,8 +200,8 @@ class MLFlowPlugin(ZnTrackPlugin):
             node = zntrack.from_rev(node_name, rev=rev)
             plugin = cls(node)
 
-            plugin.setup()
-            plugin.close()
+            with plugin:
+                pass  # load run_id states
             with mlflow.start_run(run_id=plugin.parent_run_id):
                 mlflow.set_tag("git_hash", commit_hash)
                 mlflow.set_tag("git_commit_message", commit_message)
@@ -223,12 +219,11 @@ class MLFlowPlugin(ZnTrackPlugin):
         for node_name in node_names:
             if node_name in child_runs["tags.dvc_stage_name"].values:
                 node = zntrack.from_rev(node_name, rev=rev)
-                node.state.plugins["MLFlowPlugin"].setup()
-                mlflow.set_tag("git_hash", commit_hash)
-                mlflow.set_tag("git_commit_message", commit_message.strip())
-                if remote_url is not None:
-                    mlflow.set_tag("git_remote", remote_url)
-                node.state.plugins["MLFlowPlugin"].close()
+                with node.state.plugins["MLFlowPlugin"]:
+                    mlflow.set_tag("git_hash", commit_hash)
+                    mlflow.set_tag("git_commit_message", commit_message.strip())
+                    if remote_url is not None:
+                        mlflow.set_tag("git_remote", remote_url)
             else:
                 print(f"missing {node_name}")
                 node = zntrack.from_rev(node_name, rev=rev)

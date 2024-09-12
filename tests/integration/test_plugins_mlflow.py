@@ -15,7 +15,7 @@ def mlflow_proj_path(proj_path):
     os.environ["ZNTRACK_PLUGINS"] = (
         "zntrack.plugins.dvc_plugin.DVCPlugin,zntrack.plugins.mlflow_plugin.MLFlowPlugin"
     )
-    os.environ["MLFLOW_TRACKING_URI"] = "http://127.0.0.1:5000"
+    os.environ["MLFLOW_TRACKING_URI"] = "http://127.0.0.1:5001"
     os.environ["MLFLOW_EXPERIMENT_NAME"] = f"test-{uuid.uuid4()}"
 
     config = {
@@ -46,8 +46,8 @@ def test_mlflow_metrics(mlflow_proj_path):
     proj.repro(build=False)
     # # the run should be there
 
-    node.state.plugins["MLFlowPlugin"].setup()
-    node.state.plugins["MLFlowPlugin"].close()
+    with node.state.plugins["MLFlowPlugin"]:
+        pass  # load run_id states
 
     child_run_id = node.state.plugins["MLFlowPlugin"].child_run_id
     parent_run_id = node.state.plugins["MLFlowPlugin"].parent_run_id
