@@ -25,91 +25,109 @@ from zntrack.utils.misc import load_env_vars
 # TODO: in finalize have the parent run active (if not already)
 
 
+def get_mlflow_parent_run() -> str:
+    # Can I get rid of this by using cwd and machine_id?
+
+    exp_info = get_exp_info()
+    try:
+        parent_run_id = exp_info["parent_run_id"]
+        mlflow.start_run(run_id=parent_run_id)
+        return parent_run_id
+
+    except KeyError:
+        run = mlflow.start_run()
+        parent_run_id = run.info.run_id
+        exp_info["parent_run_id"] = parent_run_id
+        set_exp_info(exp_info)
+        return parent_run_id
+
+
+def get_mlflow_child_run(stage_hash: str, node_name: str, node_path: str) -> str:
+    runs_df = mlflow.search_runs(
+        filter_string=f"tags.dvc_stage_hash = '{stage_hash}'",
+    )
+    if len(runs_df) == 0:
+        # we assume there is an active run, maybe test?
+        run = mlflow.start_run(nested=True)
+        warnings.warn("Creating new child run")
+        exp_info = get_exp_info()
+        tags = exp_info.get("tags", {})
+
+        mlflow.set_tag("dvc_stage_hash", stage_hash)
+        mlflow.set_tag("dvc_stage_name", node_name)
+        # TODO: do we want to include the name of the parent run?
+        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
+        mlflow.set_tag(
+            "zntrack_node",
+            node_path,
+        )
+        for tag_key, tag_value in tags.items():
+            mlflow.set_tag(tag_key, tag_value)
+        return run.info.run_id
+    else:
+        print("found existing run")
+        run_id = runs_df.iloc[0].run_id
+        mlflow.start_run(run_id=run_id, nested=True)
+        return run_id
+
+
 @dataclass
 class MLFlowPlugin(ZnTrackPlugin):
 
     _continue_on_error_ = True
+    parent_run_id = None
+    child_run_id = None
 
     def __post_init__(self):
         load_env_vars("")
+        # can not load the runs in here, because the node name is not set yet.
 
-        self.parent_run_id = None
-        self.child_run_id = None
+    def setup(self):
+        # 1. find the parent run, create one if it does not exist
+        # 2. find the child run, create one if it does not exist
 
-    @contextlib.contextmanager
-    def get_mlflow_parent_run(self):
-        # Can I get rid of this by using cwd and machine_id?
-
-        exp_info = get_exp_info()
-        try:
-            parent_run_id = exp_info["parent_run_id"]
-            with mlflow.start_run(run_id=parent_run_id):
-                yield
-        except KeyError:
-            with mlflow.start_run() as run:
-                parent_run_id = run.info.run_id
-                exp_info["parent_run_id"] = parent_run_id
-                set_exp_info(exp_info)
-                yield
+        self.parent_run_id = self.parent_run_id or get_mlflow_parent_run()
+        self.child_run_id = self.child_run_id or get_mlflow_child_run(
+            self.node.state.get_stage_hash(),
+            self.node.name,
+            f"{self.node.__module__}.{self.node.__class__.__name__}",
+        )
 
     def get_run_info(self) -> dict:
-        with self.get_mlflow_child_run():
-            # get the name of the current run
-            run_info = mlflow.active_run().info
-            experiment_id = run_info.experiment_id
-            # run_name = run_info.run_name
-            try:
-                run_name = mlflow.get_run(run_info.run_id).data.tags[
-                    mlflow_tags.MLFLOW_RUN_NAME
-                ]
-            except KeyError:
-                run_name = run_info.run_name
-            run_id = run_info.run_id
-            host_url = mlflow.get_tracking_uri()
-            uri = f"{host_url}/#/experiments/{experiment_id}/runs/{run_id}"
-            return {"name": run_name, "uri": uri, "id": run_id}
+        # self.setup()
 
-    @contextlib.contextmanager
-    def get_mlflow_child_run(self):
-        stage_hash = self.node.state.get_stage_hash()
-        runs_df = mlflow.search_runs(
-            filter_string=f"tags.dvc_stage_hash = '{self.node.state.get_stage_hash()}'",
-        )
-        if len(runs_df) == 0:
-            with self.get_mlflow_parent_run():
-                with mlflow.start_run(nested=True):
-                    exp_info = get_exp_info()
-                    tags = exp_info.get("tags", {})
-
-                    mlflow.set_tag("dvc_stage_hash", stage_hash)
-                    mlflow.set_tag("dvc_stage_name", self.node.name)
-                    # TODO: do we want to include the name of the parent run?
-                    mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, self.node.name)
-                    mlflow.set_tag(
-                        "zntrack_node",
-                        f"{self.node.__module__}.{self.node.__class__.__name__}",
-                    )
-                    for tag_key, tag_value in tags.items():
-                        mlflow.set_tag(tag_key, tag_value)
-                    yield
-        else:
-            print("found existing run")
-            with mlflow.start_run(run_id=runs_df.iloc[0].run_id):
-                yield
+        # get the name of the current run
+        run_info = mlflow.active_run().info
+        experiment_id = run_info.experiment_id
+        # run_name = run_info.run_name
+        try:
+            run_name = mlflow.get_run(run_info.run_id).data.tags[
+                mlflow_tags.MLFLOW_RUN_NAME
+            ]
+        except KeyError:
+            run_name = run_info.run_name
+        run_id = run_info.run_id
+        host_url = mlflow.get_tracking_uri()
+        uri = f"{host_url}/#/experiments/{experiment_id}/runs/{run_id}"
+        return {"name": run_name, "uri": uri, "id": run_id}
 
     def getter(self, field: Field) -> Any:
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: Field) -> None:
-        with self.get_mlflow_child_run():
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
-                mlflow.log_param(field.name, getattr(self.node, field.name))
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
-                metrics = getattr(self.node, field.name)
-                for key, value in metrics.items():
-                    mlflow.log_metric(f"{field.name}.{key}", value)
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
+            mlflow.log_param(field.name, getattr(self.node, field.name))
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
+            metrics = getattr(self.node, field.name)
+            for key, value in metrics.items():
+                mlflow.log_metric(f"{field.name}.{key}", value)
                 # TODO: plots
                 # TODO: define tags for all experiments in a parent run
+
+    def close(self):
+        # close both the parent and the child run
+        while mlflow.active_run():
+            mlflow.end_run()
 
     def convert_to_dvc_yaml(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
@@ -128,8 +146,9 @@ class MLFlowPlugin(ZnTrackPlugin):
     def extend_plots(self, attribute: str, data: dict, reference):
         step = len(reference)
         new_data = {f"{attribute}.{key}": value for key, value in data.items()}
-        with self.get_mlflow_child_run():
-            mlflow.log_metrics(new_data, step=step)
+        # self.setup()
+
+        mlflow.log_metrics(new_data, step=step)
 
     @classmethod
     def finalize(cls, rev: str | None = None):
@@ -185,7 +204,9 @@ class MLFlowPlugin(ZnTrackPlugin):
             node = zntrack.from_rev(node_name, rev=rev)
             plugin = cls(node)
 
-            with plugin.get_mlflow_parent_run():
+            plugin.setup()
+            plugin.close()
+            with mlflow.start_run(run_id=plugin.parent_run_id):
                 mlflow.set_tag("git_hash", commit_hash)
                 mlflow.set_tag("git_commit_message", commit_message)
                 if remote_url is not None:
@@ -202,11 +223,12 @@ class MLFlowPlugin(ZnTrackPlugin):
         for node_name in node_names:
             if node_name in child_runs["tags.dvc_stage_name"].values:
                 node = zntrack.from_rev(node_name, rev=rev)
-                with node.state.plugins["MLFlowPlugin"].get_mlflow_child_run():
-                    mlflow.set_tag("git_hash", commit_hash)
-                    mlflow.set_tag("git_commit_message", commit_message)
-                    if remote_url is not None:
-                        mlflow.set_tag("git_remote", remote_url)
+                node.state.plugins["MLFlowPlugin"].setup()
+                mlflow.set_tag("git_hash", commit_hash)
+                mlflow.set_tag("git_commit_message", commit_message.strip())
+                if remote_url is not None:
+                    mlflow.set_tag("git_remote", remote_url)
+                node.state.plugins["MLFlowPlugin"].close()
             else:
                 print(f"missing {node_name}")
                 node = zntrack.from_rev(node_name, rev=rev)
@@ -243,7 +265,7 @@ class MLFlowPlugin(ZnTrackPlugin):
 
                         # set git hash and commit message
                         mlflow.set_tag("git_hash", commit_hash)
-                        mlflow.set_tag("git_commit_message", commit_message)
+                        mlflow.set_tag("git_commit_message", commit_message.strip())
                         if remote_url is not None:
                             mlflow.set_tag("git_remote", remote_url)
 

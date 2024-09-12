@@ -2,6 +2,7 @@ import os
 import pathlib
 import uuid
 
+import git
 import mlflow
 import pytest
 import yaml
@@ -30,18 +31,48 @@ def mlflow_proj_path(proj_path):
 
     del os.environ["ZNTRACK_PLUGINS"]
     del os.environ["MLFLOW_TRACKING_URI"]
-    # del os.environ["MLFLOW_EXPERIMENT_NAME"]
+    del os.environ["MLFLOW_EXPERIMENT_NAME"]
 
 
 def test_mlflow_metrics(mlflow_proj_path):
     proj = zntrack.Project()
 
     with proj:
-        node = zntrack.examples.ParamsToOuts(params=1)
+        node = zntrack.examples.ParamsToMetrics(params={"loss": 0})
 
-    proj.repro()
+    proj.build()
+    # there should be no entry in the mlflow server
 
-    # list all mlflow runs under the active experiment
-    runs = mlflow.search_runs()
-    # one parent and one child run
-    assert len(runs) == 2
+    proj.repro(build=False)
+    # # the run should be there
+
+    node.state.plugins["MLFlowPlugin"].setup()
+    node.state.plugins["MLFlowPlugin"].close()
+
+    child_run_id = node.state.plugins["MLFlowPlugin"].child_run_id
+    parent_run_id = node.state.plugins["MLFlowPlugin"].parent_run_id
+
+    assert child_run_id is not None
+    assert parent_run_id is not None
+
+    run = mlflow.get_run(child_run_id)
+    # assert params are logged
+    assert run.data.params == {"params": "{'loss': 0}"}  # this is strange!
+    # assert tags
+    assert run.data.tags["dvc_stage_name"] == "ParamsToMetrics"
+    assert run.data.tags["dvc_stage_hash"] == node.state.get_stage_hash()
+    assert run.data.tags["zntrack_node"] == "zntrack.examples.ParamsToMetrics"
+
+    # assert metrics
+    assert run.data.metrics == {"metrics.loss": 0.0}
+
+    # make a git commit with all the changes
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "test")
+    node.state.plugins["MLFlowPlugin"].finalize()
+
+    run = mlflow.get_run(child_run_id)  # need to query the run again
+
+    assert run.data.tags["git_commit_message"] == "test"
+    assert run.data.tags["git_hash"] == repo.head.commit.hexsha

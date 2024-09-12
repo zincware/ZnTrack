@@ -26,6 +26,7 @@ if t.TYPE_CHECKING:
     from zntrack import Node
 
 PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
+PLUGIN_DICT = dict[str, ZnTrackPlugin]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -39,7 +40,9 @@ class NodeStatus:
     node: "Node|None" = dataclasses.field(
         default=None, repr=False, compare=False, hash=False
     )
-    plugins: dict = dataclasses.field(default_factory=dict, compare=False, repr=False)
+    plugins: PLUGIN_DICT = dataclasses.field(
+        default_factory=dict, compare=False, repr=False
+    )
     group: Group | None = None
     # TODO: move node name and nwd to here as well
 

@@ -45,6 +45,7 @@ class Node(znflow.Node, znfields.Base):
 
     def save(self):
         for plugin in self.state.plugins.values():
+            plugin.setup()  # consider a context manager
             for field in dataclasses.fields(self):
                 value = getattr(self, field.name)
                 if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
@@ -60,6 +61,7 @@ class Node(znflow.Node, znfields.Base):
                         )
                     else:
                         raise err
+            plugin.close()
 
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED

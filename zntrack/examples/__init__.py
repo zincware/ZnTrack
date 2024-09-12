@@ -31,7 +31,7 @@ class ParamsToOuts(zntrack.Node):
 class ParamsToMetrics(zntrack.Node):
     """Save params to metrics."""
 
-    params: t.Any = zntrack.params()
+    params: dict = zntrack.params()
     metrics: dict = zntrack.metrics()
 
     def run(self) -> None:

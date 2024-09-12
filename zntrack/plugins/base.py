@@ -2,6 +2,7 @@
 
 import abc
 import dataclasses
+import pathlib
 import typing as t
 
 import yaml
@@ -18,16 +19,19 @@ if t.TYPE_CHECKING:
     from zntrack import Node
 
 
-def _gitignore_file(path: str) -> bool:
+def _gitignore_file(path: str):
     """Add a path to the .gitignore file if it is not already there."""
-    # TODO: move to misc
+    if not pathlib.Path(".gitignore").exists():
+        with open(".gitignore", "w") as f:
+            f.write(path + "\n")
+        return
     with open(".gitignore", "r") as f:
         for line in f:
             if line.strip() == path:
-                return False
+                return
     with open(".gitignore", "a") as f:
         f.write(path + "\n")
-    return True
+    return
 
 
 def get_exp_info() -> dict:
@@ -70,6 +74,14 @@ class ZnTrackPlugin(abc.ABC):
 
     def extend_plots(self, attribute: str, data: dict, reference):
         return PLUGIN_EMPTY_RETRUN_VALUE
+
+    def setup(self):
+        # called at the beginning of the run
+        return
+
+    def close(self):
+        # called at the end of the run
+        return
 
     @classmethod
     def finalize(cls, rev: str | None = None, path_to_aim: str = ".") -> None:

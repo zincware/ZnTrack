@@ -120,7 +120,9 @@ class Project(znflow.DiGraph):
     def repro(self, build: bool = True):
         if build:
             self.build()
-        subprocess.check_call(["dvc", "repro"])
+        subprocess.check_call(
+            "dvc repro", shell=True, restore_signals=False, close_fds=True
+        )
 
     @contextlib.contextmanager
     def group(self, *names: str):
