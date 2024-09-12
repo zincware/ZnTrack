@@ -93,6 +93,11 @@ class MLFlowPlugin(ZnTrackPlugin):
             f"{self.node.__module__}.{self.node.__class__.__name__}",
         )
 
+    def close(self):
+        # close both the parent and the child run
+        while mlflow.active_run():
+            mlflow.end_run()
+
     def get_run_info(self) -> dict:
         # get the name of the current run
         run_info = mlflow.active_run().info
@@ -122,11 +127,6 @@ class MLFlowPlugin(ZnTrackPlugin):
                 # TODO: plots
                 # TODO: define tags for all experiments in a parent run
 
-    def close(self):
-        # close both the parent and the child run
-        while mlflow.active_run():
-            mlflow.end_run()
-
     def convert_to_dvc_yaml(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
@@ -142,6 +142,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def extend_plots(self, attribute: str, data: dict, reference):
+        self.setup()
         step = len(reference)
         new_data = {f"{attribute}.{key}": value for key, value in data.items()}
         mlflow.log_metrics(new_data, step=step)

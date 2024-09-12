@@ -109,6 +109,10 @@ def base_getter(self: "Node", name: str, func: t.Callable):
     try:
         func(self, name)
     except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
+        # if self.state.state == NodeStatusEnum.RUNNING:
+        #     return NOT_AVAILABLE
+        raise NodeNotAvailableError(
+            f"Node '{self.name}' is not available (could not find '{name}')."
+        )
 
     return getattr(self, name)
