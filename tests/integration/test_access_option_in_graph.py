@@ -1,5 +1,6 @@
 import zntrack.examples
 
+
 def test_connect_node_names(proj_path):
     with zntrack.Project() as proj:
         a = zntrack.examples.ParamsToOuts(params=10, name="A")
@@ -9,6 +10,7 @@ def test_connect_node_names(proj_path):
     assert a.name == "A"
     assert b.name == "con_A"
 
+
 def test_connect_node_names_automatic_names(proj_path):
     with zntrack.Project() as proj:
         a = zntrack.examples.ParamsToOuts(params=10)
@@ -17,4 +19,3 @@ def test_connect_node_names_automatic_names(proj_path):
 
     assert a.name == "ParamsToOuts"
     assert b.name == "con_ParamsToOuts"
-    
