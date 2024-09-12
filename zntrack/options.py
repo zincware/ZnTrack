@@ -9,6 +9,7 @@ from .config import (
     ZNTRACK_CACHE,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
+    ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
 from .node import Node
@@ -65,11 +66,35 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
 
 
 @functools.wraps(znfields.field)
-def plots(*, cache: bool = True, independent: bool = False, **kwargs):
+def plots(
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    x: str | None = None,
+    y: str | None = None,
+    x_label: str | None = None,
+    y_label: str | None = None,
+    template: str | None = None,
+    title: str | None = None,
+    **kwargs,
+):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
+    plots_config = {}
+    for key, value in {
+        "x": x,
+        "y": y,
+        "x_label": x_label,
+        "y_label": y_label,
+        "template": template,
+        "title": title,
+    }.items():
+        if value is not None:
+            plots_config[key] = value
+    if plots_config:
+        kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
     return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
 
 
