@@ -32,6 +32,8 @@ jobs:
         ports:
           # Maps port 6379 on service container to the host
           - 5000:5000
+        options: >-
+          mlflow ui --host 0.0.0.0
 
     steps:
       - uses: actions/checkout@v2
