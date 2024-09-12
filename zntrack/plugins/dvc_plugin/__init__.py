@@ -18,15 +18,13 @@ from zntrack.config import (
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
+    ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from zntrack.converter import (
-    CombinedConnectionsConverter,
-    ConnectionConverter,
-    NodeConverter,
-    node_to_output_paths,
-)
 from zntrack.exceptions import NodeNotAvailableError
+
+# if t.TYPE_CHECKING:
+from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, base_getter
 from zntrack.utils.misc import (
     TempPathLoader,
@@ -34,9 +32,6 @@ from zntrack.utils.misc import (
     sort_and_deduplicate,
 )
 from zntrack.utils.node_wd import NWDReplaceHandler
-
-if t.TYPE_CHECKING:
-    from zntrack import Node
 
 
 def _outs_save_func(self: "Node", name: str):
@@ -78,10 +73,28 @@ def _deps_getter(self: "Node", name: str):
         content = znjson.loads(
             json.dumps(content),
             cls=znjson.ZnDecoder.from_converters(
-                [NodeConverter, ConnectionConverter, CombinedConnectionsConverter],
+                [
+                    converter.NodeConverter,
+                    converter.ConnectionConverter,
+                    converter.CombinedConnectionsConverter,
+                    converter.DataclassConverter,
+                ],
                 add_default=True,
             ),
         )
+        if isinstance(content, converter.DataclassContainer):
+            content = content.get_with_params(self.name, name)
+        if isinstance(content, list):
+            new_content = []
+            idx = 0
+            for val in content:
+                if isinstance(val, converter.DataclassContainer):
+                    new_content.append(val.get_with_params(self.name, name, idx))
+                    idx += 1  # index only runs over dataclasses
+                else:
+                    new_content.append(val)
+            content = new_content
+
         content = znflow.handler.UpdateConnectors()(content)
 
         self.__dict__[name] = content
@@ -141,12 +154,33 @@ class DVCPlugin(ZnTrackPlugin):
         for field in dataclasses.fields(self.node):
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
+            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+                content = getattr(self.node, field.name)
+                if isinstance(content, (list, tuple)):
+                    new_content = []
+                    for val in content:
+                        if dataclasses.is_dataclass(val) and not isinstance(
+                            val, (Node, znflow.Connection, znflow.CombinedConnections)
+                        ):
+                            # We save the values of the passed dataclasses
+                            #  to the params.yaml file to be later used
+                            #  by the DataclassContainer to recreate the
+                            #  instance with the correct parameters.
+                            new_content.append(dataclasses.asdict(val))
+                        else:
+                            pass
+                    if len(new_content) > 0:
+                        data[field.name] = new_content
+                if dataclasses.is_dataclass(content) and not isinstance(
+                    content, (Node, znflow.Connection, znflow.CombinedConnections)
+                ):
+                    data[field.name] = dataclasses.asdict(content)
         if len(data) > 0:
             return data
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def convert_to_dvc_yaml(self) -> dict | object:
-        node_dict = NodeConverter().encode(self.node)
+        node_dict = converter.NodeConverter().encode(self.node)
 
         stages = {
             "cmd": f"zntrack run {node_dict['module']}.{node_dict['cls']} --name {node_dict['name']}",
@@ -154,7 +188,7 @@ class DVCPlugin(ZnTrackPlugin):
                 {(self.node.nwd / "node-meta.json").as_posix(): {"cache": False}}
             ],
         }
-        plots = {}
+        plots = []
 
         nwd_handler = NWDReplaceHandler()
 
@@ -204,8 +238,16 @@ class DVCPlugin(ZnTrackPlugin):
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
-                # cache
-                # plots[self.node.name] = None
+                if ZNTRACK_OPTION_PLOTS_CONFIG in field.metadata:
+                    file_path = (
+                        (self.node.nwd / field.name).with_suffix(".csv").as_posix()
+                    )
+                    plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG]
+                    if "x" in plots_config:
+                        plots_config["x"] = {file_path: plots_config["x"]}
+                    if "y" in plots_config:
+                        plots_config["y"] = {file_path: plots_config["y"]}
+                    plots.append({f"{self.node.name}_{field.name}": plots_config})
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
                 content = [(self.node.nwd / field.name).with_suffix(".json").as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
@@ -220,7 +262,9 @@ class DVCPlugin(ZnTrackPlugin):
                             raise NotImplementedError(
                                 "znflow.Connection getitem is not supported yet."
                             )
-                        paths.extend(node_to_output_paths(con.instance, con.attribute))
+                        paths.extend(
+                            converter.node_to_output_paths(con.instance, con.attribute)
+                        )
                     elif isinstance(con, (znflow.CombinedConnections)):
                         for _con in con.connections:
                             if con.item is not None:
@@ -228,9 +272,12 @@ class DVCPlugin(ZnTrackPlugin):
                                     "znflow.Connection getitem is not supported yet."
                                 )
                             paths.extend(
-                                node_to_output_paths(_con.instance, _con.attribute)
+                                converter.node_to_output_paths(
+                                    _con.instance, _con.attribute
+                                )
                             )
-                stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
+                if len(paths) > 0:
+                    stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS_PATH:
                 content = [
                     pathlib.Path(c).as_posix()
@@ -242,9 +289,6 @@ class DVCPlugin(ZnTrackPlugin):
             if key == "cmd":
                 continue
             stages[key] = sort_and_deduplicate(stages[key])
-
-        for key in plots:
-            plots[key] = sort_and_deduplicate(plots[key])
 
         return {"stages": stages, "plots": plots}
 
@@ -273,6 +317,7 @@ class DVCPlugin(ZnTrackPlugin):
                     converter.NodeConverter,
                     converter.CombinedConnectionsConverter,
                     znjson.converter.PathlibConverter,
+                    converter.DataclassConverter,
                 ],
                 add_default=False,
             ),

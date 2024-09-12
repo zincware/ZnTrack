@@ -87,7 +87,7 @@ class Project(znflow.DiGraph):
     def build(self) -> None:
         log.info(f"Saving {config.PARAMS_FILE_PATH}")
         params_dict = {}
-        dvc_dict = {"stages": {}, "plots": {}}
+        dvc_dict = {"stages": {}, "plots": []}
         zntrack_dict = {}
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
@@ -102,7 +102,7 @@ class Project(znflow.DiGraph):
                 ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
                     dvc_dict["stages"][node.name] = value["stages"]
                     if len(value["plots"]) > 0:
-                        dvc_dict["plots"][node.name] = value["plots"]
+                        dvc_dict["plots"].extend(value["plots"])
                 if (
                     value := plugin.convert_to_zntrack_json(graph=self)
                 ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
