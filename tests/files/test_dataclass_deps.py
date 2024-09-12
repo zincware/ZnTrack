@@ -12,6 +12,7 @@ CWD = pathlib.Path(__file__).parent.resolve()
 @dataclasses.dataclass
 class Thermostat:
     temperature: float
+    friction: float = 0.1
 
 
 class MLThermostat(zntrack.Node):
@@ -32,7 +33,7 @@ def test_deps_outside_graph(proj_path):
     with project.group("multiple_deps"):
         ml = MLThermostat(temp=300)
 
-        t1 = Thermostat(temperature=300)
+        t1 = Thermostat(temperature=300, friction=0.05)
         t2 = Thermostat(temperature=400)
         md2 = MD(thermostat=[t1, ml, t2], steps=100)
 

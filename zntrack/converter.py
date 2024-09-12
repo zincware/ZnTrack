@@ -23,9 +23,22 @@ class DataclassContainer:
         self.cls = cls
 
     def get_with_params(self, node_name, attr_name, index: int | None = None):
+        """Get an instance of the dataclass with the parameters from the params file.
+
+        Attributes
+        ----------
+        node_name : str
+            The name of the node.
+        attr_name : str
+            The name of the attribute.
+        index : int | None
+            The index in the parameter file, if the node attribute
+            is a list of dataclasses. None if a single dataclass.
+
+        """
         all_params = yaml.safe_load(PARAMS_FILE_PATH.read_text())
         if index is not None:
-            return self.cls(**all_params[node_name][attr_name][f"part_{index}"])
+            return self.cls(**all_params[node_name][attr_name][index])
         return self.cls(**all_params[node_name][attr_name])
 
 
