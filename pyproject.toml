@@ -42,6 +42,7 @@ optuna = "^3"
 scikit-learn = "^1"
 nbmake = "^1"
 pandas = "^2.2.2"
+mlflow = "^2.16"
 
 [tool.poetry.group.notebook.dependencies]
 jupyterlab = "^3"
