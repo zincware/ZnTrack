@@ -158,10 +158,14 @@ class DVCPlugin(ZnTrackPlugin):
                 content = getattr(self.node, field.name)
                 if isinstance(content, (list, tuple)):
                     new_content = []
-                    for idx, val in enumerate(content):
+                    for val in content:
                         if dataclasses.is_dataclass(val) and not isinstance(
                             val, (Node, znflow.Connection, znflow.CombinedConnections)
                         ):
+                            # We save the values of the passed dataclasses
+                            #  to the params.yaml file to be later used
+                            #  by the DataclassContainer to recreate the
+                            #  instance with the correct parameters.
                             new_content.append(dataclasses.asdict(val))
                         else:
                             pass
