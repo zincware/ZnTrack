@@ -3,10 +3,12 @@ import importlib
 import pathlib
 import typing as t
 
+import yaml
 import znflow
 import znjson
 
 from zntrack.config import (
+    PARAMS_FILE_PATH,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
@@ -14,6 +16,30 @@ from zntrack.config import (
 
 from .node import Node
 from .utils import module_handler
+
+
+class DataclassContainer:
+    def __init__(self, cls):
+        self.cls = cls
+
+    def get_with_params(self, node_name, attr_name, index: int | None = None):
+        """Get an instance of the dataclass with the parameters from the params file.
+
+        Attributes
+        ----------
+        node_name : str
+            The name of the node.
+        attr_name : str
+            The name of the attribute.
+        index : int | None
+            The index in the parameter file, if the node attribute
+            is a list of dataclasses. None if a single dataclass.
+
+        """
+        all_params = yaml.safe_load(PARAMS_FILE_PATH.read_text())
+        if index is not None:
+            return self.cls(**all_params[node_name][attr_name][index])
+        return self.cls(**all_params[node_name][attr_name])
 
 
 def _enforce_str_list(content) -> list[str]:
@@ -151,3 +177,48 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         paths.append((node.nwd / "node-meta.json").as_posix())
 
     return paths
+
+
+class DataclassConverter(znjson.ConverterBase):
+    """Convert a python dataclass object to dict and back.
+
+    This converter does not return an instance, but
+    only the class inside a DataclassContainer.
+    Saving the values must be done separately.
+
+    Attributes
+    ----------
+    representation: str
+        representation inside the dict for deserialization.
+    level: int
+        The level in which the encoding should be applied. A higher number means it will
+        try this first. E.g. test small numpy conversion before pickle
+        first.
+
+    """
+
+    level = 20
+    representation = "@dataclasses.dataclass"
+
+    def encode(self, obj: object) -> dict:
+        """Convert the znflow.Connection object to dict."""
+        module = module_handler(obj)
+        cls = obj.__class__.__name__
+
+        return {
+            "module": module,
+            "cls": cls,
+        }
+
+    def decode(self, value: dict) -> DataclassContainer:
+        """Create znflow.Connection object from dict."""
+        module = importlib.import_module(value["module"])
+        cls = getattr(module, value["cls"])
+        return DataclassContainer(cls)
+
+    def __eq__(self, other) -> bool:
+        if dataclasses.is_dataclass(other) and not isinstance(
+            other, (Node, znflow.Connection, znflow.CombinedConnections)
+        ):
+            return True
+        return False
