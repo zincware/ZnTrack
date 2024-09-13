@@ -4,10 +4,22 @@ import pathlib
 import aim
 import git
 import numpy.testing as npt
+import pandas as pd
 import pytest
 import yaml
 
 import zntrack.examples
+
+
+class RangePlotter(zntrack.Node):
+    start: int = zntrack.params()
+    stop: int = zntrack.params()
+
+    plots: pd.DataFrame = zntrack.plots(y="range")
+
+    def run(self):
+        for idx in range(self.start, self.stop):
+            self.state.extend_plots("plots", {"idx": idx})
 
 
 # fixture to set the os.env before the test and remove if after the test
@@ -70,6 +82,39 @@ def test_aim_metrics(aim_proj_path):
         assert df["dvc_stage_hash"].tolist() == [node.state.get_stage_hash()]
         assert df["zntrack_node"].tolist() == ["zntrack.examples.ParamsToMetrics"]
         assert df["params.loss"].tolist() == [0]
+        assert df["git_commit_message"].tolist() == ["test"]
+        assert df["git_commit_hash"].tolist() == [repo.head.commit.hexsha]
+
+
+def test_aim_plotting(aim_proj_path):
+    proj = zntrack.Project()
+
+    with proj:
+        node = RangePlotter(start=0, stop=10)
+
+    proj.build()
+    proj.repro(build=False)
+
+    with node.state.plugins["AIMPlugin"].get_aim_run() as run:
+        df = run.dataframe()
+        assert df["dvc_stage_name"].tolist() == ["RangePlotter"]
+        assert df["dvc_stage_hash"].tolist() == [node.state.get_stage_hash()]
+        assert df["zntrack_node"].tolist() == ["test_plugins_aim.RangePlotter"]
+
+        # metrics
+        metrics = {}
+        for metric in run.metrics():
+            metrics[metric.name] = list(metric.data.values())[0]
+
+        npt.assert_array_equal(metrics["plots.idx"], [[idx for idx in range(10)]])
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "test")
+    proj.finalize()
+
+    with node.state.plugins["AIMPlugin"].get_aim_run() as run:
+        df = run.dataframe()
         assert df["git_commit_message"].tolist() == ["test"]
         assert df["git_commit_hash"].tolist() == [repo.head.commit.hexsha]
 
