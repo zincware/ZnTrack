@@ -36,6 +36,16 @@ jobs:
           --health-retries=5
         ports:
           - 5000:5000
+      aim:
+        # Docker Hub image
+        image: pythonf/aim:v3.24.0
+        options: >-
+          --health-cmd="curl --fail http://localhost:43800/status || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 43800:43800
 
     steps:
       - uses: actions/checkout@v2
@@ -51,6 +61,8 @@ jobs:
       - name: Install package
         run: |
           poetry install --no-interaction
+          pip install aim
+# we install aim here, because of dependency issues
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"

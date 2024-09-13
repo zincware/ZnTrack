@@ -4,6 +4,7 @@ import pathlib
 import typing as t
 
 import aim
+import os
 import dvc.repo
 import git
 
@@ -34,7 +35,11 @@ class AIMPlugin(ZnTrackPlugin):
             for key, value in getattr(self.node, field.name).items():
                 run.track(value, name=f"{field.name}.{key}")
 
-    def get_aim_run(self, path: str = ".") -> aim.Run:
+    def get_aim_run(self) -> aim.Run:
+        # TODO: use setup()
+
+        path = os.environ.get("AIM_TRACKING_URI")
+
         try:
             return self.aim_run
         except AttributeError:
@@ -93,7 +98,7 @@ class AIMPlugin(ZnTrackPlugin):
             run.track(value, name=f"{attribute}.{key}", step=step)
 
     @classmethod
-    def finalize(cls, rev: str | None = None, path_to_aim: str = "."):
+    def finalize(cls, rev: str | None = None):
         """Update the aim run to include the correct commit data.
 
         Run this, once you have created a commit for your DVC experiment.
@@ -103,8 +108,6 @@ class AIMPlugin(ZnTrackPlugin):
         ----------
         rev : str, optional
             The git revision to use. If None, 'HEAD' will be used.
-        path_to_aim : str, optional
-            The path to the aim repository. Default is '.'.
 
         Example:
         -------
@@ -139,9 +142,9 @@ class AIMPlugin(ZnTrackPlugin):
         for node_name in node_names:
             node = zntrack.from_rev(node_name, rev=rev)
             plugin = cls(node)
-            run = plugin.get_aim_run(path=path_to_aim)
+            run = plugin.get_aim_run()
             run["git_hash"] = commit_hash
-            run["git_commit_message"] = commit_message
+            run["git_commit_message"] = commit_message.strip()
             if remote_url is not None:
                 run["git_remote"] = remote_url
             run.experiment = commit_hash
