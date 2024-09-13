@@ -3,22 +3,19 @@
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/NodeA"
-        },
-        "name": "NodeA"
+        }
     },
     "NodeA_1": {
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/NodeA_1"
-        },
-        "name": "NodeA_1"
+        }
     },
     "NodeB": {
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/NodeB"
         },
-        "name": "NodeB",
         "input": {
             "_type": "znflow.CombinedConnections",
             "value": {

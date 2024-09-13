@@ -182,8 +182,11 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_dvc_yaml(self) -> dict | object:
         node_dict = converter.NodeConverter().encode(self.node)
 
+        cmd = f"zntrack run {node_dict['module']}.{node_dict['cls']} --name {node_dict['name']}"
+        if hasattr(self.node, "_method"):
+            cmd += f" --method {self.node._method}"
         stages = {
-            "cmd": f"zntrack run {node_dict['module']}.{node_dict['cls']} --name {node_dict['name']}",
+            "cmd": cmd,
             "metrics": [
                 {(self.node.nwd / "node-meta.json").as_posix(): {"cache": False}}
             ],
@@ -295,7 +298,6 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_zntrack_json(self, graph) -> dict | object:
         data = {
             "nwd": self.node.nwd,
-            "name": self.node.name,
         }
         for field in dataclasses.fields(self.node):
             if field.metadata.get(ZNTRACK_OPTION) in [
