@@ -39,6 +39,11 @@ def get_mlflow_parent_run() -> str:
         parent_run_id = run.info.run_id
         exp_info["parent_run_id"] = parent_run_id
         set_exp_info(exp_info)
+
+        # set tags
+        tags = exp_info.get("tags", {})
+        for tag_key, tag_value in tags.items():
+            mlflow.set_tag(tag_key, tag_value)
         return parent_run_id
 
 

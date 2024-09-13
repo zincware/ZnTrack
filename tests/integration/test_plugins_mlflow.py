@@ -179,15 +179,23 @@ def test_multiple_nodes(mlflow_proj_path):
     a_run_2 = mlflow.search_runs(
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{a.name}'",
         output_format="list",
-    )[0]
+    )
+    assert len(a_run_2) == 1
+    a_run_2 = a_run_2[0]
+
     b_run_2 = mlflow.search_runs(
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{b.name}'",
         output_format="list",
-    )[0]
+    )
+    assert len(b_run_2) == 1
+    b_run_2 = b_run_2[0]
+
     c_run_2 = mlflow.search_runs(
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{c.name}'",
         output_format="list",
-    )[0]
+    )
+    assert len(c_run_2) == 1
+    c_run_2 = c_run_2[0]
 
     assert "original_run_id" not in a_run_2.data.tags
     assert b_run_2.data.tags["original_run_id"] == b_run.info.run_id
@@ -196,5 +204,35 @@ def test_multiple_nodes(mlflow_proj_path):
     assert c_run_2.data.metrics == {"metrics.value": 12.0}
 
 
+def test_project_tags(mlflow_proj_path):
+    with zntrack.Project(tags={"lorem": "ipsum", "hello": "world"}) as proj:
+        a = zntrack.examples.ParamsToOuts(params=3)
+        b = zntrack.examples.ParamsToOuts(params=7)
+        c = zntrack.examples.SumNodeAttributesToMetrics(inputs=[a.outs, b.outs], shift=0)
+
+    proj.repro()
+
+    with a.state.plugins["MLFlowPlugin"]:
+        a_run = mlflow.get_run(a.state.plugins["MLFlowPlugin"].child_run_id)
+        parent_run = mlflow.get_run(a.state.plugins["MLFlowPlugin"].parent_run_id)
+
+    with b.state.plugins["MLFlowPlugin"]:
+        b_run = mlflow.get_run(b.state.plugins["MLFlowPlugin"].child_run_id)
+
+    with c.state.plugins["MLFlowPlugin"]:
+        c_run = mlflow.get_run(c.state.plugins["MLFlowPlugin"].child_run_id)
+
+    assert a_run.data.tags["lorem"] == "ipsum"
+    assert a_run.data.tags["hello"] == "world"
+
+    assert b_run.data.tags["lorem"] == "ipsum"
+    assert b_run.data.tags["hello"] == "world"
+
+    assert c_run.data.tags["lorem"] == "ipsum"
+    assert c_run.data.tags["hello"] == "world"
+
+    assert parent_run.data.tags["lorem"] == "ipsum"
+    assert parent_run.data.tags["hello"] == "world"
+
+
 # TODO: test plots via extend_plots and via setting them at the end
-# TODO: test project tags

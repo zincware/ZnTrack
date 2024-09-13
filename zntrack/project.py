@@ -29,7 +29,7 @@ class Project(znflow.DiGraph):
         disable=False,
         immutable_nodes=True,
         deployment=None,
-        tags: dict | None = None,
+        tags: dict[str, str] | None = None,
         **kwargs,
     ):
         if deployment is None:
