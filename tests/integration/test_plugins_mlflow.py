@@ -136,7 +136,65 @@ def test_mlflow_plotting(mlflow_proj_path):
     assert run.data.tags["git_commit_hash"] == repo.head.commit.hexsha
 
 
-# TODO: test multiple nodes
-# TODO: test changes within one but not both nodes between commits
+def test_multiple_nodes(mlflow_proj_path):
+    with zntrack.Project() as proj:
+        a = zntrack.examples.ParamsToOuts(params=3)
+        b = zntrack.examples.ParamsToOuts(params=7)
+        c = zntrack.examples.SumNodeAttributesToMetrics(inputs=[a.outs, b.outs], shift=0)
+
+    proj.repro()
+
+    assert c.metrics == {"value": 10.0}
+
+    with a.state.plugins["MLFlowPlugin"]:
+        a_run = mlflow.get_run(a.state.plugins["MLFlowPlugin"].child_run_id)
+
+    with b.state.plugins["MLFlowPlugin"]:
+        b_run = mlflow.get_run(b.state.plugins["MLFlowPlugin"].child_run_id)
+
+    with c.state.plugins["MLFlowPlugin"]:
+        c_run = mlflow.get_run(c.state.plugins["MLFlowPlugin"].child_run_id)
+
+    assert c_run.data.metrics == {"metrics.value": 10.0}
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "exp1")
+    proj.finalize()
+
+    a.params = 5
+    proj.repro()
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "exp2")
+    proj.finalize()
+
+    # find all runs with `git_commit_hash` == repo.head.commit.hexsha
+    runs = mlflow.search_runs(
+        filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}'"
+    )
+    assert len(runs) == 4
+
+    a_run_2 = mlflow.search_runs(
+        filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{a.name}'",
+        output_format="list",
+    )[0]
+    b_run_2 = mlflow.search_runs(
+        filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{b.name}'",
+        output_format="list",
+    )[0]
+    c_run_2 = mlflow.search_runs(
+        filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{c.name}'",
+        output_format="list",
+    )[0]
+
+    assert "original_run_id" not in a_run_2.data.tags
+    assert b_run_2.data.tags["original_run_id"] == b_run.info.run_id
+    assert "original_run_id" not in c_run_2.data.tags
+
+    assert c_run_2.data.metrics == {"metrics.value": 12.0}
+
+
 # TODO: test plots via extend_plots and via setting them at the end
 # TODO: test project tags

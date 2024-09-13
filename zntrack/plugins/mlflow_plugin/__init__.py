@@ -261,33 +261,34 @@ class MLFlowPlugin(ZnTrackPlugin):
                     continue
                 print(f"found original run for {node_name} - {original_runs}")
                 original_run_id = original_runs.iloc[0].run_id
-                with cls(node).get_mlflow_parent_run():
-                    with mlflow.start_run(nested=True):
-                        mlflow.set_tag("dvc_stage_name", node.name)
-                        mlflow.set_tag(
-                            "zntrack_node",
-                            f"{node.__module__}.{node.__class__.__name__}",
-                        )
-                        mlflow.set_tag("original_run_id", original_run_id)
-                        # copy parameters and metrics from the original run
-                        original_run = mlflow.get_run(original_run_id)
-                        for key, value in original_run.data.params.items():
-                            mlflow.log_param(key, value)
-                        for key, value in original_run.data.metrics.items():
-                            mlflow.log_metric(key, value)
 
-                        # set git hash and commit message
-                        mlflow.set_tag("git_commit_hash", commit_hash)
-                        mlflow.set_tag("git_commit_message", commit_message.strip())
-                        if remote_url is not None:
-                            mlflow.set_tag("git_remote", remote_url)
+                get_mlflow_parent_run()
+                with mlflow.start_run(nested=True):
+                    mlflow.set_tag("dvc_stage_name", node.name)
+                    mlflow.set_tag(
+                        "zntrack_node",
+                        f"{node.__module__}.{node.__class__.__name__}",
+                    )
+                    mlflow.set_tag("original_run_id", original_run_id)
+                    # copy parameters and metrics from the original run
+                    original_run = mlflow.get_run(original_run_id)
+                    for key, value in original_run.data.params.items():
+                        mlflow.log_param(key, value)
+                    for key, value in original_run.data.metrics.items():
+                        mlflow.log_metric(key, value)
 
-                        mlflow.set_tag(
-                            "original_dvc_stage_hash", node.state.get_stage_hash()
-                        )
-                        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
-                        for tag_key, tag_value in tags.items():
-                            mlflow.set_tag(tag_key, tag_value)
+                    # set git hash and commit message
+                    mlflow.set_tag("git_commit_hash", commit_hash)
+                    mlflow.set_tag("git_commit_message", commit_message.strip())
+                    if remote_url is not None:
+                        mlflow.set_tag("git_remote", remote_url)
+
+                    mlflow.set_tag("original_dvc_stage_hash", node.state.get_stage_hash())
+                    mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
+                    for tag_key, tag_value in tags.items():
+                        mlflow.set_tag(tag_key, tag_value)
+                while mlflow.active_run():
+                    mlflow.end_run()
 
         # remove the parent run id exp_info
         exp_info.pop("parent_run_id")

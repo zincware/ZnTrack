@@ -1,6 +1,7 @@
 import contextlib
 import json
 import logging
+import os
 import pathlib
 import subprocess
 
@@ -8,8 +9,11 @@ import tqdm
 import yaml
 import znflow
 
+from zntrack import utils
 from zntrack.config import NWD_PATH
 from zntrack.group import Group
+from zntrack.state import PLUGIN_LIST
+from zntrack.utils.import_handler import import_handler
 from zntrack.utils.misc import load_env_vars
 
 from . import config
@@ -123,6 +127,17 @@ class Project(znflow.DiGraph):
         subprocess.check_call(
             "dvc repro", shell=True, restore_signals=False, close_fds=True
         )
+
+    def finalize(self):
+        # do we want to run a git commit?
+        # repo should not be dirty
+        utils.misc.load_env_vars()
+        plugins_paths = os.environ.get(
+            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+        )
+        plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
+        for plugin in plugins:
+            plugin.finalize()
 
     @contextlib.contextmanager
     def group(self, *names: str):
