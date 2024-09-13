@@ -18,12 +18,16 @@ if t.TYPE_CHECKING:
     pass
 
 
-def _create_aim_run(aim_repo, experiment, stage_hash, stage_name, node_path) -> str:
+def _create_aim_run(
+    aim_repo, experiment, stage_hash, stage_name, node_path, tags: dict[str, str]
+) -> str:
     assert experiment.startswith("exp-")
     run = aim.Run(repo=aim_repo, experiment=experiment)
     run["dvc_stage_hash"] = stage_hash
     run["dvc_stage_name"] = stage_name
     run["zntrack_node"] = node_path
+    for tag_key, tag_value in tags.items():
+        run.add_tag(f"{tag_key}={tag_value}")
     run.close()
     return run.hash
 
@@ -44,12 +48,15 @@ def get_aim_run_id(stage_hash: str, stage_name: str, node_path: str) -> tuple[st
     aim_repo = aim.Repo(path=os.environ["AIM_TRACKING_URI"])
     exp_info = get_exp_info()
     experiment = exp_info.get("aim_experiment")
+    tags = exp_info.get("tags", {})
     if experiment is None:
         experiment = f"exp-{uuid.uuid4().hex[:8]}"
         exp_info["aim_experiment"] = experiment
         set_exp_info(exp_info)
         return (
-            _create_aim_run(aim_repo, experiment, stage_hash, stage_name, node_path),
+            _create_aim_run(
+                aim_repo, experiment, stage_hash, stage_name, node_path, tags
+            ),
             True,
         )
     else:
@@ -58,7 +65,9 @@ def get_aim_run_id(stage_hash: str, stage_name: str, node_path: str) -> tuple[st
         ).iter():
             return run_metrics_col.run.hash, False
         return (
-            _create_aim_run(aim_repo, experiment, stage_hash, stage_name, node_path),
+            _create_aim_run(
+                aim_repo, experiment, stage_hash, stage_name, node_path, tags
+            ),
             True,
         )
 

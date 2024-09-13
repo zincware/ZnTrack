@@ -124,3 +124,16 @@ def test_multiple_nodes(aim_proj_path):
         f"run.dvc_stage_name == '{b.name}' and run.git_commit_hash == '{repo.head.commit.hexsha}'"
     ).iter():
         assert run_metrics_col.run.dataframe()["original_run_id"].tolist() == [b_run_id]
+
+
+def test_project_tags(aim_proj_path):
+    with zntrack.Project(tags={"lorem": "ipsum", "hello": "world"}) as proj:
+        a = zntrack.examples.ParamsToOuts(params=3)
+        b = zntrack.examples.ParamsToOuts(params=7)
+        c = zntrack.examples.SumNodeAttributesToMetrics(inputs=[a.outs, b.outs], shift=0)
+
+    proj.repro()
+
+    with a.state.plugins["AIMPlugin"].get_aim_run() as run:
+        run: aim.Run
+        assert set(run.tags) == {"lorem=ipsum", "hello=world"}
