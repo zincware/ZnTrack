@@ -17,6 +17,23 @@ if t.TYPE_CHECKING:
 
 
 class AIMPlugin(ZnTrackPlugin):
+    """ZnTrack integration with AIM.
+    
+    ```mermaid
+    flowchart LR
+        repo --> commit --> stage
+        
+        subgraph AIM repo
+        repo
+        end
+        subgraph Experiment
+        commit
+        end
+        subgraph Run
+        stage
+        end
+    ```
+    """
 
     _continue_on_error_ = True
 
