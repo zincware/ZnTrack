@@ -60,7 +60,7 @@ jobs:
           virtualenvs-in-project: true
       - name: Install package
         run: |
-          poetry install --no-interaction  
+          poetry install --no-interaction
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
