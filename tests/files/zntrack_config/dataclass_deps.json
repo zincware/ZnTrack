@@ -4,7 +4,6 @@
             "_type": "pathlib.Path",
             "value": "nodes/MD"
         },
-        "name": "MD",
         "thermostat": {
             "_type": "@dataclasses.dataclass",
             "value": {
@@ -17,15 +16,13 @@
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/multiple_deps/MLThermostat"
-        },
-        "name": "multiple_deps_MLThermostat"
+        }
     },
     "multiple_deps_MD": {
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/multiple_deps/MD"
         },
-        "name": "multiple_deps_MD",
         "thermostat": [
             {
                 "_type": "@dataclasses.dataclass",
