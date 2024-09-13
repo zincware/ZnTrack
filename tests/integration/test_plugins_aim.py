@@ -1,13 +1,12 @@
-import json
 import os
-import subprocess
+import pathlib
 
+import git
+import numpy.testing as npt
 import pytest
+import yaml
 
 import zntrack.examples
-import pathlib, yaml, uuid
-import numpy.testing as npt
-import git
 
 try:
     import aim
@@ -83,7 +82,6 @@ def test_aim_metrics(aim_proj_path):
             npt.assert_array_equal(metric_values, [0])
             assert metric.name == "metrics.loss"
 
-    
     # make a git commit with all the changes
     repo = git.Repo()
     repo.git.add(".")
