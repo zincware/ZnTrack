@@ -88,7 +88,7 @@ class ZnTrackPlugin(abc.ABC):
         return
 
     @classmethod
-    def finalize(cls, rev: str | None = None, path_to_aim: str = ".") -> None:
+    def finalize(cls) -> None:
         return
 
 

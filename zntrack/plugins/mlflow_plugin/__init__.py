@@ -170,7 +170,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         mlflow.log_metrics(new_data, step=step)
 
     @classmethod
-    def finalize(cls, rev: str | None = None):
+    def finalize(cls):
         """Example:
         -------
         python -c "from zntrack.plugins.mlflow_plugin import MLFlowPlugin; MLFlowPlugin.finalize()"
@@ -181,10 +181,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         # and then find the parent run by querying the tags
 
         # TODO: provide post-commit installation instructions
-
-        if rev is not None:
-            raise NotImplementedError("rev is not supported yet")
-        load_env_vars("")
+        load_env_vars()
 
         exp_info = get_exp_info()
         if "parent_run_id" not in exp_info:
@@ -197,12 +194,8 @@ class MLFlowPlugin(ZnTrackPlugin):
         if repo.is_dirty():
             raise ValueError("Can only finalize a clean git repository")
 
-        if rev is None:
-            commit_hash = repo.head.commit.hexsha
-            commit_message = repo.head.commit.message
-        else:
-            commit_hash = repo.commit(rev).hexsha
-            commit_message = repo.commit(rev).message
+        commit_hash = repo.head.commit.hexsha
+        commit_message = repo.head.commit.message
 
         # get the default remote for the current branch
         try:
@@ -212,7 +205,7 @@ class MLFlowPlugin(ZnTrackPlugin):
             remote_url = None
 
         node_names = []
-        with dvc.repo.Repo(rev=rev) as repo:
+        with dvc.repo.Repo() as repo:
             for stage in repo.index.stages:
                 with contextlib.suppress(AttributeError):
                     # only PipelineStages have a name attribute
@@ -220,7 +213,7 @@ class MLFlowPlugin(ZnTrackPlugin):
                     node_names.append(stage.name)
 
         for node_name in node_names:
-            node = zntrack.from_rev(node_name, rev=rev)
+            node = zntrack.from_rev(node_name)
             plugin = cls(node)
 
             with plugin:
@@ -241,7 +234,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         print(f"found {len(child_runs)} child runs in exp: '{active_experiment_id}'")
         for node_name in node_names:
             if node_name in child_runs["tags.dvc_stage_name"].values:
-                node = zntrack.from_rev(node_name, rev=rev)
+                node = zntrack.from_rev(node_name)
                 with node.state.plugins["MLFlowPlugin"]:
                     mlflow.set_tag("git_commit_hash", commit_hash)
                     mlflow.set_tag("git_commit_message", commit_message.strip())
@@ -249,7 +242,7 @@ class MLFlowPlugin(ZnTrackPlugin):
                         mlflow.set_tag("git_remote", remote_url)
             else:
                 print(f"missing {node_name}")
-                node = zntrack.from_rev(node_name, rev=rev)
+                node = zntrack.from_rev(node_name)
                 stage_hash = node.state.get_stage_hash()
                 original_runs = mlflow.search_runs(
                     experiment_ids=[active_experiment_id],

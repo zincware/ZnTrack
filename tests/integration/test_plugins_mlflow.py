@@ -236,3 +236,5 @@ def test_project_tags(mlflow_proj_path):
 
 
 # TODO: test plots via extend_plots and via setting them at the end
+# each plugin must keep track of plots which are extended
+#  -> code duplication. This should be done in the node.state?
