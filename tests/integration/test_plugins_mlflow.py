@@ -87,7 +87,7 @@ def test_mlflow_metrics(mlflow_proj_path):
     run = mlflow.get_run(child_run_id)  # need to query the run again
 
     assert run.data.tags["git_commit_message"] == "test"
-    assert run.data.tags["git_hash"] == repo.head.commit.hexsha
+    assert run.data.tags["git_commit_hash"] == repo.head.commit.hexsha
 
 
 def test_mlflow_plotting(mlflow_proj_path):
@@ -133,7 +133,7 @@ def test_mlflow_plotting(mlflow_proj_path):
     run = mlflow.get_run(child_run_id)  # need to query the run again
 
     assert run.data.tags["git_commit_message"] == "test"
-    assert run.data.tags["git_hash"] == repo.head.commit.hexsha
+    assert run.data.tags["git_commit_hash"] == repo.head.commit.hexsha
 
 
 # TODO: test multiple nodes

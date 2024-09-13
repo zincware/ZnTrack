@@ -8,10 +8,8 @@ import yaml
 
 import zntrack.examples
 
-try:
-    import aim
-except ImportError:
-    aim = None
+import aim
+
 
 
 class MetricsNode(zntrack.Node):
@@ -50,7 +48,6 @@ def aim_proj_path(proj_path):
     # del os.environ["MLFLOW_EXPERIMENT_NAME"]
 
 
-@pytest.mark.skipif(aim is None, reason="Aim is not installed.")
 def test_aim_metrics(aim_proj_path):
 
     with zntrack.Project() as proj:
@@ -59,31 +56,30 @@ def test_aim_metrics(aim_proj_path):
     proj.build()
     proj.repro(build=False)
 
-    # with open(node.nwd / "data.json") as f:
-    #     metrics = json.load(f)
-
-    # assert metrics == {"age": 42}
-
-    # run = node.state.plugins["AIMPlugin"].get_aim_run()
-    # assert run["dvc_stage_hash"] == node.state.get_stage_hash()
-
-    repo = aim.Repo(path=os.environ["AIM_TRACKING_URI"])
-    for run_metrics_collection in repo.query_metrics(
-        "metric.name == 'metrics.loss'"
-    ).iter_runs():
-        for metric in run_metrics_collection:
-            params = metric.run[...]
-            assert params["dvc_stage_hash"] == node.state.get_stage_hash()
-            assert params["zntrack_node"] == "zntrack.examples.ParamsToMetrics"
-            assert params["dvc_stage_name"] == "ParamsToMetrics"
-            assert params["params"] == {"loss": 0}
-
-            _, metric_values = metric.values.sparse_numpy()
-            npt.assert_array_equal(metric_values, [0])
-            assert metric.name == "metrics.loss"
+    # assert before commit causes strange issues
 
     # make a git commit with all the changes
     repo = git.Repo()
     repo.git.add(".")
     repo.git.commit("-m", "test")
     node.state.plugins["AIMPlugin"].finalize()
+
+    node.state.plugins["AIMPlugin"]
+    run = node.state.plugins["AIMPlugin"].get_aim_run()
+    df = run.dataframe()
+    assert df["dvc_stage_name"].tolist() == ["ParamsToMetrics"]
+    assert df["dvc_stage_hash"].tolist() == [node.state.get_stage_hash()]
+    assert df["zntrack_node"].tolist() == ["zntrack.examples.ParamsToMetrics"]
+    assert df["params.loss"].tolist() == [0]
+    assert df["git_commit_message"].tolist() == ["test"]
+    assert df["git_commit_hash"].tolist() == [repo.head.commit.hexsha]
+
+    # assert df["tags"]
+    # assert df["name"]
+
+    # metrics
+    metrics = {}
+    for metric in run.metrics():
+        metrics[metric.name] = list(metric.data.values())[0]
+
+    npt.assert_array_equal(metrics["metrics.loss"], [[0]])

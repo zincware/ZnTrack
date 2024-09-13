@@ -204,7 +204,7 @@ class MLFlowPlugin(ZnTrackPlugin):
             with plugin:
                 pass  # load run_id states
             with mlflow.start_run(run_id=plugin.parent_run_id):
-                mlflow.set_tag("git_hash", commit_hash)
+                mlflow.set_tag("git_commit_hash", commit_hash)
                 mlflow.set_tag("git_commit_message", commit_message)
                 if remote_url is not None:
                     mlflow.set_tag("git_remote", remote_url)
@@ -221,7 +221,7 @@ class MLFlowPlugin(ZnTrackPlugin):
             if node_name in child_runs["tags.dvc_stage_name"].values:
                 node = zntrack.from_rev(node_name, rev=rev)
                 with node.state.plugins["MLFlowPlugin"]:
-                    mlflow.set_tag("git_hash", commit_hash)
+                    mlflow.set_tag("git_commit_hash", commit_hash)
                     mlflow.set_tag("git_commit_message", commit_message.strip())
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
@@ -260,7 +260,7 @@ class MLFlowPlugin(ZnTrackPlugin):
                             mlflow.log_metric(key, value)
 
                         # set git hash and commit message
-                        mlflow.set_tag("git_hash", commit_hash)
+                        mlflow.set_tag("git_commit_hash", commit_hash)
                         mlflow.set_tag("git_commit_message", commit_message.strip())
                         if remote_url is not None:
                             mlflow.set_tag("git_remote", remote_url)
