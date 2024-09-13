@@ -74,7 +74,7 @@ def get_mlflow_child_run(stage_hash: str, node_name: str, node_path: str) -> str
 @dataclass
 class MLFlowPlugin(ZnTrackPlugin):
     """ZnTrack integration with MLFlow.
-    
+
     ```mermaid
     flowchart LR
         repo --> commit --> stage
