@@ -8,9 +8,6 @@ import yaml
 
 import zntrack.examples
 
-import aim
-
-
 
 class MetricsNode(zntrack.Node):
     user: str = zntrack.params()

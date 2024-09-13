@@ -66,9 +66,7 @@ class AIMPlugin(ZnTrackPlugin):
 
             run["dvc_stage_hash"] = uid
             run["git_remote"] = pathlib.Path.cwd().as_posix()
-            run["zntrack_node"] = (
-                f"{self.node.__module__}.{self.node.__class__.__name__}"
-            )
+            run["zntrack_node"] = f"{self.node.__module__}.{self.node.__class__.__name__}"
             run["dvc_stage_name"] = self.node.name
             # add a tag for the node
             run.add_tag(self.node.__class__.__name__)
