@@ -42,7 +42,6 @@ class DataclassContainer:
         else:
             dc_params = all_params[node_name][attr_name]
         dc_params.pop("_cls", None)
-        print(self.cls)
         return self.cls(**dc_params)
 
 

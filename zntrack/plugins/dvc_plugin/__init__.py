@@ -267,7 +267,6 @@ class DVCPlugin(ZnTrackPlugin):
                 stages.setdefault(ZnTrackOptionEnum.METRICS.value, []).extend(content)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
                 content = get_attr_always_list(self.node, field.name)
-                # TODO: what if I pass a zntrack.Node ? Needs a test!
                 paths = []
                 for con in content:
                     if isinstance(con, (znflow.Connection)):

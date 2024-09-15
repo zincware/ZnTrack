@@ -102,7 +102,6 @@ class Project(znflow.DiGraph):
         if len(dvc_dict["plots"]) == 0:
             del dvc_dict["plots"]
 
-        log.info(f"Saving {params_dict = }")
         config.PARAMS_FILE_PATH.write_text(yaml.safe_dump(params_dict))
         config.DVC_FILE_PATH.write_text(yaml.safe_dump(dvc_dict))
         config.ZNTRACK_FILE_PATH.write_text(json.dumps(zntrack_dict, indent=4))
