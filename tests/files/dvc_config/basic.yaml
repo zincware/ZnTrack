@@ -1,3 +1,14 @@
+plots:
+- MyNode_plots:
+    x:
+      nodes/MyNode/plots.csv: step
+    y:
+      nodes/MyNode/plots.csv: y
+- MyNode_plots_no_cache:
+    x:
+      nodes/MyNode/plots_no_cache.csv: step
+    y:
+      nodes/MyNode/plots_no_cache.csv: y
 stages:
   MyNode:
     cmd: zntrack run test_basic.MyNode --name MyNode

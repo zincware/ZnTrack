@@ -8,7 +8,7 @@ import zntrack
 class PandasPlotNode(zntrack.Node):
     n: int = zntrack.params()
 
-    plot: pd.DataFrame = zntrack.plots()
+    plot: pd.DataFrame = zntrack.plots(y="y", x="x")
 
     def run(self):
         self.plot = pd.DataFrame({"x": range(self.n), "y": range(self.n)})
