@@ -9,9 +9,12 @@ import aim
 import dvc.repo
 import git
 import pandas as pd
+import znflow
 
 from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
+from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, get_exp_info, set_exp_info
+from zntrack.utils import module_handler
 from zntrack.utils.misc import load_env_vars
 
 if t.TYPE_CHECKING:
@@ -109,6 +112,29 @@ class AIMPlugin(ZnTrackPlugin):
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
             with self.get_aim_run() as run:
                 run[field.name] = getattr(self.node, field.name)
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+            content = getattr(self.node, field.name)
+            new_content = []
+            if not isinstance(content, (list, tuple)):
+                content = [content]
+                # TODO: code duplication with the other plugins!
+            for val in content:
+                if dataclasses.is_dataclass(val) and not isinstance(
+                    val, (Node, znflow.Connection, znflow.CombinedConnections)
+                ):
+                    # We save the values of the passed dataclasses
+                    #  to the params.yaml file to be later used
+                    #  by the DataclassContainer to recreate the
+                    #  instance with the correct parameters.
+                    dc_params = dataclasses.asdict(val)
+                    dc_params["_cls"] = f"{module_handler(val)}.{val.__class__.__name__}"
+                    new_content.append(dc_params)
+            with self.get_aim_run() as run:
+                run[field.name] = (
+                    new_content
+                    if isinstance(getattr(self.node, field.name), list)
+                    else new_content[0]
+                )
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
             with self.get_aim_run() as run:
                 assert isinstance(getattr(self.node, field.name), dict)

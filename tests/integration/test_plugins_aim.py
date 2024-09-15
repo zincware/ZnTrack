@@ -1,3 +1,4 @@
+import dataclasses
 import os
 import pathlib
 
@@ -9,6 +10,25 @@ import pytest
 import yaml
 
 import zntrack.examples
+
+
+@dataclasses.dataclass
+class T1:
+    temperature: float
+
+
+@dataclasses.dataclass
+class T2:
+    temperature: float
+
+
+class MD(zntrack.Node):
+    t: T1 | T2 | list = zntrack.deps()
+
+    result: str = zntrack.outs()
+
+    def run(self):
+        self.result = self.t.__class__.__name__
 
 
 class RangePlotter(zntrack.Node):
@@ -182,3 +202,45 @@ def test_project_tags(aim_proj_path):
     with a.state.plugins["AIMPlugin"].get_aim_run() as run:
         run: aim.Run
         assert set(run.tags) == {"lorem=ipsum", "hello=world"}
+
+
+def test_dataclass_deps(aim_proj_path):
+    t1 = T1(temperature=1)
+    t2 = T2(temperature=1)
+
+    with zntrack.Project() as proj:
+        md = MD(t=t1)
+
+    proj.repro()
+
+    with md.state.plugins["AIMPlugin"].get_aim_run() as run:
+        df = run.dataframe()
+        assert df["t.temperature"].tolist() == [1.0]
+        assert df["t._cls"].tolist() == ["test_plugins_aim.T1"]
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "test")
+    proj.finalize()
+
+    md.t = t2
+    proj.repro()
+
+    with md.from_rev().state.plugins["AIMPlugin"].get_aim_run() as run:
+        df = run.dataframe()
+        assert df["t.temperature"].tolist() == [1.0]
+        assert df["t._cls"].tolist() == ["test_plugins_aim.T2"]
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "test")
+    proj.finalize()
+
+    md.t = [t1, t2]
+    proj.repro()
+
+    with md.from_rev().state.plugins["AIMPlugin"].get_aim_run() as run:
+        df = run.dataframe()
+        assert df["t"].tolist() == [
+            '[{"_cls": "test_plugins_aim.T1", "temperature": 1}, {"_cls": "test_plugins_aim.T2", "temperature": 1}]'
+        ]
