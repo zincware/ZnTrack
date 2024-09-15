@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 import json
 import pathlib
@@ -44,7 +45,10 @@ def _metrics_save_func(self: "Node", name: str):
 
 
 def _plots_save_func(self: "Node", name: str):
-    (self.nwd / name).with_suffix(".csv").write_text(getattr(self, name).to_csv())
+    content = getattr(self, name)
+    if not isinstance(content, pd.DataFrame):
+        raise TypeError(f"Expected a pandas DataFrame, got {type(content)}")
+    content.to_csv((self.nwd / name).with_suffix(".csv"))
 
 
 def _paths_getter(self: "Node", name: str):
@@ -113,7 +117,7 @@ def _outs_getter(self: "Node", name: str):
 
 def _plots_getter(self: "Node", name: str):
     with self.state.fs.open((self.nwd / name).with_suffix(".csv")) as f:
-        self.__dict__[name] = pd.read_csv(f)
+        self.__dict__[name] = pd.read_csv(f, index_col=0)
 
 
 @dataclasses.dataclass
@@ -255,11 +259,21 @@ class DVCPlugin(ZnTrackPlugin):
                         (self.node.nwd / field.name).with_suffix(".csv").as_posix()
                     )
                     plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG]
+                    if "x" not in plots_config or "y" not in plots_config:
+                        raise ValueError(
+                            "Both 'x' and 'y' must be specified in the plots_config."
+                        )
                     if "x" in plots_config:
                         plots_config["x"] = {file_path: plots_config["x"]}
-                    if "y" in plots_config:
-                        plots_config["y"] = {file_path: plots_config["y"]}
-                    plots.append({f"{self.node.name}_{field.name}": plots_config})
+                    if isinstance(plots_config["y"], list):
+                        for idx, y in enumerate(plots_config["y"]):
+                            cfg = copy.deepcopy(plots_config)
+                            cfg["y"] = {file_path: y}
+                            plots.append({f"{self.node.name}_{field.name}_{idx}": cfg})
+                    else:
+                        if "y" in plots_config:
+                            plots_config["y"] = {file_path: plots_config["y"]}
+                        plots.append({f"{self.node.name}_{field.name}": plots_config})
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
                 content = [(self.node.nwd / field.name).with_suffix(".json").as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:

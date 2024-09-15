@@ -1,3 +1,14 @@
+plots:
+- NodeA1_plots:
+    x:
+      nodes/NodeA1/plots.csv: step
+    y:
+      nodes/NodeA1/plots.csv: y
+- NodeA2_plots:
+    x:
+      nodes/NodeA2/plots.csv: step
+    y:
+      nodes/NodeA2/plots.csv: y
 stages:
   NodeA1:
     cmd: zntrack run test_dependencies.NodeA1 --name NodeA1

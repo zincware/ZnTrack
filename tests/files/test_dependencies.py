@@ -17,7 +17,7 @@ class NodeA1(zntrack.Node):
 
     results: int = zntrack.outs()
     metrics: dict = zntrack.metrics()
-    plots: pd.DataFrame = zntrack.plots()
+    plots: pd.DataFrame = zntrack.plots(y="y")
 
     def run(self):
         pass
@@ -32,7 +32,7 @@ class NodeA2(zntrack.Node):
 
     results: int = zntrack.outs(independent=True)
     metrics: dict = zntrack.metrics(independent=True)
-    plots: pd.DataFrame = zntrack.plots(independent=True)
+    plots: pd.DataFrame = zntrack.plots(independent=True, y="y")
 
     def run(self):
         pass

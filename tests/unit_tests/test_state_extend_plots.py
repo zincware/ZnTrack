@@ -6,7 +6,7 @@ from zntrack.exceptions import InvalidOptionError
 
 
 class MyNode(zntrack.Node):
-    plots: pd.DataFrame = zntrack.plots()
+    plots: pd.DataFrame = zntrack.plots(y="y")
     epochs: int = zntrack.params(10)
 
     def run(self):

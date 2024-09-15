@@ -42,7 +42,7 @@ class ParamsToMetrics(zntrack.Node):
 class WritePlots(zntrack.Node):
     """Generate a plot."""
 
-    plots: pd.DataFrame = zntrack.plots()
+    plots: pd.DataFrame = zntrack.plots(x="x", y="y")
     x: list = zntrack.params(default_factory=lambda: [1, 2, 3])
     y: list = zntrack.params(default_factory=lambda: [4, 5, 6])
 

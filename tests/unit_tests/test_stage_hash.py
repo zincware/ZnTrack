@@ -20,17 +20,17 @@ class NodeWithMetrics(zntrack.Node):
 
 
 class NodeWithPlots(zntrack.Node):
-    plot: int = zntrack.plots()
+    plot: int = zntrack.plots(y="y")
 
 
 class NodeWithMetricsAndPlots(zntrack.Node):
     metric: int = zntrack.metrics()
-    plot: int = zntrack.plots()
+    plot: int = zntrack.plots(y="y")
 
 
 class NodeWithMetricsAndPlotsAndParams(zntrack.Node):
     metric: int = zntrack.metrics()
-    plot: int = zntrack.plots()
+    plot: int = zntrack.plots(y="y")
     param: int = zntrack.params(default=1)
 
 

@@ -159,6 +159,8 @@ class NodeStatus:
             # TODO: accessing data in a node that is not loaded will not raise NodeNotAvailableErrors!
             target = pd.DataFrame()
         df = pd.concat([target, pd.DataFrame([data])], ignore_index=True, axis=0)
+        if "step" not in df.columns:
+            df.index.name = "step"
         setattr(self.node, attribute, df)
         for plugin in self.plugins.values():
             plugin.extend_plots(attribute, data, reference=df)
