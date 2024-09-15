@@ -26,6 +26,7 @@ from zntrack.exceptions import NodeNotAvailableError
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, base_getter
+from zntrack.utils import module_handler
 from zntrack.utils.misc import (
     TempPathLoader,
     get_attr_always_list,
@@ -166,7 +167,11 @@ class DVCPlugin(ZnTrackPlugin):
                             #  to the params.yaml file to be later used
                             #  by the DataclassContainer to recreate the
                             #  instance with the correct parameters.
-                            new_content.append(dataclasses.asdict(val))
+                            dc_params = dataclasses.asdict(val)
+                            dc_params["_cls"] = (
+                                f"{module_handler(val)}.{val.__class__.__name__}"
+                            )
+                            new_content.append(dc_params)
                         else:
                             pass
                     if len(new_content) > 0:
@@ -174,7 +179,11 @@ class DVCPlugin(ZnTrackPlugin):
                 if dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
-                    data[field.name] = dataclasses.asdict(content)
+                    dc_params = dataclasses.asdict(content)
+                    dc_params["_cls"] = (
+                        f"{module_handler(content)}.{content.__class__.__name__}"
+                    )
+                    data[field.name] = dc_params
         if len(data) > 0:
             return data
         return PLUGIN_EMPTY_RETRUN_VALUE
@@ -279,6 +288,12 @@ class DVCPlugin(ZnTrackPlugin):
                                     _con.instance, _con.attribute
                                 )
                             )
+                    elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
+                        # add node name to params.yaml
+                        stages.setdefault(ZnTrackOptionEnum.PARAMS.value, []).append(
+                            self.node.name
+                        )
+
                 if len(paths) > 0:
                     stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS_PATH:

@@ -121,12 +121,13 @@ class Project(znflow.DiGraph):
 
         # TODO: update file or overwrite?
 
-    def repro(self, build: bool = True):
+    def repro(self, build: bool = True, force: bool = False):
         if build:
             self.build()
-        subprocess.check_call(
-            "dvc repro", shell=True, restore_signals=False, close_fds=True
-        )
+        cmd = ["dvc", "repro"]
+        if force:
+            cmd.append("--force")
+        subprocess.check_call(cmd)
 
     def finalize(self):
         # do we want to run a git commit?
