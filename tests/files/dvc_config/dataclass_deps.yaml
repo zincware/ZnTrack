@@ -6,6 +6,17 @@ stages:
         cache: false
     params:
     - MD
+    - zntrack.json:
+      - MD.thermostat
+  md2_MD2:
+    cmd: zntrack run test_dataclass_deps.MD2 --name md2_MD2
+    metrics:
+    - nodes/md2/MD2/node-meta.json:
+        cache: false
+    params:
+    - zntrack.json:
+      - md2_MD2.t1
+      - md2_MD2.t2
   multiple_deps_MD:
     cmd: zntrack run test_dataclass_deps.MD --name multiple_deps_MD
     deps:
@@ -15,6 +26,8 @@ stages:
         cache: false
     params:
     - multiple_deps_MD
+    - zntrack.json:
+      - multiple_deps_MD.thermostat
   multiple_deps_MLThermostat:
     cmd: zntrack run test_dataclass_deps.MLThermostat --name multiple_deps_MLThermostat
     metrics:

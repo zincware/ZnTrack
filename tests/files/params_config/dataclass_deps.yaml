@@ -3,6 +3,13 @@ MD:
   thermostat:
     friction: 0.1
     temperature: 300
+md2_MD2:
+  t1:
+    friction: 0.05
+    temperature: 300
+  t2:
+    friction: 0.1
+    temperature: 400
 multiple_deps_MD:
   steps: 100
   thermostat:

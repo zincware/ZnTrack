@@ -24,6 +24,13 @@ class MD(zntrack.Node):
     steps: int = zntrack.params()
 
 
+class MD2(zntrack.Node):
+    """Need to test two deps"""
+
+    t1: Thermostat = zntrack.deps()
+    t2: Thermostat = zntrack.deps()
+
+
 def test_deps_outside_graph(proj_path):
     thermostat = Thermostat(temperature=300)
 
@@ -36,6 +43,9 @@ def test_deps_outside_graph(proj_path):
         t1 = Thermostat(temperature=300, friction=0.05)
         t2 = Thermostat(temperature=400)
         md2 = MD(thermostat=[t1, ml, t2], steps=100)
+
+    with project.group("md2"):
+        _ = MD2(t1=t1, t2=t2)
 
     project.build()
 

@@ -259,6 +259,8 @@ class DVCPlugin(ZnTrackPlugin):
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
                 content = get_attr_always_list(self.node, field.name)
                 paths = []
+                params = stages.get(ZnTrackOptionEnum.PARAMS.value, [])
+                # TODO: what if I pass a zntrack.Node ? Needs a test!
                 for con in content:
                     if isinstance(con, (znflow.Connection)):
                         if con.item is not None:
@@ -279,8 +281,30 @@ class DVCPlugin(ZnTrackPlugin):
                                     _con.instance, _con.attribute
                                 )
                             )
+                    elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
+                        path_in_zntrack = f"{self.node.name}.{field.name}"
+                        for entry in params:
+                            if ZNTRACK_FILE_PATH.as_posix() in entry:
+                                if (
+                                    path_in_zntrack
+                                    not in entry[ZNTRACK_FILE_PATH.as_posix()]
+                                ):
+                                    entry[ZNTRACK_FILE_PATH.as_posix()].append(
+                                        path_in_zntrack
+                                    )
+                                    break
+                        else:
+                            params.append(
+                                {
+                                    ZNTRACK_FILE_PATH.as_posix(): [
+                                        path_in_zntrack,
+                                    ]
+                                }
+                            )
                 if len(paths) > 0:
                     stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
+                if len(params) > 0:
+                    stages.setdefault(ZnTrackOptionEnum.PARAMS.value, []).extend(params)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS_PATH:
                 content = [
                     pathlib.Path(c).as_posix()
