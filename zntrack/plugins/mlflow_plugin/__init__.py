@@ -1,4 +1,5 @@
 import contextlib
+import dataclasses
 import pathlib
 import warnings
 from dataclasses import Field, dataclass
@@ -8,6 +9,7 @@ import dvc.repo
 import git
 import mlflow
 import yaml
+import znflow
 from mlflow.utils import mlflow_tags
 
 from zntrack.config import (
@@ -16,7 +18,9 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
+from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, get_exp_info, set_exp_info
+from zntrack.utils import module_handler
 from zntrack.utils.misc import load_env_vars
 
 # TODO: if this plugin fails, there should only be a warning, not an error
@@ -142,6 +146,25 @@ class MLFlowPlugin(ZnTrackPlugin):
     def save(self, field: Field) -> None:
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
             mlflow.log_param(field.name, getattr(self.node, field.name))
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+            content = getattr(self.node, field.name)
+            new_content = []
+            if not isinstance(content, (list, tuple)):
+                content = [content]
+                # TODO: code duplication with the other plugins!
+            for val in content:
+                if dataclasses.is_dataclass(val) and not isinstance(
+                    val, (Node, znflow.Connection, znflow.CombinedConnections)
+                ):
+                    # We save the values of the passed dataclasses
+                    #  to the params.yaml file to be later used
+                    #  by the DataclassContainer to recreate the
+                    #  instance with the correct parameters.
+                    dc_params = dataclasses.asdict(val)
+                    dc_params["_cls"] = f"{module_handler(val)}.{val.__class__.__name__}"
+                    new_content.append(dc_params)
+            mlflow.log_param(field.name, new_content)
+
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
             metrics = getattr(self.node, field.name)
             for key, value in metrics.items():

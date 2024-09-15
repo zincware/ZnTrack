@@ -1,3 +1,4 @@
+import dataclasses
 import os
 import pathlib
 import uuid
@@ -9,6 +10,25 @@ import pytest
 import yaml
 
 import zntrack.examples
+
+
+@dataclasses.dataclass
+class T1:
+    temperature: float
+
+
+@dataclasses.dataclass
+class T2:
+    temperature: float
+
+
+class MD(zntrack.Node):
+    t: T1 | T2 | list = zntrack.deps()
+
+    result: str = zntrack.outs()
+
+    def run(self):
+        self.result = self.t.__class__.__name__
 
 
 class RangePlotter(zntrack.Node):
@@ -233,6 +253,59 @@ def test_project_tags(mlflow_proj_path):
 
     assert parent_run.data.tags["lorem"] == "ipsum"
     assert parent_run.data.tags["hello"] == "world"
+
+
+def test_dataclass_deps(mlflow_proj_path):
+    t1 = T1(temperature=1)
+    t2 = T2(temperature=1)
+
+    with zntrack.Project() as proj:
+        md = MD(t=t1)
+
+    proj.repro()
+
+    with md.state.plugins["MLFlowPlugin"]:
+        run = mlflow.get_run(md.state.plugins["MLFlowPlugin"].child_run_id)
+
+    assert (
+        run.data.params["t"] == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'}]"
+    )
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "test")
+    proj.finalize()
+
+    md.t = t2
+    proj.repro()
+
+    md = MD.from_rev()
+
+    with md.state.plugins["MLFlowPlugin"]:
+        run = mlflow.get_run(md.state.plugins["MLFlowPlugin"].child_run_id)
+
+    assert (
+        run.data.params["t"] == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
+    )
+
+    repo = git.Repo()
+    repo.git.add(".")
+    repo.git.commit("-m", "test")
+    proj.finalize()
+
+    with zntrack.Project() as proj:
+        md = MD(t=[t1, t2])
+    proj.repro()
+
+    md = MD.from_rev()
+
+    with md.state.plugins["MLFlowPlugin"]:
+        run = mlflow.get_run(md.state.plugins["MLFlowPlugin"].child_run_id)
+
+    assert (
+        run.data.params["t"]
+        == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'}, {'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
+    )
 
 
 # TODO: test plots via extend_plots and via setting them at the end
