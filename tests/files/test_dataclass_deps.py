@@ -15,12 +15,20 @@ class Thermostat:
     friction: float = 0.1
 
 
+@dataclasses.dataclass
+class Thermostat2:
+    temperature: float
+    friction: float = 0.1
+
+
 class MLThermostat(zntrack.Node):
     temp: float = zntrack.params()
 
 
 class MD(zntrack.Node):
-    thermostat: Thermostat | list[Thermostat | MLThermostat] = zntrack.deps()
+    thermostat: (
+        Thermostat | Thermostat2 | list[Thermostat | MLThermostat | Thermostat2]
+    ) = zntrack.deps()
     steps: int = zntrack.params()
 
 
@@ -41,7 +49,7 @@ def test_deps_outside_graph(proj_path):
         ml = MLThermostat(temp=300)
 
         t1 = Thermostat(temperature=300, friction=0.05)
-        t2 = Thermostat(temperature=400)
+        t2 = Thermostat2(temperature=400)
         md2 = MD(thermostat=[t1, ml, t2], steps=100)
 
     with project.group("md2"):
@@ -59,7 +67,7 @@ def test_deps_outside_graph(proj_path):
     node2 = md2.from_rev(name=md2.name)
     assert isinstance(node2.thermostat[0], Thermostat)
     assert isinstance(node2.thermostat[1], MLThermostat)
-    assert isinstance(node2.thermostat[2], Thermostat)
+    assert isinstance(node2.thermostat[2], Thermostat2)
     assert node2.thermostat[0].temperature == t1.temperature
     assert node2.thermostat[1].temp == ml.temp
     assert node2.thermostat[2].temperature == t2.temperature

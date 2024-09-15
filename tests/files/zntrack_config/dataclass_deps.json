@@ -52,7 +52,7 @@
                 "_type": "@dataclasses.dataclass",
                 "value": {
                     "module": "test_dataclass_deps",
-                    "cls": "Thermostat"
+                    "cls": "Thermostat2"
                 }
             }
         ]
@@ -73,7 +73,7 @@
             "_type": "@dataclasses.dataclass",
             "value": {
                 "module": "test_dataclass_deps",
-                "cls": "Thermostat"
+                "cls": "Thermostat2"
             }
         }
     }

@@ -38,8 +38,12 @@ class DataclassContainer:
         """
         all_params = yaml.safe_load(PARAMS_FILE_PATH.read_text())
         if index is not None:
-            return self.cls(**all_params[node_name][attr_name][index])
-        return self.cls(**all_params[node_name][attr_name])
+            dc_params = all_params[node_name][attr_name][index]
+        else:
+            dc_params = all_params[node_name][attr_name]
+        dc_params.pop("_cls", None)
+        print(self.cls)
+        return self.cls(**dc_params)
 
 
 def _enforce_str_list(content) -> list[str]:

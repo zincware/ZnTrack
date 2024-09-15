@@ -27,18 +27,20 @@ def test_switch_deps_class_keep_params(proj_path):
     proj = zntrack.Project()
 
     thermostat_a = ThermostatA(temperature=10)
-    thermostat_b = ThermostatB(temperature=10)
+    thermostat_b = ThermostatB(temperature=5)
 
     with proj:
         md = MD(thermostat=thermostat_a)
 
     proj.repro()
-
     assert md.from_rev().result == "ThermostatA"
 
     with proj:
         md.thermostat = thermostat_b
 
     proj.repro()
-
     assert md.from_rev().result == "ThermostatB"
+
+
+if __name__ == "__main__":
+    test_switch_deps_class_keep_params("")

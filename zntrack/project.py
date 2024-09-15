@@ -102,15 +102,18 @@ class Project(znflow.DiGraph):
         if len(dvc_dict["plots"]) == 0:
             del dvc_dict["plots"]
 
+        log.info(f"Saving {params_dict = }")
         config.PARAMS_FILE_PATH.write_text(yaml.safe_dump(params_dict))
         config.DVC_FILE_PATH.write_text(yaml.safe_dump(dvc_dict))
         config.ZNTRACK_FILE_PATH.write_text(json.dumps(zntrack_dict, indent=4))
 
         # TODO: update file or overwrite?
 
-    def repro(self, build: bool = True):
+    def repro(self, build: bool = True, force: bool = False):
         if build:
             self.build()
+        if force:
+            subprocess.check_call(["dvc", "repro", "-f"])
         subprocess.check_call(["dvc", "repro"])
 
     @contextlib.contextmanager
