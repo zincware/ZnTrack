@@ -68,10 +68,10 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
 @functools.wraps(znfields.field)
 def plots(
     *,
+    y: str | list[str],
     cache: bool = True,
     independent: bool = False,
-    x: str | None = None,
-    y: str | None = None,
+    x: str = "step",
     x_label: str | None = None,
     y_label: str | None = None,
     template: str | None = None,
