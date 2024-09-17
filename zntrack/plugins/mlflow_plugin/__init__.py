@@ -267,10 +267,14 @@ class MLFlowPlugin(ZnTrackPlugin):
                     mlflow.set_tag(
                         mlflow_tags.MLFLOW_RUN_NOTE, f"{commit_message.strip()}"
                     )
+                    # there is https://github.com/mlflow/mlflow/blob/master/tests/tracking/context/test_git_context.py
+                    #  but it is not documented?
+                    mlflow.set_tag(mlflow_tags.MLFLOW_GIT_COMMIT, commit_hash)
                     # TODO: here we can have a custom description also from the Node itself.
                     mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}")
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
+                        mlflow.set_tag(mlflow_tags.MLFLOW_GIT_REPO_URL, remote_url)
             else:
                 print(f"missing {node_name}")
                 node = zntrack.from_rev(node_name)
