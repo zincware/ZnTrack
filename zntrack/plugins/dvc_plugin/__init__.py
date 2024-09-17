@@ -176,11 +176,13 @@ class DVCPlugin(ZnTrackPlugin):
                                 f"{module_handler(val)}.{val.__class__.__name__}"
                             )
                             new_content.append(dc_params)
-                        else:
+                        elif isinstance(val, (znflow.Connection, znflow.CombinedConnections)):
                             pass
+                        else:
+                            raise ValueError(f"Found unsupported type '{type(val)}' ({val}) for DEPS field '{field.name}' in list")
                     if len(new_content) > 0:
                         data[field.name] = new_content
-                if dataclasses.is_dataclass(content) and not isinstance(
+                elif dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
                     dc_params = dataclasses.asdict(content)
@@ -188,6 +190,11 @@ class DVCPlugin(ZnTrackPlugin):
                         f"{module_handler(content)}.{content.__class__.__name__}"
                     )
                     data[field.name] = dc_params
+                elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
+                    pass
+                else:
+                    raise ValueError(f"Found unsupported type '{type(content)}' ({content}) for DEPS field '{field.name}'")
+                
         if len(data) > 0:
             return data
         return PLUGIN_EMPTY_RETRUN_VALUE
