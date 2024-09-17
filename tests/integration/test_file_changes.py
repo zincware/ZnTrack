@@ -13,11 +13,10 @@ class ChangeParamsInRun(Node):
         self.param = "incorrect param"
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_ChangeParamsInRun(proj_path):
     with Project() as proj:
         ChangeParamsInRun(param="correct param")
-    proj.run()
+    proj.repro()
 
     assert ChangeParamsInRun.from_rev().param == "correct param"
 
@@ -31,11 +30,10 @@ class ChangeJsonInRun(Node):
         self.outs = pathlib.Path("incorrect_out.txt")
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_ChangeJsonInRun(proj_path):
     with Project() as proj:
         ChangeJsonInRun()
-    proj.run()
+    proj.repro()
     assert ChangeJsonInRun.from_rev().outs == pathlib.Path("correct_out.txt")
 
 
@@ -49,13 +47,3 @@ class WriteToOutsOutsideRun(Node):
     def run(self):
         self.outs = "correct outs"
 
-
-@pytest.mark.xfail(reason="pending implementation")
-def test_WriteToOutsOutsideRun(proj_path):
-    node = WriteToOutsOutsideRun(outs="correct outs")
-    node.run()
-    node.save()
-
-    assert WriteToOutsOutsideRun.from_rev().outs == "correct outs"
-    WriteToOutsOutsideRun(outs="incorrect outs").save(results=False)
-    assert WriteToOutsOutsideRun.from_rev().outs == "correct outs"
