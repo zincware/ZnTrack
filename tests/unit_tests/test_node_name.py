@@ -55,10 +55,10 @@ def test_grouped_node_name(proj_path):
     assert n3.name == "grp1_MyNode"
     assert n4.name == "grp1_MyNode_1"
 
+
 def test_duplicate_named_node():
     with zntrack.Project() as proj:
         n1 = MyNode(name="A")
     with pytest.raises(ValueError):
         with proj:
             n2 = MyNode(name="A")
-    

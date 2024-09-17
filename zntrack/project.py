@@ -101,7 +101,9 @@ class Project(znflow.DiGraph):
 
             all_node_names = self.compute_all_node_names()
             for node_uuid in self.nodes:
-                self.nodes[node_uuid]["value"].__dict__["name"] = all_node_names[node_uuid]
+                self.nodes[node_uuid]["value"].__dict__["name"] = all_node_names[
+                    node_uuid
+                ]
         finally:
             super().__exit__(exc_type, exc_val, exc_tb)
 
