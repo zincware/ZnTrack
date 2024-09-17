@@ -38,3 +38,17 @@ def test_connect_nodes_in_grp(proj_path):
 
     assert a.name == "A_B_ParamsToOuts"
     assert b.name == "con_A_B_ParamsToOuts"
+
+
+# def test_path_as_name(proj_path):
+#     proj = zntrack.Project()
+#     with proj:
+#         a = zntrack.examples.WriteDVCOuts(params=10, outs="outs.txt")
+#         # This is impossible, because the connection would have to be resolved
+#         # within the f_string itself.
+#         b = zntrack.examples.WriteDVCOuts(params=20, name=f"con_{a.outs}")
+
+#         assert a.name == "WriteDVCOuts"
+#         assert b.name == "con_outs.txt"
+
+#     proj.repro()
