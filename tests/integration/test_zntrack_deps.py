@@ -7,7 +7,6 @@ import zntrack.examples
 # TODO: change the parameters, rerun and see if it updates!
 
 
-# @pytest.mark.xfail(reason="pending implementation")
 def test_as_deps(proj_path):
     """Test for 'zntrack.deps' acting as `zntrack.zn.deps`-like field."""
     project = zntrack.Project()

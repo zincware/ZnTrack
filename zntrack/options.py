@@ -95,7 +95,7 @@ def plots(
             plots_config[key] = value
     if plots_config:
         kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
-    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs,  init=False)
+    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs,  init=False, repr=False)
 
 
 @functools.wraps(znfields.field)
