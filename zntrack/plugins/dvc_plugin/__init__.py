@@ -21,6 +21,7 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
+    NOT_AVAILABLE,
 )
 from zntrack.exceptions import NodeNotAvailableError
 
@@ -68,7 +69,7 @@ def _paths_getter(self: "Node", name: str):
 
             return content
     except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
+        return NOT_AVAILABLE
 
 
 def _deps_getter(self: "Node", name: str):

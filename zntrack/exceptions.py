@@ -8,6 +8,8 @@ class ZnTrackError(Exception):
 class NodeNotAvailableError(ZnTrackError):
     """Raised when a node is not available."""
 
+    # TODO: nodeNotavailable is not an error. It is expected behavior. remove
+
 
 class InvalidOptionError(ZnTrackError, AttributeError):
     """Raised when using an invalid ZnTrackOption for a task."""

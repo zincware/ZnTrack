@@ -159,9 +159,8 @@ class NodeStatus:
         else:
             raise InvalidOptionError(f"Unable to find 'self.{attribute}' in {self.node}.")
 
-        try:
-            target = getattr(self.node, attribute)
-        except NodeNotAvailableError:
+        target = getattr(self.node, attribute)
+        if target is NOT_AVAILABLE:
             target = pd.DataFrame()
         if target is ZNTRACK_LAZY_VALUE or target is NOT_AVAILABLE:
             # TODO: accessing data in a node that is not loaded will not raise NodeNotAvailableErrors!

@@ -62,6 +62,6 @@ def base_getter(self: "Node", name: str, func: t.Callable):
     try:
         func(self, name)
     except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
+        return NOT_AVAILABLE
 
     return getattr(self, name)
