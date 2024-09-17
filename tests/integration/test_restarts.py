@@ -1,7 +1,5 @@
 import subprocess
 
-import pytest
-
 import zntrack.examples
 
 
