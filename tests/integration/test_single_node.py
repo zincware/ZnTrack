@@ -5,31 +5,33 @@ import pytest
 import yaml
 
 import zntrack.examples
+from zntrack.config import NodeStatusEnum
 
 
-@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNumbers(proj_path, eager):
     with zntrack.Project() as project:
         add_numbers = zntrack.examples.AddNumbers(a=1, b=2)
 
-    assert not add_numbers.state.loaded
+    assert add_numbers.state.state == NodeStatusEnum.CREATED
 
-    project.run(eager=eager)
-    # if not eager:
-    #     add_numbers.load()
+    if eager:
+        project.run()
+    else:
+        project.repro()
+    
     assert add_numbers.c == 3
-    assert add_numbers.state.loaded
+    add_numbers = add_numbers.from_rev()
+    assert add_numbers.c == 3
+    assert add_numbers.state.state == NodeStatusEnum.FINISHED
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_AddNumbers_remove_params(proj_path):
     with zntrack.Project() as project:
         add_numbers = zntrack.examples.AddNumbers(a=1, b=2)
 
-    assert not add_numbers.state.loaded
+    assert add_numbers.state.state == NodeStatusEnum.CREATED
 
-    project.build()
     project.repro()
 
     params = pathlib.Path("params.yaml").read_text()
@@ -41,40 +43,37 @@ def test_AddNumbers_remove_params(proj_path):
     #     add_numbers.load()
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_zntrack_from_rev(proj_path):
     with zntrack.Project() as project:
         add_numbers = zntrack.examples.AddNumbers(a=1, b=2)
 
-    assert not add_numbers.state.loaded
+    assert add_numbers.state.state == NodeStatusEnum.CREATED
 
-    project.run()
+    project.repro()
 
     node = zntrack.from_rev(add_numbers.name)
     assert node.a == 1
     assert node.b == 2
     assert node.c == 3
-    assert node.state.loaded
+    assert node.state.state == NodeStatusEnum.FINISHED
 
 
-@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNumbers_named(proj_path, eager):
     with zntrack.Project() as project:
         add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="NodeA")
         add_numbers_b = zntrack.examples.AddNumbers(a=1, b=2, name="NodeB")
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert add_numbers_b.state.state == NodeStatusEnum.CREATED
 
-    project.run(eager=eager)
-    # if not eager:
-    #     add_numbers_a.load()
-    #     add_numbers_b.load()
+    if eager:
+        project.run()
+    else:
+        project.repro()
+
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
     assert add_numbers_b.c == 3
-    assert add_numbers_b.state.loaded
 
 
 class NodeWithInit(zntrack.Node):
@@ -111,23 +110,24 @@ def test_NodeWithInit(proj_path, eager):
     with zntrack.Project() as project:
         node = NodeWithInit(params=10)
 
-    project.run(eager=eager)
     if eager:
-        node.save()
+        project.run()
+    else:
+        project.repro()
     node = NodeWithInit.from_rev()
     assert node.value == 42
     assert node.outs == 10
 
 
-@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_NodeWithPostInit(proj_path, eager):
     with zntrack.Project() as project:
         node = NodeWithPostInit(params=10)
 
-    project.run(eager=eager)
     if eager:
-        node.save()
+        project.run()
+    else:
+        project.repro()
     node = NodeWithPostInit.from_rev()
     with pytest.raises(AttributeError):
         # _post_init_ is not called when loading from rev
@@ -182,7 +182,6 @@ class NoOutsWritten(zntrack.Node):
 #     assert node.outs is None
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_outs_in_init(proj_path):
     with pytest.raises(TypeError):
         # outs can not be set
