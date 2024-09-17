@@ -25,12 +25,24 @@ except ImportError:
 T = t.TypeVar("T", bound="Node")
 
 
+def _name_getter(self, name):
+    value = self.__dict__[name]
+    if value is not None:
+        return value
+    # find the value based on the current project context
+    graph = znflow.get_graph()
+    if graph is znflow.empty_graph:
+        raise ValueError("Node name is not set and no graph is active.")
+
+    return graph.compute_all_node_names()[self.uuid]
+
+
 @dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
 class Node(znflow.Node, znfields.Base):
     """A Node."""
 
-    name: str | None = None
+    name: str | None = znfields.field(default=None, getter=_name_getter)
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
