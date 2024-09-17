@@ -18,6 +18,7 @@ def test_module_not_installed():
             rev="ca0eef0ccfcbfb72a82136849a9ca35eac8b7629",
         )
 
+
 @pytest.mark.needs_internet
 def test_commit_not_found():
     with pytest.raises(dvc.scm.RevError):

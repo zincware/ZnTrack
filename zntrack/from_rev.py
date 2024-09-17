@@ -1,19 +1,9 @@
 import contextlib
 import importlib
-import pathlib
-import sys
-
-import dvc.api
-import yaml
-
-import contextlib
-import importlib
 import importlib.util
-import json
 import pathlib
 import sys
 import tempfile
-import typing
 import uuid
 
 import dvc.api
@@ -62,11 +52,10 @@ def _import_from_tempfile(package_and_module: str, remote, rev):
         return module
 
 
-
 def from_rev(name: str, remote: str | None = None, rev: str | None = None):
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     with fs.repo as repo:
-    # with dvc.repo.Repo(remote=remote, rev=rev) as repo:
+        # with dvc.repo.Repo(remote=remote, rev=rev) as repo:
         for stage in repo.index.stages:
             with contextlib.suppress(AttributeError):
                 # only PipelineStages have a name attribute
@@ -94,7 +83,7 @@ def from_rev(name: str, remote: str | None = None, rev: str | None = None):
             raise ModuleNotFoundError(
                 f"No module named '{module_name}'. The package might be available via 'pip"
                 f" install {module_name}' or from the remote via 'pip install git+{remote}'."
-            )        
-    
+            )
+
     cls = getattr(module, cls_name)
     return cls.from_rev(name, remote=remote, rev=rev)
