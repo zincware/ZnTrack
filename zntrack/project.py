@@ -57,7 +57,6 @@ class Project(znflow.DiGraph):
                         f"A node with the name '{node.__dict__['name']}' already exists."
                     )
                 node_names[node.uuid] = node.__dict__["name"]
-                # TODO: what about named nodes in groups?
             else:
                 if node.state.group is None:
                     if self.active_group is not None:

@@ -71,14 +71,6 @@ class Group:
     def from_znflow_group(cls, group: znflow.Group) -> "Group":
         return cls(name=group.names, nodes=group.nodes)
 
-    # def get_node_name(self, node: "Node") -> str:
-    #     """Get the node name with group prefix."""
-    #     if node not in self:
-    #         raise ValueError(f"Node {node} is not part of {self}")
-    #     if node.name is None:
-    #         return f"{'_'.join(self._name)}_{node.__class__.__name__}"
-    #     return f"{'_'.join(self._name)}_{node.name}"
-
     @classmethod
     def from_nwd(cls, nwd: pathlib.Path) -> "Group|None":
         names = _extract_group_from_nwd(nwd)
