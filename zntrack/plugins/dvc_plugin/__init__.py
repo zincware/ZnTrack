@@ -23,7 +23,6 @@ from zntrack.config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from zntrack.exceptions import NodeNotAvailableError
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node

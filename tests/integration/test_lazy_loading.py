@@ -5,7 +5,6 @@ def test_run_project(proj_path):
     with zntrack.Project() as project:
         node = zntrack.examples.ParamsToOuts(params=42)
 
-    # assert node.__dict__["outs"] is NOT_AVAILABLE
     assert "outs" not in node.__dict__
     project.build()
     project.run()

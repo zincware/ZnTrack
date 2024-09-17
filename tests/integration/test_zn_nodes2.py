@@ -84,9 +84,7 @@ def test_ExampleNodeLst(proj_path, eager):
 
     with zntrack.Project() as project:
         node = ExampleNodeLst(params=[parameter_1.param1, parameter_2.param1])
-
-    # TODO: passing an attribute of a dataclass might not correctly set the parameters
-    #  needs files test!
+        # passing a parameter of a dataclass is not possible
 
     if eager:
         project.run()

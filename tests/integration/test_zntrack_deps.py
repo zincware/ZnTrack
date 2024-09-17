@@ -24,16 +24,11 @@ def test_as_deps(proj_path):
 
     project.repro(build=False)
 
-    # # a.load()
-    # # b.load()
-    # # c.load()
-
     assert a.number == 1
     assert b.number == 10
     assert c.result == 11
 
     a.write_params(min=1, max=5, seed=31415)
-    # # b.write_params(min=5, max=10, seed=31415) # only change one of the two parameters
 
     project.repro()
 
