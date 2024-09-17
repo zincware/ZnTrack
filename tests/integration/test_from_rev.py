@@ -8,7 +8,8 @@ import zntrack.examples
 # from zntrack.utils import NodeStatusResults
 
 
-@pytest.mark.xfail(reason="pending implementation")
+# @pytest.mark.xfail(reason="pending implementation")
+@pytest.mark.needs_internet
 def test_module_not_installed():
     with pytest.raises(ModuleNotFoundError):
         zntrack.from_rev(
@@ -17,8 +18,7 @@ def test_module_not_installed():
             rev="ca0eef0ccfcbfb72a82136849a9ca35eac8b7629",
         )
 
-
-@pytest.mark.xfail(reason="pending implementation")
+@pytest.mark.needs_internet
 def test_commit_not_found():
     with pytest.raises(dvc.scm.RevError):
         zntrack.from_rev(
@@ -28,20 +28,19 @@ def test_commit_not_found():
         )
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_import_from_remote(proj_path):
     node = zntrack.from_rev(
         "HelloWorld",
         remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="890c714",
+        rev="9dedb292",
     )
     assert node.max_number == 512
     assert node.random_number == 123
     assert node.name == "HelloWorld"
-    assert node.state.rev == "890c714"
+    assert node.state.rev == "9dedb292"
     assert node.state.remote == "https://github.com/PythonFZ/ZnTrackExamples.git"
-    # assert node.state.results == NodeStatusResults.AVAILABLE
     assert node.uuid == uuid.UUID("1d2d5eef-c42b-4ff4-aa1f-837638fdf090")
+    # assert node.state.state == ...
 
 
 @pytest.mark.xfail(reason="pending implementation")
