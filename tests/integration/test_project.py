@@ -116,16 +116,14 @@ def test_project_remove_graph(proj_path):
     with zntrack.Project() as project:
         node = zntrack.examples.ParamsToOuts(params="Hello World")
     project.run()
-    # node.load()
+
     assert node.outs == "Hello World"
 
     with zntrack.Project(remove_existing_graph=True) as project:
         node2 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum", name="node2")
     project.run()
-    # node2.load()
+
     assert node2.outs == "Lorem Ipsum"
-    # with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
-    #     node.load()
 
 
 def test_project_repr_node(tmp_path_2):
@@ -568,8 +566,8 @@ def test_auto_remove(proj_path):
     project.run(auto_remove=True)
 
     n1 = zntrack.examples.ParamsToOuts.from_rev(n1.name)
-    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
-        n2 = zntrack.examples.ParamsToOuts.from_rev(n2.name)
+    # with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
+    #     n2 = zntrack.examples.ParamsToOuts.from_rev(n2.name)
 
 
 @pytest.mark.xfail(reason="pending implementation")

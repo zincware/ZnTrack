@@ -3,6 +3,7 @@ import dataclasses
 import json
 import pathlib
 import typing as t
+import uuid
 
 import typing_extensions as te
 import znfields
@@ -74,7 +75,9 @@ class Node(znflow.Node, znfields.Base):
             name = cls.__name__
         lazy_values = {}
         for field in dataclasses.fields(cls):
-            lazy_values[field.name] = ZNTRACK_LAZY_VALUE
+            # check if the field is in the init
+            if field.init:
+                lazy_values[field.name] = ZNTRACK_LAZY_VALUE
 
         lazy_values["name"] = name
         instance = cls(**lazy_values)
@@ -95,7 +98,9 @@ class Node(znflow.Node, znfields.Base):
             #  commit
             with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
                 content = json.load(f)
-                run_count = content["run_count"]
+                run_count = content.get("run_count", 0)
+                if node_uuid := content.get("uuid", None):
+                    instance._uuid = uuid.UUID(node_uuid)
                 instance.__dict__["state"]["run_count"] = run_count
 
         if not instance.state.lazy_evaluation:

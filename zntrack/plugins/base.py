@@ -5,7 +5,6 @@ import dataclasses
 import typing as t
 
 from zntrack.config import NOT_AVAILABLE, PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_LAZY_VALUE
-from zntrack.exceptions import NodeNotAvailableError
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -62,6 +61,6 @@ def base_getter(self: "Node", name: str, func: t.Callable):
     try:
         func(self, name)
     except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
+        return NOT_AVAILABLE
 
     return getattr(self, name)

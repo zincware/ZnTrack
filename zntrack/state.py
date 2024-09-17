@@ -19,7 +19,7 @@ from zntrack.config import (
     NodeStatusEnum,
     ZnTrackOptionEnum,
 )
-from zntrack.exceptions import InvalidOptionError, NodeNotAvailableError
+from zntrack.exceptions import InvalidOptionError
 from zntrack.group import Group
 from zntrack.plugins import ZnTrackPlugin
 from zntrack.utils.import_handler import import_handler
@@ -159,12 +159,8 @@ class NodeStatus:
         else:
             raise InvalidOptionError(f"Unable to find 'self.{attribute}' in {self.node}.")
 
-        try:
-            target = getattr(self.node, attribute)
-        except NodeNotAvailableError:
-            target = pd.DataFrame()
+        target = getattr(self.node, attribute)
         if target is ZNTRACK_LAZY_VALUE or target is NOT_AVAILABLE:
-            # TODO: accessing data in a node that is not loaded will not raise NodeNotAvailableErrors!
             target = pd.DataFrame()
         df = pd.concat([target, pd.DataFrame([data])], ignore_index=True, axis=0)
         if "step" not in df.columns:

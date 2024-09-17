@@ -8,9 +8,9 @@ import zntrack
 
 class LoadFromDeps(zntrack.Node):
     data: t.Optional[t.Any] = zntrack.deps()
-    file: t.Optional[pathlib.Path] = zntrack.deps_path(None)
+    file: t.Optional[pathlib.Path] = zntrack.deps_path()
 
-    result: t.Any = zntrack.outs_path()
+    result: t.Any = zntrack.outs()
 
     def get_data(self):
         if self.data is not None:
@@ -39,30 +39,31 @@ def test_init(value):
         LoadFromDeps(**{value: None})
 
 
-@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_from_zn_deps(proj_path, eager):
-    with zntrack.Project(proj_path) as proj:
+    with zntrack.Project() as proj:
         data = WriteData(data="Hello World")
         node = LoadFromDeps(data=data.outs, file=None)
-    proj.run(eager=eager)
-    # if not eager:
-    #     node.load()
+
+    if eager:
+        proj.run()
+    else:
+        proj.repro()
 
     assert node.result == "Hello World"
 
 
-@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_from_dvc_deps(proj_path, eager):
     file = proj_path / "data.txt"
     file.write_text("Hello World")
-    with zntrack.Project(proj_path) as proj:
+    with zntrack.Project() as proj:
         node = LoadFromDeps(file=file, data=None)
 
-    proj.run(eager=eager)
-    # if not eager:
-    #     node.load()
+    if eager:
+        proj.run()
+    else:
+        proj.repro()
 
     assert node.result == "Hello World"
 
@@ -81,12 +82,12 @@ class EmptyNodesNode(zntrack.Node):
         self.file.write_text("Hello World")
 
 
-@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_EmptyNode(proj_path, eager):
     with zntrack.Project() as project:
         node = EmptyNodesNode()
-    project.run(eager=eager)
-    # if not eager:
-    #     node.load()
+    if eager:
+        project.run()
+    else:
+        project.repro()
     assert node.outs == 42

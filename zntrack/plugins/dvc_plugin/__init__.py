@@ -13,6 +13,7 @@ import znjson
 
 from zntrack import converter
 from zntrack.config import (
+    NOT_AVAILABLE,
     PARAMS_FILE_PATH,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
@@ -22,7 +23,6 @@ from zntrack.config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from zntrack.exceptions import NodeNotAvailableError
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -68,7 +68,7 @@ def _paths_getter(self: "Node", name: str):
 
             return content
     except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
+        return NOT_AVAILABLE
 
 
 def _deps_getter(self: "Node", name: str):
@@ -160,10 +160,16 @@ class DVCPlugin(ZnTrackPlugin):
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+                if getattr(self.node, field.name) is None:
+                    continue
                 content = getattr(self.node, field.name)
-                if isinstance(content, (list, tuple)):
+                if isinstance(content, (list, tuple, dict)):
                     new_content = []
-                    for val in content:
+                    for val in (
+                        content
+                        if isinstance(content, (list, tuple))
+                        else content.values()
+                    ):
                         if dataclasses.is_dataclass(val) and not isinstance(
                             val, (Node, znflow.Connection, znflow.CombinedConnections)
                         ):
@@ -176,11 +182,17 @@ class DVCPlugin(ZnTrackPlugin):
                                 f"{module_handler(val)}.{val.__class__.__name__}"
                             )
                             new_content.append(dc_params)
-                        else:
+                        elif isinstance(
+                            val, (znflow.Connection, znflow.CombinedConnections)
+                        ):
                             pass
+                        else:
+                            raise ValueError(
+                                f"Found unsupported type '{type(val)}' ({val}) for DEPS field '{field.name}' in list"
+                            )
                     if len(new_content) > 0:
                         data[field.name] = new_content
-                if dataclasses.is_dataclass(content) and not isinstance(
+                elif dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
                     dc_params = dataclasses.asdict(content)
@@ -188,6 +200,13 @@ class DVCPlugin(ZnTrackPlugin):
                         f"{module_handler(content)}.{content.__class__.__name__}"
                     )
                     data[field.name] = dc_params
+                elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
+                    pass
+                else:
+                    raise ValueError(
+                        f"Found unsupported type '{type(content)}' ({content}) for DEPS field '{field.name}'"
+                    )
+
         if len(data) > 0:
             return data
         return PLUGIN_EMPTY_RETRUN_VALUE
@@ -214,12 +233,16 @@ class DVCPlugin(ZnTrackPlugin):
                     self.node.name
                 )
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS_PATH:
+                if getattr(self.node, field.name) is None:
+                    continue
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
                 content = [{pathlib.Path(x).as_posix(): None} for x in content]
                 stages.setdefault(ZnTrackOptionEnum.PARAMS.value, []).extend(content)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS_PATH:
+                if getattr(self.node, field.name) is None:
+                    continue
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
@@ -228,6 +251,8 @@ class DVCPlugin(ZnTrackPlugin):
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS_PATH:
+                if getattr(self.node, field.name) is None:
+                    continue
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
@@ -237,6 +262,8 @@ class DVCPlugin(ZnTrackPlugin):
                 stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
                 # plots[self.node.name] = None
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS_PATH:
+                if getattr(self.node, field.name) is None:
+                    continue
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
@@ -280,6 +307,8 @@ class DVCPlugin(ZnTrackPlugin):
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.METRICS.value, []).extend(content)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+                if getattr(self.node, field.name) is None:
+                    continue
                 content = get_attr_always_list(self.node, field.name)
                 paths = []
                 for con in content:
@@ -311,6 +340,8 @@ class DVCPlugin(ZnTrackPlugin):
                 if len(paths) > 0:
                     stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS_PATH:
+                if getattr(self.node, field.name) is None:
+                    continue
                 content = [
                     pathlib.Path(c).as_posix()
                     for c in get_attr_always_list(self.node, field.name)
