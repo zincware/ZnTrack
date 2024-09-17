@@ -1,7 +1,5 @@
 import pathlib
 
-import pytest
-
 import zntrack
 from zntrack import Node, Project
 
@@ -46,4 +44,3 @@ class WriteToOutsOutsideRun(Node):
 
     def run(self):
         self.outs = "correct outs"
-

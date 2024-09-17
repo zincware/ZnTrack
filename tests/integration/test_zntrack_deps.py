@@ -1,6 +1,5 @@
 """Tests for 'zntrack.deps'-field which can be used as both `zntrack.zn.deps` and `zntrack.zn.nodes`."""
 
-import pytest
 
 import zntrack.examples
 
@@ -15,7 +14,7 @@ def test_as_deps(proj_path):
         a = zntrack.examples.ComputeRandomNumber(params_file="a.json")
         b = zntrack.examples.ComputeRandomNumber(params_file="b.json")
         c = zntrack.examples.SumRandomNumbers(numbers=[a, b])
-    
+
     project.build()
 
     a = a.from_rev(a.name)

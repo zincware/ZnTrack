@@ -1,8 +1,11 @@
 """Creating a Node with invalid parameters should raise an error."""
-import zntrack
+
 import pathlib
-import pytest
+
 import pandas as pd
+import pytest
+
+import zntrack
 
 
 class MyNode(zntrack.Node):
@@ -15,13 +18,13 @@ class MyNode(zntrack.Node):
     metrics_path: str = zntrack.metrics_path()
     plots_path: str = zntrack.plots_path()
 
-    #optional
+    # optional
     opt_parameter: int = zntrack.params(1)
     opt_parameter_path: str = zntrack.params_path("parameter.yaml")
 
     opt_deps_path: str = zntrack.deps_path("deps.yaml")
     opt_outs_path: str = zntrack.outs_path("outs.yaml")
-    opt_metrics_path: str = zntrack.metrics_path( "my_metrics.json")
+    opt_metrics_path: str = zntrack.metrics_path("my_metrics.json")
     opt_plots_path: str = zntrack.plots_path("my_plots.csv")
 
     # not allowed
@@ -41,8 +44,8 @@ class SimpleMyNode(zntrack.Node):
 
 def test_init():
     with pytest.raises(TypeError):
-        n = MyNode() # missing required parameters
-    
+        n = MyNode()  # missing required parameters
+
     # works
     n = MyNode(
         parameter=1,
@@ -103,7 +106,10 @@ def test_init():
             plots=pd.DataFrame(),
         )
 
-@pytest.mark.xfail(reason="Duplicate outs are currently filtered, but should raise an error.")
+
+@pytest.mark.xfail(
+    reason="Duplicate outs are currently filtered, but should raise an error."
+)
 def test_duplicate_outs_paths(proj_path):
     with pytest.raises(ValueError):
         with zntrack.Project() as proj:

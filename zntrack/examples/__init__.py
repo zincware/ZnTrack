@@ -250,7 +250,9 @@ class ComputeRandomNumber(zntrack.Node):
 
     def write_params(self, min, max, seed):
         """Write params to file."""
-        pathlib.Path(self.params_file).write_text(json.dumps({"min": min, "max": max, "seed": seed}))
+        pathlib.Path(self.params_file).write_text(
+            json.dumps({"min": min, "max": max, "seed": seed})
+        )
 
 
 class ComputeRandomNumberWithParams(zntrack.Node):

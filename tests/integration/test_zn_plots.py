@@ -1,9 +1,9 @@
 import pandas as pd
 import pandas.testing as pdt
 import pytest
-from zntrack.config import NodeStatusEnum
 
 import zntrack.examples
+from zntrack.config import NodeStatusEnum
 
 
 @pytest.mark.parametrize("eager", [True, False])
