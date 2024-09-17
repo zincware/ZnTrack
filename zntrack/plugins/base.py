@@ -13,7 +13,6 @@ from zntrack.config import (
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_LAZY_VALUE,
 )
-from zntrack.config import NOT_AVAILABLE, PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_LAZY_VALUE
 
 if t.TYPE_CHECKING:
     from zntrack import Node
