@@ -30,6 +30,7 @@ class Node(znflow.Node, znfields.Base):
     """A Node."""
 
     name: str | None = None
+    always_changed: bool = False
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
 
@@ -89,6 +90,7 @@ class Node(znflow.Node, znfields.Base):
             lazy_values[field.name] = ZNTRACK_LAZY_VALUE
 
         lazy_values["name"] = name
+        lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
         instance = cls(**lazy_values)
 
         # TODO: check if the node is finished or not.

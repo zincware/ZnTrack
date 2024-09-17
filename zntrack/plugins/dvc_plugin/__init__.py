@@ -204,6 +204,8 @@ class DVCPlugin(ZnTrackPlugin):
                 {(self.node.nwd / "node-meta.json").as_posix(): {"cache": False}}
             ],
         }
+        if self.node.always_changed:
+            stages["always_changed"] = True
         plots = []
 
         nwd_handler = NWDReplaceHandler()
@@ -318,7 +320,7 @@ class DVCPlugin(ZnTrackPlugin):
                 stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(content)
 
         for key in stages:
-            if key == "cmd":
+            if key in ["cmd", "always_changed"]:
                 continue
             stages[key] = sort_and_deduplicate(stages[key])
 
