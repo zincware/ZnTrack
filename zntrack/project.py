@@ -4,6 +4,7 @@ import logging
 import os
 import pathlib
 import subprocess
+import uuid
 
 import tqdm
 import yaml
@@ -45,6 +46,38 @@ class Project(znflow.DiGraph):
             **kwargs,
         )
 
+    def compute_all_node_names(self) -> dict[uuid.UUID, str]:
+        """Compute the Node name based on existing nodes on the graph."""
+        all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
+        node_names = {}
+        for node in all_nodes:
+            if "name" in node.__dict__ and node.__dict__["name"] is not None:
+                if node.__dict__["name"] in node_names.values():
+                    raise ValueError(
+                        f"A node with the name '{node.__dict__['name']}' already exists."
+                    )
+                node_names[node.uuid] = node.__dict__["name"]
+            else:
+                if node.state.group is None:
+                    if self.active_group is not None:
+                        node_name = f"{'_'.join(self.active_group.names)}_{node.__class__.__name__}"
+                    else:
+                        node_name = node.__class__.__name__
+                else:
+                    node_name = (
+                        f"{'_'.join(node.state.group.name)}_{node.__class__.__name__}"
+                    )
+                if node_name not in node_names.values():
+                    node_names[node.uuid] = node_name
+                else:
+                    i = 0
+                    while True:
+                        i += 1
+                        if f"{node_name}_{i}" not in node_names.values():
+                            node_names[node.uuid] = f"{node_name}_{i}"
+                            break
+        return node_names
+
     def add_node(self, node_for_adding, **attr):
         from zntrack import Node
 
@@ -56,38 +89,23 @@ class Project(znflow.DiGraph):
         return super().add_node(node_for_adding, **attr)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for group in self.groups.values():
-            for node_uuid in group.uuids:
-                # we need to access the `state` attribute to initialize
-                # the property, so the `log.debug` is necessary!
-                log.debug(self.nodes[node_uuid]["value"].state)
-                self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
-                    Group.from_znflow_group(group)
-                )
+        try:
+            for group in self.groups.values():
+                for node_uuid in group.uuids:
+                    # we need to access the `state` attribute to initialize
+                    # the property, so the `log.debug` is necessary!
+                    log.debug(self.nodes[node_uuid]["value"].state)
+                    self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
+                        Group.from_znflow_group(group)
+                    )
 
-        # need to fix the node names
-        all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
-        all_node_names = [node.name for node in all_nodes]
-        # TODO: accessing `node.name` should be instant, so this workaround
-        # should not be required! Find and fix why it is slow!
-        for node in tqdm.tqdm(all_nodes, desc="Collecting node names"):
-            if node.name is None:
-                if node.state.group is None:
-                    node_name = node.__class__.__name__
-                else:
-                    node_name = node.state.group.get_node_name(node)
-                if node_name not in all_node_names:
-                    node.name = node_name
-                    all_node_names.append(node_name)
-                else:
-                    i = 0
-                    while True:
-                        i += 1
-                        if f"{node_name}_{i}" not in all_node_names:
-                            node.name = f"{node_name}_{i}"
-                            all_node_names.append(f"{node_name}_{i}")
-                            break
-        return super().__exit__(exc_type, exc_val, exc_tb)
+            all_node_names = self.compute_all_node_names()
+            for node_uuid in self.nodes:
+                self.nodes[node_uuid]["value"].__dict__["name"] = all_node_names[
+                    node_uuid
+                ]
+        finally:
+            super().__exit__(exc_type, exc_val, exc_tb)
 
     def build(self) -> None:
         log.info(f"Saving {config.PARAMS_FILE_PATH}")
