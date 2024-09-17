@@ -264,6 +264,8 @@ class MLFlowPlugin(ZnTrackPlugin):
                 with node.state.plugins["MLFlowPlugin"]:
                     mlflow.set_tag("git_commit_hash", commit_hash)
                     mlflow.set_tag("git_commit_message", commit_message.strip())
+                    mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NOTE, f"{commit_message.strip()}")
+                    # TODO: here we can have a custom description also from the Node itself.
                     mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}")
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
