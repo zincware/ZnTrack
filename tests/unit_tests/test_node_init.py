@@ -30,6 +30,13 @@ class MyNode(zntrack.Node):
     plots: pd.DataFrame = zntrack.plots(y="y")
 
 
+class SimpleMyNode(zntrack.Node):
+    outs_path_a: str = zntrack.outs_path()
+    outs_path_b: str = zntrack.outs_path()
+
+    def run(self):
+        pathlib.Path(self.outs_path_a).write_text("a")
+        pathlib.Path(self.outs_path_b).write_text("b")
 
 
 def test_init():
@@ -95,3 +102,17 @@ def test_init():
             # not allowed
             plots=pd.DataFrame(),
         )
+
+@pytest.mark.xfail(reason="Duplicate outs are currently filtered, but should raise an error.")
+def test_duplicate_outs_paths(proj_path):
+    with pytest.raises(ValueError):
+        with zntrack.Project() as proj:
+            n = SimpleMyNode(
+                outs_path_a="file.txt",
+                outs_path_b="file.txt",
+            )
+        proj.build()
+
+
+if __name__ == "__main__":
+    test_duplicate_outs_paths("proj_path")

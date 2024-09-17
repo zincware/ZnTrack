@@ -62,7 +62,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False)
+    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False, repr=False)
 
 
 @functools.wraps(znfields.field)

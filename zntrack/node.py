@@ -74,7 +74,9 @@ class Node(znflow.Node, znfields.Base):
             name = cls.__name__
         lazy_values = {}
         for field in dataclasses.fields(cls):
-            lazy_values[field.name] = ZNTRACK_LAZY_VALUE
+            # check if the field is in the init
+            if field.init:
+                lazy_values[field.name] = ZNTRACK_LAZY_VALUE
 
         lazy_values["name"] = name
         instance = cls(**lazy_values)
