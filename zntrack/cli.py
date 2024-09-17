@@ -73,21 +73,10 @@ def run(
 
     cls: Node = utils.import_handler.import_handler(node_path)
     node: Node = cls.from_rev(name=name, running=True)
-    node.update_run_count()
-    node.run()
+    node.increment_run_count()
+    # dynamic version of node.run()
+    getattr(node, method)()
     node.save()
-
-    # if getattr(cls, "is_node", False):
-    #     cls(exec_func=True)
-    # elif issubclass(cls, Node):
-    #     node: Node = cls.from_rev(name=name, results=False)
-    #     node.save(meta_only=True)
-    #     if not meta_only:
-    #         # dynamic version of node.run()
-    #         getattr(node, method)()
-    #         node.save(parameter=False)
-    # else:
-    #     raise ValueError(f"Node {node} is not a ZnTrack Node.")
 
 
 @app.command()

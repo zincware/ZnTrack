@@ -1,8 +1,8 @@
 {
-    "Plotting": {
+    "some-node": {
         "nwd": {
             "_type": "pathlib.Path",
-            "value": "nodes/Plotting"
+            "value": "nodes/some-node"
         }
     }
 }

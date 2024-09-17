@@ -6,6 +6,7 @@ PARAMS_FILE_PATH = pathlib.Path("params.yaml")
 ZNTRACK_FILE_PATH = pathlib.Path("zntrack.json")
 ENV_FILE_PATH = pathlib.Path("env.yaml")
 NWD_PATH = pathlib.Path("nodes")
+EXP_INFO_PATH = pathlib.Path(".exp_info.yaml")
 
 
 # Use sentinel object for zntrack specific configurations. Use

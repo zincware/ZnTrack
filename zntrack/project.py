@@ -1,6 +1,7 @@
 import contextlib
 import json
 import logging
+import os
 import pathlib
 import subprocess
 
@@ -8,8 +9,13 @@ import tqdm
 import yaml
 import znflow
 
+from zntrack import utils
 from zntrack.config import NWD_PATH
 from zntrack.group import Group
+from zntrack.state import PLUGIN_LIST
+from zntrack.utils.finalize import make_commit
+from zntrack.utils.import_handler import import_handler
+from zntrack.utils.misc import load_env_vars
 
 from . import config
 from .deployment import ZnTrackDeployment
@@ -19,10 +25,18 @@ log = logging.getLogger(__name__)
 
 class Project(znflow.DiGraph):
     def __init__(
-        self, *args, disable=False, immutable_nodes=True, deployment=None, **kwargs
+        self,
+        *args,
+        disable=False,
+        immutable_nodes=True,
+        deployment=None,
+        tags: dict[str, str] | None = None,
+        **kwargs,
     ):
         if deployment is None:
             deployment = ZnTrackDeployment()
+        self.tags = tags or {}
+        load_env_vars()
         super().__init__(
             *args,
             disable=disable,
@@ -95,7 +109,7 @@ class Project(znflow.DiGraph):
                     if len(value["plots"]) > 0:
                         dvc_dict["plots"].extend(value["plots"])
                 if (
-                    value := plugin.convert_to_zntrack_json()
+                    value := plugin.convert_to_zntrack_json(graph=self)
                 ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
                     zntrack_dict[node.name] = value
 
@@ -108,10 +122,43 @@ class Project(znflow.DiGraph):
 
         # TODO: update file or overwrite?
 
-    def repro(self, build: bool = True):
+    def repro(self, build: bool = True, force: bool = False):
         if build:
             self.build()
-        subprocess.check_call(["dvc", "repro"])
+        cmd = ["dvc", "repro"]
+        if force:
+            cmd.append("--force")
+        subprocess.check_call(cmd)
+
+    def finalize(self, msg: str | None = None, commit: bool = True, **kwargs):
+        """Finalize the project by making a commit and loading environment variables.
+
+        This method performs the following actions:
+        1. Makes a commit with the provided message if `commit` is True.
+        2. Loads environment variables.
+        3. Loads and finalizes plugins specified in the `ZNTRACK_PLUGINS` environment variable.
+
+        Parameters
+        ----------
+        msg : str, optional
+            The commit message. If None, the message will be 'zntrack: auto commit'.
+        commit : bool, optional
+            Whether to make a commit or not. Default is True
+        **kwargs
+            Additional keyword arguments to pass to `make_commit`.
+
+        """
+        if msg is None:
+            msg = "zntrack: auto commit"
+        if commit:
+            make_commit(msg, **kwargs)
+        utils.misc.load_env_vars()
+        plugins_paths = os.environ.get(
+            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+        )
+        plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
+        for plugin in plugins:
+            plugin.finalize()
 
     @contextlib.contextmanager
     def group(self, *names: str):

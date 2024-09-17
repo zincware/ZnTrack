@@ -1,14 +1,26 @@
 MD:
   steps: 100
   thermostat:
+    _cls: test_dataclass_deps.Thermostat
     friction: 0.1
     temperature: 300
+md2_MD2:
+  t1:
+    _cls: test_dataclass_deps.Thermostat
+    friction: 0.05
+    temperature: 300
+  t2:
+    _cls: test_dataclass_deps.Thermostat2
+    friction: 0.1
+    temperature: 400
 multiple_deps_MD:
   steps: 100
   thermostat:
-  - friction: 0.05
+  - _cls: test_dataclass_deps.Thermostat
+    friction: 0.05
     temperature: 300
-  - friction: 0.1
+  - _cls: test_dataclass_deps.Thermostat2
+    friction: 0.1
     temperature: 400
 multiple_deps_MLThermostat:
   temp: 300

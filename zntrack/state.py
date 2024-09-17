@@ -1,6 +1,5 @@
 import contextlib
 import dataclasses
-import os
 import pathlib
 import tempfile
 import typing as t
@@ -19,15 +18,15 @@ from zntrack.config import (
     NodeStatusEnum,
     ZnTrackOptionEnum,
 )
-from zntrack.exceptions import InvalidOptionError, NodeNotAvailableError
+from zntrack.exceptions import InvalidOptionError
 from zntrack.group import Group
 from zntrack.plugins import ZnTrackPlugin
-from zntrack.utils.import_handler import import_handler
 
 if t.TYPE_CHECKING:
     from zntrack import Node
 
 PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
+PLUGIN_DICT = dict[str, ZnTrackPlugin]
 
 
 @dataclasses.dataclass(frozen=True)
@@ -40,6 +39,9 @@ class NodeStatus:
     tmp_path: pathlib.Path | None = None
     node: "Node|None" = dataclasses.field(
         default=None, repr=False, compare=False, hash=False
+    )
+    plugins: PLUGIN_DICT = dataclasses.field(
+        default_factory=dict, compare=False, repr=False
     )
     group: Group | None = None
     # TODO: move node name and nwd to here as well
@@ -121,16 +123,6 @@ class NodeStatus:
         }
         return dict_sha256(filtered_lock)
 
-    @property
-    def plugins(self) -> dict:
-        """Get the plugins of the node."""
-        plugins_paths = os.environ.get(
-            "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
-        )
-        plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
-
-        return {plugin.__name__: plugin(self.node) for plugin in plugins}
-
     def to_dict(self) -> dict:
         """Convert the NodeStatus to a dictionary."""
         content = dataclasses.asdict(self)
@@ -159,14 +151,12 @@ class NodeStatus:
         else:
             raise InvalidOptionError(f"Unable to find 'self.{attribute}' in {self.node}.")
 
-        try:
-            target = getattr(self.node, attribute)
-        except NodeNotAvailableError:
-            target = pd.DataFrame()
+        target = getattr(self.node, attribute)
         if target is ZNTRACK_LAZY_VALUE or target is NOT_AVAILABLE:
-            # TODO: accessing data in a node that is not loaded will not raise NodeNotAvailableErrors!
             target = pd.DataFrame()
         df = pd.concat([target, pd.DataFrame([data])], ignore_index=True, axis=0)
+        if "step" not in df.columns:
+            df.index.name = "step"
         setattr(self.node, attribute, df)
         for plugin in self.plugins.values():
             plugin.extend_plots(attribute, data, reference=df)

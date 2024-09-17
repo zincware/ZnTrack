@@ -3,6 +3,8 @@ import dataclasses
 import json
 import pathlib
 import typing as t
+import uuid
+import warnings
 
 import typing_extensions as te
 import znfields
@@ -10,6 +12,7 @@ import znflow
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
+from zntrack.utils.misc import get_plugins_from_env
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 from .utils.node_wd import get_nwd
@@ -28,6 +31,7 @@ class Node(znflow.Node, znfields.Base):
     """A Node."""
 
     name: str | None = None
+    always_changed: bool = dataclasses.field(default=False, repr=False)
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
 
@@ -43,13 +47,23 @@ class Node(znflow.Node, znfields.Base):
 
     def save(self):
         for plugin in self.state.plugins.values():
-            for field in dataclasses.fields(self):
-                value = getattr(self, field.name)
-                if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
-                    raise ValueError(
-                        f"Field '{field.name}' is not set. Please set it before saving."
-                    )
-                plugin.save(field)
+            with plugin:
+                for field in dataclasses.fields(self):
+                    value = getattr(self, field.name)
+                    if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
+                        raise ValueError(
+                            f"Field '{field.name}' is not set. Please set it before saving."
+                        )
+                    try:
+                        plugin.save(field)
+                    except Exception as err:  # noqa: E722
+                        if plugin._continue_on_error_:
+                            warnings.warn(
+                                f"Plugin {plugin.__class__.__name__} failed to save field {field.name}."
+                            )
+                        else:
+                            raise err
+
         _ = self.state
         self.__dict__["state"]["state"] = NodeStatusEnum.FINISHED
 
@@ -74,9 +88,12 @@ class Node(znflow.Node, znfields.Base):
             name = cls.__name__
         lazy_values = {}
         for field in dataclasses.fields(cls):
-            lazy_values[field.name] = ZNTRACK_LAZY_VALUE
+            # check if the field is in the init
+            if field.init:
+                lazy_values[field.name] = ZNTRACK_LAZY_VALUE
 
         lazy_values["name"] = name
+        lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
         instance = cls(**lazy_values)
 
         # TODO: check if the node is finished or not.
@@ -88,6 +105,8 @@ class Node(znflow.Node, znfields.Base):
             group=Group.from_nwd(instance.nwd),
         ).to_dict()
 
+        instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
+
         with contextlib.suppress(FileNotFoundError):
             # need to update run_count after the state is set
             # TODO: do we want to set the UUID as well?
@@ -95,7 +114,9 @@ class Node(znflow.Node, znfields.Base):
             #  commit
             with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
                 content = json.load(f)
-                run_count = content["run_count"]
+                run_count = content.get("run_count", 0)
+                if node_uuid := content.get("uuid", None):
+                    instance._uuid = uuid.UUID(node_uuid)
                 instance.__dict__["state"]["run_count"] = run_count
 
         if not instance.state.lazy_evaluation:
@@ -108,17 +129,12 @@ class Node(znflow.Node, znfields.Base):
     def state(self) -> NodeStatus:
         if "state" not in self.__dict__:
             self.__dict__["state"] = NodeStatus().to_dict()
+            self.__dict__["state"]["plugins"] = get_plugins_from_env(self)
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
-    def update_run_count(self):
-        try:
-            self.__dict__["state"]["run_count"] += 1
-        except KeyError:
-            self.__dict__["state"] = NodeStatus(
-                run_count=1,
-                state=NodeStatusEnum.RUNNING,
-            ).to_dict()
+    def increment_run_count(self):
+        self.__dict__["state"]["run_count"] = self.state.run_count + 1
         (self.nwd / "node-meta.json").write_text(
             json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
         )

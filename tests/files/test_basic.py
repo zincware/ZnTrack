@@ -25,11 +25,11 @@ class MyNode(zntrack.Node):
 
     outs: int = zntrack.outs()
     metrics: dict = zntrack.metrics()
-    plots: pd.DataFrame = zntrack.plots()
+    plots: pd.DataFrame = zntrack.plots(y="y")
 
     outs_no_cache: int = zntrack.outs(cache=False)
     metrics_cache: dict = zntrack.metrics(cache=True)
-    plots_no_cache: pd.DataFrame = zntrack.plots(cache=False)
+    plots_no_cache: pd.DataFrame = zntrack.plots(cache=False, y="y")
 
 
 CWD = pathlib.Path(__file__).parent.resolve()

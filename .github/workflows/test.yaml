@@ -24,6 +24,29 @@ jobs:
         os:
           - ubuntu-latest
 
+    services:
+      # Label used to access the service container
+      mlflow:
+        # Docker Hub image
+        image: pythonf/mlflow:v2.16.0
+        options: >-
+          --health-cmd="curl --fail http://localhost:5000/health || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 5000:5000
+      aim:
+        # Docker Hub image
+        image: pythonf/aim:v3.24.0
+        options: >-
+          --health-cmd="curl --fail http://localhost:43800/status || exit 1"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        ports:
+          - 43800:43800
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}

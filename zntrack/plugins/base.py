@@ -2,13 +2,46 @@
 
 import abc
 import dataclasses
+import pathlib
 import typing as t
 
-from zntrack.config import NOT_AVAILABLE, PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_LAZY_VALUE
-from zntrack.exceptions import NodeNotAvailableError
+import yaml
+
+from zntrack.config import (
+    EXP_INFO_PATH,
+    NOT_AVAILABLE,
+    PLUGIN_EMPTY_RETRUN_VALUE,
+    ZNTRACK_LAZY_VALUE,
+)
 
 if t.TYPE_CHECKING:
     from zntrack import Node
+
+
+def _gitignore_file(path: str):
+    """Add a path to the .gitignore file if it is not already there."""
+    if not pathlib.Path(".gitignore").exists():
+        with open(".gitignore", "w") as f:
+            f.write(path + "\n")
+        return
+    with open(".gitignore", "r") as f:
+        for line in f:
+            if line.strip() == path:
+                return
+    with open(".gitignore", "a") as f:
+        f.write(path + "\n")
+    return
+
+
+def get_exp_info() -> dict:
+    if EXP_INFO_PATH.exists():
+        return yaml.safe_load(EXP_INFO_PATH.read_text())
+    return {}
+
+
+def set_exp_info(data: dict) -> None:
+    EXP_INFO_PATH.write_text(yaml.safe_dump(data))
+    _gitignore_file(EXP_INFO_PATH.as_posix())
 
 
 # TODO: have a dataclass for the base metrics, like hash, name, module, ...
@@ -17,6 +50,7 @@ class ZnTrackPlugin(abc.ABC):
     """ABC for writing zntrack plugins."""
 
     node: "Node"
+    _continue_on_error_ = False
 
     @abc.abstractmethod
     def getter(self, field: dataclasses.Field) -> t.Any:
@@ -29,7 +63,7 @@ class ZnTrackPlugin(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def convert_to_zntrack_json(self) -> t.Any: ...
+    def convert_to_zntrack_json(self, graph) -> t.Any: ...
 
     @abc.abstractmethod
     def convert_to_dvc_yaml(self) -> t.Any: ...
@@ -40,8 +74,20 @@ class ZnTrackPlugin(abc.ABC):
     def extend_plots(self, attribute: str, data: dict, reference):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
+    def __enter__(self):
+        self.setup()
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def setup(self):
+        return
+
+    def close(self):
+        return
+
     @classmethod
-    def finalize(cls, rev: str | None = None, path_to_aim: str = ".") -> None:
+    def finalize(cls) -> None:
         return
 
 
@@ -62,6 +108,6 @@ def base_getter(self: "Node", name: str, func: t.Callable):
     try:
         func(self, name)
     except FileNotFoundError:
-        raise NodeNotAvailableError(f"Node '{self.name}' is not available")
+        return NOT_AVAILABLE
 
     return getattr(self, name)

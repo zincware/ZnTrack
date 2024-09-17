@@ -1,17 +1,16 @@
 import zntrack.examples
-from zntrack.config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE
 
 
 def test_run_project(proj_path):
     with zntrack.Project() as project:
         node = zntrack.examples.ParamsToOuts(params=42)
 
-    assert node.__dict__["outs"] is NOT_AVAILABLE
+    assert "outs" not in node.__dict__
     project.build()
     project.run()
     assert node.__dict__["outs"] == 42
     node = node.from_rev()
-    assert node.__dict__["outs"] is ZNTRACK_LAZY_VALUE
+    assert "outs" not in node.__dict__
     node = node.from_rev(lazy_evaluation=False)
     assert node.__dict__["outs"] == 42
 

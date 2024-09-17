@@ -1,6 +1,8 @@
 import logging
 import sys
 
+from zntrack.apply import apply
+
 from .from_rev import from_rev
 from .node import Node
 from .options import (
@@ -33,6 +35,7 @@ __all__ = [
     "Project",
     "nwd",
     "from_rev",
+    "apply",
 ]
 
 logger = logging.getLogger(__name__)
