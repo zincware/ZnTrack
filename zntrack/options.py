@@ -62,7 +62,9 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False, repr=False)
+    return znfields.field(
+        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False, repr=False
+    )
 
 
 @functools.wraps(znfields.field)
@@ -95,7 +97,9 @@ def plots(
             plots_config[key] = value
     if plots_config:
         kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
-    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs,  init=False, repr=False)
+    return znfields.field(
+        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False, repr=False
+    )
 
 
 @functools.wraps(znfields.field)
@@ -104,7 +108,9 @@ def metrics(*, cache: bool = False, independent: bool = False, **kwargs):
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs,  init=False)
+    return znfields.field(
+        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False
+    )
 
 
 @functools.wraps(znfields.field)
