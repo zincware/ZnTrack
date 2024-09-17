@@ -37,7 +37,7 @@ class TextPlugin(ZnTrackPlugin):
             with open(self.node.nwd / f"{field.name}.txt", "w") as f:
                 f.write(getattr(self.node, field.name))
 
-    def convert_to_zntrack_json(self):
+    def convert_to_zntrack_json(self, graph=None):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def convert_to_dvc_yaml(self):

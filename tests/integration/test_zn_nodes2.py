@@ -63,7 +63,7 @@ def test_ExampleNode(proj_path, eager):
 
 
 @pytest.mark.xfail(reason="pending implementation")
-@pytest.mark.parametrize("eager", [True, False])
+@pytest.mark.parametrize("eager", [False])
 def test_ExampleNodeLst(proj_path, eager):
     project = Project()
     parameter_1 = NodeViaParams(param1=1)

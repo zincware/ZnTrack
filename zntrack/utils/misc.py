@@ -5,7 +5,17 @@ import typing as t
 import yaml
 import znflow.utils
 
+from zntrack.utils.import_handler import import_handler
+
 from ..config import ENV_FILE_PATH
+
+
+def get_plugins_from_env(self):
+    plugins_paths = os.environ.get(
+        "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"
+    )
+    plugins = [import_handler(p) for p in plugins_paths.split(",")]
+    return {plugin.__name__: plugin(self) for plugin in plugins}
 
 
 def get_attr_always_list(obj: t.Any, attr: str) -> list:

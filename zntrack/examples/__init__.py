@@ -31,7 +31,7 @@ class ParamsToOuts(zntrack.Node):
 class ParamsToMetrics(zntrack.Node):
     """Save params to metrics."""
 
-    params: t.Any = zntrack.params()
+    params: dict = zntrack.params()
     metrics: dict = zntrack.metrics()
 
     def run(self) -> None:
@@ -125,13 +125,25 @@ class AddNodeNumbers(zntrack.Node):
 class SumNodeAttributes(zntrack.Node):
     """Sum a list of numbers."""
 
-    inputs: list = zntrack.deps()
-    shift: int = zntrack.params()
-    output: int = zntrack.outs()
+    inputs: list[float | int] = zntrack.deps()
+    shift: int | float = zntrack.params()
+    output: int | float = zntrack.outs()
 
     def run(self) -> None:
         """Sum a list of numbers."""
         self.output = sum(self.inputs) + self.shift
+
+
+class SumNodeAttributesToMetrics(zntrack.Node):
+    """Sum a list of numbers."""
+
+    inputs: list[float | int] = zntrack.deps()
+    shift: int | float = zntrack.params()
+    metrics: dict[str, int | float] = zntrack.metrics()
+
+    def run(self) -> None:
+        """Sum a list of numbers."""
+        self.metrics = {"value": sum(self.inputs) + self.shift}
 
 
 class AddOne(zntrack.Node):

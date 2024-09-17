@@ -9,7 +9,7 @@ readme = "README.md"
 
 
 [tool.poetry.dependencies]
-python = ">=3.10,<4"
+python = ">=3.10,<3.13"
 dvc = "^3.50"
 pyyaml = "^6"
 tqdm = "^4"
@@ -42,6 +42,8 @@ optuna = "^3"
 scikit-learn = "^1"
 nbmake = "^1"
 pandas = "^2.2.2"
+mlflow = "^2.16"
+aim = "^3.24.0"
 
 [tool.poetry.group.notebook.dependencies]
 jupyterlab = "^3"

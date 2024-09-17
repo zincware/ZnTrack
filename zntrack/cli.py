@@ -73,7 +73,7 @@ def run(
 
     cls: Node = utils.import_handler.import_handler(node_path)
     node: Node = cls.from_rev(name=name, running=True)
-    node.update_run_count()
+    node.increment_run_count()
     # dynamic version of node.run()
     getattr(node, method)()
     node.save()
