@@ -13,7 +13,7 @@ from zntrack.config import (
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_LAZY_VALUE,
 )
-from zntrack.exceptions import NodeNotAvailableError
+from zntrack.config import NOT_AVAILABLE, PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_LAZY_VALUE
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -109,10 +109,6 @@ def base_getter(self: "Node", name: str, func: t.Callable):
     try:
         func(self, name)
     except FileNotFoundError:
-        # if self.state.state == NodeStatusEnum.RUNNING:
-        #     return NOT_AVAILABLE
-        raise NodeNotAvailableError(
-            f"Node '{self.name}' is not available (could not find '{name}')."
-        )
+        return NOT_AVAILABLE
 
     return getattr(self, name)

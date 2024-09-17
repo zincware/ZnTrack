@@ -5,9 +5,5 @@ class ZnTrackError(Exception):
     pass
 
 
-class NodeNotAvailableError(ZnTrackError):
-    """Raised when a node is not available."""
-
-
 class InvalidOptionError(ZnTrackError, AttributeError):
     """Raised when using an invalid ZnTrackOption for a task."""

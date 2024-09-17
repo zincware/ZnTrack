@@ -245,8 +245,10 @@ class ComputeRandomNumber(zntrack.Node):
 
     number: float = zntrack.outs()
 
-    def _post_init_(self):
-        self.params_file = pathlib.Path(self.params_file)
+    # def _post_init_(self):
+    #     super()._post_init_()
+    #     self.params_file = pathlib.Path(self.params_file)
+    #     raise ValueError("This is a test exception, simulating killing the Node.")
 
     def run(self):
         """Compute a random number."""
@@ -254,13 +256,15 @@ class ComputeRandomNumber(zntrack.Node):
 
     def get_random_number(self):
         """Compute a random number."""
-        params = json.loads(self.params_file.read_text())
+        params = json.loads(pathlib.Path(self.params_file).read_text())
         random.seed(params["seed"])
         return random.randint(params["min"], params["max"])
 
     def write_params(self, min, max, seed):
         """Write params to file."""
-        self.params_file.write_text(json.dumps({"min": min, "max": max, "seed": seed}))
+        pathlib.Path(self.params_file).write_text(
+            json.dumps({"min": min, "max": max, "seed": seed})
+        )
 
 
 class ComputeRandomNumberWithParams(zntrack.Node):

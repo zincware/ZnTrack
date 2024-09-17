@@ -1,8 +1,6 @@
 import pathlib
 import subprocess
 
-import pytest
-
 import zntrack.config
 import zntrack.examples
 import zntrack.exceptions
@@ -27,7 +25,7 @@ def test_load_ParamsToOuts(proj_path):
         node = zntrack.examples.ParamsToOuts(params=42)
 
     assert node.__dict__["params"] == 42
-    assert node.__dict__["outs"] == zntrack.config.NOT_AVAILABLE
+    assert "outs" not in node.__dict__
 
     assert node.params == 42
     assert node.outs == zntrack.config.NOT_AVAILABLE
@@ -49,13 +47,10 @@ def test_load_ParamsToOuts_from_rev(proj_path):
     node = zntrack.examples.ParamsToOuts.from_rev()
 
     assert node.__dict__["params"] == zntrack.config.ZNTRACK_LAZY_VALUE
-    assert node.__dict__["outs"] == zntrack.config.ZNTRACK_LAZY_VALUE
+    assert "outs" not in node.__dict__
 
-    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
-        _ = node.params
-
-    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
-        _ = node.outs
+    assert node.params == zntrack.config.NOT_AVAILABLE
+    assert node.outs == zntrack.config.NOT_AVAILABLE
 
     project.build()
     subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
@@ -71,13 +66,11 @@ def test_load_WriteDVCOuts_from_rev(proj_path):
     node = zntrack.examples.WriteDVCOuts.from_rev()
 
     assert node.__dict__["params"] == zntrack.config.ZNTRACK_LAZY_VALUE
+    # outs is actually outs_path!
     assert node.__dict__["outs"] == zntrack.config.ZNTRACK_LAZY_VALUE
 
-    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
-        _ = node.params
-
-    with pytest.raises(zntrack.exceptions.NodeNotAvailableError):
-        _ = node.outs
+    assert node.params == zntrack.config.NOT_AVAILABLE
+    assert node.outs == zntrack.config.NOT_AVAILABLE
 
     project.build()
     subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
