@@ -91,10 +91,8 @@ def test_aim_metrics(aim_proj_path):
         npt.assert_array_equal(metrics["metrics.loss"], [[0]])
 
     # make a git commit with all the changes
+    proj.finalize(msg="test")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "test")
-    proj.finalize()
 
     with node.state.plugins["AIMPlugin"].get_aim_run() as run:
         df = run.dataframe()
@@ -128,10 +126,8 @@ def test_aim_plotting(aim_proj_path):
 
         npt.assert_array_equal(metrics["plots.idx"], [[idx for idx in range(10)]])
 
+    proj.finalize(msg="test")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "test")
-    proj.finalize()
 
     with node.state.plugins["AIMPlugin"].get_aim_run() as run:
         df = run.dataframe()
@@ -157,18 +153,14 @@ def test_multiple_nodes(aim_proj_path):
     with b.state.plugins["AIMPlugin"].get_aim_run() as run:
         b_run_id = run.hash
 
+    proj.finalize(msg="exp1")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "exp1")
-    proj.finalize()
 
     a.params = 5
     proj.repro()
 
+    proj.finalize(msg="exp2")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "exp2")
-    proj.finalize()
 
     a = a.from_rev(a.name)
     b = b.from_rev(b.name)
@@ -218,10 +210,8 @@ def test_dataclass_deps(aim_proj_path):
         assert df["t.temperature"].tolist() == [1.0]
         assert df["t._cls"].tolist() == ["test_plugins_aim.T1"]
 
+    proj.finalize(msg="test")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "test")
-    proj.finalize()
 
     md.t = t2
     proj.repro()

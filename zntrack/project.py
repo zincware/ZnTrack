@@ -13,6 +13,7 @@ from zntrack import utils
 from zntrack.config import NWD_PATH
 from zntrack.group import Group
 from zntrack.state import PLUGIN_LIST
+from zntrack.utils.finalize import make_commit
 from zntrack.utils.import_handler import import_handler
 from zntrack.utils.misc import load_env_vars
 
@@ -129,9 +130,28 @@ class Project(znflow.DiGraph):
             cmd.append("--force")
         subprocess.check_call(cmd)
 
-    def finalize(self):
-        # do we want to run a git commit?
-        # repo should not be dirty
+    def finalize(self, msg: str | None = None, commit: bool = True, **kwargs):
+        """Finalize the project by making a commit and loading environment variables.
+
+        This method performs the following actions:
+        1. Makes a commit with the provided message if `commit` is True.
+        2. Loads environment variables.
+        3. Loads and finalizes plugins specified in the `ZNTRACK_PLUGINS` environment variable.
+
+        Parameters
+        ----------
+        msg : str, optional
+            The commit message. If None, the message will be 'zntrack: auto commit'.
+        commit : bool, optional
+            Whether to make a commit or not. Default is True
+        **kwargs
+            Additional keyword arguments to pass to `make_commit`.
+
+        """
+        if msg is None:
+            msg = "zntrack: auto commit"
+        if commit:
+            make_commit(msg, **kwargs)
         utils.misc.load_env_vars()
         plugins_paths = os.environ.get(
             "ZNTRACK_PLUGINS", "zntrack.plugins.dvc_plugin.DVCPlugin"

@@ -99,10 +99,8 @@ def test_mlflow_metrics(mlflow_proj_path):
     assert run.data.metrics == {"metrics.loss": 0.0}
 
     # make a git commit with all the changes
+    proj.finalize(msg="test")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "test")
-    node.state.plugins["MLFlowPlugin"].finalize()
 
     run = mlflow.get_run(child_run_id)  # need to query the run again
 
@@ -177,18 +175,14 @@ def test_multiple_nodes(mlflow_proj_path):
 
     assert c_run.data.metrics == {"metrics.value": 10.0}
 
+    proj.finalize(msg="exp1")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "exp1")
-    proj.finalize()
 
     a.params = 5
     proj.repro()
 
+    proj.finalize(msg="exp2")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "exp2")
-    proj.finalize()
 
     # find all runs with `git_commit_hash` == repo.head.commit.hexsha
     runs = mlflow.search_runs(
@@ -271,10 +265,8 @@ def test_dataclass_deps(mlflow_proj_path):
         run.data.params["t"] == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'}]"
     )
 
+    proj.finalize(msg="test")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "test")
-    proj.finalize()
 
     md.t = t2
     proj.repro()
@@ -288,10 +280,8 @@ def test_dataclass_deps(mlflow_proj_path):
         run.data.params["t"] == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
     )
 
+    proj.finalize(msg="test")
     repo = git.Repo()
-    repo.git.add(".")
-    repo.git.commit("-m", "test")
-    proj.finalize()
 
     with zntrack.Project() as proj:
         md = MD(t=[t1, t2])
