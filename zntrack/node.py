@@ -31,7 +31,7 @@ class Node(znflow.Node, znfields.Base):
     """A Node."""
 
     name: str | None = None
-    always_changed: bool = False
+    always_changed: bool = dataclasses.field(default=False, repr=False)
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
 
