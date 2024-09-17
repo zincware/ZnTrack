@@ -13,6 +13,7 @@ import znjson
 
 from zntrack import converter
 from zntrack.config import (
+    NOT_AVAILABLE,
     PARAMS_FILE_PATH,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
@@ -21,7 +22,6 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
-    NOT_AVAILABLE,
 )
 from zntrack.exceptions import NodeNotAvailableError
 
@@ -164,7 +164,11 @@ class DVCPlugin(ZnTrackPlugin):
                 content = getattr(self.node, field.name)
                 if isinstance(content, (list, tuple, dict)):
                     new_content = []
-                    for val in content if isinstance(content, (list, tuple)) else content.values():
+                    for val in (
+                        content
+                        if isinstance(content, (list, tuple))
+                        else content.values()
+                    ):
                         if dataclasses.is_dataclass(val) and not isinstance(
                             val, (Node, znflow.Connection, znflow.CombinedConnections)
                         ):

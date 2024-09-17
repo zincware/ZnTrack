@@ -1,8 +1,6 @@
 import pathlib
 import subprocess
 
-import pytest
-
 import zntrack.config
 import zntrack.examples
 import zntrack.exceptions

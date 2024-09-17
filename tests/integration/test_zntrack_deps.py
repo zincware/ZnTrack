@@ -1,6 +1,5 @@
 """Tests for 'zntrack.deps'-field which can be used as both `zntrack.zn.deps` and `zntrack.zn.nodes`."""
 
-
 import zntrack.examples
 
 # TODO: change the parameters, rerun and see if it updates!

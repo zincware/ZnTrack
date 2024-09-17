@@ -1,3 +1,4 @@
+import dataclasses
 import shutil
 import typing as t
 
@@ -5,7 +6,7 @@ import pytest
 
 import zntrack
 from zntrack import Node, Project
-import dataclasses
+
 
 @dataclasses.dataclass
 class NodeViaParams:
@@ -86,7 +87,7 @@ def test_ExampleNodeLst(proj_path, eager):
 
     # TODO: passing an attribute of a dataclass might not correctly set the parameters
     #  needs files test!
-    
+
     if eager:
         project.run()
     else:
@@ -95,7 +96,6 @@ def test_ExampleNodeLst(proj_path, eager):
     assert node.params[0] == 2
     assert node.params[1] == 10
     assert node.outs == 12
-
 
     # assert isinstance(parameter_1, NodeViaParams)
     # with project:
@@ -120,6 +120,7 @@ def test_ExampleNodeLst(proj_path, eager):
 @dataclasses.dataclass
 class RandomNumberGen:
     seed: int = 42
+
     def get_rnd(self):
         import random
 

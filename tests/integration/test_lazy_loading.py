@@ -1,5 +1,4 @@
 import zntrack.examples
-from zntrack.config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE
 
 
 def test_run_project(proj_path):

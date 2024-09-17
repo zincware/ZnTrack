@@ -19,7 +19,7 @@ from zntrack.config import (
     NodeStatusEnum,
     ZnTrackOptionEnum,
 )
-from zntrack.exceptions import InvalidOptionError, NodeNotAvailableError
+from zntrack.exceptions import InvalidOptionError
 from zntrack.group import Group
 from zntrack.plugins import ZnTrackPlugin
 from zntrack.utils.import_handler import import_handler
