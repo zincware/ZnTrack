@@ -4,5 +4,6 @@ class ZnTrackError(Exception):
 
     pass
 
+
 class InvalidOptionError(ZnTrackError, AttributeError):
     """Raised when using an invalid ZnTrackOption for a task."""
