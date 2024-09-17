@@ -89,20 +89,21 @@ class Project(znflow.DiGraph):
         return super().add_node(node_for_adding, **attr)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        for group in self.groups.values():
-            for node_uuid in group.uuids:
-                # we need to access the `state` attribute to initialize
-                # the property, so the `log.debug` is necessary!
-                log.debug(self.nodes[node_uuid]["value"].state)
-                self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
-                    Group.from_znflow_group(group)
-                )
+        try:
+            for group in self.groups.values():
+                for node_uuid in group.uuids:
+                    # we need to access the `state` attribute to initialize
+                    # the property, so the `log.debug` is necessary!
+                    log.debug(self.nodes[node_uuid]["value"].state)
+                    self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
+                        Group.from_znflow_group(group)
+                    )
 
-        all_node_names = self.compute_all_node_names()
-        for node_uuid in self.nodes:
-            self.nodes[node_uuid]["value"].__dict__["name"] = all_node_names[node_uuid]
-
-        return super().__exit__(exc_type, exc_val, exc_tb)
+            all_node_names = self.compute_all_node_names()
+            for node_uuid in self.nodes:
+                self.nodes[node_uuid]["value"].__dict__["name"] = all_node_names[node_uuid]
+        finally:
+            super().__exit__(exc_type, exc_val, exc_tb)
 
     def build(self) -> None:
         log.info(f"Saving {config.PARAMS_FILE_PATH}")

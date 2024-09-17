@@ -42,6 +42,7 @@ def test_grouped_node_name(proj_path):
         assert n2.name == "MyNode_1"
         n_named = MyNode(name="SomeNode")
         assert n_named.name == "SomeNode"
+        assert n_named.__dict__["name"] == "SomeNode"
 
     with project.group("grp1"):
         n3 = MyNode()
@@ -54,6 +55,10 @@ def test_grouped_node_name(proj_path):
     assert n3.name == "grp1_MyNode"
     assert n4.name == "grp1_MyNode_1"
 
+def test_duplicate_named_node():
+    with zntrack.Project() as proj:
+        n1 = MyNode(name="A")
     with pytest.raises(ValueError):
-        with project:
-            MyNode(name="SomeNode")
+        with proj:
+            n2 = MyNode(name="A")
+    

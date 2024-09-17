@@ -32,7 +32,7 @@ def _name_getter(self, name):
     # find the value based on the current project context
     graph = znflow.get_graph()
     if graph is znflow.empty_graph:
-        raise ValueError("Node name is not set and no graph is active.")
+        return self.__class__.__name__
 
     return graph.compute_all_node_names()[self.uuid]
 
