@@ -1,4 +1,3 @@
-import dvc.cli
 import pytest
 
 import zntrack.examples
@@ -72,7 +71,6 @@ def test_AddNodes_legacy(proj_path):
     assert add_numbers_b.state.state == NodeStatusEnum.CREATED
     assert add_nodes.state.state == NodeStatusEnum.CREATED
     proj.repro(build=False)
-
 
     add_numbers_a = add_numbers_a.from_rev(name=add_numbers_a.name)
     add_numbers_b = add_numbers_b.from_rev(name=add_numbers_b.name)
