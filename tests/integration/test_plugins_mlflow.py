@@ -8,6 +8,7 @@ import mlflow
 import pandas as pd
 import pytest
 import yaml
+from mlflow.utils import mlflow_tags
 
 import zntrack.examples
 
@@ -265,8 +266,13 @@ def test_dataclass_deps(mlflow_proj_path):
         run.data.params["t"] == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'}]"
     )
 
-    proj.finalize(msg="test")
+    proj.finalize(msg="run1 exp.")
     repo = git.Repo()
+
+    mdx = MD.from_rev()
+    with mdx.state.plugins["MLFlowPlugin"]:
+        run = mlflow.get_run(mdx.state.plugins["MLFlowPlugin"].child_run_id)
+    assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run1:MD"
 
     md.t = t2
     proj.repro()
@@ -280,8 +286,12 @@ def test_dataclass_deps(mlflow_proj_path):
         run.data.params["t"] == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
     )
 
-    proj.finalize(msg="test")
-    repo = git.Repo()
+    proj.finalize(msg="run2 exp.")
+
+    mdx = MD.from_rev()
+    with mdx.state.plugins["MLFlowPlugin"]:
+        run = mlflow.get_run(mdx.state.plugins["MLFlowPlugin"].child_run_id)
+    assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run2:MD"
 
     with zntrack.Project() as proj:
         md = MD(t=[t1, t2])
@@ -296,6 +306,7 @@ def test_dataclass_deps(mlflow_proj_path):
         run.data.params["t"]
         == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'}, {'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
     )
+    # assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run2:MD"
 
 
 # TODO: test plots via extend_plots and via setting them at the end

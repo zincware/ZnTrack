@@ -220,6 +220,8 @@ class MLFlowPlugin(ZnTrackPlugin):
         commit_hash = repo.head.commit.hexsha
         commit_message = repo.head.commit.message
 
+        prefix = commit_message.split()[0]
+
         # get the default remote for the current branch
         try:
             remote_url = repo.remote().url
@@ -244,6 +246,7 @@ class MLFlowPlugin(ZnTrackPlugin):
             with mlflow.start_run(run_id=plugin.parent_run_id):
                 mlflow.set_tag("git_commit_hash", commit_hash)
                 mlflow.set_tag("git_commit_message", commit_message)
+                mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, prefix)
                 if remote_url is not None:
                     mlflow.set_tag("git_remote", remote_url)
                 parent_run_id = mlflow.active_run().info.run_id
@@ -261,6 +264,7 @@ class MLFlowPlugin(ZnTrackPlugin):
                 with node.state.plugins["MLFlowPlugin"]:
                     mlflow.set_tag("git_commit_hash", commit_hash)
                     mlflow.set_tag("git_commit_message", commit_message.strip())
+                    mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}")
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
             else:
