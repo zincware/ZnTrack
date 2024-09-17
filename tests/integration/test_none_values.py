@@ -44,7 +44,7 @@ def test_from_zn_deps(proj_path, eager):
     with zntrack.Project() as proj:
         data = WriteData(data="Hello World")
         node = LoadFromDeps(data=data.outs, file=None)
-    
+
     if eager:
         proj.run()
     else:
