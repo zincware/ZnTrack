@@ -161,7 +161,7 @@ class WriteDVCOuts(zntrack.Node):
     """Write an output file."""
 
     params: t.Any = zntrack.params()
-    outs: pathlib.Path|str = zntrack.outs_path(zntrack.nwd / "output.txt")
+    outs: pathlib.Path | str = zntrack.outs_path(zntrack.nwd / "output.txt")
 
     def run(self):
         """Write an output file."""
