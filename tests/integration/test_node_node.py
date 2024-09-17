@@ -2,9 +2,10 @@ import dvc.cli
 import pytest
 
 import zntrack.examples
+from zntrack.config import NodeStatusEnum
 
 
-@pytest.mark.xfail(reason="pending implementation")
+# @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNodes(proj_path, eager):
     with zntrack.Project() as project:
@@ -12,24 +13,27 @@ def test_AddNodes(proj_path, eager):
         add_numbers_b = zntrack.examples.AddNumbers(a=1, b=3, name="AddNumbersB")
         add_nodes = zntrack.examples.AddNodes(a=add_numbers_a, b=add_numbers_b)
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert add_numbers_b.state.state == NodeStatusEnum.CREATED
+    assert add_nodes.state.state == NodeStatusEnum.CREATED
 
-    project.run(eager=eager)
-    # if not eager:
-    #     add_numbers_a.load()
-    #     add_numbers_b.load()
-    #     add_nodes.load()
+    if eager:
+        project.run()
+    else:
+        project.repro()
+
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    # TODO: Node status is not beind updated when not using from_rev
+    if eager:
+        assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    if eager:
+        assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    if eager:
+        assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
-@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNodeAttributes(proj_path, eager):
     with zntrack.Project() as project:
@@ -39,24 +43,21 @@ def test_AddNodeAttributes(proj_path, eager):
             a=add_numbers_a.c, b=add_numbers_b.c
         )
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
-
-    project.run(eager=eager)
-    # if not eager:
-    #     add_numbers_a.load()
-    #     add_numbers_b.load()
-    #     add_nodes.load()
+    if eager:
+        project.run()
+    else:
+        project.repro()
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    if eager:
+        assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    if eager:
+        assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    if eager:
+        assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_AddNodes_legacy(proj_path):
     with zntrack.Project() as proj:
         add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")
@@ -67,24 +68,24 @@ def test_AddNodes_legacy(proj_path):
 
     proj.build()
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert add_numbers_b.state.state == NodeStatusEnum.CREATED
+    assert add_nodes.state.state == NodeStatusEnum.CREATED
+    proj.repro(build=False)
 
-    assert dvc.cli.main(["repro"]) == 0
 
-    # add_numbers_a.load()
-    # add_numbers_b.load()
-    # add_nodes.load()
+    add_numbers_a = add_numbers_a.from_rev(name=add_numbers_a.name)
+    add_numbers_b = add_numbers_b.from_rev(name=add_numbers_b.name)
+    add_nodes = add_nodes.from_rev(name=add_nodes.name)
+
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_AddNodeAttributes_legacy(proj_path):
     with zntrack.Project() as proj:
         add_numbers_a = zntrack.examples.AddNumbers(a=1, b=2, name="AddNumbersA")
@@ -93,21 +94,22 @@ def test_AddNodeAttributes_legacy(proj_path):
 
     proj.build()
 
-    assert not add_numbers_a.state.loaded
-    assert not add_numbers_b.state.loaded
-    assert not add_nodes.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.CREATED
+    assert add_numbers_b.state.state == NodeStatusEnum.CREATED
+    assert add_nodes.state.state == NodeStatusEnum.CREATED
 
-    assert dvc.cli.main(["repro"]) == 0
+    proj.repro(build=False)
 
-    # add_numbers_a.load()
-    # add_numbers_b.load()
-    # add_nodes.load()
+    add_numbers_a = add_numbers_a.from_rev(name=add_numbers_a.name)
+    add_numbers_b = add_numbers_b.from_rev(name=add_numbers_b.name)
+    add_nodes = add_nodes.from_rev(name=add_nodes.name)
+
     assert add_numbers_a.c == 3
-    assert add_numbers_a.state.loaded
+    assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4
-    assert add_numbers_b.state.loaded
+    assert add_numbers_b.state.state == NodeStatusEnum.FINISHED
     assert add_nodes.c == 7
-    assert add_nodes.state.loaded
+    assert add_nodes.state.state == NodeStatusEnum.FINISHED
 
 
 def test_OptionalDeps(proj_path):
@@ -117,10 +119,6 @@ def test_OptionalDeps(proj_path):
         add_value = zntrack.examples.OptionalDeps(value=add_numbers.c)
 
     proj.run()
-
-    # add_numbers.load()
-    # add_none.load()
-    # add_value.load()
 
     assert add_numbers.c == 3
     assert add_none.result == 0.0
