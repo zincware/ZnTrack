@@ -63,7 +63,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     return znfields.field(
-        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False, repr=False
+        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False
     )
 
 
@@ -98,7 +98,7 @@ def plots(
     if plots_config:
         kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
     return znfields.field(
-        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False, repr=False
+        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False
     )
 
 

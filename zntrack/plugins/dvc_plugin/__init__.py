@@ -162,9 +162,9 @@ class DVCPlugin(ZnTrackPlugin):
                 data[field.name] = getattr(self.node, field.name)
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
                 content = getattr(self.node, field.name)
-                if isinstance(content, (list, tuple)):
+                if isinstance(content, (list, tuple, dict)):
                     new_content = []
-                    for val in content:
+                    for val in content if isinstance(content, (list, tuple)) else content.values():
                         if dataclasses.is_dataclass(val) and not isinstance(
                             val, (Node, znflow.Connection, znflow.CombinedConnections)
                         ):
