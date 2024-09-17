@@ -19,7 +19,7 @@ def test_AddNumbers(proj_path, eager):
         project.run()
     else:
         project.repro()
-    
+
     assert add_numbers.c == 3
     add_numbers = add_numbers.from_rev()
     assert add_numbers.c == 3
