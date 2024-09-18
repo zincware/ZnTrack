@@ -23,7 +23,6 @@ from zntrack.config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from zntrack.utils.node_wd import nwd
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -34,7 +33,7 @@ from zntrack.utils.misc import (
     get_attr_always_list,
     sort_and_deduplicate,
 )
-from zntrack.utils.node_wd import NWDReplaceHandler
+from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 
 
 def _outs_save_func(self: "Node", name: str):
@@ -247,7 +246,9 @@ class DVCPlugin(ZnTrackPlugin):
                 if getattr(self.node, field.name) is None:
                     continue
                 if getattr(self.node, field.name) == nwd:
-                    raise ValueError("Can not use 'zntrack.nwd' direclty as an output path. Please use 'zntrack.nwd / <path/file>' instead.")
+                    raise ValueError(
+                        "Can not use 'zntrack.nwd' direclty as an output path. Please use 'zntrack.nwd / <path/file>' instead."
+                    )
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
