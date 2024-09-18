@@ -23,6 +23,7 @@ from zntrack.config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
+from zntrack.utils.node_wd import nwd
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -245,6 +246,8 @@ class DVCPlugin(ZnTrackPlugin):
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
+                if getattr(self.node, field.name) == nwd:
+                    raise ValueError("Can not use 'zntrack.nwd' direclty as an output path. Please use 'zntrack.nwd / <path/file>' instead.")
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )

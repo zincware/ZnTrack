@@ -10,16 +10,16 @@ import zntrack
 
 class WriteToNWD(zntrack.Node):
     text: str = zntrack.params()
-    file: pathlib.Path = zntrack.outs_path(zntrack.nwd / "test.txt")
+    file: tuple[pathlib.Path] = zntrack.outs_path((zntrack.nwd / "test.txt",))
 
     def run(self):
         self.nwd.mkdir(exist_ok=True, parents=True)
-        self.file.write_text(self.text)
+        self.file[0].write_text(self.text)
 
 
 class FileToOuts(zntrack.Node):
     # although, this is a file path, it has to be zn.deps
-    file: pathlib.Path = zntrack.deps()
+    file: tuple[pathlib.Path] = zntrack.deps()
     text: str = zntrack.outs()
 
     def run(self):
@@ -33,20 +33,19 @@ def test_WriteToNWD(proj_path, eager):
         write_to_nwd = WriteToNWD(text="Hello World")
         file_to_outs = FileToOuts(file=write_to_nwd.file)
 
-    project.run(eager=eager)
-    assert write_to_nwd.file[0].read_text() == "Hello World"
-    assert write_to_nwd.file == [pathlib.Path("nodes", "WriteToNWD", "test.txt")]
-    # if not eager:
-    #     write_to_nwd.load()
-    assert write_to_nwd.__dict__["file"] == [pathlib.Path("$nwd$", "test.txt")]
+    if eager:
+        project.run()
+    else:
+        project.repro()
 
-    # file_to_outs.load()
+    assert write_to_nwd.file[0].read_text() == "Hello World"
+    assert write_to_nwd.file == (pathlib.Path("nodes", "WriteToNWD", "test.txt"),)
+
+    assert write_to_nwd.__dict__["file"] == (pathlib.Path("$nwd$", "test.txt"),)
     assert file_to_outs.text == "Hello World"
 
 
 def test_OutAsNWD(proj_path):
-    with pytest.raises(ValueError):
-
-        class OutsAsNWD(zntrack.Node):
-            text: t.Any = zntrack.params()
-            outs: pathlib.Path = zntrack.outs_path(zntrack.nwd)
+    class OutsAsNWD(zntrack.Node):
+        text: t.Any = zntrack.params()
+        outs: pathlib.Path = zntrack.outs_path(zntrack.nwd)
