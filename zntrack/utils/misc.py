@@ -22,6 +22,8 @@ def get_attr_always_list(obj: t.Any, attr: str) -> list:
     value = getattr(obj, attr)
     if isinstance(value, dict):
         return list(value.values())
+    if isinstance(value, tuple):
+        return list(value)
     if not isinstance(value, list):
         value = [value]
     return value

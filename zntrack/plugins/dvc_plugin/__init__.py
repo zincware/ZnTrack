@@ -33,7 +33,7 @@ from zntrack.utils.misc import (
     get_attr_always_list,
     sort_and_deduplicate,
 )
-from zntrack.utils.node_wd import NWDReplaceHandler
+from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 
 
 def _outs_save_func(self: "Node", name: str):
@@ -245,6 +245,10 @@ class DVCPlugin(ZnTrackPlugin):
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
+                if getattr(self.node, field.name) == nwd:
+                    raise ValueError(
+                        "Can not use 'zntrack.nwd' direclty as an output path. Please use 'zntrack.nwd / <path/file>' instead."
+                    )
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
