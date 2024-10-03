@@ -124,6 +124,7 @@ class Project(znflow.DiGraph):
                     value := plugin.convert_to_dvc_yaml()
                 ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
                     dvc_dict["stages"][node.name] = value["stages"]
+                    # TODO: this won't work if multiple plugins want to modify the dvc.yaml
                     if len(value["plots"]) > 0:
                         dvc_dict["plots"].extend(value["plots"])
                 if (

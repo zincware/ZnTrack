@@ -51,7 +51,7 @@ def get_mlflow_parent_run() -> str:
         return parent_run_id
 
 
-def get_mlflow_child_run(stage_hash: str, node_name: str, node_path: str) -> str:
+def get_mlflow_child_run(stage_hash: str, node: Node, node_path: str) -> str:
     runs_df = mlflow.search_runs(
         filter_string=f"tags.dvc_stage_hash = '{stage_hash}'",
     )
@@ -63,13 +63,15 @@ def get_mlflow_child_run(stage_hash: str, node_name: str, node_path: str) -> str
         tags = exp_info.get("tags", {})
 
         mlflow.set_tag("dvc_stage_hash", stage_hash)
-        mlflow.set_tag("dvc_stage_name", node_name)
+        mlflow.set_tag("dvc_stage_name", node.name)
         # TODO: do we want to include the name of the parent run?
-        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
+        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node.name)
         mlflow.set_tag(
             "zntrack_node",
             node_path,
         )
+        if hasattr(node, "__mlflow_run_note__"):
+            mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NOTE, node.__mlflow_run_note__())
         for tag_key, tag_value in tags.items():
             mlflow.set_tag(tag_key, tag_value)
         return run.info.run_id
@@ -115,7 +117,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         self.parent_run_id = self.parent_run_id or get_mlflow_parent_run()
         self.child_run_id = self.child_run_id or get_mlflow_child_run(
             self.node.state.get_stage_hash(),
-            self.node.name,
+            self.node,
             f"{self.node.__module__}.{self.node.__class__.__name__}",
         )
 
@@ -264,17 +266,18 @@ class MLFlowPlugin(ZnTrackPlugin):
                 with node.state.plugins["MLFlowPlugin"]:
                     mlflow.set_tag("git_commit_hash", commit_hash)
                     mlflow.set_tag("git_commit_message", commit_message.strip())
-                    mlflow.set_tag(
-                        mlflow_tags.MLFLOW_RUN_NOTE, f"{commit_message.strip()}"
-                    )
+                    # mlflow.set_tag(
+                    #     mlflow_tags.MLFLOW_RUN_NOTE, f"{commit_message.strip()}"
+                    # )
                     # there is https://github.com/mlflow/mlflow/blob/master/tests/tracking/context/test_git_context.py
                     #  but it is not documented?
                     mlflow.set_tag(mlflow_tags.MLFLOW_GIT_COMMIT, commit_hash)
-                    # TODO: here we can have a custom description also from the Node itself.
                     mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}")
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
                         mlflow.set_tag(mlflow_tags.MLFLOW_GIT_REPO_URL, remote_url)
+                    # if hasattr(node, "_mlflow_run_note_"):
+                        # raise ValueError("not implemented")
             else:
                 print(f"missing {node_name}")
                 node = zntrack.from_rev(node_name)

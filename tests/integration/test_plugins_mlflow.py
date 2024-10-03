@@ -31,6 +31,21 @@ class MD(zntrack.Node):
     def run(self):
         self.result = self.t.__class__.__name__
 
+    def __mlflow_run_note__(self) -> str:
+        return """
+This is the MD Node
+
+Run it via `MD(t=T1(temperature=1))`
+
+within
+
+```python
+with zntrack.Project() as proj:
+    md = MD(t=T1(temperature=1))
+proj.repro()
+```
+"""
+
 
 class RangePlotter(zntrack.Node):
     start: int = zntrack.params()
@@ -270,6 +285,7 @@ def test_dataclass_deps(mlflow_proj_path):
     repo = git.Repo()
 
     mdx = MD.from_rev()
+    assert mdx._mlflow_run_note_() != ""
     with mdx.state.plugins["MLFlowPlugin"]:
         run = mlflow.get_run(mdx.state.plugins["MLFlowPlugin"].child_run_id)
     assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run1:MD"
