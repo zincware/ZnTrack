@@ -32,8 +32,8 @@ class MD(zntrack.Node):
         self.result = self.t.__class__.__name__
 
     def __mlflow_run_note__(self) -> str:
-        return """
-This is the MD Node
+        return f"""
+This is the MD Node from rev {self.state.rev}.
 
 Run it via `MD(t=T1(temperature=1))`
 
@@ -285,7 +285,7 @@ def test_dataclass_deps(mlflow_proj_path):
     repo = git.Repo()
 
     mdx = MD.from_rev()
-    assert mdx._mlflow_run_note_() != ""
+    assert mdx.__mlflow_run_note__() != ""
     with mdx.state.plugins["MLFlowPlugin"]:
         run = mlflow.get_run(mdx.state.plugins["MLFlowPlugin"].child_run_id)
     assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run1:MD"
@@ -322,6 +322,10 @@ def test_dataclass_deps(mlflow_proj_path):
         run.data.params["t"]
         == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'}, {'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
     )
+
+    md = zntrack.from_rev(md.name)
+    assert hasattr(md, "__mlflow_run_note__")
+    assert md.__mlflow_run_note__() != ""
     # assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run2:MD"
 
 

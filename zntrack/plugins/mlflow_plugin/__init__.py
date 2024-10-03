@@ -70,8 +70,6 @@ def get_mlflow_child_run(stage_hash: str, node: Node, node_path: str) -> str:
             "zntrack_node",
             node_path,
         )
-        if hasattr(node, "__mlflow_run_note__"):
-            mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NOTE, node.__mlflow_run_note__())
         for tag_key, tag_value in tags.items():
             mlflow.set_tag(tag_key, tag_value)
         return run.info.run_id
@@ -262,7 +260,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         print(f"found {len(child_runs)} child runs in exp: '{active_experiment_id}'")
         for node_name in node_names:
             if node_name in child_runs["tags.dvc_stage_name"].values:
-                node = zntrack.from_rev(node_name)
+                node = zntrack.from_rev(node_name, rev=commit_hash)
                 with node.state.plugins["MLFlowPlugin"]:
                     mlflow.set_tag("git_commit_hash", commit_hash)
                     mlflow.set_tag("git_commit_message", commit_message.strip())
@@ -276,11 +274,13 @@ class MLFlowPlugin(ZnTrackPlugin):
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
                         mlflow.set_tag(mlflow_tags.MLFLOW_GIT_REPO_URL, remote_url)
+                    if hasattr(node, "__mlflow_run_note__"):
+                        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NOTE, node.__mlflow_run_note__())
                     # if hasattr(node, "_mlflow_run_note_"):
                     # raise ValueError("not implemented")
             else:
                 print(f"missing {node_name}")
-                node = zntrack.from_rev(node_name)
+                node = zntrack.from_rev(node_name, rev=commit_hash)
                 stage_hash = node.state.get_stage_hash()
                 original_runs = mlflow.search_runs(
                     experiment_ids=[active_experiment_id],
@@ -320,6 +320,8 @@ class MLFlowPlugin(ZnTrackPlugin):
                         mlflow.set_tag("git_remote", remote_url)
 
                     mlflow.set_tag("original_dvc_stage_hash", node.state.get_stage_hash())
+                    if hasattr(node, "__mlflow_run_note__"):
+                        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NOTE, node.__mlflow_run_note__())
                     mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
                     for tag_key, tag_value in tags.items():
                         mlflow.set_tag(tag_key, tag_value)
