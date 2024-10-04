@@ -149,7 +149,14 @@ class Project(znflow.DiGraph):
             cmd.append("--force")
         subprocess.check_call(cmd)
 
-    def finalize(self, msg: str | None = None, commit: bool = True, skip_cached: bool = True, update_run_names: bool = True, **kwargs):
+    def finalize(
+        self,
+        msg: str | None = None,
+        commit: bool = True,
+        skip_cached: bool = True,
+        update_run_names: bool = True,
+        **kwargs,
+    ):
         """Finalize the project by making a commit and loading environment variables.
 
         This method performs the following actions:

@@ -92,7 +92,9 @@ def list(
 @app.command()
 def finalize(
     skip_cached: bool = typer.Option(True, help="Do not upload cached nodes."),
-    update_run_names: bool = typer.Option(True, help="Include part of the commit message in the run names."),
+    update_run_names: bool = typer.Option(
+        True, help="Include part of the commit message in the run names."
+    ),
 ):
     """Post-commit step for plugin integration."""
     utils.misc.load_env_vars()

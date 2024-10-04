@@ -169,6 +169,7 @@ def test_mlflow_plotting(mlflow_proj_path):
     assert run.data.tags["git_commit_message"] == "test"
     assert run.data.tags["git_commit_hash"] == repo.head.commit.hexsha
 
+
 @pytest.mark.parametrize("skip_cached", [True, False])
 def test_multiple_nodes(mlflow_proj_path, skip_cached):
     with zntrack.Project() as proj:
@@ -226,7 +227,7 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
         assert len(b_run_2) == 1
         b_run_2 = b_run_2[0]
         assert b_run_2.data.tags["original_run_id"] == b_run.info.run_id
-         # original runs will not be updated with a new name to indicate that they are cached
+        # original runs will not be updated with a new name to indicate that they are cached
         assert b_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "ParamsToOuts_1"
 
     c_run_2 = mlflow.search_runs(
@@ -236,15 +237,20 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
     assert len(c_run_2) == 1
     c_run_2 = c_run_2[0]
 
-    assert "original_run_id" not in a_run_2.data.tags        
+    assert "original_run_id" not in a_run_2.data.tags
     assert "original_run_id" not in c_run_2.data.tags
 
     if skip_cached:
-        assert  a_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "ParamsToOuts"
-        assert  c_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "SumNodeAttributesToMetrics"
+        assert a_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "ParamsToOuts"
+        assert (
+            c_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "SumNodeAttributesToMetrics"
+        )
     else:
-        assert  a_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "exp2:ParamsToOuts"
-        assert  c_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "exp2:SumNodeAttributesToMetrics"
+        assert a_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "exp2:ParamsToOuts"
+        assert (
+            c_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME]
+            == "exp2:SumNodeAttributesToMetrics"
+        )
 
     assert c_run_2.data.metrics == {"metrics.value": 12.0}
 

@@ -274,7 +274,9 @@ class MLFlowPlugin(ZnTrackPlugin):
                     #  but it is not documented?
                     mlflow.set_tag(mlflow_tags.MLFLOW_GIT_COMMIT, commit_hash)
                     if update_run_names:
-                        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}")
+                        mlflow.set_tag(
+                            mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}"
+                        )
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
                         mlflow.set_tag(mlflow_tags.MLFLOW_GIT_REPO_URL, remote_url)
