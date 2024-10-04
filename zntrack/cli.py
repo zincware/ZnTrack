@@ -90,7 +90,9 @@ def list(
 
 
 @app.command()
-def finalize():
+def finalize(
+    skip_cached: bool = typer.Option(True, help="Do not upload cached nodes."),
+):
     """Post-commit step for plugin integration."""
     utils.misc.load_env_vars()
     plugins_paths = os.environ.get(
@@ -98,4 +100,4 @@ def finalize():
     )
     plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
     for plugin in plugins:
-        plugin.finalize()
+        plugin.finalize(skip_cached=skip_cached)

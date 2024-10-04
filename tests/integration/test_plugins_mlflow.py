@@ -169,8 +169,8 @@ def test_mlflow_plotting(mlflow_proj_path):
     assert run.data.tags["git_commit_message"] == "test"
     assert run.data.tags["git_commit_hash"] == repo.head.commit.hexsha
 
-
-def test_multiple_nodes(mlflow_proj_path):
+@pytest.mark.parametrize("skip_cached", [True, False])
+def test_multiple_nodes(mlflow_proj_path, skip_cached):
     with zntrack.Project() as proj:
         a = zntrack.examples.ParamsToOuts(params=3)
         b = zntrack.examples.ParamsToOuts(params=7)
@@ -191,20 +191,23 @@ def test_multiple_nodes(mlflow_proj_path):
 
     assert c_run.data.metrics == {"metrics.value": 10.0}
 
-    proj.finalize(msg="exp1")
+    proj.finalize(msg="exp1", skip_cached=skip_cached)
     repo = git.Repo()
 
     a.params = 5
     proj.repro()
 
-    proj.finalize(msg="exp2")
+    proj.finalize(msg="exp2", skip_cached=skip_cached)
     repo = git.Repo()
 
     # find all runs with `git_commit_hash` == repo.head.commit.hexsha
     runs = mlflow.search_runs(
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}'"
     )
-    assert len(runs) == 4
+    if skip_cached:
+        assert len(runs) == 3
+    else:
+        assert len(runs) == 4
 
     a_run_2 = mlflow.search_runs(
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{a.name}'",
@@ -217,8 +220,12 @@ def test_multiple_nodes(mlflow_proj_path):
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{b.name}'",
         output_format="list",
     )
-    assert len(b_run_2) == 1
-    b_run_2 = b_run_2[0]
+    if skip_cached:
+        assert len(b_run_2) == 0
+    else:
+        assert len(b_run_2) == 1
+        b_run_2 = b_run_2[0]
+        assert b_run_2.data.tags["original_run_id"] == b_run.info.run_id
 
     c_run_2 = mlflow.search_runs(
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{c.name}'",
@@ -227,8 +234,7 @@ def test_multiple_nodes(mlflow_proj_path):
     assert len(c_run_2) == 1
     c_run_2 = c_run_2[0]
 
-    assert "original_run_id" not in a_run_2.data.tags
-    assert b_run_2.data.tags["original_run_id"] == b_run.info.run_id
+    assert "original_run_id" not in a_run_2.data.tags        
     assert "original_run_id" not in c_run_2.data.tags
 
     assert c_run_2.data.metrics == {"metrics.value": 12.0}

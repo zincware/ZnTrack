@@ -149,7 +149,7 @@ class Project(znflow.DiGraph):
             cmd.append("--force")
         subprocess.check_call(cmd)
 
-    def finalize(self, msg: str | None = None, commit: bool = True, **kwargs):
+    def finalize(self, msg: str | None = None, commit: bool = True, skip_cached: bool = True, **kwargs):
         """Finalize the project by making a commit and loading environment variables.
 
         This method performs the following actions:
@@ -163,6 +163,8 @@ class Project(znflow.DiGraph):
             The commit message. If None, the message will be 'zntrack: auto commit'.
         commit : bool, optional
             Whether to make a commit or not. Default is True
+        skip_cached : bool, optional
+            Do not upload cached nodes.
         **kwargs
             Additional keyword arguments to pass to `make_commit`.
 
@@ -177,7 +179,7 @@ class Project(znflow.DiGraph):
         )
         plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
         for plugin in plugins:
-            plugin.finalize()
+            plugin.finalize(skip_cached=skip_cached)
 
     @contextlib.contextmanager
     def group(self, *names: str):

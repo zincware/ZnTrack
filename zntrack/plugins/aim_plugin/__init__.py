@@ -177,7 +177,7 @@ class AIMPlugin(ZnTrackPlugin):
                 run.track(value, name=f"{attribute}.{key}", step=step)
 
     @classmethod
-    def finalize(cls):
+    def finalize(cls, **kwargs) -> None:
         """Update the aim run to include the correct commit data.
 
         Run this, once you have created a commit for your DVC experiment.

@@ -193,7 +193,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         mlflow.log_metrics(new_data, step=step)
 
     @classmethod
-    def finalize(cls):
+    def finalize(cls, **kwargs):
         """Example:
         -------
         python -c "from zntrack.plugins.mlflow_plugin import MLFlowPlugin; MLFlowPlugin.finalize()"
@@ -204,7 +204,9 @@ class MLFlowPlugin(ZnTrackPlugin):
         # and then find the parent run by querying the tags
 
         # TODO: provide post-commit installation instructions
+        # TODO: kwarg for updating cached runs
         load_env_vars()
+        skip_cached = kwargs.get("skip_cached", True)
 
         exp_info = get_exp_info()
         if "parent_run_id" not in exp_info:
@@ -280,7 +282,7 @@ class MLFlowPlugin(ZnTrackPlugin):
                         )
                     # if hasattr(node, "_mlflow_run_note_"):
                     # raise ValueError("not implemented")
-            else:
+            elif not skip_cached:
                 print(f"missing {node_name}")
                 node = zntrack.from_rev(node_name, rev=commit_hash)
                 stage_hash = node.state.get_stage_hash()
