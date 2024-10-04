@@ -207,6 +207,7 @@ class MLFlowPlugin(ZnTrackPlugin):
         # TODO: kwarg for updating cached runs
         load_env_vars()
         skip_cached = kwargs.get("skip_cached", True)
+        update_run_names = kwargs.get("update_run_names", True)
 
         exp_info = get_exp_info()
         if "parent_run_id" not in exp_info:
@@ -272,7 +273,8 @@ class MLFlowPlugin(ZnTrackPlugin):
                     # there is https://github.com/mlflow/mlflow/blob/master/tests/tracking/context/test_git_context.py
                     #  but it is not documented?
                     mlflow.set_tag(mlflow_tags.MLFLOW_GIT_COMMIT, commit_hash)
-                    mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}")
+                    if update_run_names:
+                        mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, f"{prefix}:{node_name}")
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
                         mlflow.set_tag(mlflow_tags.MLFLOW_GIT_REPO_URL, remote_url)

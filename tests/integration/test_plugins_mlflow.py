@@ -191,13 +191,13 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
 
     assert c_run.data.metrics == {"metrics.value": 10.0}
 
-    proj.finalize(msg="exp1", skip_cached=skip_cached)
+    proj.finalize(msg="exp1", skip_cached=skip_cached, update_run_names=not skip_cached)
     repo = git.Repo()
 
     a.params = 5
     proj.repro()
 
-    proj.finalize(msg="exp2", skip_cached=skip_cached)
+    proj.finalize(msg="exp2", skip_cached=skip_cached, update_run_names=not skip_cached)
     repo = git.Repo()
 
     # find all runs with `git_commit_hash` == repo.head.commit.hexsha
@@ -226,6 +226,8 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
         assert len(b_run_2) == 1
         b_run_2 = b_run_2[0]
         assert b_run_2.data.tags["original_run_id"] == b_run.info.run_id
+         # original runs will not be updated with a new name to indicate that they are cached
+        assert b_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "ParamsToOuts_1"
 
     c_run_2 = mlflow.search_runs(
         filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{c.name}'",
@@ -236,6 +238,13 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
 
     assert "original_run_id" not in a_run_2.data.tags        
     assert "original_run_id" not in c_run_2.data.tags
+
+    if skip_cached:
+        assert  a_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "ParamsToOuts"
+        assert  c_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "SumNodeAttributesToMetrics"
+    else:
+        assert  a_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "exp2:ParamsToOuts"
+        assert  c_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "exp2:SumNodeAttributesToMetrics"
 
     assert c_run_2.data.metrics == {"metrics.value": 12.0}
 

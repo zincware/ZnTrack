@@ -149,7 +149,7 @@ class Project(znflow.DiGraph):
             cmd.append("--force")
         subprocess.check_call(cmd)
 
-    def finalize(self, msg: str | None = None, commit: bool = True, skip_cached: bool = True, **kwargs):
+    def finalize(self, msg: str | None = None, commit: bool = True, skip_cached: bool = True, update_run_names: bool = True, **kwargs):
         """Finalize the project by making a commit and loading environment variables.
 
         This method performs the following actions:
@@ -165,6 +165,8 @@ class Project(znflow.DiGraph):
             Whether to make a commit or not. Default is True
         skip_cached : bool, optional
             Do not upload cached nodes.
+        update_run_names: bool, optional
+            Include part of the commit message in the run names.
         **kwargs
             Additional keyword arguments to pass to `make_commit`.
 
@@ -179,7 +181,7 @@ class Project(znflow.DiGraph):
         )
         plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
         for plugin in plugins:
-            plugin.finalize(skip_cached=skip_cached)
+            plugin.finalize(skip_cached=skip_cached, update_run_names=update_run_names)
 
     @contextlib.contextmanager
     def group(self, *names: str):

@@ -92,6 +92,7 @@ def list(
 @app.command()
 def finalize(
     skip_cached: bool = typer.Option(True, help="Do not upload cached nodes."),
+    update_run_names: bool = typer.Option(True, help="Include part of the commit message in the run names."),
 ):
     """Post-commit step for plugin integration."""
     utils.misc.load_env_vars()
@@ -100,4 +101,4 @@ def finalize(
     )
     plugins: PLUGIN_LIST = [import_handler(p) for p in plugins_paths.split(",")]
     for plugin in plugins:
-        plugin.finalize(skip_cached=skip_cached)
+        plugin.finalize(skip_cached=skip_cached, update_run_names=update_run_names)
