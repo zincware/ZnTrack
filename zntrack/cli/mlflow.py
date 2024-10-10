@@ -1,16 +1,17 @@
-from zntrack.cli.cli import app
-import typer
-from zntrack.from_rev import from_rev
-from dvc.api import DVCFileSystem
-import yaml
-import json
-import pathlib
-import pandas as pd
-import mlflow
-import uuid
-import tqdm
-import os
 import fnmatch
+import json
+import os
+import pathlib
+import uuid
+
+import mlflow
+import pandas as pd
+import tqdm
+import typer
+import yaml
+from dvc.api import DVCFileSystem
+
+from zntrack.cli.cli import app
 
 
 @app.command()
@@ -96,8 +97,8 @@ def mlflow_sync(
                         mlflow.log_metric(metric_name, value, step=i)
                 else:
                     mlflow.log_metric(metric_name, metric_value)
-    
+
     if parent is not None:
         mlflow.end_run()
-    
+
     typer.echo(f"Uploaded metrics to MLflow experiment '{experiment_name}'")
