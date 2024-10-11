@@ -291,7 +291,7 @@ class DVCPlugin(ZnTrackPlugin):
                     file_path = (
                         (self.node.nwd / field.name).with_suffix(".csv").as_posix()
                     )
-                    plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG]
+                    plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG].copy()
                     if "x" not in plots_config or "y" not in plots_config:
                         raise ValueError(
                             "Both 'x' and 'y' must be specified in the plots_config."
@@ -358,6 +358,12 @@ class DVCPlugin(ZnTrackPlugin):
             if key in ["cmd", "always_changed"]:
                 continue
             stages[key] = sort_and_deduplicate(stages[key])
+
+
+        print(50*"-")
+        print(yaml.dump(plots))
+        print(yaml.dump(stages))
+        print(50*"-")
 
         return {"stages": stages, "plots": plots}
 
