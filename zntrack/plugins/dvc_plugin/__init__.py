@@ -359,11 +359,10 @@ class DVCPlugin(ZnTrackPlugin):
                 continue
             stages[key] = sort_and_deduplicate(stages[key])
 
-
-        print(50*"-")
+        print(50 * "-")
         print(yaml.dump(plots))
         print(yaml.dump(stages))
-        print(50*"-")
+        print(50 * "-")
 
         return {"stages": stages, "plots": plots}
 

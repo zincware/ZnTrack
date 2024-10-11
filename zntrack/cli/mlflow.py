@@ -15,6 +15,7 @@ from zntrack.cli.cli import app
 
 # TODO dry option without uploading to show the selected nodes and everything that would be uploaded
 
+
 @app.command()
 def mlflow_sync(
     nodes: list[str] | None = None,

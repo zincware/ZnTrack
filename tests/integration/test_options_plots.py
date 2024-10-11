@@ -56,6 +56,7 @@ def test_multiple_plots(proj_path):
         assert isinstance(node.plot, pd.DataFrame)
         assert len(node.plot) == 10 * (idx + 1)
 
+
 def test_groups(proj_path):
     project = zntrack.Project()
     with project.group("group1"):
@@ -64,7 +65,6 @@ def test_groups(proj_path):
     with project.group("group2"):
         n3 = PandasPlotNode(n=30)
         n4 = PandasPlotNode(n=40)
-
 
     project.build()
     subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
