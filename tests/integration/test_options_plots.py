@@ -13,6 +13,7 @@ class PandasPlotNode(zntrack.Node):
     def run(self):
         self.plot = pd.DataFrame({"x": range(self.n), "y": range(self.n)})
 
+
 class AutoSavePandasPlotNode(zntrack.Node):
     n: int = zntrack.params()
 
@@ -24,9 +25,9 @@ class AutoSavePandasPlotNode(zntrack.Node):
             self.plot = pd.concat([self.plot, pd.DataFrame({"x": [i], "y": [i]})])
             with (self.nwd / "plot.csv").open("r") as f:
                 df = pd.read_csv(f)
-                # we are always one short, because we use 
+                # we are always one short, because we use
                 # the `getter` and not the `setter`
-                assert len(df) == i 
+                assert len(df) == i
 
 
 def test_simple_plot(proj_path):

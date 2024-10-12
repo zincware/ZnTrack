@@ -1,9 +1,9 @@
+import contextlib
 import copy
 import dataclasses
 import json
 import pathlib
 import typing as t
-import contextlib
 
 import pandas as pd
 import yaml
@@ -20,9 +20,9 @@ from zntrack.config import (
     ZNTRACK_CACHE,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
-    ZNTRACK_PLOTS_AUTOSAVE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
+    ZNTRACK_PLOTS_AUTOSAVE,
     ZnTrackOptionEnum,
 )
 

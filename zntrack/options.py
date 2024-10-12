@@ -2,7 +2,6 @@ import dataclasses
 import functools
 
 import znfields
-import pandas as pd
 
 from .config import (
     NOT_AVAILABLE,
