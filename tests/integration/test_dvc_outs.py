@@ -25,6 +25,14 @@ class SingleNodeListOut(zntrack.Node):
         for path in self.paths:
             path.write_text("Lorem Ipsum")
 
+class AssertTempPath(zntrack.Node):
+    path1: pathlib.Path = zntrack.outs_path()
+
+    def run(self):
+        with self.state.use_tmp_path():
+            assert self.state.tmp_path is not None
+            
+
 
 def test_load_dvc_outs(proj_path):
     with zntrack.Project() as proj:

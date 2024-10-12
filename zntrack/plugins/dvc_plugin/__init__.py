@@ -3,6 +3,7 @@ import dataclasses
 import json
 import pathlib
 import typing as t
+import contextlib
 
 import pandas as pd
 import yaml
@@ -19,6 +20,7 @@ from zntrack.config import (
     ZNTRACK_CACHE,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
+    ZNTRACK_PLOTS_AUTOSAVE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
@@ -130,6 +132,11 @@ class DVCPlugin(ZnTrackPlugin):
         elif option == ZnTrackOptionEnum.PARAMS:
             return base_getter(self.node, field.name, _params_getter)
         elif option == ZnTrackOptionEnum.PLOTS:
+            # TODO: check autosave
+            if field.metadata.get(ZNTRACK_PLOTS_AUTOSAVE) is True:
+                with contextlib.suppress(KeyError):
+                    content = self.node.__dict__[field.name]
+                    content.to_csv((self.node.nwd / field.name).with_suffix(".csv"))
             return base_getter(self.node, field.name, _plots_getter)
         elif option in {
             ZnTrackOptionEnum.OUTS,

@@ -2,6 +2,7 @@ import dataclasses
 import functools
 
 import znfields
+import pandas as pd
 
 from .config import (
     NOT_AVAILABLE,
@@ -10,6 +11,7 @@ from .config import (
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
+    ZNTRACK_PLOTS_AUTOSAVE,
     ZnTrackOptionEnum,
 )
 from .node import Node
@@ -78,12 +80,43 @@ def plots(
     y_label: str | None = None,
     template: str | None = None,
     title: str | None = None,
+    autosave: bool = False,
     **kwargs,
 ):
+    """Pandas plot options.
+
+    Parameters
+    ----------
+    y : str | list[str]
+        Column name(s) to plot.
+    cache : bool, optional
+        Use the DVC cache, by default True.
+    independent : bool, optional
+        This fields output can be indepented of the
+        input to the node. If set tue true, the
+        entire Node output will be used for dependencies.
+        Can be useful, if the output is e.g.
+        a list of indices.
+    x : str, optional
+        Column name to use for the x-axis, by default "step".
+    x_label : str, optional
+        Label for the x-axis, by default None.
+    y_label : str, optional
+        Label for the y-axis, by default None.
+    template : str, optional
+        Plotly template to use, by default None.
+    title : str, optional
+        Title of the plot, by default None.
+    autosave : bool, optional
+        Save the data of this field every time it is being
+        updated. Disable for large dataframes.
+
+    """
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
+    kwargs["metadata"][ZNTRACK_PLOTS_AUTOSAVE] = autosave
     plots_config = {}
     for key, value in {
         "x": x,

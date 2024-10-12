@@ -13,6 +13,21 @@ class PandasPlotNode(zntrack.Node):
     def run(self):
         self.plot = pd.DataFrame({"x": range(self.n), "y": range(self.n)})
 
+class AutoSavePandasPlotNode(zntrack.Node):
+    n: int = zntrack.params()
+
+    plot: pd.DataFrame = zntrack.plots(y="y", x="x", autosave=True)
+
+    def run(self):
+        self.plot = pd.DataFrame({"x": [], "y": []})
+        for i in range(self.n):
+            self.plot = pd.concat([self.plot, pd.DataFrame({"x": [i], "y": [i]})])
+            with (self.nwd / "plot.csv").open("r") as f:
+                df = pd.read_csv(f)
+                # we are always one short, because we use 
+                # the `getter` and not the `setter`
+                assert len(df) == i 
+
 
 def test_simple_plot(proj_path):
     with zntrack.Project() as proj:
@@ -81,3 +96,11 @@ def test_groups(proj_path):
         node = node.from_rev(node.name)
         assert isinstance(node.plot, pd.DataFrame)
         assert len(node.plot) == 10 * (idx + 1)
+
+
+def test_autosave(proj_path):
+    with zntrack.Project() as proj:
+        node = AutoSavePandasPlotNode(n=10)
+
+    proj.build()
+    subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)
