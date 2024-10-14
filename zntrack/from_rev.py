@@ -36,6 +36,8 @@ def _import_from_tempfile(package_and_module: str, remote, rev):
         If the file could not be found.
 
     """
+    # TODO: either make this a proper tested package
+    # or remove this feature for security reasons
     file = pathlib.Path(*package_and_module.split(".")).with_suffix(".py")
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     with tempfile.NamedTemporaryFile(suffix=".py") as temp_file, fs.open(file) as f:
