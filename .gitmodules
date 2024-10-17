@@ -1,0 +1,3 @@
+[submodule "zntrack-examples"]
+	path = zntrack-examples
+	url = https://github.com/PythonFZ/zntrack-examples.git

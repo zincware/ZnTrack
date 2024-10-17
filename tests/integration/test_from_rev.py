@@ -30,18 +30,18 @@ def test_commit_not_found():
 
 
 def test_import_from_remote(proj_path):
-    node = zntrack.from_rev(
-        "HelloWorld",
-        remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="9dedb292",
+    node: zntrack.examples.ParamsToMetrics = zntrack.from_rev(
+        "ParamsToMetrics",
+        remote="https://github.com/PythonFZ/zntrack-examples",
+        rev="8d0c992",
     )
-    assert node.max_number == 512
-    assert node.random_number == 123
-    assert node.name == "HelloWorld"
-    assert node.state.rev == "9dedb292"
-    assert node.state.remote == "https://github.com/PythonFZ/ZnTrackExamples.git"
-    assert node.uuid == uuid.UUID("1d2d5eef-c42b-4ff4-aa1f-837638fdf090")
-    # assert node.state.state == ...
+    assert node.params == {"loss": 0.1, "accuracy": 0.9}
+    assert node.metrics == {"loss": 0.1, "accuracy": 0.9}
+    assert node.name == "ParamsToMetrics"
+    assert node.state.rev == "8d0c992"
+    assert node.state.remote == "https://github.com/PythonFZ/zntrack-examples"
+    assert node.uuid == uuid.UUID("65b1c652-6508-4ee5-816c-c2f3cec22cc7")
+    # assert node.state.state == 
 
 
 @pytest.mark.xfail(reason="pending implementation")
