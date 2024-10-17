@@ -1,0 +1,7 @@
+stages:
+  some-node:
+    always_changed: true
+    cmd: zntrack run test_meta_params.MyNode --name some-node
+    metrics:
+    - nodes/some-node/node-meta.json:
+        cache: false

@@ -1,42 +1,52 @@
-import numpy as np
+import typing as t
+
+import pytest
 
 import zntrack
 
 
-class ComputeA(zntrack.Node):
-    """Node stage A"""
-
-    inp = zntrack.zn.params()
-    out = zntrack.zn.outs()
-
-    def __init__(self, inp=None, **kwargs):
-        super().__init__(**kwargs)
-        self.inp = inp
+class CheckType(zntrack.Node):
+    params: t.Any = zntrack.params()
 
     def run(self):
-        self.out = np.power(2, self.inp)
+        pass
 
 
-def test_stage_addition(proj_path):
-    """Check that the dvc repro works"""
+@pytest.fixture
+def arg(request):
+    return request.getfixturevalue(request.param)
+
+
+@pytest.fixture
+def fix_list() -> list:
+    return list(range(10))
+
+
+@pytest.fixture
+def fix_dict() -> dict:
+    # keys must be of type str!
+    return {str(key): val for key, val in enumerate(range(10))}
+
+
+@pytest.fixture
+def fix_int() -> int:
+    return 42
+
+
+@pytest.fixture
+def fix_empty_list() -> list:
+    return []
+
+
+@pytest.mark.parametrize(
+    "arg", ["fix_list", "fix_int", "fix_dict", "fix_empty_list"], indirect=True
+)
+def test_params(arg, proj_path):
     project = zntrack.Project()
-
     with project:
-        ComputeA(inp=np.arange(5))
+        node = CheckType(params=arg)
 
-    project.run()
-    finished_stage = ComputeA.from_rev()
-    np.testing.assert_array_equal(finished_stage.out, np.array([1, 2, 4, 8, 16]))
-    np.testing.assert_array_equal(finished_stage.inp, np.arange(5))
+    project.build()
 
-
-def test_stage_addition_run(proj_path):
-    """Check that the PyTracks run method works"""
-    a = ComputeA(inp=np.arange(5))
-
-    a.run()
-    a.save()
-
-    finished_stage = ComputeA.from_rev(lazy=False)
-    np.testing.assert_array_equal(finished_stage.out, np.array([1, 2, 4, 8, 16]))
-    np.testing.assert_array_equal(finished_stage.inp, np.arange(5))
+    assert node.params == arg
+    assert CheckType.from_rev().params == arg

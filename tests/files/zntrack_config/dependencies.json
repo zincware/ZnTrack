@@ -1,0 +1,478 @@
+{
+    "NodeA1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeA1"
+        },
+        "metrics_paths": [
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/a.json"
+            },
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/b.json"
+            }
+        ],
+        "plots_path": [
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/p1.csv"
+            },
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/p2.csv"
+            }
+        ],
+        "outs_path": {
+            "_type": "pathlib.Path",
+            "value": "$nwd$/my_output.txt"
+        }
+    },
+    "NodeA2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeA2"
+        },
+        "outs_path": {
+            "_type": "pathlib.Path",
+            "value": "$nwd$/my_output.txt"
+        },
+        "metrics_paths": [
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/a.json"
+            },
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/b.json"
+            }
+        ],
+        "plots_path": [
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/p1.csv"
+            },
+            {
+                "_type": "pathlib.Path",
+                "value": "$nwd$/p2.csv"
+            }
+        ]
+    },
+    "NodeB": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeB"
+        },
+        "input": [
+            {
+                "_type": "znflow.Connection",
+                "value": {
+                    "instance": {
+                        "_type": "zntrack.Node",
+                        "value": {
+                            "module": "test_dependencies",
+                            "name": "NodeA1",
+                            "cls": "NodeA1",
+                            "remote": null,
+                            "rev": null
+                        }
+                    },
+                    "attribute": "results",
+                    "item": null
+                }
+            },
+            {
+                "_type": "znflow.Connection",
+                "value": {
+                    "instance": {
+                        "_type": "zntrack.Node",
+                        "value": {
+                            "module": "test_dependencies",
+                            "name": "NodeA2",
+                            "cls": "NodeA2",
+                            "remote": null,
+                            "rev": null
+                        }
+                    },
+                    "attribute": "results",
+                    "item": null
+                }
+            }
+        ]
+    },
+    "dependent_NodeC": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/dependent/NodeC"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA1",
+                        "cls": "NodeA1",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": null,
+                "item": null
+            }
+        }
+    },
+    "dependent_NodeC_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/dependent/NodeC_1"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA1",
+                        "cls": "NodeA1",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "results",
+                "item": null
+            }
+        }
+    },
+    "dependent_NodeC_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/dependent/NodeC_2"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA1",
+                        "cls": "NodeA1",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "metrics",
+                "item": null
+            }
+        }
+    },
+    "dependent_NodeC_3": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/dependent/NodeC_3"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA1",
+                        "cls": "NodeA1",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "plots",
+                "item": null
+            }
+        }
+    },
+    "dependent_NodeC_4": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/dependent/NodeC_4"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA1",
+                        "cls": "NodeA1",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "outs_path",
+                "item": null
+            }
+        }
+    },
+    "dependent_NodeC_5": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/dependent/NodeC_5"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA1",
+                        "cls": "NodeA1",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "metrics_paths",
+                "item": null
+            }
+        }
+    },
+    "dependent_NodeC_6": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/dependent/NodeC_6"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA1",
+                        "cls": "NodeA1",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "plots_path",
+                "item": null
+            }
+        }
+    },
+    "independent_NodeC": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/independent/NodeC"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA2",
+                        "cls": "NodeA2",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": null,
+                "item": null
+            }
+        }
+    },
+    "independent_NodeC_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/independent/NodeC_1"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA2",
+                        "cls": "NodeA2",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "results",
+                "item": null
+            }
+        }
+    },
+    "independent_NodeC_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/independent/NodeC_2"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA2",
+                        "cls": "NodeA2",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "metrics",
+                "item": null
+            }
+        }
+    },
+    "independent_NodeC_3": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/independent/NodeC_3"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA2",
+                        "cls": "NodeA2",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "plots",
+                "item": null
+            }
+        }
+    },
+    "independent_NodeC_4": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/independent/NodeC_4"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA2",
+                        "cls": "NodeA2",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "outs_path",
+                "item": null
+            }
+        }
+    },
+    "independent_NodeC_5": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/independent/NodeC_5"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA2",
+                        "cls": "NodeA2",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "metrics_paths",
+                "item": null
+            }
+        }
+    },
+    "independent_NodeC_6": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/independent/NodeC_6"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "NodeA2",
+                        "cls": "NodeA2",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "plots_path",
+                "item": null
+            }
+        }
+    },
+    "property_NodeWithProperty": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/property/NodeWithProperty"
+        }
+    },
+    "property_NodeC": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/property/NodeC"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "property_NodeWithProperty",
+                        "cls": "NodeWithProperty",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "results",
+                "item": null
+            }
+        }
+    },
+    "property_NodeC_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/property/NodeC_1"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "test_dependencies",
+                        "name": "property_NodeWithProperty",
+                        "cls": "NodeWithProperty",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": null,
+                "item": null
+            }
+        }
+    }
+}

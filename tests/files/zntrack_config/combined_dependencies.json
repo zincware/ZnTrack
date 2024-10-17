@@ -1,0 +1,62 @@
+{
+    "NodeA": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeA"
+        }
+    },
+    "NodeA_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeA_1"
+        }
+    },
+    "NodeB": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeB"
+        },
+        "input": {
+            "_type": "znflow.CombinedConnections",
+            "value": {
+                "connections": [
+                    {
+                        "_type": "znflow.Connection",
+                        "value": {
+                            "instance": {
+                                "_type": "zntrack.Node",
+                                "value": {
+                                    "module": "test_combined_dependencies",
+                                    "name": "NodeA",
+                                    "cls": "NodeA",
+                                    "remote": null,
+                                    "rev": null
+                                }
+                            },
+                            "attribute": "results",
+                            "item": null
+                        }
+                    },
+                    {
+                        "_type": "znflow.Connection",
+                        "value": {
+                            "instance": {
+                                "_type": "zntrack.Node",
+                                "value": {
+                                    "module": "test_combined_dependencies",
+                                    "name": "NodeA_1",
+                                    "cls": "NodeA",
+                                    "remote": null,
+                                    "rev": null
+                                }
+                            },
+                            "attribute": "results",
+                            "item": null
+                        }
+                    }
+                ],
+                "item": null
+            }
+        }
+    }
+}

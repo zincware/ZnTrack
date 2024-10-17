@@ -11,15 +11,19 @@ def test_list_deps(proj_path):
         node2 = zntrack.examples.ParamsToOuts(params=2, name="node2")
 
         data = [node1.outs, node2.outs]
-        node3 = zntrack.examples.SumNodeAttributes(data, shift=10)
+        node3 = zntrack.examples.SumNodeAttributes(inputs=data, shift=10)
 
-    project.run()
+    project.build()
+
+    assert node1.name == "node1"
+    assert node2.name == "node2"
+    assert node3.name == "SumNodeAttributes"
 
     assert dvc.cli.main(["repro"]) == 0
 
-    node1.load()
-    node2.load()
-    node3.load()
+    node1 = node1.from_rev(name=node1.name)
+    node2 = node2.from_rev(name=node2.name)
+    node3 = node3.from_rev(name=node3.name)
 
     assert node1.outs == 1
     assert node2.outs == 2

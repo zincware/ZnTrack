@@ -2,25 +2,18 @@
 
 from pathlib import Path
 
+import pytest
+
 import zntrack
 
 
 class StageIO(zntrack.Node):
-    outs = zntrack.dvc.outs(Path("calculation.txt"))
-    deps = zntrack.dvc.deps()
-    param = zntrack.zn.params()
-
-    def __init__(self, file=None, **kwargs):
-        """Class constructor
-        Definition of parameters and results
-        """
-        super().__init__(**kwargs)
-        self.param = file
-        self.deps = file
+    deps: Path = zntrack.deps_path()
+    param: int = zntrack.params(1)
+    outs: Path = zntrack.outs_path(Path("calculation.txt"))
 
     def run(self):
         """Actual computation"""
-
         with open(self.deps, "r") as f:
             file_content = f.readlines()
 
@@ -28,21 +21,13 @@ class StageIO(zntrack.Node):
 
 
 class StageAddition(zntrack.Node):
-    outs = zntrack.dvc.outs(Path("calculation.txt"))
+    n_1: int = zntrack.params()
+    n_2: int = zntrack.params()
 
-    n_1 = zntrack.zn.params()  # seems optional now
-    n_2 = zntrack.zn.params()
+    sum: int = zntrack.outs()
+    dif: int = zntrack.outs()
 
-    sum = zntrack.zn.outs()
-    dif = zntrack.zn.outs()
-
-    def __init__(self, n_1=None, n_2=None, **kwargs):
-        """Class constructor
-        Definition of parameters and results
-        """
-        super().__init__(**kwargs)
-        self.n_1 = n_1
-        self.n_2 = n_2
+    outs: Path = zntrack.outs_path(Path("calculation.txt"))
 
     def run(self):
         """Actual computation"""
@@ -52,6 +37,7 @@ class StageAddition(zntrack.Node):
         Path(self.outs).write_text(f"{self.n_1} + {self.n_2} = {self.sum}")
 
 
+@pytest.mark.xfail(reason="Experiments not yet supported", strict=True)
 def test_stage_addition(tmp_path_2):
     """Check that the dvc repro works"""
     project = zntrack.Project()
@@ -59,7 +45,7 @@ def test_stage_addition(tmp_path_2):
     with project:
         node = StageAddition(5, 10)
 
-    project.run()
+    project.repro()
 
     with project.create_experiment(name="exp1"):
         node
@@ -76,17 +62,18 @@ def test_stage_addition(tmp_path_2):
 
 def test_stage_io(proj_path):
     deps = Path("test_example_01.py").resolve()
-    with zntrack.Project() as project:
-        stage_io = StageIO(file=deps)
-    assert stage_io.deps == deps
-    assert stage_io.param == deps
-    project.run(repro=False)
-    # load
-    stage_io.load()
-    assert stage_io.param == deps
-    assert stage_io.deps == deps
-    project.run(repro=True)
+    assert deps.is_file()
 
-    stage_io.load()
+    with zntrack.Project() as project:
+        stage_io = StageIO(deps=deps, param=1, name="Node")
+
+    assert stage_io.deps == deps
+    assert stage_io.param == 1
+    assert stage_io.name == "Node"
+    project.build()
+
+    assert stage_io.param == 1
+    assert stage_io.deps == deps
+    project.run()
 
     assert stage_io.outs.read_text().startswith('"""')

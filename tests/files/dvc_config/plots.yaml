@@ -1,0 +1,18 @@
+plots:
+- Plotting_a:
+    template: plotly_dark
+    title: Loss over Epochs
+    x:
+      nodes/Plotting/a.csv: epoch
+    x_label: Epoch
+    y:
+      nodes/Plotting/a.csv: loss
+    y_label: Loss
+stages:
+  Plotting:
+    cmd: zntrack run test_plots.Plotting --name Plotting
+    metrics:
+    - nodes/Plotting/node-meta.json:
+        cache: false
+    outs:
+    - nodes/Plotting/a.csv

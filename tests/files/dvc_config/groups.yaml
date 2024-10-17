@@ -1,0 +1,36 @@
+stages:
+  Grp_B_MyNode:
+    cmd: zntrack run test_groups.MyNode --name Grp_B_MyNode
+    metrics:
+    - nodes/Grp/B/MyNode/node-meta.json:
+        cache: false
+    params:
+    - Grp_B_MyNode
+  Grp_MyNode:
+    cmd: zntrack run test_groups.MyNode --name Grp_MyNode
+    metrics:
+    - nodes/Grp/MyNode/node-meta.json:
+        cache: false
+    params:
+    - Grp_MyNode
+  Grp_MyNode_1:
+    cmd: zntrack run test_groups.MyNode --name Grp_MyNode_1
+    metrics:
+    - nodes/Grp/MyNode_1/node-meta.json:
+        cache: false
+    params:
+    - Grp_MyNode_1
+  Grp_MyNode_2:
+    cmd: zntrack run test_groups.MyNode --name Grp_MyNode_2
+    metrics:
+    - nodes/Grp/MyNode_2/node-meta.json:
+        cache: false
+    params:
+    - Grp_MyNode_2
+  MyNode:
+    cmd: zntrack run test_groups.MyNode --name MyNode
+    metrics:
+    - nodes/MyNode/node-meta.json:
+        cache: false
+    params:
+    - MyNode
