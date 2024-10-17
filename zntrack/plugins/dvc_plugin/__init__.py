@@ -22,7 +22,6 @@ from zntrack.config import (
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
-    ZNTRACK_PLOTS_AUTOSAVE,
     ZnTrackOptionEnum,
 )
 
@@ -132,11 +131,6 @@ class DVCPlugin(ZnTrackPlugin):
         elif option == ZnTrackOptionEnum.PARAMS:
             return base_getter(self.node, field.name, _params_getter)
         elif option == ZnTrackOptionEnum.PLOTS:
-            # TODO: check autosave
-            if field.metadata.get(ZNTRACK_PLOTS_AUTOSAVE) is True:
-                with contextlib.suppress(KeyError):
-                    content = self.node.__dict__[field.name]
-                    content.to_csv((self.node.nwd / field.name).with_suffix(".csv"))
             return base_getter(self.node, field.name, _plots_getter)
         elif option in {
             ZnTrackOptionEnum.OUTS,

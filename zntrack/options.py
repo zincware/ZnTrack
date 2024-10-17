@@ -1,6 +1,6 @@
 import dataclasses
 import functools
-
+import pandas as pd
 import znfields
 
 from .config import (
@@ -10,7 +10,6 @@ from .config import (
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
-    ZNTRACK_PLOTS_AUTOSAVE,
     ZnTrackOptionEnum,
 )
 from .node import Node
@@ -34,6 +33,10 @@ def _plugin_getter(self: Node, name: str):
                 )
             value = getter_value
     return value
+
+def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
+    value.to_csv((self.nwd / name).with_suffix(".csv"))
+    self.__dict__[name] = value
 
 
 @functools.wraps(znfields.field)
@@ -117,7 +120,8 @@ def plots(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_PLOTS_AUTOSAVE] = autosave
+    if autosave:
+        kwargs["setter"] = _plots_autosave_setter
     plots_config = {}
     for key, value in {
         "x": x,

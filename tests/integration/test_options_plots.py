@@ -24,10 +24,11 @@ class AutoSavePandasPlotNode(zntrack.Node):
         for i in range(self.n):
             self.plot = pd.concat([self.plot, pd.DataFrame({"x": [i], "y": [i]})])
             with (self.nwd / "plot.csv").open("r") as f:
-                df = pd.read_csv(f)
-                # we are always one short, because we use
-                # the `getter` and not the `setter`
-                assert len(df) == i
+                df = pd.read_csv(f, index_col=0)
+                assert len(df) == i + 1
+                assert len(self.plot) == i + 1
+                assert df.equals(self.plot)
+                
 
 
 def test_simple_plot(proj_path):

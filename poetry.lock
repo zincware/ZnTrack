@@ -6965,13 +6965,13 @@ type = ["pytest-mypy"]
 
 [[package]]
 name = "znfields"
-version = "0.1.1"
+version = "0.1.2"
 description = "Lazy evaluation of dataclass fields"
 optional = false
 python-versions = "<4.0,>=3.10"
 files = [
-    {file = "znfields-0.1.1-py3-none-any.whl", hash = "sha256:7458e384254bcb43faf74542790c07502a02bd0bab72476a806c6cf6e01f39e1"},
-    {file = "znfields-0.1.1.tar.gz", hash = "sha256:5ccd6e01a1dbb9bb63a90e48128b2bd5c4bd76955a9b8888918c2239a9be4b44"},
+    {file = "znfields-0.1.2-py3-none-any.whl", hash = "sha256:621c4746276a55637bb251494251e09671f4f4e74fbdaad7158d8a225e0d94e8"},
+    {file = "znfields-0.1.2.tar.gz", hash = "sha256:5d9e1894f1a766dd5675db1b1b05cfc6b5c9d78da84a5b01d0baffd5ca49a065"},
 ]
 
 [[package]]
@@ -7005,4 +7005,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.10,<3.14"
-content-hash = "23c473bb205c4812cfa334ca766523005a8eb047e6d7e5ddc4888df0379964e1"
+content-hash = "26fef8878edd4ab4b4aa3a17c8286ef3cf33a3c62703bfb7e816220630a9a7bb"
