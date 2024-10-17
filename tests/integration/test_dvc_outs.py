@@ -36,11 +36,13 @@ class AssertTempPath(zntrack.Node):
             assert self.path1 == pathlib.Path("nodes", self.name, "test.json"), self.path1
             self.path1.write_text("lorem ipsum")
 
+
 def test_run_temp_path(proj_path):
     project = zntrack.Project()
     with project:
         node = AssertTempPath()
     project.repro()
+
 
 def test_load_dvc_outs(proj_path):
     with zntrack.Project() as proj:

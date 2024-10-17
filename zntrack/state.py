@@ -80,7 +80,7 @@ class NodeStatus:
         """
         if path is not None:
             raise NotImplementedError("Custom paths are not implemented yet.")
-        
+
         # This feature is only required when the load is loaded, not when it is saved/executed
         if self.remote is None and self.rev is None:
             yield
