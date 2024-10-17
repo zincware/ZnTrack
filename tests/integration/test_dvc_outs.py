@@ -27,12 +27,20 @@ class SingleNodeListOut(zntrack.Node):
 
 
 class AssertTempPath(zntrack.Node):
-    path1: pathlib.Path = zntrack.outs_path()
+    path1: pathlib.Path = zntrack.outs_path(zntrack.nwd / "test.json")
 
     def run(self):
         with self.state.use_tmp_path():
-            assert self.state.tmp_path is not None
+            assert self.state.tmp_path is None
+            assert self.name == "AssertTempPath"
+            assert self.path1 == pathlib.Path("nodes", self.name, "test.json"), self.path1
+            self.path1.write_text("lorem ipsum")
 
+def test_run_temp_path(proj_path):
+    project = zntrack.Project()
+    with project:
+        node = AssertTempPath()
+    project.repro()
 
 def test_load_dvc_outs(proj_path):
     with zntrack.Project() as proj:
@@ -180,6 +188,12 @@ def test_use_tmp_path(proj_path):
     assert node3.outs == "result.txt"
     assert isinstance(node4.outs, str)
     assert node4.outs == pathlib.Path("nodes", "WriteDVCOutsPath_1", "data").as_posix()
+
+    # load the nodes so we can use the tmp_path
+    node = node.from_rev(node.name, remote=".")
+    node2 = node2.from_rev(node2.name, remote=".")
+    node3 = node3.from_rev(node3.name, remote=".")
+    node4 = node4.from_rev(node4.name, remote=".")
 
     with node.state.use_tmp_path():
         assert node.state.tmp_path != pathlib.Path("nodes", "WriteDVCOuts")
