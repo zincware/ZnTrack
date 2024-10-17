@@ -90,8 +90,8 @@ print(hello_world.random_number)
 > )
 > ```
 >
-> Try accessing the `params` parameter and `metrics` output. All Nodes
-> from this and many other repositories can be loaded like this.
+> Try accessing the `params` parameter and `metrics` output. All Nodes from this
+> and many other repositories can be loaded like this.
 
 An overview of all the ZnTrack features as well as more detailed examples can be
 found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).

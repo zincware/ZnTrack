@@ -41,7 +41,7 @@ def test_import_from_remote(proj_path):
     assert node.state.rev == "8d0c992"
     assert node.state.remote == "https://github.com/PythonFZ/zntrack-examples"
     assert node.uuid == uuid.UUID("65b1c652-6508-4ee5-816c-c2f3cec22cc7")
-    # assert node.state.state == 
+    # assert node.state.state ==
 
 
 @pytest.mark.xfail(reason="pending implementation")
