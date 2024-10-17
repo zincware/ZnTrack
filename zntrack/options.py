@@ -71,7 +71,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
 @functools.wraps(znfields.field)
 def plots(
     *,
-    y: str | list[str],
+    y: str | list[str] | None = None,
     cache: bool = True,
     independent: bool = False,
     x: str = "step",
@@ -111,6 +111,8 @@ def plots(
         updated. Disable for large dataframes.
 
     """
+    if y is None:
+        y = []
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
