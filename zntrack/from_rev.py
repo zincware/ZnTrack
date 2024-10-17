@@ -35,7 +35,7 @@ def from_rev(name: str, remote: str | None = None, rev: str | None = None):
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
             f"No module found for '{package_and_module}'. The package might be available "
-            f"via 'pip install {package_and_module}' or from the remote" 
+            f"via 'pip install {package_and_module}' or from the remote"
             f"via 'pip install git+{remote}'."
         )
 
