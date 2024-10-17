@@ -28,7 +28,6 @@ class AutoSavePandasPlotNode(zntrack.Node):
                 assert len(df) == i + 1
                 assert len(self.plot) == i + 1
                 assert df.equals(self.plot)
-                
 
 
 def test_simple_plot(proj_path):

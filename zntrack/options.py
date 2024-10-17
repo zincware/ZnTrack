@@ -1,5 +1,6 @@
 import dataclasses
 import functools
+
 import pandas as pd
 import znfields
 
@@ -33,6 +34,7 @@ def _plugin_getter(self: Node, name: str):
                 )
             value = getter_value
     return value
+
 
 def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
     value.to_csv((self.nwd / name).with_suffix(".csv"))
