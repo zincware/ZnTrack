@@ -2,6 +2,7 @@ import dataclasses
 import fnmatch
 import json
 import typing as t
+import os
 
 import mlflow
 import pandas as pd
@@ -88,14 +89,14 @@ class MLFlowNodeData:
 @app.command()
 def mlflow_sync(
     nodes: list[str] | None = typer.Argument(
-        None, help="ZnTrack nodes to sync. You can use glob patterns."
+        None, help="ZnTrack nodes to sync. You can use glob patterns. (default: all)"
     ),
     rev: str | None = typer.Option(None, help="Git revision to load nodes from."),
     remote: str | None = typer.Option(None, help="Git remote to load nodes from."),
-    experiment: str | None = typer.Option(None, help="MLFlow experiment name."),
-    uri: str | None = typer.Option(None, help="MLFlow tracking URI."),
+    experiment: str | None = typer.Option(None, help="MLFlow experiment name.", envvar="MLFLOW_EXPERIMENT_NAME"),
+    uri: str | None = typer.Option(None, help="MLFlow tracking URI.", envvar="MLFLOW_TRACKING_URI"),
     parent: str | None = typer.Option(
-        None, help="Specify a parent run name to group all nodes under."
+        None, help="Specify a parent run name to group all nodes under.", envvar="MLFLOW_PARENT_RUN_NAME"
     ),
     dry: bool = typer.Option(
         False, "--dry", help="Print the data that would be uploaded."
@@ -106,7 +107,6 @@ def mlflow_sync(
     with fs.open("dvc.yaml", "r") as f:
         config = yaml.safe_load(f)
 
-    load_env_vars()
     node_lst: list[Node] = []
 
     for stage_name in config["stages"]:
