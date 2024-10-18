@@ -1,27 +1,22 @@
+import dataclasses
 import fnmatch
 import json
-import os
-import pathlib
-import uuid
-import json
+import typing as t
 
 import mlflow
+import pandas as pd
+import typer
+import yaml
+from dvc.api import DVCFileSystem
 from mlflow.entities import Metric, Param, RunTag
 from mlflow.tracking import MlflowClient
 from mlflow.utils import mlflow_tags
-import pandas as pd
-import tqdm
-import typer
-import typing as t
-import yaml
-from dvc.api import DVCFileSystem
-import dataclasses
 
 from zntrack.cli.cli import app
-from zntrack.utils.misc import load_env_vars
+from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
 from zntrack.from_rev import from_rev
 from zntrack.node import Node
-from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
+from zntrack.utils.misc import load_env_vars
 
 numeric = t.Union[int, float]
 metrics_type = dict[str, t.Union[numeric, list[numeric]]]
@@ -48,11 +43,9 @@ class MLFlowNodeData:
 
         for key, value in self.params.items():
             params.append(Param(key=key, value=str(value)))
-        
+
         for key, value in self.tags.items():
             tags.append(RunTag(key=key, value=value))
-        
-
 
         with mlflow.start_run() as active_run:
             mlflow_client = MlflowClient()
@@ -77,7 +70,7 @@ class MLFlowNodeData:
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 params[field.name] = getattr(node, field.name)
             # TODO: metrics_path, plots_path and params_path are currently being ignored
-        
+
         tags[mlflow_tags.MLFLOW_PROJECT_BACKEND] = "zntrack"
         tags[mlflow_tags.MLFLOW_RUN_NAME] = node.name
         if node.state.rev is not None:
@@ -86,7 +79,7 @@ class MLFlowNodeData:
             tags[mlflow_tags.MLFLOW_GIT_REPO_URL] = node.state.remote
         if hasattr(node, "__run_note__"):
             tags[mlflow_tags.MLFLOW_RUN_NOTE] = node.__run_note__()
-        
+
         tags["dvc_stage_hash"] = node.state.get_stage_hash()
         tags["zntrack_node"] = f"{node.__module__}.{node.__class__.__name__}"
 
@@ -121,7 +114,7 @@ def mlflow_sync(
 
     for node in node_lst:
         data.append(MLFlowNodeData.from_node(node))
-    
+
     if dry:
         for node_data in data:
             print(json.dumps(dataclasses.asdict(node_data), indent=2))
