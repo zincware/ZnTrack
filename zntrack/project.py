@@ -205,7 +205,7 @@ class Project(znflow.DiGraph):
         # This context manager also open self.__enter__ in the `super`
         if not names:
             name = "Group1"
-            while pathlib.Path(NWD_PATH, name).exists():
+            while (name,) in self.groups:
                 name = f"Group{int(name[5:]) + 1}"
             names = (name,)
 

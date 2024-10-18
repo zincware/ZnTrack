@@ -69,6 +69,7 @@ class MLFlowNodeData:
             if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
                 params[field.name] = getattr(node, field.name)
             # TODO: metrics_path, plots_path and params_path are currently being ignored
+            # TODO: dataclass deps are also ignored
 
         tags[mlflow_tags.MLFLOW_RUN_NAME] = node.name
         if node.state.rev is not None:

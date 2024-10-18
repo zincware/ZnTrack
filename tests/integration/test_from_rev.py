@@ -8,7 +8,6 @@ import zntrack.examples
 # from zntrack.utils import NodeStatusResults
 
 
-# @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.needs_internet
 def test_module_not_installed():
     with pytest.raises(ModuleNotFoundError):

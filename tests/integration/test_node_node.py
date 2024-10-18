@@ -4,7 +4,6 @@ import zntrack.examples
 from zntrack.config import NodeStatusEnum
 
 
-# @pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.parametrize("eager", [True, False])
 def test_AddNodes(proj_path, eager):
     with zntrack.Project() as project:

@@ -30,6 +30,10 @@ class Group:
         self._nodes = nodes if nodes else []
 
     @property
+    def nwd(self) -> pathlib.Path:
+        return NWD_PATH.joinpath(*self._name)
+
+    @property
     def name(self):
         return self._name
 
@@ -48,8 +52,10 @@ class Group:
     def __str__(self) -> str:
         return f"Group(name='{self._name}')"
 
-    def __contains__(self, item: "Node") -> bool:
+    def __contains__(self, item: "Node|str") -> bool:
         """Check if the Node is in the group."""
+        if isinstance(item, str):
+            return item in [node.name for node in self._nodes]
         return item in self._nodes
 
     def __iter__(self) -> t.Iterator["Node"]:
