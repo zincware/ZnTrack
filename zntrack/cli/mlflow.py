@@ -2,7 +2,6 @@ import dataclasses
 import fnmatch
 import json
 import typing as t
-import os
 
 import mlflow
 import pandas as pd
@@ -17,7 +16,6 @@ from zntrack.cli.cli import app
 from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
 from zntrack.from_rev import from_rev
 from zntrack.node import Node
-from zntrack.utils.misc import load_env_vars
 
 numeric = t.Union[int, float]
 metrics_type = dict[str, t.Union[numeric, list[numeric]]]
@@ -93,10 +91,16 @@ def mlflow_sync(
     ),
     rev: str | None = typer.Option(None, help="Git revision to load nodes from."),
     remote: str | None = typer.Option(None, help="Git remote to load nodes from."),
-    experiment: str | None = typer.Option(None, help="MLFlow experiment name.", envvar="MLFLOW_EXPERIMENT_NAME"),
-    uri: str | None = typer.Option(None, help="MLFlow tracking URI.", envvar="MLFLOW_TRACKING_URI"),
+    experiment: str | None = typer.Option(
+        None, help="MLFlow experiment name.", envvar="MLFLOW_EXPERIMENT_NAME"
+    ),
+    uri: str | None = typer.Option(
+        None, help="MLFlow tracking URI.", envvar="MLFLOW_TRACKING_URI"
+    ),
     parent: str | None = typer.Option(
-        None, help="Specify a parent run name to group all nodes under.", envvar="MLFLOW_PARENT_RUN_NAME"
+        None,
+        help="Specify a parent run name to group all nodes under.",
+        envvar="MLFLOW_PARENT_RUN_NAME",
     ),
     dry: bool = typer.Option(
         False, "--dry", help="Print the data that would be uploaded."
