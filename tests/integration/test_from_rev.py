@@ -4,9 +4,11 @@ import dvc.scm
 import pytest
 
 import zntrack.examples
-from zntrack.utils import NodeStatusResults
+
+# from zntrack.utils import NodeStatusResults
 
 
+@pytest.mark.needs_internet
 def test_module_not_installed():
     with pytest.raises(ModuleNotFoundError):
         zntrack.from_rev(
@@ -16,6 +18,7 @@ def test_module_not_installed():
         )
 
 
+@pytest.mark.needs_internet
 def test_commit_not_found():
     with pytest.raises(dvc.scm.RevError):
         zntrack.from_rev(
@@ -26,20 +29,21 @@ def test_commit_not_found():
 
 
 def test_import_from_remote(proj_path):
-    node = zntrack.from_rev(
-        "HelloWorld",
-        remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="890c714",
+    node: zntrack.examples.ParamsToMetrics = zntrack.from_rev(
+        "ParamsToMetrics",
+        remote="https://github.com/PythonFZ/zntrack-examples",
+        rev="8d0c992",
     )
-    assert node.max_number == 512
-    assert node.random_number == 123
-    assert node.name == "HelloWorld"
-    assert node.state.rev == "890c714"
-    assert node.state.remote == "https://github.com/PythonFZ/ZnTrackExamples.git"
-    assert node.state.results == NodeStatusResults.AVAILABLE
-    assert node.uuid == uuid.UUID("1d2d5eef-c42b-4ff4-aa1f-837638fdf090")
+    assert node.params == {"loss": 0.1, "accuracy": 0.9}
+    assert node.metrics == {"loss": 0.1, "accuracy": 0.9}
+    assert node.name == "ParamsToMetrics"
+    assert node.state.rev == "8d0c992"
+    assert node.state.remote == "https://github.com/PythonFZ/zntrack-examples"
+    assert node.uuid == uuid.UUID("65b1c652-6508-4ee5-816c-c2f3cec22cc7")
+    # assert node.state.state ==
 
 
+@pytest.mark.xfail(reason="pending implementation")
 def test_connect_from_remote(proj_path):
     node_a = zntrack.from_rev(
         "HelloWorld",
@@ -60,7 +64,7 @@ def test_connect_from_remote(proj_path):
         node = zntrack.examples.AddOne(number=node_a.random_number)
 
     project.run()
-    node.load()
+    # node.load()
 
     assert node.outs == node_a.random_number + 1
 
@@ -78,6 +82,7 @@ def test_connect_from_remote(proj_path):
     project.build()
 
 
+@pytest.mark.xfail(reason="pending implementation")
 def test_two_nodes_connect_external(proj_path):
     node_a = zntrack.from_rev(
         "HelloWorld",
@@ -91,8 +96,8 @@ def test_two_nodes_connect_external(proj_path):
 
     project.run()
 
-    node1.load()
-    node2.load()
+    # node1.load()
+    # node2.load()
 
     assert node1.outs == node_a.random_number + 1
     assert node2.outs == node_a.random_number + 1

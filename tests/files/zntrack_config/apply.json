@@ -1,0 +1,20 @@
+{
+    "ParamsToOuts": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ParamsToOuts"
+        }
+    },
+    "ParamsToOuts_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ParamsToOuts_1"
+        }
+    },
+    "ParamsToOuts_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ParamsToOuts_2"
+        }
+    }
+}

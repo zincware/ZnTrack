@@ -1,47 +1,45 @@
 import zntrack
 
 
-class CreateNumbers(zntrack.Node):
-    number = zntrack.zn.outs()
+class HasNumber(zntrack.Node):
+    number: int = zntrack.outs()
 
+
+class CreateNumbers(HasNumber):
     def run(self):
         self.number = 42
 
 
-class AddOne(zntrack.Node):
-    inp = zntrack.deps()
-    number = zntrack.zn.outs()
+class AddOne(HasNumber):
+    inp: HasNumber = zntrack.deps()
 
     def run(self):
         self.number = self.inp.number + 1
 
 
-class SubtractOne(zntrack.Node):
-    inp = zntrack.deps()
-    number = zntrack.zn.outs()
+class SubtractOne(HasNumber):
+    inp: HasNumber = zntrack.deps()
 
     def run(self):
         self.number = self.inp.number - 1
 
 
-class Summation(zntrack.Node):
+class Summation(HasNumber):
     """Stage that is actually tested, containing the multiple dependencies"""
 
-    inp = zntrack.deps()
-    number = zntrack.zn.outs()
+    inp: list[HasNumber] = zntrack.deps()
 
     def run(self):
         self.number = self.inp[0].number + self.inp[1].number
 
 
-class SummationTuple(zntrack.Node):
+class SummationTuple(HasNumber):
     """Stage that is actually tested, containing the multiple dependencies
 
     Additionally testing for tuple conversion here!
     """
 
-    inp = zntrack.deps()
-    number = zntrack.zn.outs()
+    inp: list[HasNumber] = zntrack.deps()
 
     def run(self):
         self.number = self.inp[0].number + self.inp[1].number

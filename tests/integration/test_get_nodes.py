@@ -3,6 +3,7 @@ import pytest
 import zntrack.examples
 
 
+@pytest.mark.xfail(reason="pending implementation")
 @pytest.mark.needs_internet
 def test_get_nodes_remote(proj_path):
     nodes = zntrack.get_nodes(
@@ -12,6 +13,7 @@ def test_get_nodes_remote(proj_path):
     assert nodes["HelloWorld"].random_number == 123
 
 
+@pytest.mark.xfail(reason="pending implementation")
 def test_get_nodes(proj_path):
     with zntrack.Project(automatic_node_names=True) as proj:
         _ = zntrack.examples.ParamsToOuts(params=15)

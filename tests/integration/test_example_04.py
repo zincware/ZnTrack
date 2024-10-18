@@ -4,12 +4,8 @@ import zntrack
 class HelloWorld(zntrack.Node):
     """BasicTest class"""
 
-    output = zntrack.zn.outs()
-    inputs = zntrack.zn.params()
-
-    def __init__(self, inputs=None, **kwargs):
-        super().__init__(**kwargs)
-        self.inputs = inputs
+    inputs: int = zntrack.params()
+    output: int = zntrack.outs()
 
     def run(self):
         """Run method of the Node test instance"""
