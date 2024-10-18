@@ -186,8 +186,12 @@ def test_group_nodes(proj_path):
             node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
             node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
         with project.group() as group_2:
-            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur", name="Node01")
-            node_4 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit", name="Node02")
+            node_3 = zntrack.examples.ParamsToOuts(
+                params="Amet Consectetur", name="Node01"
+            )
+            node_4 = zntrack.examples.ParamsToOuts(
+                params="Adipiscing Elit", name="Node02"
+            )
         with project.group("NamedGrp") as group_3:
             node_5 = zntrack.examples.ParamsToOuts(params="Sed Do")
             node_6 = zntrack.examples.ParamsToOuts(params="Eiusmod Tempor", name="Node03")
@@ -226,7 +230,7 @@ def test_group_nodes(proj_path):
 
     for node in group_1.nodes:
         assert node.state.group == group_1
-    
+
     for node in group_2.nodes:
         assert node.state.group == group_2
 
@@ -267,7 +271,8 @@ def test_group_nodes(proj_path):
     assert group_3.name == ("NamedGrp",)
 
     assert (
-        zntrack.examples.ParamsToOuts.from_rev(name="NamedGrp_ParamsToOuts").params == "Sed Do"
+        zntrack.examples.ParamsToOuts.from_rev(name="NamedGrp_ParamsToOuts").params
+        == "Sed Do"
     )
 
 

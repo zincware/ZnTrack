@@ -2,7 +2,6 @@ import contextlib
 import json
 import logging
 import os
-import pathlib
 import subprocess
 import uuid
 
@@ -11,7 +10,6 @@ import yaml
 import znflow
 
 from zntrack import utils
-from zntrack.config import NWD_PATH
 from zntrack.group import Group
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.finalize import make_commit
