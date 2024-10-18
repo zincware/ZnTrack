@@ -29,7 +29,7 @@ class MLFlowNodeData:
     params: params_type
     tags: dict[str, str]
 
-    def upload(self) -> None:
+    def upload(self, nested: bool = False) -> None:
         metrics: list[Metric] = []
         params: list[Param] = []
         tags: list[RunTag] = []
@@ -47,7 +47,7 @@ class MLFlowNodeData:
         for key, value in self.tags.items():
             tags.append(RunTag(key=key, value=value))
 
-        with mlflow.start_run() as active_run:
+        with mlflow.start_run(nested=nested) as active_run:
             mlflow_client = MlflowClient()
             mlflow_client.log_batch(
                 run_id=active_run.info.run_id, metrics=metrics, params=params, tags=tags
@@ -71,7 +71,6 @@ class MLFlowNodeData:
                 params[field.name] = getattr(node, field.name)
             # TODO: metrics_path, plots_path and params_path are currently being ignored
 
-        tags[mlflow_tags.MLFLOW_PROJECT_BACKEND] = "zntrack"
         tags[mlflow_tags.MLFLOW_RUN_NAME] = node.name
         if node.state.rev is not None:
             tags[mlflow_tags.MLFLOW_GIT_COMMIT] = node.state.rev
@@ -88,15 +87,21 @@ class MLFlowNodeData:
 
 @app.command()
 def mlflow_sync(
-    nodes: list[str] | None = typer.Argument(None),
-    rev: str | None = None,
-    remote: str | None = None,
-    experiment: str | None = None,
-    uri: str | None = None,
-    parent: str | None = None,
-    dry: bool = False,
+    nodes: list[str] | None = typer.Argument(
+        None, help="ZnTrack nodes to sync. You can use glob patterns."
+    ),
+    rev: str | None = typer.Option(None, help="Git revision to load nodes from."),
+    remote: str | None = typer.Option(None, help="Git remote to load nodes from."),
+    experiment: str | None = typer.Option(None, help="MLFlow experiment name."),
+    uri: str | None = typer.Option(None, help="MLFlow tracking URI."),
+    parent: str | None = typer.Option(
+        None, help="Specify a parent run name to group all nodes under."
+    ),
+    dry: bool = typer.Option(
+        False, "--dry", help="Print the data that would be uploaded."
+    ),
 ) -> None:
-    """Upload artifacts to MLflow."""
+    """Synchronize ZnTrack nodes with MLFlow."""
     fs = DVCFileSystem(url=remote, rev=rev)
     with fs.open("dvc.yaml", "r") as f:
         config = yaml.safe_load(f)
@@ -129,7 +134,7 @@ def mlflow_sync(
     if parent is not None:
         with mlflow.start_run(run_name=parent):
             for node_data in data:
-                node_data.upload()
+                node_data.upload(nested=True)
     else:
         for node_data in data:
             node_data.upload()
