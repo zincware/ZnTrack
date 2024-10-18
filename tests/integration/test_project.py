@@ -183,11 +183,11 @@ def test_automatic_node_names_True(tmp_path_2):
 def test_group_nodes(proj_path):
     with zntrack.Project(automatic_node_names=True) as project:
         with project.group() as group_1:
-            node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum", name="Node01")
+            node_1 = zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
             node_2 = zntrack.examples.ParamsToOuts(params="Dolor Sit")
         with project.group() as group_2:
-            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur", name="Node02")
-            node_4 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit")
+            node_3 = zntrack.examples.ParamsToOuts(params="Amet Consectetur", name="Node01")
+            node_4 = zntrack.examples.ParamsToOuts(params="Adipiscing Elit", name="Node02")
         with project.group("NamedGrp") as group_3:
             node_5 = zntrack.examples.ParamsToOuts(params="Sed Do")
             node_6 = zntrack.examples.ParamsToOuts(params="Eiusmod Tempor", name="Node03")
@@ -198,10 +198,10 @@ def test_group_nodes(proj_path):
 
     project.repro()
 
-    assert node_1.name == "Node01"
-    assert node_2.name == "Group1_ParamsToOuts"
-    assert node_3.name == "Node02"
-    assert node_4.name == "Group2_ParamsToOuts"
+    assert node_1.name == "Group1_ParamsToOuts"
+    assert node_2.name == "Group1_ParamsToOuts_1"
+    assert node_3.name == "Node01"
+    assert node_4.name == "Node02"
     assert node_5.name == "NamedGrp_ParamsToOuts"
     assert node_6.name == "Node03"
     assert node7.name == "ParamsToOuts"
@@ -234,24 +234,17 @@ def test_group_nodes(proj_path):
         assert node.state.group == group_3
 
     # test node_names in project
-    assert "Node01" in group_1
-    assert "Group1_ParamsToOuts" in group_1
-    assert "Node02" in group_2
-    assert "Group2_ParamsToOuts" in group_2
-    assert "NamedGrp_ParamsToOuts" in group_3
-    assert "Node03" in group_3
-    # assert "NamedGrp_NodeA" not in group_1
-    # assert "NamedGrp_NodeB" not in group_1
-    # assert "NamedGrp_NodeA" not in group_2
-    # assert "NamedGrp_NodeB" not in group_2
+    assert node_1.name in group_1
+    assert node_2.name in group_1
+    assert node_3.name in group_2
+    assert node_4.name in group_2
+    assert node_5.name in group_3
+    assert node_6.name in group_3
 
-    # test without group prefix
-    # assert "ParamsToOuts" in group_1
-    # assert "ParamsToOuts_1" in group_1
-    # assert "ParamsToOuts" in group_2
-    # assert "ParamsToOuts_1" in group_2
-    # assert "NodeA" in group_3
-    # assert "NodeB" in group_3
+    assert node_1.name not in group_2
+    assert node_2.name not in group_2
+    assert node_3.name not in group_1
+    assert node_4.name not in group_1
 
     # test getitem with node name
     assert group_1[node_1.name] == node_1
@@ -260,14 +253,6 @@ def test_group_nodes(proj_path):
     assert group_2[node_4.name] == node_4
     assert group_3[node_5.name] == node_5
     assert group_3[node_6.name] == node_6
-
-    # test getitem with full name
-    # assert group_1["Group1_ParamsToOuts"] == node_1
-    # assert group_1["Group1_ParamsToOuts_1"] == node_2
-    # assert group_2["Group2_ParamsToOuts"] == node_3
-    # assert group_2["Group2_ParamsToOuts_1"] == node_4
-    # assert group_3["NamedGrp_NodeA"] == node_5
-    # assert group_3["NamedGrp_NodeB"] == node_6
 
     with pytest.raises(KeyError):
         group_1["NodeA"]
@@ -280,18 +265,6 @@ def test_group_nodes(proj_path):
     assert group_1.name == ("Group1",)
     assert group_2.name == ("Group2",)
     assert group_3.name == ("NamedGrp",)
-
-    # assert node_1.name == "Group1_ParamsToOuts"
-    # assert node_2.name == "Group1_ParamsToOuts_1"
-    # assert node_3.name == "Group2_ParamsToOuts"
-    # assert node_4.name == "Group2_ParamsToOuts_1"
-
-    # assert node_5.name == "NamedGrp_NodeA"
-    # assert node_6.name == "NamedGrp_NodeB"
-
-    # assert node7.name == "ParamsToOuts"
-    # assert node8.name == "ParamsToOuts_1"
-    # assert node9.name == "NodeC"
 
     assert (
         zntrack.examples.ParamsToOuts.from_rev(name="NamedGrp_ParamsToOuts").params == "Sed Do"
