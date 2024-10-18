@@ -53,7 +53,6 @@ class NodeC(zntrack.Node):
 
 
 class NodeWithProperty(zntrack.Node):
-
     @property
     def results(self):
         return 1

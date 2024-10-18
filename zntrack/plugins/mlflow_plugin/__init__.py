@@ -280,9 +280,9 @@ class MLFlowPlugin(ZnTrackPlugin):
                     if remote_url is not None:
                         mlflow.set_tag("git_remote", remote_url)
                         mlflow.set_tag(mlflow_tags.MLFLOW_GIT_REPO_URL, remote_url)
-                    if hasattr(node, "__mlflow_run_note__"):
+                    if hasattr(node, "__run_note__"):
                         mlflow.set_tag(
-                            mlflow_tags.MLFLOW_RUN_NOTE, node.__mlflow_run_note__()
+                            mlflow_tags.MLFLOW_RUN_NOTE, node.__run_note__()
                         )
                     # if hasattr(node, "_mlflow_run_note_"):
                     # raise ValueError("not implemented")
@@ -328,9 +328,9 @@ class MLFlowPlugin(ZnTrackPlugin):
                         mlflow.set_tag("git_remote", remote_url)
 
                     mlflow.set_tag("original_dvc_stage_hash", node.state.get_stage_hash())
-                    if hasattr(node, "__mlflow_run_note__"):
+                    if hasattr(node, "__run_note__"):
                         mlflow.set_tag(
-                            mlflow_tags.MLFLOW_RUN_NOTE, node.__mlflow_run_note__()
+                            mlflow_tags.MLFLOW_RUN_NOTE, node.__run_note__()
                         )
                     mlflow.set_tag(mlflow_tags.MLFLOW_RUN_NAME, node_name)
                     for tag_key, tag_value in tags.items():

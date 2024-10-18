@@ -3,104 +3,140 @@ import json
 import os
 import pathlib
 import uuid
+import json
 
 import mlflow
+from mlflow.entities import Metric, Param, RunTag
+from mlflow.tracking import MlflowClient
+from mlflow.utils import mlflow_tags
 import pandas as pd
 import tqdm
 import typer
+import typing as t
 import yaml
 from dvc.api import DVCFileSystem
+import dataclasses
 
 from zntrack.cli.cli import app
+from zntrack.utils.misc import load_env_vars
+from zntrack.from_rev import from_rev
+from zntrack.node import Node
+from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
 
-# TODO dry option without uploading to show the selected nodes and everything that would be uploaded
+numeric = t.Union[int, float]
+metrics_type = dict[str, t.Union[numeric, list[numeric]]]
+params_type = dict[str, t.Any]
+
+
+@dataclasses.dataclass
+class MLFlowNodeData:
+    metrics: metrics_type
+    params: params_type
+    tags: dict[str, str]
+
+    def upload(self) -> None:
+        metrics: list[Metric] = []
+        params: list[Param] = []
+        tags: list[RunTag] = []
+
+        for key, value in self.metrics.items():
+            if isinstance(value, list):
+                for i, v in enumerate(value):
+                    metrics.append(Metric(key=key, value=v, step=i, timestamp=i))
+            else:
+                metrics.append(Metric(key=key, value=value, step=0, timestamp=0))
+
+        for key, value in self.params.items():
+            params.append(Param(key=key, value=str(value)))
+        
+        for key, value in self.tags.items():
+            tags.append(RunTag(key=key, value=value))
+        
+
+
+        with mlflow.start_run() as active_run:
+            mlflow_client = MlflowClient()
+            mlflow_client.log_batch(
+                run_id=active_run.info.run_id, metrics=metrics, params=params, tags=tags
+            )
+
+    @classmethod
+    def from_node(cls, node: Node) -> "MLFlowNodeData":
+        metrics = {}
+        params = {}
+        tags = {}
+
+        for field in dataclasses.fields(node):
+            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
+                for key, value in getattr(node, field.name).items():
+                    metrics[f"{field.name}.{key}"] = value
+            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
+                df: pd.DataFrame = getattr(node, field.name)
+                for column in df.columns:
+                    metrics[f"{field.name}.{column}"] = df[column].values.tolist()
+            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
+                params[field.name] = getattr(node, field.name)
+            # TODO: metrics_path, plots_path and params_path are currently being ignored
+        
+        tags[mlflow_tags.MLFLOW_PROJECT_BACKEND] = "zntrack"
+        tags[mlflow_tags.MLFLOW_RUN_NAME] = node.name
+        if node.state.rev is not None:
+            tags[mlflow_tags.MLFLOW_GIT_COMMIT] = node.state.rev
+        if node.state.remote is not None:
+            tags[mlflow_tags.MLFLOW_GIT_REPO_URL] = node.state.remote
+        if hasattr(node, "__run_note__"):
+            tags[mlflow_tags.MLFLOW_RUN_NOTE] = node.__run_note__()
+        
+        tags["dvc_stage_hash"] = node.state.get_stage_hash()
+        tags["zntrack_node"] = f"{node.__module__}.{node.__class__.__name__}"
+
+        return cls(metrics=metrics, params=params, tags=tags)
 
 
 @app.command()
 def mlflow_sync(
-    nodes: list[str] | None = None,
+    nodes: list[str] | None = typer.Argument(None),
     rev: str | None = None,
     remote: str | None = None,
     experiment: str | None = None,
     uri: str | None = None,
     parent: str | None = None,
+    dry: bool = False,
 ) -> None:
     """Upload artifacts to MLflow."""
     fs = DVCFileSystem(url=remote, rev=rev)
     with fs.open("dvc.yaml", "r") as f:
         config = yaml.safe_load(f)
 
-    metrics: dict = {}
-    # metrics is a dict of style {stage_name: {metric_name: metric_value}}
+    load_env_vars()
+    node_lst: list[Node] = []
 
-    for stage_name, stage_config in config["stages"].items():
-        # check if stage_name fits glob pattern in nodes
+    for stage_name in config["stages"]:
         if nodes is not None:
             if not any(fnmatch.fnmatch(stage_name, node) for node in nodes):
                 continue
-        if "metrics" in stage_config:
-            for metric_config in stage_config["metrics"]:
-                if isinstance(metric_config, dict):
-                    path = next(iter(metric_config))
-                else:
-                    path = metric_config
+        node_lst.append(from_rev(name=stage_name, rev=rev, remote=remote))
 
-                with fs.open(path, "r") as f:
-                    content = json.load(f)
+    data = []
 
-                prefix = pathlib.Path(path).stem
-                content = {f"{prefix}.{k}": v for k, v in content.items()}
-                # filter keys that are not int/float
-                content = {
-                    k: v for k, v in content.items() if isinstance(v, (int, float))
-                }
-                # TODO: if any of the keys are already used - use full file paths
-                if stage_name not in metrics:
-                    metrics[stage_name] = content
-                else:
-                    metrics[stage_name].update(content)
-        if "outs" in stage_config:  # TODO: plots key
-            for outs_config in stage_config["outs"]:
-                if isinstance(outs_config, dict):
-                    path = next(iter(outs_config))
-                else:
-                    path = outs_config
-
-                if path.endswith(".csv"):  # only way right now to find plots
-                    with fs.open(path, "r") as f:
-                        content = pd.read_csv(f, index_col=0)
-                    prefix = pathlib.Path(path).stem
-                    content = {
-                        f"{prefix}.{k}": v.values.tolist() for k, v in content.items()
-                    }
-                    if stage_name not in metrics:
-                        metrics[stage_name] = content
-                    else:
-                        metrics[stage_name].update(content)
-
-    if len(metrics) == 0:
-        typer.echo("No metrics found.")
+    for node in node_lst:
+        data.append(MLFlowNodeData.from_node(node))
+    
+    if dry:
+        for node_data in data:
+            print(json.dumps(dataclasses.asdict(node_data), indent=2))
         return
 
-    # upload to mlflow
-    uri = os.getenv("MLFLOW_URI", uri)
-    if uri is None:
-        uri = "http://localhost:5000"
-    mlflow.set_tracking_uri(uri)
-    experiment_name = experiment or uuid.uuid4().hex
-    mlflow.set_experiment(experiment_name)
-    if parent is not None:
-        mlflow.start_run(run_name=parent)
-    for stage_name, stage_metrics in tqdm.tqdm(metrics.items()):
-        with mlflow.start_run(run_name=stage_name, nested=True):
-            for metric_name, metric_value in stage_metrics.items():
-                if isinstance(metric_value, list):
-                    for i, value in enumerate(metric_value):
-                        mlflow.log_metric(metric_name, value, step=i)
-                else:
-                    mlflow.log_metric(metric_name, metric_value)
+    if uri is not None:
+        mlflow.set_tracking_uri(uri)
+
+    if experiment is not None:
+        mlflow.set_experiment(experiment)
 
     if parent is not None:
-        mlflow.end_run()
-
-    typer.echo(f"Uploaded metrics to MLflow experiment '{experiment_name}'")
+        with mlflow.start_run(run_name=parent):
+            for node_data in data:
+                node_data.upload()
+    else:
+        for node_data in data:
+            node_data.upload()
