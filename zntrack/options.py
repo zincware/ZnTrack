@@ -41,8 +41,7 @@ def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
     self.__dict__[name] = value
 
 
-@functools.wraps(znfields.field)
-def params(default=dataclasses.MISSING, **kwargs):
+def params(default=dataclasses.MISSING, **kwargs) -> znfields.field:
     # TODO: check types, do not allow e.g. connections or anything that can not be serialized
     return znfields.field(
         default=default,
@@ -52,8 +51,7 @@ def params(default=dataclasses.MISSING, **kwargs):
     )
 
 
-@functools.wraps(znfields.field)
-def deps(default=dataclasses.MISSING, **kwargs):
+def deps(default=dataclasses.MISSING, **kwargs) -> znfields.field:
     return znfields.field(
         default=default,
         metadata={ZNTRACK_OPTION: ZnTrackOptionEnum.DEPS},
@@ -62,8 +60,7 @@ def deps(default=dataclasses.MISSING, **kwargs):
     )
 
 
-@functools.wraps(znfields.field)
-def outs(*, cache: bool = True, independent: bool = False, **kwargs):
+def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -73,7 +70,6 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     )
 
 
-@functools.wraps(znfields.field)
 def plots(
     *,
     y: str | list[str] | None = None,
@@ -86,7 +82,7 @@ def plots(
     title: str | None = None,
     autosave: bool = False,
     **kwargs,
-):
+) -> znfields.field:
     """Pandas plot options.
 
     Parameters
@@ -142,8 +138,7 @@ def plots(
     )
 
 
-@functools.wraps(znfields.field)
-def metrics(*, cache: bool = False, independent: bool = False, **kwargs):
+def metrics(*, cache: bool = False, independent: bool = False, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -153,30 +148,27 @@ def metrics(*, cache: bool = False, independent: bool = False, **kwargs):
     )
 
 
-@functools.wraps(znfields.field)
-def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
-@functools.wraps(znfields.field)
-def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
-@functools.wraps(znfields.field)
 def outs_path(
     default=dataclasses.MISSING,
     *,
     cache: bool = True,
     independent: bool = False,
     **kwargs,
-):
+) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -184,14 +176,13 @@ def outs_path(
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
-@functools.wraps(znfields.field)
 def plots_path(
     default=dataclasses.MISSING,
     *,
     cache: bool = True,
     independent: bool = False,
     **kwargs,
-):
+) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -199,14 +190,13 @@ def plots_path(
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
-@functools.wraps(znfields.field)
 def metrics_path(
     default=dataclasses.MISSING,
     *,
     cache: bool = False,
     independent: bool = False,
     **kwargs,
-):
+) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache

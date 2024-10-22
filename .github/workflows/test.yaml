@@ -62,6 +62,7 @@ jobs:
       - name: Install package
         run: |
           poetry install --no-interaction
+          pip install aim
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
