@@ -80,7 +80,7 @@ class NodeWithPostInit(zntrack.Node):
     params: t.Any = zntrack.params()
     outs: t.Any = zntrack.outs()
 
-    def _post_init_(self):
+    def __post_init__(self):
         # _ = self.params
         # the value is not loaded in the _post_init_
         self.value = 42
@@ -100,9 +100,7 @@ def test_NodeWithPostInit(proj_path, eager):
     else:
         project.repro()
     node = NodeWithPostInit.from_rev()
-    with pytest.raises(AttributeError):
-        # _post_init_ is not called when loading from rev
-        assert node.value == 42
+    assert node.value == 42
     assert node.outs == 10
 
 
