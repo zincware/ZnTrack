@@ -2,7 +2,6 @@ import dataclasses
 import os
 import pathlib
 
-import aim
 import git
 import numpy.testing as npt
 import pandas as pd
@@ -10,6 +9,11 @@ import pytest
 import yaml
 
 import zntrack.examples
+
+try:
+    import aim
+except ImportError:
+    pytest.skip("aim is not installed", allow_module_level=True)
 
 
 @dataclasses.dataclass
