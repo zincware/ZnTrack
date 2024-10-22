@@ -76,8 +76,6 @@ def test_AddNumbers_named(proj_path, eager):
     assert add_numbers_b.c == 3
 
 
-
-
 class NodeWithPostInit(zntrack.Node):
     params: t.Any = zntrack.params()
     outs: t.Any = zntrack.outs()
@@ -90,7 +88,6 @@ class NodeWithPostInit(zntrack.Node):
     def run(self) -> None:
         assert self.value == 42
         self.outs = self.params
-
 
 
 @pytest.mark.parametrize("eager", [True, False])

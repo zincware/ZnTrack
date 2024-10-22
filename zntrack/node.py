@@ -53,8 +53,10 @@ class Node(znflow.Node, znfields.Base):
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
-    
-    @te.deprecated("The _post_load_ method was removed. Use __post_init__ in combination with `self.state` instead.")
+
+    @te.deprecated(
+        "The _post_load_ method was removed. Use __post_init__ in combination with `self.state` instead."
+    )
     def _post_load_(self):
         raise NotImplementedError
 
