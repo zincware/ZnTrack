@@ -1,5 +1,4 @@
 import dataclasses
-import functools
 
 import pandas as pd
 import znfields
@@ -138,7 +137,9 @@ def plots(
     )
 
 
-def metrics(*, cache: bool = False, independent: bool = False, **kwargs) -> znfields.field:
+def metrics(
+    *, cache: bool = False, independent: bool = False, **kwargs
+) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -148,14 +149,18 @@ def metrics(*, cache: bool = False, independent: bool = False, **kwargs) -> znfi
     )
 
 
-def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs) -> znfields.field:
+def params_path(
+    default=dataclasses.MISSING, *, cache: bool = True, **kwargs
+) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
-def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs) -> znfields.field:
+def deps_path(
+    default=dataclasses.MISSING, *, cache: bool = True, **kwargs
+) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
