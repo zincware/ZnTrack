@@ -15,7 +15,6 @@ from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
-from .utils.node_wd import get_nwd
 
 try:
     from typing import dataclass_transform
@@ -90,7 +89,7 @@ class Node(znflow.Node, znfields.Base):
 
     @property
     def nwd(self) -> pathlib.Path:
-        return get_nwd(self, mkdir=True)
+        return self.state.nwd
 
     @classmethod
     def from_rev(

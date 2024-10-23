@@ -63,24 +63,29 @@ def load_env_vars(name: str | None = None) -> None:
 class TempPathLoader(znflow.utils.IterableHandler):
     def default(self, value, **kwargs):
         instance = kwargs["instance"]
-        path = value
+        from zntrack.utils.node_wd import get_nwd, NWDReplaceHandler
 
-        if instance.state.fs.isdir(pathlib.Path(path).as_posix()):
+        nwd_handler = NWDReplaceHandler()
+
+        original_nwd = get_nwd(instance)
+        tmp_nwd = instance.nwd
+
+        original_path = pathlib.Path(nwd_handler(value, nwd=original_nwd))
+        tmp_path = pathlib.Path(nwd_handler(value, nwd=tmp_nwd))
+
+        if instance.state.fs.isdir(original_path.as_posix()):
             instance.state.fs.get(
-                pathlib.Path(path).as_posix(),
+                original_path.as_posix(),
                 instance.state.tmp_path.as_posix(),
                 recursive=True,
             )
-            _path = instance.state.tmp_path / pathlib.Path(path).name
         else:
-            temp_file = instance.state.tmp_path / pathlib.Path(path).name
-            instance.state.fs.get(pathlib.Path(path).as_posix(), temp_file.as_posix())
-            _path = temp_file
+            instance.state.fs.get(original_path.as_posix(), tmp_path.as_posix())
 
-        if isinstance(path, pathlib.PurePath):
-            return _path
+        if isinstance(value, pathlib.PurePath):
+            return tmp_path
         else:
-            return _path.as_posix()
+            return tmp_path.as_posix()
 
 
 def sort_key(item):

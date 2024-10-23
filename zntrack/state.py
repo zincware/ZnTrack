@@ -2,6 +2,7 @@ import contextlib
 import dataclasses
 import pathlib
 import tempfile
+import warnings
 import typing as t
 
 import dvc.api
@@ -14,6 +15,8 @@ from fsspec.spec import AbstractFileSystem
 from zntrack.config import NodeStatusEnum
 from zntrack.group import Group
 from zntrack.plugins import ZnTrackPlugin
+from zntrack.utils.node_wd import get_nwd
+
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -44,6 +47,12 @@ class NodeStatus:
         return self.node.name
 
     @property
+    def nwd(self):
+        if self.tmp_path is not None:
+            return self.tmp_path
+        return get_nwd(self.node, mkdir=True)
+
+    @property
     def fs(self) -> AbstractFileSystem:
         """Get the file system of the Node."""
         if self.remote is None and self.rev is None:
@@ -59,7 +68,7 @@ class NodeStatus:
         return self.run_count > 1
 
     @contextlib.contextmanager
-    def use_tmp_path(self, path: pathlib.Path | None = None) -> t.Iterator[None]:
+    def use_tmp_path(self, path: pathlib.Path | None = None) -> t.Iterator[pathlib.Path]:
         """Load the data for '*_path' into a temporary directory.
 
         If you can not use 'node.state.fs.open' you can use
@@ -76,13 +85,18 @@ class NodeStatus:
 
         # This feature is only required when the load is loaded, not when it is saved/executed
         if self.remote is None and self.rev is None:
-            yield
+            warnings.warn(
+                "The temporary path is not used when neither remote or rev are set."
+                "Consider checking for `self.state.remote` and `self.state.rev` when"
+                "using `with node.state.use_tmp_path(): ...` ."
+            )
+            yield pathlib.Path.cwd()
             return
 
         with tempfile.TemporaryDirectory() as tmpdir:
             self.node.__dict__["state"]["tmp_path"] = pathlib.Path(tmpdir)
             try:
-                yield
+                yield pathlib.Path(tmpdir)
             finally:
                 self.node.__dict__["state"].pop("tmp_path")
 

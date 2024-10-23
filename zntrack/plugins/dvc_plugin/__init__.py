@@ -61,11 +61,13 @@ def _paths_getter(self: "Node", name: str):
         with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
             content = json.load(f)[self.name][name]
             content = znjson.loads(json.dumps(content))
-            content = nwd_handler(content, nwd=self.nwd)
 
             if self.state.tmp_path is not None:
                 loader = TempPathLoader()
-                return loader(content, instance=self)
+                loader(content, instance=self)
+            
+            content = nwd_handler(content, nwd=self.nwd)
+
 
             return content
     except FileNotFoundError:
