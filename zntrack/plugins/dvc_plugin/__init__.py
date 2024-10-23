@@ -65,9 +65,8 @@ def _paths_getter(self: "Node", name: str):
             if self.state.tmp_path is not None:
                 loader = TempPathLoader()
                 loader(content, instance=self)
-            
-            content = nwd_handler(content, nwd=self.nwd)
 
+            content = nwd_handler(content, nwd=self.nwd)
 
             return content
     except FileNotFoundError:

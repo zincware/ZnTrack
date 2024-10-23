@@ -63,7 +63,7 @@ def load_env_vars(name: str | None = None) -> None:
 class TempPathLoader(znflow.utils.IterableHandler):
     def default(self, value, **kwargs):
         instance = kwargs["instance"]
-        from zntrack.utils.node_wd import get_nwd, NWDReplaceHandler
+        from zntrack.utils.node_wd import NWDReplaceHandler, get_nwd
 
         nwd_handler = NWDReplaceHandler()
 

@@ -1,6 +1,9 @@
-import zntrack
 import pathlib
+
 import pytest
+
+import zntrack
+
 
 class OutsTmp(zntrack.Node):
     file: pathlib.Path = zntrack.outs_path(zntrack.nwd / "file.txt")
@@ -17,10 +20,13 @@ def test_outs_tmp(proj_path):
     project = zntrack.Project()
     with project:
         node = OutsTmp()
-    
+
     project.repro()
     assert node.nwd == pathlib.Path("nodes", OutsTmp.__name__)
-    with pytest.warns(UserWarning, match="The temporary path is not used when neither remote or rev are set."):
+    with pytest.warns(
+        UserWarning,
+        match="The temporary path is not used when neither remote or rev are set.",
+    ):
         with node.state.use_tmp_path() as path:
             assert node.nwd == pathlib.Path("nodes", OutsTmp.__name__)
 
