@@ -7,11 +7,7 @@ import typing as t
 
 import yaml
 
-from zntrack.config import (
-    EXP_INFO_PATH,
-    NOT_AVAILABLE,
-    ZNTRACK_LAZY_VALUE,
-)
+from zntrack.config import EXP_INFO_PATH, NOT_AVAILABLE, ZNTRACK_LAZY_VALUE
 
 if t.TYPE_CHECKING:
     from zntrack import Node

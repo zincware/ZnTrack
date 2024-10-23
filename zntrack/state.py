@@ -11,9 +11,7 @@ from dvc.utils import dict_sha256
 from fsspec.implementations.local import LocalFileSystem
 from fsspec.spec import AbstractFileSystem
 
-from zntrack.config import (
-    NodeStatusEnum,
-)
+from zntrack.config import NodeStatusEnum
 from zntrack.group import Group
 from zntrack.plugins import ZnTrackPlugin
 
