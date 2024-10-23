@@ -12,13 +12,8 @@ from fsspec.implementations.local import LocalFileSystem
 from fsspec.spec import AbstractFileSystem
 
 from zntrack.config import (
-    NOT_AVAILABLE,
-    ZNTRACK_LAZY_VALUE,
-    ZNTRACK_OPTION,
     NodeStatusEnum,
-    ZnTrackOptionEnum,
 )
-from zntrack.exceptions import InvalidOptionError
 from zntrack.group import Group
 from zntrack.plugins import ZnTrackPlugin
 

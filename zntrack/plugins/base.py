@@ -10,7 +10,6 @@ import yaml
 from zntrack.config import (
     EXP_INFO_PATH,
     NOT_AVAILABLE,
-    PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_LAZY_VALUE,
 )
 

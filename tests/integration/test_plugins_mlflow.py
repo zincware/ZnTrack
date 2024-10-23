@@ -347,4 +347,3 @@ def test_dataclass_deps(mlflow_proj_path):
     assert hasattr(md, "__run_note__")
     assert md.__run_note__() != ""
     # assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run2:MD"
-
