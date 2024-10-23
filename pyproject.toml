@@ -16,7 +16,6 @@ tqdm = "^4"
 
 znjson = "^0.2"
 znflow = "^0.2.2"
-varname = "^0.13"
 typer = "^0"
 znfields = "^0.1.2"
 pandas = "^2"
