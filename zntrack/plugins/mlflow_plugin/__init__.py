@@ -4,6 +4,7 @@ import pathlib
 import warnings
 from dataclasses import Field, dataclass
 from typing import Any
+import pandas as pd
 
 import dvc.repo
 import git
@@ -171,6 +172,11 @@ class MLFlowPlugin(ZnTrackPlugin):
                 mlflow.log_metric(f"{field.name}.{key}", value)
                 # TODO: plots
                 # TODO: define tags for all experiments in a parent run
+        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
+            df: pd.DataFrame = getattr(self.node, field.name).copy()
+            for idx, row in df.iterrows():
+                for key, value in row.items():
+                    mlflow.log_metric(f"{field.name}.{key}", value, step=idx)
 
     def convert_to_dvc_yaml(self):
         return PLUGIN_EMPTY_RETRUN_VALUE
