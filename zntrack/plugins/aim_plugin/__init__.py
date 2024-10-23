@@ -144,9 +144,10 @@ class AIMPlugin(ZnTrackPlugin):
 
         if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
             df: pd.DataFrame = getattr(self.node, field.name).copy()
-            for idx, row in df.iterrows():
-                for key, value in row.items():
-                    run.track(value, name=f"{field.name}.{key}", step=idx)
+            with self.get_aim_run() as run:
+                for idx, row in df.iterrows():
+                    for key, value in row.items():
+                        run.track(value, name=f"{field.name}.{key}", step=idx)
 
     @contextlib.contextmanager
     def get_aim_run(self) -> t.Iterator[aim.Run]:

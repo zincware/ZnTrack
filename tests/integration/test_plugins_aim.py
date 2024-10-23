@@ -126,7 +126,6 @@ def test_aim_plotting(aim_proj_path):
         metrics = {}
         for metric in run.metrics():
             metrics[metric.name] = list(metric.data.values())[0]
-
         npt.assert_array_equal(metrics["plots.idx"], [[idx for idx in range(10)]])
 
     proj.finalize(msg="test")
