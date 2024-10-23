@@ -134,38 +134,6 @@ class NodeStatus:
         content.pop("node")
         return content
 
-    def extend_plots(self, attribute: str, data: dict):
-        # if isintance(target, str): ...
-        # TODO: how to check if something has already been written when using extend_plot on
-        # some plots but not on others in the final saving step?
-
-        # TODO: check that the stage hash is the same if metrics are set or not
-        # TODO: test get_stage_hash with params / metrics / plots / outs / out_path / ...
-        import pandas as pd
-
-        fields = dataclasses.fields(self.node)
-        for field in fields:
-            if field.name == attribute:
-                option_type = field.metadata.get(ZNTRACK_OPTION)
-                if option_type == ZnTrackOptionEnum.PLOTS:
-                    break
-                else:
-                    raise InvalidOptionError(
-                        f"Can not use self.{attribute} with type {option_type} for 'plots'."
-                    )
-        else:
-            raise InvalidOptionError(f"Unable to find 'self.{attribute}' in {self.node}.")
-
-        target = getattr(self.node, attribute)
-        if target is ZNTRACK_LAZY_VALUE or target is NOT_AVAILABLE:
-            target = pd.DataFrame()
-        df = pd.concat([target, pd.DataFrame([data])], ignore_index=True, axis=0)
-        if "step" not in df.columns:
-            df.index.name = "step"
-        setattr(self.node, attribute, df)
-        for plugin in self.plugins.values():
-            plugin.extend_plots(attribute, data, reference=df)
-
     def get_field(self, attribute: str) -> dataclasses.Field:
         fields = dataclasses.fields(self.node)
         for field in fields:

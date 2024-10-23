@@ -186,12 +186,6 @@ class MLFlowPlugin(ZnTrackPlugin):
 
         return PLUGIN_EMPTY_RETRUN_VALUE
 
-    def extend_plots(self, attribute: str, data: dict, reference):
-        self.setup()
-        step = len(reference)
-        new_data = {f"{attribute}.{key}": value for key, value in data.items()}
-        mlflow.log_metrics(new_data, step=step)
-
     @classmethod
     def finalize(cls, **kwargs):
         """Example:

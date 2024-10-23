@@ -42,8 +42,7 @@ class RangePlotter(zntrack.Node):
     plots: pd.DataFrame = zntrack.plots(y="range")
 
     def run(self):
-        for idx in range(self.start, self.stop):
-            self.state.extend_plots("plots", {"idx": idx})
+        self.plots = pd.DataFrame({"idx": [idx for idx in range(self.start, self.stop)]})
 
 
 # fixture to set the os.env before the test and remove if after the test

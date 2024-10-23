@@ -170,12 +170,6 @@ class AIMPlugin(ZnTrackPlugin):
 
         return PLUGIN_EMPTY_RETRUN_VALUE
 
-    def extend_plots(self, attribute: str, data: dict, reference):
-        step = len(reference)
-        with self.get_aim_run() as run:
-            for key, value in data.items():
-                run.track(value, name=f"{attribute}.{key}", step=step)
-
     @classmethod
     def finalize(cls, **kwargs) -> None:
         """Update the aim run to include the correct commit data.

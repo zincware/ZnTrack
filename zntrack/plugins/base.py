@@ -71,9 +71,6 @@ class ZnTrackPlugin(abc.ABC):
     @abc.abstractmethod
     def convert_to_params_yaml(self) -> t.Any: ...
 
-    def extend_plots(self, attribute: str, data: dict, reference):
-        return PLUGIN_EMPTY_RETRUN_VALUE
-
     def __enter__(self):
         self.setup()
 

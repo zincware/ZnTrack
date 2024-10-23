@@ -54,8 +54,7 @@ class RangePlotter(zntrack.Node):
     plots: pd.DataFrame = zntrack.plots(y="range")
 
     def run(self):
-        for idx in range(self.start, self.stop):
-            self.state.extend_plots("plots", {"idx": idx})
+        self.plots = pd.DataFrame({"idx": [idx for idx in range(self.start, self.stop)]})
 
 
 @pytest.fixture
@@ -349,7 +348,3 @@ def test_dataclass_deps(mlflow_proj_path):
     assert md.__run_note__() != ""
     # assert run.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "run2:MD"
 
-
-# TODO: test plots via extend_plots and via setting them at the end
-# each plugin must keep track of plots which are extended
-#  -> code duplication. This should be done in the node.state?
