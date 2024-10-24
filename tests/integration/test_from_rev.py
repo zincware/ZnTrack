@@ -114,22 +114,18 @@ def test_connect_from_remote(proj_path):
     # project.build()
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_two_nodes_connect_external(proj_path):
-    node_a = zntrack.from_rev(
-        "HelloWorld",
-        remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="890c714",
+    node_a : zntrack.examples.ParamsToOuts = zntrack.from_rev(
+        name="NumericOuts",
+        remote="https://github.com/PythonFZ/zntrack-examples",
+        rev="de82dc7104ac3"
     )
 
-    with zntrack.Project(automatic_node_names=True) as project:
-        node1 = zntrack.examples.AddOne(number=node_a.random_number)
-        node2 = zntrack.examples.AddOne(number=node_a.random_number)
+    with zntrack.Project() as project:
+        node1 = zntrack.examples.AddOne(number=node_a.outs)
+        node2 = zntrack.examples.AddOne(number=node_a.outs)
 
-    project.run()
+    project.repro()
 
-    # node1.load()
-    # node2.load()
-
-    assert node1.outs == node_a.random_number + 1
-    assert node2.outs == node_a.random_number + 1
+    assert node1.outs == node_a.outs + 1
+    assert node2.outs == node_a.outs + 1
