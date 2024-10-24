@@ -40,6 +40,8 @@ def test_import_from_remote(proj_path):
     assert node.state.rev == "8d0c992"
     assert node.state.remote == "https://github.com/PythonFZ/zntrack-examples"
     assert node.uuid == uuid.UUID("65b1c652-6508-4ee5-816c-c2f3cec22cc7")
+    assert node.state.get_stage_hash() == "70cbf7993d07a6cd0266a0fc0a874e163bc6f464ecc82bb1367b18d24091853c"
+    assert node.state.get_stage_hash(include_outs=True) == "0e2ec8fab1123c1259ccf96a9590c4b161fc44cf4d93f755699a8fe99c3afe4c"
     # assert node.state.state ==
 
 

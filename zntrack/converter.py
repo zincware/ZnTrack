@@ -139,7 +139,7 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
     if node._external_:
         # DODO: use the dvc_stage hash instead!
         # try use the one including the outputs
-        import_path = pathlib.Path("external", str(node.uuid))
+        import_path = pathlib.Path("external", node.state.get_stage_hash(include_outs=True)[:32])
         import_path.mkdir(exist_ok=True, parents=True)
         # we need to make the parent directory of the output
         # that directory is probably best described by using the node.name

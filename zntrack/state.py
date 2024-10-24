@@ -60,6 +60,14 @@ class NodeStatus:
             url=self.remote,
             rev=self.rev,
         )
+    
+    @property
+    def dvc_fs(self) -> dvc.api.DVCFileSystem:
+        """Get the file system of the Node."""
+        return dvc.api.DVCFileSystem(
+            url=self.remote,
+            rev=self.rev,
+        )
 
     @property
     def restarted(self) -> bool:
@@ -99,15 +107,9 @@ class NodeStatus:
             finally:
                 self.node.__dict__["state"].pop("tmp_path")
 
-    def get_stage(self) -> dvc.stage.PipelineStage:
+    def get_stage(self) -> dvc.stage.Stage:
         """Access to the internal dvc.repo api."""
-        with dvc.repo.Repo(remote=self.remote, rev=self.rev) as repo:
-            stage = repo.stage.collect(self.name)[0]
-            if self.rev is None:
-                # If the rev is not None, we don't need this but get:
-                # AttributeError: 'Repo' object has no attribute 'stage_cache'
-                stage.save(allow_missing=True, run_cache=False)
-            return stage
+        return next(iter(self.dvc_fs.repo.stage.collect(self.name)))
 
     def get_stage_lock(self) -> dict:
         """Access to the internal dvc.repo api."""
@@ -116,23 +118,15 @@ class NodeStatus:
 
     def get_stage_hash(self, include_outs: bool = False) -> str:
         """Get the hash of the stage."""
-        if include_outs:
-            raise NotImplementedError("Include outs is not implemented yet.")
-        try:
-            # I do not understand what is goind on here?
-            (
-                self.node.nwd / "node-meta.json"
-            ).touch()  # REMOVE!!!! node-meta might exist, do not remove!!
-            stage_lock = self.get_stage_lock()
-        finally:
-            content = (self.node.nwd / "node-meta.json").read_text()
-            if content == "":
-                (self.node.nwd / "node-meta.json").unlink()
+        stage_lock = self.get_stage_lock()
 
-        filtered_lock = {
-            k: v for k, v in stage_lock.items() if k in ["cmd", "deps", "params"]
-        }
-        return dict_sha256(filtered_lock)
+        if include_outs:
+            return dict_sha256(stage_lock)
+        else:
+            filtered_lock = {
+                k: v for k, v in stage_lock.items() if k in ["cmd", "deps", "params"]
+            }
+            return dict_sha256(filtered_lock)
 
     def to_dict(self) -> dict:
         """Convert the NodeStatus to a dictionary."""
