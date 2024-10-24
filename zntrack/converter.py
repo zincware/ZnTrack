@@ -1,8 +1,8 @@
 import dataclasses
 import importlib
 import pathlib
-import typing as t
 import subprocess
+import typing as t
 import warnings
 
 import yaml
@@ -198,9 +198,14 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
 
     if len(paths) == 0:
         if node._external_:
-            node_meta_path = (import_path / "node-meta.json")
+            node_meta_path = import_path / "node-meta.json"
             if not node_meta_path.exists():
-                cmd = ["dvc", "import", node.state.remote, (node.nwd / "node-meta.json").as_posix()]
+                cmd = [
+                    "dvc",
+                    "import",
+                    node.state.remote,
+                    (node.nwd / "node-meta.json").as_posix(),
+                ]
                 if node.state.rev is not None:
                     cmd.extend(["--rev", node.state.rev])
                 cmd.append("--no-download")
