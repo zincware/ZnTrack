@@ -60,7 +60,7 @@ class NodeStatus:
             url=self.remote,
             rev=self.rev,
         )
-    
+
     @property
     def dvc_fs(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""
