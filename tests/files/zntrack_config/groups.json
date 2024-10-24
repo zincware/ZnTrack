@@ -1,0 +1,32 @@
+{
+    "MyNode": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/MyNode"
+        }
+    },
+    "Grp_MyNode": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/Grp/MyNode"
+        }
+    },
+    "Grp_MyNode_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/Grp/MyNode_1"
+        }
+    },
+    "Grp_MyNode_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/Grp/MyNode_2"
+        }
+    },
+    "Grp_B_MyNode": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/Grp/B/MyNode"
+        }
+    }
+}

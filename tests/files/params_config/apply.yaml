@@ -1,0 +1,13 @@
+ParamsToOuts:
+  params:
+  - a
+  - b
+ParamsToOuts_1:
+  params:
+  - a
+  - b
+ParamsToOuts_2:
+  params:
+  - a
+  - b
+  - c

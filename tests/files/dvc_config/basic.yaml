@@ -1,0 +1,44 @@
+plots:
+- MyNode_plots:
+    x:
+      nodes/MyNode/plots.csv: step
+    y:
+      nodes/MyNode/plots.csv: y
+- MyNode_plots_no_cache:
+    x:
+      nodes/MyNode/plots_no_cache.csv: step
+    y:
+      nodes/MyNode/plots_no_cache.csv: y
+stages:
+  MyNode:
+    cmd: zntrack run test_basic.MyNode --name MyNode
+    deps:
+    - deps.yaml
+    - deps2.yaml
+    metrics:
+    - nodes/MyNode/metrics-cache.json
+    - nodes/MyNode/metrics.json:
+        cache: false
+    - nodes/MyNode/metrics_cache.json
+    - nodes/MyNode/my_metrics.json:
+        cache: false
+    - nodes/MyNode/node-meta.json:
+        cache: false
+    outs:
+    - no-cache-plots.json:
+        cache: false
+    - nodes/MyNode/my_plots.csv
+    - nodes/MyNode/no-cache-outs.json:
+        cache: false
+    - nodes/MyNode/no-cache-plots.csv:
+        cache: false
+    - nodes/MyNode/outs.json
+    - nodes/MyNode/outs_no_cache.json:
+        cache: false
+    - nodes/MyNode/plots.csv
+    - nodes/MyNode/plots_no_cache.csv:
+        cache: false
+    - outs.yaml
+    params:
+    - MyNode
+    - parameter.yaml: null

@@ -1,0 +1,28 @@
+stages:
+  DepsToMetrics:
+    cmd: zntrack run zntrack.examples.DepsToMetrics --name DepsToMetrics
+    deps:
+    - nodes/ParamsToMetrics/metrics.json
+    metrics:
+    - nodes/DepsToMetrics/metrics.json:
+        cache: false
+    - nodes/DepsToMetrics/node-meta.json:
+        cache: false
+  DepsToMetrics_1:
+    cmd: zntrack run zntrack.examples.DepsToMetrics --name DepsToMetrics_1
+    deps:
+    - nodes/ParamsToMetrics/node-meta.json
+    metrics:
+    - nodes/DepsToMetrics_1/metrics.json:
+        cache: false
+    - nodes/DepsToMetrics_1/node-meta.json:
+        cache: false
+  ParamsToMetrics:
+    cmd: zntrack run zntrack.examples.ParamsToMetrics --name ParamsToMetrics
+    metrics:
+    - nodes/ParamsToMetrics/metrics.json:
+        cache: false
+    - nodes/ParamsToMetrics/node-meta.json:
+        cache: false
+    params:
+    - ParamsToMetrics

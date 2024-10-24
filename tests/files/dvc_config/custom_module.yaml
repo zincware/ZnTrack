@@ -1,0 +1,6 @@
+stages:
+  NodeFromCustomModule:
+    cmd: zntrack run zntrack.mymodule.NodeFromCustomModule --name NodeFromCustomModule
+    metrics:
+    - nodes/NodeFromCustomModule/node-meta.json:
+        cache: false
