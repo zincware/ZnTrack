@@ -43,43 +43,67 @@ def test_import_from_remote(proj_path):
     # assert node.state.state ==
 
 
-@pytest.mark.xfail(reason="pending implementation")
 def test_connect_from_remote(proj_path):
-    node_a = zntrack.from_rev(
-        "HelloWorld",
-        remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="890c714",
+    project = zntrack.Project()
+    import os
+    os.chdir("/tmp/test01")
+
+    external_node: zntrack.examples.ParamsToMetrics = zntrack.from_rev(
+        name="ParamsToMetrics",
+        remote="https://github.com/PythonFZ/zntrack-examples",
+        rev="59dac86",
     )
 
-    node_b = zntrack.from_rev(
-        "HelloWorld",
-        remote="https://github.com/PythonFZ/ZnTrackExamples.git",
-        rev="369fe8f",
-    )
+    with project:
+        n1 = zntrack.examples.DepsToMetrics(
+            deps=external_node.metrics,
+        )
+        n2 = zntrack.examples.DepsToMetrics(
+            deps=external_node.metrics,
+        )
+    
+    project.repro()
 
-    assert node_a.random_number == 123
-    assert node_b.random_number == 126
+    assert external_node.metrics == {'accuracy': 0.9, 'loss': 0.1}
+    assert n1.metrics == {'accuracy': 0.9, 'loss': 0.1}
+    assert n2.metrics == {'accuracy': 0.9, 'loss': 0.1}
+    # raise NotImplementedError("This test is not done yet!")
 
-    with zntrack.Project() as project:
-        node = zntrack.examples.AddOne(number=node_a.random_number)
 
-    project.run()
-    # node.load()
+    # node_a = zntrack.from_rev(
+    #     "HelloWorld",
+    #     remote="https://github.com/PythonFZ/ZnTrackExamples.git",
+    #     rev="890c714",
+    # )
 
-    assert node.outs == node_a.random_number + 1
+    # node_b = zntrack.from_rev(
+    #     "HelloWorld",
+    #     remote="https://github.com/PythonFZ/ZnTrackExamples.git",
+    #     rev="369fe8f",
+    # )
 
-    with zntrack.Project() as project:
-        node = zntrack.examples.AddOne(number=node_b.random_number)
+    # assert node_a.random_number == 123
+    # assert node_b.random_number == 126
 
-    project.run()
-    # We can not use node.load() here and build again,
-    # because it will convert connections to e.g. type int
-    # and then we can not connect to the node anymore.
-    # node.load()
+    # with zntrack.Project() as project:
+    #     node = zntrack.examples.AddOne(number=node_a.random_number)
 
-    assert zntrack.from_rev(node.name).outs == node_b.random_number + 1
+    # project.repro()
 
-    project.build()
+    # assert node.outs == node_a.random_number + 1
+
+    # with zntrack.Project() as project:
+    #     node = zntrack.examples.AddOne(number=node_b.random_number)
+
+    # project.run()
+    # # We can not use node.load() here and build again,
+    # # because it will convert connections to e.g. type int
+    # # and then we can not connect to the node anymore.
+    # # node.load()
+
+    # assert zntrack.from_rev(node.name).outs == node_b.random_number + 1
+
+    # project.build()
 
 
 @pytest.mark.xfail(reason="pending implementation")

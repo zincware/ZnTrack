@@ -53,6 +53,10 @@ def _plots_save_func(self: "Node", name: str):
 
 
 def _paths_getter(self: "Node", name: str):
+    # TODO: if self._external_: try looking into
+    # external/self.uuid/...
+    # this works for everything except node-meta.json because that
+    # defines the uuid
     nwd_handler = NWDReplaceHandler()
 
     if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
@@ -344,6 +348,8 @@ class DVCPlugin(ZnTrackPlugin):
                         stages.setdefault(ZnTrackOptionEnum.PARAMS.value, []).append(
                             self.node.name
                         )
+                    else:
+                        raise ValueError("unsupoorted type")
 
                 if len(paths) > 0:
                     stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)

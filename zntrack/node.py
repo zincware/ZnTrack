@@ -140,6 +140,8 @@ class Node(znflow.Node, znfields.Base):
             for field in dataclasses.fields(cls):
                 _ = getattr(instance, field.name)
 
+        instance._external_ = True
+
         return instance
 
     @property

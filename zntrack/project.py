@@ -112,6 +112,8 @@ class Project(znflow.DiGraph):
         zntrack_dict = {}
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
+            if node._external_:
+                continue
             for plugin in node.state.plugins.values():
                 # TODO: combine all params into one dict
                 if (

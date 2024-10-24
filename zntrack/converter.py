@@ -2,6 +2,8 @@ import dataclasses
 import importlib
 import pathlib
 import typing as t
+import subprocess
+import warnings
 
 import yaml
 import znflow
@@ -72,8 +74,8 @@ class NodeConverter(znjson.ConverterBase):
             "module": module_handler(obj),
             "name": obj.name,
             "cls": obj.__class__.__name__,
-            "remote": None,
-            "rev": None,
+            "remote": obj.state.remote,
+            "rev": obj.state.rev,
         }
 
     def decode(self, s: dict) -> Node:
@@ -133,6 +135,20 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
     # TODO: this should be a part of the DVCPlugin!
     if not isinstance(node, Node):
         raise ValueError(f"Expected a Node object, got {type(node)}")
+    import_path = None
+    if node._external_:
+        import_path = pathlib.Path("external", str(node.uuid))
+        import_path.mkdir(exist_ok=True, parents=True)
+        # we need to make the parent directory of the output
+        # that directory is probably best described by using the node.name
+        # of the node that depends on the import?
+        # or we use a hash from commit / node name / repo path <-- only validate answer!
+        # we want to run dvc import remote get_path(node, "attribute") --rev rev --out /.../get_path(node, "attribute").name
+        # use --no-download option while building
+        # check how dvc repro or paraffin would download files? Do we want the user to force download?
+        # have zntrack.Path(path, remote, rev, is_dvc_tracked, is_db) to use dvc import-url / import-db in the graph
+        # return []
+        # raise NotImplementedError
     if attribute is None:
         fields = dataclasses.fields(node)
     else:
@@ -160,6 +176,9 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
             ]
         ):
             continue
+        if node._external_:
+            warnings.warn("External nodes are currently always loaded dynamically.")
+            continue
         if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) == True:
             paths.append((node.nwd / "node-meta.json").as_posix())
         if option_type == ZnTrackOptionEnum.OUTS:
@@ -176,8 +195,19 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
             paths.extend(_enforce_str_list(getattr(node, field.name)))
 
     if len(paths) == 0:
-        # for nodes with no outputs, we rely on 'node-meta.json'
-        paths.append((node.nwd / "node-meta.json").as_posix())
+        if node._external_:
+            node_meta_path = (import_path / "node-meta.json")
+            if not node_meta_path.exists():
+                cmd = ["dvc", "import", node.state.remote, (node.nwd / "node-meta.json").as_posix()]
+                if node.state.rev is not None:
+                    cmd.extend(["--rev", node.state.rev])
+                cmd.append("--no-download")
+                cmd.extend(["--out", node_meta_path.as_posix()])
+                subprocess.check_call(cmd)
+            paths.append(node_meta_path.as_posix())
+        else:
+            # for nodes with no outputs, we rely on 'node-meta.json'
+            paths.append((node.nwd / "node-meta.json").as_posix())
 
     return paths
 
