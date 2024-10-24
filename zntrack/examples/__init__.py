@@ -42,6 +42,7 @@ class ParamsToMetrics(zntrack.Node):
         """Markdown style run note."""
         return "This is a test run note."
 
+
 class DepsToMetrics(zntrack.Node):
     """Save params to metrics."""
 
@@ -51,6 +52,7 @@ class DepsToMetrics(zntrack.Node):
     def run(self) -> None:
         """Save params to metrics."""
         self.metrics = self.deps
+
 
 class WritePlots(zntrack.Node):
     """Generate a plot."""
