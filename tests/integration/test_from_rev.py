@@ -76,6 +76,10 @@ def test_connect_from_remote(proj_path):
     assert external_node.metrics == {"accuracy": 0.9, "loss": 0.1}
     assert n1.metrics == {"accuracy": 0.9, "loss": 0.1}
     assert n2.metrics == {"accuracy": 0.9, "loss": 0.1}
+
+    # TODO: test with different rev and assert that things changed!
+
+    
     # raise NotImplementedError("This test is not done yet!")
 
     # node_a = zntrack.from_rev(
