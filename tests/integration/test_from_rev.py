@@ -53,9 +53,6 @@ def test_import_from_remote(proj_path):
 
 def test_connect_from_remote(proj_path):
     project = zntrack.Project()
-    import os
-
-    os.chdir("/tmp/test01")
 
     external_node: zntrack.examples.ParamsToMetrics = zntrack.from_rev(
         name="ParamsToMetrics",
