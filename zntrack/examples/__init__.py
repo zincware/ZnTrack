@@ -13,6 +13,16 @@ import pandas as pd
 import zntrack
 
 
+class ReadFile(zntrack.Node):
+    """Read a file."""
+
+    path: pathlib.Path = zntrack.deps_path()
+    content: str = zntrack.outs()
+
+    def run(self):
+        """Read a file."""
+        self.content = self.path.read_text()
+
 class ParamsToOuts(zntrack.Node):
     """Save params to outs."""
 

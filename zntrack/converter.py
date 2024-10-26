@@ -8,6 +8,7 @@ import warnings
 import yaml
 import znflow
 import znjson
+from zntrack.add import DVCImportPath
 
 from zntrack.config import (
     PARAMS_FILE_PATH,
@@ -185,6 +186,9 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
             continue
         if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) == True:
             paths.append((node.nwd / "node-meta.json").as_posix())
+            if node._external_:
+                raise NotImplementedError
+                # paths.append((import_path / "node-meta.json").as_posix())
         if option_type == ZnTrackOptionEnum.OUTS:
             paths.append((node.nwd / f"{field.name}.json").as_posix())
         elif option_type == ZnTrackOptionEnum.PLOTS:
@@ -210,7 +214,7 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
                 ]
                 if node.state.rev is not None:
                     cmd.extend(["--rev", node.state.rev])
-                cmd.append("--no-download")
+                cmd.append("--no-download") # consider using --no-exec
                 cmd.extend(["--out", node_meta_path.as_posix()])
                 subprocess.check_call(cmd)
             paths.append(node_meta_path.as_posix())
@@ -263,4 +267,22 @@ class DataclassConverter(znjson.ConverterBase):
             other, (Node, znflow.Connection, znflow.CombinedConnections)
         ):
             return True
-        return False
+        return False 
+
+class DVCImportPathConverter(znjson.ConverterBase):
+    """Convert a DVCImportPath object to to pathlib.
+    
+    We do not want to store the information about the DVCImportPath
+    as this is handled in the "path.dvc" file.
+    Thus, we just make use of the pathlib.Path representation.
+    """
+
+    level = 100
+    instance = DVCImportPath
+    representation = "pathlib.Path"
+
+    def encode(self, obj: DVCImportPath) -> str:
+        return obj.path.as_posix()
+    
+    def decode(self, value: str) -> None:
+        raise NotImplementedError("DVCImportPath is converted to pathlib.Path.")

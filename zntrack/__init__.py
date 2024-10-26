@@ -19,6 +19,7 @@ from .options import (
 )
 from .project import Project
 from .utils import nwd
+from zntrack.add import add
 
 __all__ = [
     "params",
@@ -36,6 +37,7 @@ __all__ = [
     "nwd",
     "from_rev",
     "apply",
+    "add",
 ]
 
 logger = logging.getLogger(__name__)

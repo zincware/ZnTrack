@@ -24,6 +24,8 @@ from zntrack.config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
+from zntrack.utils.misc import RunDVCImportPathHandler
+
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -88,6 +90,7 @@ def _deps_getter(self: "Node", name: str):
                     converter.NodeConverter,
                     converter.ConnectionConverter,
                     converter.CombinedConnectionsConverter,
+                    converter.DVCImportPathConverter,
                     converter.DataclassConverter,
                 ],
                 add_default=True,
@@ -142,13 +145,15 @@ class DVCPlugin(ZnTrackPlugin):
             ZnTrackOptionEnum.METRICS,
         }:
             return base_getter(self.node, field.name, _outs_getter)
+        elif option == ZnTrackOptionEnum.DEPS_PATH:
+            return _paths_getter(self.node, field.name)
         elif option in {
             ZnTrackOptionEnum.PARAMS_PATH,
-            ZnTrackOptionEnum.DEPS_PATH,
             ZnTrackOptionEnum.OUTS_PATH,
             ZnTrackOptionEnum.PLOTS_PATH,
             ZnTrackOptionEnum.METRICS_PATH,
-        }:
+        }:  
+            # TODO: do not use nwd_handler for deps_path and params_path
             return _paths_getter(self.node, field.name)
         return PLUGIN_EMPTY_RETRUN_VALUE
 
@@ -360,6 +365,7 @@ class DVCPlugin(ZnTrackPlugin):
                     pathlib.Path(c).as_posix()
                     for c in get_attr_always_list(self.node, field.name)
                 ]
+                RunDVCImportPathHandler()(self.node.__dict__.get(field.name))
                 stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(content)
 
         for key in stages:
@@ -393,6 +399,7 @@ class DVCPlugin(ZnTrackPlugin):
                     converter.NodeConverter,
                     converter.CombinedConnectionsConverter,
                     znjson.converter.PathlibConverter,
+                    converter.DVCImportPathConverter,
                     converter.DataclassConverter,
                 ],
                 add_default=False,

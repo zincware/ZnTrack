@@ -1,0 +1,12 @@
+{
+    "ReadFile": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ReadFile"
+        },
+        "path": {
+            "_type": "pathlib.Path",
+            "value": "LICENSE"
+        }
+    }
+}

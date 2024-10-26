@@ -6,8 +6,17 @@ import yaml
 import znflow.utils
 
 from zntrack.utils.import_handler import import_handler
+from zntrack.add import DVCImportPath
 
 from ..config import ENV_FILE_PATH
+
+class RunDVCImportPathHandler(znflow.utils.IterableHandler):
+    """Replace the nwd placeholder with the actual nwd."""
+
+    def default(self, value):
+        if isinstance(value, DVCImportPath):
+            value.run()
+        
 
 
 def get_plugins_from_env(self):

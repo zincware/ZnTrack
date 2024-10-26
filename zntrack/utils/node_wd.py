@@ -11,6 +11,8 @@ import znflow.utils
 import znjson
 
 from zntrack.config import NWD_PATH, ZNTRACK_FILE_PATH, NodeStatusEnum
+from zntrack.add import DVCImportPath
+
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -98,6 +100,9 @@ class NWDReplaceHandler(znflow.utils.IterableHandler):
             )
         elif value is None:
             return value
+        elif isinstance(value, DVCImportPath):
+            # with DVCImportPath, we do not expect the nwd placeholder
+            return value.path
         else:
             raise ValueError(
                 f"replace_nwd_placeholder is not implemented for {type(value)}"
