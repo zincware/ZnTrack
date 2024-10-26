@@ -79,7 +79,6 @@ def test_connect_from_remote(proj_path):
 
     # TODO: test with different rev and assert that things changed!
 
-    
     # raise NotImplementedError("This test is not done yet!")
 
     # node_a = zntrack.from_rev(

@@ -111,7 +111,7 @@ class NodeStatus:
         """Access to the internal dvc.repo api."""
         stage = next(iter(self.dvc_fs.repo.stage.collect(self.name)))
         if self.rev is None and self.remote is None:
-            # If we want to look at the current workspace result, we need to 
+            # If we want to look at the current workspace result, we need to
             # load all the information, not just dvc.yaml
             stage.save(allow_missing=True, run_cache=False)
         return stage

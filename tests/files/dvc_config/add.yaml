@@ -8,4 +8,3 @@ stages:
         cache: false
     outs:
     - nodes/ReadFile/content.json
-

@@ -1,7 +1,8 @@
-import pytest
+
 import pandas as pd
+import pytest
+
 import zntrack
-from uuid import UUID
 
 
 class Node(zntrack.Node):
@@ -65,35 +66,12 @@ class NodeWithMetricsAndPlotsAndParams(zntrack.Node):
     ("node", "stage_hash", "full_stage_hash"),
     [
         (Node, "99a611464d", None),
-        (
-            NodeWithParameter,
-            "8c8fb1673bb9", None
-        ),
-        (
-            NodeWithOuts,
-            "77984ac3472e3",
-            None
-        ),
-        (
-            NodeWithMetrics,
-            "22877d83878b1",
-            None
-        ),
-        (
-            NodeWithPlots,
-            "e173cec6feabe",
-            None
-        ),
-        (
-            NodeWithMetricsAndPlots,
-            "a4b2aba9ec",
-            None
-        ),
-        (
-            NodeWithMetricsAndPlotsAndParams,
-            "b64bdd1da9",
-            None
-        ),
+        (NodeWithParameter, "8c8fb1673bb9", None),
+        (NodeWithOuts, "77984ac3472e3", None),
+        (NodeWithMetrics, "22877d83878b1", None),
+        (NodeWithPlots, "e173cec6feabe", None),
+        (NodeWithMetricsAndPlots, "a4b2aba9ec", None),
+        (NodeWithMetricsAndPlotsAndParams, "b64bdd1da9", None),
     ],
 )
 def test_get_stage_hash(proj_path, node, stage_hash, full_stage_hash):
@@ -108,8 +86,6 @@ def test_get_stage_hash(proj_path, node, stage_hash, full_stage_hash):
 
     assert node.from_rev().state.get_stage_hash()[:10] == stage_hash[:10]
 
-
     # TODO: this changes every run because of node_meta - do we want to exclude it - as it is the only output that is
     # by design non-deterministic!
     # assert node.from_rev().state.get_stage_hash(include_outs=True)[:10] == full_stage_hash[:10]
-
