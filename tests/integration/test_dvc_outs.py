@@ -205,7 +205,9 @@ def test_use_tmp_path(proj_path):
         assert node2.outs == node2.state.tmp_path / "data"
         assert isinstance(node2.outs, pathlib.PurePath)
     with node3.state.use_tmp_path():
-        assert node3.outs == (node3.state.tmp_path / "result.txt").as_posix()
+        # no NWD, thus no tmp_path usage possible (as of yet)
+        assert node3.outs == "result.txt"
+        # assert node3.outs == (node3.state.tmp_path / "result.txt").as_posix()
         assert isinstance(node3.outs, str)
     with node4.state.use_tmp_path():
         assert node4.outs == (node4.state.tmp_path / "data").as_posix()

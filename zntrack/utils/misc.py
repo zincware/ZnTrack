@@ -82,14 +82,15 @@ class TempPathLoader(znflow.utils.IterableHandler):
         original_path = pathlib.Path(nwd_handler(value, nwd=original_nwd))
         tmp_path = pathlib.Path(nwd_handler(value, nwd=tmp_nwd))
 
-        if instance.state.fs.isdir(original_path.as_posix()):
-            instance.state.fs.get(
-                original_path.as_posix(),
-                instance.state.tmp_path.as_posix(),
-                recursive=True,
-            )
-        else:
-            instance.state.fs.get(original_path.as_posix(), tmp_path.as_posix())
+        if not tmp_path.exists():
+            if instance.state.fs.isdir(original_path.as_posix()):
+                instance.state.fs.get(
+                    original_path.as_posix(),
+                    instance.state.tmp_path.as_posix(),
+                    recursive=True,
+                )
+            else:
+                instance.state.fs.get(original_path.as_posix(), tmp_path.as_posix())
 
         if isinstance(value, pathlib.PurePath):
             return tmp_path
