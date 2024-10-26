@@ -14,6 +14,12 @@ class DVCImportPath(NodeBaseMixin):
     rev: str | None = None
 
     def run(self):
+        if self.path.exists():
+            # check if a {self.path}.dvc file exists
+            if (self.path.with_suffix(".dvc")).exists():
+                return
+            else:
+                raise FileExistsError(f"{self.path} exists but no {self.path}.dvc file found")
         if self.rev:
             subprocess.check_call(["dvc", "import", self.url, self.path.as_posix(), "--rev", self.rev, "--no-exec"])
         else:

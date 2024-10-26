@@ -15,6 +15,9 @@ def test_add_url(proj_path) -> None:
 
     with project:
         zntrack.examples.ReadFile(path=file)
+        # zntrack.examples.ReadFile(path=file) 
+        # TODO: test with multiple nodes reading the file
+        # TODO: test with repeated project.build() (after dvc repro)
 
     project.build()
 
