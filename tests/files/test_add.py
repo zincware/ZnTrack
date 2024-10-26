@@ -1,10 +1,13 @@
-import zntrack.examples
-import os
-import pathlib
 import json
+import pathlib
+
 import yaml
 
-IMPORT_URL_FILE = "https://raw.githubusercontent.com/PythonFZ/zntrack-examples/refs/heads/main/LICENSE"
+import zntrack.examples
+
+IMPORT_URL_FILE = (
+    "https://raw.githubusercontent.com/PythonFZ/zntrack-examples/refs/heads/main/LICENSE"
+)
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -15,7 +18,7 @@ def test_add_url(proj_path) -> None:
 
     with project:
         zntrack.examples.ReadFile(path=file)
-        # zntrack.examples.ReadFile(path=file) 
+        # zntrack.examples.ReadFile(path=file)
         # TODO: test with multiple nodes reading the file
         # TODO: test with repeated project.build() (after dvc repro)
 
@@ -32,4 +35,3 @@ def test_add_url(proj_path) -> None:
     ).read_text()
 
     assert (proj_path / "LICENSE.dvc").exists()
-

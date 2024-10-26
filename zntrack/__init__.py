@@ -1,6 +1,7 @@
 import logging
 import sys
 
+from zntrack.add import add
 from zntrack.apply import apply
 
 from .from_rev import from_rev
@@ -19,7 +20,6 @@ from .options import (
 )
 from .project import Project
 from .utils import nwd
-from zntrack.add import add
 
 __all__ = [
     "params",

@@ -24,14 +24,13 @@ from zntrack.config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from zntrack.utils.misc import RunDVCImportPathHandler
-
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, base_getter
 from zntrack.utils import module_handler
 from zntrack.utils.misc import (
+    RunDVCImportPathHandler,
     TempPathLoader,
     get_attr_always_list,
     sort_and_deduplicate,
@@ -152,7 +151,7 @@ class DVCPlugin(ZnTrackPlugin):
             ZnTrackOptionEnum.OUTS_PATH,
             ZnTrackOptionEnum.PLOTS_PATH,
             ZnTrackOptionEnum.METRICS_PATH,
-        }:  
+        }:
             # TODO: do not use nwd_handler for deps_path and params_path
             return _paths_getter(self.node, field.name)
         return PLUGIN_EMPTY_RETRUN_VALUE

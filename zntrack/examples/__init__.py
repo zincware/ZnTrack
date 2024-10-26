@@ -23,6 +23,7 @@ class ReadFile(zntrack.Node):
         """Read a file."""
         self.content = self.path.read_text()
 
+
 class ParamsToOuts(zntrack.Node):
     """Save params to outs."""
 

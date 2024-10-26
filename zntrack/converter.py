@@ -8,8 +8,8 @@ import warnings
 import yaml
 import znflow
 import znjson
-from zntrack.add import DVCImportPath
 
+from zntrack.add import DVCImportPath
 from zntrack.config import (
     PARAMS_FILE_PATH,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
@@ -214,7 +214,7 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
                 ]
                 if node.state.rev is not None:
                     cmd.extend(["--rev", node.state.rev])
-                cmd.append("--no-download") # consider using --no-exec
+                cmd.append("--no-download")  # consider using --no-exec
                 cmd.extend(["--out", node_meta_path.as_posix()])
                 subprocess.check_call(cmd)
             paths.append(node_meta_path.as_posix())
@@ -267,11 +267,12 @@ class DataclassConverter(znjson.ConverterBase):
             other, (Node, znflow.Connection, znflow.CombinedConnections)
         ):
             return True
-        return False 
+        return False
+
 
 class DVCImportPathConverter(znjson.ConverterBase):
     """Convert a DVCImportPath object to to pathlib.
-    
+
     We do not want to store the information about the DVCImportPath
     as this is handled in the "path.dvc" file.
     Thus, we just make use of the pathlib.Path representation.
@@ -283,6 +284,6 @@ class DVCImportPathConverter(znjson.ConverterBase):
 
     def encode(self, obj: DVCImportPath) -> str:
         return obj.path.as_posix()
-    
+
     def decode(self, value: str) -> None:
         raise NotImplementedError("DVCImportPath is converted to pathlib.Path.")

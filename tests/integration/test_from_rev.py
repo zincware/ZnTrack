@@ -115,10 +115,10 @@ def test_connect_from_remote(proj_path):
 
 
 def test_two_nodes_connect_external(proj_path):
-    node_a : zntrack.examples.ParamsToOuts = zntrack.from_rev(
+    node_a: zntrack.examples.ParamsToOuts = zntrack.from_rev(
         name="NumericOuts",
         remote="https://github.com/PythonFZ/zntrack-examples",
-        rev="de82dc7104ac3"
+        rev="de82dc7104ac3",
     )
 
     with zntrack.Project() as project:

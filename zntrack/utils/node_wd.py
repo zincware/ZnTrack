@@ -10,9 +10,8 @@ import typing as t
 import znflow.utils
 import znjson
 
-from zntrack.config import NWD_PATH, ZNTRACK_FILE_PATH, NodeStatusEnum
 from zntrack.add import DVCImportPath
-
+from zntrack.config import NWD_PATH, ZNTRACK_FILE_PATH, NodeStatusEnum
 
 if t.TYPE_CHECKING:
     from zntrack import Node
