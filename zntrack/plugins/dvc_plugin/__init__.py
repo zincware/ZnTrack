@@ -79,41 +79,6 @@ def _paths_getter(self: "Node", name: str):
         return NOT_AVAILABLE
 
 
-def _deps_getter(self: "Node", name: str):
-    with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
-        content = json.load(f)[self.name][name]
-        # TODO: Ensure deps are loaded from the correct revision
-        content = znjson.loads(
-            json.dumps(content),
-            cls=znjson.ZnDecoder.from_converters(
-                [
-                    converter.NodeConverter,
-                    converter.ConnectionConverter,
-                    converter.CombinedConnectionsConverter,
-                    converter.DVCImportPathConverter,
-                    converter.DataclassConverter,
-                ],
-                add_default=True,
-            ),
-        )
-        if isinstance(content, converter.DataclassContainer):
-            content = content.get_with_params(self.name, name)
-        if isinstance(content, list):
-            new_content = []
-            idx = 0
-            for val in content:
-                if isinstance(val, converter.DataclassContainer):
-                    new_content.append(val.get_with_params(self.name, name, idx))
-                    idx += 1  # index only runs over dataclasses
-                else:
-                    new_content.append(val)
-            content = new_content
-
-        content = znflow.handler.UpdateConnectors()(content)
-
-        self.__dict__[name] = content
-
-
 def _params_getter(self: "Node", name: str):
     with self.state.fs.open(PARAMS_FILE_PATH) as f:
         self.__dict__[name] = yaml.safe_load(f)[self.name][name]
@@ -137,9 +102,6 @@ class DVCPlugin(ZnTrackPlugin):
 
         if getter is not None:
             return getter(self.node, field.name)
-
-        if option == ZnTrackOptionEnum.DEPS:
-            return base_getter(self.node, field.name, _deps_getter)
         elif option == ZnTrackOptionEnum.PARAMS:
             return base_getter(self.node, field.name, _params_getter)
         elif option == ZnTrackOptionEnum.PLOTS:

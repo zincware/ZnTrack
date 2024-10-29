@@ -9,7 +9,6 @@ CWD = pathlib.Path(__file__).parent.resolve()
 
 
 class NodeFromCustomModule(zntrack.Node):
-
     _module_ = "zntrack.mymodule"
 
     def run(self):

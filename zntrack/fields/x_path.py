@@ -104,7 +104,6 @@ def metrics_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-
 def deps_path(
     default=dataclasses.MISSING, *, cache: bool = True, **kwargs
 ) -> znfields.field:

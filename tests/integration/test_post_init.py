@@ -4,7 +4,6 @@ import zntrack
 
 
 class NodeWithPostInit(zntrack.Node):
-
     def __post_init__(self):
         self.value = 42
 
