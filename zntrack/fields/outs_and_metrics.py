@@ -44,7 +44,9 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields
     )
 
 
-def metrics(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
+def metrics(
+    *, cache: bool = False, independent: bool = False, **kwargs
+) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache

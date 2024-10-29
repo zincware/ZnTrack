@@ -79,11 +79,6 @@ def _paths_getter(self: "Node", name: str):
         return NOT_AVAILABLE
 
 
-def _plots_getter(self: "Node", name: str):
-    with self.state.fs.open((self.nwd / name).with_suffix(".csv")) as f:
-        self.__dict__[name] = pd.read_csv(f, index_col=0)
-
-
 @dataclasses.dataclass
 class DVCPlugin(ZnTrackPlugin):
     def getter(self, field: dataclasses.Field) -> t.Any:
@@ -92,8 +87,6 @@ class DVCPlugin(ZnTrackPlugin):
 
         if getter is not None:
             return getter(self.node, field.name)
-        elif option == ZnTrackOptionEnum.PLOTS:
-            return base_getter(self.node, field.name, _plots_getter)
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
