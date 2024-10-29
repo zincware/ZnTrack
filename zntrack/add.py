@@ -13,33 +13,40 @@ class DVCImportPath(NodeBaseMixin):
     url: str
     path: pathlib.Path
     rev: str | None = None
+    force: bool = False
 
     def run(self):
-        if self.path.exists():
-            # check if a {self.path}.dvc file exists
-            if (self.path.with_suffix(".dvc")).exists():
+        if self.path.exists() and not self.force:
+            dvc_file = self.path.parent / (self.path.name + '.dvc')
+            if dvc_file.exists():
                 return
             else:
                 raise FileExistsError(
-                    f"{self.path} exists but no {self.path}.dvc file found"
+                    f"{self.path} exists but no {dvc_file} file found"
                 )
         if self.rev:
+            cmd = [
+                "dvc",
+                "import",
+                self.url,
+                self.path.as_posix(),
+                "--rev",
+                self.rev,
+                "--no-exec",
+            ]
+            if self.force:
+                cmd.append("--force")
             subprocess.check_call(
-                [
-                    "dvc",
-                    "import",
-                    self.url,
-                    self.path.as_posix(),
-                    "--rev",
-                    self.rev,
-                    "--no-exec",
-                ]
+                cmd
             )
         else:
+            cmd = ["dvc", "import-url", self.url, self.path.as_posix(), "--no-exec"]
+            if self.force:
+                cmd.append("--force")
             subprocess.check_call(
-                ["dvc", "import-url", self.url, self.path.as_posix(), "--no-exec"]
+                cmd
             )
 
 
-def add(url: str, path: str, rev: t.Optional[str] = None) -> DVCImportPath:
-    return DVCImportPath(url, pathlib.Path(path), rev)
+def add(url: str, path: str, rev: t.Optional[str] = None, force: bool = False) -> DVCImportPath:
+    return DVCImportPath(url, pathlib.Path(path), rev, force=force)
