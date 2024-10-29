@@ -14,8 +14,7 @@ from zntrack.config import (
     ZNTRACK_CACHE,
     ZNTRACK_OPTION,
 )
-from zntrack.plugins import plugin_getter
-from zntrack.plugins import ZnTrackPlugin, base_getter
+from zntrack.plugins import ZnTrackPlugin, base_getter, plugin_getter
 
 
 def _text_getter(self: zntrack.Node, name: str):

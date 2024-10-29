@@ -3,9 +3,6 @@ import sys
 
 from zntrack.add import add
 from zntrack.apply import apply
-
-from zntrack.from_rev import from_rev
-from zntrack.node import Node
 from zntrack.fields import (
     deps,
     deps_path,
@@ -18,6 +15,8 @@ from zntrack.fields import (
     plots,
     plots_path,
 )
+from zntrack.from_rev import from_rev
+from zntrack.node import Node
 from zntrack.project import Project
 from zntrack.utils import nwd
 
