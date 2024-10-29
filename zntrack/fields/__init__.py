@@ -13,6 +13,7 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 from zntrack.fields.deps import deps
+from zntrack.fields.outs_and_metrics import metrics, outs
 from zntrack.fields.params import params
 from zntrack.fields.x_path import (
     deps_path,
@@ -29,25 +30,23 @@ from zntrack.plugins import plugin_getter
 # TODO: zntrack.outs() and zntrack.outs(cache=False) needs different files!
 
 
-__all__ = ["outs_path", "params_path", "plots_path", "metrics_path", "deps_path", "deps", "params", "plots", "metrics", "outs"]
+__all__ = [
+    "outs_path",
+    "params_path",
+    "plots_path",
+    "metrics_path",
+    "deps_path",
+    "deps",
+    "params",
+    "plots",
+    "metrics",
+    "outs",
+]
 
 
 def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
     value.to_csv((self.nwd / name).with_suffix(".csv"))
     self.__dict__[name] = value
-
-
-
-
-
-def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
-    kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    return znfields.field(
-        default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
-    )
 
 
 def plots(

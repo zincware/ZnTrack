@@ -79,14 +79,6 @@ def _paths_getter(self: "Node", name: str):
         return NOT_AVAILABLE
 
 
-
-
-
-def _outs_getter(self: "Node", name: str):
-    with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
-        self.__dict__[name] = json.load(f, cls=znjson.ZnDecoder)
-
-
 def _plots_getter(self: "Node", name: str):
     with self.state.fs.open((self.nwd / name).with_suffix(".csv")) as f:
         self.__dict__[name] = pd.read_csv(f, index_col=0)
@@ -102,11 +94,6 @@ class DVCPlugin(ZnTrackPlugin):
             return getter(self.node, field.name)
         elif option == ZnTrackOptionEnum.PLOTS:
             return base_getter(self.node, field.name, _plots_getter)
-        elif option in {
-            ZnTrackOptionEnum.OUTS,
-            ZnTrackOptionEnum.METRICS,
-        }:
-            return base_getter(self.node, field.name, _outs_getter)
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
