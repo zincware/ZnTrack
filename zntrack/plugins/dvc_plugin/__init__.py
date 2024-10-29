@@ -22,6 +22,7 @@ from zntrack.config import (
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
+    ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
@@ -44,15 +45,23 @@ from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 class DVCPlugin(ZnTrackPlugin):
     def getter(self, field: dataclasses.Field) -> t.Any:
         getter = field.metadata.get(ZNTRACK_FIELD_LOAD)
+        suffix = field.metadata.get(ZNTRACK_FIELD_SUFFIX)
 
         if getter is not None:
+            if suffix is not None:
+                return getter(self.node, field.name, suffix=suffix)
             return getter(self.node, field.name)
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
         dump_func = field.metadata.get(ZNTRACK_FIELD_DUMP)
+        suffix = field.metadata.get(ZNTRACK_FIELD_SUFFIX)
+
         if dump_func is not None:
-            dump_func(self.node, field.name)
+            if suffix is not None:
+                dump_func(self.node, field.name, suffix=suffix)
+            else:
+                dump_func(self.node, field.name)
 
     def convert_to_params_yaml(self) -> dict | object:
         data = {}

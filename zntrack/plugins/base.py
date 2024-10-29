@@ -105,7 +105,7 @@ class ZnTrackPlugin(abc.ABC):
         return
 
 
-def base_getter(self: "Node", name: str, func: t.Callable):
+def base_getter(self: "Node", name: str, func: t.Callable, suffix: t.Optional[str] = None):
     if (
         name in self.__dict__
         and self.__dict__[name] is not ZNTRACK_LAZY_VALUE
@@ -115,12 +115,18 @@ def base_getter(self: "Node", name: str, func: t.Callable):
 
     if name in self.__dict__ and self.__dict__[name] is NOT_AVAILABLE:
         try:
-            func(self, name)
+            if suffix is not None:
+                func(self, name, suffix)
+            else:
+                func(self, name)
         except FileNotFoundError:
             return NOT_AVAILABLE
 
     try:
-        func(self, name)
+        if suffix is not None:
+            func(self, name, suffix)
+        else:
+            func(self, name)
     except FileNotFoundError:
         return NOT_AVAILABLE
 
