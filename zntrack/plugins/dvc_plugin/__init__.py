@@ -187,18 +187,20 @@ class DVCPlugin(ZnTrackPlugin):
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.METRICS.value, []).extend(content)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:
-                content = [(self.node.nwd / field.name).with_suffix(".json").as_posix()]
+                suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+                content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
-                content = [(self.node.nwd / field.name).with_suffix(".csv").as_posix()]
+                suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+                content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
                 if ZNTRACK_OPTION_PLOTS_CONFIG in field.metadata:
                     file_path = (
-                        (self.node.nwd / field.name).with_suffix(".csv").as_posix()
+                        (self.node.nwd / field.name).with_suffix(suffix).as_posix()
                     )
                     plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG].copy()
                     if "x" not in plots_config or "y" not in plots_config:
@@ -217,7 +219,8 @@ class DVCPlugin(ZnTrackPlugin):
                             plots_config["y"] = {file_path: plots_config["y"]}
                         plots.append({f"{self.node.name}_{field.name}": plots_config})
             elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
-                content = [(self.node.nwd / field.name).with_suffix(".json").as_posix()]
+                suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+                content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(ZnTrackOptionEnum.METRICS.value, []).extend(content)

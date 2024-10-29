@@ -12,16 +12,17 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
+    ZNTRACK_FIELD_SUFFIX,
 )
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter
 
 
-def _plots_save_func(self: "Node", name: str):
+def _plots_save_func(self: "Node", name: str, suffix: str):
     content = getattr(self, name)
     if not isinstance(content, pd.DataFrame):
         raise TypeError(f"Expected a pandas DataFrame, got {type(content)}")
-    content.to_csv((self.nwd / name).with_suffix(".csv"))
+    content.to_csv((self.nwd / name).with_suffix(suffix))
 
 
 def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
@@ -29,8 +30,8 @@ def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
     self.__dict__[name] = value
 
 
-def _plots_getter(self: "Node", name: str):
-    with self.state.fs.open((self.nwd / name).with_suffix(".csv")) as f:
+def _plots_getter(self: "Node", name: str, suffix: str):
+    with self.state.fs.open((self.nwd / name).with_suffix(suffix)) as f:
         self.__dict__[name] = pd.read_csv(f, index_col=0)
 
 
@@ -103,6 +104,7 @@ def plots(
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
         base_getter, func=_plots_getter
     )
+    kwargs["metadata"][ZNTRACK_FIELD_SUFFIX] = ".csv"
     return znfields.field(
         default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
     )
