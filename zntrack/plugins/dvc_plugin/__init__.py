@@ -149,8 +149,6 @@ class DVCPlugin(ZnTrackPlugin):
             ZnTrackOptionEnum.METRICS,
         }:
             return base_getter(self.node, field.name, _outs_getter)
-        elif option == ZnTrackOptionEnum.DEPS_PATH:
-            return _paths_getter(self.node, field.name)
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:

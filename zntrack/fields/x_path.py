@@ -102,3 +102,14 @@ def metrics_path(
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     kwargs["metadata"][ZNTRACK_FIELD_GETTER] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
+
+
+
+def deps_path(
+    default=dataclasses.MISSING, *, cache: bool = True, **kwargs
+) -> znfields.field:
+    kwargs["metadata"] = kwargs.get("metadata", {})
+    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
+    kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = _paths_getter
+    return znfields.field(default=default, getter=plugin_getter, **kwargs)
