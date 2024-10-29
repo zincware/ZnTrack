@@ -3,7 +3,7 @@ import dataclasses
 import pandas as pd
 import znfields
 
-from .config import (
+from zntrack.config import (
     NOT_AVAILABLE,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
@@ -12,7 +12,7 @@ from .config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from .node import Node
+from zntrack.node import Node
 
 # TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
 # raise an error if passed to `metrics_path` etc.

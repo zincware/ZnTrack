@@ -4,9 +4,9 @@ import sys
 from zntrack.add import add
 from zntrack.apply import apply
 
-from .from_rev import from_rev
-from .node import Node
-from .options import (
+from zntrack.from_rev import from_rev
+from zntrack.node import Node
+from zntrack.fields import (
     deps,
     deps_path,
     metrics,
@@ -18,8 +18,8 @@ from .options import (
     plots,
     plots_path,
 )
-from .project import Project
-from .utils import nwd
+from zntrack.project import Project
+from zntrack.utils import nwd
 
 __all__ = [
     "params",
