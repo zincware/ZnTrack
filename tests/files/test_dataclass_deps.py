@@ -8,6 +8,9 @@ import zntrack
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
+@dataclasses.dataclass
+class SimpleThermostat:
+    """Simple thermostat class"""
 
 @dataclasses.dataclass
 class Thermostat:
@@ -27,7 +30,7 @@ class MLThermostat(zntrack.Node):
 
 class MD(zntrack.Node):
     thermostat: (
-        Thermostat | Thermostat2 | list[Thermostat | MLThermostat | Thermostat2]
+        SimpleThermostat | Thermostat | Thermostat2 | list[Thermostat | MLThermostat | Thermostat2]
     ) = zntrack.deps()
     steps: int = zntrack.params()
 
@@ -41,6 +44,7 @@ class MD2(zntrack.Node):
 
 def test_deps_outside_graph(proj_path):
     thermostat = Thermostat(temperature=300)
+    simple_thermostat = SimpleThermostat()
 
     with zntrack.Project() as project:
         md = MD(thermostat=thermostat, steps=100)
@@ -54,6 +58,9 @@ def test_deps_outside_graph(proj_path):
 
     with project.group("md2"):
         _ = MD2(t1=t1, t2=t2)
+
+    with project.group("md3"):
+        _ = MD(thermostat=simple_thermostat, steps=100)
 
     project.build()
 

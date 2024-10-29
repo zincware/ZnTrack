@@ -76,5 +76,18 @@
                 "cls": "Thermostat2"
             }
         }
+    },
+    "md3_MD": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/md3/MD"
+        },
+        "thermostat": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_deps",
+                "cls": "SimpleThermostat"
+            }
+        }
     }
 }

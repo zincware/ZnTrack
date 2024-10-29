@@ -4,6 +4,10 @@ import zntrack
 
 
 @dataclasses.dataclass
+class SimpleThermostat:
+    """Simple thermostat class"""
+
+@dataclasses.dataclass
 class ThermostatA:
     temperature: float = zntrack.params()
 
@@ -14,7 +18,7 @@ class ThermostatB:
 
 
 class MD(zntrack.Node):
-    thermostat: ThermostatA | ThermostatB = zntrack.deps()
+    thermostat: ThermostatA | ThermostatB | SimpleThermostat = zntrack.deps()
 
     result: str = zntrack.outs()
 
@@ -28,6 +32,7 @@ def test_switch_deps_class_keep_params(proj_path):
 
     thermostat_a = ThermostatA(temperature=10)
     thermostat_b = ThermostatB(temperature=5)
+    thermostat_c = SimpleThermostat()
 
     with proj:
         md = MD(thermostat=thermostat_a)
@@ -41,6 +46,12 @@ def test_switch_deps_class_keep_params(proj_path):
     proj.repro()
     assert md.from_rev().result == "ThermostatB"
 
+    with proj:
+        md.thermostat = thermostat_c
+
+    proj.repro()
+    assert md.from_rev().result == "SimpleThermostat"
+    
 
 if __name__ == "__main__":
     test_switch_deps_class_keep_params("")
