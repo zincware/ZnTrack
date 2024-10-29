@@ -19,7 +19,7 @@ class SingleNodeDefaultNWD(zntrack.Node):
 
 
 class SingleNodeListOut(zntrack.Node):
-    paths: typing.List[pathlib.Path]|typing.Tuple[pathlib.Path] = zntrack.outs_path()
+    paths: typing.List[pathlib.Path] | typing.Tuple[pathlib.Path] = zntrack.outs_path()
 
     def run(self):
         for path in self.paths:
@@ -68,6 +68,7 @@ def test_multiple_outs(proj_path):
         pathlib.Path("test_1.txt"),
         pathlib.Path("test_2.txt"),
     ]
+
 
 def test_multiple_outs_tuple(proj_path):
     with zntrack.Project() as proj:
