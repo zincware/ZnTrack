@@ -6,16 +6,15 @@ import znfields
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
+    ZNTRACK_FIELD_DUMP,
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
-    ZNTRACK_FIELD_DUMP,
 )
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter
-
 
 
 def _plots_save_func(self: "Node", name: str):

@@ -18,8 +18,8 @@ from zntrack.config import (
     PARAMS_FILE_PATH,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
-    ZNTRACK_FIELD_LOAD,
     ZNTRACK_FIELD_DUMP,
+    ZNTRACK_FIELD_LOAD,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
@@ -38,7 +38,6 @@ from zntrack.utils.misc import (
     sort_and_deduplicate,
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
-
 
 
 @dataclasses.dataclass

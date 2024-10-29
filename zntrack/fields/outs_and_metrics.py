@@ -7,9 +7,9 @@ import znjson
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
+    ZNTRACK_FIELD_DUMP,
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    ZNTRACK_FIELD_DUMP,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
@@ -21,13 +21,13 @@ def _outs_getter(self: "Node", name: str):
     with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
         self.__dict__[name] = json.load(f, cls=znjson.ZnDecoder)
 
+
 def _outs_save_func(self: "Node", name: str):
     (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
 
 
 def _metrics_save_func(self: "Node", name: str):
     (self.nwd / name).with_suffix(".json").write_text(json.dumps(getattr(self, name)))
-
 
 
 def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
