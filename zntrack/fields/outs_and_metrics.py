@@ -26,7 +26,7 @@ def _outs_save_func(self: "Node", name: str):
 
 
 def _metrics_save_func(self: "Node", name: str):
-    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+    (self.nwd / name).with_suffix(".json").write_text(json.dumps(getattr(self, name)))
 
 
 
