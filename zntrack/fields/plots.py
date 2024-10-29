@@ -8,11 +8,11 @@ from zntrack.config import (
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_DUMP,
     ZNTRACK_FIELD_LOAD,
+    ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
-    ZNTRACK_FIELD_SUFFIX,
 )
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter

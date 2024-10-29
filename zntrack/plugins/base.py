@@ -105,7 +105,9 @@ class ZnTrackPlugin(abc.ABC):
         return
 
 
-def base_getter(self: "Node", name: str, func: t.Callable, suffix: t.Optional[str] = None):
+def base_getter(
+    self: "Node", name: str, func: t.Callable, suffix: t.Optional[str] = None
+):
     if (
         name in self.__dict__
         and self.__dict__[name] is not ZNTRACK_LAZY_VALUE
