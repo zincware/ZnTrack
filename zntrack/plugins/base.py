@@ -7,10 +7,27 @@ import typing as t
 
 import yaml
 
-from zntrack.config import EXP_INFO_PATH, NOT_AVAILABLE, ZNTRACK_LAZY_VALUE
+from zntrack.config import EXP_INFO_PATH, NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, PLUGIN_EMPTY_RETRUN_VALUE
 
 if t.TYPE_CHECKING:
     from zntrack import Node
+
+
+def plugin_getter(self: "Node", name: str):
+    value = PLUGIN_EMPTY_RETRUN_VALUE
+
+    field = self.state.get_field(name)
+
+    for plugin in self.state.plugins.values():
+        getter_value = plugin.getter(field)
+        # TODO: is saving / loading part of a plugin or default feature?
+        if getter_value is not PLUGIN_EMPTY_RETRUN_VALUE:
+            if value is not PLUGIN_EMPTY_RETRUN_VALUE:
+                raise ValueError(
+                    f"Multiple plugins return a value for {name}: {value} and {getter_value}"
+                )
+            value = getter_value
+    return value
 
 
 def _gitignore_file(path: str):

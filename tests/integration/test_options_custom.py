@@ -14,7 +14,7 @@ from zntrack.config import (
     ZNTRACK_CACHE,
     ZNTRACK_OPTION,
 )
-from zntrack.options import _plugin_getter
+from zntrack.plugins import plugin_getter
 from zntrack.plugins import ZnTrackPlugin, base_getter
 
 
@@ -52,7 +52,7 @@ def text(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = "TextPlugin.text"
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    return znfields.field(default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs)
+    return znfields.field(default=NOT_AVAILABLE, getter=plugin_getter, **kwargs)
 
 
 class TextNode(zntrack.Node):

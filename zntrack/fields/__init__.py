@@ -13,26 +13,16 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 from zntrack.node import Node
+from zntrack.plugins import plugin_getter
 
 # TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
 # raise an error if passed to `metrics_path` etc.
 # TODO: zntrack.outs() and zntrack.outs(cache=False) needs different files!
 
+from zntrack.fields.x_path import outs_path, params_path, plots_path, metrics_path
 
-def _plugin_getter(self: Node, name: str):
-    value = PLUGIN_EMPTY_RETRUN_VALUE
+__all__ = ["outs_path", "params_path", "plots_path", "metrics_path"]
 
-    field = self.state.get_field(name)
-
-    for plugin in self.state.plugins.values():
-        getter_value = plugin.getter(field)
-        if getter_value is not PLUGIN_EMPTY_RETRUN_VALUE:
-            if value is not PLUGIN_EMPTY_RETRUN_VALUE:
-                raise ValueError(
-                    f"Multiple plugins return a value for {name}: {value} and {getter_value}"
-                )
-            value = getter_value
-    return value
 
 
 def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
@@ -45,7 +35,7 @@ def params(default=dataclasses.MISSING, **kwargs) -> znfields.field:
     return znfields.field(
         default=default,
         metadata={ZNTRACK_OPTION: ZnTrackOptionEnum.PARAMS},
-        getter=_plugin_getter,
+        getter=plugin_getter,
         **kwargs,
     )
 
@@ -54,7 +44,7 @@ def deps(default=dataclasses.MISSING, **kwargs) -> znfields.field:
     return znfields.field(
         default=default,
         metadata={ZNTRACK_OPTION: ZnTrackOptionEnum.DEPS},
-        getter=_plugin_getter,
+        getter=plugin_getter,
         **kwargs,
     )
 
@@ -65,7 +55,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     return znfields.field(
-        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False
+        default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
     )
 
 
@@ -133,7 +123,7 @@ def plots(
     if plots_config:
         kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
     return znfields.field(
-        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False
+        default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
     )
 
 
@@ -145,17 +135,11 @@ def metrics(
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     return znfields.field(
-        default=NOT_AVAILABLE, getter=_plugin_getter, **kwargs, init=False
+        default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
     )
 
 
-def params_path(
-    default=dataclasses.MISSING, *, cache: bool = True, **kwargs
-) -> znfields.field:
-    kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    return znfields.field(default=default, getter=_plugin_getter, **kwargs)
+
 
 
 def deps_path(
@@ -164,46 +148,8 @@ def deps_path(
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    return znfields.field(default=default, getter=_plugin_getter, **kwargs)
+    return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def outs_path(
-    default=dataclasses.MISSING,
-    *,
-    cache: bool = True,
-    independent: bool = False,
-    **kwargs,
-) -> znfields.field:
-    kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    return znfields.field(default=default, getter=_plugin_getter, **kwargs)
 
 
-def plots_path(
-    default=dataclasses.MISSING,
-    *,
-    cache: bool = True,
-    independent: bool = False,
-    **kwargs,
-) -> znfields.field:
-    kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    return znfields.field(default=default, getter=_plugin_getter, **kwargs)
-
-
-def metrics_path(
-    default=dataclasses.MISSING,
-    *,
-    cache: bool = False,
-    independent: bool = False,
-    **kwargs,
-) -> znfields.field:
-    kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    return znfields.field(default=default, getter=_plugin_getter, **kwargs)

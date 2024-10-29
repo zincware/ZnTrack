@@ -23,6 +23,7 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
+    ZNTRACK_FIELD_GETTER,
 )
 
 # if t.TYPE_CHECKING:
@@ -132,6 +133,10 @@ def _plots_getter(self: "Node", name: str):
 class DVCPlugin(ZnTrackPlugin):
     def getter(self, field: dataclasses.Field) -> t.Any:
         option = field.metadata.get(ZNTRACK_OPTION)
+        getter = field.metadata.get(ZNTRACK_FIELD_GETTER)
+
+        if getter is not None:
+            return getter(self.node, field.name)
 
         if option == ZnTrackOptionEnum.DEPS:
             return base_getter(self.node, field.name, _deps_getter)
@@ -145,14 +150,6 @@ class DVCPlugin(ZnTrackPlugin):
         }:
             return base_getter(self.node, field.name, _outs_getter)
         elif option == ZnTrackOptionEnum.DEPS_PATH:
-            return _paths_getter(self.node, field.name)
-        elif option in {
-            ZnTrackOptionEnum.PARAMS_PATH,
-            ZnTrackOptionEnum.OUTS_PATH,
-            ZnTrackOptionEnum.PLOTS_PATH,
-            ZnTrackOptionEnum.METRICS_PATH,
-        }:
-            # TODO: do not use nwd_handler for deps_path and params_path
             return _paths_getter(self.node, field.name)
         return PLUGIN_EMPTY_RETRUN_VALUE
 
