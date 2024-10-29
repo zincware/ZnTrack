@@ -15,6 +15,7 @@ from zntrack.config import (
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
+    ZNTRACK_FIELD_SUFFIX,
 )
 
 from .node import Node
@@ -190,11 +191,14 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
                 raise NotImplementedError
                 # paths.append((import_path / "node-meta.json").as_posix())
         if option_type == ZnTrackOptionEnum.OUTS:
-            paths.append((node.nwd / f"{field.name}.json").as_posix())
+            suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+            paths.append((node.nwd / f"{field.name}.{suffix}").as_posix())
         elif option_type == ZnTrackOptionEnum.PLOTS:
-            paths.append((node.nwd / f"{field.name}.csv").as_posix())
+            suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+            paths.append((node.nwd / f"{field.name}.{suffix}").as_posix())
         elif option_type == ZnTrackOptionEnum.METRICS:
-            paths.append((node.nwd / f"{field.name}.json").as_posix())
+            suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+            paths.append((node.nwd / f"{field.name}.{suffix}").as_posix())
         elif option_type == ZnTrackOptionEnum.OUTS_PATH:
             paths.extend(_enforce_str_list(getattr(node, field.name)))
         elif option_type == ZnTrackOptionEnum.PLOTS_PATH:
