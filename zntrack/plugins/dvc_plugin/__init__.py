@@ -79,9 +79,7 @@ def _paths_getter(self: "Node", name: str):
         return NOT_AVAILABLE
 
 
-def _params_getter(self: "Node", name: str):
-    with self.state.fs.open(PARAMS_FILE_PATH) as f:
-        self.__dict__[name] = yaml.safe_load(f)[self.name][name]
+
 
 
 def _outs_getter(self: "Node", name: str):
@@ -102,8 +100,6 @@ class DVCPlugin(ZnTrackPlugin):
 
         if getter is not None:
             return getter(self.node, field.name)
-        elif option == ZnTrackOptionEnum.PARAMS:
-            return base_getter(self.node, field.name, _params_getter)
         elif option == ZnTrackOptionEnum.PLOTS:
             return base_getter(self.node, field.name, _plots_getter)
         elif option in {

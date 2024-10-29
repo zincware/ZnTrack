@@ -13,6 +13,7 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 from zntrack.fields.deps import deps
+from zntrack.fields.params import params
 from zntrack.fields.x_path import (
     deps_path,
     metrics_path,
@@ -28,7 +29,7 @@ from zntrack.plugins import plugin_getter
 # TODO: zntrack.outs() and zntrack.outs(cache=False) needs different files!
 
 
-__all__ = ["outs_path", "params_path", "plots_path", "metrics_path", "deps_path", "deps"]
+__all__ = ["outs_path", "params_path", "plots_path", "metrics_path", "deps_path", "deps", "params", "plots", "metrics", "outs"]
 
 
 def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
@@ -36,14 +37,7 @@ def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
     self.__dict__[name] = value
 
 
-def params(default=dataclasses.MISSING, **kwargs) -> znfields.field:
-    # TODO: check types, do not allow e.g. connections or anything that can not be serialized
-    return znfields.field(
-        default=default,
-        metadata={ZNTRACK_OPTION: ZnTrackOptionEnum.PARAMS},
-        getter=plugin_getter,
-        **kwargs,
-    )
+
 
 
 def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
