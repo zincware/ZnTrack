@@ -6,7 +6,7 @@ import znfields
 
 from zntrack.config import (
     PARAMS_FILE_PATH,
-    ZNTRACK_FIELD_GETTER,
+    ZNTRACK_FIELD_LOAD,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
@@ -23,7 +23,7 @@ def params(default=dataclasses.MISSING, **kwargs) -> znfields.field:
     # TODO: check types, do not allow e.g. connections or anything that can not be serialized
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
         base_getter, func=_params_getter
     )
     return znfields.field(

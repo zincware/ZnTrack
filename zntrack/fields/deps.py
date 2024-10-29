@@ -10,7 +10,7 @@ import znjson
 
 from zntrack import converter
 from zntrack.config import (
-    ZNTRACK_FIELD_GETTER,
+    ZNTRACK_FIELD_LOAD,
     ZNTRACK_FILE_PATH,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
@@ -59,7 +59,7 @@ def _deps_getter(self: "Node", name: str):
 def deps(default=dataclasses.MISSING, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
         base_getter, func=_deps_getter
     )
     return znfields.field(default=default, getter=plugin_getter, **kwargs)

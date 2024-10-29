@@ -6,7 +6,7 @@ import znfields
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
-    ZNTRACK_FIELD_GETTER,
+    ZNTRACK_FIELD_LOAD,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
@@ -101,7 +101,7 @@ def plots(
     if plots_config:
         kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
 
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
         base_getter, func=_plots_getter
     )
     return znfields.field(

@@ -7,7 +7,7 @@ import znjson
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
-    ZNTRACK_FIELD_GETTER,
+    ZNTRACK_FIELD_LOAD,
     ZNTRACK_FILE_PATH,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_LAZY_VALUE,
@@ -58,7 +58,7 @@ def outs_path(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
@@ -68,7 +68,7 @@ def params_path(
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
@@ -83,7 +83,7 @@ def plots_path(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
@@ -98,7 +98,7 @@ def metrics_path(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
@@ -108,5 +108,5 @@ def deps_path(
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)

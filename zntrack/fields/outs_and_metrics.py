@@ -7,7 +7,7 @@ import znjson
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
-    ZNTRACK_FIELD_GETTER,
+    ZNTRACK_FIELD_LOAD,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_FIELD_DUMP,
     ZNTRACK_OPTION,
@@ -35,7 +35,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
         base_getter, func=_outs_getter
     )
     kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _outs_save_func
@@ -51,7 +51,7 @@ def metrics(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
         base_getter, func=_outs_getter
     )
     kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _metrics_save_func

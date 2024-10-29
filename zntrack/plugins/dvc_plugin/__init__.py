@@ -18,7 +18,7 @@ from zntrack.config import (
     PARAMS_FILE_PATH,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
-    ZNTRACK_FIELD_GETTER,
+    ZNTRACK_FIELD_LOAD,
     ZNTRACK_FIELD_DUMP,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
@@ -44,7 +44,7 @@ from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 @dataclasses.dataclass
 class DVCPlugin(ZnTrackPlugin):
     def getter(self, field: dataclasses.Field) -> t.Any:
-        getter = field.metadata.get(ZNTRACK_FIELD_GETTER)
+        getter = field.metadata.get(ZNTRACK_FIELD_LOAD)
 
         if getter is not None:
             return getter(self.node, field.name)
