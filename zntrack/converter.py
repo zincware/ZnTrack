@@ -190,7 +190,11 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
             if node._external_:
                 raise NotImplementedError
                 # paths.append((import_path / "node-meta.json").as_posix())
-        if option_type in [ZnTrackOptionEnum.OUTS, ZnTrackOptionEnum.PLOTS, ZnTrackOptionEnum.METRICS]:
+        if option_type in [
+            ZnTrackOptionEnum.OUTS,
+            ZnTrackOptionEnum.PLOTS,
+            ZnTrackOptionEnum.METRICS,
+        ]:
             suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
             paths.append((node.nwd / field.name).with_suffix(suffix).as_posix())
         elif option_type == ZnTrackOptionEnum.OUTS_PATH:
