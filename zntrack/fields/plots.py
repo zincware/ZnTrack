@@ -11,9 +11,18 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
+    ZNTRACK_FIELD_DUMP,
 )
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter
+
+
+
+def _plots_save_func(self: "Node", name: str):
+    content = getattr(self, name)
+    if not isinstance(content, pd.DataFrame):
+        raise TypeError(f"Expected a pandas DataFrame, got {type(content)}")
+    content.to_csv((self.nwd / name).with_suffix(".csv"))
 
 
 def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
@@ -76,6 +85,8 @@ def plots(
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     if autosave:
         kwargs["setter"] = _plots_autosave_setter
+    else:
+        kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _plots_save_func
     plots_config = {}
     for key, value in {
         "x": x,

@@ -19,6 +19,7 @@ from zntrack.config import (
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_GETTER,
+    ZNTRACK_FIELD_DUMP,
     ZNTRACK_FILE_PATH,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
@@ -39,50 +40,10 @@ from zntrack.utils.misc import (
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 
 
-def _outs_save_func(self: "Node", name: str):
-    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
-
-
-def _metrics_save_func(self: "Node", name: str):
-    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
-
-
-def _plots_save_func(self: "Node", name: str):
-    content = getattr(self, name)
-    if not isinstance(content, pd.DataFrame):
-        raise TypeError(f"Expected a pandas DataFrame, got {type(content)}")
-    content.to_csv((self.nwd / name).with_suffix(".csv"))
-
-
-def _paths_getter(self: "Node", name: str):
-    # TODO: if self._external_: try looking into
-    # external/self.uuid/...
-    # this works for everything except node-meta.json because that
-    # defines the uuid
-    nwd_handler = NWDReplaceHandler()
-
-    if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
-        return nwd_handler(self.__dict__[name], nwd=self.nwd)
-    try:
-        with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
-            content = json.load(f)[self.name][name]
-            content = znjson.loads(json.dumps(content))
-
-            if self.state.tmp_path is not None:
-                loader = TempPathLoader()
-                loader(content, instance=self)
-
-            content = nwd_handler(content, nwd=self.nwd)
-
-            return content
-    except FileNotFoundError:
-        return NOT_AVAILABLE
-
 
 @dataclasses.dataclass
 class DVCPlugin(ZnTrackPlugin):
     def getter(self, field: dataclasses.Field) -> t.Any:
-        option = field.metadata.get(ZNTRACK_OPTION)
         getter = field.metadata.get(ZNTRACK_FIELD_GETTER)
 
         if getter is not None:
@@ -90,12 +51,9 @@ class DVCPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:
-            _outs_save_func(self.node, field.name)
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
-            _plots_save_func(self.node, field.name)
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
-            _metrics_save_func(self.node, field.name)
+        dump_func = field.metadata.get(ZNTRACK_FIELD_DUMP)
+        if dump_func is not None:
+            dump_func(self.node, field.name)
 
     def convert_to_params_yaml(self) -> dict | object:
         data = {}

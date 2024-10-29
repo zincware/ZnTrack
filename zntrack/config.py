@@ -71,8 +71,15 @@ ZNTRACK_OPTION_PLOTS_CONFIG = _ZNTRACK_OPTION_PLOTS_CONFIG()
 class _ZNTRACK_FIELD_GETTER_TYPE:
     pass
 
-
+# TODO: rename getter to align with dump to load
 ZNTRACK_FIELD_GETTER = _ZNTRACK_FIELD_GETTER_TYPE()
+
+
+class _ZNTRACK_FIELD_DUMP_TYPE:
+    pass
+
+
+ZNTRACK_FIELD_DUMP = _ZNTRACK_FIELD_DUMP_TYPE()
 
 
 class NodeStatusEnum(enum.Enum):

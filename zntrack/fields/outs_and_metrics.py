@@ -9,6 +9,7 @@ from zntrack.config import (
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_GETTER,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
+    ZNTRACK_FIELD_DUMP,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
@@ -20,6 +21,14 @@ def _outs_getter(self: "Node", name: str):
     with self.state.fs.open((self.nwd / name).with_suffix(".json")) as f:
         self.__dict__[name] = json.load(f, cls=znjson.ZnDecoder)
 
+def _outs_save_func(self: "Node", name: str):
+    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+
+
+def _metrics_save_func(self: "Node", name: str):
+    (self.nwd / name).with_suffix(".json").write_text(znjson.dumps(getattr(self, name)))
+
+
 
 def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
@@ -29,6 +38,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields
     kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
         base_getter, func=_outs_getter
     )
+    kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _outs_save_func
     return znfields.field(
         default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
     )
@@ -44,6 +54,7 @@ def metrics(
     kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
         base_getter, func=_outs_getter
     )
+    kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _metrics_save_func
     return znfields.field(
         default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
     )
