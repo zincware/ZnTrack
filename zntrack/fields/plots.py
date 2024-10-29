@@ -1,4 +1,3 @@
-import dataclasses
 import functools
 
 import pandas as pd
@@ -6,7 +5,6 @@ import znfields
 
 from zntrack.config import (
     NOT_AVAILABLE,
-    PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_GETTER,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
