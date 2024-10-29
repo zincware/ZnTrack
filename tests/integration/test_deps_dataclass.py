@@ -7,6 +7,7 @@ import zntrack
 class SimpleThermostat:
     """Simple thermostat class"""
 
+
 @dataclasses.dataclass
 class ThermostatA:
     temperature: float = zntrack.params()
@@ -51,7 +52,7 @@ def test_switch_deps_class_keep_params(proj_path):
 
     proj.repro()
     assert md.from_rev().result == "SimpleThermostat"
-    
+
 
 if __name__ == "__main__":
     test_switch_deps_class_keep_params("")

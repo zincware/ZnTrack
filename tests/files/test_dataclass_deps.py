@@ -8,9 +8,11 @@ import zntrack
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
+
 @dataclasses.dataclass
 class SimpleThermostat:
     """Simple thermostat class"""
+
 
 @dataclasses.dataclass
 class Thermostat:
@@ -30,7 +32,10 @@ class MLThermostat(zntrack.Node):
 
 class MD(zntrack.Node):
     thermostat: (
-        SimpleThermostat | Thermostat | Thermostat2 | list[Thermostat | MLThermostat | Thermostat2]
+        SimpleThermostat
+        | Thermostat
+        | Thermostat2
+        | list[Thermostat | MLThermostat | Thermostat2]
     ) = zntrack.deps()
     steps: int = zntrack.params()
 
