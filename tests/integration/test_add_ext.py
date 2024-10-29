@@ -1,6 +1,4 @@
-import json
-import pathlib
-import yaml
+
 import pytest
 
 import zntrack.examples
@@ -10,6 +8,7 @@ apache_license = (
 )
 
 epl_license = "https://raw.githubusercontent.com/zincware/ZnDraw/refs/heads/main/LICENSE"
+
 
 @pytest.mark.needs_internet
 def test_add_read_url(proj_path) -> None:
@@ -25,7 +24,8 @@ def test_add_read_url(proj_path) -> None:
     assert "Apache License" in node_1.content
     assert "Apache License" in node_2.content
 
-    project.repro() # test run and build again
+    project.repro()  # test run and build again
+
 
 @pytest.mark.needs_internet
 def test_add_two_files(proj_path) -> None:
@@ -36,13 +36,14 @@ def test_add_two_files(proj_path) -> None:
     with project:
         node_1 = zntrack.examples.ReadFile(path=file_1)
         node_2 = zntrack.examples.ReadFile(path=file_2)
-    
+
     project.repro()
 
     assert "Apache License" in node_1.content
     assert "Apache License" in node_2.content
 
-    project.repro() # test run and build again
+    project.repro()  # test run and build again
+
 
 @pytest.mark.needs_internet
 def test_update_file(proj_path) -> None:
@@ -51,7 +52,7 @@ def test_update_file(proj_path) -> None:
 
     with project:
         node = zntrack.examples.ReadFile(path=file)
-    
+
     project.repro()
 
     assert "Apache License" in node.content
@@ -68,4 +69,4 @@ def test_update_file(proj_path) -> None:
 
     assert "Eclipse Public License" in zntrack.from_rev(name=node.name).content
 
-    project.repro() 
+    project.repro()
