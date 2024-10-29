@@ -1,4 +1,5 @@
 import dataclasses
+import functools
 import json
 
 import znfields
@@ -16,7 +17,6 @@ from zntrack.config import (
 )
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter
-import functools
 
 # if t.TYPE_CHECKING:
 
@@ -59,5 +59,7 @@ def _deps_getter(self: "Node", name: str):
 def deps(default=dataclasses.MISSING, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS
-    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(base_getter, func=_deps_getter)
+    kwargs["metadata"][ZNTRACK_FIELD_GETTER] = functools.partial(
+        base_getter, func=_deps_getter
+    )
     return znfields.field(default=default, getter=plugin_getter, **kwargs)

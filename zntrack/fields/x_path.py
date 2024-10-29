@@ -18,9 +18,7 @@ from zntrack.config import (
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
 from zntrack.plugins import plugin_getter
-from zntrack.utils.misc import (
-    TempPathLoader,
-)
+from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
 
