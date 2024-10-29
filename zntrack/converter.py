@@ -12,10 +12,10 @@ import znjson
 from zntrack.add import DVCImportPath
 from zntrack.config import (
     PARAMS_FILE_PATH,
+    ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
-    ZNTRACK_FIELD_SUFFIX,
 )
 
 from .node import Node
