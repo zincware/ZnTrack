@@ -29,6 +29,10 @@ def from_rev(name: str, remote: str | None = None, rev: str | None = None):
     package_and_module, cls_name = run_str.rsplit(".", 1)
 
     sys.path.append(pathlib.Path.cwd().as_posix())
+    if remote is not None:
+        # check if remote is a path that exists
+        if pathlib.Path(remote).exists():
+            sys.path.append(remote)
 
     try:
         module = importlib.import_module(package_and_module)
