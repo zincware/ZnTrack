@@ -2,11 +2,11 @@ import functools
 import json
 import pathlib
 
-import yaml
-import znfields
 import h5py
 import numpy as np
 import numpy.testing as npt
+import yaml
+import znfields
 
 import zntrack
 from zntrack import Node
@@ -77,5 +77,5 @@ def test_text_node(proj_path):
 
     # I know this is file testing but this should be fast
     project.repro(build=False)
-    
+
     npt.assert_array_equal(node.content, np.arange(9).reshape(3, 3))
