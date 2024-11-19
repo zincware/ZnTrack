@@ -21,6 +21,11 @@ Welcome to ZnTrack, the first developer package from zincware <https://github.co
 We're excited to have you on board!
 ZnTrack is designed to simplify code sharing and reproducibility.
 
+.. note::
+
+   This documentation has not been updated to the newest version of ZnTrack.
+   Features and changes in :code:`v0.8.0` and newer are not included in this documentation.
+
 - :ref:`userdoc-get-started`
 - :ref:`userdoc-examples`
 - :ref:`userdoc-theory`
