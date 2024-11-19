@@ -5,4 +5,4 @@ stages:
     - nodes/TextNode/node-meta.json:
         cache: false
     outs:
-    - nodes/TextNode/content.txt
+    - nodes/TextNode/content.h5

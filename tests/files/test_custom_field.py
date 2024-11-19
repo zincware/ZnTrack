@@ -4,6 +4,9 @@ import pathlib
 
 import yaml
 import znfields
+import h5py
+import numpy as np
+import numpy.testing as npt
 
 import zntrack
 from zntrack import Node
@@ -22,35 +25,38 @@ from zntrack.plugins import base_getter, plugin_getter
 CWD = pathlib.Path(__file__).parent.resolve()
 
 
-def _text_getter(self: Node, name: str, suffix: str):
-    with self.state.fs.open((self.nwd / name).with_suffix(suffix), mode="r") as f:
-        self.__dict__[name] = f.read()
+def _h5data_getter(self: Node, name: str, suffix: str):
+    file = (self.nwd / name).with_suffix(suffix)
+    with self.state.fs.open(file, mode="rb") as f:
+        self.__dict__[name] = h5py.File(f, "r")["data"][()]
 
 
-def _text_save_func(self: Node, name: str, suffix: str):
-    (self.nwd / name).with_suffix(suffix).write_text(getattr(self, name))
+def _h5data_save_func(self: Node, name: str, suffix: str):
+    file = (self.nwd / name).with_suffix(suffix)
+    with h5py.File(file, "w") as f:
+        f.create_dataset("data", data=getattr(self, name))
 
 
-def text(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
+def h5data(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
-        base_getter, func=_text_getter
+        base_getter, func=_h5data_getter
     )
-    kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _text_save_func
-    kwargs["metadata"][ZNTRACK_FIELD_SUFFIX] = ".txt"
+    kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _h5data_save_func
+    kwargs["metadata"][ZNTRACK_FIELD_SUFFIX] = ".h5"
     return znfields.field(
         default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
     )
 
 
 class TextNode(Node):
-    content: str = text()
+    content: np.ndarray = h5data()
 
     def run(self):
-        self.content = "Hello, World!"
+        self.content = np.arange(9).reshape(3, 3)
 
 
 def test_text_node(proj_path):
@@ -71,4 +77,5 @@ def test_text_node(proj_path):
 
     # I know this is file testing but this should be fast
     project.repro(build=False)
-    assert node.content == "Hello, World!"
+    
+    npt.assert_array_equal(node.content, np.arange(9).reshape(3, 3))
