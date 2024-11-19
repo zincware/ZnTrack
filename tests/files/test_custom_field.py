@@ -1,5 +1,12 @@
 import functools
+import json
+import pathlib
+
+import yaml
 import znfields
+
+import zntrack
+from zntrack import Node
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
@@ -11,11 +18,6 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 from zntrack.plugins import base_getter, plugin_getter
-from zntrack import Node
-import zntrack
-import pathlib
-import json
-import yaml
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -24,9 +26,9 @@ def _text_getter(self: Node, name: str, suffix: str):
     with self.state.fs.open((self.nwd / name).with_suffix(suffix), mode="r") as f:
         self.__dict__[name] = f.read()
 
-def _text_save_func(self: Node, name: str, suffix: str):
-     (self.nwd / name).with_suffix(suffix).write_text(getattr(self, name))
 
+def _text_save_func(self: Node, name: str, suffix: str):
+    (self.nwd / name).with_suffix(suffix).write_text(getattr(self, name))
 
 
 def text(*, cache: bool = True, independent: bool = False, **kwargs) -> znfields.field:
@@ -67,6 +69,6 @@ def test_text_node(proj_path):
         proj_path / "params.yaml"
     ).read_text()
 
-    # I know this is file testing but this should be fast 
+    # I know this is file testing but this should be fast
     project.repro(build=False)
     assert node.content == "Hello, World!"
