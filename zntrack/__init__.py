@@ -6,6 +6,7 @@ from zntrack.apply import apply
 from zntrack.fields import (
     deps,
     deps_path,
+    field,
     metrics,
     metrics_path,
     outs,
@@ -37,6 +38,7 @@ __all__ = [
     "from_rev",
     "apply",
     "add",
+    "field",
 ]
 
 logger = logging.getLogger(__name__)

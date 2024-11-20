@@ -11,7 +11,7 @@ class NodeWithPostInit(zntrack.Node):
 def test_repr(proj_path):
     assert (
         repr(zntrack.examples.ParamsToOuts(params=42))
-        == "ParamsToOuts(name='ParamsToOuts', params=42, outs=NOT_AVAILABLE)"
+        == "ParamsToOuts(name='ParamsToOuts', params=42)"
     )
     assert (
         repr(zntrack.examples.WriteDVCOuts(params=42))
@@ -22,11 +22,11 @@ def test_repr(proj_path):
     assert repr(zntrack.Node(name="SomeNode")) == "Node(name='SomeNode')"
     assert (
         repr(zntrack.examples.ParamsToMetrics(params=42))
-        == "ParamsToMetrics(name='ParamsToMetrics', params=42, metrics=NOT_AVAILABLE)"
+        == "ParamsToMetrics(name='ParamsToMetrics', params=42)"
     )
     assert (
         repr(zntrack.examples.WritePlots())
-        == "WritePlots(name='WritePlots', plots=NOT_AVAILABLE, x=[1, 2, 3], y=[4, 5, 6])"
+        == "WritePlots(name='WritePlots', x=[1, 2, 3], y=[4, 5, 6])"
     )
 
 
@@ -39,31 +39,22 @@ def test_repr_from_rev(proj_path):
 
     proj.build()
 
-    assert repr(n1) == "ParamsToOuts(name='ParamsToOuts', params=42, outs=NOT_AVAILABLE)"
+    assert repr(n1) == "ParamsToOuts(name='ParamsToOuts', params=42)"
     assert (
         repr(n2)
         == "WriteDVCOuts(name='WriteDVCOuts', params=42, outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
     )
 
-    assert (
-        repr(n6)
-        == "ParamsToMetrics(name='ParamsToMetrics', params=42, metrics=NOT_AVAILABLE)"
-    )
-    assert (
-        repr(n7)
-        == "WritePlots(name='WritePlots', plots=NOT_AVAILABLE, x=[1, 2, 3], y=[4, 5, 6])"
-    )
+    assert repr(n6) == "ParamsToMetrics(name='ParamsToMetrics', params=42)"
+    assert repr(n7) == "WritePlots(name='WritePlots', x=[1, 2, 3], y=[4, 5, 6])"
 
     proj.run()
 
-    assert repr(n1) == "ParamsToOuts(name='ParamsToOuts', params=42, outs=42)"
+    assert repr(n1) == "ParamsToOuts(name='ParamsToOuts', params=42)"
     assert (
         repr(n2)
         == "WriteDVCOuts(name='WriteDVCOuts', params=42, outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
     )
 
-    assert repr(n6) == "ParamsToMetrics(name='ParamsToMetrics', params=42, metrics=42)"
-    assert (
-        repr(n7)
-        == "WritePlots(name='WritePlots', plots=   x  y\n0  1  4\n1  2  5\n2  3  6, x=[1, 2, 3], y=[4, 5, 6])"
-    )
+    assert repr(n6) == "ParamsToMetrics(name='ParamsToMetrics', params=42)"
+    assert repr(n7) == "WritePlots(name='WritePlots', x=[1, 2, 3], y=[4, 5, 6])"

@@ -1,24 +1,15 @@
 import dataclasses
-import functools
 import json
 
-import znfields
 import znflow
 import znflow.handler
 import znflow.utils
 import znjson
 
 from zntrack import converter
-from zntrack.config import (
-    ZNTRACK_FIELD_LOAD,
-    ZNTRACK_FILE_PATH,
-    ZNTRACK_OPTION,
-    ZnTrackOptionEnum,
-)
+from zntrack.config import ZNTRACK_FILE_PATH, ZnTrackOptionEnum
+from zntrack.fields.base import field
 from zntrack.node import Node
-from zntrack.plugins import base_getter, plugin_getter
-
-# if t.TYPE_CHECKING:
 
 
 def _deps_getter(self: "Node", name: str):
@@ -53,13 +44,13 @@ def _deps_getter(self: "Node", name: str):
 
         content = znflow.handler.UpdateConnectors()(content)
 
-        self.__dict__[name] = content
+        return content
 
 
-def deps(default=dataclasses.MISSING, **kwargs) -> znfields.field:
-    kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
-        base_getter, func=_deps_getter
+def deps(default=dataclasses.MISSING, **kwargs):
+    return field(
+        default=default,
+        load_fn=_deps_getter,
+        zntrack_option=ZnTrackOptionEnum.DEPS,
+        **kwargs
     )
-    return znfields.field(default=default, getter=plugin_getter, **kwargs)

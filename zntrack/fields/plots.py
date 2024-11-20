@@ -1,21 +1,8 @@
-import functools
-
 import pandas as pd
-import znfields
 
-from zntrack.config import (
-    NOT_AVAILABLE,
-    ZNTRACK_CACHE,
-    ZNTRACK_FIELD_DUMP,
-    ZNTRACK_FIELD_LOAD,
-    ZNTRACK_FIELD_SUFFIX,
-    ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    ZNTRACK_OPTION,
-    ZNTRACK_OPTION_PLOTS_CONFIG,
-    ZnTrackOptionEnum,
-)
+from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, ZnTrackOptionEnum
+from zntrack.fields.base import field
 from zntrack.node import Node
-from zntrack.plugins import base_getter, plugin_getter
 
 
 def _plots_save_func(self: "Node", name: str, suffix: str):
@@ -32,7 +19,7 @@ def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
 
 def _plots_getter(self: "Node", name: str, suffix: str):
     with self.state.fs.open((self.nwd / name).with_suffix(suffix)) as f:
-        self.__dict__[name] = pd.read_csv(f, index_col=0)
+        return pd.read_csv(f, index_col=0)
 
 
 def plots(
@@ -47,7 +34,7 @@ def plots(
     title: str | None = None,
     autosave: bool = False,
     **kwargs,
-) -> znfields.field:
+):
     """Pandas plot options.
 
     Parameters
@@ -79,14 +66,9 @@ def plots(
     """
     if y is None:
         y = []
+
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    if autosave:
-        kwargs["setter"] = _plots_autosave_setter
-    else:
-        kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _plots_save_func
+
     plots_config = {}
     for key, value in {
         "x": x,
@@ -101,10 +83,17 @@ def plots(
     if plots_config:
         kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
 
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
-        base_getter, func=_plots_getter
-    )
-    kwargs["metadata"][ZNTRACK_FIELD_SUFFIX] = ".csv"
-    return znfields.field(
-        default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
+    if autosave:
+        kwargs["setter"] = _plots_autosave_setter
+    return field(
+        default=NOT_AVAILABLE,
+        cache=cache,
+        independent=independent,
+        zntrack_option=ZnTrackOptionEnum.PLOTS,
+        dump_fn=_plots_save_func,
+        suffix=".csv",
+        load_fn=_plots_getter,
+        repr=False,
+        init=False,
+        **kwargs,
     )

@@ -43,6 +43,7 @@ scikit-learn = "^1"
 nbmake = "^1"
 mlflow = "^2.16"
 dvc-s3 = "^3.2.0"
+h5py = "^3"
 
 [tool.poetry.group.notebook.dependencies]
 jupyterlab = "^3"

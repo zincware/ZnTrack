@@ -1,3 +1,4 @@
+from zntrack.fields.base import field
 from zntrack.fields.deps import deps
 from zntrack.fields.outs_and_metrics import metrics, outs
 from zntrack.fields.params import params
@@ -26,4 +27,5 @@ __all__ = [
     "plots",
     "metrics",
     "outs",
+    "field",
 ]

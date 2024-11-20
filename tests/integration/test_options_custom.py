@@ -19,7 +19,7 @@ from zntrack.plugins import ZnTrackPlugin, base_getter, plugin_getter
 
 def _text_getter(self: zntrack.Node, name: str):
     with self.state.fs.open(self.nwd / f"{name}.txt", mode="r") as f:
-        self.__dict__[name] = f.read()
+        return f.read()
 
 
 class TextPlugin(ZnTrackPlugin):

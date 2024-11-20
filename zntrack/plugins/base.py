@@ -118,17 +118,17 @@ def base_getter(
     if name in self.__dict__ and self.__dict__[name] is NOT_AVAILABLE:
         try:
             if suffix is not None:
-                func(self, name, suffix)
+                self.__dict__[name] = func(self, name, suffix)
             else:
-                func(self, name)
+                self.__dict__[name] = func(self, name)
         except FileNotFoundError:
             return NOT_AVAILABLE
 
     try:
         if suffix is not None:
-            func(self, name, suffix)
+            self.__dict__[name] = func(self, name, suffix)
         else:
-            func(self, name)
+            self.__dict__[name] = func(self, name)
     except FileNotFoundError:
         return NOT_AVAILABLE
 
