@@ -66,7 +66,6 @@ def test_repro_basic(proj_path):
         f.write("deps2: 1")
 
     with zntrack.Project() as project:
-
         node = MyNode(
             parameter=1,
             parameter_path="parameter.yaml",

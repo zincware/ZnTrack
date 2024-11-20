@@ -18,8 +18,8 @@ from zntrack.config import (
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter
 
-# if t.TYPE_CHECKING:
-
+from zntrack.fields.base import field
+import dataclasses
 
 def _deps_getter(self: "Node", name: str):
     with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
@@ -53,13 +53,8 @@ def _deps_getter(self: "Node", name: str):
 
         content = znflow.handler.UpdateConnectors()(content)
 
-        self.__dict__[name] = content
+        return content
 
 
-def deps(default=dataclasses.MISSING, **kwargs) -> znfields.field:
-    kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
-        base_getter, func=_deps_getter
-    )
-    return znfields.field(default=default, getter=plugin_getter, **kwargs)
+def deps(default=dataclasses.MISSING, **kwargs):
+    return field(default=default, load_fn=_deps_getter, zntrack_option=ZnTrackOptionEnum.DEPS, **kwargs)

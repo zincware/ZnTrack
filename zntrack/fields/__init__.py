@@ -9,6 +9,7 @@ from zntrack.fields.x_path import (
     params_path,
     plots_path,
 )
+from zntrack.fields.base import field
 
 # TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
 # raise an error if passed to `metrics_path` etc.
@@ -26,4 +27,5 @@ __all__ = [
     "plots",
     "metrics",
     "outs",
+    "field",
 ]
