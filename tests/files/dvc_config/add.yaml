@@ -1,0 +1,10 @@
+stages:
+  ReadFile:
+    cmd: zntrack run zntrack.examples.ReadFile --name ReadFile
+    deps:
+    - LICENSE
+    metrics:
+    - nodes/ReadFile/node-meta.json:
+        cache: false
+    outs:
+    - nodes/ReadFile/content.json

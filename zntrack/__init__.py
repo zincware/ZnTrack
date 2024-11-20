@@ -1,18 +1,12 @@
-"""ZnTrack - Create, visualize, run & benchmark DVC pipelines in Python.
+import logging
+import sys
 
-GitHub: https://github.com/zincware/ZnTrack
-"""
-
-import importlib.metadata
-
-from zntrack import exceptions, tools
-from zntrack.core.load import from_rev, get_nodes
-from zntrack.core.node import Node
-from zntrack.core.nodify import NodeConfig, nodify
-from zntrack.fields import Field, FieldGroup, LazyField, dvc, meta, zn
-from zntrack.fields.fields import (
+from zntrack.add import add
+from zntrack.apply import apply
+from zntrack.fields import (
     deps,
     deps_path,
+    field,
     metrics,
     metrics_path,
     outs,
@@ -22,42 +16,39 @@ from zntrack.fields.fields import (
     plots,
     plots_path,
 )
+from zntrack.from_rev import from_rev
+from zntrack.node import Node
 from zntrack.project import Project
-from zntrack.utils import config
-from zntrack.utils.apply import apply
-from zntrack.utils.node_wd import nwd
-
-__version__ = importlib.metadata.version("zntrack")
+from zntrack.utils import nwd
 
 __all__ = [
-    "Node",
-    "dvc",
-    "zn",
-    "Project",
-    "nwd",
-    "meta",
-    "config",
-    "Field",
-    "LazyField",
-    "FieldGroup",
-    "nodify",
-    "NodeConfig",
-    "tools",
-    "exceptions",
-    "from_rev",
-    "get_nodes",
-    "apply",
-]
-
-__all__ += [
-    "outs",
-    "metrics",
     "params",
     "deps",
+    "outs",
     "plots",
-    "outs_path",
-    "metrics_path",
+    "metrics",
     "params_path",
     "deps_path",
+    "outs_path",
     "plots_path",
+    "metrics_path",
+    "Node",
+    "Project",
+    "nwd",
+    "from_rev",
+    "apply",
+    "add",
+    "field",
 ]
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+# Formatter for advanced logging
+formatter = logging.Formatter("%(asctime)s - %(levelname)s: %(message)s")
+
+channel = logging.StreamHandler(sys.stdout)
+channel.setLevel(logging.INFO)
+channel.setFormatter(formatter)
+
+logger.addHandler(channel)

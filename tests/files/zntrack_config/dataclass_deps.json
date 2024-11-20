@@ -1,0 +1,93 @@
+{
+    "MD": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/MD"
+        },
+        "thermostat": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_deps",
+                "cls": "Thermostat"
+            }
+        }
+    },
+    "multiple_deps_MLThermostat": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/multiple_deps/MLThermostat"
+        }
+    },
+    "multiple_deps_MD": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/multiple_deps/MD"
+        },
+        "thermostat": [
+            {
+                "_type": "@dataclasses.dataclass",
+                "value": {
+                    "module": "test_dataclass_deps",
+                    "cls": "Thermostat"
+                }
+            },
+            {
+                "_type": "znflow.Connection",
+                "value": {
+                    "instance": {
+                        "_type": "zntrack.Node",
+                        "value": {
+                            "module": "test_dataclass_deps",
+                            "name": "multiple_deps_MLThermostat",
+                            "cls": "MLThermostat",
+                            "remote": null,
+                            "rev": null
+                        }
+                    },
+                    "attribute": null,
+                    "item": null
+                }
+            },
+            {
+                "_type": "@dataclasses.dataclass",
+                "value": {
+                    "module": "test_dataclass_deps",
+                    "cls": "Thermostat2"
+                }
+            }
+        ]
+    },
+    "md2_MD2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/md2/MD2"
+        },
+        "t1": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_deps",
+                "cls": "Thermostat"
+            }
+        },
+        "t2": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_deps",
+                "cls": "Thermostat2"
+            }
+        }
+    },
+    "md3_MD": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/md3/MD"
+        },
+        "thermostat": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_deps",
+                "cls": "SimpleThermostat"
+            }
+        }
+    }
+}

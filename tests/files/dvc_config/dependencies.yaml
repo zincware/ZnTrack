@@ -1,0 +1,197 @@
+plots:
+- NodeA1_plots:
+    x:
+      nodes/NodeA1/plots.csv: step
+    y:
+      nodes/NodeA1/plots.csv: y
+- NodeA2_plots:
+    x:
+      nodes/NodeA2/plots.csv: step
+    y:
+      nodes/NodeA2/plots.csv: y
+stages:
+  NodeA1:
+    cmd: zntrack run test_dependencies.NodeA1 --name NodeA1
+    metrics:
+    - nodes/NodeA1/a.json:
+        cache: false
+    - nodes/NodeA1/b.json:
+        cache: false
+    - nodes/NodeA1/metrics.json:
+        cache: false
+    - nodes/NodeA1/node-meta.json:
+        cache: false
+    outs:
+    - nodes/NodeA1/my_output.txt
+    - nodes/NodeA1/p1.csv
+    - nodes/NodeA1/p2.csv
+    - nodes/NodeA1/plots.csv
+    - nodes/NodeA1/results.json
+  NodeA2:
+    cmd: zntrack run test_dependencies.NodeA2 --name NodeA2
+    metrics:
+    - nodes/NodeA2/a.json:
+        cache: false
+    - nodes/NodeA2/b.json:
+        cache: false
+    - nodes/NodeA2/metrics.json:
+        cache: false
+    - nodes/NodeA2/node-meta.json:
+        cache: false
+    outs:
+    - nodes/NodeA2/my_output.txt
+    - nodes/NodeA2/p1.csv
+    - nodes/NodeA2/p2.csv
+    - nodes/NodeA2/plots.csv
+    - nodes/NodeA2/results.json
+  NodeB:
+    cmd: zntrack run test_dependencies.NodeB --name NodeB
+    deps:
+    - nodes/NodeA1/results.json
+    - nodes/NodeA2/node-meta.json
+    - nodes/NodeA2/results.json
+    metrics:
+    - nodes/NodeB/node-meta.json:
+        cache: false
+  dependent_NodeC:
+    cmd: zntrack run test_dependencies.NodeC --name dependent_NodeC
+    deps:
+    - nodes/NodeA1/a.json
+    - nodes/NodeA1/b.json
+    - nodes/NodeA1/metrics.json
+    - nodes/NodeA1/my_output.txt
+    - nodes/NodeA1/p1.csv
+    - nodes/NodeA1/p2.csv
+    - nodes/NodeA1/plots.csv
+    - nodes/NodeA1/results.json
+    metrics:
+    - nodes/dependent/NodeC/node-meta.json:
+        cache: false
+  dependent_NodeC_1:
+    cmd: zntrack run test_dependencies.NodeC --name dependent_NodeC_1
+    deps:
+    - nodes/NodeA1/results.json
+    metrics:
+    - nodes/dependent/NodeC_1/node-meta.json:
+        cache: false
+  dependent_NodeC_2:
+    cmd: zntrack run test_dependencies.NodeC --name dependent_NodeC_2
+    deps:
+    - nodes/NodeA1/metrics.json
+    metrics:
+    - nodes/dependent/NodeC_2/node-meta.json:
+        cache: false
+  dependent_NodeC_3:
+    cmd: zntrack run test_dependencies.NodeC --name dependent_NodeC_3
+    deps:
+    - nodes/NodeA1/plots.csv
+    metrics:
+    - nodes/dependent/NodeC_3/node-meta.json:
+        cache: false
+  dependent_NodeC_4:
+    cmd: zntrack run test_dependencies.NodeC --name dependent_NodeC_4
+    deps:
+    - nodes/NodeA1/my_output.txt
+    metrics:
+    - nodes/dependent/NodeC_4/node-meta.json:
+        cache: false
+  dependent_NodeC_5:
+    cmd: zntrack run test_dependencies.NodeC --name dependent_NodeC_5
+    deps:
+    - nodes/NodeA1/a.json
+    - nodes/NodeA1/b.json
+    metrics:
+    - nodes/dependent/NodeC_5/node-meta.json:
+        cache: false
+  dependent_NodeC_6:
+    cmd: zntrack run test_dependencies.NodeC --name dependent_NodeC_6
+    deps:
+    - nodes/NodeA1/p1.csv
+    - nodes/NodeA1/p2.csv
+    metrics:
+    - nodes/dependent/NodeC_6/node-meta.json:
+        cache: false
+  independent_NodeC:
+    cmd: zntrack run test_dependencies.NodeC --name independent_NodeC
+    deps:
+    - nodes/NodeA2/a.json
+    - nodes/NodeA2/b.json
+    - nodes/NodeA2/metrics.json
+    - nodes/NodeA2/my_output.txt
+    - nodes/NodeA2/node-meta.json
+    - nodes/NodeA2/p1.csv
+    - nodes/NodeA2/p2.csv
+    - nodes/NodeA2/plots.csv
+    - nodes/NodeA2/results.json
+    metrics:
+    - nodes/independent/NodeC/node-meta.json:
+        cache: false
+  independent_NodeC_1:
+    cmd: zntrack run test_dependencies.NodeC --name independent_NodeC_1
+    deps:
+    - nodes/NodeA2/node-meta.json
+    - nodes/NodeA2/results.json
+    metrics:
+    - nodes/independent/NodeC_1/node-meta.json:
+        cache: false
+  independent_NodeC_2:
+    cmd: zntrack run test_dependencies.NodeC --name independent_NodeC_2
+    deps:
+    - nodes/NodeA2/metrics.json
+    - nodes/NodeA2/node-meta.json
+    metrics:
+    - nodes/independent/NodeC_2/node-meta.json:
+        cache: false
+  independent_NodeC_3:
+    cmd: zntrack run test_dependencies.NodeC --name independent_NodeC_3
+    deps:
+    - nodes/NodeA2/node-meta.json
+    - nodes/NodeA2/plots.csv
+    metrics:
+    - nodes/independent/NodeC_3/node-meta.json:
+        cache: false
+  independent_NodeC_4:
+    cmd: zntrack run test_dependencies.NodeC --name independent_NodeC_4
+    deps:
+    - nodes/NodeA2/my_output.txt
+    - nodes/NodeA2/node-meta.json
+    metrics:
+    - nodes/independent/NodeC_4/node-meta.json:
+        cache: false
+  independent_NodeC_5:
+    cmd: zntrack run test_dependencies.NodeC --name independent_NodeC_5
+    deps:
+    - nodes/NodeA2/a.json
+    - nodes/NodeA2/b.json
+    - nodes/NodeA2/node-meta.json
+    metrics:
+    - nodes/independent/NodeC_5/node-meta.json:
+        cache: false
+  independent_NodeC_6:
+    cmd: zntrack run test_dependencies.NodeC --name independent_NodeC_6
+    deps:
+    - nodes/NodeA2/node-meta.json
+    - nodes/NodeA2/p1.csv
+    - nodes/NodeA2/p2.csv
+    metrics:
+    - nodes/independent/NodeC_6/node-meta.json:
+        cache: false
+  property_NodeC:
+    cmd: zntrack run test_dependencies.NodeC --name property_NodeC
+    deps:
+    - nodes/property/NodeWithProperty/node-meta.json
+    metrics:
+    - nodes/property/NodeC/node-meta.json:
+        cache: false
+  property_NodeC_1:
+    cmd: zntrack run test_dependencies.NodeC --name property_NodeC_1
+    deps:
+    - nodes/property/NodeWithProperty/node-meta.json
+    metrics:
+    - nodes/property/NodeC_1/node-meta.json:
+        cache: false
+  property_NodeWithProperty:
+    cmd: zntrack run test_dependencies.NodeWithProperty --name property_NodeWithProperty
+    metrics:
+    - nodes/property/NodeWithProperty/node-meta.json:
+        cache: false

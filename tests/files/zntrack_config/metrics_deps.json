@@ -1,0 +1,54 @@
+{
+    "ParamsToMetrics": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ParamsToMetrics"
+        }
+    },
+    "DepsToMetrics": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/DepsToMetrics"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "zntrack.examples",
+                        "name": "ParamsToMetrics",
+                        "cls": "ParamsToMetrics",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "metrics",
+                "item": null
+            }
+        }
+    },
+    "DepsToMetrics_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/DepsToMetrics_1"
+        },
+        "deps": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "zntrack.examples",
+                        "name": "ParamsToMetrics",
+                        "cls": "ParamsToMetrics",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "params",
+                "item": null
+            }
+        }
+    }
+}

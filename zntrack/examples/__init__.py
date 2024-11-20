@@ -13,11 +13,22 @@ import pandas as pd
 import zntrack
 
 
+class ReadFile(zntrack.Node):
+    """Read a file."""
+
+    path: pathlib.Path = zntrack.deps_path()
+    content: str = zntrack.outs()
+
+    def run(self):
+        """Read a file."""
+        self.content = self.path.read_text()
+
+
 class ParamsToOuts(zntrack.Node):
     """Save params to outs."""
 
-    params = zntrack.params()
-    outs = zntrack.outs()
+    params: t.Any = zntrack.params()
+    outs: t.Any = zntrack.outs()
 
     def run(self) -> None:
         """Save params to outs."""
@@ -31,20 +42,35 @@ class ParamsToOuts(zntrack.Node):
 class ParamsToMetrics(zntrack.Node):
     """Save params to metrics."""
 
-    params = zntrack.params()
-    metrics = zntrack.metrics()
+    params: dict = zntrack.params()
+    metrics: dict = zntrack.metrics()
 
     def run(self) -> None:
         """Save params to metrics."""
         self.metrics = self.params
 
+    def __run_note__(self) -> str:
+        """Markdown style run note."""
+        return "This is a test run note."
+
+
+class DepsToMetrics(zntrack.Node):
+    """Save params to metrics."""
+
+    deps: dict = zntrack.deps()
+    metrics: dict = zntrack.metrics()
+
+    def run(self) -> None:
+        """Save params to metrics."""
+        self.metrics = self.deps
+
 
 class WritePlots(zntrack.Node):
     """Generate a plot."""
 
-    plots: pd.DataFrame = zntrack.plots()
-    x: list = zntrack.params([1, 2, 3])
-    y: list = zntrack.params([4, 5, 6])
+    plots: pd.DataFrame = zntrack.plots(x="x", y="y")
+    x: list = zntrack.params(default_factory=lambda: [1, 2, 3])
+    y: list = zntrack.params(default_factory=lambda: [4, 5, 6])
 
     def run(self):
         """Write plots."""
@@ -54,9 +80,9 @@ class WritePlots(zntrack.Node):
 class AddNumbers(zntrack.Node):
     """Add two numbers."""
 
-    a = zntrack.params()
-    b = zntrack.params()
-    c = zntrack.outs()
+    a: float = zntrack.params()
+    b: float = zntrack.params()
+    c: float = zntrack.outs()
 
     def run(self):
         """Add two numbers."""
@@ -66,8 +92,8 @@ class AddNumbers(zntrack.Node):
 class AddNumbersProperty(zntrack.Node):
     """Add two numbers."""
 
-    a = zntrack.params()
-    b = zntrack.params()
+    a: float = zntrack.params()
+    b: float = zntrack.params()
 
     @property
     def c(self):
@@ -80,7 +106,7 @@ class AddNodes(zntrack.Node):
 
     a: AddNumbers = zntrack.deps()
     b: AddNumbers = zntrack.deps()
-    c = zntrack.outs()
+    c: float = zntrack.outs()
 
     def run(self):
         """Add two nodes."""
@@ -90,9 +116,9 @@ class AddNodes(zntrack.Node):
 class AddNodes2(zntrack.Node):
     """Add two nodes."""
 
-    a: AddNumbers = zntrack.deps()
-    b: AddNumbers = zntrack.deps()
-    c = zntrack.outs()
+    a: ParamsToOuts = zntrack.deps()
+    b: ParamsToOuts = zntrack.deps()
+    c: float = zntrack.outs()
 
     def run(self):
         """Add two nodes."""
@@ -104,7 +130,7 @@ class AddNodeAttributes(zntrack.Node):
 
     a: float = zntrack.deps()
     b: float = zntrack.deps()
-    c = zntrack.outs()
+    c: float = zntrack.outs()
 
     def run(self):
         """Add two node attributes."""
@@ -125,13 +151,25 @@ class AddNodeNumbers(zntrack.Node):
 class SumNodeAttributes(zntrack.Node):
     """Sum a list of numbers."""
 
-    inputs: list = zntrack.deps()
-    shift: int = zntrack.params()
-    output: int = zntrack.outs()
+    inputs: list[float | int] = zntrack.deps()
+    shift: int | float = zntrack.params()
+    output: int | float = zntrack.outs()
 
     def run(self) -> None:
         """Sum a list of numbers."""
         self.output = sum(self.inputs) + self.shift
+
+
+class SumNodeAttributesToMetrics(zntrack.Node):
+    """Sum a list of numbers."""
+
+    inputs: list[float | int] = zntrack.deps()
+    shift: int | float = zntrack.params()
+    metrics: dict[str, int | float] = zntrack.metrics()
+
+    def run(self) -> None:
+        """Sum a list of numbers."""
+        self.metrics = {"value": sum(self.inputs) + self.shift}
 
 
 class AddOne(zntrack.Node):
@@ -148,8 +186,8 @@ class AddOne(zntrack.Node):
 class WriteDVCOuts(zntrack.Node):
     """Write an output file."""
 
-    params = zntrack.params()
-    outs = zntrack.outs_path(zntrack.nwd / "output.txt")
+    params: t.Any = zntrack.params()
+    outs: pathlib.Path | str = zntrack.outs_path(zntrack.nwd / "output.txt")
 
     def run(self):
         """Write an output file."""
@@ -184,8 +222,8 @@ class WriteDVCOutsSequence(zntrack.Node):
 class WriteDVCOutsPath(zntrack.Node):
     """Write an output file."""
 
-    params = zntrack.params()
-    outs = zntrack.outs_path(zntrack.nwd / "data")
+    params: t.Any = zntrack.params()
+    outs: pathlib.Path | str = zntrack.outs_path(zntrack.nwd / "data")
 
     def run(self):
         """Write an output file."""
@@ -205,10 +243,10 @@ class WriteDVCOutsPath(zntrack.Node):
 class WriteMultipleDVCOuts(zntrack.Node):
     """Write an output file."""
 
-    params = zntrack.params()
-    outs1 = zntrack.outs_path(zntrack.nwd / "output.txt")
-    outs2 = zntrack.outs_path(zntrack.nwd / "output2.txt")
-    outs3 = zntrack.outs_path(zntrack.nwd / "data")
+    params: t.Any = zntrack.params()
+    outs1: pathlib.Path = zntrack.outs_path(zntrack.nwd / "output.txt")
+    outs2: pathlib.Path = zntrack.outs_path(zntrack.nwd / "output2.txt")
+    outs3: pathlib.Path = zntrack.outs_path(zntrack.nwd / "data")
 
     def run(self):
         """Write an output file."""
@@ -229,12 +267,14 @@ class WriteMultipleDVCOuts(zntrack.Node):
 class ComputeRandomNumber(zntrack.Node):
     """Compute a random number."""
 
-    params_file = zntrack.params_path()
+    params_file: str = zntrack.params_path()
 
-    number = zntrack.outs()
+    number: float = zntrack.outs()
 
-    def _post_init_(self):
-        self.params_file = pathlib.Path(self.params_file)
+    # def _post_init_(self):
+    #     super()._post_init_()
+    #     self.params_file = pathlib.Path(self.params_file)
+    #     raise ValueError("This is a test exception, simulating killing the Node.")
 
     def run(self):
         """Compute a random number."""
@@ -242,13 +282,15 @@ class ComputeRandomNumber(zntrack.Node):
 
     def get_random_number(self):
         """Compute a random number."""
-        params = json.loads(self.params_file.read_text())
+        params = json.loads(pathlib.Path(self.params_file).read_text())
         random.seed(params["seed"])
         return random.randint(params["min"], params["max"])
 
     def write_params(self, min, max, seed):
         """Write params to file."""
-        self.params_file.write_text(json.dumps({"min": min, "max": max, "seed": seed}))
+        pathlib.Path(self.params_file).write_text(
+            json.dumps({"min": min, "max": max, "seed": seed})
+        )
 
 
 class ComputeRandomNumberWithParams(zntrack.Node):
@@ -258,7 +300,7 @@ class ComputeRandomNumberWithParams(zntrack.Node):
     max: int = zntrack.params()
     seed: int = zntrack.params()
 
-    number = zntrack.outs()
+    number: float = zntrack.outs()
 
     def run(self):
         """Compute a random number."""

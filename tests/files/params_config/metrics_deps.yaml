@@ -1,0 +1,3 @@
+ParamsToMetrics:
+  params:
+    loss: 0.01

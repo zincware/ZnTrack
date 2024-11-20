@@ -1,0 +1,38 @@
+stages:
+  MD:
+    cmd: zntrack run test_dataclass_deps.MD --name MD
+    metrics:
+    - nodes/MD/node-meta.json:
+        cache: false
+    params:
+    - MD
+  md2_MD2:
+    cmd: zntrack run test_dataclass_deps.MD2 --name md2_MD2
+    metrics:
+    - nodes/md2/MD2/node-meta.json:
+        cache: false
+    params:
+    - md2_MD2
+  md3_MD:
+    cmd: zntrack run test_dataclass_deps.MD --name md3_MD
+    metrics:
+    - nodes/md3/MD/node-meta.json:
+        cache: false
+    params:
+    - md3_MD
+  multiple_deps_MD:
+    cmd: zntrack run test_dataclass_deps.MD --name multiple_deps_MD
+    deps:
+    - nodes/multiple_deps/MLThermostat/node-meta.json
+    metrics:
+    - nodes/multiple_deps/MD/node-meta.json:
+        cache: false
+    params:
+    - multiple_deps_MD
+  multiple_deps_MLThermostat:
+    cmd: zntrack run test_dataclass_deps.MLThermostat --name multiple_deps_MLThermostat
+    metrics:
+    - nodes/multiple_deps/MLThermostat/node-meta.json:
+        cache: false
+    params:
+    - multiple_deps_MLThermostat

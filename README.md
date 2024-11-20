@@ -78,20 +78,20 @@ print(hello_world.random_number)
 
 > ## Tip
 >
-> You can easily load this Node directly from a repository.
+> You can easily load a Node directly from a repository.
 >
 > ```python
 > import zntrack
 >
 > node = zntrack.from_rev(
->     "HelloWorld",
->     remote="https://github.com/PythonFZ/ZnTrackExamples.git",
->     rev="890c714",
+>     "ParamsToMetrics",
+>     remote="https://github.com/PythonFZ/zntrack-examples",
+>     rev="8d0c992"
 > )
 > ```
 >
-> Try accessing the `max_number` parameter and `random_number` output. All Nodes
-> from this and many other repositories can be loaded like this.
+> Try accessing the `params` parameter and `metrics` output. All Nodes from this
+> and many other repositories can be loaded like this.
 
 An overview of all the ZnTrack features as well as more detailed examples can be
 found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).

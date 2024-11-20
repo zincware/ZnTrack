@@ -1,14 +1,11 @@
-import pathlib
-
 import yaml
-import znflow
 
 import zntrack
-from zntrack.utils import config
+from zntrack import config
 
 
 class NodeWithProperty(zntrack.Node):
-    params = zntrack.zn.params(None)
+    params: int = zntrack.params(None)
 
     @property
     def calc(self):
@@ -24,47 +21,48 @@ def test_NodeWithProperty(proj_path):
     with zntrack.Project() as proj:
         node = NodeWithProperty()
 
+    proj.build()
     proj.run()
 
-    node.load()
+    node = node.from_rev()
     assert node.params is None
 
 
 class NodeA(zntrack.Node):
-    params1 = zntrack.zn.params(1)
+    params1: int = zntrack.params(1)
 
 
 class NodeB(zntrack.Node):
-    params2 = zntrack.zn.params(2)
+    params2: int = zntrack.params(2)
 
 
 def test_SwitchNode(proj_path):
     with zntrack.Project() as proj:
         NodeA(name="Node")
-    proj.run(repro=False)
+    proj.build()
 
-    params = yaml.safe_load(config.files.params.read_text())
+    params = yaml.safe_load(config.PARAMS_FILE_PATH.read_text())
     assert params["Node"] == {"params1": 1}
 
     with zntrack.Project() as proj:
         NodeB(name="Node")
-    proj.run(repro=False)
+    proj.build()
 
-    params = yaml.safe_load(config.files.params.read_text())
+    params = yaml.safe_load(config.PARAMS_FILE_PATH.read_text())
     assert params["Node"] == {"params2": 2}
 
 
 class CustomModule(zntrack.Node):
-    _module_ = "zntrack.nodes"
+    _module_ = "package.module"
 
 
 def test_CustomModule(proj_path):
     with zntrack.Project() as proj:
         CustomModule()
-    proj.run(repro=False)
+    proj.build()
 
-    dvc = yaml.safe_load(config.files.dvc.read_text())
+    dvc = yaml.safe_load(config.DVC_FILE_PATH.read_text())
     assert (
         dvc["stages"]["CustomModule"]["cmd"]
-        == "zntrack run zntrack.nodes.CustomModule --name CustomModule"
+        == "zntrack run package.module.CustomModule --name CustomModule"
     )
