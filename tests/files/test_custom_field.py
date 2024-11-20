@@ -1,17 +1,12 @@
-import functools
 import json
 import pathlib
 
-import h5py
 import numpy as np
-import numpy.testing as npt
 import yaml
-import znfields
 
 import zntrack
+from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum
 from zntrack.fields import field
-from zntrack.config import ZnTrackOptionEnum, NOT_AVAILABLE
-import dataclasses
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -41,9 +36,7 @@ def _h5data_save_func(self: zntrack.Node, name: str, suffix: str):
     raise NotImplementedError
 
 
-def h5data(
-    *, cache: bool = True, independent: bool = False, **kwargs
-):
+def h5data(*, cache: bool = True, independent: bool = False, **kwargs):
     return field(
         cache=cache,
         independent=independent,

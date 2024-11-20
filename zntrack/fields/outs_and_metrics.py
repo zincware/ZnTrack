@@ -1,23 +1,13 @@
-import functools
 import json
 
-import znfields
 import znjson
 
 from zntrack.config import (
     NOT_AVAILABLE,
-    ZNTRACK_CACHE,
-    ZNTRACK_FIELD_DUMP,
-    ZNTRACK_FIELD_LOAD,
-    ZNTRACK_FIELD_SUFFIX,
-    ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
-from zntrack.node import Node
-from zntrack.plugins import base_getter, plugin_getter
 from zntrack.fields.base import field
-import dataclasses
+from zntrack.node import Node
 
 
 def _outs_getter(self: "Node", name: str, suffix: str):
@@ -60,9 +50,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     )
 
 
-def metrics(
-    *, cache: bool = False, independent: bool = False, **kwargs
-):
+def metrics(*, cache: bool = False, independent: bool = False, **kwargs):
     return field(
         default=NOT_AVAILABLE,
         cache=cache,

@@ -1,19 +1,13 @@
 import dataclasses
-import functools
 
 import yaml
-import znfields
 
 from zntrack.config import (
     PARAMS_FILE_PATH,
-    ZNTRACK_FIELD_LOAD,
-    ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
-from zntrack.node import Node
-from zntrack.plugins import base_getter, plugin_getter
 from zntrack.fields.base import field
-import dataclasses
+from zntrack.node import Node
 
 
 def _params_getter(self: "Node", name: str):

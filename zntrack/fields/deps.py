@@ -1,8 +1,6 @@
 import dataclasses
-import functools
 import json
 
-import znfields
 import znflow
 import znflow.handler
 import znflow.utils
@@ -10,16 +8,12 @@ import znjson
 
 from zntrack import converter
 from zntrack.config import (
-    ZNTRACK_FIELD_LOAD,
     ZNTRACK_FILE_PATH,
-    ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
-from zntrack.node import Node
-from zntrack.plugins import base_getter, plugin_getter
-
 from zntrack.fields.base import field
-import dataclasses
+from zntrack.node import Node
+
 
 def _deps_getter(self: "Node", name: str):
     with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
@@ -57,4 +51,9 @@ def _deps_getter(self: "Node", name: str):
 
 
 def deps(default=dataclasses.MISSING, **kwargs):
-    return field(default=default, load_fn=_deps_getter, zntrack_option=ZnTrackOptionEnum.DEPS, **kwargs)
+    return field(
+        default=default,
+        load_fn=_deps_getter,
+        zntrack_option=ZnTrackOptionEnum.DEPS,
+        **kwargs
+    )
