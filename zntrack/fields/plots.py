@@ -1,11 +1,6 @@
-
 import pandas as pd
 
-from zntrack.config import (
-    NOT_AVAILABLE,
-    ZNTRACK_OPTION_PLOTS_CONFIG,
-    ZnTrackOptionEnum,
-)
+from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, ZnTrackOptionEnum
 from zntrack.fields.base import field
 from zntrack.node import Node
 

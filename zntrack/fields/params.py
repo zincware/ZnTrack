@@ -2,10 +2,7 @@ import dataclasses
 
 import yaml
 
-from zntrack.config import (
-    PARAMS_FILE_PATH,
-    ZnTrackOptionEnum,
-)
+from zntrack.config import PARAMS_FILE_PATH, ZnTrackOptionEnum
 from zntrack.fields.base import field
 from zntrack.node import Node
 

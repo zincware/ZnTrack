@@ -7,10 +7,7 @@ import znflow.utils
 import znjson
 
 from zntrack import converter
-from zntrack.config import (
-    ZNTRACK_FILE_PATH,
-    ZnTrackOptionEnum,
-)
+from zntrack.config import ZNTRACK_FILE_PATH, ZnTrackOptionEnum
 from zntrack.fields.base import field
 from zntrack.node import Node
 
