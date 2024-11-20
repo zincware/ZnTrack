@@ -1,6 +1,6 @@
+import importlib.metadata
 import logging
 import sys
-import importlib.metadata
 
 from zntrack.add import add
 from zntrack.apply import apply
