@@ -6,6 +6,7 @@ from zntrack.apply import apply
 from zntrack.fields import (
     deps,
     deps_path,
+    field,
     metrics,
     metrics_path,
     outs,
@@ -14,7 +15,6 @@ from zntrack.fields import (
     params_path,
     plots,
     plots_path,
-    field,
 )
 from zntrack.from_rev import from_rev
 from zntrack.node import Node

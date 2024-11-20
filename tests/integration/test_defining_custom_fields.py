@@ -1,13 +1,11 @@
-import json
 import pathlib
 
+import h5py
 import numpy as np
-import yaml
-import numpy.testing as npt 
+import numpy.testing as npt
 
 import zntrack
 from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum
-import h5py
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -26,6 +24,7 @@ def _h5data_save_func(self: zntrack.Node, name: str, suffix: str):
     file = (self.nwd / name).with_suffix(suffix)
     with h5py.File(file, "w") as f:
         f.create_dataset("data", data=getattr(self, name))
+
 
 def h5data(*, cache: bool = True, independent: bool = False, **kwargs):
     return zntrack.field(
