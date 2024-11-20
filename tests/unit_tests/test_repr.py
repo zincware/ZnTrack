@@ -45,14 +45,8 @@ def test_repr_from_rev(proj_path):
         == "WriteDVCOuts(name='WriteDVCOuts', params=42, outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
     )
 
-    assert (
-        repr(n6)
-        == "ParamsToMetrics(name='ParamsToMetrics', params=42)"
-    )
-    assert (
-        repr(n7)
-        == "WritePlots(name='WritePlots', x=[1, 2, 3], y=[4, 5, 6])"
-    )
+    assert repr(n6) == "ParamsToMetrics(name='ParamsToMetrics', params=42)"
+    assert repr(n7) == "WritePlots(name='WritePlots', x=[1, 2, 3], y=[4, 5, 6])"
 
     proj.run()
 
@@ -63,7 +57,4 @@ def test_repr_from_rev(proj_path):
     )
 
     assert repr(n6) == "ParamsToMetrics(name='ParamsToMetrics', params=42)"
-    assert (
-        repr(n7)
-        == "WritePlots(name='WritePlots', x=[1, 2, 3], y=[4, 5, 6])"
-    )
+    assert repr(n7) == "WritePlots(name='WritePlots', x=[1, 2, 3], y=[4, 5, 6])"
