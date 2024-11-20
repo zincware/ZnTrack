@@ -14,6 +14,7 @@ from zntrack.fields import (
     params_path,
     plots,
     plots_path,
+    field,
 )
 from zntrack.from_rev import from_rev
 from zntrack.node import Node
@@ -37,6 +38,7 @@ __all__ = [
     "from_rev",
     "apply",
     "add",
+    "field",
 ]
 
 logger = logging.getLogger(__name__)
