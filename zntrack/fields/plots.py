@@ -99,24 +99,16 @@ def plots(
         kwargs["metadata"][ZNTRACK_OPTION_PLOTS_CONFIG] = plots_config
 
     if autosave:
-        return field(
-            default=NOT_AVAILABLE,
-            cache=cache,
-            independent=independent,
-            zntrack_option=ZnTrackOptionEnum.PLOTS,
-            dump_fn=_plots_save_func,
-            suffix=".csv",
-            autosave_setter=_plots_autosave_setter,
-            **kwargs,
-        )
-    else:
-        return field(
-            default=NOT_AVAILABLE,
-            cache=cache,
-            independent=independent,
-            zntrack_option=ZnTrackOptionEnum.PLOTS,
-            dump_fn=_plots_save_func,
-            suffix=".csv",
-            load_fn=_plots_getter,
-            **kwargs,
-        )
+        kwargs["setter"] = _plots_autosave_setter
+    return field(
+        default=NOT_AVAILABLE,
+        cache=cache,
+        independent=independent,
+        zntrack_option=ZnTrackOptionEnum.PLOTS,
+        dump_fn=_plots_save_func,
+        suffix=".csv",
+        load_fn=_plots_getter,
+        repr=False,
+        init=False,
+        **kwargs,
+    )

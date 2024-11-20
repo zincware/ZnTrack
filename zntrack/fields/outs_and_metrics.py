@@ -54,6 +54,8 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
         dump_fn=_outs_save_func,
         suffix=".json",
         load_fn=_outs_getter,
+        repr=False,
+        init=False,
         **kwargs,
     )
 
@@ -69,5 +71,7 @@ def metrics(
         dump_fn=_metrics_save_func,
         suffix=".json",
         load_fn=_outs_getter,
+        repr=False,
+        init=False,
         **kwargs,
     )
