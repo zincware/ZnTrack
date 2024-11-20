@@ -21,18 +21,6 @@ def _metrics_save_func(self: "Node", name: str, suffix: str):
 
 
 def outs(*, cache: bool = True, independent: bool = False, **kwargs):
-    # kwargs["metadata"] = kwargs.get("metadata", {})
-    # kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS
-    # kwargs["metadata"][ZNTRACK_CACHE] = cache
-    # kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    # kwargs["metadata"][ZNTRACK_FIELD_LOAD] = functools.partial(
-    #     base_getter, func=_outs_getter
-    # )
-    # kwargs["metadata"][ZNTRACK_FIELD_DUMP] = _outs_save_func
-    # kwargs["metadata"][ZNTRACK_FIELD_SUFFIX] = ".json"
-    # return znfields.field(
-    #     default=NOT_AVAILABLE, getter=plugin_getter, **kwargs, init=False
-    # )
     return field(
         default=NOT_AVAILABLE,
         cache=cache,
