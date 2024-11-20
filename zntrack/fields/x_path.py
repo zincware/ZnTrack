@@ -21,9 +21,6 @@ from zntrack.plugins import plugin_getter
 from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
-from zntrack.fields.base import field
-import dataclasses
-
 
 def _paths_getter(self: Node, name: str):
     # TODO: if self._external_: try looking into
@@ -65,9 +62,7 @@ def outs_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def params_path(
-    default=dataclasses.MISSING, *, cache: bool = True, **kwargs
-):
+def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -105,9 +100,7 @@ def metrics_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def deps_path(
-    default=dataclasses.MISSING, *, cache: bool = True, **kwargs
-):
+def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache

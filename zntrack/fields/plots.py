@@ -1,23 +1,13 @@
-import functools
 
 import pandas as pd
-import znfields
 
 from zntrack.config import (
     NOT_AVAILABLE,
-    ZNTRACK_CACHE,
-    ZNTRACK_FIELD_DUMP,
-    ZNTRACK_FIELD_LOAD,
-    ZNTRACK_FIELD_SUFFIX,
-    ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from zntrack.node import Node
-from zntrack.plugins import base_getter, plugin_getter
 from zntrack.fields.base import field
-import dataclasses
+from zntrack.node import Node
 
 
 def _plots_save_func(self: "Node", name: str, suffix: str):
