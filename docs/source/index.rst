@@ -71,24 +71,7 @@ Class based Node
    with zntrack.Project() as project:
       node = AddNumbers(number1=10, number2=20)
 
-   project.run()
-
-
-Function based Node
--------------------
- .. code-block:: python
-
-   import zntrack
-
-   @zntrack.nodify(outs="number.txt", params={"number1": 10, "number2": 20})
-   def add_numbers(cfg: zntrack.NodeConfig):
-      with open(cfg.outs) as file:
-            file.write(str(cfg.params.number1 + cfg.params.number2))
-
-   with zntrack.Project() as project:
-      node = add_numbers()
-
-   project.run()
+   project.repro()
 
 
 .. toctree::

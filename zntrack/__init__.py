@@ -1,5 +1,6 @@
 import logging
 import sys
+import importlib.metadata
 
 from zntrack.add import add
 from zntrack.apply import apply
@@ -52,3 +53,5 @@ channel.setLevel(logging.INFO)
 channel.setFormatter(formatter)
 
 logger.addHandler(channel)
+
+__version__ = importlib.metadata.version("zntrack")

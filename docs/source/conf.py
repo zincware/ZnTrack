@@ -12,8 +12,8 @@ import sys
 sys.path.insert(0, os.path.abspath(".."))
 
 project = "ZnTrack"
-copyright = "2023, zincwarecode <zincwarecode@gmail.com>"
-author = "zincwarecode <zincwarecode@gmail.com>"
+copyright = "2024, Fabian Zills"
+author = "Fabian Zills"
 version = importlib.import_module("zntrack").__version__
 
 # -- General configuration ---------------------------------------------------
