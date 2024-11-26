@@ -9,7 +9,6 @@ def test_nested_deps(proj_path) -> None:
         b = zntrack.examples.AddNumbers(a=1, b=2)
         c = zntrack.examples.AddNodeAttributes(a=a.c, b=b.c)
 
-    
     project.repro()
 
     x = c.from_rev(name=c.name)
