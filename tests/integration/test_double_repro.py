@@ -14,7 +14,7 @@ def test_repro_twice(proj_path) -> None:
     project = zntrack.Project()
     with project:
         a = zntrack.examples.AddNumbers(a=1, b=4, name="NodeA")
-    
+
     project.repro()
 
     assert a.c == 5
