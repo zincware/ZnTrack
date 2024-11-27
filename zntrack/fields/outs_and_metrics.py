@@ -13,11 +13,16 @@ def _outs_getter(self: "Node", name: str, suffix: str):
 
 
 def _outs_save_func(self: "Node", name: str, suffix: str):
-    (self.nwd / name).with_suffix(suffix).write_text(znjson.dumps(getattr(self, name)))
-
+    try:
+        (self.nwd / name).with_suffix(suffix).write_text(znjson.dumps(getattr(self, name)))
+    except TypeError as err:
+        raise TypeError(f"Error while saving {name} to {self.nwd / name}.json") from err
 
 def _metrics_save_func(self: "Node", name: str, suffix: str):
-    (self.nwd / name).with_suffix(suffix).write_text(json.dumps(getattr(self, name)))
+    try:
+        (self.nwd / name).with_suffix(suffix).write_text(json.dumps(getattr(self, name)))
+    except TypeError as err:
+        raise TypeError(f"Error while saving {name} to {self.nwd / name}.json") from err
 
 
 def outs(*, cache: bool = True, independent: bool = False, **kwargs):
