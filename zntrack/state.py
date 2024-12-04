@@ -4,6 +4,7 @@ import pathlib
 import tempfile
 import typing as t
 import warnings
+import json
 
 import dvc.api
 import dvc.repo
@@ -11,6 +12,7 @@ import dvc.stage.serialize
 from dvc.utils import dict_sha256
 from fsspec.implementations.local import LocalFileSystem
 from fsspec.spec import AbstractFileSystem
+import datetime
 
 from zntrack.config import NodeStatusEnum
 from zntrack.group import Group
@@ -39,6 +41,7 @@ class NodeStatus:
         default_factory=dict, compare=False, repr=False
     )
     group: Group | None = None
+    run_time: datetime.timedelta | None = None
     # TODO: move node name and nwd to here as well
 
     @property
@@ -146,3 +149,21 @@ class NodeStatus:
                 return field
         else:
             raise AttributeError(f"Unable to locate '{attribute}' in {self.node}.")
+        
+    def add_run_time(self, run_time: datetime.timedelta) -> None:
+        """Add the run time to the node."""
+        self.node.__dict__["state"]["run_time"] += run_time
+
+    def increment_run_count(self) -> None:
+        self.node.__dict__["state"]["run_count"] = self.run_count + 1
+
+    def save_node_meta(self) -> None:
+        node_meta_content = {
+            "uuid": str(self.node.uuid),
+            "run_count": self.run_count,
+            "run_time": self.run_time.total_seconds(),
+        }
+
+        (self.nwd / "node-meta.json").write_text(
+            json.dumps(node_meta_content, indent=2)
+        )
