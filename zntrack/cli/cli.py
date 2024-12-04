@@ -1,6 +1,7 @@
 """The ZnTrack CLI."""
 
 import contextlib
+import datetime
 import importlib.metadata
 import os
 import pathlib
@@ -14,7 +15,6 @@ from zntrack import Node, utils
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
 from zntrack.utils.misc import load_env_vars
-import datetime
 
 load_env_vars()
 

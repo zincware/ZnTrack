@@ -1,12 +1,12 @@
 import contextlib
 import dataclasses
+import datetime
+import importlib.metadata
+import json
 import pathlib
 import tempfile
 import typing as t
 import warnings
-import json
-import importlib.metadata
-import contextlib
 
 import dvc.api
 import dvc.repo
@@ -14,7 +14,6 @@ import dvc.stage.serialize
 from dvc.utils import dict_sha256
 from fsspec.implementations.local import LocalFileSystem
 from fsspec.spec import AbstractFileSystem
-import datetime
 
 from zntrack.config import NodeStatusEnum
 from zntrack.group import Group
@@ -151,7 +150,7 @@ class NodeStatus:
                 return field
         else:
             raise AttributeError(f"Unable to locate '{attribute}' in {self.node}.")
-        
+
     def add_run_time(self, run_time: datetime.timedelta) -> None:
         """Add the run time to the node."""
         if self.run_time is None:
@@ -174,10 +173,6 @@ class NodeStatus:
 
         with contextlib.suppress(importlib.metadata.PackageNotFoundError):
             module = self.node.__module__.split(".")[0]
-            node_meta_content["package_version"] = importlib.metadata.version(
-                module
-            )
+            node_meta_content["package_version"] = importlib.metadata.version(module)
 
-        (self.nwd / "node-meta.json").write_text(
-            json.dumps(node_meta_content, indent=2)
-        )
+        (self.nwd / "node-meta.json").write_text(json.dumps(node_meta_content, indent=2))

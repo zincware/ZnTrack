@@ -1,11 +1,11 @@
 import contextlib
 import dataclasses
+import datetime
 import json
 import pathlib
 import typing as t
 import uuid
 import warnings
-import datetime
 
 import typing_extensions as te
 import znfields
@@ -137,7 +137,9 @@ class Node(znflow.Node, znfields.Base):
                 if node_uuid := content.get("uuid", None):
                     instance._uuid = uuid.UUID(node_uuid)
                 instance.__dict__["state"]["run_count"] = run_count
-                instance.__dict__["state"]["run_time"] = datetime.timedelta(seconds=run_time)
+                instance.__dict__["state"]["run_time"] = datetime.timedelta(
+                    seconds=run_time
+                )
 
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
