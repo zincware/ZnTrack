@@ -5,6 +5,8 @@ import tempfile
 import typing as t
 import warnings
 import json
+import importlib.metadata
+import contextlib
 
 import dvc.api
 import dvc.repo
@@ -152,7 +154,10 @@ class NodeStatus:
         
     def add_run_time(self, run_time: datetime.timedelta) -> None:
         """Add the run time to the node."""
-        self.node.__dict__["state"]["run_time"] += run_time
+        if self.run_time is None:
+            self.node.__dict__["state"]["run_time"] = run_time
+        else:
+            self.node.__dict__["state"]["run_time"] += run_time
 
     def increment_run_count(self) -> None:
         self.node.__dict__["state"]["run_count"] = self.run_count + 1
@@ -161,8 +166,17 @@ class NodeStatus:
         node_meta_content = {
             "uuid": str(self.node.uuid),
             "run_count": self.run_count,
-            "run_time": self.run_time.total_seconds(),
+            "zntrack_version": importlib.metadata.version("zntrack"),
         }
+
+        if self.run_time is not None:
+            node_meta_content["run_time"] = self.run_time.total_seconds()
+
+        with contextlib.suppress(importlib.metadata.PackageNotFoundError):
+            module = self.node.__module__.split(".")[0]
+            node_meta_content["package_version"] = importlib.metadata.version(
+                module
+            )
 
         (self.nwd / "node-meta.json").write_text(
             json.dumps(node_meta_content, indent=2)
