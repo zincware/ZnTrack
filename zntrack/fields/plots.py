@@ -6,6 +6,7 @@ from zntrack.node import Node
 
 
 def _plots_save_func(self: "Node", name: str, suffix: str):
+    self.nwd.mkdir(parents=True, exist_ok=True)
     content = getattr(self, name)
     if not isinstance(content, pd.DataFrame):
         raise TypeError(f"Expected a pandas DataFrame, got {type(content)}")
@@ -13,6 +14,7 @@ def _plots_save_func(self: "Node", name: str, suffix: str):
 
 
 def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
+    self.nwd.mkdir(parents=True, exist_ok=True)
     value.to_csv((self.nwd / name).with_suffix(".csv"))
     self.__dict__[name] = value
 

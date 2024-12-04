@@ -13,6 +13,7 @@ def _outs_getter(self: "Node", name: str, suffix: str):
 
 
 def _outs_save_func(self: "Node", name: str, suffix: str):
+    self.nwd.mkdir(parents=True, exist_ok=True)
     try:
         (self.nwd / name).with_suffix(suffix).write_text(
             znjson.dumps(getattr(self, name))
@@ -22,6 +23,7 @@ def _outs_save_func(self: "Node", name: str, suffix: str):
 
 
 def _metrics_save_func(self: "Node", name: str, suffix: str):
+    self.nwd.mkdir(parents=True, exist_ok=True)
     try:
         (self.nwd / name).with_suffix(suffix).write_text(json.dumps(getattr(self, name)))
     except TypeError as err:
