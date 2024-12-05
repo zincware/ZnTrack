@@ -54,7 +54,7 @@ def test_state_get_after_run(proj_path):
     assert len(n.state.get_stage_lock()["outs"]) == 1
     assert n.state.get_stage_lock()["outs"][0]["hash"] == "md5"
     assert n.state.get_stage_lock()["outs"][0]["path"] == "nodes/MyNode/node-meta.json"
-    assert n.state.get_stage_lock()["outs"][0]["size"] == 126
+    assert n.state.get_stage_lock()["outs"][0]["size"] > 100 # run time can vary
     assert "md5" in n.state.get_stage_lock()["outs"][0]
     assert n.state.remote is None
     assert n.state.rev is None
