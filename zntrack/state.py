@@ -53,7 +53,7 @@ class NodeStatus:
     def nwd(self):
         if self.tmp_path is not None:
             return self.tmp_path
-        return get_nwd(self.node, mkdir=False)
+        return get_nwd(self.node)
 
     @property
     def fs(self) -> AbstractFileSystem:
