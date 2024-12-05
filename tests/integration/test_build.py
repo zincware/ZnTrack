@@ -1,7 +1,4 @@
-import json
 import pathlib
-
-import pandas as pd
 
 import zntrack.examples
 
@@ -38,7 +35,7 @@ def test_nodes_not_created(proj_path):
             x=[1, 2, 3],
             y=[4, 5, 6],
         )
-    
+
     project.build()
 
     assert not pathlib.Path("nodes").exists()
