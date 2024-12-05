@@ -20,6 +20,7 @@ class ZnTrackDeployment(VanillaDeployment):
         else:
             super()._run_node(node_uuid)
 
+        node.state.save_node_meta()
         node.save()
 
     # TODO: when finished all Nodes, commit all changes
