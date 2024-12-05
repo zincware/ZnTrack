@@ -1,5 +1,5 @@
-import unittest.mock as mock
 import datetime
+import unittest.mock as mock
 
 from znflow.deployment import VanillaDeployment
 
