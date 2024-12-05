@@ -26,6 +26,8 @@ if t.TYPE_CHECKING:
 PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
 PLUGIN_DICT = dict[str, ZnTrackPlugin]
 
+COUNT = 0
+
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
@@ -53,11 +55,19 @@ class NodeStatus:
     def nwd(self):
         if self.tmp_path is not None:
             return self.tmp_path
+        if "nwd" not in self.node.__dict__:
+            global COUNT
+            COUNT += 1
+            print(f"nwd: {COUNT}")
+        self.node.__dict__["nwd"] = get_nwd(self.node)
+
         return get_nwd(self.node)
 
     @property
     def fs(self) -> AbstractFileSystem:
         """Get the file system of the Node."""
+        # print("ACCESS FILE SYSTEM")
+        print("This should not be called during build.")
         if self.remote is None and self.rev is None:
             return LocalFileSystem()
         return dvc.api.DVCFileSystem(

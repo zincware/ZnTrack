@@ -58,7 +58,7 @@ def get_nwd(node: "Node") -> pathlib.Path:
         if (
             node.state.remote is None
             and node.state.rev is None
-            and node.state.state == NodeStatusEnum.FINISHED
+            and node.state.state != NodeStatusEnum.FINISHED
         ):
             nwd = pathlib.Path(NWD_PATH, node.name)
         else:
