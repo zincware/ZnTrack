@@ -6,6 +6,7 @@ import os
 import pathlib
 import shutil
 import typing as t
+import datetime
 
 import znflow.utils
 import znjson
@@ -70,11 +71,11 @@ def get_nwd(node: "Node") -> pathlib.Path:
             except (FileNotFoundError, KeyError):
                 nwd = pathlib.Path(NWD_PATH, node.name)
 
-    if node.state.group is not None:
-        # strip the groups from node_name
-        to_replace = "_".join(node.state.group.name) + "_"
-        replacement = "/".join(node.state.group.name) + "/"
-        nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
+        if node.state.group is not None:
+            # strip the groups from node_name
+            to_replace = "_".join(node.state.group.name) + "_"
+            replacement = "/".join(node.state.group.name) + "/"
+            nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
 
     return nwd
 
