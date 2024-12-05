@@ -57,7 +57,7 @@ class NodeStatus:
             return self.tmp_path
         if "nwd" not in self.node.__dict__:
             global COUNT
-            print(f"nwd: {(datetime.datetime.now() - COUNT).total_seconds()} for {self.node.name}")
+            # print(f"nwd: {(datetime.datetime.now() - COUNT).total_seconds()} for {self.node.name}")
             COUNT = datetime.datetime.now()
         self.node.__dict__["nwd"] = get_nwd(self.node)
 
