@@ -174,5 +174,5 @@ class NodeStatus:
         with contextlib.suppress(importlib.metadata.PackageNotFoundError):
             module = self.node.__module__.split(".")[0]
             node_meta_content["package_version"] = importlib.metadata.version(module)
-
+        self.nwd.mkdir(parents=True, exist_ok=True)
         (self.nwd / "node-meta.json").write_text(json.dumps(node_meta_content, indent=2))
