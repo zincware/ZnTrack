@@ -528,7 +528,7 @@ def test_git_only_repo(proj_path, git_only_repo):
     with zntrack.Project(git_only_repo=git_only_repo) as project:
         zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
 
-    project.run()
+    project.repro()
 
     # commit everything
     repo = git.Repo()
