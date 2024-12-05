@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "zntrack"
-version = "0.8.0"
+version = "0.8.1"
 description = "Create, Run and Benchmark DVC Pipelines in Python"
 authors = ["zincwarecode <zincwarecode@gmail.com>"]
 license = "Apache-2.0"
@@ -15,7 +15,7 @@ pyyaml = "^6"
 tqdm = "^4"
 
 znjson = "^0.2"
-znflow = "^0.2.2"
+znflow = "^0.2.3"
 typer = "^0.13"
 znfields = "^0.1.2"
 pandas = "^2"
