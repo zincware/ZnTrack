@@ -1,3 +1,4 @@
+import datetime
 import unittest.mock as mock
 
 from znflow.deployment import VanillaDeployment
@@ -6,7 +7,9 @@ from znflow.deployment import VanillaDeployment
 class ZnTrackDeployment(VanillaDeployment):
     def _run_node(self, node_uuid):
         node = self.graph.nodes[node_uuid]["value"]
-        node.increment_run_count()
+        start_time = datetime.datetime.now()
+        node.state.increment_run_count()
+        node.state.save_node_meta()
         if hasattr(node, "_method"):
             method_string = getattr(node, "_method")
             method = getattr(node, method_string)
@@ -20,6 +23,9 @@ class ZnTrackDeployment(VanillaDeployment):
         else:
             super()._run_node(node_uuid)
 
+        run_time = datetime.datetime.now() - start_time
+        node.state.add_run_time(run_time)
+        node.state.save_node_meta()
         node.save()
 
     # TODO: when finished all Nodes, commit all changes

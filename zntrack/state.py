@@ -1,5 +1,8 @@
 import contextlib
 import dataclasses
+import datetime
+import importlib.metadata
+import json
 import pathlib
 import tempfile
 import typing as t
@@ -39,6 +42,7 @@ class NodeStatus:
         default_factory=dict, compare=False, repr=False
     )
     group: Group | None = None
+    run_time: datetime.timedelta | None = None
     # TODO: move node name and nwd to here as well
 
     @property
@@ -49,7 +53,7 @@ class NodeStatus:
     def nwd(self):
         if self.tmp_path is not None:
             return self.tmp_path
-        return get_nwd(self.node, mkdir=True)
+        return get_nwd(self.node)
 
     @property
     def fs(self) -> AbstractFileSystem:
@@ -146,3 +150,29 @@ class NodeStatus:
                 return field
         else:
             raise AttributeError(f"Unable to locate '{attribute}' in {self.node}.")
+
+    def add_run_time(self, run_time: datetime.timedelta) -> None:
+        """Add the run time to the node."""
+        if self.run_time is None:
+            self.node.__dict__["state"]["run_time"] = run_time
+        else:
+            self.node.__dict__["state"]["run_time"] += run_time
+
+    def increment_run_count(self) -> None:
+        self.node.__dict__["state"]["run_count"] = self.run_count + 1
+
+    def save_node_meta(self) -> None:
+        node_meta_content = {
+            "uuid": str(self.node.uuid),
+            "run_count": self.run_count,
+            "zntrack_version": importlib.metadata.version("zntrack"),
+        }
+
+        if self.run_time is not None:
+            node_meta_content["run_time"] = self.run_time.total_seconds()
+
+        with contextlib.suppress(importlib.metadata.PackageNotFoundError):
+            module = self.node.__module__.split(".")[0]
+            node_meta_content["package_version"] = importlib.metadata.version(module)
+        self.nwd.mkdir(parents=True, exist_ok=True)
+        (self.nwd / "node-meta.json").write_text(json.dumps(node_meta_content, indent=2))

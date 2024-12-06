@@ -1,5 +1,6 @@
 import contextlib
 import dataclasses
+import datetime
 import json
 import pathlib
 import typing as t
@@ -132,9 +133,13 @@ class Node(znflow.Node, znfields.Base):
             with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
                 content = json.load(f)
                 run_count = content.get("run_count", 0)
+                run_time = content.get("run_time", 0)
                 if node_uuid := content.get("uuid", None):
                     instance._uuid = uuid.UUID(node_uuid)
                 instance.__dict__["state"]["run_count"] = run_count
+                instance.__dict__["state"]["run_time"] = datetime.timedelta(
+                    seconds=run_time
+                )
 
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
@@ -151,12 +156,6 @@ class Node(znflow.Node, znfields.Base):
             self.__dict__["state"]["plugins"] = get_plugins_from_env(self)
 
         return NodeStatus(**self.__dict__["state"], node=self)
-
-    def increment_run_count(self):
-        self.__dict__["state"]["run_count"] = self.state.run_count + 1
-        (self.nwd / "node-meta.json").write_text(
-            json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
-        )
 
     @te.deprecated("loading is handled automatically via lazy evaluation")
     def load(self):
