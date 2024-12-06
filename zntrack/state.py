@@ -27,7 +27,6 @@ PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
 PLUGIN_DICT = dict[str, ZnTrackPlugin]
 
 
-
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
     remote: str | None = None
