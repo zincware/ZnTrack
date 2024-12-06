@@ -26,7 +26,6 @@ if t.TYPE_CHECKING:
 PLUGIN_LIST = list[t.Type[ZnTrackPlugin]]
 PLUGIN_DICT = dict[str, ZnTrackPlugin]
 
-COUNT = datetime.datetime.now()
 
 
 @dataclasses.dataclass(frozen=True)
@@ -56,9 +55,6 @@ class NodeStatus:
         if self.tmp_path is not None:
             return self.tmp_path
         if "nwd" not in self.node.__dict__:
-            global COUNT
-            # print(f"nwd: {(datetime.datetime.now() - COUNT).total_seconds()} for {self.node.name}")
-            COUNT = datetime.datetime.now()
         self.node.__dict__["nwd"] = get_nwd(self.node)
 
         return get_nwd(self.node)
