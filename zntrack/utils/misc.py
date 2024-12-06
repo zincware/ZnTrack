@@ -76,7 +76,7 @@ class TempPathLoader(znflow.utils.IterableHandler):
 
         nwd_handler = NWDReplaceHandler()
 
-        original_nwd = get_nwd(instance)            
+        original_nwd = get_nwd(instance)
         tmp_nwd = instance.nwd
 
         original_path = pathlib.Path(nwd_handler(value, nwd=original_nwd))
