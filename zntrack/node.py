@@ -54,10 +54,8 @@ class Node(znflow.Node, znfields.Base):
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
 
-    @te.deprecated(
-        "The _post_load_ method was removed. Use __post_init__ in combination with `self.state` instead."
-    )
     def _post_load_(self):
+        """Called after `from_rev` is called."""
         raise NotImplementedError
 
     def run(self):
@@ -146,6 +144,9 @@ class Node(znflow.Node, znfields.Base):
                 _ = getattr(instance, field.name)
 
         instance._external_ = True
+        if hasattr(instance, "_post_load_"):
+            with contextlib.suppress(NotImplementedError):
+                instance._post_load_()
 
         return instance
 
