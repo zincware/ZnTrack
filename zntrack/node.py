@@ -147,15 +147,15 @@ class Node(znflow.Node, znfields.Base):
 
             instance._external_ = True
 
-
         original_post_init = cls.__post_init__
+
         def _(self):
             __post_init__(self)
             original_post_init(self)
+
         cls.__post_init__ = _
         instance = cls(**lazy_values)
 
-  
         return instance
 
     @property

@@ -1,9 +1,11 @@
 """Test that the dataclass post_init works properly."""
 
-import zntrack
-import pathlib
 import os
+import pathlib
+
 import git
+
+import zntrack
 
 
 class NodeWithPostInit(zntrack.Node):
@@ -90,7 +92,6 @@ def test_save_post_init(proj_path):
     assert not file.exists()
 
     cwd = pathlib.Path.cwd().resolve().as_posix()
-
 
     # now we load it in a different directory
     os.mkdir("new_dir")
