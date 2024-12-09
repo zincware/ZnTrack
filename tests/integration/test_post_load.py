@@ -32,6 +32,7 @@ def test_post_load(proj_path):
     assert n.params == 2  # modified by _post_load_
     assert n.outs == 1
 
+
 def test_post_load_deps(proj_path):
     project = zntrack.Project()
 
@@ -43,7 +44,7 @@ def test_post_load_deps(proj_path):
     project.repro()
 
     # post load has not been called
-    assert dep_node.outs == 1 
+    assert dep_node.outs == 1
     assert node.outs == 1
     assert node.params == 1
     # assert dep_node_2.deps == 2 # has not been resolved from a connection
@@ -61,4 +62,3 @@ def test_post_load_deps(proj_path):
 
     assert node.from_rev().outs == 1
     assert node.from_rev().params == 2
-
