@@ -144,7 +144,7 @@ class Node(znflow.Node, znfields.Base):
                 _ = getattr(instance, field.name)
 
         instance._external_ = True
-        if hasattr(instance, "_post_load_"):
+        if not running and hasattr(instance, "_post_load_"):
             with contextlib.suppress(NotImplementedError):
                 instance._post_load_()
 
