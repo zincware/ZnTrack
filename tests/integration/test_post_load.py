@@ -21,5 +21,5 @@ def test_post_load(proj_path):
     project.repro()
 
     n = node.from_rev()
-    assert n.params == 2 # modified by _post_load_
+    assert n.params == 2  # modified by _post_load_
     assert n.outs == 1
