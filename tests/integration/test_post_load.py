@@ -12,7 +12,7 @@ class NodeWithPostLoad(zntrack.Node):
         self.outs = self.params
 
 
-class DepsOnPotLoadNode(zntrack.Node):
+class DepsOnPostLoadNode(zntrack.Node):
     deps: float = zntrack.deps()
     outs: float = zntrack.outs()
 
@@ -37,8 +37,8 @@ def test_post_load_deps(proj_path):
 
     with project:
         node = NodeWithPostLoad(params=1)
-        dep_node = DepsOnPotLoadNode(deps=node.outs)
-        dep_node_2 = DepsOnPotLoadNode(deps=node.params)
+        dep_node = DepsOnPostLoadNode(deps=node.outs)
+        dep_node_2 = DepsOnPostLoadNode(deps=node.params)
 
     project.repro()
 
@@ -54,6 +54,7 @@ def test_post_load_deps(proj_path):
     assert n.outs == 1
     assert n.deps == 1
 
+    # _post_load_ will also be called if the node is resolved from a connection
     n2 = dep_node_2.from_rev(name=dep_node_2.name)
     assert n2.outs == 2
     assert n2.deps == 2
