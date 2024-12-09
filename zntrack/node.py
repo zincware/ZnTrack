@@ -112,41 +112,50 @@ class Node(znflow.Node, znfields.Base):
 
         lazy_values["name"] = name
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
+
+        def __post_init__(instance):
+            # TODO: check if the node is finished or not.
+            instance.__dict__["state"] = NodeStatus(
+                remote=remote,
+                rev=rev,
+                state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
+                lazy_evaluation=lazy_evaluation,
+                group=Group.from_nwd(instance.nwd),
+            ).to_dict()
+
+            instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
+
+            with contextlib.suppress(FileNotFoundError):
+                # need to update run_count after the state is set
+                # TODO: do we want to set the UUID as well?
+                # TODO: test that run_count is correct, when using from_rev from another
+                #  commit
+                with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
+                    content = json.load(f)
+                    run_count = content.get("run_count", 0)
+                    run_time = content.get("run_time", 0)
+                    if node_uuid := content.get("uuid", None):
+                        instance._uuid = uuid.UUID(node_uuid)
+                    instance.__dict__["state"]["run_count"] = run_count
+                    instance.__dict__["state"]["run_time"] = datetime.timedelta(
+                        seconds=run_time
+                    )
+
+            if not instance.state.lazy_evaluation:
+                for field in dataclasses.fields(cls):
+                    _ = getattr(instance, field.name)
+
+            instance._external_ = True
+
+
+        original_post_init = cls.__post_init__
+        def _(self):
+            __post_init__(self)
+            original_post_init(self)
+        cls.__post_init__ = _
         instance = cls(**lazy_values)
 
-        # TODO: check if the node is finished or not.
-        instance.__dict__["state"] = NodeStatus(
-            remote=remote,
-            rev=rev,
-            state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
-            lazy_evaluation=lazy_evaluation,
-            group=Group.from_nwd(instance.nwd),
-        ).to_dict()
-
-        instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
-
-        with contextlib.suppress(FileNotFoundError):
-            # need to update run_count after the state is set
-            # TODO: do we want to set the UUID as well?
-            # TODO: test that run_count is correct, when using from_rev from another
-            #  commit
-            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
-                content = json.load(f)
-                run_count = content.get("run_count", 0)
-                run_time = content.get("run_time", 0)
-                if node_uuid := content.get("uuid", None):
-                    instance._uuid = uuid.UUID(node_uuid)
-                instance.__dict__["state"]["run_count"] = run_count
-                instance.__dict__["state"]["run_time"] = datetime.timedelta(
-                    seconds=run_time
-                )
-
-        if not instance.state.lazy_evaluation:
-            for field in dataclasses.fields(cls):
-                _ = getattr(instance, field.name)
-
-        instance._external_ = True
-
+  
         return instance
 
     @property
