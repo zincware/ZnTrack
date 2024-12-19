@@ -82,6 +82,7 @@ def test_node_in_group(proj_path):
     project.repro()
     assert n.state.group.name == ("MyGrp",)
 
+
 def test_custom_node_name_in_group(proj_path):
     project = zntrack.Project()
     with project.group("MyGrp"):
@@ -97,7 +98,6 @@ def test_custom_node_name_in_group(proj_path):
 
     assert n.name == "MyGrp_CustomName"
     assert n.state.group.name == ("MyGrp",)
-
 
 
 if __name__ == "__main__":
