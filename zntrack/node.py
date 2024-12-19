@@ -32,9 +32,7 @@ def _name_getter(self, name):
     if value is not None:
         if graph is not znflow.empty_graph and graph.active_group is not None:
             pass
-        elif self.state.group is None:
-            return value
-        elif all(x in value for x in self.state.group.name):
+        else:
             return value
     # find the value based on the current project context
     if graph is znflow.empty_graph:
