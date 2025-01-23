@@ -40,6 +40,8 @@ from zntrack.utils.misc import (
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 
+from zntrack.user_config import ALWAYS_CACHE
+
 
 @dataclasses.dataclass
 class DVCPlugin(ZnTrackPlugin):
@@ -129,7 +131,7 @@ class DVCPlugin(ZnTrackPlugin):
         stages = {
             "cmd": cmd,
             "metrics": [
-                {(self.node.nwd / "node-meta.json").as_posix(): {"cache": False}}
+                {(self.node.nwd / "node-meta.json").as_posix(): {"cache": ALWAYS_CACHE}}
             ],
         }
         if self.node.always_changed:

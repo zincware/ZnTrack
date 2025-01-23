@@ -22,6 +22,8 @@ from zntrack.node import Node
 from zntrack.project import Project
 from zntrack.utils import nwd
 
+from zntrack import user_config as config
+
 __all__ = [
     "params",
     "deps",
@@ -40,6 +42,7 @@ __all__ = [
     "apply",
     "add",
     "field",
+    "config",
 ]
 
 logger = logging.getLogger(__name__)

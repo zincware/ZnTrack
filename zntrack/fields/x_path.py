@@ -15,6 +15,8 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 
+from zntrack.user_config import ALWAYS_CACHE
+
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
 from zntrack.plugins import plugin_getter
@@ -88,7 +90,7 @@ def plots_path(
 def metrics_path(
     default=dataclasses.MISSING,
     *,
-    cache: bool = False,
+    cache: bool = ALWAYS_CACHE,
     independent: bool = False,
     **kwargs,
 ):

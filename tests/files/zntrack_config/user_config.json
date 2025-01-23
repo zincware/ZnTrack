@@ -1,0 +1,8 @@
+{
+    "MyNode": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/MyNode"
+        }
+    }
+}
