@@ -4,6 +4,7 @@ import json
 import znfields
 import znjson
 
+from zntrack import config
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
@@ -88,10 +89,12 @@ def plots_path(
 def metrics_path(
     default=dataclasses.MISSING,
     *,
-    cache: bool = False,
+    cache: bool | None = None,
     independent: bool = False,
     **kwargs,
 ):
+    if cache is None:
+        cache = config.ALWAYS_CACHE
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
