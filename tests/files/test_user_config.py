@@ -27,7 +27,7 @@ def test_node(proj_path):
 
     proj.repro()
 
-    zntrack.config.ALWAYS_CACHE = False # reset to default value
+    zntrack.config.ALWAYS_CACHE = False  # reset to default value
     assert zntrack.config.ALWAYS_CACHE is False
 
     assert json.loads(
@@ -39,7 +39,6 @@ def test_node(proj_path):
     assert (CWD / "params_config" / "user_config.yaml").read_text() == (
         proj_path / "params.yaml"
     ).read_text()
-
 
 
 if __name__ == "__main__":

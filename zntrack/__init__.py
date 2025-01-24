@@ -4,6 +4,7 @@ import sys
 
 from zntrack.add import add
 from zntrack.apply import apply
+from zntrack.config import config
 from zntrack.fields import (
     deps,
     deps_path,
@@ -21,8 +22,6 @@ from zntrack.from_rev import from_rev
 from zntrack.node import Node
 from zntrack.project import Project
 from zntrack.utils import nwd
-
-from zntrack.config import config
 
 __all__ = [
     "params",

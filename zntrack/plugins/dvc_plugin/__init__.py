@@ -26,6 +26,7 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
+    config,
 )
 
 # if t.TYPE_CHECKING:
@@ -39,8 +40,6 @@ from zntrack.utils.misc import (
     sort_and_deduplicate,
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
-
-from zntrack.config import config
 
 
 @dataclasses.dataclass
@@ -131,7 +130,11 @@ class DVCPlugin(ZnTrackPlugin):
         stages = {
             "cmd": cmd,
             "metrics": [
-                {(self.node.nwd / "node-meta.json").as_posix(): {"cache": config.ALWAYS_CACHE}}
+                {
+                    (self.node.nwd / "node-meta.json").as_posix(): {
+                        "cache": config.ALWAYS_CACHE
+                    }
+                }
             ],
         }
         if self.node.always_changed:

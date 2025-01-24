@@ -2,10 +2,9 @@ import json
 
 import znjson
 
-from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum
+from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum, config
 from zntrack.fields.base import field
 from zntrack.node import Node
-from zntrack.config import config
 
 
 def _outs_getter(self: "Node", name: str, suffix: str):

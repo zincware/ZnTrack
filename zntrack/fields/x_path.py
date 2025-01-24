@@ -13,9 +13,8 @@ from zntrack.config import (
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
+    config,
 )
-
-from zntrack.config import config
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
