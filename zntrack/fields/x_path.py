@@ -13,7 +13,7 @@ from zntrack.config import (
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
-    config,
+    Config,
 )
 
 # if t.TYPE_CHECKING:
@@ -89,7 +89,7 @@ def plots_path(
 def metrics_path(
     default=dataclasses.MISSING,
     *,
-    cache: bool = config.ALWAYS_CACHE,
+    cache: bool = Config.ALWAYS_CACHE,
     independent: bool = False,
     **kwargs,
 ):

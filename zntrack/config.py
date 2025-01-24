@@ -25,9 +25,6 @@ class Config:
     ALWAYS_CACHE: bool = False
 
 
-config = Config()
-
-
 # Use sentinel object for zntrack specific configurations. Use
 # a class to give it a better repr.
 class _ZNTRACK_OPTION_TYPE:

@@ -10,27 +10,38 @@ import zntrack
 CWD = pathlib.Path(__file__).parent.resolve()
 
 
-class MyNode(zntrack.Node):
-    """Some Node."""
+# class MyNode(zntrack.Node):
+#     """Some Node."""
 
-    metric: dict = zntrack.metrics()
+#     metric: dict = zntrack.metrics()
 
-    def run(self) -> None:
-        self.metric = {"a": 1, "b": 2}
+#     def run(self) -> None:
+#         self.metric = {"a": 1, "b": 2}
 
 
 def test_node(proj_path):
-    assert zntrack.config.ALWAYS_CACHE is False
-    zntrack.config.ALWAYS_CACHE = True
-    assert zntrack.config.ALWAYS_CACHE is True
+    assert zntrack.Config.ALWAYS_CACHE is False
+    zntrack.Config.ALWAYS_CACHE = True
+    assert zntrack.Config.ALWAYS_CACHE is True
+
+    # We define the node here, because the config has to be set
+    #  bevore calling zntrack.metrics()
+    class MyNode(zntrack.Node):
+        """Some Node."""
+
+        metric: dict = zntrack.metrics()
+
+        def run(self) -> None:
+            self.metric = {"a": 1, "b": 2}
+
 
     with zntrack.Project() as proj:
         node = MyNode()
 
-    proj.repro()
+    proj.build()
 
-    zntrack.config.ALWAYS_CACHE = False  # reset to default value
-    assert zntrack.config.ALWAYS_CACHE is False
+    zntrack.Config.ALWAYS_CACHE = False  # reset to default value
+    assert zntrack.Config.ALWAYS_CACHE is False
 
     assert json.loads(
         (CWD / "zntrack_config" / "user_config.json").read_text()

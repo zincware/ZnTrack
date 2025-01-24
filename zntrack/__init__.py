@@ -4,7 +4,7 @@ import sys
 
 from zntrack.add import add
 from zntrack.apply import apply
-from zntrack.config import config
+from zntrack.config import Config
 from zntrack.fields import (
     deps,
     deps_path,
@@ -41,7 +41,7 @@ __all__ = [
     "apply",
     "add",
     "field",
-    "config",
+    "Config",
 ]
 
 logger = logging.getLogger(__name__)

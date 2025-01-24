@@ -2,7 +2,7 @@ import json
 
 import znjson
 
-from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum, config
+from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum, Config
 from zntrack.fields.base import field
 from zntrack.node import Node
 
@@ -45,7 +45,9 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     )
 
 
-def metrics(*, cache: bool = config.ALWAYS_CACHE, independent: bool = False, **kwargs):
+def metrics(*, cache: bool|None = None, independent: bool = False, **kwargs):
+    if cache is None:
+        cache = Config.ALWAYS_CACHE
     return field(
         default=NOT_AVAILABLE,
         cache=cache,
