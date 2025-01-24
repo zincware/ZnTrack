@@ -2,6 +2,7 @@ import importlib.metadata
 import logging
 import sys
 
+from zntrack import config
 from zntrack.add import add
 from zntrack.apply import apply
 from zntrack.fields import (
@@ -21,7 +22,6 @@ from zntrack.from_rev import from_rev
 from zntrack.node import Node
 from zntrack.project import Project
 from zntrack.utils import nwd
-from zntrack import config
 
 __all__ = [
     "params",

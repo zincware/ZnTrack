@@ -4,6 +4,7 @@ import json
 import znfields
 import znjson
 
+from zntrack import config
 from zntrack.config import (
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
@@ -14,7 +15,6 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
 )
-from zntrack import config
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -89,7 +89,7 @@ def plots_path(
 def metrics_path(
     default=dataclasses.MISSING,
     *,
-    cache: bool|None = None,
+    cache: bool | None = None,
     independent: bool = False,
     **kwargs,
 ):

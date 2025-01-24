@@ -12,7 +12,7 @@ import znflow.handler
 import znflow.utils
 import znjson
 
-from zntrack import converter
+from zntrack import config, converter
 from zntrack.config import (
     NOT_AVAILABLE,
     PARAMS_FILE_PATH,
@@ -27,7 +27,6 @@ from zntrack.config import (
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
 )
-from zntrack import config
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node

@@ -26,7 +26,6 @@ def test_node(proj_path):
         def run(self) -> None:
             self.metric = {"a": 1, "b": 2}
 
-
     with zntrack.Project() as proj:
         node = MyNode()
 
