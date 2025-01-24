@@ -26,8 +26,8 @@ from zntrack.config import (
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
-    Config,
 )
+from zntrack import config
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -132,7 +132,7 @@ class DVCPlugin(ZnTrackPlugin):
             "metrics": [
                 {
                     (self.node.nwd / "node-meta.json").as_posix(): {
-                        "cache": Config.ALWAYS_CACHE
+                        "cache": config.ALWAYS_CACHE
                     }
                 }
             ],

@@ -13,8 +13,8 @@ from zntrack.config import (
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
-    Config,
 )
+from zntrack import config
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -89,10 +89,12 @@ def plots_path(
 def metrics_path(
     default=dataclasses.MISSING,
     *,
-    cache: bool = Config.ALWAYS_CACHE,
+    cache: bool|None = None,
     independent: bool = False,
     **kwargs,
 ):
+    if cache is None:
+        cache = config.ALWAYS_CACHE
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache

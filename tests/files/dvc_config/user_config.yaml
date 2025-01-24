@@ -5,3 +5,4 @@ stages:
     - nodes/MyNode/metric.json
     - nodes/MyNode/node-meta.json:
         cache: true
+    - nodes/MyNode/results.json
