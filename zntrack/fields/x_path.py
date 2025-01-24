@@ -15,7 +15,7 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 
-from zntrack.user_config import ALWAYS_CACHE
+from zntrack.config import config
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
@@ -90,7 +90,7 @@ def plots_path(
 def metrics_path(
     default=dataclasses.MISSING,
     *,
-    cache: bool = ALWAYS_CACHE,
+    cache: bool = config.ALWAYS_CACHE,
     independent: bool = False,
     **kwargs,
 ):

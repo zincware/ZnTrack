@@ -18,7 +18,9 @@ class MyNode(zntrack.Node):
 
 
 def test_node(proj_path):
+    assert zntrack.config.ALWAYS_CACHE is False
     zntrack.config.ALWAYS_CACHE = True
+    assert zntrack.config.ALWAYS_CACHE is True
 
     with zntrack.Project() as proj:
         node = MyNode()
@@ -26,6 +28,7 @@ def test_node(proj_path):
     proj.repro()
 
     zntrack.config.ALWAYS_CACHE = False # reset to default value
+    assert zntrack.config.ALWAYS_CACHE is False
 
     assert json.loads(
         (CWD / "zntrack_config" / "user_config.json").read_text()

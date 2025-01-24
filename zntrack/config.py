@@ -9,6 +9,24 @@ NWD_PATH = pathlib.Path("nodes")
 EXP_INFO_PATH = pathlib.Path(".exp_info.yaml")
 
 
+class Config:
+    """Configuration class for ZnTrack.
+    
+    Attributes
+    ----------
+    ALWAYS_CACHE : bool
+        For "node-meta.json" and "dvc stage add ... --metrics-no-cache" the default is using
+        git tracked files. Setting this to True will override the default behavior to always
+        use the DVC cache. If you have a DVC cache setup, this might be desirable, to avoid
+        a mixture between DVC cache and git tracked files.
+    
+    """
+
+    ALWAYS_CACHE: bool = False
+
+config = Config()
+
+
 # Use sentinel object for zntrack specific configurations. Use
 # a class to give it a better repr.
 class _ZNTRACK_OPTION_TYPE:
