@@ -13,8 +13,10 @@ CWD = pathlib.Path(__file__).parent.resolve()
 class MyNode(zntrack.Node):
     """Some Node."""
 
+    metric: dict = zntrack.metrics()
+
     def run(self) -> None:
-        pass
+        self.metric = {"a": 1, "b": 2}
 
 
 def test_node(proj_path):
