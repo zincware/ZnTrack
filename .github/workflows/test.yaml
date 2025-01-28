@@ -49,19 +49,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      - name: Install package
-        run: |
-          poetry run pip install aim
-          poetry install --no-interaction
+      - name: Install the project
+        run: uv sync --all-extras --dev
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
@@ -69,11 +62,11 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
-          poetry run python --version
-          poetry run coverage run -m pytest --benchmark-autosave -vv
-          poetry run coverage xml
-          poetry run coverage lcov
-          poetry run py.test-benchmark compare --csv=export.csv
+          uv run python --version
+          uv run coverage run -m pytest --benchmark-autosave -vv
+          uv run coverage xml
+          uv run coverage lcov
+          uv run py.test-benchmark compare --csv=export.csv
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
