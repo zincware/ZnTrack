@@ -16,6 +16,7 @@ from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
+import logging
 
 try:
     from typing import dataclass_transform
@@ -23,6 +24,8 @@ except ImportError:
     from typing_extensions import dataclass_transform
 
 T = t.TypeVar("T", bound="Node")
+
+log = logging.getLogger(__name__)
 
 
 def _name_getter(self, name):
@@ -42,7 +45,7 @@ def _name_getter(self, name):
 class Node(znflow.Node, znfields.Base):
     """A Node."""
 
-    name: str | None = znfields.field(default=None, getter=_name_getter)
+    name: str | None = znfields.field(default=None, getter=_name_getter) # TODO: add setter and log warning
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
@@ -53,6 +56,8 @@ class Node(znflow.Node, znfields.Base):
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
+                if "_" in self.name:
+                    log.warning("Node name should not contain '_'. This character is used for defining groups.")
 
     def _post_load_(self):
         """Called after `from_rev` is called."""
