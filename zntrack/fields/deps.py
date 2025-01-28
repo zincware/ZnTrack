@@ -52,5 +52,5 @@ def deps(default=dataclasses.MISSING, **kwargs):
         default=default,
         load_fn=_deps_getter,
         zntrack_option=ZnTrackOptionEnum.DEPS,
-        **kwargs
+        **kwargs,
     )
