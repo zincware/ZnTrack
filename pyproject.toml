@@ -32,6 +32,7 @@ Documentation = "https://zntrack.readthedocs.io"
 dev = [
     "coverage>=7.6.10",
     "dvc-s3>=3.2.0",
+    "furo>=2024.8.6",
     "h5py>=3.12.1",
     "mlflow>=2.20.0",
     "pytest>=8.3.4",
