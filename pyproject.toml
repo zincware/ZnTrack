@@ -8,7 +8,7 @@ authors = [
 license = "Apache-2.0"
 keywords=["data-science", "data-version-control", "machine-learning", "reproducibility", "collaboration"]
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.10"
 dependencies = [
     "dvc>=3.59.0",
     "pandas>=2.2.3",
@@ -33,6 +33,7 @@ dev = [
     "coverage>=7.6.10",
     "mlflow>=2.20.0",
     "pytest>=8.3.4",
+    "pytest-benchmark>=5.1.0",
 ]
 
 
