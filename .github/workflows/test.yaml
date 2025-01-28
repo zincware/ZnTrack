@@ -115,8 +115,8 @@ jobs:
       run: uv sync --all-extras --dev
     - name: Install pandoc
       run: |
-        apt update
-        apt install pandoc
+        sudo apt update
+        sudo apt install pandoc
     - name: Setup git user
       run: |
         git config --global user.name "John Doe"
