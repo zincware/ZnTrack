@@ -1,0 +1,12 @@
+{
+    "MyNode": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/MyNode"
+        },
+        "metrics_path": {
+            "_type": "pathlib.Path",
+            "value": "$nwd$/results.json"
+        }
+    }
+}
