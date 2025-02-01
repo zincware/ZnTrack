@@ -34,7 +34,8 @@ ensures reproducibility, scalability, and ease of collaboration.
 ## Example: Molecular Dynamics Workflow
 
 Let’s take a workflow that constructs a periodic, atomistic system of Ethanol
-and runs a geometry optimization using [MACE-MP-0](https://arxiv.org/abs/2401.00096).
+and runs a geometry optimization using
+[MACE-MP-0](https://arxiv.org/abs/2401.00096).
 
 ### Original Workflow
 
