@@ -15,18 +15,26 @@
 
 # ZnTrack: Make Your Python Code Reproducible!
 
-ZnTrack (`zɪŋk træk`) is a lightweight and easy-to-use Python package for converting your existing Python code into reproducible workflows. By structuring your code as a directed graph with well-defined inputs and outputs, ZnTrack ensures reproducibility, scalability, and ease of collaboration.
+ZnTrack (`zɪŋk træk`) is a lightweight and easy-to-use Python package for
+converting your existing Python code into reproducible workflows. By structuring
+your code as a directed graph with well-defined inputs and outputs, ZnTrack
+ensures reproducibility, scalability, and ease of collaboration.
 
 ## Key Features
 
-- **Reproducible Workflows**: Convert Python scripts into reproducible workflows with minimal effort.
-- **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs, and metrics in your Python code.
-- **Lightweight and Database-Free**: ZnTrack is lightweight and does not require any databases.
-- **DVC Integration**: Seamlessly integrates with [DVC](https://dvc.org) for data version control.
+- **Reproducible Workflows**: Convert Python scripts into reproducible workflows
+  with minimal effort.
+- **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs,
+  and metrics in your Python code.
+- **Lightweight and Database-Free**: ZnTrack is lightweight and does not require
+  any databases.
+- **DVC Integration**: Seamlessly integrates with [DVC](https://dvc.org) for
+  data version control.
 
 ## Example: Molecular Dynamics Workflow
 
-Let’s take a workflow that constructs a periodic, atomistic system of Ethanol and runs a geometry optimization using MACE-MP-0.
+Let’s take a workflow that constructs a periodic, atomistic system of Ethanol
+and runs a geometry optimization using MACE-MP-0.
 
 ### Original Workflow
 
@@ -160,21 +168,25 @@ optm = zntrack.from_rev(name="StructureOptimization")
 print(optm.frames)
 ```
 
-For more examples, check out the following packages that build on top of ZnTrack:
+For more examples, check out the following packages that build on top of
+ZnTrack:
+
 - [MLIPx](https://mlipx.readthedocs.io/en/latest/)
 - [IPSuite](https://github.com/zincware/IPSuite)
 
----
+______________________________________________________________________
 
 ## Technical Details
 
 ### ZnTrack as an Object-Relational Mapping for DVC
 
-ZnTrack provides an easy-to-use interface for DVC directly from Python. It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml`, and much more.
+ZnTrack provides an easy-to-use interface for DVC directly from Python. It
+handles all the computational overhead of reading config files, defining outputs
+in the `dvc.yaml`, and much more.
 
 For more information on DVC, visit their [homepage](https://dvc.org/doc).
 
----
+______________________________________________________________________
 
 ## References
 
@@ -190,22 +202,27 @@ If you use ZnTrack in your research, please cite us:
 }
 ```
 
----
+______________________________________________________________________
 
 ## Copyright
 
-This project is distributed under the [Apache License Version 2.0](https://github.com/zincware/ZnTrack/blob/main/LICENSE).
+This project is distributed under the
+[Apache License Version 2.0](https://github.com/zincware/ZnTrack/blob/main/LICENSE).
 
----
+______________________________________________________________________
 
 ## Similar Tools
 
-Here’s a list of other projects that either work together with ZnTrack or achieve similar results with slightly different goals or programming languages:
+Here’s a list of other projects that either work together with ZnTrack or
+achieve similar results with slightly different goals or programming languages:
 
 - [DVC](https://dvc.org/) - Main dependency of ZnTrack for Data Version Control.
 - [dvthis](https://github.com/jcpsantiago/dvthis) - Introduce DVC to R.
-- [DAGsHub Client](https://github.com/DAGsHub/client) - Logging parameters from within Python.
+- [DAGsHub Client](https://github.com/DAGsHub/client) - Logging parameters from
+  within Python.
 - [MLFlow](https://mlflow.org/) - A Machine Learning Lifecycle Platform.
 - [Metaflow](https://metaflow.org/) - A framework for real-life data science.
-- [Hydra](https://hydra.cc/) - A framework for elegantly configuring complex applications.
-- [Snakemake](https://snakemake.readthedocs.io/en/stable/) - Workflow management system for reproducible and scalable data analyses.
+- [Hydra](https://hydra.cc/) - A framework for elegantly configuring complex
+  applications.
+- [Snakemake](https://snakemake.readthedocs.io/en/stable/) - Workflow management
+  system for reproducible and scalable data analyses.
