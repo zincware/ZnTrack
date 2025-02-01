@@ -166,3 +166,13 @@ with project:
 
 project.repro()
 ```
+
+We can now see that the files have been created in `nodes/StructureOptimization>/frames.traj` which contains our final trajectory.
+To look at the results, we can also run the following Python script:
+
+```python
+import zntrack
+
+optm = zntrack.from_rev(name="StructureOptimization")
+print(optm.frames)
+```
