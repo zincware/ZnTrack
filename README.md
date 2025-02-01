@@ -65,9 +65,10 @@ For this example to work, you will need:
 </ul>
 </details>
 
+
 ### Converted Workflow with ZnTrack
 
-To make this workflow reproducible, we convert it into a graph structure:
+To make this workflow reproducible, we convert it into a **directed graph structure** where each step is represented as a **Node**. Nodes define their inputs, outputs, and the computational logic to execute. Here's the graph structure for our example:
 
 ```mermaid
 flowchart LR
@@ -78,16 +79,13 @@ MACE_MP --> StructureOptimization
 
 #### Node Definitions
 
-Within ZnTrack, each Node is defined by a class. The class attributes define the
-inputs and outputs for each Node, while the `run` method provides the actual
-code that will be executed at runtime.
+In ZnTrack, each **Node** is defined as a Python class. The class attributes define the **inputs** (parameters and dependencies) and **outputs**, while the `run` method contains the computational logic to be executed.
 
-> [INFO] ZnTrack uses Python dataclasses under the hood to provide you with an
-> automatic `__init__`. Starting from Python 3.11 most IDEs should also reliably
-> provide type hints for ZnTrack nodes.
+> [!NOTE]
+> ZnTrack uses Python dataclasses under the hood, providing an automatic `__init__` method. Starting from Python 3.11, most IDEs should reliably provide type hints for ZnTrack Nodes.
 
-> [NOTE] For files produces during the `run`, ZnTrack provides a unique node
-> working directort (`zntrack.nwd`) which should be used to store files within.
+> [!TIP]
+> For files produced during the `run` method, ZnTrack provides a unique **Node Working Directory** (`zntrack.nwd`). Always use this directory to store files to ensure reproducibility and avoid conflicts.
 
 ```python
 import zntrack
@@ -95,124 +93,143 @@ import ase.io
 from pathlib import Path
 
 class Smiles2Conformers(zntrack.Node):
-    smiles: str = zntrack.params() # a required parameter
-    numConfs: int = zntrack.params(32) # a default parameter
+    smiles: str = zntrack.params()  # A required parameter
+    numConfs: int = zntrack.params(32)  # A parameter with a default value
 
-    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz") # node output in the node working directory
+    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")  # Output file path
 
     def run(self) -> None:
+        # Generate molecular conformers from a SMILES string
         frames = smiles2conformers(smiles=self.smiles, numConfs=self.numConfs)
+        # Save the frames to the output file
         ase.io.write(frames, self.frames_path)
 
     @property
     def frames(self) -> list[ase.Atoms]:
-        with self.state.fs.open(self.frames_path, "r") as f: # we use the node state filesystem to read the Node to enable automatic data download and comparison of results. This will become important later.
+        # Load the frames from the output file using the node's filesystem
+        with self.state.fs.open(self.frames_path, "r") as f:
             return list(ase.io.iread(f, ":", format="extxyz"))
 
 
 class Pack(zntrack.Node):
-    data: list[list[ase.Atoms]] = zntrack.deps() # in addition to parameters we can define dependencies as inputs
-    counts: list[int] = zntrack.params()
-    density: float = zntrack.params()
+    data: list[list[ase.Atoms]] = zntrack.deps()  # Input dependency (list of ASE Atoms)
+    counts: list[int] = zntrack.params()  # Parameter (list of counts)
+    density: float = zntrack.params()  # Parameter (density value)
 
-    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
+    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")  # Output file path
 
     def run(self) -> None:
+        # Pack the molecular frames into a periodic box
         box = pack(data=self.data, counts=self.counts, density=self.density)
+        # Save the packed structure to the output file
         ase.io.write(box, self.frames_path)
 
     @property
     def frames(self) -> list[ase.Atoms]:
+        # Load the packed structure from the output file
         with self.state.fs.open(self.frames_path, "r") as f:
             return list(ase.io.iread(f, ":", format="extxyz"))
 
 
 # We could hardcode the MACE_MP model into the StructureOptimization Node, but we
-# can also define it as a dependency. In contrast to `Smiles2Conformers` and
-# `Pack` the model does not require a `run` method and thus we can define it as a
-# `@dataclass`
+# can also define it as a dependency. Since the model doesn't require a `run` method,
+# we define it as a `@dataclass`.
 
 @dataclass
 class MACE_MP:
-    model: str = "medium"
+    model: str = "medium"  # Default model type
 
     def get_calculator(self, **kwargs):
+        # Return a MACE-MP calculator instance
         return mace_mp(model=self.model)
 
 
 class StructureOptimization(zntrack.Node):
-    model: MACE_MP = zntrack.deps() # model dependency
-    data: list[ase.Atoms] = zntrack.deps() # ase.Atoms dependency
-    data_id: int = zntrack.params()
-    fmax: float = zntrack.params(0.05)
+    model: MACE_MP = zntrack.deps()  # Dependency (MACE_MP model)
+    data: list[ase.Atoms] = zntrack.deps()  # Dependency (list of ASE Atoms)
+    data_id: int = zntrack.params()  # Parameter (index of the structure to optimize)
+    fmax: float = zntrack.params(0.05)  # Parameter (force convergence threshold)
 
-    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.traj")
+    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.traj")  # Output file path
 
     def run(self):
+        # Select the structure to optimize
         atoms = self.data[self.data_id]
+        # Attach the MACE-MP calculator
         atoms.calc = self.model.get_calculator()
+        # Run the geometry optimization
         dyn = LBFGS(atoms, trajectory=self.frames_path)
         dyn.run(fmax=0.5)
 
     @property
     def frames(self) -> list[ase.Atoms]:
+        # Load the optimization trajectory from the output file
         with self.state.fs.open(self.frames_path, "rb") as f:
             return list(ase.io.iread(f, ":", format="traj"))
 ```
 
 #### Building and Running the Workflow
 
-Now that we have defined all necessary Nodes we can put them to use and build
-our graph. Best to go into a new and empty directory, run `git init` followed by
-`dvc init`. Then we create a file `src/__init__.py` and place the Node
-definitions in there. Finally we create a new file `main.py` as described bellow
-and execute it using `python main.py` to build and access our workflow.
+Now that we’ve defined all the necessary Nodes, we can build and execute the workflow. Follow these steps:
 
-```python
-import zntrack
-from src import MACE_MP, Smiles2Conformers, Pack, StructureOptimization
+1. **Initialize a new directory** for your project:
+   ```bash
+   git init
+   dvc init
+   ```
 
-project = zntrack.Project()
+2. **Create a Python module** for the Node definitions:
+   - Create a file `src/__init__.py` and place the Node definitions inside it.
 
-model = MACE_MP()
+3. **Define and execute the workflow** in a `main.py` file:
+   ```python
+   import zntrack
+   from src import MACE_MP, Smiles2Conformers, Pack, StructureOptimization
 
-with project:
-  # within the project context we can define and connect nodes
-    etoh = Smiles2Conformers(smiles="CCO", numConfs=32)
-    box = Pack(data=[etoh.frames], counts=[32], density=789)
-    optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)
+   # Initialize the ZnTrack project
+   project = zntrack.Project()
 
-# the nodes will only be executed afterwards in seperate python kernels.
-# if you don't want to execute the graph immediatly, use `project.build()` instead
-# and run the graph alter using `dvc repro` or the paraffin package.
-project.repro()
-```
+   # Define the MACE-MP model
+   model = MACE_MP()
+
+   # Build the workflow graph
+   with project:
+       etoh = Smiles2Conformers(smiles="CCO", numConfs=32)  # Generate conformers
+       box = Pack(data=[etoh.frames], counts=[32], density=789)  # Pack the structures
+       optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)  # Optimize the structure
+
+   # Execute the workflow
+   project.repro()
+   ```
+
+   > **TIP**  
+   > If you don’t want to execute the graph immediately, use `project.build()` instead. You can run the graph later using `dvc repro` or the [paraffin](https://github.com/zincware/paraffin) package.
 
 #### Accessing Results
 
-Once the graph has been executed, the respective files will have been written.
-For example, you could load the `nodes/StructureOptimization/frames.traj`
-trajectory directly from the file path.
+Once the workflow has been executed, the results are stored in the respective files. For example, the optimized trajectory is saved in `nodes/StructureOptimization/frames.traj`.
 
-Alternatively, you can load ZnTrack nodes after they have been executed and need
-not to worry about where the file was stored or in which format, because you can
-look at the `list[ase.Atoms]` direclty from within Python by loading the node as
-follows:
+You can load the results directly using ZnTrack, without worrying about file paths or formats:
 
 ```python
 import zntrack
 
+# Load the StructureOptimization Node
 optm = zntrack.from_rev(name="StructureOptimization")
+
+# Access the optimization trajectory
 print(optm.frames)
 ```
 
-For more examples, check out the following packages that build on top of
-ZnTrack:
+---
 
-- [MLIPx](https://mlipx.readthedocs.io/en/latest/)
-- [IPSuite](https://github.com/zincware/IPSuite)
+### More Examples
 
-______________________________________________________________________
+For additional examples and advanced use cases, check out these packages built on top of ZnTrack:
+
+- [MLIPx](https://mlipx.readthedocs.io/en/latest/) - Machine Learning Interatomic Potentials.
+- [IPSuite](https://github.com/zincware/IPSuite) - Interatomic Potential Suite for materials science.
+
 
 ## Technical Details
 
