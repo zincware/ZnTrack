@@ -97,7 +97,8 @@ class ConnectionConverter(znjson.ConverterBase):
         """Convert the znflow.Connection object to dict."""
         if obj.item is not None:
             raise NotImplementedError("znflow.Connection getitem is not supported yet.")
-        # Can not use `dataclasses.asdict` because it automatically converts nested dataclasses to dict.
+        # Can not use `dataclasses.asdict` because it automatically
+        # converts nested dataclasses to dict.
         return {
             "instance": obj.instance,
             "attribute": obj.attribute,
@@ -149,10 +150,13 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         # that directory is probably best described by using the node.name
         # of the node that depends on the import?
         # or we use a hash from commit / node name / repo path <-- only validate answer!
-        # we want to run dvc import remote get_path(node, "attribute") --rev rev --out /.../get_path(node, "attribute").name
+        # we want to run dvc import remote get_path(node, "attribute")
+        # --rev rev --out /.../get_path(node, "attribute").name
         # use --no-download option while building
-        # check how dvc repro or paraffin would download files? Do we want the user to force download?
-        # have zntrack.Path(path, remote, rev, is_dvc_tracked, is_db) to use dvc import-url / import-db in the graph
+        # check how dvc repro or paraffin would download files?
+        # Do we want the user to force download?
+        # have zntrack.Path(path, remote, rev, is_dvc_tracked, is_db)
+        #  to use dvc import-url / import-db in the graph
         # return []
         # raise NotImplementedError
     if attribute is None:
@@ -185,7 +189,7 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         if node._external_:
             warnings.warn("External nodes are currently always loaded dynamically.")
             continue
-        if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) == True:
+        if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) is True:
             paths.append((node.nwd / "node-meta.json").as_posix())
             if node._external_:
                 raise NotImplementedError

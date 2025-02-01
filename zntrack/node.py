@@ -8,7 +8,7 @@ import typing as t
 import uuid
 import warnings
 
-import typing_extensions as te
+import typing_extensions as ty_ex
 import znfields
 import znflow
 
@@ -70,13 +70,14 @@ class Node(znflow.Node, znfields.Base):
 
     def __post_init__(self):
         if self.name is None:
-            # automatic node names expectes the name to be None when
+            # automatic node names expects the name to be None when
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
                 if "_" in self.name:
                     log.warning(
-                        "Node name should not contain '_'. This character is used for defining groups."
+                        "Node name should not contain '_'."
+                        " This character is used for defining groups."
                     )
 
     def _post_load_(self):
@@ -93,14 +94,16 @@ class Node(znflow.Node, znfields.Base):
                     value = getattr(self, field.name)
                     if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
                         raise ValueError(
-                            f"Field '{field.name}' is not set. Please set it before saving."
+                            f"Field '{field.name}' is not set."
+                            " Please set it before saving."
                         )
                     try:
                         plugin.save(field)
                     except Exception as err:  # noqa: E722
                         if plugin._continue_on_error_:
                             warnings.warn(
-                                f"Plugin {plugin.__class__.__name__} failed to save field {field.name}."
+                                f"Plugin {plugin.__class__.__name__} failed to"
+                                f" save field {field.name}."
                             )
                         else:
                             raise err
@@ -183,6 +186,6 @@ class Node(znflow.Node, znfields.Base):
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
-    @te.deprecated("loading is handled automatically via lazy evaluation")
+    @ty_ex.deprecated("loading is handled automatically via lazy evaluation")
     def load(self):
         pass

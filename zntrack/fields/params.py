@@ -13,7 +13,8 @@ def _params_getter(self: "Node", name: str):
 
 
 def params(default=dataclasses.MISSING, **kwargs):
-    # TODO: check types, do not allow e.g. connections or anything that can not be serialized
+    # TODO: check types, do not allow e.g. connections
+    #  or anything that can not be serialized
     return field(
         default=default,
         zntrack_option=ZnTrackOptionEnum.PARAMS,

@@ -116,21 +116,19 @@ def sort_and_deduplicate(data: list[str | dict[str, dict]]):
         if key not in new_data:
             if isinstance(key, dict):
                 if next(iter(key.keys())) in new_data:
-                    raise ValueError(
-                        f"Duplicate key with different parameters found: {key}"
-                    )
+                    raise ValueError(f"Found Duplicate key with different params: {key}")
                 for other_key in new_data:
                     if isinstance(other_key, dict):
                         if next(iter(other_key.keys())) == next(iter(key.keys())):
                             if other_key != key:
                                 raise ValueError(
-                                    f"Duplicate key with different parameters found: {key}"
+                                    f"Found Duplicate key with different params: {key}"
                                 )
             if isinstance(key, str):
                 for other_key in new_data:
                     if isinstance(other_key, dict) and key in other_key.keys():
                         raise ValueError(
-                            f"Duplicate key with different parameters found: {key}"
+                            f"Found Duplicate key with different params: {key}"
                         )
             new_data.append(key)
 

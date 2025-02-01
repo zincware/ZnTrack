@@ -22,7 +22,8 @@ def from_rev(name: str, remote: str | None = None, rev: str | None = None):
         else:
             raise ValueError(f"Stage {name} not found in {repo}")
 
-    # cmd will be "zntrack run module.name --name ..." and we need the module.name and --name part
+    # cmd will be "zntrack run module.name --name ..."
+    # and we need the module.name and --name part
     run_str = cmd.split()[2]
     name = cmd.split()[4]
 

@@ -237,7 +237,7 @@ class WriteDVCOutsPath(zntrack.Node):
                 return (pathlib.Path(self.outs) / "file.txt").read_text()
             except FileNotFoundError:
                 files = list(pathlib.Path(self.outs).iterdir())
-                raise ValueError(f"Expected {self.outs } file, found {files}.")
+                raise ValueError(f"Expected {self.outs} file, found {files}.")
 
 
 class WriteMultipleDVCOuts(zntrack.Node):
