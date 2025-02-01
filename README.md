@@ -65,10 +65,12 @@ For this example to work, you will need:
 </ul>
 </details>
 
-
 ### Converted Workflow with ZnTrack
 
-To make this workflow reproducible, we convert it into a **directed graph structure** where each step is represented as a **Node**. Nodes define their inputs, outputs, and the computational logic to execute. Here's the graph structure for our example:
+To make this workflow reproducible, we convert it into a **directed graph
+structure** where each step is represented as a **Node**. Nodes define their
+inputs, outputs, and the computational logic to execute. Here's the graph
+structure for our example:
 
 ```mermaid
 flowchart LR
@@ -79,13 +81,17 @@ MACE_MP --> StructureOptimization
 
 #### Node Definitions
 
-In ZnTrack, each **Node** is defined as a Python class. The class attributes define the **inputs** (parameters and dependencies) and **outputs**, while the `run` method contains the computational logic to be executed.
+In ZnTrack, each **Node** is defined as a Python class. The class attributes
+define the **inputs** (parameters and dependencies) and **outputs**, while the
+`run` method contains the computational logic to be executed.
 
-> [!NOTE]
-> ZnTrack uses Python dataclasses under the hood, providing an automatic `__init__` method. Starting from Python 3.11, most IDEs should reliably provide type hints for ZnTrack Nodes.
+> [!NOTE] ZnTrack uses Python dataclasses under the hood, providing an automatic
+> `__init__` method. Starting from Python 3.11, most IDEs should reliably
+> provide type hints for ZnTrack Nodes.
 
-> [!TIP]
-> For files produced during the `run` method, ZnTrack provides a unique **Node Working Directory** (`zntrack.nwd`). Always use this directory to store files to ensure reproducibility and avoid conflicts.
+> [!TIP] For files produced during the `run` method, ZnTrack provides a unique
+> **Node Working Directory** (`zntrack.nwd`). Always use this directory to store
+> files to ensure reproducibility and avoid conflicts.
 
 ```python
 import zntrack
@@ -162,18 +168,22 @@ class StructureOptimization(zntrack.Node):
 
 #### Building and Running the Workflow
 
-Now that we’ve defined all the necessary Nodes, we can build and execute the workflow. Follow these steps:
+Now that we’ve defined all the necessary Nodes, we can build and execute the
+workflow. Follow these steps:
 
 1. **Initialize a new directory** for your project:
+
    ```bash
    git init
    dvc init
    ```
 
-2. **Create a Python module** for the Node definitions:
+1. **Create a Python module** for the Node definitions:
+
    - Create a file `src/__init__.py` and place the Node definitions inside it.
 
-3. **Define and execute the workflow** in a `main.py` file:
+1. **Define and execute the workflow** in a `main.py` file:
+
    ```python
    import zntrack
    from src import MACE_MP, Smiles2Conformers, Pack, StructureOptimization
@@ -194,14 +204,18 @@ Now that we’ve defined all the necessary Nodes, we can build and execute the w
    project.repro()
    ```
 
-   > [!TIP]
-   > If you don’t want to execute the graph immediately, use `project.build()` instead. You can run the graph later using `dvc repro` or the [paraffin](https://github.com/zincware/paraffin) package.
+   > [!TIP] If you don’t want to execute the graph immediately, use
+   > `project.build()` instead. You can run the graph later using `dvc repro` or
+   > the [paraffin](https://github.com/zincware/paraffin) package.
 
 #### Accessing Results
 
-Once the workflow has been executed, the results are stored in the respective files. For example, the optimized trajectory is saved in `nodes/StructureOptimization/frames.traj`.
+Once the workflow has been executed, the results are stored in the respective
+files. For example, the optimized trajectory is saved in
+`nodes/StructureOptimization/frames.traj`.
 
-You can load the results directly using ZnTrack, without worrying about file paths or formats:
+You can load the results directly using ZnTrack, without worrying about file
+paths or formats:
 
 ```python
 import zntrack
@@ -213,15 +227,17 @@ optm = zntrack.from_rev(name="StructureOptimization")
 print(optm.frames)
 ```
 
----
+______________________________________________________________________
 
 ### More Examples
 
-For additional examples and advanced use cases, check out these packages built on top of ZnTrack:
+For additional examples and advanced use cases, check out these packages built
+on top of ZnTrack:
 
-- [MLIPx](https://mlipx.readthedocs.io/en/latest/) - Machine Learning Interatomic Potentials.
-- [IPSuite](https://github.com/zincware/IPSuite) - Interatomic Potential Suite for materials science.
-
+- [MLIPx](https://mlipx.readthedocs.io/en/latest/) - Machine Learning
+  Interatomic Potentials.
+- [IPSuite](https://github.com/zincware/IPSuite) - Interatomic Potential Suite
+  for materials science.
 
 ## Technical Details
 
