@@ -237,10 +237,8 @@ ______________________________________________________________________
 For additional examples and advanced use cases, check out these packages built
 on top of ZnTrack:
 
-- [MLIPx](https://mlipx.readthedocs.io/en/latest/) - Machine Learning
-  Interatomic Potentials.
-- [IPSuite](https://github.com/zincware/IPSuite) - Interatomic Potential Suite
-  for materials science.
+- [mlipx](https://mlipx.readthedocs.io/en/latest/) - Machine Learned Interatomic Potential eXploration.
+- [IPSuite](https://github.com/zincware/IPSuite) - Machine Learned **I**nteratomic **P**otential Tools.
 
 ## Technical Details
 
