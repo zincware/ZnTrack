@@ -206,10 +206,10 @@ workflow. Follow these steps:
    project.repro()
    ```
 
-   > [!TIP]
-   > If you don’t want to execute the graph immediately, use
-   > `project.build()` instead. You can run the graph later using `dvc repro` or
-   > the [paraffin](https://github.com/zincware/paraffin) package.
+> [!TIP]
+> If you don’t want to execute the graph immediately, use
+> `project.build()` instead. You can run the graph later using `dvc repro` or
+> the [paraffin](https://github.com/zincware/paraffin) package.
 
 #### Accessing Results
 
