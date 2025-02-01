@@ -92,6 +92,11 @@ def test_grouped_custom_node_names(proj_path):
         assert n1.name == "grp1_Alpha"
         assert n2.name == "grp1_Beta"
 
+    project.build()
+
+    assert n1.name == "grp1_Alpha"
+    assert n2.name == "grp1_Beta"
+
 
 def test_nested_grouped_custom_node_names(proj_path):
     """Test that nodes with custom names within nested groups get correctly prefixed"""
@@ -103,6 +108,13 @@ def test_nested_grouped_custom_node_names(proj_path):
 
         assert n1.name == "A_B_Alpha"
         assert n2.name == "A_B_Beta"
+    
+    project.build()
+
+    assert n1.name == "A_B_Alpha"
+    assert n2.name == "A_B_Beta"
+    assert n1.name == "A_B_Alpha"
+    assert n2.name == "A_B_Beta"
 
 
 # Grouped Duplicate Naming Tests
@@ -117,6 +129,13 @@ def test_grouped_duplicate_named_node(proj_path):
     with project.group("grp2"):
         n2 = MyNode(name="A")
         assert n2.name == "grp2_A"
+
+    project.build()
+
+    assert n1.name == "grp1_A"
+    assert n2.name == "grp2_A"
+    assert n1.name == "grp1_A"
+    assert n2.name == "grp2_A"
 
     with pytest.raises(ValueError, match="A node with the name 'grp1_A' already exists."):
         with project.group("grp1"):

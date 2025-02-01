@@ -46,14 +46,14 @@ def _name_getter(self, attr_name: str) -> str:
     # If value exists and the graph is either empty or not inside a group, return it
     if value is not None:
         if graph is znflow.empty_graph or graph.active_group is None:
-            return value
+            return str(value)
 
     # If no graph is active, return the class name as the default
     if graph is znflow.empty_graph:
-        return self.__class__.__name__
+        return str(self.__class__.__name__)
 
     # Compute name based on project-wide node names
-    return graph.compute_all_node_names()[self.uuid]
+    return str(graph.compute_all_node_names()[self.uuid])
 
 
 @dataclass_transform()
