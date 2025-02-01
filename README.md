@@ -78,16 +78,26 @@ MACE_MP --> StructureOptimization
 
 #### Node Definitions
 
+Within ZnTrack, each Node is defined by a class.
+The class attributes define the inputs and outputs for each Node, while the `run` method provides the actual code that will be executed at runtime.
+
+> [INFO]
+> ZnTrack uses Python dataclasses under the hood to provide you with an automatic `__init__`.
+> Starting from Python 3.11 most IDEs should also reliably provide type hints for ZnTrack nodes.
+
+> [NOTE]
+> For files produces during the `run`, ZnTrack provides a unique node working directort (`zntrack.nwd`) which should be used to store files within.
+
 ```python
 import zntrack
 import ase.io
 from pathlib import Path
 
 class Smiles2Conformers(zntrack.Node):
-    smiles: str = zntrack.params()
-    numConfs: int = zntrack.params(32)
+    smiles: str = zntrack.params() # a required parameter
+    numConfs: int = zntrack.params(32) # a default parameter
 
-    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
+    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz") # node output in the node working directory
 
     def run(self) -> None:
         frames = smiles2conformers(smiles=self.smiles, numConfs=self.numConfs)
@@ -95,12 +105,12 @@ class Smiles2Conformers(zntrack.Node):
 
     @property
     def frames(self) -> list[ase.Atoms]:
-        with self.state.fs.open(self.frames_path, "r") as f:
+        with self.state.fs.open(self.frames_path, "r") as f: # we use the node state filesystem to read the Node to enable automatic data download and comparison of results. This will become important later.
             return list(ase.io.iread(f, ":", format="extxyz"))
 
 
 class Pack(zntrack.Node):
-    data: list[list[ase.Atoms]] = zntrack.deps()
+    data: list[list[ase.Atoms]] = zntrack.deps() # in addition to parameters we can define dependencies as inputs
     counts: list[int] = zntrack.params()
     density: float = zntrack.params()
 
@@ -130,8 +140,8 @@ class MACE_MP:
 
 
 class StructureOptimization(zntrack.Node):
-    model: MACE_MP = zntrack.deps()
-    data: list[ase.Atoms] = zntrack.deps()
+    model: MACE_MP = zntrack.deps() # model dependency
+    data: list[ase.Atoms] = zntrack.deps() # ase.Atoms dependency
     data_id: int = zntrack.params()
     fmax: float = zntrack.params(0.05)
 
@@ -166,14 +176,23 @@ project = zntrack.Project()
 model = MACE_MP()
 
 with project:
+  # within the project context we can define and connect nodes
     etoh = Smiles2Conformers(smiles="CCO", numConfs=32)
     box = Pack(data=[etoh.frames], counts=[32], density=789)
     optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)
 
+# the nodes will only be executed afterwards in seperate python kernels.
+# if you don't want to execute the graph immediatly, use `project.build()` instead
+# and run the graph alter using `dvc repro` or the paraffin package.
 project.repro()
 ```
 
 #### Accessing Results
+
+Once the graph has been executed, the respective files will have been written.
+For example, you could load the `nodes/StructureOptimization/frames.traj` trajectory directly from the file path.
+
+Alternatively, you can load ZnTrack nodes after they have been executed and need not to worry about where the file was stored or in which format, because you can look at the `list[ase.Atoms]` direclty from within  Python by loading the node as follows:
 
 ```python
 import zntrack
