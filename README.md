@@ -13,133 +13,143 @@
 
 ![Logo](https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/_static/logo_ZnTrack.png)
 
-# ZnTrack: A Parameter Tracking Package for Python
+# ZnTrack: Make your Python Code reproducible!
 
-ZnTrack `zɪŋk træk` is a lightweight and easy-to-use package for tracking
-parameters in your Python projects using DVC. With ZnTrack, you can define
-parameters in Python classes and monitor how they change over time. This
-information can then be used to compare the results of different runs, identify
-computational bottlenecks, and avoid the re-running of code components where
-parameters have not changed.
+ZnTrack enables you to convert your existing Python code into reproducible workflows by converting them into directed graph structure with well defined inputs and outputs per node.
 
-## Key Features
+## Example
 
-- Parameter, output and metric tracking: ZnTrack makes it easy to store and
-  track the values of parameters in your Python code. It further allows you to
-  store any outputs produced and gives an easy interface to define metrics.
-- Lightweight and database-free: Unlike other parameter tracking solutions,
-  ZnTrack is lightweight and does not require any databases.
+Let us take the following workflow that constructs a periodic, atomistic system of Ethanol and runs a geometry optimization using MACE-MP-0.
 
-## Getting Started
+```python
+from ase.optimize import LBFGS
+from mace.calculators import mace_mp
+from rdkit2ase import pack, smiles2conformers
 
-To get started with ZnTrack, you can install it via pip: `pip install zntrack`
+model = mace_mp()
 
-Next, you can start using ZnTrack to track parameters, outputs and metrics in
-your Python code. Here's an example of how to use ZnTrack to track the value of
-a parameter in a Python class. Start in an empty directory and run `git init`
-and `dvc init` for preparation.
+frames = smiles2conformers(smiles="CCO", numConfs=32)
+box = pack(data=[frames], counts=[32], density=789)
 
-Then put the following into a python file called `hello_world.py` and call it
-with `python hello_world.py`.
+box.calc = model
+
+dyn = LBFGS(box, trajectory="optim.traj")
+dyn.run(fmax=0.5)
+```
+
+<details>
+<summary>Dependencencyes</summary>
+For this example to work you will need
+- https://github.com/ACEsuit/mace
+- https://github.com/m3g/packmol
+- https://github.com/zincware/rdkit2ase
+</details>
+
+To make this reproducible, we convert it into the following graph structure:
+
+```mermaid
+flowchart LR
+
+Smiles2Conformers --> Pack --> StructureOptimization
+MACE_MP --> StructureOptimization
+```
 
 ```python
 import zntrack
-from random import randrange
+import ase.io
+from pathlib import Path
+
+class Smiles2Conformers(zntrack.Node):
+  smiles: str = zntrack.params()
+  numConfs: int = zntrack.params(32)
+
+  frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
+
+  def run(self) -> None:
+    frames = smiles2conformers(smiles=self.smiles, numConfs=self.numConfs)
+    ase.io.write(frames, self.frames_path)
+
+  @property
+  def frames(self) -> list[ase.Atoms]:
+    with self.state.fs.open(self.frames_path, "r") as f:
+      return list(ase.io.iread(f, ":", format="extxyz"))
 
 
-class HelloWorld(zntrack.Node):
-    """Define a ZnTrack Node"""
-    # parameter to be tracked
-    max_number: int = zntrack.params()
-    # parameter to store as output
-    random_number: int = zntrack.outs()
+class Pack(zntrack.Node):
+  data: list[list[ase.Atoms]] = zntrack.deps()
+  counts: list[int] = zntrack.params()
+  density: float = zntrack.params()
 
-    def run(self):
-        """Command to be run by DVC"""
-        self.random_number = randrange(self.max_number)
+  frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
 
-if __name__ == "__main__":
-    # Write the computational graph
-    with zntrack.Project() as project:
-        hello_world = HelloWorld(max_number=512)
-    project.run()
+  def run(self) -> None:
+    box = pack(data=self.data, counts=self.counts, density=self.density)
+    ase.io.write(box, self.frames_path)
+
+  @property
+  def frames(self) -> list[ase.Atoms]:
+    with self.state.fs.open(self.frames_path, "r") as f:
+      return list(ase.io.iread(f, ":", format="extxyz"))
+
 ```
 
-This will create a [DVC](https://dvc.org) stage `HelloWorld`. The workflow is
-defined in `dvc.yaml` and the parameters are stored in `params.yaml`.
-
-This will run the workflow with `dvc repro` automatically. Once the graph is
-executed, the results, i.e. the random number can be accessed directly by the
-Node object.
+We could hardcode the MACE_MP model into the StructureOptimization Node, but we can also define it as a dependency.
+In contrast to `Smiles2Conformers` and `Pack` the model does not require a `run` method and thus we can define it as a `@dataclass`
 
 ```python
-hello_world.load()
-print(hello_world.random_number)
+from dataclasses import dataclass
+
+@dataclass
+class MACE_MP:
+  model: str = "medium"
+
+  def get_calculator(self, **kwargs):
+    return mace_mp(model=self.model)
+
+
+class StructureOptimization(zntrack.Node):
+  model: MACE_MP = zntrack.deps()
+  data: list[ase.Atoms] = zntrack.deps()
+  data_id: int = zntrack.params()
+  fmax: float = zntrack.params(0.05)
+
+  frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.traj")
+
+  def run(self):
+    atoms = self.data[self.data_id]
+    atoms.calc = self.model.get_calculator()
+    dyn = LBFGS(atoms, trajectory=self.frames_path)
+    dyn.run(fmax=0.5)
+
+  @property
+  def frames(self) -> list[ase.Atoms]:
+    with self.state.fs.open(self.frames_path, "rb") as f:
+      return list(ase.io.iread(f, ":", format="traj"))
 ```
 
-> ## Tip
->
-> You can easily load a Node directly from a repository.
->
-> ```python
-> import zntrack
->
-> node = zntrack.from_rev(
->     "ParamsToMetrics",
->     remote="https://github.com/PythonFZ/zntrack-examples",
->     rev="8d0c992"
-> )
-> ```
->
-> Try accessing the `params` parameter and `metrics` output. All Nodes from this
-> and many other repositories can be loaded like this.
+Now that we have defined all necessary Nodes we can put them to use and build our graph:
 
-An overview of all the ZnTrack features as well as more detailed examples can be
-found in the [ZnTrack Documentation](https://zntrack.readthedocs.io/en/latest/).
+```python
+project = zntrack.Project()
 
-# Technical Details
+model = MACE_MP()
 
-## ZnTrack as an Object-Relational Mapping for DVC
+with project:
+  etoh = Smiles2Conformers(
+    smiles="CCO",
+    numConfs=32
+  )
+  box = Pack(
+    data=[etoh.frames],
+    counts=[32],
+    density=789
+  )
+  optm = StructureOptimization(
+    model=model,
+    data=box.frames,
+    data_id=-1,
+    fmax=0.5
+  )
 
-On a fundamental level the ZnTrack package provides an easy-to-use interface for
-DVC directly from Python. It handles all the computational overhead of reading
-config files, defining outputs in the `dvc.yaml` as well as in the script and
-much more.
-
-For more information on DVC visit their [homepage](https://dvc.org/doc).
-
-# References
-
-If you use ZnTrack in your research and find it helpful please cite us.
-
-```bibtex
-@misc{zillsZnTrackDataCode2024,
-  title = {{{ZnTrack}} -- {{Data}} as {{Code}}},
-  author = {Zills, Fabian and Sch{\"a}fer, Moritz and Tovey, Samuel and K{\"a}stner, Johannes and Holm, Christian},
-  year = {2024},
-  eprint={2401.10603},
-  archivePrefix={arXiv},
-}
+project.repro()
 ```
-
-# Copyright
-
-This project is distributed under the
-[Apache License Version 2.0](https://github.com/zincware/ZnTrack/blob/main/LICENSE).
-
-## Similar Tools
-
-The following (incomplete) list of other projects that either work together with
-ZnTrack or can achieve similar results with slightly different goals or
-programming languages.
-
-- [DVC](https://dvc.org/) - Main dependency of ZnTrack for Data Version Control.
-- [dvthis](https://github.com/jcpsantiago/dvthis) - Introduce DVC to R.
-- [DAGsHub Client](https://github.com/DAGsHub/client) - Logging parameters from
-  within .Python
-- [MLFlow](https://mlflow.org/) - A Machine Learning Lifecycle Platform.
-- [Metaflow](https://metaflow.org/) - A framework for real-life data science.
-- [Hydra](https://hydra.cc/) - A framework for elegantly configuring complex
-  applications
-- [Snakemake](https://snakemake.readthedocs.io/en/stable/) - Workflow management
-  system to create reproducible and scalable data analyses.
