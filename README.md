@@ -176,3 +176,7 @@ import zntrack
 optm = zntrack.from_rev(name="StructureOptimization")
 print(optm.frames)
 ```
+
+For more examples checkout the following packages that build ontop of ZnTrack
+- https://mlipx.readthedocs.io/en/latest/
+- https://github.com/zincware/IPSuite
