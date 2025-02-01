@@ -1,6 +1,5 @@
 import contextlib
 import dataclasses
-import pathlib
 import warnings
 from dataclasses import Field, dataclass
 from typing import Any
@@ -9,12 +8,10 @@ import dvc.repo
 import git
 import mlflow
 import pandas as pd
-import yaml
 import znflow
 from mlflow.utils import mlflow_tags
 
 from zntrack.config import (
-    EXP_INFO_PATH,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_OPTION,
     ZnTrackOptionEnum,
@@ -26,7 +23,8 @@ from zntrack.utils.misc import load_env_vars
 
 # TODO: if this plugin fails, there should only be a warning, not an error
 # so that the results are not lost
-# TODO: have the mlflow run active over the entire run method to avoid searching for it over again.
+# TODO: have the mlflow run active over the entire run
+#  method to avoid searching for it over again.
 # TODO: in finalize have the parent run active (if not already)
 
 
@@ -196,7 +194,8 @@ class MLFlowPlugin(ZnTrackPlugin):
     def finalize(cls, **kwargs):
         """Example:
         -------
-        python -c "from zntrack.plugins.mlflow_plugin import MLFlowPlugin; MLFlowPlugin.finalize()"
+        python -c "from zntrack.plugins.mlflow_plugin \
+                import MLFlowPlugin; MLFlowPlugin.finalize()"
 
         """
         # TODO: with the dependency on the file this does not support revs

@@ -1,7 +1,6 @@
 import contextlib
 import dataclasses
 import os
-import pathlib
 import typing as t
 import uuid
 
@@ -202,7 +201,7 @@ class AIMPlugin(ZnTrackPlugin):
 
         import zntrack
 
-        tags = exp_info.get("tags", {})
+        exp_info.get("tags", {})
 
         repo = git.Repo(".")
         if repo.is_dirty():
