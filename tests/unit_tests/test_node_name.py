@@ -1,4 +1,5 @@
 import pytest
+
 import zntrack
 
 
@@ -40,7 +41,7 @@ def test_duplicate_named_node_error(proj_path):
     """Test that an explicitly named node cannot be duplicated"""
     with zntrack.Project() as project:
         MyNode(name="A")
-    
+
     with pytest.raises(ValueError, match="A node with the name 'A' already exists."):
         with project:
             MyNode(name="A")
@@ -108,7 +109,7 @@ def test_nested_grouped_custom_node_names(proj_path):
 
         assert n1.name == "A_B_Alpha"
         assert n2.name == "A_B_Beta"
-    
+
     project.build()
 
     assert n1.name == "A_B_Alpha"

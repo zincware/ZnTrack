@@ -31,12 +31,11 @@ def test_names(proj_path):
         zntrack.examples.ParamsToMetrics(params={"loss": 0.09}, name="Lorine")
     #     # zntrack.examples.ParamsToMetrics(params={"loss": 0.09}, name="Lorine") # ValueError
 
-
     project.build()
 
-    assert json.loads(
-        (CWD / "zntrack_config" / "names.json").read_text()
-    ) == json.loads((proj_path / "zntrack.json").read_text())
+    assert json.loads((CWD / "zntrack_config" / "names.json").read_text()) == json.loads(
+        (proj_path / "zntrack.json").read_text()
+    )
     assert yaml.safe_load(
         (CWD / "dvc_config" / "names.yaml").read_text()
     ) == yaml.safe_load((proj_path / "dvc.yaml").read_text())
