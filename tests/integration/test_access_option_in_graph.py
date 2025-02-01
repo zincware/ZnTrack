@@ -32,12 +32,12 @@ def test_connect_nodes_in_grp(proj_path):
         a = zntrack.examples.ParamsToOuts(params=10)
         assert a.name == "A_B_ParamsToOuts"
         b = zntrack.examples.ParamsToOuts(params=20, name=f"con_{a.name}")
-        assert b.name == "con_A_B_ParamsToOuts"
+        assert b.name == "A_B_con_A_B_ParamsToOuts"
 
     proj.repro()
 
     assert a.name == "A_B_ParamsToOuts"
-    assert b.name == "con_A_B_ParamsToOuts"
+    assert b.name == "A_B_con_A_B_ParamsToOuts"
 
 
 # def test_path_as_name(proj_path):
