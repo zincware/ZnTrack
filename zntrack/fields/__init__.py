@@ -11,8 +11,9 @@ from zntrack.fields.x_path import (
     plots_path,
 )
 
-# TODO: default file names like `nwd/metrics.json`, `nwd/node-meta.json`, `nwd/plots.csv` should
-# raise an error if passed to `metrics_path` etc.
+# TODO: default file names like `nwd/metrics.json`,
+#  `nwd/node-meta.json`, `nwd/plots.csv` should raise
+#  an error if passed to `metrics_path` etc.
 # TODO: zntrack.outs() and zntrack.outs(cache=False) needs different files!
 
 

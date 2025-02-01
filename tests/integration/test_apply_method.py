@@ -10,7 +10,7 @@ def test_apply(proj_path, eager) -> None:
     """Test the "zntrack.apply" function."""
     project = zntrack.Project()
 
-    JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")
+    JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")  # noqa N806
 
     with project:
         a = zntrack.examples.ParamsToOuts(params=["a", "b"])
@@ -33,7 +33,7 @@ def test_deps_apply(proj_path, eager, attribute):
     """Test connecting applied nodes to other nodes."""
     project = zntrack.Project()
 
-    JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")
+    JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")  # noqa N806
 
     assert issubclass(JoinedParamsToOuts, zntrack.Node)
 

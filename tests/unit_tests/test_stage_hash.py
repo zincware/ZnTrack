@@ -85,6 +85,8 @@ def test_get_stage_hash(proj_path, node, stage_hash, full_stage_hash):
 
     assert node.from_rev().state.get_stage_hash()[:10] == stage_hash[:10]
 
-    # TODO: this changes every run because of node_meta - do we want to exclude it - as it is the only output that is
+    # TODO: this changes every run because of node_meta
+    #  - do we want to exclude it - as it is the only output that is
     # by design non-deterministic!
-    # assert node.from_rev().state.get_stage_hash(include_outs=True)[:10] == full_stage_hash[:10]
+    # assert node.from_rev().state.get_stage_hash(include_outs=True)[:10]
+    #  == full_stage_hash[:10]

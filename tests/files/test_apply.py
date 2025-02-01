@@ -13,7 +13,7 @@ CWD = pathlib.Path(__file__).parent.resolve()
 def test_apply(proj_path) -> None:
     project = zntrack.Project()
 
-    JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")
+    JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")  # noqa N806
 
     with project:
         zntrack.examples.ParamsToOuts(params=["a", "b"])

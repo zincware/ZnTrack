@@ -29,7 +29,8 @@ def plugin_getter(self: "Node", name: str):
         if getter_value is not PLUGIN_EMPTY_RETRUN_VALUE:
             if value is not PLUGIN_EMPTY_RETRUN_VALUE:
                 raise ValueError(
-                    f"Multiple plugins return a value for {name}: {value} and {getter_value}"
+                    "Multiple plugins return a value for "
+                    f"{name}: {value} and {getter_value}"
                 )
             value = getter_value
     return value

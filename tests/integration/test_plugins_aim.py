@@ -170,17 +170,26 @@ def test_multiple_nodes(aim_proj_path):
 
     aim_repo = aim.Repo(path=os.environ["AIM_TRACKING_URI"])
     for run_metrics_col in aim_repo.query_metrics(
-        f"run.dvc_stage_name == '{a.name}' and run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        (
+            f"run.dvc_stage_name == '{a.name}' and "
+            f"run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        )
     ).iter():
         assert "original_run_id" not in run_metrics_col.run.dataframe().columns
 
     for run_metrics_col in aim_repo.query_metrics(
-        f"run.dvc_stage_name == '{c.name}' and run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        (
+            f"run.dvc_stage_name == '{c.name}' and "
+            f"run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        )
     ).iter():
         assert "original_run_id" not in run_metrics_col.run.dataframe().columns
 
     for run_metrics_col in aim_repo.query_metrics(
-        f"run.dvc_stage_name == '{b.name}' and run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        (
+            f"run.dvc_stage_name == '{b.name}' and "
+            f"run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        )
     ).iter():
         assert run_metrics_col.run.dataframe()["original_run_id"].tolist() == [b_run_id]
 
@@ -234,5 +243,8 @@ def test_dataclass_deps(aim_proj_path):
     with md.from_rev().state.plugins["AIMPlugin"].get_aim_run() as run:
         df = run.dataframe()
         assert df["t"].tolist() == [
-            '[{"_cls": "test_plugins_aim.T1", "temperature": 1}, {"_cls": "test_plugins_aim.T2", "temperature": 1}]'
+            (
+                '[{"_cls": "test_plugins_aim.T1", "temperature": 1},'
+                ' {"_cls": "test_plugins_aim.T2", "temperature": 1}]'
+            )
         ]

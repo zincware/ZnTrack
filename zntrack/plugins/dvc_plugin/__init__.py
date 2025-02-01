@@ -1,12 +1,9 @@
-import contextlib
 import copy
 import dataclasses
 import json
 import pathlib
 import typing as t
 
-import pandas as pd
-import yaml
 import znflow
 import znflow.handler
 import znflow.utils
@@ -14,15 +11,11 @@ import znjson
 
 from zntrack import config, converter
 from zntrack.config import (
-    NOT_AVAILABLE,
-    PARAMS_FILE_PATH,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_DUMP,
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_FIELD_SUFFIX,
-    ZNTRACK_FILE_PATH,
-    ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     ZnTrackOptionEnum,
@@ -30,11 +23,10 @@ from zntrack.config import (
 
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
-from zntrack.plugins import ZnTrackPlugin, base_getter
+from zntrack.plugins import ZnTrackPlugin
 from zntrack.utils import module_handler
 from zntrack.utils.misc import (
     RunDVCImportPathHandler,
-    TempPathLoader,
     get_attr_always_list,
     sort_and_deduplicate,
 )
@@ -97,7 +89,8 @@ class DVCPlugin(ZnTrackPlugin):
                             pass
                         else:
                             raise ValueError(
-                                f"Found unsupported type '{type(val)}' ({val}) for DEPS field '{field.name}' in list"
+                                f"Found unsupported type '{type(val)}' ({val}) for DEPS"
+                                f" field '{field.name}' in list"
                             )
                     if len(new_content) > 0:
                         data[field.name] = new_content
@@ -113,7 +106,8 @@ class DVCPlugin(ZnTrackPlugin):
                     pass
                 else:
                     raise ValueError(
-                        f"Found unsupported type '{type(content)}' ({content}) for DEPS field '{field.name}'"
+                        f"Found unsupported type '{type(content)}' ({content})"
+                        f" for DEPS field '{field.name}'"
                     )
 
         if len(data) > 0:
@@ -123,7 +117,8 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_dvc_yaml(self) -> dict | object:
         node_dict = converter.NodeConverter().encode(self.node)
 
-        cmd = f"zntrack run {node_dict['module']}.{node_dict['cls']} --name {node_dict['name']}"
+        cmd = f"zntrack run {node_dict['module']}.{node_dict['cls']}"
+        cmd += " --name {node_dict['name']}"
         if hasattr(self.node, "_method"):
             cmd += f" --method {self.node._method}"
         stages = {
@@ -160,7 +155,8 @@ class DVCPlugin(ZnTrackPlugin):
                     continue
                 if getattr(self.node, field.name) == nwd:
                     raise ValueError(
-                        "Can not use 'zntrack.nwd' direclty as an output path. Please use 'zntrack.nwd / <path/file>' instead."
+                        "Can not use 'zntrack.nwd' direclty as an output path. "
+                        "Please use 'zntrack.nwd / <path/file>' instead."
                     )
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd

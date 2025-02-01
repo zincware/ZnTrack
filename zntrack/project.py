@@ -133,7 +133,8 @@ class Project(znflow.DiGraph):
                     value := plugin.convert_to_dvc_yaml()
                 ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
                     dvc_dict["stages"][node.name] = value["stages"]
-                    # TODO: this won't work if multiple plugins want to modify the dvc.yaml
+                    # TODO: this won't work if multiple
+                    # plugins want to modify the dvc.yaml
                     if len(value["plots"]) > 0:
                         dvc_dict["plots"].extend(value["plots"])
                 if (
@@ -171,7 +172,8 @@ class Project(znflow.DiGraph):
         This method performs the following actions:
         1. Makes a commit with the provided message if `commit` is True.
         2. Loads environment variables.
-        3. Loads and finalizes plugins specified in the `ZNTRACK_PLUGINS` environment variable.
+        3. Loads and finalizes plugins specified
+           in the `ZNTRACK_PLUGINS` environment variable.
 
         Parameters
         ----------

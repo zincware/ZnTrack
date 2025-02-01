@@ -94,7 +94,8 @@ class NodeStatus:
         if path is not None:
             raise NotImplementedError("Custom paths are not implemented yet.")
 
-        # This feature is only required when the load is loaded, not when it is saved/executed
+        # This feature is only required when the load
+        #  is loaded, not when it is saved/executed
         if self.remote is None and self.rev is None:
             warnings.warn(
                 "The temporary path is not used when neither remote or rev are set."
