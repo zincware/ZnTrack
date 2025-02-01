@@ -1,5 +1,7 @@
-import zntrack.examples
 from pathlib import Path
+
+import zntrack.examples
+
 
 def test_outs_path_to_deps_path(proj_path):
     with zntrack.Project() as proj:

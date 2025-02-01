@@ -19,8 +19,8 @@ from zntrack.utils.misc import get_plugins_from_env
 from .config import (
     NOT_AVAILABLE,
     ZNTRACK_LAZY_VALUE,
-    NodeStatusEnum,
     ZNTRACK_OPTION,
+    NodeStatusEnum,
     ZnTrackOptionEnum,
 )
 
