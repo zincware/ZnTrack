@@ -17,19 +17,16 @@ def test_names(proj_path):
         zntrack.examples.ParamsToMetrics(params={"loss": 0.01})
         zntrack.examples.ParamsToMetrics(params={"loss": 0.02})
         zntrack.examples.ParamsToMetrics(params={"loss": 0.03}, name="Thanasis")
-        # zntrack.examples.ParamsToMetrics(params={"loss": 0.03}, name="Thanasis") # ValueError
 
     with project.group("grp"):
         zntrack.examples.ParamsToMetrics(params={"loss": 0.04})
         zntrack.examples.ParamsToMetrics(params={"loss": 0.05})
         zntrack.examples.ParamsToMetrics(params={"loss": 0.06}, name="Cydney")
-    #     # zntrack.examples.ParamsToMetrics(params={"loss": 0.06}, name="Cydney") # ValueError
 
     with project.group("grp", "subgrp"):
         zntrack.examples.ParamsToMetrics(params={"loss": 0.07})
         zntrack.examples.ParamsToMetrics(params={"loss": 0.08})
         zntrack.examples.ParamsToMetrics(params={"loss": 0.09}, name="Lorine")
-    #     # zntrack.examples.ParamsToMetrics(params={"loss": 0.09}, name="Lorine") # ValueError
 
     project.build()
 
