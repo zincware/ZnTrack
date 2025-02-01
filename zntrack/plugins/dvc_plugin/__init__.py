@@ -155,7 +155,7 @@ class DVCPlugin(ZnTrackPlugin):
                     continue
                 if getattr(self.node, field.name) == nwd:
                     raise ValueError(
-                        "Can not use 'zntrack.nwd' direclty as an output path. "
+                        "Can not use 'zntrack.nwd' directly as an output path. "
                         "Please use 'zntrack.nwd / <path/file>' instead."
                     )
                 content = nwd_handler(

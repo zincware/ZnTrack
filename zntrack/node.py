@@ -8,7 +8,7 @@ import typing as t
 import uuid
 import warnings
 
-import typing_extensions as te
+import typing_extensions as ty_ex
 import znfields
 import znflow
 
@@ -70,7 +70,7 @@ class Node(znflow.Node, znfields.Base):
 
     def __post_init__(self):
         if self.name is None:
-            # automatic node names expectes the name to be None when
+            # automatic node names expects the name to be None when
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
@@ -186,6 +186,6 @@ class Node(znflow.Node, znfields.Base):
 
         return NodeStatus(**self.__dict__["state"], node=self)
 
-    @te.deprecated("loading is handled automatically via lazy evaluation")
+    @ty_ex.deprecated("loading is handled automatically via lazy evaluation")
     def load(self):
         pass

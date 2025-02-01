@@ -5,7 +5,7 @@ import pytest
 
 import zntrack
 
-# TODO UNCLEAR ERROR, __file__ atribute is not the
+# TODO UNCLEAR ERROR, __file__ attribute is not the
 #  same as the test file we want to collect
 
 

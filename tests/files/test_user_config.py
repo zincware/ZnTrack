@@ -16,7 +16,7 @@ def test_node(proj_path):
     assert zntrack.config.ALWAYS_CACHE is True
 
     # We define the node here, because the config has to be set
-    #  bevore calling zntrack.metrics()
+    #  before calling zntrack.metrics()
     class MyNode(zntrack.Node):
         """Some Node."""
 
