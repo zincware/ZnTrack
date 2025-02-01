@@ -34,7 +34,7 @@ ensures reproducibility, scalability, and ease of collaboration.
 ## Example: Molecular Dynamics Workflow
 
 Let’s take a workflow that constructs a periodic, atomistic system of Ethanol
-and runs a geometry optimization using MACE-MP-0.
+and runs a geometry optimization using [MACE-MP-0](https://arxiv.org/abs/2401.00096).
 
 ### Original Workflow
 
@@ -57,9 +57,11 @@ dyn.run(fmax=0.5)
 <details>
 <summary>Dependencies</summary>
 For this example to work, you will need:
-- [MACE](https://github.com/ACEsuit/mace)
-- [Packmol](https://github.com/m3g/packmol)
-- [rdkit2ase](https://github.com/zincware/rdkit2ase)
+<ul>
+  <li>[MACE](https://github.com/ACEsuit/mace)</li>
+  <li>[Packmol](https://github.com/m3g/packmol)</li>
+  <li>[rdkit2ase](https://github.com/zincware/rdkit2ase)</li>
+</ul>
 </details>
 
 ### Converted Workflow with ZnTrack
