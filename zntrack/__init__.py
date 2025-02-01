@@ -2,6 +2,7 @@ import importlib.metadata
 import logging
 import sys
 
+from zntrack import config
 from zntrack.add import add
 from zntrack.apply import apply
 from zntrack.fields import (
@@ -40,6 +41,7 @@ __all__ = [
     "apply",
     "add",
     "field",
+    "config",
 ]
 
 logger = logging.getLogger(__name__)

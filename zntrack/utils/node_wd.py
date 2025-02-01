@@ -38,18 +38,16 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
     shutil.rmtree(target)
 
 
-def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
+def get_nwd(node: "Node") -> pathlib.Path:
     """Get the node working directory.
 
     This is used instead of `node.nwd` because it allows
     for parameters to define if the nwd should be created.
 
-    Attributes
-    ----------
+    Arguments:
+    ---------
     node: Node
         The node instance for which the nwd should be returned.
-    mkdir: bool, optional
-        If True, the nwd is created if it does not exist.
 
     """
     try:
@@ -74,12 +72,10 @@ def get_nwd(node: "Node", mkdir: bool = False) -> pathlib.Path:
 
     if node.state.group is not None:
         # strip the groups from node_name
-        to_replace = "_".join(node.state.group.name) + "_"
-        replacement = "/".join(node.state.group.name) + "/"
+        to_replace = "_".join(node.state.group.names) + "_"
+        replacement = "/".join(node.state.group.names) + "/"
         nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
 
-    if mkdir:
-        nwd.mkdir(parents=True, exist_ok=True)
     return nwd
 
 

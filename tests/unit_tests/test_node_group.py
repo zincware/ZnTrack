@@ -11,7 +11,7 @@ def test_project_group(proj_path):
         n = MyNode()
 
     assert isinstance(grp, zntrack.group.Group)
-    assert grp.name == ("Group1",)
+    assert grp.names == ("Group1",)
     assert n in grp
     assert n.state.group == grp
     assert len(grp) == 1

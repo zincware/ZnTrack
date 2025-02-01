@@ -1,0 +1,27 @@
+ParamsToMetrics:
+  params:
+    loss: 0.01
+ParamsToMetrics_1:
+  params:
+    loss: 0.02
+Thanasis:
+  params:
+    loss: 0.03
+grp_Cydney:
+  params:
+    loss: 0.06
+grp_ParamsToMetrics:
+  params:
+    loss: 0.04
+grp_ParamsToMetrics_1:
+  params:
+    loss: 0.05
+grp_subgrp_Lorine:
+  params:
+    loss: 0.09
+grp_subgrp_ParamsToMetrics:
+  params:
+    loss: 0.07
+grp_subgrp_ParamsToMetrics_1:
+  params:
+    loss: 0.08

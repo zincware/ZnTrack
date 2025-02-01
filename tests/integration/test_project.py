@@ -204,17 +204,17 @@ def test_group_nodes(proj_path):
 
     assert node_1.name == "Group1_ParamsToOuts"
     assert node_2.name == "Group1_ParamsToOuts_1"
-    assert node_3.name == "Node01"
-    assert node_4.name == "Node02"
+    assert node_3.name == "Group2_Node01"
+    assert node_4.name == "Group2_Node02"
     assert node_5.name == "NamedGrp_ParamsToOuts"
-    assert node_6.name == "Node03"
+    assert node_6.name == "NamedGrp_Node03"
     assert node7.name == "ParamsToOuts"
     assert node8.name == "ParamsToOuts_1"
     assert node9.name == "Node04"
 
-    assert group_1.name == ("Group1",)
-    assert group_2.name == ("Group2",)
-    assert group_3.name == ("NamedGrp",)
+    assert group_1.names == ("Group1",)
+    assert group_2.names == ("Group2",)
+    assert group_3.names == ("NamedGrp",)
 
     # test nodes in groups
     assert node_1 in group_1
@@ -266,9 +266,9 @@ def test_group_nodes(proj_path):
     assert list(group_2) == [node_3, node_4]
     assert list(group_3) == [node_5, node_6]
 
-    assert group_1.name == ("Group1",)
-    assert group_2.name == ("Group2",)
-    assert group_3.name == ("NamedGrp",)
+    assert group_1.names == ("Group1",)
+    assert group_2.names == ("Group2",)
+    assert group_3.names == ("NamedGrp",)
 
     assert (
         zntrack.examples.ParamsToOuts.from_rev(name="NamedGrp_ParamsToOuts").params
@@ -528,7 +528,7 @@ def test_git_only_repo(proj_path, git_only_repo):
     with zntrack.Project(git_only_repo=git_only_repo) as project:
         zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
 
-    project.run()
+    project.repro()
 
     # commit everything
     repo = git.Repo()
@@ -612,6 +612,6 @@ def test_group_names(proj_path):
     with project.group("NamedGrp") as grp3:
         pass
 
-    assert grp1.name == ("Group1",)
-    assert grp2.name == ("Group2",)
-    assert grp3.name == ("NamedGrp",)
+    assert grp1.names == ("Group1",)
+    assert grp2.names == ("Group2",)
+    assert grp3.names == ("NamedGrp",)

@@ -1,6 +1,7 @@
 """The ZnTrack CLI."""
 
 import contextlib
+import datetime
 import importlib.metadata
 import os
 import pathlib
@@ -71,14 +72,19 @@ def run(
         The method to run on the node.
 
     """
+    start_time = datetime.datetime.now()
     utils.misc.load_env_vars(name)
     sys.path.append(pathlib.Path.cwd().as_posix())
 
     cls: Node = utils.import_handler.import_handler(node_path)
     node: Node = cls.from_rev(name=name, running=True)
-    node.increment_run_count()
+    node.state.increment_run_count()
+    node.state.save_node_meta()
     # dynamic version of node.run()
     getattr(node, method)()
+    run_time = datetime.datetime.now() - start_time
+    node.state.add_run_time(run_time)
+    node.state.save_node_meta()
     node.save()
 
 

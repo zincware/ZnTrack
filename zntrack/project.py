@@ -22,6 +22,13 @@ from .deployment import ZnTrackDeployment
 log = logging.getLogger(__name__)
 
 
+class _FinalNodeNameString(str):
+    """A string that represents the final name of a node.
+
+    Used to differentiate between a custom name and a computed name.
+    """
+
+
 class Project(znflow.DiGraph):
     def __init__(
         self,
@@ -49,31 +56,33 @@ class Project(znflow.DiGraph):
         all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
         node_names = {}
         for node in all_nodes:
-            if "name" in node.__dict__ and node.__dict__["name"] is not None:
-                if node.__dict__["name"] in node_names.values():
-                    raise ValueError(
-                        f"A node with the name '{node.__dict__['name']}' already exists."
-                    )
-                node_names[node.uuid] = node.__dict__["name"]
+            custom_name = node.__dict__.get("name")
+            node_name = custom_name or node.__class__.__name__
+            if custom_name is not None and isinstance(custom_name, _FinalNodeNameString):
+                node_names[node.uuid] = custom_name
+                continue
+
+            if node.state.group is None:
+                if self.active_group is not None:
+                    node_name = f"{'_'.join(self.active_group.names)}_{node_name}"
+                else:
+                    node_name = f"{node_name}"
             else:
-                if node.state.group is None:
-                    if self.active_group is not None:
-                        node_name = f"{'_'.join(self.active_group.names)}_{node.__class__.__name__}"
-                    else:
-                        node_name = node.__class__.__name__
-                else:
-                    node_name = (
-                        f"{'_'.join(node.state.group.name)}_{node.__class__.__name__}"
+                node_name = f"{'_'.join(node.state.group.names)}_{node_name}"
+
+            if node_name in node_names.values():
+                if custom_name:
+                    raise ValueError(
+                        f"A node with the name '{node_name}' already exists."
                     )
-                if node_name not in node_names.values():
-                    node_names[node.uuid] = node_name
-                else:
-                    i = 0
-                    while True:
-                        i += 1
-                        if f"{node_name}_{i}" not in node_names.values():
-                            node_names[node.uuid] = f"{node_name}_{i}"
-                            break
+                i = 0
+                while True:
+                    i += 1
+                    if f"{node_name}_{i}" not in node_names.values():
+                        node_name = f"{node_name}_{i}"
+                        break
+            node_names[node.uuid] = _FinalNodeNameString(node_name)
+
         return node_names
 
     def add_node(self, node_for_adding, **attr):
@@ -210,6 +219,6 @@ class Project(znflow.DiGraph):
             names = (name,)
 
         with super().group(*names) as znflow_grp:
-            group = Group(name=znflow_grp.names)
+            group = Group(names=znflow_grp.names)
             yield group
         group._nodes = znflow_grp.nodes

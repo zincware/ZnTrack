@@ -1,6 +1,8 @@
 import contextlib
 import dataclasses
+import datetime
 import json
+import logging
 import pathlib
 import typing as t
 import uuid
@@ -23,17 +25,35 @@ except ImportError:
 
 T = t.TypeVar("T", bound="Node")
 
+log = logging.getLogger(__name__)
 
-def _name_getter(self, name):
-    value = self.__dict__[name]
-    if value is not None:
-        return value
-    # find the value based on the current project context
+
+def _name_getter(self, attr_name: str) -> str:
+    """Retrieve the name of a node based on the current graph context.
+
+    Parameter
+    ---------
+        attr_name (str): The attribute name to retrieve.
+
+    Returns
+    -------
+        str: The resolved node name.
+
+    """
+    value = self.__dict__.get(attr_name)  # Safer lookup with .get()
     graph = znflow.get_graph()
-    if graph is znflow.empty_graph:
-        return self.__class__.__name__
 
-    return graph.compute_all_node_names()[self.uuid]
+    # If value exists and the graph is either empty or not inside a group, return it
+    if value is not None:
+        if graph is znflow.empty_graph or graph.active_group is None:
+            return str(value)
+
+    # If no graph is active, return the class name as the default
+    if graph is znflow.empty_graph:
+        return str(self.__class__.__name__)
+
+    # Compute name based on project-wide node names
+    return str(graph.compute_all_node_names()[self.uuid])
 
 
 @dataclass_transform()
@@ -41,7 +61,9 @@ def _name_getter(self, name):
 class Node(znflow.Node, znfields.Base):
     """A Node."""
 
-    name: str | None = znfields.field(default=None, getter=_name_getter)
+    name: str | None = znfields.field(
+        default=None, getter=_name_getter
+    )  # TODO: add setter and log warning
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
@@ -52,11 +74,13 @@ class Node(znflow.Node, znfields.Base):
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
+                if "_" in self.name:
+                    log.warning(
+                        "Node name should not contain '_'. This character is used for defining groups."
+                    )
 
-    @te.deprecated(
-        "The _post_load_ method was removed. Use __post_init__ in combination with `self.state` instead."
-    )
     def _post_load_(self):
+        """Called after `from_rev` is called."""
         raise NotImplementedError
 
     def run(self):
@@ -132,15 +156,22 @@ class Node(znflow.Node, znfields.Base):
             with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
                 content = json.load(f)
                 run_count = content.get("run_count", 0)
+                run_time = content.get("run_time", 0)
                 if node_uuid := content.get("uuid", None):
                     instance._uuid = uuid.UUID(node_uuid)
                 instance.__dict__["state"]["run_count"] = run_count
+                instance.__dict__["state"]["run_time"] = datetime.timedelta(
+                    seconds=run_time
+                )
 
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
                 _ = getattr(instance, field.name)
 
         instance._external_ = True
+        if not running and hasattr(instance, "_post_load_"):
+            with contextlib.suppress(NotImplementedError):
+                instance._post_load_()
 
         return instance
 
@@ -151,12 +182,6 @@ class Node(znflow.Node, znfields.Base):
             self.__dict__["state"]["plugins"] = get_plugins_from_env(self)
 
         return NodeStatus(**self.__dict__["state"], node=self)
-
-    def increment_run_count(self):
-        self.__dict__["state"]["run_count"] = self.state.run_count + 1
-        (self.nwd / "node-meta.json").write_text(
-            json.dumps({"uuid": str(self.uuid), "run_count": self.state.run_count})
-        )
 
     @te.deprecated("loading is handled automatically via lazy evaluation")
     def load(self):

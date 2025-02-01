@@ -12,7 +12,7 @@ import znflow.handler
 import znflow.utils
 import znjson
 
-from zntrack import converter
+from zntrack import config, converter
 from zntrack.config import (
     NOT_AVAILABLE,
     PARAMS_FILE_PATH,
@@ -129,7 +129,11 @@ class DVCPlugin(ZnTrackPlugin):
         stages = {
             "cmd": cmd,
             "metrics": [
-                {(self.node.nwd / "node-meta.json").as_posix(): {"cache": False}}
+                {
+                    (self.node.nwd / "node-meta.json").as_posix(): {
+                        "cache": config.ALWAYS_CACHE
+                    }
+                }
             ],
         }
         if self.node.always_changed:

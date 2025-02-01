@@ -25,17 +25,17 @@ def _extract_group_from_nwd(path: pathlib.Path) -> tuple | None:
 
 
 class Group:
-    def __init__(self, name: tuple[str], nodes: list | None = None) -> None:
-        self._name = name
+    def __init__(self, names: tuple[str], nodes: list | None = None) -> None:
+        self._names = names
         self._nodes = nodes if nodes else []
 
     @property
     def nwd(self) -> pathlib.Path:
-        return NWD_PATH.joinpath(*self._name)
+        return NWD_PATH.joinpath(*self._names)
 
     @property
-    def name(self):
-        return self._name
+    def names(self):
+        return self._names
 
     @property
     def nodes(self):
@@ -44,13 +44,13 @@ class Group:
     def __eq__(self, value: "Group") -> bool:
         if not isinstance(value, self.__class__):
             return False
-        return value.name == self.name
+        return value.names == self.names
 
     def __repr__(self) -> str:
-        return f"Group(name='{self._name}')"
+        return f"Group(name='{self._names}')"
 
     def __str__(self) -> str:
-        return f"Group(name='{self._name}')"
+        return f"Group(name='{self._names}')"
 
     def __contains__(self, item: "Node|str") -> bool:
         """Check if the Node is in the group."""
@@ -75,11 +75,11 @@ class Group:
 
     @classmethod
     def from_znflow_group(cls, group: znflow.Group) -> "Group":
-        return cls(name=group.names, nodes=group.nodes)
+        return cls(names=group.names, nodes=group.nodes)
 
     @classmethod
     def from_nwd(cls, nwd: pathlib.Path) -> "Group|None":
         names = _extract_group_from_nwd(nwd)
         if names is None:
             return None
-        return cls(name=names)
+        return cls(names=names)
