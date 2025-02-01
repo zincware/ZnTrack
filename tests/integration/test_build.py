@@ -13,7 +13,7 @@ def test_nodes_not_created(proj_path):
         b = zntrack.examples.ParamsToOuts(
             params=18,
         )
-        c = zntrack.examples.AddNodeAttributes(
+        zntrack.examples.AddNodeAttributes(
             a=a.outs,
             b=b.outs,
         )
@@ -25,7 +25,7 @@ def test_nodes_not_created(proj_path):
         e = zntrack.examples.ParamsToOuts(
             params=18,
         )
-        f = zntrack.examples.AddNodeAttributes(
+        zntrack.examples.AddNodeAttributes(
             a=d.outs,
             b=e.outs,
         )

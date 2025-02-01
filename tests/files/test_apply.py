@@ -16,9 +16,9 @@ def test_apply(proj_path) -> None:
     JoinedParamsToOuts = zntrack.apply(zntrack.examples.ParamsToOuts, "join")
 
     with project:
-        a = zntrack.examples.ParamsToOuts(params=["a", "b"])
-        b = JoinedParamsToOuts(params=["a", "b"])
-        c = zntrack.apply(zntrack.examples.ParamsToOuts, "join")(params=["a", "b", "c"])
+        zntrack.examples.ParamsToOuts(params=["a", "b"])
+        JoinedParamsToOuts(params=["a", "b"])
+        zntrack.apply(zntrack.examples.ParamsToOuts, "join")(params=["a", "b", "c"])
 
     project.build()
 

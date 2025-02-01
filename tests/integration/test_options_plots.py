@@ -101,7 +101,7 @@ def test_groups(proj_path):
 
 def test_autosave(proj_path):
     with zntrack.Project() as proj:
-        node = AutoSavePandasPlotNode(n=10)
+        AutoSavePandasPlotNode(n=10)
 
     proj.build()
     subprocess.run(["dvc", "repro"], cwd=proj_path, check=True)

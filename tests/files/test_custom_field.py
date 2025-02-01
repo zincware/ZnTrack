@@ -42,7 +42,7 @@ class TextNode(zntrack.Node):
 
 def test_text_node(proj_path):
     with zntrack.Project() as project:
-        node = TextNode()
+        TextNode()
     project.build()
 
     assert json.loads(

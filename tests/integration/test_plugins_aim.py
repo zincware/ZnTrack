@@ -42,7 +42,7 @@ class RangePlotter(zntrack.Node):
     plots: pd.DataFrame = zntrack.plots(y="range")
 
     def run(self):
-        self.plots = pd.DataFrame({"idx": [idx for idx in range(self.start, self.stop)]})
+        self.plots = pd.DataFrame({"idx": list(range(self.start, self.stop))})
 
 
 # fixture to set the os.env before the test and remove if after the test
@@ -126,7 +126,7 @@ def test_aim_plotting(aim_proj_path):
         metrics = {}
         for metric in run.metrics():
             metrics[metric.name] = list(metric.data.values())[0]
-        npt.assert_array_equal(metrics["plots.idx"], [[idx for idx in range(10)]])
+        npt.assert_array_equal(metrics["plots.idx"], [list(range(10))])
 
     proj.finalize(msg="test")
     repo = git.Repo()
@@ -189,7 +189,7 @@ def test_project_tags(aim_proj_path):
     with zntrack.Project(tags={"lorem": "ipsum", "hello": "world"}) as proj:
         a = zntrack.examples.ParamsToOuts(params=3)
         b = zntrack.examples.ParamsToOuts(params=7)
-        c = zntrack.examples.SumNodeAttributesToMetrics(inputs=[a.outs, b.outs], shift=0)
+        zntrack.examples.SumNodeAttributesToMetrics(inputs=[a.outs, b.outs], shift=0)
 
     proj.repro()
 

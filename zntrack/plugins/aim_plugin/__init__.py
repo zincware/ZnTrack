@@ -202,7 +202,7 @@ class AIMPlugin(ZnTrackPlugin):
 
         import zntrack
 
-        tags = exp_info.get("tags", {})
+        exp_info.get("tags", {})
 
         repo = git.Repo(".")
         if repo.is_dirty():

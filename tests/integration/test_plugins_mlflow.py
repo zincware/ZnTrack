@@ -54,7 +54,7 @@ class RangePlotter(zntrack.Node):
     plots: pd.DataFrame = zntrack.plots(y="range")
 
     def run(self):
-        self.plots = pd.DataFrame({"idx": [idx for idx in range(self.start, self.stop)]})
+        self.plots = pd.DataFrame({"idx": list(range(self.start, self.stop))})
 
 
 @pytest.fixture
@@ -181,7 +181,7 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
     assert c.metrics == {"value": 10.0}
 
     with a.state.plugins["MLFlowPlugin"]:
-        a_run = mlflow.get_run(a.state.plugins["MLFlowPlugin"].child_run_id)
+        mlflow.get_run(a.state.plugins["MLFlowPlugin"].child_run_id)
 
     with b.state.plugins["MLFlowPlugin"]:
         b_run = mlflow.get_run(b.state.plugins["MLFlowPlugin"].child_run_id)
@@ -302,7 +302,7 @@ def test_dataclass_deps(mlflow_proj_path):
     )
 
     proj.finalize(msg="run1 exp.")
-    repo = git.Repo()
+    git.Repo()
 
     mdx = MD.from_rev()
     assert mdx.__run_note__() != ""

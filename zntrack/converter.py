@@ -185,7 +185,7 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         if node._external_:
             warnings.warn("External nodes are currently always loaded dynamically.")
             continue
-        if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) == True:
+        if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) is True:
             paths.append((node.nwd / "node-meta.json").as_posix())
             if node._external_:
                 raise NotImplementedError
