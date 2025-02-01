@@ -118,7 +118,7 @@ class DVCPlugin(ZnTrackPlugin):
         node_dict = converter.NodeConverter().encode(self.node)
 
         cmd = f"zntrack run {node_dict['module']}.{node_dict['cls']}"
-        cmd += " --name {node_dict['name']}"
+        cmd += f" --name {node_dict['name']}"
         if hasattr(self.node, "_method"):
             cmd += f" --method {self.node._method}"
         stages = {
