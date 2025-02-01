@@ -78,15 +78,16 @@ MACE_MP --> StructureOptimization
 
 #### Node Definitions
 
-Within ZnTrack, each Node is defined by a class.
-The class attributes define the inputs and outputs for each Node, while the `run` method provides the actual code that will be executed at runtime.
+Within ZnTrack, each Node is defined by a class. The class attributes define the
+inputs and outputs for each Node, while the `run` method provides the actual
+code that will be executed at runtime.
 
-> [INFO]
-> ZnTrack uses Python dataclasses under the hood to provide you with an automatic `__init__`.
-> Starting from Python 3.11 most IDEs should also reliably provide type hints for ZnTrack nodes.
+> [INFO] ZnTrack uses Python dataclasses under the hood to provide you with an
+> automatic `__init__`. Starting from Python 3.11 most IDEs should also reliably
+> provide type hints for ZnTrack nodes.
 
-> [NOTE]
-> For files produces during the `run`, ZnTrack provides a unique node working directort (`zntrack.nwd`) which should be used to store files within.
+> [NOTE] For files produces during the `run`, ZnTrack provides a unique node
+> working directort (`zntrack.nwd`) which should be used to store files within.
 
 ```python
 import zntrack
@@ -190,9 +191,13 @@ project.repro()
 #### Accessing Results
 
 Once the graph has been executed, the respective files will have been written.
-For example, you could load the `nodes/StructureOptimization/frames.traj` trajectory directly from the file path.
+For example, you could load the `nodes/StructureOptimization/frames.traj`
+trajectory directly from the file path.
 
-Alternatively, you can load ZnTrack nodes after they have been executed and need not to worry about where the file was stored or in which format, because you can look at the `list[ase.Atoms]` direclty from within  Python by loading the node as follows:
+Alternatively, you can load ZnTrack nodes after they have been executed and need
+not to worry about where the file was stored or in which format, because you can
+look at the `list[ase.Atoms]` direclty from within Python by loading the node as
+follows:
 
 ```python
 import zntrack
