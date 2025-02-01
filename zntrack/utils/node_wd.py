@@ -72,8 +72,8 @@ def get_nwd(node: "Node") -> pathlib.Path:
 
     if node.state.group is not None:
         # strip the groups from node_name
-        to_replace = "_".join(node.state.group.name) + "_"
-        replacement = "/".join(node.state.group.name) + "/"
+        to_replace = "_".join(node.state.group.names) + "_"
+        replacement = "/".join(node.state.group.names) + "/"
         nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
 
     return nwd

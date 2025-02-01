@@ -68,7 +68,7 @@ class Project(znflow.DiGraph):
                 else:
                     node_name = f"{node_name}"
             else:
-                node_name = f"{'_'.join(node.state.group.name)}_{node_name}"
+                node_name = f"{'_'.join(node.state.group.names)}_{node_name}"
 
             if node_name in node_names.values():
                 if custom_name:
@@ -219,6 +219,6 @@ class Project(znflow.DiGraph):
             names = (name,)
 
         with super().group(*names) as znflow_grp:
-            group = Group(name=znflow_grp.names)
+            group = Group(names=znflow_grp.names)
             yield group
         group._nodes = znflow_grp.nodes

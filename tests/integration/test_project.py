@@ -212,9 +212,9 @@ def test_group_nodes(proj_path):
     assert node8.name == "ParamsToOuts_1"
     assert node9.name == "Node04"
 
-    assert group_1.name == ("Group1",)
-    assert group_2.name == ("Group2",)
-    assert group_3.name == ("NamedGrp",)
+    assert group_1.names == ("Group1",)
+    assert group_2.names == ("Group2",)
+    assert group_3.names == ("NamedGrp",)
 
     # test nodes in groups
     assert node_1 in group_1
@@ -266,9 +266,9 @@ def test_group_nodes(proj_path):
     assert list(group_2) == [node_3, node_4]
     assert list(group_3) == [node_5, node_6]
 
-    assert group_1.name == ("Group1",)
-    assert group_2.name == ("Group2",)
-    assert group_3.name == ("NamedGrp",)
+    assert group_1.names == ("Group1",)
+    assert group_2.names == ("Group2",)
+    assert group_3.names == ("NamedGrp",)
 
     assert (
         zntrack.examples.ParamsToOuts.from_rev(name="NamedGrp_ParamsToOuts").params
@@ -612,6 +612,6 @@ def test_group_names(proj_path):
     with project.group("NamedGrp") as grp3:
         pass
 
-    assert grp1.name == ("Group1",)
-    assert grp2.name == ("Group2",)
-    assert grp3.name == ("NamedGrp",)
+    assert grp1.names == ("Group1",)
+    assert grp2.names == ("Group2",)
+    assert grp3.names == ("NamedGrp",)

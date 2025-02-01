@@ -7,7 +7,7 @@ import zntrack.examples
 
 class NodeInGroup(zntrack.Node):
     def run(self):
-        assert self.state.group.name == ("MyGrp",)
+        assert self.state.group.names == ("MyGrp",)
 
 
 def test_groups_io(proj_path):
@@ -29,9 +29,9 @@ def test_groups_io(proj_path):
     subprocess.check_call(["dvc", "repro"])
 
     assert a.state.group is None
-    assert b.state.group.name == ("A",)
+    assert b.state.group.names == ("A",)
     assert c.state.group == b.state.group
-    assert d.state.group.name == ("A", "B")
+    assert d.state.group.names == ("A", "B")
 
     assert a.outs == 1
     assert b.outs == 2
@@ -58,7 +58,7 @@ def test_groups_io(proj_path):
         assert node == d
 
     with pytest.raises(AttributeError):
-        b.state.group.name = "Hello"
+        b.state.group.names = "Hello"
 
     with pytest.raises(AttributeError):
         b.state.group.nodes = []
@@ -80,7 +80,7 @@ def test_node_in_group(proj_path):
         n = NodeInGroup()
 
     project.repro()
-    assert n.state.group.name == ("MyGrp",)
+    assert n.state.group.names == ("MyGrp",)
 
 
 def test_custom_node_name_in_group(proj_path):
@@ -94,10 +94,10 @@ def test_custom_node_name_in_group(proj_path):
     project.repro()
 
     assert m.name == "MyGrp_NodeInGroup"
-    assert m.state.group.name == ("MyGrp",)
+    assert m.state.group.names == ("MyGrp",)
 
     assert n.name == "MyGrp_CustomName"
-    assert n.state.group.name == ("MyGrp",)
+    assert n.state.group.names == ("MyGrp",)
 
 
 if __name__ == "__main__":
