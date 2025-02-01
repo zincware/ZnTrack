@@ -1,5 +1,7 @@
-import zntrack.examples
 import functools
+
+import zntrack.examples
+
 
 class NodeWithProperty(zntrack.Node):
     params: int = zntrack.params(42)
@@ -20,7 +22,7 @@ def test_property_access_graph_building(proj_path):
     with project:
         node = NodeWithProperty()
         zntrack.examples.DepsToMetrics(deps=node.value)
-    
+
     project.build()
 
     assert not hasattr(node, "property_triggered")
@@ -34,11 +36,11 @@ def test_property_access_graph_building(proj_path):
     with project:
         node = NodeWithProperty()
         zntrack.examples.DepsToMetrics(deps=node.value)
-    
+
     assert not hasattr(node, "property_triggered")
     project.build()
     assert not hasattr(node, "property_triggered")
 
     # sanity check
-    node.value # trigger property access
+    node.value  # trigger property access
     assert node.property_triggered is True
