@@ -127,9 +127,16 @@ class StructureOptimization(zntrack.Node):
       return list(ase.io.iread(f, ":", format="traj"))
 ```
 
-Now that we have defined all necessary Nodes we can put them to use and build our graph:
+Now that we have defined all necessary Nodes we can put them to use and build our graph.
+Best to go into a new and empty directory, run `git init` followed by `dvc init`.
+Then we create a file `src/__init__.py` and place the Node definitions in there.
+Finally we create a new file `main.py` as described bellow and execute it using `python main.py` to build and access our workflow.
 
 ```python
+import zntrack
+
+from src import MACE_MP, Smiles2Conformers, Pack, StructureOptimization
+
 project = zntrack.Project()
 
 model = MACE_MP()
