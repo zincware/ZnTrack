@@ -118,6 +118,6 @@ def test_grouped_duplicate_named_node(proj_path):
         n2 = MyNode(name="A")
         assert n2.name == "grp2_A"
 
-    with project.group("grp1"):
-        with pytest.raises(ValueError, match="A node with the name 'grp1_A' already exists."):
+    with pytest.raises(ValueError, match="A node with the name 'grp1_A' already exists."):
+        with project.group("grp1"):
             MyNode(name="A")
