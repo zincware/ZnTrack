@@ -23,7 +23,26 @@ from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
 
-def _paths_getter(self: Node, name: str):
+def _paths_getter_input(self: Node, name: str):
+    """Resolve the paths for data the Node consumes."""
+    if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
+        return self.__dict__[name]
+    try:
+        with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
+            content = json.load(f)[self.name][name]
+            content = znjson.loads(json.dumps(content))
+
+            if self.state.tmp_path is not None:
+                loader = TempPathLoader()
+                loader(content, instance=self)
+
+            return content
+    except FileNotFoundError:
+        return NOT_AVAILABLE
+
+
+def _paths_getter_output(self: Node, name: str):
+    """Resolve the paths for data the Node produces."""
     # TODO: if self._external_: try looking into
     # external/self.uuid/...
     # this works for everything except node-meta.json because that
@@ -59,15 +78,14 @@ def outs_path(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter_output
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def params_path(default=dataclasses.MISSING, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter_input
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
@@ -82,7 +100,7 @@ def plots_path(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter_output
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
@@ -99,13 +117,12 @@ def metrics_path(
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter_output
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def deps_path(default=dataclasses.MISSING, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
-    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
+    kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter_input
     return znfields.field(default=default, getter=plugin_getter, **kwargs)

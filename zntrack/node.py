@@ -16,7 +16,13 @@ from zntrack.group import Group
 from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env
 
-from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
+from .config import (
+    NOT_AVAILABLE,
+    ZNTRACK_LAZY_VALUE,
+    NodeStatusEnum,
+    ZNTRACK_OPTION,
+    ZnTrackOptionEnum,
+)
 
 try:
     from typing import dataclass_transform
@@ -78,6 +84,17 @@ class Node(znflow.Node, znfields.Base):
                     log.warning(
                         "Node name should not contain '_'. This character is used for defining groups."
                     )
+        for field in dataclasses.fields(self):
+            # X_Path should be resolved instead of passing
+            #  a connection. They are known at runtime.
+            if field.metadata.get(ZNTRACK_OPTION, None) in [
+                ZnTrackOptionEnum.PARAMS_PATH,
+                ZnTrackOptionEnum.DEPS_PATH,
+                ZnTrackOptionEnum.OUTS_PATH,
+                ZnTrackOptionEnum.PLOTS_PATH,
+                ZnTrackOptionEnum.METRICS_PATH,
+            ]:
+                self._protected_.append(field.name)
 
     def _post_load_(self):
         """Called after `from_rev` is called."""
