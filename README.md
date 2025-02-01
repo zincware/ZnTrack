@@ -13,16 +13,22 @@
 
 ![Logo](https://raw.githubusercontent.com/zincware/ZnTrack/main/docs/source/_static/logo_ZnTrack.png)
 
-# ZnTrack: Make your Python Code reproducible!
+# ZnTrack: Make Your Python Code Reproducible!
 
-ZnTrack enables you to convert your existing Python code into reproducible
-workflows by converting them into directed graph structure with well defined
-inputs and outputs per node.
+ZnTrack (`zɪŋk træk`) is a lightweight and easy-to-use Python package for converting your existing Python code into reproducible workflows. By structuring your code as a directed graph with well-defined inputs and outputs, ZnTrack ensures reproducibility, scalability, and ease of collaboration.
 
-## Example
+## Key Features
 
-Let us take the following workflow that constructs a periodic, atomistic system
-of Ethanol and runs a geometry optimization using MACE-MP-0.
+- **Reproducible Workflows**: Convert Python scripts into reproducible workflows with minimal effort.
+- **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs, and metrics in your Python code.
+- **Lightweight and Database-Free**: ZnTrack is lightweight and does not require any databases.
+- **DVC Integration**: Seamlessly integrates with [DVC](https://dvc.org) for data version control.
+
+## Example: Molecular Dynamics Workflow
+
+Let’s take a workflow that constructs a periodic, atomistic system of Ethanol and runs a geometry optimization using MACE-MP-0.
+
+### Original Workflow
 
 ```python
 from ase.optimize import LBFGS
@@ -41,14 +47,16 @@ dyn.run(fmax=0.5)
 ```
 
 <details>
-<summary>Dependencencyes</summary>
-For this example to work you will need
-- https://github.com/ACEsuit/mace
-- https://github.com/m3g/packmol
-- https://github.com/zincware/rdkit2ase
+<summary>Dependencies</summary>
+For this example to work, you will need:
+- [MACE](https://github.com/ACEsuit/mace)
+- [Packmol](https://github.com/m3g/packmol)
+- [rdkit2ase](https://github.com/zincware/rdkit2ase)
 </details>
 
-To make this reproducible, we convert it into the following graph structure:
+### Converted Workflow with ZnTrack
+
+To make this workflow reproducible, we convert it into a graph structure:
 
 ```mermaid
 flowchart LR
@@ -57,90 +65,78 @@ Smiles2Conformers --> Pack --> StructureOptimization
 MACE_MP --> StructureOptimization
 ```
 
+#### Node Definitions
+
 ```python
 import zntrack
 import ase.io
 from pathlib import Path
 
 class Smiles2Conformers(zntrack.Node):
-  smiles: str = zntrack.params()
-  numConfs: int = zntrack.params(32)
+    smiles: str = zntrack.params()
+    numConfs: int = zntrack.params(32)
 
-  frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
+    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
 
-  def run(self) -> None:
-    frames = smiles2conformers(smiles=self.smiles, numConfs=self.numConfs)
-    ase.io.write(frames, self.frames_path)
+    def run(self) -> None:
+        frames = smiles2conformers(smiles=self.smiles, numConfs=self.numConfs)
+        ase.io.write(frames, self.frames_path)
 
-  @property
-  def frames(self) -> list[ase.Atoms]:
-    with self.state.fs.open(self.frames_path, "r") as f:
-      return list(ase.io.iread(f, ":", format="extxyz"))
+    @property
+    def frames(self) -> list[ase.Atoms]:
+        with self.state.fs.open(self.frames_path, "r") as f:
+            return list(ase.io.iread(f, ":", format="extxyz"))
 
 
 class Pack(zntrack.Node):
-  data: list[list[ase.Atoms]] = zntrack.deps()
-  counts: list[int] = zntrack.params()
-  density: float = zntrack.params()
+    data: list[list[ase.Atoms]] = zntrack.deps()
+    counts: list[int] = zntrack.params()
+    density: float = zntrack.params()
 
-  frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
+    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")
 
-  def run(self) -> None:
-    box = pack(data=self.data, counts=self.counts, density=self.density)
-    ase.io.write(box, self.frames_path)
+    def run(self) -> None:
+        box = pack(data=self.data, counts=self.counts, density=self.density)
+        ase.io.write(box, self.frames_path)
 
-  @property
-  def frames(self) -> list[ase.Atoms]:
-    with self.state.fs.open(self.frames_path, "r") as f:
-      return list(ase.io.iread(f, ":", format="extxyz"))
+    @property
+    def frames(self) -> list[ase.Atoms]:
+        with self.state.fs.open(self.frames_path, "r") as f:
+            return list(ase.io.iread(f, ":", format="extxyz"))
 
-```
-
-We could hardcode the MACE_MP model into the StructureOptimization Node, but we
-can also define it as a dependency. In contrast to `Smiles2Conformers` and
-`Pack` the model does not require a `run` method and thus we can define it as a
-`@dataclass`
-
-```python
-from dataclasses import dataclass
 
 @dataclass
 class MACE_MP:
-  model: str = "medium"
+    model: str = "medium"
 
-  def get_calculator(self, **kwargs):
-    return mace_mp(model=self.model)
+    def get_calculator(self, **kwargs):
+        return mace_mp(model=self.model)
 
 
 class StructureOptimization(zntrack.Node):
-  model: MACE_MP = zntrack.deps()
-  data: list[ase.Atoms] = zntrack.deps()
-  data_id: int = zntrack.params()
-  fmax: float = zntrack.params(0.05)
+    model: MACE_MP = zntrack.deps()
+    data: list[ase.Atoms] = zntrack.deps()
+    data_id: int = zntrack.params()
+    fmax: float = zntrack.params(0.05)
 
-  frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.traj")
+    frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.traj")
 
-  def run(self):
-    atoms = self.data[self.data_id]
-    atoms.calc = self.model.get_calculator()
-    dyn = LBFGS(atoms, trajectory=self.frames_path)
-    dyn.run(fmax=0.5)
+    def run(self):
+        atoms = self.data[self.data_id]
+        atoms.calc = self.model.get_calculator()
+        dyn = LBFGS(atoms, trajectory=self.frames_path)
+        dyn.run(fmax=0.5)
 
-  @property
-  def frames(self) -> list[ase.Atoms]:
-    with self.state.fs.open(self.frames_path, "rb") as f:
-      return list(ase.io.iread(f, ":", format="traj"))
+    @property
+    def frames(self) -> list[ase.Atoms]:
+        with self.state.fs.open(self.frames_path, "rb") as f:
+            return list(ase.io.iread(f, ":", format="traj"))
 ```
 
-Now that we have defined all necessary Nodes we can put them to use and build
-our graph. Best to go into a new and empty directory, run `git init` followed by
-`dvc init`. Then we create a file `src/__init__.py` and place the Node
-definitions in there. Finally we create a new file `main.py` as described bellow
-and execute it using `python main.py` to build and access our workflow.
+#### Building and Running the Workflow
 
 ```python
 import zntrack
-
 from src import MACE_MP, Smiles2Conformers, Pack, StructureOptimization
 
 project = zntrack.Project()
@@ -148,27 +144,14 @@ project = zntrack.Project()
 model = MACE_MP()
 
 with project:
-  etoh = Smiles2Conformers(
-    smiles="CCO",
-    numConfs=32
-  )
-  box = Pack(
-    data=[etoh.frames],
-    counts=[32],
-    density=789
-  )
-  optm = StructureOptimization(
-    model=model,
-    data=box.frames,
-    data_id=-1,
-    fmax=0.5
-  )
+    etoh = Smiles2Conformers(smiles="CCO", numConfs=32)
+    box = Pack(data=[etoh.frames], counts=[32], density=789)
+    optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)
 
 project.repro()
 ```
 
-We can now see that the files have been created in `nodes/StructureOptimization>/frames.traj` which contains our final trajectory.
-To look at the results, we can also run the following Python script:
+#### Accessing Results
 
 ```python
 import zntrack
@@ -177,6 +160,52 @@ optm = zntrack.from_rev(name="StructureOptimization")
 print(optm.frames)
 ```
 
-For more examples checkout the following packages that build ontop of ZnTrack
-- https://mlipx.readthedocs.io/en/latest/
-- https://github.com/zincware/IPSuite
+For more examples, check out the following packages that build on top of ZnTrack:
+- [MLIPx](https://mlipx.readthedocs.io/en/latest/)
+- [IPSuite](https://github.com/zincware/IPSuite)
+
+---
+
+## Technical Details
+
+### ZnTrack as an Object-Relational Mapping for DVC
+
+ZnTrack provides an easy-to-use interface for DVC directly from Python. It handles all the computational overhead of reading config files, defining outputs in the `dvc.yaml`, and much more.
+
+For more information on DVC, visit their [homepage](https://dvc.org/doc).
+
+---
+
+## References
+
+If you use ZnTrack in your research, please cite us:
+
+```bibtex
+@misc{zillsZnTrackDataCode2024,
+  title = {{{ZnTrack}} -- {{Data}} as {{Code}}},
+  author = {Zills, Fabian and Sch{\"a}fer, Moritz and Tovey, Samuel and K{\"a}stner, Johannes and Holm, Christian},
+  year = {2024},
+  eprint={2401.10603},
+  archivePrefix={arXiv},
+}
+```
+
+---
+
+## Copyright
+
+This project is distributed under the [Apache License Version 2.0](https://github.com/zincware/ZnTrack/blob/main/LICENSE).
+
+---
+
+## Similar Tools
+
+Here’s a list of other projects that either work together with ZnTrack or achieve similar results with slightly different goals or programming languages:
+
+- [DVC](https://dvc.org/) - Main dependency of ZnTrack for Data Version Control.
+- [dvthis](https://github.com/jcpsantiago/dvthis) - Introduce DVC to R.
+- [DAGsHub Client](https://github.com/DAGsHub/client) - Logging parameters from within Python.
+- [MLFlow](https://mlflow.org/) - A Machine Learning Lifecycle Platform.
+- [Metaflow](https://metaflow.org/) - A framework for real-life data science.
+- [Hydra](https://hydra.cc/) - A framework for elegantly configuring complex applications.
+- [Snakemake](https://snakemake.readthedocs.io/en/stable/) - Workflow management system for reproducible and scalable data analyses.
