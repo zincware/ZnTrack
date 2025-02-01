@@ -15,11 +15,14 @@
 
 # ZnTrack: Make your Python Code reproducible!
 
-ZnTrack enables you to convert your existing Python code into reproducible workflows by converting them into directed graph structure with well defined inputs and outputs per node.
+ZnTrack enables you to convert your existing Python code into reproducible
+workflows by converting them into directed graph structure with well defined
+inputs and outputs per node.
 
 ## Example
 
-Let us take the following workflow that constructs a periodic, atomistic system of Ethanol and runs a geometry optimization using MACE-MP-0.
+Let us take the following workflow that constructs a periodic, atomistic system
+of Ethanol and runs a geometry optimization using MACE-MP-0.
 
 ```python
 from ase.optimize import LBFGS
@@ -93,8 +96,10 @@ class Pack(zntrack.Node):
 
 ```
 
-We could hardcode the MACE_MP model into the StructureOptimization Node, but we can also define it as a dependency.
-In contrast to `Smiles2Conformers` and `Pack` the model does not require a `run` method and thus we can define it as a `@dataclass`
+We could hardcode the MACE_MP model into the StructureOptimization Node, but we
+can also define it as a dependency. In contrast to `Smiles2Conformers` and
+`Pack` the model does not require a `run` method and thus we can define it as a
+`@dataclass`
 
 ```python
 from dataclasses import dataclass
@@ -127,10 +132,11 @@ class StructureOptimization(zntrack.Node):
       return list(ase.io.iread(f, ":", format="traj"))
 ```
 
-Now that we have defined all necessary Nodes we can put them to use and build our graph.
-Best to go into a new and empty directory, run `git init` followed by `dvc init`.
-Then we create a file `src/__init__.py` and place the Node definitions in there.
-Finally we create a new file `main.py` as described bellow and execute it using `python main.py` to build and access our workflow.
+Now that we have defined all necessary Nodes we can put them to use and build
+our graph. Best to go into a new and empty directory, run `git init` followed by
+`dvc init`. Then we create a file `src/__init__.py` and place the Node
+definitions in there. Finally we create a new file `main.py` as described bellow
+and execute it using `python main.py` to build and access our workflow.
 
 ```python
 import zntrack
