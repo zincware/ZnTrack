@@ -204,10 +204,10 @@ def test_group_nodes(proj_path):
 
     assert node_1.name == "Group1_ParamsToOuts"
     assert node_2.name == "Group1_ParamsToOuts_1"
-    assert node_3.name == "Node01"
-    assert node_4.name == "Node02"
+    assert node_3.name == "Group2_Node01"
+    assert node_4.name == "Group2_Node02"
     assert node_5.name == "NamedGrp_ParamsToOuts"
-    assert node_6.name == "Node03"
+    assert node_6.name == "NamedGrp_Node03"
     assert node7.name == "ParamsToOuts"
     assert node8.name == "ParamsToOuts_1"
     assert node9.name == "Node04"
