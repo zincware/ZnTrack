@@ -28,16 +28,32 @@ T = t.TypeVar("T", bound="Node")
 log = logging.getLogger(__name__)
 
 
-def _name_getter(self, name):
-    value = self.__dict__[name]
-    if value is not None:
-        return value
-    # find the value based on the current project context
-    graph = znflow.get_graph()
-    if graph is znflow.empty_graph:
-        return self.__class__.__name__
+def _name_getter(self, attr_name: str) -> str:
+    """Retrieve the name of a node based on the current graph context.
 
-    return graph.compute_all_node_names()[self.uuid]
+    Parameter
+    ---------
+        attr_name (str): The attribute name to retrieve.
+
+    Returns
+    -------
+        str: The resolved node name.
+
+    """
+    value = self.__dict__.get(attr_name)  # Safer lookup with .get()
+    graph = znflow.get_graph()
+
+    # If value exists and the graph is either empty or not inside a group, return it
+    if value is not None:
+        if graph is znflow.empty_graph or graph.active_group is None:
+            return str(value)
+
+    # If no graph is active, return the class name as the default
+    if graph is znflow.empty_graph:
+        return str(self.__class__.__name__)
+
+    # Compute name based on project-wide node names
+    return str(graph.compute_all_node_names()[self.uuid])
 
 
 @dataclass_transform()

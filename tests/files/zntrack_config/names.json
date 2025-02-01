@@ -1,0 +1,56 @@
+{
+    "ParamsToMetrics": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ParamsToMetrics"
+        }
+    },
+    "ParamsToMetrics_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ParamsToMetrics_1"
+        }
+    },
+    "Thanasis": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/Thanasis"
+        }
+    },
+    "grp_ParamsToMetrics": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/grp/ParamsToMetrics"
+        }
+    },
+    "grp_ParamsToMetrics_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/grp/ParamsToMetrics_1"
+        }
+    },
+    "grp_Cydney": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/grp/Cydney"
+        }
+    },
+    "grp_subgrp_ParamsToMetrics": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/grp/subgrp/ParamsToMetrics"
+        }
+    },
+    "grp_subgrp_ParamsToMetrics_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/grp/subgrp/ParamsToMetrics_1"
+        }
+    },
+    "grp_subgrp_Lorine": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/grp/subgrp/Lorine"
+        }
+    }
+}
