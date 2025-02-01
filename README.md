@@ -99,9 +99,7 @@ class Smiles2Conformers(zntrack.Node):
     frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")  # Output file path
 
     def run(self) -> None:
-        # Generate molecular conformers from a SMILES string
         frames = smiles2conformers(smiles=self.smiles, numConfs=self.numConfs)
-        # Save the frames to the output file
         ase.io.write(frames, self.frames_path)
 
     @property
@@ -119,9 +117,7 @@ class Pack(zntrack.Node):
     frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.xyz")  # Output file path
 
     def run(self) -> None:
-        # Pack the molecular frames into a periodic box
         box = pack(data=self.data, counts=self.counts, density=self.density)
-        # Save the packed structure to the output file
         ase.io.write(box, self.frames_path)
 
     @property
@@ -140,7 +136,6 @@ class MACE_MP:
     model: str = "medium"  # Default model type
 
     def get_calculator(self, **kwargs):
-        # Return a MACE-MP calculator instance
         return mace_mp(model=self.model)
 
 
@@ -153,11 +148,8 @@ class StructureOptimization(zntrack.Node):
     frames_path: Path = zntrack.outs_path(zntrack.nwd / "frames.traj")  # Output file path
 
     def run(self):
-        # Select the structure to optimize
         atoms = self.data[self.data_id]
-        # Attach the MACE-MP calculator
         atoms.calc = self.model.get_calculator()
-        # Run the geometry optimization
         dyn = LBFGS(atoms, trajectory=self.frames_path)
         dyn.run(fmax=0.5)
 
@@ -194,15 +186,15 @@ Now that we’ve defined all the necessary Nodes, we can build and execute the w
 
    # Build the workflow graph
    with project:
-       etoh = Smiles2Conformers(smiles="CCO", numConfs=32)  # Generate conformers
-       box = Pack(data=[etoh.frames], counts=[32], density=789)  # Pack the structures
-       optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)  # Optimize the structure
+       etoh = Smiles2Conformers(smiles="CCO", numConfs=32)
+       box = Pack(data=[etoh.frames], counts=[32], density=789)
+       optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)
 
    # Execute the workflow
    project.repro()
    ```
 
-   > **TIP**  
+   > [!TIP]
    > If you don’t want to execute the graph immediately, use `project.build()` instead. You can run the graph later using `dvc repro` or the [paraffin](https://github.com/zincware/paraffin) package.
 
 #### Accessing Results
