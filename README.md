@@ -85,11 +85,13 @@ In ZnTrack, each **Node** is defined as a Python class. The class attributes
 define the **inputs** (parameters and dependencies) and **outputs**, while the
 `run` method contains the computational logic to be executed.
 
-> [!NOTE] ZnTrack uses Python dataclasses under the hood, providing an automatic
+> [!NOTE]
+> ZnTrack uses Python dataclasses under the hood, providing an automatic
 > `__init__` method. Starting from Python 3.11, most IDEs should reliably
 > provide type hints for ZnTrack Nodes.
 
-> [!TIP] For files produced during the `run` method, ZnTrack provides a unique
+> [!TIP]
+> For files produced during the `run` method, ZnTrack provides a unique
 > **Node Working Directory** (`zntrack.nwd`). Always use this directory to store
 > files to ensure reproducibility and avoid conflicts.
 
@@ -204,7 +206,8 @@ workflow. Follow these steps:
    project.repro()
    ```
 
-   > [!TIP] If you don’t want to execute the graph immediately, use
+   > [!TIP]
+   > If you don’t want to execute the graph immediately, use
    > `project.build()` instead. You can run the graph later using `dvc repro` or
    > the [paraffin](https://github.com/zincware/paraffin) package.
 
