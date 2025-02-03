@@ -224,7 +224,7 @@ import zntrack
 
 # Load the StructureOptimization Node
 optm = zntrack.from_rev(name="StructureOptimization")
-# you can pass `remote: str` and `rev: str` to access files from
+# you can pass `remote: str` and `rev: str` to access data from
 # a different commit or a remote repository.
 
 # Access the optimization trajectory
