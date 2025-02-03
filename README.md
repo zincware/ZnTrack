@@ -1,6 +1,5 @@
 [![coeralls](https://coveralls.io/repos/github/zincware/ZnTrack/badge.svg)](https://coveralls.io/github/zincware/ZnTrack)
 [![codecov](https://codecov.io/gh/zincware/ZnTrack/branch/main/graph/badge.svg?token=ZQ67FXN1IT)](https://codecov.io/gh/zincware/ZnTrack)
-[![Maintainability](https://api.codeclimate.com/v1/badges/f25e119bbd5d5ec74e2c/maintainability)](https://codeclimate.com/github/zincware/ZnTrack/maintainability)
 ![PyTest](https://github.com/zincware/ZnTrack/actions/workflows/test.yaml/badge.svg)
 [![PyPI version](https://badge.fury.io/py/zntrack.svg)](https://badge.fury.io/py/zntrack)
 [![code-style](https://img.shields.io/badge/code%20style-black-black)](https://github.com/psf/black/)
@@ -239,16 +238,6 @@ on top of ZnTrack:
 
 - [mlipx](https://mlipx.readthedocs.io/en/latest/) - Machine Learned Interatomic Potential eXploration.
 - [IPSuite](https://github.com/zincware/IPSuite) - Machine Learned **I**nteratomic **P**otential Tools.
-
-## Technical Details
-
-### ZnTrack as an Object-Relational Mapping for DVC
-
-ZnTrack provides an easy-to-use interface for DVC directly from Python. It
-handles all the computational overhead of reading config files, defining outputs
-in the `dvc.yaml`, and much more.
-
-For more information on DVC, visit their [homepage](https://dvc.org/doc).
 
 ______________________________________________________________________
 
