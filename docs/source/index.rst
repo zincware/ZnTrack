@@ -61,7 +61,7 @@ We will convert the function into a :term:`Node` and build a directed workflow g
       with project:
          x = Add(a=1, b=2)
          y = Add(a=x.result, b=3)
-      
+
       project.repro()
 
       print(y.result)
@@ -91,4 +91,4 @@ Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git
    node
    project
    glossary
-   
+

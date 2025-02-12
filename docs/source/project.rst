@@ -11,14 +11,14 @@ To create a new ZnTrack Project, create a new repository.
 
     mkdir my_project
     cd my_project
-    git init 
+    git init
     dvc init
 
 .. note::
 
     This documentation assumes that you have one workflow file ``main.py`` in the root of your project.
     Further all :term:`Node` definitions that do not originate from a package are expected to be imported from ``src/__init__.py``.
-    
+
     To ensure this, you can also run
 
     .. code-block :: python
@@ -37,8 +37,8 @@ To create a new ZnTrack Project, create a new repository.
             import zntrack
 
             class Add(zntrack.Node):
-                a: int = zntrack.params() 
-                b: int = zntrack.params() 
+                a: int = zntrack.params()
+                b: int = zntrack.params()
 
                 result: int = zntrack.outs()
 

@@ -3,20 +3,20 @@
 Node
 ====
 
-A :term:`Node` is the core component of ZnTrack, defining a unit of computation to be used in a workflow. 
+A :term:`Node` is the core component of ZnTrack, defining a unit of computation to be used in a workflow.
 It encapsulates a self-contained piece of logic that can be executed independently or as part of a larger pipeline.
 
 
 .. note::
-    
-    The :term:`Node` is built on top of Python's `dataclasses <https://docs.python.org/3/library/dataclasses.html>`_, 
+
+    The :term:`Node` is built on top of Python's `dataclasses <https://docs.python.org/3/library/dataclasses.html>`_,
     leveraging their simplicity and power to define structured, reusable components.
 
 A :term:`Node` consists of the following three key parts:
 
 Inputs
 ------
-Every parameter or dependency required to run the :term:`Node`. 
+Every parameter or dependency required to run the :term:`Node`.
 Inputs define the data or configuration that the :term:`Node` needs to perform its computation.
 Possible inputs are:
 
@@ -27,7 +27,7 @@ Possible inputs are:
 
 Outputs
 -------
-Every result produced by the :term:`Node`. 
+Every result produced by the :term:`Node`.
 Outputs are the data or artifacts generated after the :term:`Node` has executed its logic.
 Possible outputs are:
 
@@ -40,11 +40,11 @@ Possible outputs are:
 
 Run
 ---
-The function that is executed when the :term:`Node` is run. 
+The function that is executed when the :term:`Node` is run.
 This is where the core computation or logic of the :term:`Node` is defined.
 
-It is also possible to define multiple run methods for a single :term:`Node`. 
-This allows for flexible execution strategies depending on the context. 
+It is also possible to define multiple run methods for a single :term:`Node`.
+This allows for flexible execution strategies depending on the context.
 For more details, see ...(TODO: Add link to ``zntrack.apply`` documentation).
 
 
@@ -58,9 +58,9 @@ We can leverage the integrated features of ZnTrack to hide all file writing or r
 
     class Add(zntrack.Node): # inherit from zntrack.Node
         # we define a parameter as dataclass.Field.
-        a: int = zntrack.params() 
+        a: int = zntrack.params()
         # One could use a dict or define as many parameters as needed.
-        b: int = zntrack.params() 
+        b: int = zntrack.params()
 
         # We define an arbitrary output.
         result: int = zntrack.outs()
@@ -91,7 +91,7 @@ The Node above is equivalent to the following :term:`Node`.
 
             with open(self.params_file, "r") as f:
                 params = json.load(f)
-            
+
             result = params["a"] + params["b"]
 
             self.results_file.parent.mkdir(parents=True, exist_ok=True)

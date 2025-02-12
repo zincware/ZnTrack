@@ -14,7 +14,7 @@ Glossary
 
     GIT
         tba
-    
+
     Commit hash
         tba
 
