@@ -13,7 +13,7 @@ Key Features
 - **Reproducible Workflows**: Convert Python scripts into reproducible workflows with minimal effort.
 - **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs, and metrics in your Python code.
 - **Shareable and Collaborative**: Collaborate with your team by working together through GIT. Share your workflows and use parts in other projects or package them as Python packages.
-- **DVC Integration**: ZnTrack is built on top of :term:`DVC` for version control and experiment managment and seamlessly integrates into the :term:`DVC` ecosystem.
+- **DVC Integration**: ZnTrack is built on top of :term:`DVC` for version control and experiment management and seamlessly integrates into the :term:`DVC` ecosystem.
 
 Installation
 ------------
@@ -67,7 +67,7 @@ We will convert the function into a :term:`Node` and build a directed workflow g
 As you can see, ZnTrack uses ``class`` instead of functions to define a :term:`Node`.
 This is different to almost every other workflow management tool and is motivated by the fact that all inputs and outputs from a Node a stored, thus each :term:`Node` is stateful.
 At any point after a :term:`Node` was executed you can access it's results.
-Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git` :term:`commit hash`.
+Each :term:`Node` is uniquely identified by the :term:`node name` and :term:`git` :term:`commit hash`.
 
 .. code-block:: python
 
@@ -79,7 +79,7 @@ Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git
 
 .. note::
 
-   You can ommit the remote and the rev parameter to load a :term:`Node` from the current repository and commit.
+   You can omit the remote and the rev parameter to load a :term:`Node` from the current repository and commit.
 
 
 .. dropdown:: Projects using ZnTrack

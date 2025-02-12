@@ -110,6 +110,7 @@ exclude = [
 
 
 [tool.codespell]
+ignore-words-list = "basf"
 skip = "poetry.lock,examples/*"
 
 [tool.pytest.ini_options]
