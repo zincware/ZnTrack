@@ -20,10 +20,10 @@ Every parameter or dependency required to run the :term:`Node`.
 Inputs define the data or configuration that the :term:`Node` needs to perform its computation.
 Possible inputs are:
 
-* ``zntrack.params()`` for json-serializable dictionaries.
-* ``zntrack.params_path()`` for parameter files. See `parameter dependencies <https://dvc.org/doc/user-guide/pipelines/defining-pipelines#parameter-dependencies>`_ for more information.
-* ``zntrack.deps()`` for dependencies from another :term:`Node`. See dependencies (TODO: site on deps!)
-* ``zntrack.deps_path()`` for file dependencies. See `simple dependencies <https://dvc.org/doc/user-guide/pipelines/defining-pipelines#simple-dependencies>`_ for more information.
+* :meth:`zntrack.params` for json-serializable data, e.g. ``{"loss": "mse", "epochs": 10}``. 
+* :meth:`zntrack.params_path` for parameter files. See `parameter dependencies <https://dvc.org/doc/user-guide/pipelines/defining-pipelines#parameter-dependencies>`_ for more information.
+* :meth:`zntrack.deps` for dependencies from another :term:`Node`. See :ref:`Project` for an example.
+* :meth:`zntrack.deps_path` for file dependencies. See `simple dependencies <https://dvc.org/doc/user-guide/pipelines/defining-pipelines#simple-dependencies>`_ for more information.
 
 Outputs
 -------
@@ -31,12 +31,12 @@ Every result produced by the :term:`Node`.
 Outputs are the data or artifacts generated after the :term:`Node` has executed its logic.
 Possible outputs are:
 
-* ``zntrack.outs()`` for any output data. This falls back to `pickle <https://docs.python.org/3/library/pickle.html>`_ to serialize data.
-* ``zntrack.outs_path()`` to define an output file path.
-* ``zntrack.metrics()`` for metrics stored as ``dict[str, int|float]``.
-* ``zntrack.metrics_path()`` for file paths to store `metrics <https://dvc.org/doc/command-reference/metrics>`_.
-* ``zntrack.plots()`` for plots as pandas dataframes.
-* ``zntrack.plots_path()`` for file paths to store `plots <https://dvc.org/doc/user-guide/experiment-management/visualizing-plots>`_.
+* :meth:`zntrack.outs` for any output data. This falls back to `pickle <https://docs.python.org/3/library/pickle.html>`_ to serialize data.
+* :meth:`zntrack.outs_path` to define an output file path.
+* :meth:`zntrack.metrics` for metrics stored as ``dict[str, int|float]``.
+* :meth:`zntrack.metrics_path` for file paths to store `metrics <https://dvc.org/doc/command-reference/metrics>`_.
+* :meth:`zntrack.plots` for plots as pandas dataframes.
+* :meth:`zntrack.plots_path` for file paths to store `plots <https://dvc.org/doc/user-guide/experiment-management/visualizing-plots>`_.
 
 Run
 ---

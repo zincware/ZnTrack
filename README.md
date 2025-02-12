@@ -23,7 +23,6 @@ ensures reproducibility, scalability, and ease of collaboration.
 
 - **Reproducible Workflows**: Convert Python scripts into reproducible workflows with minimal effort.
 - **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs, and metrics in your Python code.
-- **Lightweight and Database-Free**: ZnTrack is lightweight and does not require any databases.
 - **Shareable and Collaborative**: Collaborate with your team by working together through GIT. Share your workflows and use parts in other projects or package them as Python packages.
 - **DVC Integration**: ZnTrack is built on top of [DVC](https://dvc.org) for version control and experiment managment and seamlessly integrates into the [DVC](https://dvc.org) ecosystem.
 

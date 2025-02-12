@@ -12,7 +12,6 @@ Key Features
 
 - **Reproducible Workflows**: Convert Python scripts into reproducible workflows with minimal effort.
 - **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs, and metrics in your Python code.
-- **Lightweight and Database-Free**: ZnTrack is lightweight and does not require any databases.
 - **Shareable and Collaborative**: Collaborate with your team by working together through GIT. Share your workflows and use parts in other projects or package them as Python packages.
 - **DVC Integration**: ZnTrack is built on top of :term:`DVC` for version control and experiment managment and seamlessly integrates into the :term:`DVC` ecosystem.
 
@@ -36,9 +35,8 @@ Let us convert a simple Python script into a reproducible workflow using ZnTrack
 
    if __name__ == "__main__":
       x = add(1, 2)
-      y = add(x, 3)
-      print(y)
-      >>> 6
+      print(x)
+      >>> 3
 
 
 We will convert the function into a :term:`Node` and build a directed workflow graph using ZnTrack.
@@ -60,12 +58,11 @@ We will convert the function into a :term:`Node` and build a directed workflow g
 
       with project:
          x = Add(a=1, b=2)
-         y = Add(a=x.result, b=3)
 
       project.repro()
 
-      print(y.result)
-      >>> 6
+      print(x.result)
+      >>> 3
 
 As you can see, ZnTrack uses ``class`` instead of functions to define a :term:`Node`.
 This is different to almost every other workflow management tool and is motivated by the fact that all inputs and outputs from a Node a stored, thus each :term:`Node` is stateful.
@@ -90,5 +87,6 @@ Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git
 
    node
    project
+   fields
    glossary
 

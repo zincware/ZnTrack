@@ -20,6 +20,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx.ext.viewcode",
     "sphinx_design",
+    "sphinx.ext.autodoc",
 ]
 
 templates_path = ["_templates"]
@@ -53,3 +54,17 @@ html_theme_options = {
 html_css_files = [
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
 ]
+
+# -- Options for hoverxref extension -----------------------------------------
+# https://sphinx-hoverxref.readthedocs.io/en/latest/
+
+hoverxref_roles = ["term"]
+hoverxref_role_types = {
+    "class": "tooltip",
+}
+
+# -- Options for sphinx_copybutton -------------------------------------------
+# https://sphinx-copybutton.readthedocs.io/en/latest/
+
+copybutton_prompt_text = r">>> |\.\.\. |\(.*\) \$ "
+copybutton_prompt_is_regexp = True

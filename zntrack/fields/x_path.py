@@ -63,10 +63,34 @@ def outs_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def params_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def params_path(default=dataclasses.MISSING, **kwargs):
+    """Define input parameter file path(s).
+    
+    Parameters
+    ----------
+    default : str|Path|list[str|Path], optional
+        Path to one or multiple parameter files.
+
+    Examples
+    --------
+
+    >>> import zntrack
+    >>> class MyNode(zntrack.Node):
+    ...     params_path: str = zntrack.params_path(default="params.yaml")
+    ...
+    ...     def run(self) -> None: ...
+    ...
+    >>> a = MyNode()
+    >>> a.params_path
+    'params.yaml'
+    >>> b = MyNode(params_path="params2.yaml")
+    >>> b.params_path
+    'params2.yaml'
+
+    """
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = cache
+    kwargs["metadata"][ZNTRACK_CACHE] = True # TODO: remove?
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
@@ -78,6 +102,32 @@ def plots_path(
     independent: bool = False,
     **kwargs,
 ):
+    """Create a field that handles plots and figure paths.
+
+    Parameters
+    ----------
+    default : str|Path|list[str|Path], optional
+        Path to one or multiple plot files.
+        See https://dvc.org/doc/user-guide/experiment-management/visualizing-plots
+        for more information.
+    cache : bool, optional
+        Whether to use the DVC cache for the field.
+    independent : bool, optional
+        Set to true if the output of this field can be independent of the
+        node's inputs. E.g. if a csv file is produced that contains indices
+        it might not change if the inputs to the node change.
+        In such a case subsequent nodes might not rerun if 
+        independent is kept as False.
+
+    Examples
+    --------
+    >>> import zntrack
+    >>> class MyNode(zntrack.Node):
+    ...     plots_path: str = zntrack.plots_path(zntrack.nwd / "plots.png")
+    ...
+    ...     def run(self) -> None: ...
+    ...         '''Save a figure to self.plots_path.'''
+    """
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache

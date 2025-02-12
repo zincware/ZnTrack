@@ -23,3 +23,6 @@ Glossary
 
     Project
         The ZnTrack project.
+
+    ZnFlow
+        The ZnFlow workflow manager.
