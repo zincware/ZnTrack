@@ -55,7 +55,7 @@ To create a new ZnTrack Project, create a new repository.
                 def run(self) -> None:
                     self.result = self.a * self.b
 
-We will now define a workflow connecting multiple ``Add`` :term:`Node` instances.
+We will now define a workflow connecting multiple :term:`Node` instances.
 As you can see, ZnTrack allows you to connect the Nodes directly through their attributes.
 It is important to consider the ``main.py`` file purely as a workflow configuration file.
 A great explanation for this is given in the `Apache Airflow documentation <https://airflow.apache.org/docs/apache-airflow/stable/tutorial/fundamentals.html#it-s-a-dag-definition-file>`_.
@@ -77,7 +77,7 @@ A great explanation for this is given in the `Apache Airflow documentation <http
 
     import zntrack
 
-    from src import Add
+    from src import Add, Multiply
 
     project = zntrack.Project()
 
@@ -100,7 +100,7 @@ Calling ``project.build()`` will create all configuration files and prepare the 
     - ``zntrack.json``: Additional information that is used by ZnTrack to manage the workflow.
 
     You should not modify the ``dvc.yaml`` and ``zntrack.json`` files manually.
-    It is possible to modify the ``params.yaml`` file, but recommended to change them within the ``main.py`` to ensure one source of truth.
+    It is possible to modify the ``params.yaml`` file, but recommended to change the parameters within the ``main.py`` instead, to ensure one source of truth.
 
 To execute the workflow, we make use of the ``dvc`` command line tool.
 
