@@ -44,6 +44,16 @@ To create a new ZnTrack Project, create a new repository.
 
                 def run(self) -> None:
                     self.result = self.a + self.b
+            
+            # Multiply used ``zntrack.deps`` to process data from other nodes
+            class Multiply(zntrack.Node):
+                a: int = zntrack.deps()
+                b: int = zntrack.deps()
+
+                result: int = zntrack.outs()
+
+                def run(self) -> None:
+                    self.result = self.a * self.b
 
 We will now define a workflow connecting multiple ``Add`` :term:`Node` instances.
 As you can see, ZnTrack allows you to connect the Nodes directly through their attributes.
@@ -74,7 +84,7 @@ A great explanation for this is given in the `Apache Airflow documentation <http
     with project:
         add1 = Add(a=1, b=2)
         add2 = Add(a=3, b=4)
-        add3 = Add(a=add1.result, b=add2.result)
+        add3 = Multiply(a=add1.result, b=add2.result)
 
     project.build()
 
