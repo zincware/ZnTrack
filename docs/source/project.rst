@@ -44,7 +44,7 @@ To create a new ZnTrack Project, create a new repository.
 
                 def run(self) -> None:
                     self.result = self.a + self.b
-            
+
             # Multiply used ``zntrack.deps`` to process data from other nodes
             class Multiply(zntrack.Node):
                 a: int = zntrack.deps()
