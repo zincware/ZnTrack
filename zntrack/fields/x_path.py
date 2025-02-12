@@ -55,6 +55,27 @@ def outs_path(
     independent: bool = False,
     **kwargs,
 ):
+    """Define output file path(s) for a node.
+
+    Parameters
+    ----------
+    default : str|Path|list[str|Path], optional
+        Default path(s) to output files.
+    cache : bool, optional
+        Whether to use the DVC cache for the field. Default is `True`.
+    independent : bool, optional
+        Whether the output is independent of the node's inputs. Default is `False`.
+
+    Examples
+    --------
+    >>> import zntrack
+    >>> from pathlib import Path
+    >>> class MyNode(zntrack.Node):
+    ...     outs_path: Path = zntrack.outs_path(zntrack.nwd / "output.txt")
+    ...
+    ...     def run(self) -> None: ...
+    ...         '''Save output to self.outs_path.'''
+    """
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
@@ -73,7 +94,6 @@ def params_path(default=dataclasses.MISSING, **kwargs):
 
     Examples
     --------
-
     >>> import zntrack
     >>> class MyNode(zntrack.Node):
     ...     params_path: str = zntrack.params_path(default="params.yaml")
@@ -90,7 +110,7 @@ def params_path(default=dataclasses.MISSING, **kwargs):
     """
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
-    kwargs["metadata"][ZNTRACK_CACHE] = True # TODO: remove?
+    kwargs["metadata"][ZNTRACK_CACHE] = True  # TODO: remove?
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
@@ -122,8 +142,9 @@ def plots_path(
     Examples
     --------
     >>> import zntrack
+    >>> from pathlib import Path
     >>> class MyNode(zntrack.Node):
-    ...     plots_path: str = zntrack.plots_path(zntrack.nwd / "plots.png")
+    ...     plots_path: Path = zntrack.plots_path(zntrack.nwd / "plots.png")
     ...
     ...     def run(self) -> None: ...
     ...         '''Save a figure to self.plots_path.'''
@@ -143,6 +164,28 @@ def metrics_path(
     independent: bool = False,
     **kwargs,
 ):
+    """Define metrics file path(s) for a node.
+
+    Parameters
+    ----------
+    default : str|Path|list[str|Path], optional
+        Path to one or multiple metrics files.
+    cache : bool, optional
+        Whether to use the DVC cache for the field. If `None`, 
+        defaults to `zntrack.config.ALWAYS_CACHE`.
+    independent : bool, optional
+        Whether the output is independent of the node's inputs. Default is `False`.
+
+    Examples
+    --------
+    >>> import zntrack
+    >>> from pathlib import Path
+    >>> class MyNode(zntrack.Node):
+    ...     metrics_path: Path = zntrack.metrics_path(zntrack.nwd / "metrics.json")
+    ...
+    ...     def run(self) -> None: ...
+    ...         '''Save metrics to self.metrics_path.'''
+    """
     if cache is None:
         cache = config.ALWAYS_CACHE
     kwargs["metadata"] = kwargs.get("metadata", {})
@@ -154,6 +197,25 @@ def metrics_path(
 
 
 def deps_path(default=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+    """Define dependency file path(s) for a node.
+
+    Parameters
+    ----------
+    default : str|Path|list[str|Path], optional
+        Path to one or multiple dependency files.
+    cache : bool, optional
+        Whether to use the DVC cache for the field. Default is `True`.
+
+    Examples
+    --------
+    >>> import zntrack
+    >>> class MyNode(zntrack.Node):
+    ...     dependencies: str = zntrack.deps_path()
+    ...
+    ...     def run(self) -> None: ...
+    ...
+    ... a = MyNode(dependencies=["file1.txt", "file2.txt"])
+    """
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache

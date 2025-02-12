@@ -32,6 +32,27 @@ def _metrics_save_func(self: "Node", name: str, suffix: str):
 
 
 def outs(*, cache: bool = True, independent: bool = False, **kwargs):
+    """Define output for a node.
+
+    An output can be anything that can be pickled.
+
+    Parameters
+    ----------
+    cache : bool, optional
+       Set to true to use the DVC cache for the field. 
+       Default is ``zntrack.config.ALWAYS_CACHE``.
+    independent : bool, optional
+         Whether the output is independent of the node's inputs. Default is `False`.
+
+    Examples
+    --------
+    >>> import zntrack
+    >>> class MyNode(zntrack.Node):
+    ...     outs: int = zntrack.outs()
+    ...
+    ...     def run(self) -> None:
+    ...         '''Save output to self.outs.'''
+    """
     return field(
         default=NOT_AVAILABLE,
         cache=cache,
@@ -47,6 +68,27 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
 
 
 def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs):
+    """Define metrics for a node.
+
+    The metrics must be a dictionary that can be serialized to JSON.
+    
+    Parameters
+    ----------
+    cache : bool, optional
+       Set to true to use the DVC cache for the field. 
+       Default is ``zntrack.config.ALWAYS_CACHE``.
+    independent : bool, optional
+         Whether the output is independent of the node's inputs. Default is `False`.
+
+    Examples
+    --------
+    >>> import zntrack
+    >>> class MyNode(zntrack.Node):
+    ...     metrics: dict = zntrack.metrics()
+    ...
+    ...     def run(self) -> None:
+    ...         '''Save metrics to self.metrics.'''
+    """
     if cache is None:
         cache = config.ALWAYS_CACHE
     return field(
