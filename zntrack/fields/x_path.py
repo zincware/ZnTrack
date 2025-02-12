@@ -1,9 +1,10 @@
 import dataclasses
 import json
+import typing as t
+from pathlib import Path
 
 import znfields
 import znjson
-from pathlib import Path
 
 from zntrack import config
 from zntrack.config import (
@@ -22,9 +23,6 @@ from zntrack.node import Node
 from zntrack.plugins import plugin_getter
 from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
-
-
-import typing as t
 
 FIELD_PATH_TYPE = t.Union[str, Path, t.List[t.Union[str,Path]], dataclasses._MISSING_TYPE]
 
@@ -92,7 +90,7 @@ def outs_path(
 
 def params_path(default:FIELD_PATH_TYPE=dataclasses.MISSING, **kwargs):
     """Define input parameter file path(s).
-    
+
     Parameters
     ----------
     default : str|Path|list[str|Path], optional
@@ -142,7 +140,7 @@ def plots_path(
         Set to true if the output of this field can be independent of the
         node's inputs. E.g. if a csv file is produced that contains indices
         it might not change if the inputs to the node change.
-        In such a case subsequent nodes might not rerun if 
+        In such a case subsequent nodes might not rerun if
         independent is kept as False.
 
     Examples
@@ -177,7 +175,7 @@ def metrics_path(
     default : str|Path|list[str|Path], optional
         Path to one or multiple metrics files.
     cache : bool, optional
-        Whether to use the DVC cache for the field. If `None`, 
+        Whether to use the DVC cache for the field. If `None`,
         defaults to `zntrack.config.ALWAYS_CACHE`.
     independent : bool, optional
         Whether the output is independent of the node's inputs. Default is `False`.

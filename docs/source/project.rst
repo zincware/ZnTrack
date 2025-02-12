@@ -136,7 +136,7 @@ Groups are purely organizational and do not affect the workflow execution.
         add2 = Add(a=1, b=2)
         print(add2.name)
         >>> grp_Add
-    
+
     with project.group("grp", "subgrp"):
         add3 = Add(a=3, b=4)
         print(add3.name)

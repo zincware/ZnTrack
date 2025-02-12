@@ -20,7 +20,7 @@ Every parameter or dependency required to run the :term:`Node`.
 Inputs define the data or configuration that the :term:`Node` needs to perform its computation.
 Possible inputs are:
 
-* :meth:`zntrack.params` for json-serializable data, e.g. ``{"loss": "mse", "epochs": 10}``. 
+* :meth:`zntrack.params` for json-serializable data, e.g. ``{"loss": "mse", "epochs": 10}``.
 * :meth:`zntrack.params_path` for parameter files. See `parameter dependencies <https://dvc.org/doc/user-guide/pipelines/defining-pipelines#parameter-dependencies>`_ for more information.
 * :meth:`zntrack.deps` for dependencies from another :term:`Node`. See :ref:`Project` for an example.
 * :meth:`zntrack.deps_path` for file dependencies. See `simple dependencies <https://dvc.org/doc/user-guide/pipelines/defining-pipelines#simple-dependencies>`_ for more information.

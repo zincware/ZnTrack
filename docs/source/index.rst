@@ -89,4 +89,3 @@ Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git
    project
    fields
    glossary
-

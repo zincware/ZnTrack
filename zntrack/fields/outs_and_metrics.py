@@ -39,7 +39,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     Parameters
     ----------
     cache : bool, optional
-       Set to true to use the DVC cache for the field. 
+       Set to true to use the DVC cache for the field.
        Default is ``zntrack.config.ALWAYS_CACHE``.
     independent : bool, optional
          Whether the output is independent of the node's inputs. Default is `False`.
@@ -71,11 +71,11 @@ def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs):
     """Define metrics for a node.
 
     The metrics must be a dictionary that can be serialized to JSON.
-    
+
     Parameters
     ----------
     cache : bool, optional
-       Set to true to use the DVC cache for the field. 
+       Set to true to use the DVC cache for the field.
        Default is ``zntrack.config.ALWAYS_CACHE``.
     independent : bool, optional
          Whether the output is independent of the node's inputs. Default is `False`.
