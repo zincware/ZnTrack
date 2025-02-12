@@ -112,7 +112,7 @@ jobs:
       with:
         python-version: "3.12"
     - name: Install the project
-      run: uv sync --all-extras --group=docs --dev         
+      run: uv sync --all-extras --group=docs --dev
     - name: Install pandoc
       run: |
         sudo apt update
