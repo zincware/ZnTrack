@@ -83,12 +83,12 @@ Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git
 
 
 .. dropdown:: Projects using ZnTrack
-   :open: 
+   :open:
 
    .. card:: MLIPX
 
       ``mlipx`` is a Python library designed for evaluating machine-learned interatomic potentials (MLIPs). It offers a growing set of evaluation methods alongside powerful visualization and comparison tools.
-      
+
       https://github.com/basf/mlipx
 
    .. card:: IPSuite
