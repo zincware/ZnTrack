@@ -1,83 +1,94 @@
-.. ZnTrack documentation master file, created by
-   sphinx-quickstart on Mon Feb  6 15:28:26 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+ZnTrack Documentation
+=====================
 
-.. _DVC: https://dvc.org/
+ZnTrack (``zɪŋk træk``) is a lightweight and easy-to-use Python package for
+converting your existing Python code into reproducible workflows. By structuring
+your code as a directed graph with well-defined inputs and outputs, ZnTrack
+ensures reproducibility, scalability, and ease of collaboration.
 
-ZnTrack's documentation!
-========================
 
-.. image:: _static/logo_ZnTrack.png
-   :alt: ZnTrack logo
-   :target: https://github.com/zincware/ZnTrack
+Key Features
+------------
 
-.. raw:: html
+- **Reproducible Workflows**: Convert Python scripts into reproducible workflows with minimal effort.
+- **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs, and metrics in your Python code.
+- **Lightweight and Database-Free**: ZnTrack is lightweight and does not require any databases.
+- **Shareable and Collaborative**: Collaborate with your team by working together through GIT. Share your workflows and use parts in other projects or package them as Python packages.
+- **DVC Integration**: ZnTrack is built on top of :term:`DVC` for version control and experiment managment and seamlessly integrates into the :term:`DVC` ecosystem.
 
-   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
-   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=fork&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
+Installation
+------------
+You can install ZnTrack via pip:
 
-Welcome to ZnTrack, the first developer package from zincware <https://github.com/zincware>_.
-We're excited to have you on board!
-ZnTrack is designed to simplify code sharing and reproducibility.
+.. code-block:: bash
 
-.. note::
-
-   This documentation has not been updated to the newest version of ZnTrack.
-   Features and changes in :code:`v0.8.0` and newer are not included in this documentation.
-
-- :ref:`userdoc-get-started`
-- :ref:`userdoc-examples`
-- :ref:`userdoc-theory`
-- :ref:`userdoc-api`
+   pip install zntrack
 
 
 Example
-==========
+-------
+Let us convert a simple Python script into a reproducible workflow using ZnTrack.
 
-With ZnTrack, you can construct a reproducible workflow using Nodes.
-A Node, in this context, is a Python class or function with well-defined:
+.. code-block:: python
 
-* **Inputs:** Parameters and dependencies.
-* **Outputs:** Files, metrics, and plots.
-* **Code:** Function or class run method.
+   def add(a: int, b: int) -> int:
+       return a + b
+
+   if __name__ == "__main__":
+      x = add(1, 2)
+      y = add(x, 3)
+      print(y)
+      >>> 6
 
 
-Nodes are connected by passing one node instance or attribute to another, similar to regular Python objects.
-Unlike executing standard Python objects, ZnTrack enables you to define the workflow first, and the code is executed in a subsequent step.
+We will convert the function into a :term:`Node` and build a directed workflow graph using ZnTrack.
 
-ZnTrack offers node tracking using DVC_, a Git-like version control system for data.
-This feature provides automatic checkpoints, caching, and facilitates the effortless sharing of your workflow.
-
-Here are two examples illustrating what ZnTrack Nodes can look like.
-ZnTrack supports both function and class-based Nodes, as well as a combination of both.
-For detailed information, check out the :ref:userdoc-get-started section.
-
-Class based Node
-----------------
 .. code-block:: python
 
    import zntrack
 
-   class AddNumbers(zntrack.Node):
-      number1 = zntrack.params()
-      number2 = zntrack.params()
+   class Add(zntrack.Node):
+      a: int = zntrack.params()
+      b: int = zntrack.params()
+      result: int = zntrack.outs()
 
-      result = zntrack.outs()
+      def run(self) -> None:
+         self.result = self.a + self.b
 
-      def run(self):
-         self.result = self.number1 + self.number2
+   if __name__ == "__main__":
+      project = zntrack.Project()
 
-   with zntrack.Project() as project:
-      node = AddNumbers(number1=10, number2=20)
+      with project:
+         x = Add(a=1, b=2)
+         y = Add(a=x.result, b=3)
+      
+      project.repro()
 
-   project.repro()
+      print(y.result)
+      >>> 6
 
+As you can see, ZnTrack uses ``class`` instead of functions to define a :term:`Node`.
+This is different to almost every other workflow management tool and is motivated by the fact that all inputs and outputs from a Node a stored, thus each :term:`Node` is stateful.
+At any point after a :term:`Node` was executed you can access it's results.
+Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git` :term:`commit hash`.
+
+.. code-block:: python
+
+   import zntrack
+
+   x = zntrack.from_rev(name="Add", rev="HEAD", remote="https://github.com/user/repo")
+   print(x.result)
+   >>> 3
+
+.. note::
+
+   You can ommit the remote and the rev parameter to load a :term:`Node` from the current repository and commit.
 
 .. toctree::
    :hidden:
+   :maxdepth: 2
 
-   _get-started/index
-   _examples/index
-   _theory/index
-   _api/index
+   node
+   project
+   glossary
+   

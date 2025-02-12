@@ -5,16 +5,12 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
-import importlib
-import os
-import sys
-
-sys.path.insert(0, os.path.abspath(".."))
+import zntrack
 
 project = "ZnTrack"
-copyright = "2024, Fabian Zills"
+copyright = "2025, Fabian Zills"
 author = "Fabian Zills"
-version = importlib.import_module("zntrack").__version__
+release = zntrack.__version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -22,9 +18,8 @@ version = importlib.import_module("zntrack").__version__
 extensions = [
     "sphinx.ext.napoleon",
     "sphinx_copybutton",
-    "nbsphinx",
-    "nbsphinx_link",
     "sphinx.ext.viewcode",
+    "sphinx_design",
 ]
 
 templates_path = ["_templates"]
@@ -36,11 +31,14 @@ exclude_patterns = []
 
 html_theme = "furo"
 html_favicon = "_static/favicon_ZnTrack.png"
-html_logo = "_static/logo_ZnTrack.png"
-html_title = "zincware package"
+# html_logo = "_static/logo_ZnTrack.png"
+html_title = "ZnTrack"
 html_static_path = ["_static"]
 html_theme_options = {
     "navigation_with_keys": True,
+    "source_repository": "https://github.com/zincware/ZnTrack/",
+    "source_branch": "main",
+    "source_directory": "docs/source/",
     "footer_icons": [
         {
             "name": "GitHub",
@@ -53,7 +51,5 @@ html_theme_options = {
 
 # font-awesome logos
 html_css_files = [
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/fontawesome.min.css",
-    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/solid.min.css",
     "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/brands.min.css",
 ]
