@@ -31,8 +31,8 @@ repos:
     hooks:
       - id: ruff
         args: ['--fix']
-  - repo: https://github.com/executablebooks/mdformat
-    rev: 0.7.22
-    hooks:
-    - id: mdformat
-      args: ["--wrap=80"]
+  # - repo: https://github.com/executablebooks/mdformat
+  #   rev: 0.7.22
+  #   hooks:
+  #   - id: mdformat
+  #     args: ["--wrap=80"]
