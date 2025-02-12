@@ -81,6 +81,35 @@ Each :term:`Node` is uniquely idenfitied by the :term:`node name` and :term:`git
 
    You can ommit the remote and the rev parameter to load a :term:`Node` from the current repository and commit.
 
+
+.. dropdown:: Projects using ZnTrack
+   :open: 
+
+   .. card:: MLIPX
+
+      ``mlipx`` is a Python library designed for evaluating machine-learned interatomic potentials (MLIPs). It offers a growing set of evaluation methods alongside powerful visualization and comparison tools.
+      
+      https://github.com/basf/mlipx
+
+   .. card:: IPSuite
+
+      IPSuite provides you with tools to generate Machine Learned Interatomic Potentials.
+
+      https://github.com/zincware/ipsuite
+
+   .. card:: Apax
+
+      apax is a high-performance, extendable package for training of and inference with atomistic neural networks.
+
+      https://github.com/apax-hub/apax
+
+   .. card:: ZnDraw
+
+      ZnDraw is a powerful tool for visualizing and interacting with atomistic trajectories.
+
+      https://github.com/zincware/zndraw
+
+
 .. toctree::
    :hidden:
    :maxdepth: 2
