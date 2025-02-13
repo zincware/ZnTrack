@@ -92,9 +92,16 @@ define the **inputs** (parameters and dependencies) and **outputs**, while the
 > files to ensure reproducibility and avoid conflicts.
 
 ```python
-import zntrack
-import ase.io
+from dataclasses import dataclass
 from pathlib import Path
+
+import ase.io
+from ase.optimize import LBFGS
+from mace.calculators import mace_mp
+from rdkit2ase import pack, smiles2conformers
+
+import zntrack
+
 
 class Smiles2Conformers(zntrack.Node):
     smiles: str = zntrack.params()  # A required parameter
@@ -104,7 +111,7 @@ class Smiles2Conformers(zntrack.Node):
 
     def run(self) -> None:
         frames = smiles2conformers(smiles=self.smiles, numConfs=self.numConfs)
-        ase.io.write(frames, self.frames_path)
+        ase.io.write(self.frames_path, frames)
 
     @property
     def frames(self) -> list[ase.Atoms]:
@@ -122,7 +129,7 @@ class Pack(zntrack.Node):
 
     def run(self) -> None:
         box = pack(data=self.data, counts=self.counts, density=self.density)
-        ase.io.write(box, self.frames_path)
+        ase.io.write(self.frames_path, box)
 
     @property
     def frames(self) -> list[ase.Atoms]:
@@ -134,6 +141,7 @@ class Pack(zntrack.Node):
 # We could hardcode the MACE_MP model into the StructureOptimization Node, but we
 # can also define it as a dependency. Since the model doesn't require a `run` method,
 # we define it as a `@dataclass`.
+
 
 @dataclass
 class MACE_MP:
@@ -154,7 +162,7 @@ class StructureOptimization(zntrack.Node):
     def run(self):
         atoms = self.data[self.data_id]
         atoms.calc = self.model.get_calculator()
-        dyn = LBFGS(atoms, trajectory=self.frames_path)
+        dyn = LBFGS(atoms, trajectory=self.frames_path.as_posix())
         dyn.run(fmax=0.5)
 
     @property
@@ -183,23 +191,24 @@ workflow. Follow these steps:
 1. **Define and execute the workflow** in a `main.py` file:
 
    ```python
-   import zntrack
-   from src import MACE_MP, Smiles2Conformers, Pack, StructureOptimization
+    from src import MACE_MP, Pack, Smiles2Conformers, StructureOptimization
 
-   # Initialize the ZnTrack project
-   project = zntrack.Project()
+    import zntrack
 
-   # Define the MACE-MP model
-   model = MACE_MP()
+    # Initialize the ZnTrack project
+    project = zntrack.Project()
 
-   # Build the workflow graph
-   with project:
-       etoh = Smiles2Conformers(smiles="CCO", numConfs=32)
-       box = Pack(data=[etoh.frames], counts=[32], density=789)
-       optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)
+    # Define the MACE-MP model
+    model = MACE_MP()
 
-   # Execute the workflow
-   project.repro()
+    # Build the workflow graph
+    with project:
+        etoh = Smiles2Conformers(smiles="CCO", numConfs=32)
+        box = Pack(data=[etoh.frames], counts=[32], density=789)
+        optm = StructureOptimization(model=model, data=box.frames, data_id=-1, fmax=0.5)
+
+    # Execute the workflow
+    project.repro()
    ```
 
 > [!TIP]
