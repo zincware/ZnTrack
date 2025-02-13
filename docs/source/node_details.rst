@@ -1,5 +1,6 @@
 More about Nodes
 ----------------
+This section describes some special cases for :term:`Node` definitions.
 
 On and Off Graph Nodes
 ======================
@@ -63,3 +64,38 @@ They are often used to define a exchangeable model as illustrated in the example
             shifted_number = ManipulateNumber(number=1.0, method=shift)
             scaled_number = ManipulateNumber(number=1.0, method=scale)
         project.repro()
+
+Always Changed
+==============
+In some cases you want a :term:`Node` to always run, even if the inputs have not changed.
+This could be the case when debugging a new :term:`Node`.
+In such cases, you can set ``always_changed=True``
+
+.. code-block:: python
+
+    import zntrack.examples
+
+    project = zntrack.Project()
+
+    with project:
+        node = zntrack.examples.ParamsToOuts(params=42, always_changed=True)
+
+    project.repro()
+
+Node State
+==========
+Each :term:`Node` provides a ``state`` attribute to access some metadata or the `DVCFileSystem <https://dvc.org/doc/api-reference/dvcfilesystem>`_.
+The :meth:`zntrack.state.NodeStatus` is ``frozen`` and read-only.
+
+.. autoclass:: zntrack.state.NodeStatus
+    :members: use_tmp_path, fs
+
+
+Custom run methods
+==================
+
+By default, a :term:`Node` will execute the ``run`` method.
+Sometimes it is useful to define multiple methods for a single :term:`Node` with slightly different behavior.
+This can be achieved by using :meth:`zntrack.apply`.
+
+.. autofunction:: zntrack.apply

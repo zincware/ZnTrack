@@ -29,6 +29,39 @@ PLUGIN_DICT = dict[str, ZnTrackPlugin]
 
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
+    """Node status object.
+    
+    Parameters
+    ----------
+    remote : str, optional
+        The repository remote, e.g. the URL of the git repository.
+    rev : str, optional
+        The revision of the repository, e.g. the git commit hash.
+    run_count : int
+        How often this Node has been run.
+        Only incremented when the Node is restarted.
+    state : NodeStatusEnum
+        The state of the Node.
+    lazy_evaluation : bool
+        Wheter to load fields lazily.
+    tmp_path : pathlib.Path, optional
+        The temporary path when using 'use_tmp_path'.
+    node : Node, optional
+        The Node object.
+    plugins : dict[str, ZnTrackPlugin], optional
+        Active plugins. In addition to the default plugins, MLFLow or AIM plugins will
+        be added here.
+    group : Group, optional
+        The group of the Node.
+    run_time : datetime.timedelta, optional
+        The total run time of the Node.
+    name: str
+        The name of the Node.
+    nwd: pathlib.Path
+        The node working directory.
+    restarted: bool
+        Whether the Node was restarted and has been run at least once before.
+    """
     remote: str | None = None
     rev: str | None = None
     run_count: int = 0
@@ -57,7 +90,38 @@ class NodeStatus:
 
     @property
     def fs(self) -> AbstractFileSystem:
-        """Get the file system of the Node."""
+        """Get the file system of the Node.
+        
+        If the remote is None, the local file system is returned.
+        Otherwise, a DVCFileSystem is returned.
+        The FileSystem should be used to open files to ensure,
+        that the correct version of the file is loaded.
+        
+        Examples
+        --------
+
+        >>> import zntrack
+        >>> from pathlib import Path
+        >>>
+        >>> class MyNode(zntrack.Node):
+        ...     outs_path: Path = zntrack.outs_path(zntrack.nwd / "file.txt")
+        ...
+        ...     def run(self):
+        ...         self.outs_path.parent.mkdir(parents=True, exist_ok=True)
+        ...         self.outs_path.write_text("Hello World!")
+        ...
+        ...     @property
+        ...     def data(self):
+        ...         with self.state.fs.open(self.outs_path) as f:
+        ...             return f.read()
+        >>> # build and run the graph and make multiple commits.
+        >>> # the filesystem ensures that the correct version of the file is loaded.
+        >>>
+        >>> import zntrack
+        >>> zntrack.from_rev("MyNode", rev="HEAD").data
+        >>> zntrack.from_remote("MyNode", rev="HEAD~1").data
+
+        """
         if self.remote is None and self.rev is None:
             return LocalFileSystem()
         return dvc.api.DVCFileSystem(
@@ -80,15 +144,15 @@ class NodeStatus:
 
     @contextlib.contextmanager
     def use_tmp_path(self, path: pathlib.Path | None = None) -> t.Iterator[pathlib.Path]:
-        """Load the data for '*_path' into a temporary directory.
+        """Load the data for ``*_path`` into a temporary directory.
 
-        If you can not use 'node.state.fs.open' you can use
+        If you can not use ``node.state.fs.open`` you can use
         this as an alternative. This will load the data into
         a temporary directory and then delete it afterwards.
-        The respective paths 'node.*_path' will be replaced
+        The respective paths ``node.*_path`` will be replaced
         automatically inside the context manager.
 
-        This is only set, if either 'remote' or 'rev' are set.
+        This is only set, if either ``remote`` or ``rev`` are set.
         Otherwise, the data will be loaded from the current directory.
         """
         if path is not None:
