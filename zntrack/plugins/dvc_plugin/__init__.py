@@ -16,7 +16,7 @@ from zntrack.config import (
     ZNTRACK_FIELD_DUMP,
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_FIELD_SUFFIX,
-    ZNTRACK_OPTION,
+    FIELD_TYPE,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     FieldTypes,
 )
@@ -58,9 +58,9 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_params_yaml(self) -> dict | object:
         data = {}
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS:
+            if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
-            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.DEPS:
+            if field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = getattr(self.node, field.name)
@@ -138,11 +138,11 @@ class DVCPlugin(ZnTrackPlugin):
         nwd_handler = NWDReplaceHandler()
 
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS:
+            if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
                 stages.setdefault(FieldTypes.PARAMS.value, []).append(
                     self.node.name
                 )
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS_PATH:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
@@ -150,7 +150,7 @@ class DVCPlugin(ZnTrackPlugin):
                 )
                 content = [{pathlib.Path(x).as_posix(): None} for x in content]
                 stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.OUTS_PATH:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 if getattr(self.node, field.name) == nwd:
@@ -165,7 +165,7 @@ class DVCPlugin(ZnTrackPlugin):
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PLOTS_PATH:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
@@ -176,7 +176,7 @@ class DVCPlugin(ZnTrackPlugin):
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
                 # plots[self.node.name] = None
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.METRICS_PATH:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
@@ -186,13 +186,13 @@ class DVCPlugin(ZnTrackPlugin):
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.OUTS:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PLOTS:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
@@ -218,13 +218,13 @@ class DVCPlugin(ZnTrackPlugin):
                         if "y" in plots_config:
                             plots_config["y"] = {file_path: plots_config["y"]}
                         plots.append({f"{self.node.name}_{field.name}": plots_config})
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.METRICS:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
                 stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.DEPS:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = get_attr_always_list(self.node, field.name)
@@ -259,7 +259,7 @@ class DVCPlugin(ZnTrackPlugin):
 
                 if len(paths) > 0:
                     stages.setdefault(FieldTypes.DEPS.value, []).extend(paths)
-            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.DEPS_PATH:
+            elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = [
@@ -281,7 +281,7 @@ class DVCPlugin(ZnTrackPlugin):
             "nwd": self.node.nwd,
         }
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(ZNTRACK_OPTION) in [
+            if field.metadata.get(FIELD_TYPE) in [
                 FieldTypes.PARAMS_PATH,
                 FieldTypes.DEPS_PATH,
                 FieldTypes.OUTS_PATH,

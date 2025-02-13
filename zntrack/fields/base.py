@@ -10,7 +10,7 @@ from zntrack.config import (
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    ZNTRACK_OPTION,
+    FIELD_TYPE,
     FieldTypes,
 )
 
@@ -44,7 +44,7 @@ def field(
         Use the DVC cache for the field.
     independent : bool
         If the output of this field can be independent of the input.
-    zntrack_option : FieldTypes
+    field_type : FieldTypes
         The type of the field.
     dump_fn : FN_WITH_SUFFIX | FN_WITHOUT_SUFFIX
         Function to dump the field.
@@ -89,7 +89,7 @@ def field(
     ...         self.data = np.arange(9).reshape(3, 3)
     """
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = field_type
+    kwargs["metadata"][FIELD_TYPE] = field_type
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     if load_fn is not None:

@@ -19,11 +19,11 @@ ALWAYS_CACHE: bool = False
 
 # Use sentinel object for zntrack specific configurations. Use
 # a class to give it a better repr.
-class _ZNTRACK_OPTION_TYPE:
+class _FIELD_TYPE_TYPE:
     pass
 
 
-ZNTRACK_OPTION = _ZNTRACK_OPTION_TYPE()
+FIELD_TYPE = _FIELD_TYPE_TYPE()
 
 
 class _ZNTRACK_CACHE_TYPE:

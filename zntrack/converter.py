@@ -14,7 +14,7 @@ from zntrack.config import (
     PARAMS_FILE_PATH,
     ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    ZNTRACK_OPTION,
+    FIELD_TYPE,
     FieldTypes,
 )
 
@@ -173,7 +173,7 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
             fields = dataclasses.fields(node)
     paths = []
     for field in fields:
-        option_type = field.metadata.get(ZNTRACK_OPTION)
+        option_type = field.metadata.get(FIELD_TYPE)
 
         if any(
             option_type is x
