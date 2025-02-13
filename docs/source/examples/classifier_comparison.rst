@@ -1,3 +1,5 @@
+.. _example_classifier_comparison:
+
 Scikit-learn classifier comparison
 ==================================
 
