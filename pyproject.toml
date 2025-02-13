@@ -27,6 +27,7 @@ zntrack = 'zntrack.cli:app'
 Repository = "https://github.com/zincware/zntrack"
 Releases = "https://github.com/zincware/zntrack/releases"
 Documentation = "https://zntrack.readthedocs.io"
+Discord = "https://discord.gg/7ncfwhsnm4"
 
 [dependency-groups]
 dev = [
