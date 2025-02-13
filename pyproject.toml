@@ -43,6 +43,12 @@ docs = [
     "sphinx>=8.1.3",
     "sphinx-copybutton>=0.5.2",
     "sphinx-design>=0.6.1",
+    "sphinxcontrib-mermaid>=1.0.0",
+]
+examples = [
+    "ase>=3.24.0",
+    "mace-torch>=0.3.10",
+    "rdkit2ase>=0.1.4",
 ]
 
 [build-system]
