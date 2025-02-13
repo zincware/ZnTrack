@@ -96,7 +96,7 @@ The :term:`Node` above can also be written in a more explicit manner, manually s
 
 Design Patterns
 ---------------
-A :term:`Node` should focus around a single piece of logic, making it easier to understand and maintain.
-However, all inter-Node communication is handled through files, which will slow down the workflow.
-Therefore, it is recommended to group fast, related tasks into a single :term:`Node` to minimize file I/O overhead, if the tasks always run together.
-For example, if you can embarrassingly parallelize a task, like preprocessing some data in batches, you would not want to split the task into multiple :term:`Node`s but handle the parallelization within the :term:`Node`.
+A :term:`Node` should encapsulate a single, well-defined piece of logic to improve readability and maintainability.
+However, since communication between :term:`Node` instances occurs through files, excessive splitting can slow down the workflow due to file I/O overhead.
+To optimize performance, related tasks that always run together should be grouped within a single :term:`Node`.
+For example, if a task can be efficiently parallelized—such as preprocessing data in batches—it is better to handle the parallelization within a single :term:`Node` rather than splitting it into multiple :term:`Node` instances.
