@@ -12,8 +12,8 @@ import znflow
 from mlflow.utils import mlflow_tags
 
 from zntrack.config import (
-    PLUGIN_EMPTY_RETRUN_VALUE,
     FIELD_TYPE,
+    PLUGIN_EMPTY_RETRUN_VALUE,
     FieldTypes,
 )
 from zntrack.node import Node

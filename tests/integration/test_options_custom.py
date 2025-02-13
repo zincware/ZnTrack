@@ -9,10 +9,10 @@ import znfields
 
 import zntrack
 from zntrack.config import (
+    FIELD_TYPE,
     NOT_AVAILABLE,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
-    FIELD_TYPE,
 )
 from zntrack.plugins import ZnTrackPlugin, base_getter, plugin_getter
 
