@@ -11,10 +11,10 @@ import znjson
 
 from zntrack.add import DVCImportPath
 from zntrack.config import (
+    FIELD_TYPE,
     PARAMS_FILE_PATH,
     ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    FIELD_TYPE,
     FieldTypes,
 )
 

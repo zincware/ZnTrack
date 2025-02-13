@@ -11,12 +11,12 @@ import znjson
 
 from zntrack import config, converter
 from zntrack.config import (
+    FIELD_TYPE,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_DUMP,
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_FIELD_SUFFIX,
-    FIELD_TYPE,
     ZNTRACK_OPTION_PLOTS_CONFIG,
     FieldTypes,
 )

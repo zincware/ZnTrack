@@ -5,15 +5,14 @@ import typing as t
 import znfields
 
 from zntrack.config import (
+    FIELD_TYPE,
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_DUMP,
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    FIELD_TYPE,
     FieldTypes,
 )
-
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter
 
@@ -33,7 +32,7 @@ def field(
     **kwargs,
 ):
     """Create a custom field.
-    
+
     Arguments
     ---------
     default : t.Any

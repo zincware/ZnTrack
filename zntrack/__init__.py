@@ -5,6 +5,7 @@ import sys
 from zntrack import config
 from zntrack.add import add
 from zntrack.apply import apply
+from zntrack.config import NOT_AVAILABLE, FieldTypes
 from zntrack.fields import (
     deps,
     deps_path,
@@ -22,7 +23,6 @@ from zntrack.from_rev import from_rev
 from zntrack.node import Node
 from zntrack.project import Project
 from zntrack.utils import nwd
-from zntrack.config import FieldTypes, NOT_AVAILABLE
 
 __all__ = [
     "params",

@@ -8,13 +8,13 @@ import znjson
 
 from zntrack import config
 from zntrack.config import (
+    FIELD_TYPE,
     NOT_AVAILABLE,
     ZNTRACK_CACHE,
     ZNTRACK_FIELD_LOAD,
     ZNTRACK_FILE_PATH,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_LAZY_VALUE,
-    FIELD_TYPE,
     FieldTypes,
 )
 

@@ -10,7 +10,7 @@ import git
 import pandas as pd
 import znflow
 
-from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, FIELD_TYPE, FieldTypes
+from zntrack.config import FIELD_TYPE, PLUGIN_EMPTY_RETRUN_VALUE, FieldTypes
 from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, get_exp_info, set_exp_info
 from zntrack.utils import module_handler
