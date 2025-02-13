@@ -93,3 +93,10 @@ The :term:`Node` above can also be written in a more explicit manner, manually s
             self.results_file.parent.mkdir(parents=True, exist_ok=True)
             with open(self.results_file, "w") as f:
                 json.dump({"result": result}, f)
+
+Design Patterns
+---------------
+A :term:`Node` should focus around a single piece of logic, making it easier to understand and maintain.
+However, all inter-Node communication is handled through files, which will slow down the workflow.
+Therefore, it is recommended to group fast, related tasks into a single :term:`Node` to minimize file I/O overhead, if the tasks always run together.
+For example, if you can embarrassingly parallelize a task, like preprocessing some data in batches, you would not want to split the task into multiple :term:`Node`s but handle the parallelization within the :term:`Node`.
