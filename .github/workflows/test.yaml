@@ -102,27 +102,3 @@ jobs:
   #     - name: Pytest
   #       run: |
   #         poetry run pytest --nbmake ./examples
-
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-    - name: Install uv and set the python version
-      uses: astral-sh/setup-uv@v5
-      with:
-        python-version: "3.12"
-    - name: Install the project
-      run: uv sync --all-extras --group=docs --dev
-    - name: Install pandoc
-      run: |
-        sudo apt update
-        sudo apt install pandoc
-    - name: Setup git user
-      run: |
-        git config --global user.name "John Doe"
-        git config --global user.email johndoe@example.com
-        git config --global init.defaultBranch "main"
-    - name: Build documentation
-      run: |
-        cd docs
-        uv run make html
