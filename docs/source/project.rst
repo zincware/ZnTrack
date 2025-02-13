@@ -5,7 +5,7 @@ Project
 
 A workflow is defined within a :term:`Project`.
 
-To create a new ZnTrack Project, create a new repository.
+To create a new ZnTrack project, initialize a new repository:
 
 .. code-block:: bash
 
@@ -16,12 +16,12 @@ To create a new ZnTrack Project, create a new repository.
 
 .. note::
 
-    This documentation assumes that you have one workflow file ``main.py`` in the root of your project.
-    Further all :term:`Node` definitions that do not originate from a package are expected to be imported from ``src/__init__.py``.
+    This documentation assumes that you have a single workflow file, ``main.py``, in the root of your project.
+    Additionally, all :term:`Node` definitions that do not originate from a package should be imported from ``src/__init__.py``.
 
-    To ensure this, you can also run
+    To ensure this structure, run:
 
-    .. code-block :: python
+    .. code-block:: bash
 
         touch main.py
         mkdir src
@@ -45,7 +45,7 @@ To create a new ZnTrack Project, create a new repository.
                 def run(self) -> None:
                     self.result = self.a + self.b
 
-            # Multiply used ``zntrack.deps`` to process data from other nodes
+            # Multiply uses ``zntrack.deps`` to process data from other nodes
             class Multiply(zntrack.Node):
                 a: int = zntrack.deps()
                 b: int = zntrack.deps()
@@ -55,23 +55,24 @@ To create a new ZnTrack Project, create a new repository.
                 def run(self) -> None:
                     self.result = self.a * self.b
 
-We will now define a workflow connecting multiple :term:`Node` instances.
-As you can see, ZnTrack allows you to connect the Nodes directly through their attributes.
-It is important to consider the ``main.py`` file purely as a workflow configuration file.
-A great explanation for this is given in the `Apache Airflow documentation <https://airflow.apache.org/docs/apache-airflow/stable/tutorial/fundamentals.html#it-s-a-dag-definition-file>`_.
+We will now define a workflow that connects multiple :term:`Node` instances.
+As you can see, ZnTrack allows you to connect Nodes directly through their attributes.
+It is important to treat the ``main.py`` file purely as a workflow configuration file.
+For a great explanation of this approach, refer to the `Apache Airflow documentation <https://airflow.apache.org/docs/apache-airflow/stable/tutorial/fundamentals.html#it-s-a-dag-definition-file>`_.
 
 
 .. note::
 
-    In addition to the predefined fields, here ``a``, ``b`` and ``result``, it is also possible to pass the full :term:`Node` instance as an argument.
-    For on-the-fly computations it is further possible to define ``@property`` methods that are not stored in the :term:`Node` state and pass them between :term:`Node` instances.
-    The ``@property`` can also be used to define custom file readers.
+    In addition to the predefined fields (e.g., ``a``, ``b``, and ``result``), it is also possible to pass the full :term:`Node` instance as an argument.
+    For on-the-fly computations, you can define ``@property`` methods that are not stored in the :term:`Node` state and pass them between :term:`Node` instances.
+    The ``@property`` decorator can also be used to define custom file readers.
 
-.. dropdown:: The project context manager
+
+.. dropdown:: The Project Context Manager
 
     The workflow is defined within the context manager of the :term:`Project`.
-    Instead of passing the actual argument, a :term:`ZnFlow` connection is created between the :term:`Node` instances.
-    Besides that, a :term:`Node` can also be used like a regular Python object outside of the context manager.
+    Instead of passing actual values, a :term:`ZnFlow` connection is created between :term:`Node` instances.
+    However, a :term:`Node` can also be used like a regular Python object outside of the context manager.
 
 .. code-block:: python
 
@@ -88,21 +89,22 @@ A great explanation for this is given in the `Apache Airflow documentation <http
 
     project.build()
 
-Calling ``project.build()`` will create all configuration files and prepare the project to be executed.
+Calling ``project.build()`` generates all necessary configuration files and prepares the project for execution.
 
-.. dropdown:: ZnTrack configuration files
+
+.. dropdown:: ZnTrack Configuration Files
     :open:
 
     A ZnTrack project typically consists of three configuration files:
 
-    - ``params.yaml``: Parameters defined in the ``main.py`` file are stored here in per :term:`node name` keys.
-    - ``dvc.yaml``: The :term:`DVC` workflow is defined in this file. For more information see `DVC documentation <https://dvc.org/doc/user-guide/project-structure/dvcyaml-files#dvcyaml>`_.
-    - ``zntrack.json``: Additional information that is used by ZnTrack to manage the workflow.
+    - ``params.yaml``: Stores parameters defined in ``main.py``, organized by :term:`node name` keys.
+    - ``dvc.yaml``: Defines the :term:`DVC` workflow. For details, see the `DVC documentation <https://dvc.org/doc/user-guide/project-structure/dvcyaml-files#dvcyaml>`_.
+    - ``zntrack.json``: Contains additional metadata used by ZnTrack to manage the workflow.
 
-    You should not modify the ``dvc.yaml`` and ``zntrack.json`` files manually.
-    It is possible to modify the ``params.yaml`` file, but recommended to change the parameters within the ``main.py`` instead, to ensure one source of truth.
+    You should not modify ``dvc.yaml`` or ``zntrack.json`` manually.
+    While you can edit ``params.yaml``, it is recommended to change parameters within ``main.py`` to maintain a single source of truth.
 
-To execute the workflow, we make use of the ``dvc`` command line tool.
+To execute the workflow, use the ``dvc`` command-line tool:
 
 .. code-block:: bash
 
@@ -110,31 +112,31 @@ To execute the workflow, we make use of the ``dvc`` command line tool.
 
 .. tip::
 
-    Instead of calling ``dvc repro`` you can also write ``project.repro()`` instead of ``project.build()``.
+    Instead of running ``dvc repro``, you can call ``project.repro()`` instead of ``project.build()``.
 
 
 Groups
 ------
 
-To organize the workflow, it is possible to group :term:`Node` instances.
-Groups are purely organizational and do not affect the workflow execution.
+To organize the workflow, you can group :term:`Node` instances.
+Groups are purely for organization and do not affect execution.
 
 .. note::
 
-    Each :term:`Node` is given a unique name.
-    The name typically consists of the class name followed by a counter.
-    If a :term:`Node` is grouped, the group name is prefixed to the :term:`Node` name.
-    You can get a list of all :term:`Node` names using the CLI command ``zntrack list``.
-    If you want to use a custom name, you can pass the ``name`` argument to the :term:`Node` constructor like so
+    Each :term:`Node` is assigned a unique name.
+    By default, this name consists of the class name followed by a counter.
+    If a :term:`Node` is part of a group, the group name is prefixed to its name.
+    
+    You can list all :term:`Node` names using the CLI command ``zntrack list``.
+    If you want to set a custom name, pass the ``name`` argument when creating the :term:`Node` instance:
 
     .. code-block:: python
 
         add1 = Add(a=1, b=2, name="custom_name")
 
-    The custom name will also be prefixed with the group name if the :term:`Node` is grouped.
-    A custom name must be unique per group.
-    It will not be appended by a counter but will raise an error if a duplicate is found.
-
+    If a :term:`Node` is in a group, the group name is also prefixed to the custom name.
+    Custom names must be unique within their group.
+    If a duplicate name is found, ZnTrack will raise an error.
 
 
 .. code-block:: python
