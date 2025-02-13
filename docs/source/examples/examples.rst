@@ -2,7 +2,7 @@ Examples
 ========
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
    pack_box
    classifier_comparison

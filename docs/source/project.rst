@@ -131,6 +131,10 @@ Groups are purely organizational and do not affect the workflow execution.
 
         add1 = Add(a=1, b=2, name="custom_name")
 
+    The custom name will also be prefixed with the group name if the :term:`Node` is grouped.
+    A custom name must be unique per group. 
+    It will not be appended by a counter but will raise an error if a duplicate is found.
+
 
 
 .. code-block:: python

@@ -114,10 +114,10 @@ class NodeStatus:
         ...     def data(self):
         ...         with self.state.fs.open(self.outs_path) as f:
         ...             return f.read()
+        ...
         >>> # build and run the graph and make multiple commits.
         >>> # the filesystem ensures that the correct version of the file is loaded.
         >>>
-        >>> import zntrack
         >>> zntrack.from_rev("MyNode", rev="HEAD").data
         >>> zntrack.from_remote("MyNode", rev="HEAD~1").data
 
@@ -154,6 +154,34 @@ class NodeStatus:
 
         This is only set, if either ``remote`` or ``rev`` are set.
         Otherwise, the data will be loaded from the current directory.
+
+        Examples
+        --------
+
+        >>> import zntrack
+        >>> from pathlib import Path
+        >>>
+        >>> class MyNode(zntrack.Node):
+        ...     outs_path: Path = zntrack.outs_path(zntrack.nwd / "file.txt")
+        ...
+        ...     def run(self):
+        ...         self.outs_path.parent.mkdir(parents=True, exist_ok=True)
+        ...         self.outs_path.write_text("Hello World!")
+        ...
+        ...     @property
+        ...     def data(self):
+        ...         with self.state.use_tmp_path():
+        ...             with open(self.outs_path) as f:
+        ...                 return f.read()
+        ...
+        >>> # build and run the graph and make multiple commits.
+        >>> # the `use_tmp_path` ensures that the correct version
+        >>> # of the file is loaded in the temporary directory and
+        >>> # the `self.outs_path` is updated accordingly.
+        >>>
+        >>> zntrack.from_rev("MyNode", rev="HEAD").data
+        >>> zntrack.from_remote("MyNode", rev="HEAD~1").data
+
         """
         if path is not None:
             raise NotImplementedError("Custom paths are not implemented yet.")

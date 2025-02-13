@@ -15,6 +15,8 @@ In other words, they are defined within the context of the :term:`Project` and w
 In some cases a :term:`Node` should provide some additional methods but will only be used within other :term:`Node` instances.
 Such a :term:`Node` is called "off-graph" and can be represented by a Python ``dataclass``.
 They are often used to define a exchangeable model as illustrated in the example on :ref:`example_classifier_comparison`.
+Another use-case for off-graph :term:`Node` is to reuse a :term:`Node` from another project.
+If you load a :term:`Node` via ``zntrack.from_rev`` you can also use it as an off-graph :term:`Node`.
 
 .. note::
 
@@ -69,7 +71,7 @@ Always Changed
 ==============
 In some cases you want a :term:`Node` to always run, even if the inputs have not changed.
 This could be the case when debugging a new :term:`Node`.
-In such cases, you can set ``always_changed=True``
+In such cases, you can set ``always_changed=True``.
 
 .. code-block:: python
 
@@ -90,6 +92,8 @@ The :meth:`zntrack.state.NodeStatus` is ``frozen`` and read-only.
 .. autoclass:: zntrack.state.NodeStatus
     :members: use_tmp_path, fs
 
+
+.. _zntrack_apply:
 
 Custom run methods
 ==================

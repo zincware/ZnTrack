@@ -3,6 +3,15 @@
 Scikit-learn classifier comparison
 ==================================
 
+Original code
+-------------
+
+.. dropdown:: Dependencies
+
+    For this example you will need:
+
+    - https://scikit-learn.org/stable/install.html
+
 In this example we will adapt the `classifier comparison example <https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html#sphx-glr-auto-examples-classification-plot-classifier-comparison-py>`_ from the scikit-learn documentation to use ZnTrack.
 
 The original code looks like this:

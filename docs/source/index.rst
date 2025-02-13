@@ -64,7 +64,7 @@ We will convert the function into a :term:`Node` and build a directed workflow g
       print(x.result)
       >>> 3
 
-As you can see, ZnTrack uses ``class`` instead of functions to define a :term:`Node`.
+As you can see, ZnTrack uses Python classes instead of functions to define a :term:`Node`.
 This is different to almost every other workflow management tool and is motivated by the fact that all inputs and outputs from a Node a stored, thus each :term:`Node` is stateful.
 At any point after a :term:`Node` was executed you can access it's results.
 Each :term:`Node` is uniquely identified by the :term:`node name` and :term:`git` :term:`commit hash`.
@@ -87,13 +87,13 @@ Each :term:`Node` is uniquely identified by the :term:`node name` and :term:`git
 
    .. card:: MLIPX
 
-      ``mlipx`` is a Python library designed for evaluating machine-learned interatomic potentials (MLIPs). It offers a growing set of evaluation methods alongside powerful visualization and comparison tools.
+      ``mlipx`` is a Python library designed for evaluating machine-learned interatomic potentials. It offers a growing set of evaluation methods alongside powerful visualization and comparison tools.
       +++
       https://github.com/basf/mlipx
 
    .. card:: IPSuite
 
-      IPSuite provides you with tools to generate Machine Learned Interatomic Potentials.
+      IPSuite provides you with tools to generate machine-learned interatomic potentials.
       +++
       https://github.com/zincware/ipsuite
 
@@ -111,7 +111,7 @@ Each :term:`Node` is uniquely identified by the :term:`node name` and :term:`git
 
    .. card:: Paraffin
 
-      DVC graph executor and progess visualization tool.
+      A DVC graph executor and progess visualization tool.
 
       .. tip::
 
