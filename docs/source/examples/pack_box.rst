@@ -34,3 +34,21 @@ Here's the graph structure for our example:
 
 .. literalinclude:: ./pack_box/main.py
     :language: Python
+
+Generated configuration files
+-----------------------------
+
+.. dropdown:: dvc.yaml File
+
+    .. literalinclude:: ./pack_box/dvc.yaml
+        :language: YAML
+
+.. dropdown:: params.yaml File
+
+    .. literalinclude:: ./pack_box/params.yaml
+        :language: YAML
+
+.. dropdown:: zntrack.json File
+
+    .. literalinclude:: ./pack_box/zntrack.json
+        :language: JSON

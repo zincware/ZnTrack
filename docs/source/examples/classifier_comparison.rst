@@ -64,3 +64,21 @@ Here's the graph structure for a single dataset and multiple classifiers:
 
     .. literalinclude:: ./classifier_comparison/main.py
         :language: Python
+
+Generated configuration files
+-----------------------------
+
+.. dropdown:: dvc.yaml File
+
+    .. literalinclude:: ./classifier_comparison/dvc.yaml
+        :language: YAML
+
+.. dropdown:: params.yaml File
+
+    .. literalinclude:: ./classifier_comparison/params.yaml
+        :language: YAML
+
+.. dropdown:: zntrack.json File
+
+    .. literalinclude:: ./classifier_comparison/zntrack.json
+        :language: JSON
