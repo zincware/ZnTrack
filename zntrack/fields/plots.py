@@ -65,6 +65,16 @@ def plots(
         Save the data of this field every time it is being
         updated. Disable for large dataframes.
 
+    Examples
+    --------
+    
+    >>> import zntrack
+    >>> import pandas as pd
+    >>> class MyNode(zntrack.Node):
+    ...     plots: pd.DataFrame = zntrack.plots(y="loss")
+    ...
+    ...     def run(self):
+    ...         self.plots = pd.DataFrame({"loss": [1, 2, 3]})
     """
     if y is None:
         y = []
