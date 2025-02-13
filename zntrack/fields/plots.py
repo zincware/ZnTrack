@@ -67,7 +67,7 @@ def plots(
 
     Examples
     --------
-    
+
     >>> import zntrack
     >>> import pandas as pd
     >>> class MyNode(zntrack.Node):
