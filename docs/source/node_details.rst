@@ -33,7 +33,7 @@ They are often used to define a exchangeable model as illustrated in the example
 
         def compute(self, input:float) -> float:
             return input + self.shift
-    
+
     @dataclass
     class Scale:
         scale: float
@@ -50,7 +50,7 @@ They are often used to define a exchangeable model as illustrated in the example
         def run(self) -> None:
             self.result = self.method.compute(self.number)
 
-    
+
     if __name__ == "__main__":
         project = zntrack.Project()
 
