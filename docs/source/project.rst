@@ -126,7 +126,7 @@ Groups are purely for organization and do not affect execution.
     Each :term:`Node` is assigned a unique name.
     By default, this name consists of the class name followed by a counter.
     If a :term:`Node` is part of a group, the group name is prefixed to its name.
-    
+
     You can list all :term:`Node` names using the CLI command ``zntrack list``.
     If you want to set a custom name, pass the ``name`` argument when creating the :term:`Node` instance:
 
