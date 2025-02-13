@@ -22,6 +22,7 @@ from zntrack.from_rev import from_rev
 from zntrack.node import Node
 from zntrack.project import Project
 from zntrack.utils import nwd
+from zntrack.config import ZnTrackOptionEnum, NOT_AVAILABLE
 
 __all__ = [
     "params",
@@ -41,6 +42,8 @@ __all__ = [
     "apply",
     "add",
     "field",
+    "ZnTrackOptionEnum",
+    "NOT_AVAILABLE",
     "config",
 ]
 

@@ -14,7 +14,6 @@ from zntrack.config import (
     ZnTrackOptionEnum,
 )
 
-# if t.TYPE_CHECKING:
 from zntrack.node import Node
 from zntrack.plugins import base_getter, plugin_getter
 
@@ -33,7 +32,62 @@ def field(
     load_fn: FN_WITHOUT_SUFFIX | FN_WITH_SUFFIX | None = None,
     **kwargs,
 ):
-    """Create a field with zntrack options."""
+    """Create a custom field.
+    
+    Arguments
+    ---------
+    default : t.Any
+        Default value of the field.
+        For an output field, this should be ``zntrack.NOT_AVAILABLE``
+        and should not be set during initialization.
+    cache : bool
+        Use the DVC cache for the field.
+    independent : bool
+        If the output of this field can be independent of the input.
+    zntrack_option : ZnTrackOptionEnum
+        The type of the field.
+    dump_fn : FN_WITH_SUFFIX | FN_WITHOUT_SUFFIX
+        Function to dump the field.
+    suffix : str
+        Suffix to append to the field name.
+        Can be None if the output is a directory.
+    load_fn : FN_WITHOUT_SUFFIX | FN_WITH_SUFFIX
+        Function to load the field.
+    **kwargs
+        Additional arguments to pass to the field.
+
+    Examples
+    --------
+
+    >>> import numpy as np
+    >>> import zntrack
+    ...
+    >>> def _load_fn(self: zntrack.Node, name: str, suffix: str) -> np.ndarray:
+    ...     with self.state.fs.open((self.nwd / name).with_suffix(suffix), mode="rb") as f:
+    ...         return np.load(f)
+    ...
+    >>> def _dump_fn(self: zntrack.Node, name: str, suffix: str) -> None:
+    ...     with open((self.nwd / name).with_suffix(suffix), mode="wb") as f:
+    ...         np.save(f, getattr(self, name))
+    ...
+    >>> def numpy_field(*, cache: bool = True, independent: bool = False, **kwargs):
+    ...     return field(
+                default=zntrack.NOT_AVAILABLE
+    ...         cache=cache,
+    ...         independent=independent,
+    ...         zntrack_option=zntrack.ZnTrackOptionEnum.OUTS,
+    ...         dump_fn=_dump_fn,
+    ...         suffix=".npy",
+    ...         load_fn=_load_fn,
+    ...         **kwargs,
+    ...     )
+    ...
+    >>> class MyNode(Node):
+    ...     data: np.ndarray = numpy_field()
+    ...
+    ...     def run(self) -> None:
+    ...         self.data = np.arange(9).reshape(3, 3)
+    """
     kwargs["metadata"] = kwargs.get("metadata", {})
     kwargs["metadata"][ZNTRACK_OPTION] = zntrack_option
     kwargs["metadata"][ZNTRACK_CACHE] = cache
