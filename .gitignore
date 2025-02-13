@@ -168,3 +168,4 @@ dvc.yaml
 .dvc
 nodes/
 .vscode/
+junit.xml

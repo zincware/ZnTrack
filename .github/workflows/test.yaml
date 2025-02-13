@@ -63,11 +63,13 @@ jobs:
       - name: Pytest
         run: |
           uv run python --version
-          uv run coverage run -m pytest --benchmark-autosave -vv
-          uv run coverage xml
-          uv run py.test-benchmark compare --csv=export.csv
-      - uses: codecov/codecov-action@v5
+          uv run pytest --cov --junitxml=junit.xml -o junit_family=legacy
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          verbose: true
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

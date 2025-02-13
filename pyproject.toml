@@ -30,13 +30,12 @@ Documentation = "https://zntrack.readthedocs.io"
 
 [dependency-groups]
 dev = [
-    "coverage>=7.6.10",
     "dvc-s3>=3.2.0",
     "h5py>=3.12.1",
     "mlflow>=2.20.0",
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",
-    "pytest-benchmark>=5.1.0",
+    "pytest-cov>=6.0.0",
     "ruff>=0.9.6",
 ]
 docs = [
