@@ -70,7 +70,7 @@ We can leverage the integrated features of ZnTrack to hide all file writing or r
             self.result = self.a + self.b
 
 
-The Node above is equivalent to the following :term:`Node`.
+The :term:`Node` above can also be written like following :term:`Node`, saving and loading the inputs and outputs manually.
 
 .. note::
 
