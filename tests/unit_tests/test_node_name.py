@@ -2,6 +2,7 @@ import pytest
 
 import zntrack
 
+from dvc.stage.exceptions import InvalidStageName
 
 class MyNode(zntrack.Node):
     pass
@@ -141,3 +142,11 @@ def test_grouped_duplicate_named_node(proj_path):
     with pytest.raises(ValueError, match="A node with the name 'grp1_A' already exists."):
         with project.group("grp1"):
             MyNode(name="A")
+
+@pytest.mark.parametrize("char", ["@:", "#", "$", ":", "/", "\\", ".", ";", ","])
+def test_forbidden_node_names(proj_path, char):
+    """Test that nodes with forbidden names cannot be created"""
+    with zntrack.Project():
+        # https://github.com/iterative/dvc/blob/main/tests/func/test_run.py#L372-L375C32
+        with pytest.raises(InvalidStageName):
+            MyNode(name=f"copy_name-{char}")
