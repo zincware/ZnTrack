@@ -43,7 +43,7 @@ class NodeStatus:
     state : NodeStatusEnum
         The state of the Node.
     lazy_evaluation : bool
-        Wheter to load fields lazily.
+        Whether to load fields lazily.
     tmp_path : pathlib.Path, optional
         The temporary path when using 'use_tmp_path'.
     node : Node, optional
@@ -62,6 +62,7 @@ class NodeStatus:
     restarted: bool
         Whether the Node was restarted and has been run at least once before.
     """
+
     remote: str | None = None
     rev: str | None = None
     run_count: int = 0

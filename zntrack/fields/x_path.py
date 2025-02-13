@@ -24,7 +24,9 @@ from zntrack.plugins import plugin_getter
 from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
-FIELD_PATH_TYPE = t.Union[str, Path, t.List[t.Union[str,Path]], dataclasses._MISSING_TYPE]
+FIELD_PATH_TYPE = t.Union[
+    str, Path, t.List[t.Union[str, Path]], dataclasses._MISSING_TYPE
+]
 
 
 def _paths_getter(self: Node, name: str):
@@ -53,7 +55,7 @@ def _paths_getter(self: Node, name: str):
 
 
 def outs_path(
-    default:FIELD_PATH_TYPE=dataclasses.MISSING,
+    default: FIELD_PATH_TYPE = dataclasses.MISSING,
     *,
     cache: bool = True,
     independent: bool = False,
@@ -88,7 +90,7 @@ def outs_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def params_path(default:FIELD_PATH_TYPE=dataclasses.MISSING, **kwargs):
+def params_path(default: FIELD_PATH_TYPE = dataclasses.MISSING, **kwargs):
     """Define input parameter file path(s).
 
     Parameters
@@ -120,7 +122,7 @@ def params_path(default:FIELD_PATH_TYPE=dataclasses.MISSING, **kwargs):
 
 
 def plots_path(
-    default:FIELD_PATH_TYPE=dataclasses.MISSING,
+    default: FIELD_PATH_TYPE = dataclasses.MISSING,
     *,
     cache: bool = True,
     independent: bool = False,
@@ -162,7 +164,7 @@ def plots_path(
 
 
 def metrics_path(
-    default:FIELD_PATH_TYPE=dataclasses.MISSING,
+    default: FIELD_PATH_TYPE = dataclasses.MISSING,
     *,
     cache: bool | None = None,
     independent: bool = False,
@@ -200,7 +202,9 @@ def metrics_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def deps_path(default:FIELD_PATH_TYPE=dataclasses.MISSING, *, cache: bool = True, **kwargs):
+def deps_path(
+    default: FIELD_PATH_TYPE = dataclasses.MISSING, *, cache: bool = True, **kwargs
+):
     """Define dependency file path(s) for a node.
 
     Parameters
