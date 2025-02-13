@@ -75,7 +75,7 @@ def field(
                 default=zntrack.NOT_AVAILABLE
     ...         cache=cache,
     ...         independent=independent,
-    ...         zntrack_option=zntrack.FieldTypes.OUTS,
+    ...         field_type=zntrack.FieldTypes.OUTS,
     ...         dump_fn=_dump_fn,
     ...         suffix=".npy",
     ...         load_fn=_load_fn,
