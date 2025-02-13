@@ -109,6 +109,17 @@ Each :term:`Node` is uniquely identified by the :term:`node name` and :term:`git
       +++
       https://github.com/zincware/zndraw
 
+   .. card:: Paraffin
+
+      DVC graph executor and progess visualization tool.
+      
+      .. tip::
+
+         Paraffin can be used with or without ZnTrack and provides powerful tools for distributed execution of :term:`DVC` graphs together with a graphical user interface for monitoring the progress.
+
+      +++
+      https://github.com/zincware/paraffin
+
 
 .. toctree::
    :hidden:
