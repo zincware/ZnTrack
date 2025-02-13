@@ -38,6 +38,19 @@ Let’s convert a simple Python script into a reproducible workflow using ZnTrac
 
 We will now transform this function into a :term:`Node` and build a directed workflow graph using ZnTrack.
 
+.. note::
+
+   A ZnTrack :term:`Project` always requireds a  :term:`GIT` and :term:`DVC` repository.
+   Initialize a new project by running the following commands:
+
+   .. code-block:: bash
+
+      mkdir my_project
+      cd my_project
+      git init
+      dvc init
+      touch main.py # Add the code below to main.py
+
 .. code-block:: python
 
    import zntrack
