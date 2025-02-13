@@ -18,6 +18,27 @@ Converted Workflow with ZnTrack
 We can now adapt the scikit-learn example to utilize ZnTrack.
 This allows us to store and share the results and reuse the code by a better seperation into individual :term:`Node` for each task.
 Further, we can easily optimize parameters and compare different classifiers via tools of the :term:`DVC` infrastructure.
+Here's the graph structure for a single dataset and multiple classifiers:
+
+.. mermaid::
+
+    flowchart TD
+
+    Dataset --> TrainTestSplit
+    subgraph Classifier
+        KNeighborsClassifier
+        SVC
+        GaussianProcessClassifier
+        DecisionTreeClassifier
+        RandomForestClassifier
+        a["..."]
+    end
+    TrainTestSplit --> KNeighborsClassifier --> Compare
+    TrainTestSplit --> SVC --> Compare
+    TrainTestSplit --> GaussianProcessClassifier --> Compare
+    TrainTestSplit --> DecisionTreeClassifier --> Compare
+    TrainTestSplit --> RandomForestClassifier --> Compare
+    TrainTestSplit --> a["..."] --> Compare
 
 .. dropdown:: ZnTrack Nodes
     :open:
