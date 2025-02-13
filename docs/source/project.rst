@@ -159,3 +159,14 @@ Groups are purely for organization and do not affect execution.
         >>> grp_subgrp_Add
 
     project.build()
+
+MLFlow Integration
+------------------
+
+ZnTrack provides an integration between DVC and MLFlow.
+You can upload existing runs using a command line interface if mlflow is installed.
+See the CLI help for information on how to configure the MLFlow server, selected :term:`Node` instances, and the experiment id.
+
+.. code-block:: bash
+
+    ntrack mlflow-sync --help
