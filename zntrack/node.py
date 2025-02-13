@@ -11,6 +11,8 @@ import warnings
 import typing_extensions as ty_ex
 import znfields
 import znflow
+from dvc.stage.exceptions import InvalidStageName
+from dvc.stage.utils import is_valid_name
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
@@ -27,6 +29,19 @@ T = t.TypeVar("T", bound="Node")
 
 log = logging.getLogger(__name__)
 
+def _name_setter(self, attr_name: str, value: str) -> None:
+    """Check if the node name is valid."""
+
+    if value is not None and not is_valid_name(value):
+        raise InvalidStageName
+
+    if value is not None and "_" in value:
+        warnings.warn(
+            "Node name should not contain '_'."
+            " This character is used for defining groups."
+        )
+
+    self.__dict__[attr_name] = value
 
 def _name_getter(self, attr_name: str) -> str:
     """Retrieve the name of a node based on the current graph context.
@@ -62,8 +77,8 @@ class Node(znflow.Node, znfields.Base):
     """A Node."""
 
     name: str | None = znfields.field(
-        default=None, getter=_name_getter
-    )  # TODO: add setter and log warning
+        default=None, getter=_name_getter, setter=_name_setter
+    )
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
     _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
@@ -74,11 +89,6 @@ class Node(znflow.Node, znfields.Base):
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
-                if "_" in self.name:
-                    log.warning(
-                        "Node name should not contain '_'."
-                        " This character is used for defining groups."
-                    )
 
     def _post_load_(self):
         """Called after `from_rev` is called."""
