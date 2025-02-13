@@ -6,4 +6,3 @@ Examples
 
    pack_box
    classifier_comparison
-
