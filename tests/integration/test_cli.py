@@ -95,7 +95,7 @@ def test_list_groups(proj_path, runner):
     assert result.exit_code == 0
 
 
-def test_list_groups(proj_path, runner):
+def test_list_multi_nested_groups(proj_path, runner):
     proj = zntrack.Project()
 
     with proj:
@@ -120,7 +120,12 @@ def test_list_groups(proj_path, runner):
         "dynamics": [
             {
                 "400K": [
-                    {"B": ["ParamsToOuts -> dynamics_400K_B_ParamsToOuts", "ParamsToOuts_1 -> dynamics_400K_B_ParamsToOuts_1"]},
+                    {
+                        "B": [
+                            "ParamsToOuts -> dynamics_400K_B_ParamsToOuts",
+                            "ParamsToOuts_1 -> dynamics_400K_B_ParamsToOuts_1",
+                        ]
+                    },
                     "ParamsToOuts -> dynamics_400K_ParamsToOuts",
                     "ParamsToOuts_1 -> dynamics_400K_ParamsToOuts_1",
                 ]
