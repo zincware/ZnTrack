@@ -40,7 +40,7 @@ We will now transform this function into a :term:`Node` and build a directed wor
 
 .. note::
 
-   A ZnTrack :term:`Project` always requireds a  :term:`GIT` and :term:`DVC` repository.
+   A ZnTrack :term:`Project` always requires a :term:`GIT` and :term:`DVC` repository.
    Initialize a new project by running the following commands:
 
    .. code-block:: bash
