@@ -3,7 +3,7 @@ import json
 import znjson
 
 from zntrack import config
-from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum
+from zntrack.config import NOT_AVAILABLE, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
 
@@ -57,7 +57,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
         default=NOT_AVAILABLE,
         cache=cache,
         independent=independent,
-        zntrack_option=ZnTrackOptionEnum.OUTS,
+        zntrack_option=FieldTypes.OUTS,
         dump_fn=_outs_save_func,
         suffix=".json",
         load_fn=_outs_getter,
@@ -95,7 +95,7 @@ def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs):
         default=NOT_AVAILABLE,
         cache=cache,
         independent=independent,
-        zntrack_option=ZnTrackOptionEnum.METRICS,
+        zntrack_option=FieldTypes.METRICS,
         dump_fn=_metrics_save_func,
         suffix=".json",
         load_fn=_outs_getter,

@@ -14,7 +14,7 @@ from mlflow.utils import mlflow_tags
 from zntrack.config import (
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_OPTION,
-    ZnTrackOptionEnum,
+    FieldTypes,
 )
 from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, get_exp_info, set_exp_info
@@ -143,9 +143,9 @@ class MLFlowPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: Field) -> None:
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
+        if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS:
             mlflow.log_param(field.name, getattr(self.node, field.name))
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+        if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.DEPS:
             content = getattr(self.node, field.name)
             new_content = []
             if not isinstance(content, (list, tuple)):
@@ -164,13 +164,13 @@ class MLFlowPlugin(ZnTrackPlugin):
                     new_content.append(dc_params)
             mlflow.log_param(field.name, new_content)
 
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
+        if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.METRICS:
             metrics = getattr(self.node, field.name)
             for key, value in metrics.items():
                 mlflow.log_metric(f"{field.name}.{key}", value)
                 # TODO: plots
                 # TODO: define tags for all experiments in a parent run
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
+        if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PLOTS:
             df: pd.DataFrame = getattr(self.node, field.name).copy()
             for idx, row in df.iterrows():
                 for key, value in row.items():

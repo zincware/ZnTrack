@@ -1,5 +1,6 @@
 import enum
 import pathlib
+import typing_extensions as tyex
 
 DVC_FILE_PATH = pathlib.Path("dvc.yaml")
 PARAMS_FILE_PATH = pathlib.Path("params.yaml")
@@ -103,6 +104,20 @@ class NodeStatusEnum(enum.Enum):
     FINISHED = 3
 
 
+class FieldTypes(str, enum.Enum):
+    DEPS = "deps"
+    PARAMS = "params"
+    OUTS = "outs"
+    PLOTS = "plots"
+    METRICS = "metrics"
+
+    PARAMS_PATH = "params_path"
+    DEPS_PATH = "deps_path"
+    OUTS_PATH = "outs_path"
+    PLOTS_PATH = "plots_path"
+    METRICS_PATH = "metrics_path"
+
+@tyex.deprecated("ZnTrackOptionEnum is deprecated. Use FieldTypes instead.")
 class ZnTrackOptionEnum(str, enum.Enum):
     DEPS = "deps"
     PARAMS = "params"

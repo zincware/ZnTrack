@@ -13,7 +13,7 @@ from mlflow.tracking import MlflowClient
 from mlflow.utils import mlflow_tags
 
 from zntrack.cli.cli import app
-from zntrack.config import ZNTRACK_OPTION, ZnTrackOptionEnum
+from zntrack.config import ZNTRACK_OPTION, FieldTypes
 from zntrack.from_rev import from_rev
 from zntrack.node import Node
 
@@ -59,14 +59,14 @@ class MLFlowNodeData:
         tags = {}
 
         for field in dataclasses.fields(node):
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
+            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.METRICS:
                 for key, value in getattr(node, field.name).items():
                     metrics[f"{field.name}.{key}"] = value
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
+            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PLOTS:
                 df: pd.DataFrame = getattr(node, field.name)
                 for column in df.columns:
                     metrics[f"{field.name}.{column}"] = df[column].values.tolist()
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
+            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS:
                 params[field.name] = getattr(node, field.name)
             # TODO: metrics_path, plots_path and params_path are currently being ignored
             # TODO: dataclass deps are also ignored

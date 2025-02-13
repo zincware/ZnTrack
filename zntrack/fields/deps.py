@@ -7,7 +7,7 @@ import znflow.utils
 import znjson
 
 from zntrack import converter
-from zntrack.config import ZNTRACK_FILE_PATH, ZnTrackOptionEnum
+from zntrack.config import ZNTRACK_FILE_PATH, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
 
@@ -80,6 +80,6 @@ def deps(default=dataclasses.MISSING, **kwargs):
     return field(
         default=default,
         load_fn=_deps_getter,
-        zntrack_option=ZnTrackOptionEnum.DEPS,
+        zntrack_option=FieldTypes.DEPS,
         **kwargs,
     )

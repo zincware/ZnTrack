@@ -15,7 +15,7 @@ from zntrack.config import (
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_LAZY_VALUE,
     ZNTRACK_OPTION,
-    ZnTrackOptionEnum,
+    FieldTypes,
 )
 
 # if t.TYPE_CHECKING:
@@ -83,7 +83,7 @@ def outs_path(
     ...         '''Save output to self.outs_path.'''
     """
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.OUTS_PATH
+    kwargs["metadata"][ZNTRACK_OPTION] = FieldTypes.OUTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
@@ -115,7 +115,7 @@ def params_path(default: FIELD_PATH_TYPE = dataclasses.MISSING, **kwargs):
 
     """
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PARAMS_PATH
+    kwargs["metadata"][ZNTRACK_OPTION] = FieldTypes.PARAMS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = True  # TODO: remove?
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
@@ -156,7 +156,7 @@ def plots_path(
     ...         '''Save a figure to self.plots_path.'''
     """
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.PLOTS_PATH
+    kwargs["metadata"][ZNTRACK_OPTION] = FieldTypes.PLOTS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
@@ -195,7 +195,7 @@ def metrics_path(
     if cache is None:
         cache = config.ALWAYS_CACHE
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.METRICS_PATH
+    kwargs["metadata"][ZNTRACK_OPTION] = FieldTypes.METRICS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
@@ -225,7 +225,7 @@ def deps_path(
     ... a = MyNode(dependencies=["file1.txt", "file2.txt"])
     """
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = ZnTrackOptionEnum.DEPS_PATH
+    kwargs["metadata"][ZNTRACK_OPTION] = FieldTypes.DEPS_PATH
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)

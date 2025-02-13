@@ -11,7 +11,7 @@ from zntrack.config import (
     ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
     ZNTRACK_OPTION,
-    ZnTrackOptionEnum,
+    FieldTypes,
 )
 
 from zntrack.node import Node
@@ -26,7 +26,7 @@ def field(
     *,
     cache: bool = True,
     independent: bool = False,
-    zntrack_option: ZnTrackOptionEnum,
+    zntrack_option: FieldTypes,
     dump_fn: FN_WITH_SUFFIX | FN_WITHOUT_SUFFIX | None = None,
     suffix: str | None = None,
     load_fn: FN_WITHOUT_SUFFIX | FN_WITH_SUFFIX | None = None,
@@ -44,7 +44,7 @@ def field(
         Use the DVC cache for the field.
     independent : bool
         If the output of this field can be independent of the input.
-    zntrack_option : ZnTrackOptionEnum
+    zntrack_option : FieldTypes
         The type of the field.
     dump_fn : FN_WITH_SUFFIX | FN_WITHOUT_SUFFIX
         Function to dump the field.
@@ -75,7 +75,7 @@ def field(
                 default=zntrack.NOT_AVAILABLE
     ...         cache=cache,
     ...         independent=independent,
-    ...         zntrack_option=zntrack.ZnTrackOptionEnum.OUTS,
+    ...         zntrack_option=zntrack.FieldTypes.OUTS,
     ...         dump_fn=_dump_fn,
     ...         suffix=".npy",
     ...         load_fn=_load_fn,

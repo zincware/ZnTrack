@@ -5,7 +5,7 @@ import numpy as np
 import numpy.testing as npt
 
 import zntrack
-from zntrack.config import NOT_AVAILABLE, ZnTrackOptionEnum
+from zntrack.config import NOT_AVAILABLE, FieldTypes
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -30,7 +30,7 @@ def h5data(*, cache: bool = True, independent: bool = False, **kwargs):
     return zntrack.field(
         cache=cache,
         independent=independent,
-        zntrack_option=ZnTrackOptionEnum.OUTS,
+        zntrack_option=FieldTypes.OUTS,
         load_fn=_h5data_getter,
         dump_fn=_h5data_save_func,
         suffix=".h5",

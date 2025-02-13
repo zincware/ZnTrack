@@ -1,6 +1,6 @@
 import pandas as pd
 
-from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, ZnTrackOptionEnum
+from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
 
@@ -101,7 +101,7 @@ def plots(
         default=NOT_AVAILABLE,
         cache=cache,
         independent=independent,
-        zntrack_option=ZnTrackOptionEnum.PLOTS,
+        zntrack_option=FieldTypes.PLOTS,
         dump_fn=_plots_save_func,
         suffix=".csv",
         load_fn=_plots_getter,

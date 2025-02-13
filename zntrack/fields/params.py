@@ -2,7 +2,7 @@ import dataclasses
 
 import yaml
 
-from zntrack.config import PARAMS_FILE_PATH, ZnTrackOptionEnum
+from zntrack.config import PARAMS_FILE_PATH, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
 
@@ -47,7 +47,7 @@ def params(default=dataclasses.MISSING, **kwargs):
     #  or anything that can not be serialized
     return field(
         default=default,
-        zntrack_option=ZnTrackOptionEnum.PARAMS,
+        zntrack_option=FieldTypes.PARAMS,
         load_fn=_params_getter,
         suffix=None,
         cache=None,

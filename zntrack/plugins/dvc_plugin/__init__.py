@@ -18,7 +18,7 @@ from zntrack.config import (
     ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_OPTION,
     ZNTRACK_OPTION_PLOTS_CONFIG,
-    ZnTrackOptionEnum,
+    FieldTypes,
 )
 
 # if t.TYPE_CHECKING:
@@ -58,9 +58,9 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_params_yaml(self) -> dict | object:
         data = {}
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
+            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.DEPS:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = getattr(self.node, field.name)
@@ -138,19 +138,19 @@ class DVCPlugin(ZnTrackPlugin):
         nwd_handler = NWDReplaceHandler()
 
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
-                stages.setdefault(ZnTrackOptionEnum.PARAMS.value, []).append(
+            if field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS:
+                stages.setdefault(FieldTypes.PARAMS.value, []).append(
                     self.node.name
                 )
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS_PATH:
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PARAMS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
                 content = [{pathlib.Path(x).as_posix(): None} for x in content]
-                stages.setdefault(ZnTrackOptionEnum.PARAMS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS_PATH:
+                stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.OUTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 if getattr(self.node, field.name) == nwd:
@@ -164,8 +164,8 @@ class DVCPlugin(ZnTrackPlugin):
                 content = [pathlib.Path(x).as_posix() for x in content]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS_PATH:
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PLOTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
@@ -174,9 +174,9 @@ class DVCPlugin(ZnTrackPlugin):
                 content = [pathlib.Path(x).as_posix() for x in content]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
                 # plots[self.node.name] = None
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS_PATH:
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.METRICS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
@@ -185,19 +185,19 @@ class DVCPlugin(ZnTrackPlugin):
                 content = [pathlib.Path(x).as_posix() for x in content]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(ZnTrackOptionEnum.METRICS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.OUTS:
+                stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.OUTS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.PLOTS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(ZnTrackOptionEnum.OUTS.value, []).extend(content)
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
                 if ZNTRACK_OPTION_PLOTS_CONFIG in field.metadata:
                     file_path = (
                         (self.node.nwd / field.name).with_suffix(suffix).as_posix()
@@ -218,13 +218,13 @@ class DVCPlugin(ZnTrackPlugin):
                         if "y" in plots_config:
                             plots_config["y"] = {file_path: plots_config["y"]}
                         plots.append({f"{self.node.name}_{field.name}": plots_config})
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.METRICS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(ZnTrackOptionEnum.METRICS.value, []).extend(content)
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+                stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.DEPS:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = get_attr_always_list(self.node, field.name)
@@ -251,15 +251,15 @@ class DVCPlugin(ZnTrackPlugin):
                             )
                     elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
                         # add node name to params.yaml
-                        stages.setdefault(ZnTrackOptionEnum.PARAMS.value, []).append(
+                        stages.setdefault(FieldTypes.PARAMS.value, []).append(
                             self.node.name
                         )
                     else:
                         raise ValueError("unsupoorted type")
 
                 if len(paths) > 0:
-                    stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(paths)
-            elif field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS_PATH:
+                    stages.setdefault(FieldTypes.DEPS.value, []).extend(paths)
+            elif field.metadata.get(ZNTRACK_OPTION) == FieldTypes.DEPS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = [
@@ -267,7 +267,7 @@ class DVCPlugin(ZnTrackPlugin):
                     for c in get_attr_always_list(self.node, field.name)
                 ]
                 RunDVCImportPathHandler()(self.node.__dict__.get(field.name))
-                stages.setdefault(ZnTrackOptionEnum.DEPS.value, []).extend(content)
+                stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
 
         for key in stages:
             if key in ["cmd", "always_changed"]:
@@ -282,12 +282,12 @@ class DVCPlugin(ZnTrackPlugin):
         }
         for field in dataclasses.fields(self.node):
             if field.metadata.get(ZNTRACK_OPTION) in [
-                ZnTrackOptionEnum.PARAMS_PATH,
-                ZnTrackOptionEnum.DEPS_PATH,
-                ZnTrackOptionEnum.OUTS_PATH,
-                ZnTrackOptionEnum.PLOTS_PATH,
-                ZnTrackOptionEnum.METRICS_PATH,
-                ZnTrackOptionEnum.DEPS,
+                FieldTypes.PARAMS_PATH,
+                FieldTypes.DEPS_PATH,
+                FieldTypes.OUTS_PATH,
+                FieldTypes.PLOTS_PATH,
+                FieldTypes.METRICS_PATH,
+                FieldTypes.DEPS,
             ]:
                 data[field.name] = self.node.__dict__[field.name]
 
