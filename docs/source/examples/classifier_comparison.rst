@@ -1,18 +1,33 @@
-classifier_comparison
-=====================
+Scikit-learn classifier comparison
+==================================
 
+In this example we will adapt the `classifier comparison example <https://scikit-learn.org/stable/auto_examples/classification/plot_classifier_comparison.html#sphx-glr-auto-examples-classification-plot-classifier-comparison-py>`_ from the scikit-learn documentation to use ZnTrack.
 
-.. literalinclude:: ./classifier_comparison/original.py
-    :language: Python
+The original code looks like this:
+
+.. dropdown:: Original code
+    :open:
+
+    .. literalinclude:: ./classifier_comparison/original.py
+        :language: Python
 
 
 Converted Workflow with ZnTrack
 --------------------------------
 
+We can now adapt the scikit-learn example to utilize ZnTrack.
+This allows us to store and share the results and reuse the code by a better seperation into individual :term:`Node` for each task.
+Further, we can easily optimize parameters and compare different classifiers via tools of the :term:`DVC` infrastructure.
 
-.. literalinclude:: ./classifier_comparison/src/__init__.py
-    :language: Python
+.. dropdown:: ZnTrack Nodes
+    :open:
+
+    .. literalinclude:: ./classifier_comparison/src/__init__.py
+        :language: Python
 
 
-.. literalinclude:: ./classifier_comparison/main.py
-    :language: Python
+.. dropdown:: ZnTrack Workflow
+    :open:
+
+    .. literalinclude:: ./classifier_comparison/main.py
+        :language: Python

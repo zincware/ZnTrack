@@ -37,6 +37,7 @@ dev = [
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",
     "pytest-benchmark>=5.1.0",
+    "ruff>=0.9.6",
 ]
 docs = [
     "furo>=2024.8.6",
@@ -48,6 +49,7 @@ docs = [
 examples = [
     "ase>=3.24.0",
     "mace-torch>=0.3.10",
+    "paraffin>=0.3.6",
     "rdkit2ase>=0.1.4",
 ]
 
