@@ -139,4 +139,3 @@ def test_list_groups(proj_path, runner):
     groups = yaml.safe_load(result.stdout)
     assert groups == true_groups
     assert result.exit_code == 0
-

@@ -37,7 +37,7 @@ def get_groups(remote, rev) -> Tuple[dict, list]:
         """Recursively add node_name into the correct nested group structure."""
         if not grp_names:
             return
-        
+
         current_group = grp_names[0]
 
         # If this is the last level, add the node directly
