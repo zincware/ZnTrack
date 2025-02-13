@@ -30,7 +30,7 @@ PLUGIN_DICT = dict[str, ZnTrackPlugin]
 @dataclasses.dataclass(frozen=True)
 class NodeStatus:
     """Node status object.
-    
+
     Parameters
     ----------
     remote : str, optional
@@ -91,12 +91,12 @@ class NodeStatus:
     @property
     def fs(self) -> AbstractFileSystem:
         """Get the file system of the Node.
-        
+
         If the remote is None, the local file system is returned.
         Otherwise, a DVCFileSystem is returned.
         The FileSystem should be used to open files to ensure,
         that the correct version of the file is loaded.
-        
+
         Examples
         --------
 

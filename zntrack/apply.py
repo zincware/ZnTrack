@@ -7,7 +7,7 @@ o = t.TypeVar("o")
 
 def apply(obj: o, method: str) -> o:
     """Update the default ``run`` method of ``zntrack.Node``.
-    
+
     Parameters
     ----------
     obj : zntrack.Node
