@@ -1,8 +1,8 @@
 import pytest
+from dvc.stage.exceptions import InvalidStageName
 
 import zntrack
 
-from dvc.stage.exceptions import InvalidStageName
 
 class MyNode(zntrack.Node):
     pass

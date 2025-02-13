@@ -11,13 +11,12 @@ import warnings
 import typing_extensions as ty_ex
 import znfields
 import znflow
+from dvc.stage.exceptions import InvalidStageName
+from dvc.stage.utils import is_valid_name
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env
-
-from dvc.stage.utils import is_valid_name
-from dvc.stage.exceptions import InvalidStageName
 
 from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 
@@ -41,7 +40,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
             "Node name should not contain '_'."
             " This character is used for defining groups."
         )
-    
+
     self.__dict__[attr_name] = value
 
 def _name_getter(self, attr_name: str) -> str:
