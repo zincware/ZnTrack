@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          submodules: "true"
 
       - name: Install uv and set the Python version
         uses: astral-sh/setup-uv@v5
