@@ -47,7 +47,7 @@ def params(default=dataclasses.MISSING, **kwargs):
     #  or anything that can not be serialized
     return field(
         default=default,
-        zntrack_option=FieldTypes.PARAMS,
+        field_type=FieldTypes.PARAMS,
         load_fn=_params_getter,
         suffix=None,
         cache=None,

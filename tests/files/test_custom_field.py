@@ -23,7 +23,7 @@ def h5data(*, cache: bool = True, independent: bool = False, **kwargs):
     return field(
         cache=cache,
         independent=independent,
-        zntrack_option=FieldTypes.OUTS,
+        field_type=FieldTypes.OUTS,
         load_fn=_h5data_getter,
         dump_fn=_h5data_save_func,
         suffix=".h5",

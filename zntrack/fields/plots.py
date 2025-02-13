@@ -101,7 +101,7 @@ def plots(
         default=NOT_AVAILABLE,
         cache=cache,
         independent=independent,
-        zntrack_option=FieldTypes.PLOTS,
+        field_type=FieldTypes.PLOTS,
         dump_fn=_plots_save_func,
         suffix=".csv",
         load_fn=_plots_getter,

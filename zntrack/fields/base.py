@@ -26,7 +26,7 @@ def field(
     *,
     cache: bool = True,
     independent: bool = False,
-    zntrack_option: FieldTypes,
+    field_type: FieldTypes,
     dump_fn: FN_WITH_SUFFIX | FN_WITHOUT_SUFFIX | None = None,
     suffix: str | None = None,
     load_fn: FN_WITHOUT_SUFFIX | FN_WITH_SUFFIX | None = None,
@@ -89,7 +89,7 @@ def field(
     ...         self.data = np.arange(9).reshape(3, 3)
     """
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = zntrack_option
+    kwargs["metadata"][ZNTRACK_OPTION] = field_type
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     if load_fn is not None:

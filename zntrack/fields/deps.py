@@ -80,6 +80,6 @@ def deps(default=dataclasses.MISSING, **kwargs):
     return field(
         default=default,
         load_fn=_deps_getter,
-        zntrack_option=FieldTypes.DEPS,
+        field_type=FieldTypes.DEPS,
         **kwargs,
     )
