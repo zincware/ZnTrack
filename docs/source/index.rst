@@ -117,4 +117,5 @@ Each :term:`Node` is uniquely identified by the :term:`node name` and :term:`git
    node
    project
    fields
+   examples/examples
    glossary
