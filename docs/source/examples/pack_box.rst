@@ -6,7 +6,7 @@ Original code
 -------------
 
 .. dropdown:: Dependencies
-    
+
     For this example you will need:
 
     - https://github.com/ACEsuit/mace
@@ -41,4 +41,3 @@ structure for our example:
 
 .. literalinclude:: ./pack_box/main.py
     :language: Python
-
