@@ -114,11 +114,28 @@ class Project(znflow.DiGraph):
         finally:
             super().__exit__(exc_type, exc_val, exc_tb)
 
-    def build(self) -> None:
+    def build(self, _append: bool = False) -> None:
+        """Build the project by saving the parameters, dvc.yaml, and zntrack.json files.
+        
+        Parameters
+        ----------
+        _append : bool, optional
+            Whether to append to the existing files or overwrite them. Default is False.
+            This feature is experimental and may not work as expected.
+        """
         log.info(f"Saving {config.PARAMS_FILE_PATH}")
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": []}
         zntrack_dict = {}
+        if _append:
+            if config.PARAMS_FILE_PATH.exists():
+                params_dict = yaml.safe_load(config.PARAMS_FILE_PATH.read_text())
+            if config.DVC_FILE_PATH.exists():
+                dvc_dict = yaml.safe_load(config.DVC_FILE_PATH.read_text())
+                if "plots" not in dvc_dict:
+                    dvc_dict["plots"] = []
+            if config.ZNTRACK_FILE_PATH.exists():
+                zntrack_dict = json.loads(config.ZNTRACK_FILE_PATH.read_text())
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
             if node._external_:
