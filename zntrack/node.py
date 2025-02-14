@@ -29,6 +29,7 @@ T = t.TypeVar("T", bound="Node")
 
 log = logging.getLogger(__name__)
 
+
 def _name_setter(self, attr_name: str, value: str) -> None:
     """Check if the node name is valid."""
 
@@ -42,6 +43,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
         )
 
     self.__dict__[attr_name] = value
+
 
 def _name_getter(self, attr_name: str) -> str:
     """Retrieve the name of a node based on the current graph context.
