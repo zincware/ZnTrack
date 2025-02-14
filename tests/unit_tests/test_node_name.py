@@ -143,6 +143,7 @@ def test_grouped_duplicate_named_node(proj_path):
         with project.group("grp1"):
             MyNode(name="A")
 
+
 @pytest.mark.parametrize("char", ["@:", "#", "$", ":", "/", "\\", ".", ";", ","])
 def test_forbidden_node_names(proj_path, char):
     """Test that nodes with forbidden names cannot be created"""

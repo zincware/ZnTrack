@@ -20,7 +20,7 @@ def get_groups(remote, rev) -> Tuple[dict, list]:
     Returns:
     -------
     groups : dict
-        a nested dictionary with the group names as keys and the nodes in each group as
+        A nested dictionary with the group names as keys and the nodes in each group as
         values. Contains "short-name -> long-name" if inside a group.
     node_names: list
         A list of all node names in the project.
@@ -34,19 +34,31 @@ def get_groups(remote, rev) -> Tuple[dict, list]:
     node_names = []
 
     def add_to_group(groups, grp_names, node_name):
+        """Recursively add node_name into the correct nested group structure."""
+        if not grp_names:
+            return
+
+        current_group = grp_names[0]
+
+        # If this is the last level, add the node directly
         if len(grp_names) == 1:
-            if grp_names[0] not in groups:
-                groups[grp_names[0]] = []
-            groups[grp_names[0]].append(node_name)
+            if current_group not in groups:
+                groups[current_group] = []
+            groups[current_group].append(node_name)
         else:
-            if grp_names[0] not in groups:
-                groups[grp_names[0]] = [{}]
-            add_to_group(groups[grp_names[0]][0], grp_names[1:], node_name)
+            # Ensure the current group contains a dictionary inside a list
+            if current_group not in groups:
+                groups[current_group] = [{}]
+            elif not isinstance(groups[current_group][0], dict):
+                groups[current_group].insert(0, {})
+
+            add_to_group(groups[current_group][0], grp_names[1:], node_name)
 
     for node_name, node_config in config.items():
         nwd = pathlib.Path(node_config["nwd"]["value"])
         grp_names = nwd.parent.as_posix().split("/")[1:]
-        if len(grp_names) == 0:
+
+        if not grp_names:
             node_names.append(node_name)
             grp_names = ["nodes"]
         else:
@@ -55,6 +67,7 @@ def get_groups(remote, rev) -> Tuple[dict, list]:
 
             node_names.append(f"{'_'.join(grp_names)}_{node_name}")
             node_name = f"{node_name} -> {node_names[-1]}"
+
         add_to_group(true_groups, grp_names, node_name)
 
     return true_groups, node_names
