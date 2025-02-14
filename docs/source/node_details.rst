@@ -108,7 +108,7 @@ This can be achieved by using :meth:`zntrack.apply`.
 Entry Points
 ============
 
-If you are developing a package based on ZnTrack, you can expose your :term:`Node `definitions to other packages.
+If you are developing a package based on ZnTrack, you can expose your :term:`Node` definitions to other packages.
 
 You can define one or more groups of Nodes and register them using a function like this:
 
