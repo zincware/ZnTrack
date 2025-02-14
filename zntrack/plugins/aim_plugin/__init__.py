@@ -10,7 +10,7 @@ import git
 import pandas as pd
 import znflow
 
-from zntrack.config import PLUGIN_EMPTY_RETRUN_VALUE, ZNTRACK_OPTION, ZnTrackOptionEnum
+from zntrack.config import FIELD_TYPE, PLUGIN_EMPTY_RETRUN_VALUE, FieldTypes
 from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin, get_exp_info, set_exp_info
 from zntrack.utils import module_handler
@@ -108,10 +108,10 @@ class AIMPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PARAMS:
+        if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
             with self.get_aim_run() as run:
                 run[field.name] = getattr(self.node, field.name)
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.DEPS:
+        if field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
             content = getattr(self.node, field.name)
             new_content = []
             if not isinstance(content, (list, tuple)):
@@ -134,14 +134,14 @@ class AIMPlugin(ZnTrackPlugin):
                     if isinstance(getattr(self.node, field.name), list)
                     else new_content[0]
                 )
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.METRICS:
+        if field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS:
             with self.get_aim_run() as run:
                 assert isinstance(getattr(self.node, field.name), dict)
 
                 for key, value in getattr(self.node, field.name).items():
                     run.track(value, name=f"{field.name}.{key}")
 
-        if field.metadata.get(ZNTRACK_OPTION) == ZnTrackOptionEnum.PLOTS:
+        if field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS:
             df: pd.DataFrame = getattr(self.node, field.name).copy()
             with self.get_aim_run() as run:
                 for idx, row in df.iterrows():
