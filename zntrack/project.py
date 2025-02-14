@@ -116,7 +116,7 @@ class Project(znflow.DiGraph):
 
     def build(self, _append: bool = False) -> None:
         """Build the project by saving the parameters, dvc.yaml, and zntrack.json files.
-        
+
         Parameters
         ----------
         _append : bool, optional
