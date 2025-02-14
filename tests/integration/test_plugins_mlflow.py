@@ -108,7 +108,7 @@ def test_mlflow_metrics(mlflow_proj_path):
     # assert tags
     assert run.data.tags["dvc_stage_name"] == "ParamsToMetrics"
     assert run.data.tags["dvc_stage_hash"] == node.state.get_stage_hash()
-    assert run.data.tags["zntrack_node"] == "zntrack.examples.ParamsToMetrics"
+    assert run.data.tags["zntrack_node"] == "zntrack.examples.nodes.ParamsToMetrics"
 
     # assert metrics
     assert run.data.metrics == {"metrics.loss": 0.0}
