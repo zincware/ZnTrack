@@ -4,6 +4,7 @@ from zntrack.examples.nodes import (
     AddNodeNumbers,
     AddNodes,
     AddNodes2,
+    AddNumbers,
     AddNumbersProperty,
     AddOne,
     ComputeRandomNumber,
@@ -27,6 +28,7 @@ from zntrack.examples.nodes import (
 )
 
 __all__ = [
+    "AddNumbers",
     "ReadFile",
     "ParamsToOuts",
     "ParamsToMetrics",
