@@ -61,6 +61,8 @@ def get_nwd(node: "Node") -> pathlib.Path:
             and node.state.state == NodeStatusEnum.FINISHED
         ):
             nwd = pathlib.Path(NWD_PATH, node.name)
+        elif node.state.state == NodeStatusEnum.CREATED:
+            nwd = pathlib.Path(NWD_PATH, node.name)
         else:
             try:
                 with node.state.fs.open(ZNTRACK_FILE_PATH) as f:
