@@ -159,7 +159,7 @@ class Node(znflow.Node, znfields.Base):
             state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
             lazy_evaluation=lazy_evaluation,
         ).to_dict()
-        
+
         # need to process NWD related fields after the state is set
         instance.__dict__["state"]["group"] = Group.from_nwd(instance.nwd)
 
