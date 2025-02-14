@@ -61,9 +61,11 @@ def field(
     >>> import numpy as np
     >>> import zntrack
     ...
-    >>> def _load_fn(self: zntrack.Node, name: str, suffix: str) -> np.ndarray:
-    ...     with self.state.fs.open((self.nwd / name).with_suffix(suffix), mode="rb") as f:
-    ...         return np.load(f)
+    >>>    def _load_fn(self: zntrack.Node, name: str, suffix: str) -> np.ndarray:
+    ...        with self.state.fs.open(
+    ...            (self.nwd / name).with_suffix(suffix), mode="rb"
+    ...        ) as f:
+    ...            return np.load(f)
     ...
     >>> def _dump_fn(self: zntrack.Node, name: str, suffix: str) -> None:
     ...     with open((self.nwd / name).with_suffix(suffix), mode="wb") as f:
