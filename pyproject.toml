@@ -115,3 +115,6 @@ skip = "poetry.lock,examples/*"
 markers = [
     "needs_internet: marks tests which need internet access (deselect with '-m \"not needs_internet\"')",
 ]
+
+[project.entry-points.'zntrack.nodes']
+zntrack-examples = 'zntrack.examples:nodes'

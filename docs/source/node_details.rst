@@ -104,3 +104,30 @@ Sometimes, it is useful to define multiple methods for a single :term:`Node` wit
 This can be achieved by using :meth:`zntrack.apply`.
 
 .. autofunction:: zntrack.apply
+
+Entry Points
+============
+
+If you are developing a package based on ZnTrack, you can expose your :term:`Node `definitions to other packages.
+
+You can define one or more groups of Nodes and register them using a function like this:
+
+.. code-block:: python
+
+    import zntrack
+
+    def nodes() -> list[zntrack.Node]:
+        return [
+            mypackage.MyNode1,
+            mypackage.MyNode2,
+        ]
+
+This function should be registered as an entry point in your ``pyproject.toml``:
+
+.. code-block:: toml
+
+    [project.entry-points."zntrack.nodes"]
+    mypackage = "mypackage.nodes:nodes"
+
+Each entry represents a group of Nodes.
+If your Nodes are organized into different categories, you can define multiple entry points accordingly.
