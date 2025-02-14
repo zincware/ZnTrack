@@ -1,6 +1,6 @@
 stages:
   ReadFile:
-    cmd: zntrack run zntrack.examples.ReadFile --name ReadFile
+    cmd: zntrack run zntrack.examples.nodes.ReadFile --name ReadFile
     deps:
     - LICENSE
     metrics:

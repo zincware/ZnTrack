@@ -1,6 +1,6 @@
 stages:
   ParamsToOuts:
-    cmd: zntrack run zntrack.examples.ParamsToOuts --name ParamsToOuts
+    cmd: zntrack run zntrack.examples.nodes.ParamsToOuts --name ParamsToOuts
     metrics:
     - nodes/ParamsToOuts/node-meta.json:
         cache: false
@@ -9,7 +9,7 @@ stages:
     params:
     - ParamsToOuts
   ParamsToOuts_1:
-    cmd: zntrack run zntrack.examples.ParamsToOuts --name ParamsToOuts_1 --method join
+    cmd: zntrack run zntrack.examples.nodes.ParamsToOuts --name ParamsToOuts_1 --method join
     metrics:
     - nodes/ParamsToOuts_1/node-meta.json:
         cache: false
@@ -18,7 +18,7 @@ stages:
     params:
     - ParamsToOuts_1
   ParamsToOuts_2:
-    cmd: zntrack run zntrack.examples.ParamsToOuts --name ParamsToOuts_2 --method join
+    cmd: zntrack run zntrack.examples.nodes.ParamsToOuts --name ParamsToOuts_2 --method join
     metrics:
     - nodes/ParamsToOuts_2/node-meta.json:
         cache: false

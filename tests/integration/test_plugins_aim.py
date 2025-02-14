@@ -83,7 +83,7 @@ def test_aim_metrics(aim_proj_path):
         df = run.dataframe()
         assert df["dvc_stage_name"].tolist() == ["ParamsToMetrics"]
         assert df["dvc_stage_hash"].tolist() == [node.state.get_stage_hash()]
-        assert df["zntrack_node"].tolist() == ["zntrack.examples.ParamsToMetrics"]
+        assert df["zntrack_node"].tolist() == ["zntrack.examples.nodes.ParamsToMetrics"]
         assert df["params.loss"].tolist() == [0]
 
         # metrics
@@ -101,7 +101,7 @@ def test_aim_metrics(aim_proj_path):
         df = run.dataframe()
         assert df["dvc_stage_name"].tolist() == ["ParamsToMetrics"]
         assert df["dvc_stage_hash"].tolist() == [node.state.get_stage_hash()]
-        assert df["zntrack_node"].tolist() == ["zntrack.examples.ParamsToMetrics"]
+        assert df["zntrack_node"].tolist() == ["zntrack.examples.nodes.ParamsToMetrics"]
         assert df["params.loss"].tolist() == [0]
         assert df["git_commit_message"].tolist() == ["test"]
         assert df["git_commit_hash"].tolist() == [repo.head.commit.hexsha]
