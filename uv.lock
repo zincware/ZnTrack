@@ -3698,6 +3698,19 @@ wheels = [
 ]
 
 [[package]]
+name = "sphinx-hoverxref"
+version = "1.4.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sphinx" },
+    { name = "sphinxcontrib-jquery" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d6/6d/89764d3c719ed172d94778a74661cca647b2475165ae6cde1f73c9524d63/sphinx_hoverxref-1.4.2.tar.gz", hash = "sha256:74fab961b1b8c0e9c2cf22fa195c0e783d635e78686d39dd06ff157c196ca0c9", size = 1715764 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/19/3b/d981175d7b9bbbcf6894faf640d15198394efc7dedd6182332c4a791a5a6/sphinx_hoverxref-1.4.2-py2.py3-none-any.whl", hash = "sha256:4fc2e283e908d9df61ea9196589934944a7e2e6e3cb753a420b938cd6d14e220", size = 32198 },
+]
+
+[[package]]
 name = "sphinxcontrib-applehelp"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -3722,6 +3735,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/43/93/983afd9aa001e5201eab16b5a444ed5b9b0a7a010541e0ddfbbfd0b2470c/sphinxcontrib_htmlhelp-2.1.0.tar.gz", hash = "sha256:c9e2916ace8aad64cc13a0d233ee22317f2b9025b9cf3295249fa985cc7082e9", size = 22617 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/0a/7b/18a8c0bcec9182c05a0b3ec2a776bba4ead82750a55ff798e8d406dae604/sphinxcontrib_htmlhelp-2.1.0-py3-none-any.whl", hash = "sha256:166759820b47002d22914d64a075ce08f4c46818e17cfc9470a9786b759b19f8", size = 98705 },
+]
+
+[[package]]
+name = "sphinxcontrib-jquery"
+version = "4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "sphinx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/de/f3/aa67467e051df70a6330fe7770894b3e4f09436dea6881ae0b4f3d87cad8/sphinxcontrib-jquery-4.1.tar.gz", hash = "sha256:1620739f04e36a2c779f1a131a2dfd49b2fd07351bf1968ced074365933abc7a", size = 122331 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/76/85/749bd22d1a68db7291c89e2ebca53f4306c3f205853cf31e9de279034c3c/sphinxcontrib_jquery-4.1-py2.py3-none-any.whl", hash = "sha256:f936030d7d0147dd026a4f2b5a57343d233f1fc7b363f68b3d4f1cb0993878ae", size = 121104 },
 ]
 
 [[package]]
@@ -4539,6 +4564,7 @@ docs = [
     { name = "sphinx" },
     { name = "sphinx-copybutton" },
     { name = "sphinx-design" },
+    { name = "sphinx-hoverxref" },
     { name = "sphinxcontrib-mermaid" },
 ]
 examples = [
@@ -4575,6 +4601,7 @@ docs = [
     { name = "sphinx", specifier = ">=8.1.3" },
     { name = "sphinx-copybutton", specifier = ">=0.5.2" },
     { name = "sphinx-design", specifier = ">=0.6.1" },
+    { name = "sphinx-hoverxref", specifier = ">=1.4.2" },
     { name = "sphinxcontrib-mermaid", specifier = ">=1.0.0" },
 ]
 examples = [
