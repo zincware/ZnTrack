@@ -118,6 +118,7 @@ class FieldTypes(str, enum.Enum):
     PLOTS_PATH = "plots_path"
     METRICS_PATH = "metrics_path"
 
+
 @tyex.deprecated("ZnTrackOptionEnum is deprecated. Use FieldTypes instead.")
 class ZnTrackOptionEnum(str, enum.Enum):
     DEPS = "deps"

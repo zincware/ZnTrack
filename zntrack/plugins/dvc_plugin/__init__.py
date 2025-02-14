@@ -139,9 +139,7 @@ class DVCPlugin(ZnTrackPlugin):
 
         for field in dataclasses.fields(self.node):
             if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
-                stages.setdefault(FieldTypes.PARAMS.value, []).append(
-                    self.node.name
-                )
+                stages.setdefault(FieldTypes.PARAMS.value, []).append(self.node.name)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue

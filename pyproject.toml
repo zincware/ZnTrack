@@ -57,14 +57,6 @@ examples = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.black]
-line-length = 90
-preview = true
-
-[tool.isort]
-profile = 'black'
-multi_line_output = 3
-
 [tool.coverage.run]
 # omit the tests themselves
 omit = ["*/tests/*", "*/tmp/*", "*/interface/*", "zntrack/examples/*"]
