@@ -34,6 +34,10 @@ repos:
         args: [ --fix ]
       # Run the formatter.
       - id: ruff-format
+  # - repo: https://github.com/rstcheck/rstcheck
+  #   rev: 'v6.2.4'
+  #   hooks:
+  #   -   id: rstcheck
   # - repo: https://github.com/executablebooks/mdformat
   #   rev: 0.7.22
   #   hooks:

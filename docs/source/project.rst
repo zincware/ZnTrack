@@ -7,6 +7,12 @@ A workflow is defined within a :term:`Project`.
 
 To create a new ZnTrack project, initialize a new repository:
 
+.. tip::
+
+    ZnTrack builds a :term:`DVC` data pipeline for you.
+    You don't need to know :term:`DVC` to use ZnTrack, but it is recommended to familiarize yourself with the basics.
+    For more information, see the `DVC documentation <https://dvc.org/doc/start/data-pipelines/data-pipelines>`_ on data pipelines.
+
 .. code-block:: bash
 
     mkdir my_project
@@ -169,4 +175,4 @@ See the CLI help for information on how to configure the MLFlow server, selected
 
 .. code-block:: bash
 
-    ntrack mlflow-sync --help
+    zntrack mlflow-sync --help
