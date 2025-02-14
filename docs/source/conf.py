@@ -22,6 +22,7 @@ extensions = [
     "sphinx_design",
     "sphinx.ext.autodoc",
     "sphinxcontrib.mermaid",
+    "hoverxref.extension",
 ]
 
 templates_path = ["_templates"]
