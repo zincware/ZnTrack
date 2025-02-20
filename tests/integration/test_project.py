@@ -520,7 +520,6 @@ def test_group_dvc_outs(proj_path):
     )
 
 
-
 @pytest.mark.xfail(reason="pending implementation")
 def test_auto_remove(proj_path):
     with zntrack.Project(automatic_node_names=True) as project:
