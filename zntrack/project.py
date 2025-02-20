@@ -137,9 +137,10 @@ class Project(znflow.DiGraph):
                     if is_tracked:
                         warnings.warn(
                             f"{meta_file} is tracked by git. Please set "
-                            "`zntrack.config.ALWAYS_CACHE = False` or remove the file from "
-                            "git. This has been changed with ZnTrack v0.8.4. Mixing GIT and"
-                            " DVC tracked stage outputs can lead to unexpected behavior."
+                            "`zntrack.config.ALWAYS_CACHE = False` or remove the "
+                            "file from git. This has been changed with ZnTrack v0.8.4."
+                            "Mixing GIT and DVC tracked stage outputs can"
+                            " lead to unexpected behavior."
                         )
 
             if node._external_:
