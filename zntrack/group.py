@@ -4,6 +4,8 @@ import typing as t
 import znflow
 
 from zntrack.config import NWD_PATH
+from dvc.stage.exceptions import InvalidStageName
+from dvc.stage.utils import is_valid_name
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -26,6 +28,9 @@ def _extract_group_from_nwd(path: pathlib.Path) -> tuple | None:
 
 class Group:
     def __init__(self, names: tuple[str], nodes: list | None = None) -> None:
+        for name in names:
+            if not is_valid_name(name):
+                raise InvalidStageName
         self._names = names
         self._nodes = nodes if nodes else []
 
