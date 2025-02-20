@@ -51,7 +51,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
     graph = znflow.get_graph()
     nwd = NWD_PATH / value  # TODO: bad default value, will be wrong in `__post_init__`
     if graph is not znflow.empty_graph:
-        graph.all_nwds.remove(self.__dict__["nwd"]) # remove the current nwd
+        graph.all_nwds.remove(self.__dict__["nwd"])  # remove the current nwd
 
         if graph.active_group is None:
             nwd = NWD_PATH / value

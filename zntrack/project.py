@@ -55,7 +55,6 @@ class Project(znflow.DiGraph):
         # https://github.com/zincware/ZnFlow/issues/132 can be used
         # to set nwd directly as pk
 
-
     def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
 
