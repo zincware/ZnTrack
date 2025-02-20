@@ -32,7 +32,7 @@ log = logging.getLogger(__name__)
 
 def _name_setter(self, attr_name: str, value: str) -> None:
     """Check if the node name is valid."""
-    if "attr_name" in self.__dict__:
+    if attr_name in self.__dict__:
         raise AttributeError("Node name cannot be changed.")
 
     if value is None:
