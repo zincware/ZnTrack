@@ -90,8 +90,8 @@ def _name_getter(self, attr_name: str) -> str:
         base_parts = NWD_PATH.parts
 
         # Remove the common prefix (base path) from nwd_parts
-        if nwd_parts[:len(base_parts)] == base_parts:
-            rel_parts = nwd_parts[len(base_parts):]
+        if nwd_parts[: len(base_parts)] == base_parts:
+            rel_parts = nwd_parts[len(base_parts) :]
         else:
             raise ValueError(f"{nwd} does not start with {NWD_PATH}")
 
@@ -103,6 +103,7 @@ def _name_getter(self, attr_name: str) -> str:
         return nwd_to_name(self.__dict__["nwd"])
     else:
         return self.__class__.__name__
+
 
 @dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
