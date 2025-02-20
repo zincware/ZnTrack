@@ -118,8 +118,5 @@ markers = [
     "needs_internet: marks tests which need internet access (deselect with '-m \"not needs_internet\"')",
 ]
 
-[tool.uv.sources]
-znflow = { git = "https://github.com/zincware/ZnFlow.git" }
-
 [project.entry-points.'zntrack.nodes']
 zntrack-examples = 'zntrack.examples:nodes'
