@@ -82,12 +82,22 @@ def _name_getter(self, attr_name: str) -> str:
     """
 
     def nwd_to_name(nwd: pathlib.Path) -> str:
-        rel_path = nwd.relative_to(NWD_PATH)
-        print(f"rel_path: {rel_path}")
-        return "_".join(rel_path.parts)
+        # Convert both paths to lists of parts
+        nwd_parts = nwd.parts
+        base_parts = NWD_PATH.parts
 
-    if self.nwd is not None:
-        return nwd_to_name(self.nwd)
+        # Remove the common prefix (base path) from nwd_parts
+        if nwd_parts[:len(base_parts)] == base_parts:
+            rel_parts = nwd_parts[len(base_parts):]
+        else:
+            raise ValueError(f"{nwd} does not start with {NWD_PATH}")
+
+        print(f"rel_path: {rel_parts}")
+        return "_".join(rel_parts)
+
+    if self.__dict__.get("nwd") is not None:
+        # can not use self.nwd in case of `tmp_path`
+        return nwd_to_name(self.__dict__["nwd"])
     else:
         return "UNKNOWN"
 
@@ -170,11 +180,16 @@ class Node(znflow.Node, znfields.Base):
         lazy_values["name"] = name
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
         instance = cls(**lazy_values)
-        import dvc.api
+        if remote is not None or rev is not None:
+            import dvc.api
 
-        with dvc.api.open("zntrack.json", repo=remote, rev=rev) as f:
-            conf = json.loads(f.read())
-            nwd = pathlib.Path(conf[name]["nwd"]["value"])
+            with dvc.api.open("zntrack.json", repo=remote, rev=rev) as f:
+                conf = json.loads(f.read())
+                nwd = pathlib.Path(conf[name]["nwd"]["value"])
+        else:
+            with open("zntrack.json") as f:
+                conf = json.load(f)
+                nwd = pathlib.Path(conf[name]["nwd"]["value"])
         instance.__dict__["nwd"] = nwd
 
         # TODO: check if the node is finished or not.
