@@ -16,7 +16,7 @@ from dvc.stage.utils import is_valid_name
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
-from zntrack.utils.misc import get_plugins_from_env
+from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
 from .config import NOT_AVAILABLE, NWD_PATH, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 
@@ -78,19 +78,6 @@ def _name_getter(self, attr_name: str) -> str:
         str: The resolved node name.
 
     """
-
-    def nwd_to_name(nwd: pathlib.Path) -> str:
-        # Convert both paths to lists of parts
-        nwd_parts = nwd.parts
-        base_parts = NWD_PATH.parts
-
-        # Remove the common prefix (base path) from nwd_parts
-        if nwd_parts[: len(base_parts)] == base_parts:
-            rel_parts = nwd_parts[len(base_parts) :]
-        else:
-            raise ValueError(f"{nwd} does not start with {NWD_PATH}")
-
-        return "_".join(rel_parts)
 
     if self.__dict__.get("nwd") is not None:
         # can not use self.nwd in case of `tmp_path`

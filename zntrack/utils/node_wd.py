@@ -5,6 +5,7 @@ import os
 import pathlib
 import shutil
 import typing as t
+import warnings
 
 import znflow.utils
 
@@ -45,9 +46,11 @@ def get_nwd(node: "Node") -> pathlib.Path:
         The node instance for which the nwd should be returned.
     """
     try:
-        return pathlib.Path(node.__dict__["nwd"])
+        return node.__dict__["nwd"]
     except KeyError:
-        # required for MyNode().nwd outside of graph context
+        warnings.warn("Using the NWD outside a project context"
+                      " can not guarantee unique directories."
+                      )
         return pathlib.Path(NWD_PATH, node.__class__.__name__)
 
 
