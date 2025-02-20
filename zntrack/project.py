@@ -50,6 +50,11 @@ class Project(znflow.DiGraph):
             deployment=deployment,
             **kwargs,
         )
+        self.all_nwds = set()
+        # keep track of all nwd paths, they should be unique, until
+        # https://github.com/zincware/ZnFlow/issues/132 can be used
+        # to set nwd directly as pk
+
 
     def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
@@ -62,9 +67,6 @@ class Project(znflow.DiGraph):
             return super().add_znflow_node(node_for_adding)
         # here we finalize the node name!
         # It can only be updated once more via `MyNode(name=...)`
-
-        # using __dict__ for performance reasons
-        all_nwds = set(x["value"].__dict__["nwd"] for x in self.nodes.values())
         if self.active_group is None:
             nwd = NWD_PATH / node_for_adding.__class__.__name__
         else:
@@ -73,7 +75,7 @@ class Project(znflow.DiGraph):
                 / "/".join(self.active_group.names)
                 / node_for_adding.__class__.__name__
             )
-        if nwd in all_nwds:
+        if nwd in self.all_nwds:
             postfix = 1
             while True:
                 if self.active_group is None:
@@ -84,10 +86,10 @@ class Project(znflow.DiGraph):
                         / "/".join(self.active_group.names)
                         / f"{node_for_adding.__class__.__name__}_{postfix}"
                     )
-                if nwd not in all_nwds:
+                if nwd not in self.all_nwds:
                     break
                 postfix += 1
-
+        self.all_nwds.add(nwd)
         node_for_adding.__dict__["nwd"] = nwd
 
         return super().add_znflow_node(node_for_adding)
