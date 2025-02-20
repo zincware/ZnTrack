@@ -151,3 +151,11 @@ def test_forbidden_node_names(proj_path, char):
         # https://github.com/iterative/dvc/blob/main/tests/func/test_run.py#L372-L375C32
         with pytest.raises(InvalidStageName):
             MyNode(name=f"copy_name-{char}")
+
+
+@pytest.mark.parametrize("char", ["@:", "#", "$", ":", "/", "\\", ".", ";", ","])
+def test_forbidden_group_names(proj_path, char):
+    project = zntrack.Project()
+    with pytest.raises(InvalidStageName):
+        with project.group(f"copy_name-{char}"):
+            MyNode()
