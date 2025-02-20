@@ -3,12 +3,12 @@ import json
 import logging
 import os
 import subprocess
+import warnings
 
+import git
 import tqdm
 import yaml
 import znflow
-import git
-import warnings
 
 from zntrack import utils
 from zntrack.config import NWD_PATH
