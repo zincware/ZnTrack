@@ -48,9 +48,10 @@ def get_nwd(node: "Node") -> pathlib.Path:
     try:
         return node.__dict__["nwd"]
     except KeyError:
-        warnings.warn("Using the NWD outside a project context"
-                      " can not guarantee unique directories."
-                      )
+        warnings.warn(
+            "Using the NWD outside a project context"
+            " can not guarantee unique directories."
+        )
         return pathlib.Path(NWD_PATH, node.__class__.__name__)
 
 
