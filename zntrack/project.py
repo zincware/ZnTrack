@@ -114,12 +114,15 @@ class Project(znflow.DiGraph):
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": []}
         zntrack_dict = {}
-        repo = git.Repo()
+        try:
+            repo = git.Repo()
+        except git.InvalidGitRepositoryError:
+            repo = None
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
 
             # check if the node.nwd / node-meta.json is git tracked
-            if config.ALWAYS_CACHE:
+            if config.ALWAYS_CACHE and repo is not None:
                 meta_file = node.nwd / "node-meta.json"
                 if meta_file.exists():
                     # Convert to relative path safely

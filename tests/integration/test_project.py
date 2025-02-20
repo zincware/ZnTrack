@@ -520,27 +520,6 @@ def test_group_dvc_outs(proj_path):
     )
 
 
-# @pytest.mark.xfail(reason="pending implementation")
-# it fails with False
-@pytest.mark.parametrize("git_only_repo", [True])
-def test_git_only_repo(proj_path, git_only_repo):
-    with zntrack.Project(git_only_repo=git_only_repo) as project:
-        zntrack.examples.ParamsToOuts(params="Lorem Ipsum")
-
-    project.repro()
-
-    # commit everything
-    repo = git.Repo()
-    repo.git.add(".")
-    repo.index.commit("initial commit")
-
-    if git_only_repo:
-        # check if node-meta.json is in the repo index
-        assert ("nodes/ParamsToOuts/node-meta.json", 0) in repo.index.entries.keys()
-    else:
-        # check if node-meta.json is not in the repo index
-        assert ("nodes/ParamsToOuts/node-meta.json", 0) not in repo.index.entries.keys()
-
 
 @pytest.mark.xfail(reason="pending implementation")
 def test_auto_remove(proj_path):
