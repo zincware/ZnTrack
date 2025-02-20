@@ -3,13 +3,13 @@ import json
 import logging
 import os
 import subprocess
-import uuid
 
 import tqdm
 import yaml
 import znflow
 
 from zntrack import utils
+from zntrack.config import NWD_PATH
 from zntrack.group import Group
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.finalize import make_commit
@@ -50,50 +50,49 @@ class Project(znflow.DiGraph):
             deployment=deployment,
             **kwargs,
         )
+        self.all_nwds = set()
+        # keep track of all nwd paths, they should be unique, until
+        # https://github.com/zincware/ZnFlow/issues/132 can be used
+        # to set nwd directly as pk
 
-    def compute_all_node_names(self) -> dict[uuid.UUID, str]:
-        """Compute the Node name based on existing nodes on the graph."""
-        all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
-        node_names = {}
-        for node in all_nodes:
-            custom_name = node.__dict__.get("name")
-            node_name = custom_name or node.__class__.__name__
-            if custom_name is not None and isinstance(custom_name, _FinalNodeNameString):
-                node_names[node.uuid] = custom_name
-                continue
-
-            if node.state.group is None:
-                if self.active_group is not None:
-                    node_name = f"{'_'.join(self.active_group.names)}_{node_name}"
-                else:
-                    node_name = f"{node_name}"
-            else:
-                node_name = f"{'_'.join(node.state.group.names)}_{node_name}"
-
-            if node_name in node_names.values():
-                if custom_name:
-                    raise ValueError(
-                        f"A node with the name '{node_name}' already exists."
-                    )
-                i = 0
-                while True:
-                    i += 1
-                    if f"{node_name}_{i}" not in node_names.values():
-                        node_name = f"{node_name}_{i}"
-                        break
-            node_names[node.uuid] = _FinalNodeNameString(node_name)
-
-        return node_names
-
-    def add_node(self, node_for_adding, **attr):
+    def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
 
         if not isinstance(node_for_adding, Node):
             raise ValueError(
-                f"Node must be an instance of 'zntrack.Node', not {type(node_for_adding)}"
+                "Node must be an instance of 'zntrack.Node',"
+                f" not {type(node_for_adding)}."
             )
+        if node_for_adding._external_:
+            return super().add_znflow_node(node_for_adding)
+        # here we finalize the node name!
+        # It can only be updated once more via `MyNode(name=...)`
+        if self.active_group is None:
+            nwd = NWD_PATH / node_for_adding.__class__.__name__
+        else:
+            nwd = (
+                NWD_PATH
+                / "/".join(self.active_group.names)
+                / node_for_adding.__class__.__name__
+            )
+        if nwd in self.all_nwds:
+            postfix = 1
+            while True:
+                if self.active_group is None:
+                    nwd = NWD_PATH / f"{node_for_adding.__class__.__name__}_{postfix}"
+                else:
+                    nwd = (
+                        NWD_PATH
+                        / "/".join(self.active_group.names)
+                        / f"{node_for_adding.__class__.__name__}_{postfix}"
+                    )
+                if nwd not in self.all_nwds:
+                    break
+                postfix += 1
+        self.all_nwds.add(nwd)
+        node_for_adding.__dict__["nwd"] = nwd
 
-        return super().add_node(node_for_adding, **attr)
+        return super().add_znflow_node(node_for_adding)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
@@ -105,12 +104,6 @@ class Project(znflow.DiGraph):
                     self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
                         Group.from_znflow_group(group)
                     )
-
-            all_node_names = self.compute_all_node_names()
-            for node_uuid in self.nodes:
-                self.nodes[node_uuid]["value"].__dict__["name"] = all_node_names[
-                    node_uuid
-                ]
         finally:
             super().__exit__(exc_type, exc_val, exc_tb)
 
