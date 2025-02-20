@@ -2,10 +2,10 @@ import pathlib
 import typing as t
 
 import znflow
-
-from zntrack.config import NWD_PATH
 from dvc.stage.exceptions import InvalidStageName
 from dvc.stage.utils import is_valid_name
+
+from zntrack.config import NWD_PATH
 
 if t.TYPE_CHECKING:
     from zntrack import Node
