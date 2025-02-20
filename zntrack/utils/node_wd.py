@@ -39,47 +39,16 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
 def get_nwd(node: "Node") -> pathlib.Path:
     """Get the node working directory.
 
-    This is used instead of `node.nwd` because it allows
-    for parameters to define if the nwd should be created.
-
     Arguments:
     ---------
     node: Node
         The node instance for which the nwd should be returned.
-
     """
     try:
         return pathlib.Path(node.__dict__["nwd"])
     except KeyError:
+        # required for MyNode().nwd outside of graph context
         return pathlib.Path(NWD_PATH, node.__class__.__name__)
-    # try:
-    #     nwd = xx
-    # except KeyError:
-    #     nwd = pathlib.Path(NWD_PATH, node.__class__.__name__)
-    #     if node.name is None:
-    #         raise ValueError("Unable to determine node name.")
-    #     if (
-    #         node.state.remote is None
-    #         and node.state.rev is None
-    #         and node.state.state == NodeStatusEnum.FINISHED
-    #     ):
-    #         nwd = pathlib.Path(NWD_PATH, node.name)
-    #     else:
-    #         try:
-    #             with node.state.fs.open(ZNTRACK_FILE_PATH) as f:
-    #                 zntrack_config = json.load(f)
-    #             nwd = zntrack_config[node.name]["nwd"]
-    #             nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
-    #         except (FileNotFoundError, KeyError):
-    #             nwd = pathlib.Path(NWD_PATH, node.name)
-
-    # if node.state.group is not None:
-    #     # strip the groups from node_name
-    #     to_replace = "_".join(node.state.group.names) + "_"
-    #     replacement = "/".join(node.state.group.names) + "/"
-    #     nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
-
-    return nwd
 
 
 class NWDReplaceHandler(znflow.utils.IterableHandler):

@@ -32,14 +32,10 @@ log = logging.getLogger(__name__)
 
 def _name_setter(self, attr_name: str, value: str) -> None:
     """Check if the node name is valid."""
-    # TODO: update nwd to NWD_PATH / value
-    #  or NWD_PATH / "_".join(self.group) / value
-    # TODO: here we not only need to update the NWD but also the node graph!
     if "attr_name" in self.__dict__:
         raise AttributeError("Node name cannot be changed.")
+
     if value is None:
-        # this should probably reset the name to the default?
-        # also check if the name has been set once and do not allow setting it again? This would require saving `name` though
         return
 
     if value is not None and not is_valid_name(value):
@@ -51,11 +47,11 @@ def _name_setter(self, attr_name: str, value: str) -> None:
             " This character is used for defining groups."
         )
     self.__dict__[attr_name] = value  # only used to check if the name has been set once
-    # relabel the graph and update NWD
+
     graph = znflow.get_graph()
     nwd = NWD_PATH / value  # TODO: bad default value, will be wrong in `__post_init__`
     if graph is not znflow.empty_graph:
-        all_nwds = set(x["value"].nwd for x in graph.nodes.values())
+        all_nwds = {x["value"].nwd for x in graph.nodes.values()}
         if graph.active_group is None:
             nwd = NWD_PATH / value
         else:
