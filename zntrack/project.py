@@ -3,13 +3,13 @@ import json
 import logging
 import os
 import subprocess
-import uuid
 
 import tqdm
 import yaml
 import znflow
 
 from zntrack import utils
+from zntrack.config import NWD_PATH
 from zntrack.group import Group
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.finalize import make_commit
@@ -17,7 +17,6 @@ from zntrack.utils.import_handler import import_handler
 from zntrack.utils.misc import load_env_vars
 
 from . import config
-from zntrack.config import NWD_PATH
 from .deployment import ZnTrackDeployment
 
 log = logging.getLogger(__name__)
@@ -66,14 +65,22 @@ class Project(znflow.DiGraph):
         if self.active_group is None:
             nwd = NWD_PATH / node_for_adding.__class__.__name__
         else:
-            nwd = NWD_PATH / "/".join(self.active_group.names) / node_for_adding.__class__.__name__
+            nwd = (
+                NWD_PATH
+                / "/".join(self.active_group.names)
+                / node_for_adding.__class__.__name__
+            )
         if nwd in all_nwds:
             postfix = 1
             while True:
                 if self.active_group is None:
                     nwd = NWD_PATH / f"{node_for_adding.__class__.__name__}_{postfix}"
                 else:
-                    nwd = NWD_PATH / "/".join(self.active_group.names) / f"{node_for_adding.__class__.__name__}_{postfix}"
+                    nwd = (
+                        NWD_PATH
+                        / "/".join(self.active_group.names)
+                        / f"{node_for_adding.__class__.__name__}_{postfix}"
+                    )
                 if nwd not in all_nwds:
                     break
                 postfix += 1

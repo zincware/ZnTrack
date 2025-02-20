@@ -7,7 +7,6 @@ import pathlib
 import typing as t
 import uuid
 import warnings
-import networkx as nx
 
 import typing_extensions as ty_ex
 import znfields
@@ -19,7 +18,7 @@ from zntrack.group import Group
 from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env
 
-from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum, NWD_PATH
+from .config import NOT_AVAILABLE, NWD_PATH, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 
 try:
     from typing import dataclass_transform
@@ -33,7 +32,7 @@ log = logging.getLogger(__name__)
 
 def _name_setter(self, attr_name: str, value: str) -> None:
     """Check if the node name is valid."""
-    # TODO: update nwd to NWD_PATH / value 
+    # TODO: update nwd to NWD_PATH / value
     #  or NWD_PATH / "_".join(self.group) / value
     # TODO: here we not only need to update the NWD but also the node graph!
     if "attr_name" in self.__dict__:
@@ -43,7 +42,6 @@ def _name_setter(self, attr_name: str, value: str) -> None:
         # also check if the name has been set once and do not allow setting it again? This would require saving `name` though
         return
 
-
     if value is not None and not is_valid_name(value):
         raise InvalidStageName
 
@@ -52,7 +50,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
             "Node name should not contain '_'."
             " This character is used for defining groups."
         )
-    self.__dict__[attr_name] = value # only used to check if the name has been set once
+    self.__dict__[attr_name] = value  # only used to check if the name has been set once
     # relabel the graph and update NWD
     graph = znflow.get_graph()
     nwd = NWD_PATH / value  # TODO: bad default value, will be wrong in `__post_init__`
@@ -70,7 +68,6 @@ def _name_setter(self, attr_name: str, value: str) -> None:
     self.__dict__["nwd"] = nwd
 
 
-
 def _name_getter(self, attr_name: str) -> str:
     """Retrieve the name of a node based on the current graph context.
 
@@ -83,16 +80,16 @@ def _name_getter(self, attr_name: str) -> str:
         str: The resolved node name.
 
     """
+
     def nwd_to_name(nwd: pathlib.Path) -> str:
         rel_path = nwd.relative_to(NWD_PATH)
         print(f"rel_path: {rel_path}")
         return "_".join(rel_path.parts)
-    
+
     if self.nwd is not None:
         return nwd_to_name(self.nwd)
     else:
         return "UNKNOWN"
-
 
 
 @dataclass_transform()

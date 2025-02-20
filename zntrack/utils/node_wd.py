@@ -1,6 +1,5 @@
 """Helpers for the Node Working Directory (NWD)."""
 
-import json
 import logging
 import os
 import pathlib
@@ -8,10 +7,8 @@ import shutil
 import typing as t
 
 import znflow.utils
-import znjson
 
 from zntrack.add import DVCImportPath
-from zntrack.config import NWD_PATH, ZNTRACK_FILE_PATH, NodeStatusEnum
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -38,7 +35,7 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
     shutil.rmtree(target)
 
 
-def get_nwd(node: "Node") -> pathlib.Path|None:
+def get_nwd(node: "Node") -> pathlib.Path | None:
     """Get the node working directory.
 
     This is used instead of `node.nwd` because it allows
