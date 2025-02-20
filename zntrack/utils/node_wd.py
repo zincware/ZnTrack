@@ -38,7 +38,7 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
     shutil.rmtree(target)
 
 
-def get_nwd(node: "Node") -> pathlib.Path:
+def get_nwd(node: "Node") -> pathlib.Path|None:
     """Get the node working directory.
 
     This is used instead of `node.nwd` because it allows
@@ -51,30 +51,35 @@ def get_nwd(node: "Node") -> pathlib.Path:
 
     """
     try:
-        nwd = node.__dict__["nwd"]
+        return pathlib.Path(node.__dict__["nwd"])
     except KeyError:
-        if node.name is None:
-            raise ValueError("Unable to determine node name.")
-        if (
-            node.state.remote is None
-            and node.state.rev is None
-            and node.state.state == NodeStatusEnum.FINISHED
-        ):
-            nwd = pathlib.Path(NWD_PATH, node.name)
-        else:
-            try:
-                with node.state.fs.open(ZNTRACK_FILE_PATH) as f:
-                    zntrack_config = json.load(f)
-                nwd = zntrack_config[node.name]["nwd"]
-                nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
-            except (FileNotFoundError, KeyError):
-                nwd = pathlib.Path(NWD_PATH, node.name)
+        return None
+    # try:
+    #     nwd = xx
+    # except KeyError:
+    #     nwd = pathlib.Path(NWD_PATH, node.__class__.__name__)
+    #     if node.name is None:
+    #         raise ValueError("Unable to determine node name.")
+    #     if (
+    #         node.state.remote is None
+    #         and node.state.rev is None
+    #         and node.state.state == NodeStatusEnum.FINISHED
+    #     ):
+    #         nwd = pathlib.Path(NWD_PATH, node.name)
+    #     else:
+    #         try:
+    #             with node.state.fs.open(ZNTRACK_FILE_PATH) as f:
+    #                 zntrack_config = json.load(f)
+    #             nwd = zntrack_config[node.name]["nwd"]
+    #             nwd = json.loads(json.dumps(nwd), cls=znjson.ZnDecoder)
+    #         except (FileNotFoundError, KeyError):
+    #             nwd = pathlib.Path(NWD_PATH, node.name)
 
-    if node.state.group is not None:
-        # strip the groups from node_name
-        to_replace = "_".join(node.state.group.names) + "_"
-        replacement = "/".join(node.state.group.names) + "/"
-        nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
+    # if node.state.group is not None:
+    #     # strip the groups from node_name
+    #     to_replace = "_".join(node.state.group.names) + "_"
+    #     replacement = "/".join(node.state.group.names) + "/"
+    #     nwd = pathlib.Path(str(nwd).replace(to_replace, replacement))
 
     return nwd
 

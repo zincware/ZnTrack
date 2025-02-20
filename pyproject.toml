@@ -33,6 +33,7 @@ Discord = "https://discord.gg/7ncfwhsnm4"
 dev = [
     "dvc-s3>=3.2.0",
     "h5py>=3.12.1",
+    "ipykernel>=6.29.5",
     "mlflow>=2.20.0",
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",
@@ -116,6 +117,9 @@ skip = "poetry.lock,examples/*"
 markers = [
     "needs_internet: marks tests which need internet access (deselect with '-m \"not needs_internet\"')",
 ]
+
+[tool.uv.sources]
+znflow = { git = "https://github.com/zincware/ZnFlow.git" }
 
 [project.entry-points.'zntrack.nodes']
 zntrack-examples = 'zntrack.examples:nodes'
