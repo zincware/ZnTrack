@@ -11,9 +11,9 @@ CWD = pathlib.Path(__file__).parent.resolve()
 
 
 def test_node(proj_path):
-    assert zntrack.config.ALWAYS_CACHE is False
-    zntrack.config.ALWAYS_CACHE = True
     assert zntrack.config.ALWAYS_CACHE is True
+    zntrack.config.ALWAYS_CACHE = False
+    assert zntrack.config.ALWAYS_CACHE is False
 
     # We define the node here, because the config has to be set
     #  before calling zntrack.metrics()
@@ -31,8 +31,8 @@ def test_node(proj_path):
 
     proj.build()
 
-    zntrack.config.ALWAYS_CACHE = False  # reset to default value
-    assert zntrack.config.ALWAYS_CACHE is False
+    zntrack.config.ALWAYS_CACHE = True  # reset to default value
+    assert zntrack.config.ALWAYS_CACHE is True
 
     assert json.loads(
         (CWD / "zntrack_config" / "user_config.json").read_text()

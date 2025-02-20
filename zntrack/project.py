@@ -7,6 +7,8 @@ import subprocess
 import tqdm
 import yaml
 import znflow
+import git
+import warnings
 
 from zntrack import utils
 from zntrack.config import NWD_PATH
@@ -112,8 +114,31 @@ class Project(znflow.DiGraph):
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": []}
         zntrack_dict = {}
+        repo = git.Repo()
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
+
+            # check if the node.nwd / node-meta.json is git tracked
+            if config.ALWAYS_CACHE:
+                meta_file = node.nwd / "node-meta.json"
+                if meta_file.exists():
+                    # Convert to relative path safely
+                    try:
+                        rel_path = os.path.relpath(meta_file, repo.working_dir)
+                    except ValueError:  # In case of absolute/relative path issues
+                        print(f"⚠️ Skipping {meta_file} (not in repo?)")
+                        continue
+
+                    # Check if the file is tracked
+                    is_tracked = rel_path in repo.git.ls_files()
+                    if is_tracked:
+                        warnings.warn(
+                            f"{meta_file} is tracked by git. Please set "
+                            "`zntrack.config.ALWAYS_CACHE = False` or remove the file from "
+                            "git. This has been changed with ZnTrack v0.8.4. Mixing GIT and"
+                            " DVC tracked stage outputs can lead to unexpected behavior."
+                        )
+
             if node._external_:
                 continue
             for plugin in node.state.plugins.values():

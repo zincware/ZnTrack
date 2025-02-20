@@ -20,10 +20,9 @@ stages:
     - nodes/MyNode/metrics.json:
         cache: false
     - nodes/MyNode/metrics_cache.json
-    - nodes/MyNode/my_metrics.json:
-        cache: false
+    - nodes/MyNode/my_metrics.json 
     - nodes/MyNode/node-meta.json:
-        cache: false
+        cache: true
     outs:
     - no-cache-plots.json:
         cache: false
