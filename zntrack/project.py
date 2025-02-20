@@ -62,8 +62,9 @@ class Project(znflow.DiGraph):
             return super().add_znflow_node(node_for_adding)
         # here we finalize the node name!
         # It can only be updated once more via `MyNode(name=...)`
-
-        all_nwds = set(x["value"].nwd for x in self.nodes.values())
+        
+        # using __dict__ for performance reasons
+        all_nwds = set(x["value"].__dict__["nwd"] for x in self.nodes.values())
         if self.active_group is None:
             nwd = NWD_PATH / node_for_adding.__class__.__name__
         else:
