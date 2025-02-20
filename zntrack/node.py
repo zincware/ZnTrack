@@ -16,9 +16,9 @@ from dvc.stage.utils import is_valid_name
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
-from zntrack.utils.misc import get_plugins_from_env
+from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
-from .config import NOT_AVAILABLE, ZNTRACK_LAZY_VALUE, NodeStatusEnum
+from .config import NOT_AVAILABLE, NWD_PATH, ZNTRACK_LAZY_VALUE, NodeStatusEnum
 
 try:
     from typing import dataclass_transform
@@ -32,6 +32,11 @@ log = logging.getLogger(__name__)
 
 def _name_setter(self, attr_name: str, value: str) -> None:
     """Check if the node name is valid."""
+    if attr_name in self.__dict__:
+        raise AttributeError("Node name cannot be changed.")
+
+    if value is None:
+        return
 
     if value is not None and not is_valid_name(value):
         raise InvalidStageName
@@ -41,8 +46,26 @@ def _name_setter(self, attr_name: str, value: str) -> None:
             "Node name should not contain '_'."
             " This character is used for defining groups."
         )
+    self.__dict__[attr_name] = value  # only used to check if the name has been set once
 
-    self.__dict__[attr_name] = value
+    graph = znflow.get_graph()
+    nwd = NWD_PATH / value  # TODO: bad default value, will be wrong in `__post_init__`
+    if graph is not znflow.empty_graph:
+        graph.all_nwds.remove(self.__dict__["nwd"])  # remove the current nwd
+
+        if graph.active_group is None:
+            nwd = NWD_PATH / value
+        else:
+            nwd = NWD_PATH / "/".join(graph.active_group.names) / value
+
+        if nwd in graph.all_nwds:
+            if graph.active_group is None:
+                name = value
+            else:
+                name = "_".join(graph.active_group.names) + "_" + value
+            raise ValueError(f"A node with the name '{name}' already exists.")
+        graph.all_nwds.add(nwd)
+    self.__dict__["nwd"] = nwd
 
 
 def _name_getter(self, attr_name: str) -> str:
@@ -57,20 +80,12 @@ def _name_getter(self, attr_name: str) -> str:
         str: The resolved node name.
 
     """
-    value = self.__dict__.get(attr_name)  # Safer lookup with .get()
-    graph = znflow.get_graph()
 
-    # If value exists and the graph is either empty or not inside a group, return it
-    if value is not None:
-        if graph is znflow.empty_graph or graph.active_group is None:
-            return str(value)
-
-    # If no graph is active, return the class name as the default
-    if graph is znflow.empty_graph:
-        return str(self.__class__.__name__)
-
-    # Compute name based on project-wide node names
-    return str(graph.compute_all_node_names()[self.uuid])
+    if self.__dict__.get("nwd") is not None:
+        # can not use self.nwd in case of `tmp_path`
+        return nwd_to_name(self.__dict__["nwd"])
+    else:
+        return self.__class__.__name__
 
 
 @dataclass_transform()
@@ -151,6 +166,21 @@ class Node(znflow.Node, znfields.Base):
         lazy_values["name"] = name
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
         instance = cls(**lazy_values)
+        if remote is not None or rev is not None:
+            import dvc.api
+
+            with dvc.api.open("zntrack.json", repo=remote, rev=rev) as f:
+                conf = json.loads(f.read())
+                nwd = pathlib.Path(conf[name]["nwd"]["value"])
+        else:
+            try:
+                with open("zntrack.json") as f:
+                    conf = json.load(f)
+                    nwd = pathlib.Path(conf[name]["nwd"]["value"])
+            except FileNotFoundError:
+                # from_rev is called before a graph is built
+                nwd = NWD_PATH / name
+        instance.__dict__["nwd"] = nwd
 
         # TODO: check if the node is finished or not.
         instance.__dict__["state"] = NodeStatus(

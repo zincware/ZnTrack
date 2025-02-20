@@ -8,7 +8,7 @@ import znflow.utils
 from zntrack.add import DVCImportPath
 from zntrack.utils.import_handler import import_handler
 
-from ..config import ENV_FILE_PATH
+from ..config import ENV_FILE_PATH, NWD_PATH
 
 
 class RunDVCImportPathHandler(znflow.utils.IterableHandler):
@@ -133,3 +133,17 @@ def sort_and_deduplicate(data: list[str | dict[str, dict]]):
             new_data.append(key)
 
     return new_data
+
+
+def nwd_to_name(nwd: pathlib.Path) -> str:
+    # Convert both paths to lists of parts
+    nwd_parts = nwd.parts
+    base_parts = NWD_PATH.parts
+
+    # Remove the common prefix (base path) from nwd_parts
+    if nwd_parts[: len(base_parts)] == base_parts:
+        rel_parts = nwd_parts[len(base_parts) :]
+    else:
+        raise ValueError(f"{nwd} does not start with {NWD_PATH}")
+
+    return "_".join(rel_parts)
