@@ -60,7 +60,8 @@ class Project(znflow.DiGraph):
 
         if not isinstance(node_for_adding, Node):
             raise ValueError(
-                f"Node must be an instance of 'zntrack.Node', not {type(node_for_adding)}."
+                "Node must be an instance of 'zntrack.Node',"
+                f" not {type(node_for_adding)}."
             )
         if node_for_adding._external_:
             return super().add_znflow_node(node_for_adding)
