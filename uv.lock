@@ -4851,9 +4851,13 @@ wheels = [
 [[package]]
 name = "znflow"
 version = "0.2.5"
-source = { git = "https://github.com/zincware/ZnFlow.git#9bb958f8a9333da6eeaf49a413438c4e89e5d1d1" }
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "networkx" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/8e/bc/6317d604bfafe626a59e5b3e83605e49735ccf5ac4483e6f9d026a1e9661/znflow-0.2.5.tar.gz", hash = "sha256:6e6773fe29333041292046785efbd9e83ddafac9a9345d153cd7e077b62544d5", size = 209711 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/7e/ea/a3f7ddeec7ac3f4a3f501f762c403c8c64be63e0323e49148b2c09b77473/znflow-0.2.5-py3-none-any.whl", hash = "sha256:5cf25a022068e8353b69ad7a968eab6cee7c5999b30317bbdcfda5bc675f1178", size = 23050 },
 ]
 
 [[package]]
@@ -4914,7 +4918,7 @@ requires-dist = [
     { name = "tqdm", specifier = ">=4.67.1" },
     { name = "typer", specifier = ">=0.15.1" },
     { name = "znfields", specifier = ">=0.1.2" },
-    { name = "znflow", git = "https://github.com/zincware/ZnFlow.git" },
+    { name = "znflow", specifier = ">=0.2.5" },
     { name = "znjson", specifier = ">=0.2.6" },
 ]
 
