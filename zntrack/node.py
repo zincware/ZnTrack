@@ -63,8 +63,11 @@ def _name_setter(self, attr_name: str, value: str) -> None:
             nwd = NWD_PATH / "/".join(graph.active_group.names) / value
 
         if nwd in all_nwds:
-            raise ValueError(f"Node with name '{value}' already exists in graph.")
-        old_nwd = self.__dict__.get("nwd")
+            if graph.active_group is None:
+                name = value
+            else:
+                name = "_".join(graph.active_group.names) + "_" + value
+            raise ValueError(f"A node with the name '{name}' already exists.")
     self.__dict__["nwd"] = nwd
 
 
@@ -99,8 +102,7 @@ def _name_getter(self, attr_name: str) -> str:
         # can not use self.nwd in case of `tmp_path`
         return nwd_to_name(self.__dict__["nwd"])
     else:
-        return "UNKNOWN"
-
+        return self.__class__.__name__
 
 @dataclass_transform()
 @dataclasses.dataclass(kw_only=True)
@@ -187,9 +189,13 @@ class Node(znflow.Node, znfields.Base):
                 conf = json.loads(f.read())
                 nwd = pathlib.Path(conf[name]["nwd"]["value"])
         else:
-            with open("zntrack.json") as f:
-                conf = json.load(f)
-                nwd = pathlib.Path(conf[name]["nwd"]["value"])
+            try:
+                with open("zntrack.json") as f:
+                    conf = json.load(f)
+                    nwd = pathlib.Path(conf[name]["nwd"]["value"])
+            except FileNotFoundError:
+                # from_rev is called before a graph is built
+                nwd = NWD_PATH / name
         instance.__dict__["nwd"] = nwd
 
         # TODO: check if the node is finished or not.

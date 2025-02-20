@@ -9,6 +9,7 @@ import typing as t
 import znflow.utils
 
 from zntrack.add import DVCImportPath
+from zntrack.config import NWD_PATH
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -35,7 +36,7 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
     shutil.rmtree(target)
 
 
-def get_nwd(node: "Node") -> pathlib.Path | None:
+def get_nwd(node: "Node") -> pathlib.Path:
     """Get the node working directory.
 
     This is used instead of `node.nwd` because it allows
@@ -50,7 +51,7 @@ def get_nwd(node: "Node") -> pathlib.Path | None:
     try:
         return pathlib.Path(node.__dict__["nwd"])
     except KeyError:
-        return None
+        return pathlib.Path(NWD_PATH, node.__class__.__name__)
     # try:
     #     nwd = xx
     # except KeyError:
