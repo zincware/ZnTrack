@@ -16,16 +16,16 @@ class MyNode(zntrack.Node):
     deps_path: str = zntrack.deps_path()
     deps2_paths: list[pathlib.Path] = zntrack.deps_path()
     outs_path: list[str] = zntrack.outs_path(cache=True)
-    metrics_path: pathlib.Path = zntrack.metrics_path(cache=True)
+    metrics_path: pathlib.Path = zntrack.metrics_path(cache=False)
     plots_path: list[pathlib.Path] = zntrack.plots_path(cache=True)
 
     outs_path_no_cache: list[pathlib.Path] = zntrack.outs_path(cache=False)
     plots_path_no_cache: list[pathlib.Path | str] = zntrack.plots_path(cache=False)
     metrics_path_cache: pathlib.Path = zntrack.metrics_path(cache=True)
 
-    outs: int = zntrack.outs(cache=True)
+    outs: int = zntrack.outs()
     metrics: dict = zntrack.metrics(cache=False)
-    plots: pd.DataFrame = zntrack.plots(y="y", cache=True)
+    plots: pd.DataFrame = zntrack.plots(y="y")
 
     outs_no_cache: int = zntrack.outs(cache=False)
     metrics_cache: dict = zntrack.metrics(cache=True)
