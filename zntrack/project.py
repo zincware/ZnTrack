@@ -3,7 +3,9 @@ import json
 import logging
 import os
 import subprocess
+import warnings
 
+import git
 import tqdm
 import yaml
 import znflow
@@ -112,8 +114,30 @@ class Project(znflow.DiGraph):
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": []}
         zntrack_dict = {}
+        try:
+            repo = git.Repo()
+        except git.InvalidGitRepositoryError:
+            repo = None
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
+
+            # check if the node.nwd / node-meta.json is git tracked
+            if config.ALWAYS_CACHE and repo is not None:
+                meta_file = node.nwd / "node-meta.json"
+                # Convert to relative path safely
+                rel_path = os.path.relpath(meta_file, repo.working_dir)
+
+                # Check if the file is tracked
+                is_tracked = rel_path in repo.git.ls_files()
+                if is_tracked:
+                    warnings.warn(
+                        f"{meta_file} is tracked by git. Please set "
+                        "`zntrack.config.ALWAYS_CACHE = False` or remove the "
+                        "file from git. This has been changed with ZnTrack v0.8.4."
+                        " Mixing git and DVC tracked stage outputs can"
+                        " lead to unexpected behavior."
+                    )
+
             if node._external_:
                 continue
             for plugin in node.state.plugins.values():

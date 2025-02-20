@@ -15,7 +15,7 @@ EXP_INFO_PATH = pathlib.Path(".exp_info.yaml")
 # git tracked files. Setting this to True will override the default behavior to always
 # use the DVC cache. If you have a DVC cache setup, this might be desirable, to avoid
 # a mixture between DVC cache and git tracked files.
-ALWAYS_CACHE: bool = False
+ALWAYS_CACHE: bool = True
 
 
 # Use sentinel object for zntrack specific configurations. Use

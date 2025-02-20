@@ -5,6 +5,6 @@ stages:
     - LICENSE
     metrics:
     - nodes/ReadFile/node-meta.json:
-        cache: false
+        cache: true
     outs:
     - nodes/ReadFile/content.json
