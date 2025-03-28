@@ -51,20 +51,30 @@ def _name_setter(self, attr_name: str, value: str) -> None:
     graph = znflow.get_graph()
     nwd = NWD_PATH / value  # TODO: bad default value, will be wrong in `__post_init__`
     if graph is not znflow.empty_graph:
-        graph.all_nwds.remove(self.__dict__["nwd"])  # remove the current nwd
+        NWD_IDENTIFIER = NWD_PATH / self.__class__.__name__
+        if NWD_IDENTIFIER in graph.node_name_counter:
+            graph.node_name_counter[NWD_IDENTIFIER] -= 1
+            if graph.node_name_counter[NWD_IDENTIFIER] <= 0:
+                del graph.node_name_counter[NWD_IDENTIFIER]
+
+        # graph.all_nwds.remove(self.__dict__["nwd"])  # remove the current nwd
 
         if graph.active_group is None:
             nwd = NWD_PATH / value
         else:
             nwd = NWD_PATH / "/".join(graph.active_group.names) / value
 
-        if nwd in graph.all_nwds:
+        if nwd in graph.node_name_counter:
             if graph.active_group is None:
                 name = value
             else:
                 name = "_".join(graph.active_group.names) + "_" + value
             raise ValueError(f"A node with the name '{name}' already exists.")
-        graph.all_nwds.add(nwd)
+        # graph.node_name_counter[nwd] = 0
+        if nwd in graph.node_name_counter:
+            graph.node_name_counter[nwd] += 1
+        else:
+            graph.node_name_counter[nwd] = 0
     self.__dict__["nwd"] = nwd
 
 
