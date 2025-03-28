@@ -24,7 +24,6 @@ from .deployment import ZnTrackDeployment
 log = logging.getLogger(__name__)
 
 
-
 class _FinalNodeNameString(str):
     """A string that represents the final name of a node.
 
