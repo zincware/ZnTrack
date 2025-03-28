@@ -24,6 +24,7 @@ from .deployment import ZnTrackDeployment
 log = logging.getLogger(__name__)
 
 
+
 class _FinalNodeNameString(str):
     """A string that represents the final name of a node.
 
@@ -52,10 +53,18 @@ class Project(znflow.DiGraph):
             deployment=deployment,
             **kwargs,
         )
-        self.all_nwds = set()
+        self.node_name_counter: dict[str, int] = {}
         # keep track of all nwd paths, they should be unique, until
         # https://github.com/zincware/ZnFlow/issues/132 can be used
         # to set nwd directly as pk
+
+    def _get_updated_node_nwd(self, name: str) -> str:
+        if name in self.node_name_counter:
+            self.node_name_counter[name] += 1
+            return f"{name}_{self.node_name_counter[name]}"
+        else:
+            self.node_name_counter[name] = 0
+            return name
 
     def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
@@ -77,21 +86,7 @@ class Project(znflow.DiGraph):
                 / "/".join(self.active_group.names)
                 / node_for_adding.__class__.__name__
             )
-        if nwd in self.all_nwds:
-            postfix = 1
-            while True:
-                if self.active_group is None:
-                    nwd = NWD_PATH / f"{node_for_adding.__class__.__name__}_{postfix}"
-                else:
-                    nwd = (
-                        NWD_PATH
-                        / "/".join(self.active_group.names)
-                        / f"{node_for_adding.__class__.__name__}_{postfix}"
-                    )
-                if nwd not in self.all_nwds:
-                    break
-                postfix += 1
-        self.all_nwds.add(nwd)
+        nwd = NWD_PATH / self._get_updated_node_nwd(node_for_adding.__class__.__name__)
         node_for_adding.__dict__["nwd"] = nwd
 
         return super().add_znflow_node(node_for_adding)
