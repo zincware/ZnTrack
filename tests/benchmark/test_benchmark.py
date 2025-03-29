@@ -51,7 +51,7 @@ def test_connections(benchmark, count, tmp_path):
                 )
             for _ in range(count):
                 zntrack.examples.AddNodes(
-                    a=random.sample(nodes, 1),
+                    a=random.choice(nodes),
                     b=None,
                 )
 
