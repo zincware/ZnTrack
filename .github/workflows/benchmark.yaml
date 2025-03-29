@@ -1,0 +1,33 @@
+name: cml
+
+on:
+    push:
+jobs:
+  benchmark:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-node@v1
+        with:
+          node-version: '16'
+      - uses: iterative/setup-cml@v1
+      - name: Install package
+        run: |
+          uv sync --all-extras --dev
+      - name: Run pytest
+        run: |
+          uv run python --version
+          uv run pytest --benchmark-histogram benchmark -m benchmark
+      - name: Create report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo '# Benchmark' >> report.md
+          echo '## Write: Varying number of nodes' >> report.md
+          echo '![](./benchmark-node-count.svg "Write benchmark, varying nodes")' >> report.md
+          echo '## Write: Varying number of edges' >> report.md
+          echo '![](./benchmark-edge-count.svg "Write benchmark, varying edges")' >> report.md
+
+          cml comment update report.md
