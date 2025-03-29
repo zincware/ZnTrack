@@ -1,6 +1,5 @@
 import random
 
-import numpy as np
 import pytest
 
 import zntrack.examples
@@ -8,7 +7,7 @@ import zntrack.examples
 
 @pytest.mark.benchmark(group="node-count")
 # @pytest.mark.parametrize("count", list(range(0, 1100, 100))[1:])
-@pytest.mark.parametrize("count", [10,50,100,500,1_000,5_000,10_000])
+@pytest.mark.parametrize("count", [10, 50, 100, 500, 1_000, 5_000, 10_000])
 def test_node_count(benchmark, count, tmp_path):
     """
     Benchmark the number of nodes in a graph.
