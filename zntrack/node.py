@@ -71,8 +71,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
     nwd = NWD_PATH / value
 
     if graph is not znflow.empty_graph:
-        nwd_identifier = NWD_PATH / self.__class__.__name__
-
+        nwd_identifier = str(NWD_PATH / self.__class__.__name__)
         if graph.node_name_counter.get(nwd_identifier, 0) > 0:
             graph.node_name_counter[nwd_identifier] -= 1
             if graph.node_name_counter[nwd_identifier] == 0:
