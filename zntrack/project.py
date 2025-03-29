@@ -2,9 +2,9 @@ import contextlib
 import json
 import logging
 import os
+import pathlib
 import subprocess
 import warnings
-import pathlib
 
 import git
 import tqdm
