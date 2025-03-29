@@ -7,7 +7,8 @@ import zntrack.examples
 
 
 @pytest.mark.benchmark(group="node-count")
-@pytest.mark.parametrize("count", np.arange(0, 1100, 100)[1:])
+# @pytest.mark.parametrize("count", list(range(0, 1100, 100))[1:])
+@pytest.mark.parametrize("count", [10,50,100,500,1_000,5_000,10_000])
 def test_node_count(benchmark, count, tmp_path):
     """
     Benchmark the number of nodes in a graph.
@@ -27,7 +28,7 @@ def test_node_count(benchmark, count, tmp_path):
 
 
 @pytest.mark.benchmark(group="edge-count")
-@pytest.mark.parametrize("count", np.arange(0, 110, 10)[1:])
+@pytest.mark.parametrize("count", list(range(0, 110, 10))[1:])
 def test_connections(benchmark, count, tmp_path):
     """
     Benchmark the number of connections in a graph.
