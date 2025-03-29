@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import warnings
+import pathlib
 
 import git
 import tqdm
@@ -57,13 +58,25 @@ class Project(znflow.DiGraph):
         # https://github.com/zincware/ZnFlow/issues/132 can be used
         # to set nwd directly as pk
 
-    def _get_updated_node_nwd(self, name: str) -> str:
-        if name in self.node_name_counter:
-            self.node_name_counter[name] += 1
-            return f"{name}_{self.node_name_counter[name]}"
+    def _get_updated_node_nwd(self, name: str) -> pathlib.Path:
+        if self.active_group is None:
+            if name in self.node_name_counter:
+                self.node_name_counter[name] += 1
+                return NWD_PATH / f"{name}_{self.node_name_counter[name]}"
+            else:
+                self.node_name_counter[name] = 0
+                return NWD_PATH / name
         else:
-            self.node_name_counter[name] = 0
-            return name
+            group_path = "/".join(self.active_group.names)
+            grp_and_name = pathlib.Path(group_path, name).as_posix()
+            if grp_and_name in self.node_name_counter:
+                self.node_name_counter[grp_and_name] += 1
+                counter = self.node_name_counter[grp_and_name]
+                nwd = NWD_PATH / group_path / f"{name}_{counter}"
+            else:
+                self.node_name_counter[grp_and_name] = 0
+                nwd = NWD_PATH / group_path / name
+            return nwd
 
     def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
@@ -77,15 +90,7 @@ class Project(znflow.DiGraph):
             return super().add_znflow_node(node_for_adding)
         # here we finalize the node name!
         # It can only be updated once more via `MyNode(name=...)`
-        if self.active_group is None:
-            nwd = NWD_PATH / node_for_adding.__class__.__name__
-        else:
-            nwd = (
-                NWD_PATH
-                / "/".join(self.active_group.names)
-                / node_for_adding.__class__.__name__
-            )
-        nwd = NWD_PATH / self._get_updated_node_nwd(node_for_adding.__class__.__name__)
+        nwd = self._get_updated_node_nwd(node_for_adding.__class__.__name__)
         node_for_adding.__dict__["nwd"] = nwd
 
         return super().add_znflow_node(node_for_adding)
