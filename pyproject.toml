@@ -37,6 +37,7 @@ dev = [
     "mlflow>=2.20.0",
     "pre-commit>=4.1.0",
     "pytest>=8.3.4",
+    "pytest-benchmark[histogram]>=5.1.0",
     "pytest-cov>=6.0.0",
     "ruff>=0.9.6",
 ]
@@ -117,6 +118,7 @@ skip = "poetry.lock,examples/*"
 markers = [
     "needs_internet: marks tests which need internet access (deselect with '-m \"not needs_internet\"')",
 ]
+addopts = "-m 'not benchmark'"
 
 [project.entry-points.'zntrack.nodes']
 zntrack-examples = 'zntrack.examples:nodes'
