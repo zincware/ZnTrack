@@ -59,24 +59,38 @@ class Project(znflow.DiGraph):
         # to set nwd directly as pk
 
     def _get_updated_node_nwd(self, name: str) -> pathlib.Path:
+        """
+        Generate an updated node path within the working directory, ensuring uniqueness.
+
+        If `active_group` is set, the path is nested within the group structure.
+        Otherwise, the node name is managed at the root level.
+
+        Parameters
+        ----------
+        name : str
+            The base name of the node.
+
+        Returns
+        -------
+        pathlib.Path
+            The updated node path with an incremented counter if necessary.
+        """
         if self.active_group is None:
-            if name in self.node_name_counter:
-                self.node_name_counter[name] += 1
-                return NWD_PATH / f"{name}_{self.node_name_counter[name]}"
-            else:
-                self.node_name_counter[name] = 0
-                return NWD_PATH / name
+            counter = self.node_name_counter.get(name, -1) + 1
+            self.node_name_counter[name] = counter
+
+            if counter:
+                return NWD_PATH / f"{name}_{counter}"
+            return NWD_PATH / name
         else:
             group_path = "/".join(self.active_group.names)
-            grp_and_name = pathlib.Path(group_path, name).as_posix()
-            if grp_and_name in self.node_name_counter:
-                self.node_name_counter[grp_and_name] += 1
-                counter = self.node_name_counter[grp_and_name]
-                nwd = NWD_PATH / group_path / f"{name}_{counter}"
-            else:
-                self.node_name_counter[grp_and_name] = 0
-                nwd = NWD_PATH / group_path / name
-            return nwd
+            grp_and_name = f"{group_path}/{name}"
+            
+            counter = self.node_name_counter.get(grp_and_name, -1) + 1
+            self.node_name_counter[grp_and_name] = counter
+            if counter:
+                return NWD_PATH / group_path / f"{name}_{counter}"
+            return NWD_PATH / group_path / name
 
     def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
