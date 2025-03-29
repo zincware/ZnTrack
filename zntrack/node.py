@@ -29,6 +29,7 @@ T = t.TypeVar("T", bound="Node")
 
 log = logging.getLogger(__name__)
 
+
 def _name_setter(self, attr_name: str, value: str) -> None:
     """
     Validates and sets the node name, ensuring uniqueness within the graph.
@@ -66,27 +67,30 @@ def _name_setter(self, attr_name: str, value: str) -> None:
     self.__dict__[attr_name] = value  # only used to check if the name has been set once
 
     graph = znflow.get_graph()
-    
+
     nwd = NWD_PATH / value
-    
+
     if graph is not znflow.empty_graph:
         nwd_identifier = NWD_PATH / self.__class__.__name__
-        
+
         if graph.node_name_counter.get(nwd_identifier, 0) > 0:
             graph.node_name_counter[nwd_identifier] -= 1
             if graph.node_name_counter[nwd_identifier] == 0:
                 del graph.node_name_counter[nwd_identifier]
 
         group_path = "/".join(graph.active_group.names) if graph.active_group else ""
-        nwd = pathlib.Path(NWD_PATH, group_path, value) if group_path else NWD_PATH / value
+        nwd = (
+            pathlib.Path(NWD_PATH, group_path, value) if group_path else NWD_PATH / value
+        )
 
         if nwd in graph.node_name_counter:
             node_name = f"{group_path}_{value}" if group_path else value
             raise ValueError(f"A node with the name '{node_name}' already exists.")
-        
+
         graph.node_name_counter[nwd] = graph.node_name_counter.get(nwd, -1) + 1
 
         self.__dict__["nwd"] = nwd
+
 
 def _name_getter(self, attr_name: str) -> str:
     """Retrieve the name of a node based on the current graph context.

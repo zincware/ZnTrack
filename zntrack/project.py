@@ -85,7 +85,7 @@ class Project(znflow.DiGraph):
         else:
             group_path = "/".join(self.active_group.names)
             grp_and_name = f"{group_path}/{name}"
-            
+
             counter = self.node_name_counter.get(grp_and_name, -1) + 1
             self.node_name_counter[grp_and_name] = counter
             if counter:
