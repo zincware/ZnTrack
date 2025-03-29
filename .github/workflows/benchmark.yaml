@@ -28,6 +28,6 @@ jobs:
           echo '## Write: Varying number of nodes' >> report.md
           echo '![](./benchmark-node-count.svg "Write benchmark, varying nodes")' >> report.md
           echo '## Write: Varying number of edges' >> report.md
-          echo '![](./benchmark-edge-size.svg "Write benchmark, varying edges")' >> report.md
+          echo '![](./benchmark-edge-count.svg "Write benchmark, varying edges")' >> report.md
 
           cml comment update report.md
