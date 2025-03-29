@@ -1,6 +1,6 @@
 import random
-import numpy as np
 
+import numpy as np
 import pytest
 
 import zntrack.examples
