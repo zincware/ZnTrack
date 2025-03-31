@@ -68,6 +68,10 @@ def _name_setter(self, attr_name: str, value: str) -> None:
 
     graph = znflow.get_graph()
 
+    # in case the name is set outside the graph
+    # (no groups can be active)
+    nwd = NWD_PATH / value 
+
     if graph is not znflow.empty_graph:
         name = self.__class__.__name__
         if graph.active_group is None:
@@ -77,7 +81,6 @@ def _name_setter(self, attr_name: str, value: str) -> None:
             if value in graph.node_name_counter:
                 raise ValueError(f"A node with the name '{value}' already exists.")
             graph.node_name_counter[value] = 1
-            nwd = NWD_PATH / value
         else:
             group_path = "/".join(graph.active_group.names)
             grp_and_name = f"{group_path}/{name}"
@@ -91,7 +94,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
             graph.node_name_counter[node_name] = 1
             nwd = NWD_PATH / group_path / value
 
-        self.__dict__["nwd"] = nwd
+    self.__dict__["nwd"] = nwd
 
 
 def _name_getter(self, attr_name: str) -> str:
