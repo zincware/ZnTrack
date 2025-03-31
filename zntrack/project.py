@@ -2,6 +2,7 @@ import contextlib
 import json
 import logging
 import os
+import pathlib
 import subprocess
 import warnings
 
@@ -52,10 +53,45 @@ class Project(znflow.DiGraph):
             deployment=deployment,
             **kwargs,
         )
-        self.all_nwds = set()
+        self.node_name_counter: dict[str, int] = {}
         # keep track of all nwd paths, they should be unique, until
         # https://github.com/zincware/ZnFlow/issues/132 can be used
         # to set nwd directly as pk
+
+    def _get_updated_node_nwd(self, name: str) -> pathlib.Path:
+        """
+        Generate an updated node path within the working directory, ensuring uniqueness.
+
+        If `active_group` is set, the path is nested within the group structure.
+        Otherwise, the node name is managed at the root level.
+
+        Parameters
+        ----------
+        name : str
+            The base name of the node.
+
+        Returns
+        -------
+        pathlib.Path
+            The updated node path with an incremented counter if necessary.
+        """
+        if self.active_group is None:
+            counter = self.node_name_counter.get(name, 0)
+            self.node_name_counter[name] = counter + 1
+
+            if counter:
+                return NWD_PATH / f"{name}_{counter}"
+            return NWD_PATH / name
+        else:
+            group_path = "/".join(self.active_group.names)
+            grp_and_name = f"{group_path}/{name}"
+
+            counter = self.node_name_counter.get(grp_and_name, 0)
+            self.node_name_counter[grp_and_name] = counter + 1
+
+            if counter:
+                return NWD_PATH / group_path / f"{name}_{counter}"
+            return NWD_PATH / group_path / name
 
     def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
@@ -69,29 +105,7 @@ class Project(znflow.DiGraph):
             return super().add_znflow_node(node_for_adding)
         # here we finalize the node name!
         # It can only be updated once more via `MyNode(name=...)`
-        if self.active_group is None:
-            nwd = NWD_PATH / node_for_adding.__class__.__name__
-        else:
-            nwd = (
-                NWD_PATH
-                / "/".join(self.active_group.names)
-                / node_for_adding.__class__.__name__
-            )
-        if nwd in self.all_nwds:
-            postfix = 1
-            while True:
-                if self.active_group is None:
-                    nwd = NWD_PATH / f"{node_for_adding.__class__.__name__}_{postfix}"
-                else:
-                    nwd = (
-                        NWD_PATH
-                        / "/".join(self.active_group.names)
-                        / f"{node_for_adding.__class__.__name__}_{postfix}"
-                    )
-                if nwd not in self.all_nwds:
-                    break
-                postfix += 1
-        self.all_nwds.add(nwd)
+        nwd = self._get_updated_node_nwd(node_for_adding.__class__.__name__)
         node_for_adding.__dict__["nwd"] = nwd
 
         return super().add_znflow_node(node_for_adding)

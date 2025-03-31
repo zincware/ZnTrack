@@ -31,17 +31,35 @@ log = logging.getLogger(__name__)
 
 
 def _name_setter(self, attr_name: str, value: str) -> None:
-    """Check if the node name is valid."""
+    """
+    Validates and sets the node name, ensuring uniqueness within the graph.
+
+    Parameters
+    ----------
+    attr_name : str
+        The attribute name to be set.
+    value : str
+        The desired node name.
+
+    Raises
+    ------
+    AttributeError
+        If the node name is already set and cannot be changed.
+    InvalidStageName
+        If the given name is invalid.
+    ValueError
+        If a node with the same name already exists.
+    """
     if attr_name in self.__dict__:
         raise AttributeError("Node name cannot be changed.")
 
     if value is None:
         return
 
-    if value is not None and not is_valid_name(value):
+    if not is_valid_name(value):
         raise InvalidStageName
 
-    if value is not None and "_" in value:
+    if "_" in value:
         warnings.warn(
             "Node name should not contain '_'."
             " This character is used for defining groups."
@@ -49,22 +67,33 @@ def _name_setter(self, attr_name: str, value: str) -> None:
     self.__dict__[attr_name] = value  # only used to check if the name has been set once
 
     graph = znflow.get_graph()
-    nwd = NWD_PATH / value  # TODO: bad default value, will be wrong in `__post_init__`
+
+    # in case the name is set outside the graph
+    # (no groups can be active)
+    nwd = NWD_PATH / value
+
     if graph is not znflow.empty_graph:
-        graph.all_nwds.remove(self.__dict__["nwd"])  # remove the current nwd
-
+        name = self.__class__.__name__
         if graph.active_group is None:
-            nwd = NWD_PATH / value
-        else:
-            nwd = NWD_PATH / "/".join(graph.active_group.names) / value
+            if graph.node_name_counter.get(name, 0) > 0:
+                graph.node_name_counter[name] -= 1
 
-        if nwd in graph.all_nwds:
-            if graph.active_group is None:
-                name = value
-            else:
-                name = "_".join(graph.active_group.names) + "_" + value
-            raise ValueError(f"A node with the name '{name}' already exists.")
-        graph.all_nwds.add(nwd)
+            if value in graph.node_name_counter:
+                raise ValueError(f"A node with the name '{value}' already exists.")
+            graph.node_name_counter[value] = 1
+        else:
+            group_path = "/".join(graph.active_group.names)
+            grp_and_name = f"{group_path}/{name}"
+
+            if graph.node_name_counter.get(grp_and_name, 0) > 0:
+                graph.node_name_counter[grp_and_name] -= 1
+
+            node_name = f"{group_path}_{value}"
+            if node_name in graph.node_name_counter:
+                raise ValueError(f"A node with the name '{node_name}' already exists.")
+            graph.node_name_counter[node_name] = 1
+            nwd = NWD_PATH / group_path / value
+
     self.__dict__["nwd"] = nwd
 
 
