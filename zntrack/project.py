@@ -88,7 +88,7 @@ class Project(znflow.DiGraph):
 
             counter = self.node_name_counter.get(grp_and_name, 0)
             self.node_name_counter[grp_and_name] = counter + 1
-            
+
             if counter:
                 return NWD_PATH / group_path / f"{name}_{counter}"
             return NWD_PATH / group_path / name
