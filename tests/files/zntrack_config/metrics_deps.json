@@ -16,7 +16,7 @@
                 "instance": {
                     "_type": "zntrack.Node",
                     "value": {
-                        "module": "zntrack.examples",
+                        "module": "zntrack.examples.nodes",
                         "name": "ParamsToMetrics",
                         "cls": "ParamsToMetrics",
                         "remote": null,
@@ -39,7 +39,7 @@
                 "instance": {
                     "_type": "zntrack.Node",
                     "value": {
-                        "module": "zntrack.examples",
+                        "module": "zntrack.examples.nodes",
                         "name": "ParamsToMetrics",
                         "cls": "ParamsToMetrics",
                         "remote": null,

@@ -2,8 +2,10 @@ import importlib.metadata
 import logging
 import sys
 
+from zntrack import config
 from zntrack.add import add
 from zntrack.apply import apply
+from zntrack.config import NOT_AVAILABLE, FieldTypes
 from zntrack.fields import (
     deps,
     deps_path,
@@ -40,6 +42,9 @@ __all__ = [
     "apply",
     "add",
     "field",
+    "FieldTypes",
+    "NOT_AVAILABLE",
+    "config",
 ]
 
 logger = logging.getLogger(__name__)

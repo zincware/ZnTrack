@@ -1,6 +1,6 @@
 import pandas as pd
 
-from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, ZnTrackOptionEnum
+from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
 
@@ -65,6 +65,16 @@ def plots(
         Save the data of this field every time it is being
         updated. Disable for large dataframes.
 
+    Examples
+    --------
+
+    >>> import zntrack
+    >>> import pandas as pd
+    >>> class MyNode(zntrack.Node):
+    ...     plots: pd.DataFrame = zntrack.plots(y="loss")
+    ...
+    ...     def run(self):
+    ...         self.plots = pd.DataFrame({"loss": [1, 2, 3]})
     """
     if y is None:
         y = []
@@ -91,7 +101,7 @@ def plots(
         default=NOT_AVAILABLE,
         cache=cache,
         independent=independent,
-        zntrack_option=ZnTrackOptionEnum.PLOTS,
+        field_type=FieldTypes.PLOTS,
         dump_fn=_plots_save_func,
         suffix=".csv",
         load_fn=_plots_getter,

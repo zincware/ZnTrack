@@ -17,10 +17,10 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
+          - "3.13"
           - "3.12"
           - "3.11"
           - "3.10"
-          - 3.9
         os:
           - ubuntu-latest
 
@@ -49,19 +49,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+      - name: Install uv and set the python version
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: ${{ matrix.python-version }}
-      - name: Install Poetry
-        uses: snok/install-poetry@v1
-        with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-      - name: Install package
-        run: |
-          poetry run pip install aim
-          poetry install --no-interaction
+      - name: Install the project
+        run: uv sync --all-extras --dev
       - name: Setup git user
         run: |
           git config --global user.name "John Doe"
@@ -69,66 +62,14 @@ jobs:
           git config --global init.defaultBranch "main"
       - name: Pytest
         run: |
-          poetry run python --version
-          poetry run coverage run -m pytest --benchmark-autosave -vv
-          poetry run coverage xml
-          poetry run coverage lcov
-          poetry run py.test-benchmark compare --csv=export.csv
-      - name: Coveralls
-        uses: coverallsapp/github-action@master
+          uv run python --version
+          uv run pytest --cov --junitxml=junit.xml -o junit_family=legacy
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: coverage.lcov
-      - uses: codecov/codecov-action@v2
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
         with:
-          flags: fulltest
-          verbose: true
-
-  # nbtest:
-  #   runs-on: ubuntu-latest
-  #   needs: [ pytest ]
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Set up Python 3.11
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: "3.11"
-  #     - name: Install Poetry
-  #       uses: snok/install-poetry@v1
-  #       with:
-  #         virtualenvs-create: true
-  #         virtualenvs-in-project: true
-  #     - name: Install package
-  #       run: |
-  #         poetry install
-  #     - name: Setup git user
-  #       run: |
-  #         git config --global user.name "John Doe"
-  #         git config --global user.email johndoe@example.com
-  #         git config --global init.defaultBranch "main"
-  #     - name: Pytest
-  #       run: |
-  #         poetry run pytest --nbmake ./examples
-
-  # doctest:
-  #   runs-on: ubuntu-latest
-  #   needs: [ pytest, nbtest ]
-  #   steps:
-  #     - uses: actions/checkout@v2
-  #     - name: Set up Python 3.11
-  #       uses: actions/setup-python@v4
-  #       with:
-  #         python-version: "3.11"
-  #     - name: Install Poetry
-  #       uses: snok/install-poetry@v1
-  #       with:
-  #         virtualenvs-create: true
-  #         virtualenvs-in-project: true
-  #     - name: Install package
-  #       run: |
-  #         sudo apt install pandoc
-  #         poetry install --with=docs
-  #     - name: Build documentation
-  #       run: |
-  #         cd ./docs
-  #         poetry run make html
+          token: ${{ secrets.CODECOV_TOKEN }}

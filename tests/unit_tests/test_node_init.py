@@ -44,10 +44,10 @@ class SimpleMyNode(zntrack.Node):
 
 def test_init():
     with pytest.raises(TypeError):
-        n = MyNode()  # missing required parameters
+        MyNode()  # missing required parameters
 
     # works
-    n = MyNode(
+    MyNode(
         parameter=1,
         parameter_path="parameter.yaml",
         deps_path="deps.yaml",
@@ -56,7 +56,7 @@ def test_init():
         plots_path="my_plots.csv",
     )
     # works with optional
-    n = MyNode(
+    MyNode(
         parameter=1,
         parameter_path="parameter.yaml",
         deps_path="deps.yaml",
@@ -73,7 +73,7 @@ def test_init():
 
     # fails with not allowed
     with pytest.raises(TypeError):
-        n = MyNode(
+        MyNode(
             parameter=1,
             parameter_path="parameter.yaml",
             deps_path="deps.yaml",
@@ -84,7 +84,7 @@ def test_init():
             outs=1,
         )
     with pytest.raises(TypeError):
-        n = MyNode(
+        MyNode(
             parameter=1,
             parameter_path="parameter.yaml",
             deps_path="deps.yaml",
@@ -95,7 +95,7 @@ def test_init():
             metrics={},
         )
     with pytest.raises(TypeError):
-        n = MyNode(
+        MyNode(
             parameter=1,
             parameter_path="parameter.yaml",
             deps_path="deps.yaml",
@@ -113,7 +113,7 @@ def test_init():
 def test_duplicate_outs_paths(proj_path):
     with pytest.raises(ValueError):
         with zntrack.Project() as proj:
-            n = SimpleMyNode(
+            SimpleMyNode(
                 outs_path_a="file.txt",
                 outs_path_b="file.txt",
             )

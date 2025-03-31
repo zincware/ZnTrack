@@ -36,7 +36,7 @@ def test_group_nodes(proj_path):
 
     assert a.state.group is None
     assert isinstance(b.state.group, zntrack.group.Group)
-    assert b.state.group.name == ("Grp",)
+    assert b.state.group.names == ("Grp",)
 
     assert b in b.state.group
     assert c in b.state.group

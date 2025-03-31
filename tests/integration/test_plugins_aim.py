@@ -42,7 +42,7 @@ class RangePlotter(zntrack.Node):
     plots: pd.DataFrame = zntrack.plots(y="range")
 
     def run(self):
-        self.plots = pd.DataFrame({"idx": [idx for idx in range(self.start, self.stop)]})
+        self.plots = pd.DataFrame({"idx": list(range(self.start, self.stop))})
 
 
 # fixture to set the os.env before the test and remove if after the test
@@ -83,7 +83,7 @@ def test_aim_metrics(aim_proj_path):
         df = run.dataframe()
         assert df["dvc_stage_name"].tolist() == ["ParamsToMetrics"]
         assert df["dvc_stage_hash"].tolist() == [node.state.get_stage_hash()]
-        assert df["zntrack_node"].tolist() == ["zntrack.examples.ParamsToMetrics"]
+        assert df["zntrack_node"].tolist() == ["zntrack.examples.nodes.ParamsToMetrics"]
         assert df["params.loss"].tolist() == [0]
 
         # metrics
@@ -101,7 +101,7 @@ def test_aim_metrics(aim_proj_path):
         df = run.dataframe()
         assert df["dvc_stage_name"].tolist() == ["ParamsToMetrics"]
         assert df["dvc_stage_hash"].tolist() == [node.state.get_stage_hash()]
-        assert df["zntrack_node"].tolist() == ["zntrack.examples.ParamsToMetrics"]
+        assert df["zntrack_node"].tolist() == ["zntrack.examples.nodes.ParamsToMetrics"]
         assert df["params.loss"].tolist() == [0]
         assert df["git_commit_message"].tolist() == ["test"]
         assert df["git_commit_hash"].tolist() == [repo.head.commit.hexsha]
@@ -126,7 +126,7 @@ def test_aim_plotting(aim_proj_path):
         metrics = {}
         for metric in run.metrics():
             metrics[metric.name] = list(metric.data.values())[0]
-        npt.assert_array_equal(metrics["plots.idx"], [[idx for idx in range(10)]])
+        npt.assert_array_equal(metrics["plots.idx"], [list(range(10))])
 
     proj.finalize(msg="test")
     repo = git.Repo()
@@ -170,17 +170,26 @@ def test_multiple_nodes(aim_proj_path):
 
     aim_repo = aim.Repo(path=os.environ["AIM_TRACKING_URI"])
     for run_metrics_col in aim_repo.query_metrics(
-        f"run.dvc_stage_name == '{a.name}' and run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        (
+            f"run.dvc_stage_name == '{a.name}' and "
+            f"run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        )
     ).iter():
         assert "original_run_id" not in run_metrics_col.run.dataframe().columns
 
     for run_metrics_col in aim_repo.query_metrics(
-        f"run.dvc_stage_name == '{c.name}' and run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        (
+            f"run.dvc_stage_name == '{c.name}' and "
+            f"run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        )
     ).iter():
         assert "original_run_id" not in run_metrics_col.run.dataframe().columns
 
     for run_metrics_col in aim_repo.query_metrics(
-        f"run.dvc_stage_name == '{b.name}' and run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        (
+            f"run.dvc_stage_name == '{b.name}' and "
+            f"run.git_commit_hash == '{repo.head.commit.hexsha}'"
+        )
     ).iter():
         assert run_metrics_col.run.dataframe()["original_run_id"].tolist() == [b_run_id]
 
@@ -189,7 +198,7 @@ def test_project_tags(aim_proj_path):
     with zntrack.Project(tags={"lorem": "ipsum", "hello": "world"}) as proj:
         a = zntrack.examples.ParamsToOuts(params=3)
         b = zntrack.examples.ParamsToOuts(params=7)
-        c = zntrack.examples.SumNodeAttributesToMetrics(inputs=[a.outs, b.outs], shift=0)
+        zntrack.examples.SumNodeAttributesToMetrics(inputs=[a.outs, b.outs], shift=0)
 
     proj.repro()
 
@@ -234,5 +243,8 @@ def test_dataclass_deps(aim_proj_path):
     with md.from_rev().state.plugins["AIMPlugin"].get_aim_run() as run:
         df = run.dataframe()
         assert df["t"].tolist() == [
-            '[{"_cls": "test_plugins_aim.T1", "temperature": 1}, {"_cls": "test_plugins_aim.T2", "temperature": 1}]'
+            (
+                '[{"_cls": "test_plugins_aim.T1", "temperature": 1},'
+                ' {"_cls": "test_plugins_aim.T2", "temperature": 1}]'
+            )
         ]

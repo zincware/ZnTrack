@@ -1,0 +1,10 @@
+stages:
+  MyNode:
+    cmd: zntrack run test_user_config.MyNode --name MyNode
+    metrics:
+    - nodes/MyNode/metric.json:
+        cache: false
+    - nodes/MyNode/node-meta.json:
+        cache: false
+    - nodes/MyNode/results.json:
+        cache: false

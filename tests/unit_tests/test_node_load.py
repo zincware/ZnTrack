@@ -7,7 +7,7 @@ import zntrack.exceptions
 
 
 def test_load_WriteDVCOuts(proj_path):
-    with zntrack.Project() as project:
+    with zntrack.Project():
         node = zntrack.examples.WriteDVCOuts(params=42)
 
     assert node.__dict__["params"] == 42

@@ -2,14 +2,17 @@ import contextlib
 import json
 import logging
 import os
+import pathlib
 import subprocess
-import uuid
+import warnings
 
+import git
 import tqdm
 import yaml
 import znflow
 
 from zntrack import utils
+from zntrack.config import NWD_PATH
 from zntrack.group import Group
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.finalize import make_commit
@@ -20,6 +23,13 @@ from . import config
 from .deployment import ZnTrackDeployment
 
 log = logging.getLogger(__name__)
+
+
+class _FinalNodeNameString(str):
+    """A string that represents the final name of a node.
+
+    Used to differentiate between a custom name and a computed name.
+    """
 
 
 class Project(znflow.DiGraph):
@@ -43,48 +53,62 @@ class Project(znflow.DiGraph):
             deployment=deployment,
             **kwargs,
         )
+        self.node_name_counter: dict[str, int] = {}
+        # keep track of all nwd paths, they should be unique, until
+        # https://github.com/zincware/ZnFlow/issues/132 can be used
+        # to set nwd directly as pk
 
-    def compute_all_node_names(self) -> dict[uuid.UUID, str]:
-        """Compute the Node name based on existing nodes on the graph."""
-        all_nodes = [self.nodes[uuid]["value"] for uuid in self.nodes]
-        node_names = {}
-        for node in all_nodes:
-            if "name" in node.__dict__ and node.__dict__["name"] is not None:
-                if node.__dict__["name"] in node_names.values():
-                    raise ValueError(
-                        f"A node with the name '{node.__dict__['name']}' already exists."
-                    )
-                node_names[node.uuid] = node.__dict__["name"]
-            else:
-                if node.state.group is None:
-                    if self.active_group is not None:
-                        node_name = f"{'_'.join(self.active_group.names)}_{node.__class__.__name__}"
-                    else:
-                        node_name = node.__class__.__name__
-                else:
-                    node_name = (
-                        f"{'_'.join(node.state.group.name)}_{node.__class__.__name__}"
-                    )
-                if node_name not in node_names.values():
-                    node_names[node.uuid] = node_name
-                else:
-                    i = 0
-                    while True:
-                        i += 1
-                        if f"{node_name}_{i}" not in node_names.values():
-                            node_names[node.uuid] = f"{node_name}_{i}"
-                            break
-        return node_names
+    def _get_updated_node_nwd(self, name: str) -> pathlib.Path:
+        """
+        Generate an updated node path within the working directory, ensuring uniqueness.
 
-    def add_node(self, node_for_adding, **attr):
+        If `active_group` is set, the path is nested within the group structure.
+        Otherwise, the node name is managed at the root level.
+
+        Parameters
+        ----------
+        name : str
+            The base name of the node.
+
+        Returns
+        -------
+        pathlib.Path
+            The updated node path with an incremented counter if necessary.
+        """
+        if self.active_group is None:
+            counter = self.node_name_counter.get(name, 0)
+            self.node_name_counter[name] = counter + 1
+
+            if counter:
+                return NWD_PATH / f"{name}_{counter}"
+            return NWD_PATH / name
+        else:
+            group_path = "/".join(self.active_group.names)
+            grp_and_name = f"{group_path}/{name}"
+
+            counter = self.node_name_counter.get(grp_and_name, 0)
+            self.node_name_counter[grp_and_name] = counter + 1
+
+            if counter:
+                return NWD_PATH / group_path / f"{name}_{counter}"
+            return NWD_PATH / group_path / name
+
+    def add_znflow_node(self, node_for_adding, **attr):
         from zntrack import Node
 
         if not isinstance(node_for_adding, Node):
             raise ValueError(
-                f"Node must be an instance of 'zntrack.Node', not {type(node_for_adding)}"
+                "Node must be an instance of 'zntrack.Node',"
+                f" not {type(node_for_adding)}."
             )
+        if node_for_adding._external_:
+            return super().add_znflow_node(node_for_adding)
+        # here we finalize the node name!
+        # It can only be updated once more via `MyNode(name=...)`
+        nwd = self._get_updated_node_nwd(node_for_adding.__class__.__name__)
+        node_for_adding.__dict__["nwd"] = nwd
 
-        return super().add_node(node_for_adding, **attr)
+        return super().add_znflow_node(node_for_adding)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         try:
@@ -96,12 +120,6 @@ class Project(znflow.DiGraph):
                     self.nodes[node_uuid]["value"].__dict__["state"]["group"] = (
                         Group.from_znflow_group(group)
                     )
-
-            all_node_names = self.compute_all_node_names()
-            for node_uuid in self.nodes:
-                self.nodes[node_uuid]["value"].__dict__["name"] = all_node_names[
-                    node_uuid
-                ]
         finally:
             super().__exit__(exc_type, exc_val, exc_tb)
 
@@ -110,8 +128,30 @@ class Project(znflow.DiGraph):
         params_dict = {}
         dvc_dict = {"stages": {}, "plots": []}
         zntrack_dict = {}
+        try:
+            repo = git.Repo()
+        except git.InvalidGitRepositoryError:
+            repo = None
         for node_uuid in tqdm.tqdm(self):
             node = self.nodes[node_uuid]["value"]
+
+            # check if the node.nwd / node-meta.json is git tracked
+            if config.ALWAYS_CACHE and repo is not None:
+                meta_file = node.nwd / "node-meta.json"
+                # Convert to relative path safely
+                rel_path = os.path.relpath(meta_file, repo.working_dir)
+
+                # Check if the file is tracked
+                is_tracked = rel_path in repo.git.ls_files()
+                if is_tracked:
+                    warnings.warn(
+                        f"{meta_file} is tracked by git. Please set "
+                        "`zntrack.config.ALWAYS_CACHE = False` or remove the "
+                        "file from git. This has been changed with ZnTrack v0.8.4."
+                        " Mixing git and DVC tracked stage outputs can"
+                        " lead to unexpected behavior."
+                    )
+
             if node._external_:
                 continue
             for plugin in node.state.plugins.values():
@@ -124,7 +164,8 @@ class Project(znflow.DiGraph):
                     value := plugin.convert_to_dvc_yaml()
                 ) is not config.PLUGIN_EMPTY_RETRUN_VALUE:
                     dvc_dict["stages"][node.name] = value["stages"]
-                    # TODO: this won't work if multiple plugins want to modify the dvc.yaml
+                    # TODO: this won't work if multiple
+                    # plugins want to modify the dvc.yaml
                     if len(value["plots"]) > 0:
                         dvc_dict["plots"].extend(value["plots"])
                 if (
@@ -162,7 +203,8 @@ class Project(znflow.DiGraph):
         This method performs the following actions:
         1. Makes a commit with the provided message if `commit` is True.
         2. Loads environment variables.
-        3. Loads and finalizes plugins specified in the `ZNTRACK_PLUGINS` environment variable.
+        3. Loads and finalizes plugins specified
+           in the `ZNTRACK_PLUGINS` environment variable.
 
         Parameters
         ----------
@@ -210,6 +252,6 @@ class Project(znflow.DiGraph):
             names = (name,)
 
         with super().group(*names) as znflow_grp:
-            group = Group(name=znflow_grp.names)
+            group = Group(names=znflow_grp.names)
             yield group
         group._nodes = znflow_grp.nodes

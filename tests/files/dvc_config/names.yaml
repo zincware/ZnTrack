@@ -1,0 +1,73 @@
+stages:
+  ParamsToMetrics:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name ParamsToMetrics
+    metrics:
+    - nodes/ParamsToMetrics/metrics.json
+    - nodes/ParamsToMetrics/node-meta.json:
+        cache: true
+    params:
+    - ParamsToMetrics
+  ParamsToMetrics_1:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name ParamsToMetrics_1
+    metrics:
+    - nodes/ParamsToMetrics_1/metrics.json
+    - nodes/ParamsToMetrics_1/node-meta.json:
+        cache: true
+    params:
+    - ParamsToMetrics_1
+  Thanasis:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name Thanasis
+    metrics:
+    - nodes/Thanasis/metrics.json
+    - nodes/Thanasis/node-meta.json:
+        cache: true
+    params:
+    - Thanasis
+  grp_Cydney:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name grp_Cydney
+    metrics:
+    - nodes/grp/Cydney/metrics.json
+    - nodes/grp/Cydney/node-meta.json:
+        cache: true
+    params:
+    - grp_Cydney
+  grp_ParamsToMetrics:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name grp_ParamsToMetrics
+    metrics:
+    - nodes/grp/ParamsToMetrics/metrics.json
+    - nodes/grp/ParamsToMetrics/node-meta.json:
+        cache: true
+    params:
+    - grp_ParamsToMetrics
+  grp_ParamsToMetrics_1:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name grp_ParamsToMetrics_1
+    metrics:
+    - nodes/grp/ParamsToMetrics_1/metrics.json
+    - nodes/grp/ParamsToMetrics_1/node-meta.json:
+        cache: true
+    params:
+    - grp_ParamsToMetrics_1
+  grp_subgrp_Lorine:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name grp_subgrp_Lorine
+    metrics:
+    - nodes/grp/subgrp/Lorine/metrics.json
+    - nodes/grp/subgrp/Lorine/node-meta.json:
+        cache: true
+    params:
+    - grp_subgrp_Lorine
+  grp_subgrp_ParamsToMetrics:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name grp_subgrp_ParamsToMetrics
+    metrics:
+    - nodes/grp/subgrp/ParamsToMetrics/metrics.json
+    - nodes/grp/subgrp/ParamsToMetrics/node-meta.json:
+        cache: true
+    params:
+    - grp_subgrp_ParamsToMetrics
+  grp_subgrp_ParamsToMetrics_1:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToMetrics --name grp_subgrp_ParamsToMetrics_1
+    metrics:
+    - nodes/grp/subgrp/ParamsToMetrics_1/metrics.json
+    - nodes/grp/subgrp/ParamsToMetrics_1/node-meta.json:
+        cache: true
+    params:
+    - grp_subgrp_ParamsToMetrics_1

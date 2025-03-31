@@ -13,9 +13,9 @@ def test_repr(proj_path):
         repr(zntrack.examples.ParamsToOuts(params=42))
         == "ParamsToOuts(name='ParamsToOuts', params=42)"
     )
-    assert (
-        repr(zntrack.examples.WriteDVCOuts(params=42))
-        == "WriteDVCOuts(name='WriteDVCOuts', params=42, outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
+    assert repr(zntrack.examples.WriteDVCOuts(params=42)) == (
+        "WriteDVCOuts(name='WriteDVCOuts', params=42,"
+        " outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
     )
     assert repr(NodeWithPostInit()) == "NodeWithPostInit(name='NodeWithPostInit')"
     assert repr(zntrack.Node()) == "Node(name='Node')"
@@ -40,9 +40,9 @@ def test_repr_from_rev(proj_path):
     proj.build()
 
     assert repr(n1) == "ParamsToOuts(name='ParamsToOuts', params=42)"
-    assert (
-        repr(n2)
-        == "WriteDVCOuts(name='WriteDVCOuts', params=42, outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
+    assert repr(n2) == (
+        "WriteDVCOuts(name='WriteDVCOuts',"
+        " params=42, outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
     )
 
     assert repr(n6) == "ParamsToMetrics(name='ParamsToMetrics', params=42)"
@@ -51,9 +51,9 @@ def test_repr_from_rev(proj_path):
     proj.run()
 
     assert repr(n1) == "ParamsToOuts(name='ParamsToOuts', params=42)"
-    assert (
-        repr(n2)
-        == "WriteDVCOuts(name='WriteDVCOuts', params=42, outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
+    assert repr(n2) == (
+        "WriteDVCOuts(name='WriteDVCOuts', params=42,"
+        " outs=PosixPath('nodes/WriteDVCOuts/output.txt'))"
     )
 
     assert repr(n6) == "ParamsToMetrics(name='ParamsToMetrics', params=42)"

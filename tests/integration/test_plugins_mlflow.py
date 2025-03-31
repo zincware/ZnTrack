@@ -54,7 +54,7 @@ class RangePlotter(zntrack.Node):
     plots: pd.DataFrame = zntrack.plots(y="range")
 
     def run(self):
-        self.plots = pd.DataFrame({"idx": [idx for idx in range(self.start, self.stop)]})
+        self.plots = pd.DataFrame({"idx": list(range(self.start, self.stop))})
 
 
 @pytest.fixture
@@ -108,7 +108,7 @@ def test_mlflow_metrics(mlflow_proj_path):
     # assert tags
     assert run.data.tags["dvc_stage_name"] == "ParamsToMetrics"
     assert run.data.tags["dvc_stage_hash"] == node.state.get_stage_hash()
-    assert run.data.tags["zntrack_node"] == "zntrack.examples.ParamsToMetrics"
+    assert run.data.tags["zntrack_node"] == "zntrack.examples.nodes.ParamsToMetrics"
 
     # assert metrics
     assert run.data.metrics == {"metrics.loss": 0.0}
@@ -181,7 +181,7 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
     assert c.metrics == {"value": 10.0}
 
     with a.state.plugins["MLFlowPlugin"]:
-        a_run = mlflow.get_run(a.state.plugins["MLFlowPlugin"].child_run_id)
+        mlflow.get_run(a.state.plugins["MLFlowPlugin"].child_run_id)
 
     with b.state.plugins["MLFlowPlugin"]:
         b_run = mlflow.get_run(b.state.plugins["MLFlowPlugin"].child_run_id)
@@ -210,14 +210,20 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
         assert len(runs) == 4
 
     a_run_2 = mlflow.search_runs(
-        filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{a.name}'",
+        filter_string=(
+            f"tags.git_commit_hash = '{repo.head.commit.hexsha}' "
+            f"and tags.dvc_stage_name = '{a.name}'"
+        ),
         output_format="list",
     )
     assert len(a_run_2) == 1
     a_run_2 = a_run_2[0]
 
     b_run_2 = mlflow.search_runs(
-        filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{b.name}'",
+        filter_string=(
+            f"tags.git_commit_hash = '{repo.head.commit.hexsha}'"
+            f" and tags.dvc_stage_name = '{b.name}'"
+        ),
         output_format="list",
     )
     if skip_cached:
@@ -226,11 +232,15 @@ def test_multiple_nodes(mlflow_proj_path, skip_cached):
         assert len(b_run_2) == 1
         b_run_2 = b_run_2[0]
         assert b_run_2.data.tags["original_run_id"] == b_run.info.run_id
-        # original runs will not be updated with a new name to indicate that they are cached
+        # original runs will not be updated with a new name to
+        # indicate that they are cached
         assert b_run_2.data.tags[mlflow_tags.MLFLOW_RUN_NAME] == "ParamsToOuts_1"
 
     c_run_2 = mlflow.search_runs(
-        filter_string=f"tags.git_commit_hash = '{repo.head.commit.hexsha}' and tags.dvc_stage_name = '{c.name}'",
+        filter_string=(
+            f"tags.git_commit_hash = '{repo.head.commit.hexsha}'"
+            f" and tags.dvc_stage_name = '{c.name}'"
+        ),
         output_format="list",
     )
     assert len(c_run_2) == 1
@@ -302,7 +312,7 @@ def test_dataclass_deps(mlflow_proj_path):
     )
 
     proj.finalize(msg="run1 exp.")
-    repo = git.Repo()
+    git.Repo()
 
     mdx = MD.from_rev()
     assert mdx.__run_note__() != ""
@@ -338,9 +348,9 @@ def test_dataclass_deps(mlflow_proj_path):
     with md.state.plugins["MLFlowPlugin"]:
         run = mlflow.get_run(md.state.plugins["MLFlowPlugin"].child_run_id)
 
-    assert (
-        run.data.params["t"]
-        == "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'}, {'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
+    assert run.data.params["t"] == (
+        "[{'temperature': 1, '_cls': 'test_plugins_mlflow.T1'},"
+        " {'temperature': 1, '_cls': 'test_plugins_mlflow.T2'}]"
     )
 
     md = zntrack.from_rev(md.name)

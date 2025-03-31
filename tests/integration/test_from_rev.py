@@ -120,8 +120,11 @@ def test_two_nodes_connect_external(proj_path):
         remote="https://github.com/PythonFZ/zntrack-examples",
         rev="de82dc7104ac3",
     )
+    assert node_a.name == "NumericOuts"
+    assert node_a.__dict__["nwd"].as_posix() == "nodes/NumericOuts"
 
     with zntrack.Project() as project:
+        assert node_a.name == "NumericOuts"
         node1 = zntrack.examples.AddOne(number=node_a.outs)
         node2 = zntrack.examples.AddOne(number=node_a.outs)
 

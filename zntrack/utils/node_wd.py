@@ -1,17 +1,16 @@
 """Helpers for the Node Working Directory (NWD)."""
 
-import json
 import logging
 import os
 import pathlib
 import shutil
 import typing as t
+import warnings
 
 import znflow.utils
-import znjson
 
 from zntrack.add import DVCImportPath
-from zntrack.config import NWD_PATH, ZNTRACK_FILE_PATH, NodeStatusEnum
+from zntrack.config import NWD_PATH
 
 if t.TYPE_CHECKING:
     from zntrack import Node
@@ -41,17 +40,13 @@ def move_nwd(target: pathlib.Path, destination: pathlib.Path) -> None:
 def get_nwd(node: "Node") -> pathlib.Path:
     """Get the node working directory.
 
-    This is used instead of `node.nwd` because it allows
-    for parameters to define if the nwd should be created.
-
     Arguments:
     ---------
     node: Node
         The node instance for which the nwd should be returned.
-
     """
     try:
-        nwd = node.__dict__["nwd"]
+        return node.__dict__["nwd"]
     except KeyError:
         if node.name is None:
             raise ValueError("Unable to determine node name.")
