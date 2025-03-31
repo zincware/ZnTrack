@@ -76,8 +76,8 @@ class Project(znflow.DiGraph):
             The updated node path with an incremented counter if necessary.
         """
         if self.active_group is None:
-            counter = self.node_name_counter.get(name, -1) + 1
-            self.node_name_counter[name] = counter
+            counter = self.node_name_counter.get(name, 0)
+            self.node_name_counter[name] = counter + 1
 
             if counter:
                 return NWD_PATH / f"{name}_{counter}"
@@ -86,8 +86,9 @@ class Project(znflow.DiGraph):
             group_path = "/".join(self.active_group.names)
             grp_and_name = f"{group_path}/{name}"
 
-            counter = self.node_name_counter.get(grp_and_name, -1) + 1
-            self.node_name_counter[grp_and_name] = counter
+            counter = self.node_name_counter.get(grp_and_name, 0)
+            self.node_name_counter[grp_and_name] = counter + 1
+            
             if counter:
                 return NWD_PATH / group_path / f"{name}_{counter}"
             return NWD_PATH / group_path / name
