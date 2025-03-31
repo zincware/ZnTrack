@@ -82,10 +82,10 @@ def run(
     node.state.save_node_meta()
     # dynamic version of node.run()
     getattr(node, method)()
+    node.save()
     run_time = datetime.datetime.now() - start_time
     node.state.add_run_time(run_time)
     node.state.save_node_meta()
-    node.save()
 
 
 @app.command()
