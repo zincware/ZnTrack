@@ -70,7 +70,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
 
     # in case the name is set outside the graph
     # (no groups can be active)
-    nwd = NWD_PATH / value 
+    nwd = NWD_PATH / value
 
     if graph is not znflow.empty_graph:
         name = self.__class__.__name__
