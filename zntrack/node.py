@@ -76,7 +76,9 @@ def _name_setter(self, attr_name: str, value: str) -> None:
                 if graph.node_name_counter[name] == 0:
                     del graph.node_name_counter[name]
             
-            graph.node_name_counter[name] = graph.node_name_counter.get(name, -1) + 1
+            if value in graph.node_name_counter:
+                raise ValueError(f"A node with the name '{value}' already exists.")
+            graph.node_name_counter[value] = 1
             nwd = NWD_PATH / value
         else:
             group_path = "/".join(graph.active_group.names)
@@ -87,7 +89,10 @@ def _name_setter(self, attr_name: str, value: str) -> None:
                 if graph.node_name_counter[grp_and_name] == 0:
                     del graph.node_name_counter[grp_and_name]
             
-            graph.node_name_counter[grp_and_name] = graph.node_name_counter.get(grp_and_name, -1) + 1
+            node_name = f"{group_path}_{value}"
+            if node_name in graph.node_name_counter:
+                raise ValueError(f"A node with the name '{node_name}' already exists.")
+            graph.node_name_counter[node_name] = 1
             nwd = NWD_PATH / group_path / value
 
         self.__dict__["nwd"] = nwd
