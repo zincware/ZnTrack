@@ -68,25 +68,27 @@ def _name_setter(self, attr_name: str, value: str) -> None:
 
     graph = znflow.get_graph()
 
-    nwd = NWD_PATH / value
-
     if graph is not znflow.empty_graph:
-        nwd_identifier = str(NWD_PATH / self.__class__.__name__)
-        if graph.node_name_counter.get(nwd_identifier, 0) > 0:
-            graph.node_name_counter[nwd_identifier] -= 1
-            if graph.node_name_counter[nwd_identifier] == 0:
-                del graph.node_name_counter[nwd_identifier]
+        name = self.__class__.__name__
+        if graph.active_group is None:
+            if graph.node_name_counter.get(name, 0) > 0:
+                graph.node_name_counter[name] -= 1
+                if graph.node_name_counter[name] == 0:
+                    del graph.node_name_counter[name]
+            
+            graph.node_name_counter[name] = graph.node_name_counter.get(name, -1) + 1
+            nwd = NWD_PATH / value
+        else:
+            group_path = "/".join(graph.active_group.names)
+            grp_and_name = f"{group_path}/{name}"
 
-        group_path = "/".join(graph.active_group.names) if graph.active_group else ""
-        nwd = (
-            pathlib.Path(NWD_PATH, group_path, value) if group_path else NWD_PATH / value
-        )
-
-        if nwd in graph.node_name_counter:
-            node_name = f"{group_path}_{value}" if group_path else value
-            raise ValueError(f"A node with the name '{node_name}' already exists.")
-
-        graph.node_name_counter[nwd] = graph.node_name_counter.get(nwd, -1) + 1
+            if graph.node_name_counter.get(grp_and_name, 0) > 0:
+                graph.node_name_counter[grp_and_name] -= 1
+                if graph.node_name_counter[grp_and_name] == 0:
+                    del graph.node_name_counter[grp_and_name]
+            
+            graph.node_name_counter[grp_and_name] = graph.node_name_counter.get(grp_and_name, -1) + 1
+            nwd = NWD_PATH / group_path / value
 
         self.__dict__["nwd"] = nwd
 

@@ -21,11 +21,14 @@ def test_group_nodes(proj_path):
 
     with project:
         a = MyNode(parameter=1)
+        # ax = MyNode(parameter=1, name="MyNode")
 
     with project.group("Grp") as grp:
         b = MyNode(parameter=2)
         c = MyNode(parameter=3)
         d = MyNode(parameter=4)
+        # bx = MyNode(parameter=2, name="MyNode")
+        # fx = MyNode(parameter=2, name="CustomName")
 
     assert b in grp
 
