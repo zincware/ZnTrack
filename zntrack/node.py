@@ -75,7 +75,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
                 graph.node_name_counter[name] -= 1
                 if graph.node_name_counter[name] == 0:
                     del graph.node_name_counter[name]
-            
+
             if value in graph.node_name_counter:
                 raise ValueError(f"A node with the name '{value}' already exists.")
             graph.node_name_counter[value] = 1
@@ -88,7 +88,7 @@ def _name_setter(self, attr_name: str, value: str) -> None:
                 graph.node_name_counter[grp_and_name] -= 1
                 if graph.node_name_counter[grp_and_name] == 0:
                     del graph.node_name_counter[grp_and_name]
-            
+
             node_name = f"{group_path}_{value}"
             if node_name in graph.node_name_counter:
                 raise ValueError(f"A node with the name '{node_name}' already exists.")
