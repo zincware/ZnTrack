@@ -95,5 +95,52 @@ def test_list_groups(proj_path, runner):
     assert result.exit_code == 0
 
 
-if __name__ == "__main__":
-    test_list_groups(None, None)
+def test_list_multi_nested_groups(proj_path, runner):
+    proj = zntrack.Project()
+
+    with proj:
+        zntrack.examples.ParamsToOuts(params=15)
+        zntrack.examples.ParamsToOuts(params=15)
+
+    with proj.group("dynamics"):
+        zntrack.examples.ParamsToOuts(params=15)
+        zntrack.examples.ParamsToOuts(params=15)
+
+    with proj.group("dynamics", "400K"):
+        zntrack.examples.ParamsToOuts(params=15)
+        zntrack.examples.ParamsToOuts(params=15)
+
+    with proj.group("dynamics", "400K", "B"):
+        zntrack.examples.ParamsToOuts(params=15)
+        zntrack.examples.ParamsToOuts(params=15)
+
+    proj.build()
+
+    true_groups = {
+        "dynamics": [
+            {
+                "400K": [
+                    {
+                        "B": [
+                            "ParamsToOuts -> dynamics_400K_B_ParamsToOuts",
+                            "ParamsToOuts_1 -> dynamics_400K_B_ParamsToOuts_1",
+                        ]
+                    },
+                    "ParamsToOuts -> dynamics_400K_ParamsToOuts",
+                    "ParamsToOuts_1 -> dynamics_400K_ParamsToOuts_1",
+                ]
+            },
+            "ParamsToOuts -> dynamics_ParamsToOuts",
+            "ParamsToOuts_1 -> dynamics_ParamsToOuts_1",
+        ],
+        "nodes": ["ParamsToOuts", "ParamsToOuts_1"],
+    }
+
+    groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
+    assert groups == true_groups
+
+    result = runner.invoke(app, ["list", proj_path.as_posix()])
+    assert result.exit_code == 0
+    groups = yaml.safe_load(result.stdout)
+    assert groups == true_groups
+    assert result.exit_code == 0

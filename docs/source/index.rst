@@ -1,83 +1,144 @@
-.. ZnTrack documentation master file, created by
-   sphinx-quickstart on Mon Feb  6 15:28:26 2023.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+ZnTrack Documentation
+=====================
 
-.. _DVC: https://dvc.org/
+ZnTrack (``zɪŋk træk``) is a lightweight and easy-to-use Python package for converting existing Python code into reproducible workflows.
+By structuring your code as a directed graph with well-defined inputs and outputs, ZnTrack ensures reproducibility, scalability, and ease of collaboration.
 
-ZnTrack's documentation!
-========================
 
-.. image:: _static/logo_ZnTrack.png
-   :alt: ZnTrack logo
-   :target: https://github.com/zincware/ZnTrack
+Key Features
+------------
 
-.. raw:: html
+- **Reproducible Workflows**: Convert Python scripts into reproducible workflows with minimal effort.
+- **Parameter, Output, and Metric Tracking**: Easily track parameters, outputs, and metrics in your Python code.
+- **Shareable and Collaborative**: Work together with your team using Git. Share your workflows, reuse components in other projects, or package them as Python modules.
+- **DVC Integration**: ZnTrack is built on top of :term:`DVC` for version control and experiment management, seamlessly integrating into the :term:`DVC` ecosystem.
 
-   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=star&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
-   <iframe src="https://ghbtns.com/github-btn.html?user=zincware&repo=zntrack&type=fork&count=true&size=large" frameborder="0" scrolling="0" width="130" height="30" title="GitHub"></iframe>
+Installation
+------------
+You can install ZnTrack via pip:
 
-Welcome to ZnTrack, the first developer package from zincware <https://github.com/zincware>_.
-We're excited to have you on board!
-ZnTrack is designed to simplify code sharing and reproducibility.
+.. code-block:: bash
 
-.. note::
-
-   This documentation has not been updated to the newest version of ZnTrack.
-   Features and changes in :code:`v0.8.0` and newer are not included in this documentation.
-
-- :ref:`userdoc-get-started`
-- :ref:`userdoc-examples`
-- :ref:`userdoc-theory`
-- :ref:`userdoc-api`
+   pip install zntrack
 
 
 Example
-==========
+-------
+Let’s convert a simple Python script into a reproducible workflow using ZnTrack.
 
-With ZnTrack, you can construct a reproducible workflow using Nodes.
-A Node, in this context, is a Python class or function with well-defined:
+.. code-block:: python
 
-* **Inputs:** Parameters and dependencies.
-* **Outputs:** Files, metrics, and plots.
-* **Code:** Function or class run method.
+   def add(a: int, b: int) -> int:
+       return a + b
 
+   if __name__ == "__main__":
+      x = add(1, 2)
+      print(x)
+      >>> 3
 
-Nodes are connected by passing one node instance or attribute to another, similar to regular Python objects.
-Unlike executing standard Python objects, ZnTrack enables you to define the workflow first, and the code is executed in a subsequent step.
+We will now transform this function into a :term:`Node` and build a directed workflow graph using ZnTrack.
 
-ZnTrack offers node tracking using DVC_, a Git-like version control system for data.
-This feature provides automatic checkpoints, caching, and facilitates the effortless sharing of your workflow.
+.. note::
 
-Here are two examples illustrating what ZnTrack Nodes can look like.
-ZnTrack supports both function and class-based Nodes, as well as a combination of both.
-For detailed information, check out the :ref:userdoc-get-started section.
+   A ZnTrack :term:`Project` always requires a :term:`GIT` and :term:`DVC` repository.
+   Initialize a new project by running the following commands:
 
-Class based Node
-----------------
+   .. code-block:: bash
+
+      mkdir my_project
+      cd my_project
+      git init
+      dvc init
+      touch main.py # Add the code below to main.py
+
 .. code-block:: python
 
    import zntrack
 
-   class AddNumbers(zntrack.Node):
-      number1 = zntrack.params()
-      number2 = zntrack.params()
+   class Add(zntrack.Node):
+      a: int = zntrack.params()
+      b: int = zntrack.params()
+      result: int = zntrack.outs()
 
-      result = zntrack.outs()
+      def run(self) -> None:
+         self.result = self.a + self.b
 
-      def run(self):
-         self.result = self.number1 + self.number2
+   if __name__ == "__main__":
+      project = zntrack.Project()
 
-   with zntrack.Project() as project:
-      node = AddNumbers(number1=10, number2=20)
+      with project:
+         x = Add(a=1, b=2)
 
-   project.repro()
+      project.repro()
+
+      print(x.result)
+      >>> 3
+
+ZnTrack uses Python classes instead of functions to define a :term:`Node`.
+This approach differs from most other workflow management tools and is motivated by the need to store all inputs and outputs of a Node, making each :term:`Node` stateful.
+
+Once a :term:`Node` has been executed, you can access its results at any time.
+Each :term:`Node` is uniquely identified by its :term:`node name` and the :term:`git` :term:`commit hash`.
+
+.. code-block:: python
+
+   import zntrack
+
+   x = zntrack.from_rev(name="Add", rev="HEAD", remote="https://github.com/user/repo")
+   print(x.result)
+   >>> 3
+
+.. note::
+
+   You can omit the ``remote`` and ``rev`` parameters to load a :term:`Node` from the current repository and commit.
+
+
+.. dropdown:: Projects using ZnTrack
+   :open:
+
+   .. card:: MLIPX
+
+      ``mlipx`` is a Python library designed for evaluating machine-learned interatomic potentials. It offers a growing set of evaluation methods alongside powerful visualization and comparison tools.
+      +++
+      https://github.com/basf/mlipx
+
+   .. card:: IPSuite
+
+      IPSuite provides tools for generating machine-learned interatomic potentials.
+      +++
+      https://github.com/zincware/ipsuite
+
+   .. card:: Apax
+
+      Apax is a high-performance, extendable package for training and inference with atomistic neural networks.
+      +++
+      https://github.com/apax-hub/apax
+
+   .. card:: ZnDraw
+
+      ZnDraw is a powerful tool for visualizing and interacting with atomistic trajectories.
+      +++
+      https://github.com/zincware/zndraw
+
+   .. card:: Paraffin
+
+      A DVC graph executor and progress visualization tool.
+
+      .. tip::
+
+         Paraffin can be used with or without ZnTrack and provides powerful tools for distributed execution of :term:`DVC` graphs, along with a graphical user interface for monitoring progress.
+
+      +++
+      https://github.com/zincware/paraffin
 
 
 .. toctree::
    :hidden:
+   :maxdepth: 2
 
-   _get-started/index
-   _examples/index
-   _theory/index
-   _api/index
+   node
+   project
+   fields
+   node_details
+   examples/examples
+   glossary

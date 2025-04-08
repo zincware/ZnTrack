@@ -3,6 +3,6 @@ stages:
     cmd: zntrack run test_custom_field.TextNode --name TextNode
     metrics:
     - nodes/TextNode/node-meta.json:
-        cache: false
+        cache: true
     outs:
     - nodes/TextNode/content.h5

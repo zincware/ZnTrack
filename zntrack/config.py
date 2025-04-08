@@ -1,6 +1,8 @@
 import enum
 import pathlib
 
+import typing_extensions as tyex
+
 DVC_FILE_PATH = pathlib.Path("dvc.yaml")
 PARAMS_FILE_PATH = pathlib.Path("params.yaml")
 ZNTRACK_FILE_PATH = pathlib.Path("zntrack.json")
@@ -13,16 +15,16 @@ EXP_INFO_PATH = pathlib.Path(".exp_info.yaml")
 # git tracked files. Setting this to True will override the default behavior to always
 # use the DVC cache. If you have a DVC cache setup, this might be desirable, to avoid
 # a mixture between DVC cache and git tracked files.
-ALWAYS_CACHE: bool = False
+ALWAYS_CACHE: bool = True
 
 
 # Use sentinel object for zntrack specific configurations. Use
 # a class to give it a better repr.
-class _ZNTRACK_OPTION_TYPE:
+class _FIELD_TYPE_TYPE:
     pass
 
 
-ZNTRACK_OPTION = _ZNTRACK_OPTION_TYPE()
+FIELD_TYPE = _FIELD_TYPE_TYPE()
 
 
 class _ZNTRACK_CACHE_TYPE:
@@ -103,6 +105,21 @@ class NodeStatusEnum(enum.Enum):
     FINISHED = 3
 
 
+class FieldTypes(str, enum.Enum):
+    DEPS = "deps"
+    PARAMS = "params"
+    OUTS = "outs"
+    PLOTS = "plots"
+    METRICS = "metrics"
+
+    PARAMS_PATH = "params_path"
+    DEPS_PATH = "deps_path"
+    OUTS_PATH = "outs_path"
+    PLOTS_PATH = "plots_path"
+    METRICS_PATH = "metrics_path"
+
+
+@tyex.deprecated("ZnTrackOptionEnum is deprecated. Use FieldTypes instead.")
 class ZnTrackOptionEnum(str, enum.Enum):
     DEPS = "deps"
     PARAMS = "params"

@@ -18,9 +18,9 @@ class NodeWithEnv(zntrack.Node):
     def run(self):
         import os
 
-        assert (
-            os.environ["OMP_NUM_THREADS"] == self.OMP_NUM_THREADS
-        ), f'{os.environ["OMP_NUM_THREADS"]} != {self.OMP_NUM_THREADS}'
+        assert os.environ["OMP_NUM_THREADS"] == self.OMP_NUM_THREADS, (
+            f"{os.environ['OMP_NUM_THREADS']} != {self.OMP_NUM_THREADS}"
+        )
 
         self.result = os.environ["OMP_NUM_THREADS"]
 

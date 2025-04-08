@@ -9,10 +9,10 @@ import znfields
 
 import zntrack
 from zntrack.config import (
+    FIELD_TYPE,
     NOT_AVAILABLE,
     PLUGIN_EMPTY_RETRUN_VALUE,
     ZNTRACK_CACHE,
-    ZNTRACK_OPTION,
 )
 from zntrack.plugins import ZnTrackPlugin, base_getter, plugin_getter
 
@@ -24,13 +24,13 @@ def _text_getter(self: zntrack.Node, name: str):
 
 class TextPlugin(ZnTrackPlugin):
     def getter(self, field: dataclasses.Field) -> t.Any:
-        if field.metadata.get(ZNTRACK_OPTION) == "TextPlugin.text":
+        if field.metadata.get(FIELD_TYPE) == "TextPlugin.text":
             return base_getter(self.node, field.name, _text_getter)
 
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def save(self, field: dataclasses.Field) -> None:
-        if field.metadata.get(ZNTRACK_OPTION) == "TextPlugin.text":
+        if field.metadata.get(FIELD_TYPE) == "TextPlugin.text":
             if not pathlib.Path(self.node.nwd).exists():
                 pathlib.Path(self.node.nwd).mkdir(parents=True)
             with open(self.node.nwd / f"{field.name}.txt", "w") as f:
@@ -49,7 +49,7 @@ class TextPlugin(ZnTrackPlugin):
 @functools.wraps(znfields.field)
 def text(*, cache: bool = True, **kwargs):
     kwargs["metadata"] = kwargs.get("metadata", {})
-    kwargs["metadata"][ZNTRACK_OPTION] = "TextPlugin.text"
+    kwargs["metadata"][FIELD_TYPE] = "TextPlugin.text"
     kwargs["metadata"][ZNTRACK_CACHE] = cache
     return znfields.field(default=NOT_AVAILABLE, getter=plugin_getter, **kwargs)
 

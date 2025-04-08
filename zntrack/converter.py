@@ -11,11 +11,11 @@ import znjson
 
 from zntrack.add import DVCImportPath
 from zntrack.config import (
+    FIELD_TYPE,
     PARAMS_FILE_PATH,
     ZNTRACK_FIELD_SUFFIX,
     ZNTRACK_INDEPENDENT_OUTPUT_TYPE,
-    ZNTRACK_OPTION,
-    ZnTrackOptionEnum,
+    FieldTypes,
 )
 
 from .node import Node
@@ -97,7 +97,8 @@ class ConnectionConverter(znjson.ConverterBase):
         """Convert the znflow.Connection object to dict."""
         if obj.item is not None:
             raise NotImplementedError("znflow.Connection getitem is not supported yet.")
-        # Can not use `dataclasses.asdict` because it automatically converts nested dataclasses to dict.
+        # Can not use `dataclasses.asdict` because it automatically
+        # converts nested dataclasses to dict.
         return {
             "instance": obj.instance,
             "attribute": obj.attribute,
@@ -149,10 +150,13 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         # that directory is probably best described by using the node.name
         # of the node that depends on the import?
         # or we use a hash from commit / node name / repo path <-- only validate answer!
-        # we want to run dvc import remote get_path(node, "attribute") --rev rev --out /.../get_path(node, "attribute").name
+        # we want to run dvc import remote get_path(node, "attribute")
+        # --rev rev --out /.../get_path(node, "attribute").name
         # use --no-download option while building
-        # check how dvc repro or paraffin would download files? Do we want the user to force download?
-        # have zntrack.Path(path, remote, rev, is_dvc_tracked, is_db) to use dvc import-url / import-db in the graph
+        # check how dvc repro or paraffin would download files?
+        # Do we want the user to force download?
+        # have zntrack.Path(path, remote, rev, is_dvc_tracked, is_db)
+        #  to use dvc import-url / import-db in the graph
         # return []
         # raise NotImplementedError
     if attribute is None:
@@ -169,15 +173,15 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
             fields = dataclasses.fields(node)
     paths = []
     for field in fields:
-        option_type = field.metadata.get(ZNTRACK_OPTION)
+        option_type = field.metadata.get(FIELD_TYPE)
 
         if any(
             option_type is x
             for x in [
-                ZnTrackOptionEnum.PARAMS,
-                ZnTrackOptionEnum.PARAMS,
-                ZnTrackOptionEnum.DEPS,
-                ZnTrackOptionEnum.DEPS_PATH,
+                FieldTypes.PARAMS,
+                FieldTypes.PARAMS,
+                FieldTypes.DEPS,
+                FieldTypes.DEPS_PATH,
                 None,
             ]
         ):
@@ -185,23 +189,23 @@ def node_to_output_paths(node: Node, attribute: str) -> t.List[str]:
         if node._external_:
             warnings.warn("External nodes are currently always loaded dynamically.")
             continue
-        if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) == True:
+        if field.metadata.get(ZNTRACK_INDEPENDENT_OUTPUT_TYPE) is True:
             paths.append((node.nwd / "node-meta.json").as_posix())
             if node._external_:
                 raise NotImplementedError
                 # paths.append((import_path / "node-meta.json").as_posix())
         if option_type in [
-            ZnTrackOptionEnum.OUTS,
-            ZnTrackOptionEnum.PLOTS,
-            ZnTrackOptionEnum.METRICS,
+            FieldTypes.OUTS,
+            FieldTypes.PLOTS,
+            FieldTypes.METRICS,
         ]:
             suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
             paths.append((node.nwd / field.name).with_suffix(suffix).as_posix())
-        elif option_type == ZnTrackOptionEnum.OUTS_PATH:
+        elif option_type == FieldTypes.OUTS_PATH:
             paths.extend(_enforce_str_list(getattr(node, field.name)))
-        elif option_type == ZnTrackOptionEnum.PLOTS_PATH:
+        elif option_type == FieldTypes.PLOTS_PATH:
             paths.extend(_enforce_str_list(getattr(node, field.name)))
-        elif option_type == ZnTrackOptionEnum.METRICS_PATH:
+        elif option_type == FieldTypes.METRICS_PATH:
             paths.extend(_enforce_str_list(getattr(node, field.name)))
 
     if len(paths) == 0:
