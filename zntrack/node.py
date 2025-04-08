@@ -24,6 +24,7 @@ from .config import (
     ZNTRACK_LAZY_VALUE,
     FieldTypes,
     NodeStatusEnum,
+    NWD_PATH,
 )
 
 try:
