@@ -21,10 +21,10 @@ from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 from .config import (
     FIELD_TYPE,
     NOT_AVAILABLE,
+    NWD_PATH,
     ZNTRACK_LAZY_VALUE,
     FieldTypes,
     NodeStatusEnum,
-    NWD_PATH,
 )
 
 try:
