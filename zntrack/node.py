@@ -142,10 +142,7 @@ class Node(znflow.Node, znfields.Base):
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
-                if "_" in self.name:
-                    log.warning(
-                        "Node name should not contain '_'. This character is used for defining groups."
-                    )
+
         for field in dataclasses.fields(self):
             # X_Path should be resolved instead of passing
             #  a connection. They are known at runtime.
