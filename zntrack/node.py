@@ -19,11 +19,11 @@ from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
 from .config import (
+    FIELD_TYPE,
     NOT_AVAILABLE,
     ZNTRACK_LAZY_VALUE,
-    FIELD_TYPE,
-    NodeStatusEnum,
     FieldTypes,
+    NodeStatusEnum,
 )
 
 try:
