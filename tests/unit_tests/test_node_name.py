@@ -2,6 +2,7 @@ import pytest
 from dvc.stage.exceptions import InvalidStageName
 
 import zntrack
+import warnings
 
 
 class MyNode(zntrack.Node):
@@ -159,3 +160,41 @@ def test_forbidden_group_names(proj_path, char):
     with pytest.raises(InvalidStageName):
         with project.group(f"copy_name-{char}"):
             MyNode()
+
+
+def test_underscore_warning(proj_path):
+    """Test that a warning is raised when using underscores in node names,
+    and no warning is raised when using valid names."""
+    
+    with zntrack.Project():
+        with pytest.warns(Warning, match="Node name should not contain '_'"):
+            MyNode(name="A_B_C")
+
+    with zntrack.Project():
+       with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            MyNode(name="ABC")
+
+def test_underscore_warning_groups(proj_path):
+    project = zntrack.Project()
+
+    # TODO: group names should also not contain underscores
+    with pytest.warns(Warning, match="Node name should not contain '_'"):
+        with project.group("ref"):
+            MyNode(name="A_B_C")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with project.group("ref"):
+            MyNode(name="ABC")
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        with project.group("ref", "ref2"):
+            a = MyNode(name="ABC")
+
+            project.build()
+    
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        zntrack.from_rev(a.name) # this should be fine!
