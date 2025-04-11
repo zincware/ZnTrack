@@ -196,9 +196,7 @@ class Node(znflow.Node, znfields.Base):
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
         with warnings.catch_warnings():
             warnings.filterwarnings(
-                "ignore",
-                message=".*should not contain '_'*",
-                category=UserWarning
+                "ignore", message=".*should not contain '_'*", category=UserWarning
             )
             instance = cls(**lazy_values)
         if remote is not None or rev is not None:

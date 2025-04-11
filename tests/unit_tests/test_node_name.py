@@ -1,8 +1,9 @@
+import warnings
+
 import pytest
 from dvc.stage.exceptions import InvalidStageName
 
 import zntrack
-import warnings
 
 
 class MyNode(zntrack.Node):
@@ -161,7 +162,9 @@ def test_forbidden_group_names(proj_path, char):
         with project.group(f"copy-name-{char}"):
             MyNode()
 
+
 # --- NODE NAME TESTS --- #
+
 
 @pytest.mark.parametrize("nodename", ["A_B_C"])
 def test_node_name_warns_on_underscore(proj_path, nodename):
@@ -187,6 +190,7 @@ def test_node_name_no_warning(proj_path, nodename):
 
 
 # --- GROUP NAME TESTS --- #
+
 
 @pytest.mark.parametrize("groupname", ["A_B_C"])
 def test_group_name_warns_on_underscore(proj_path, groupname):
@@ -216,13 +220,14 @@ def test_group_name_no_warning(proj_path, groupname):
 
 # --- COMBINED GROUP+NODE NAME TESTS --- #
 
+
 @pytest.mark.parametrize(
     "groupname, nodename",
     [
         ("A_B_C", "A_B_C"),
         ("A", "A_B_C"),
         ("A_B_C", "A"),
-    ]
+    ],
 )
 def test_group_and_node_name_warns_on_underscore(proj_path, groupname, nodename):
     project = zntrack.Project()
@@ -232,10 +237,7 @@ def test_group_and_node_name_warns_on_underscore(proj_path, groupname, nodename)
             MyNode(name=nodename)
 
 
-@pytest.mark.parametrize(
-    "groupname, nodename",
-    [("ABC", "DEF")]
-)
+@pytest.mark.parametrize("groupname, nodename", [("ABC", "DEF")])
 def test_group_and_node_name_no_warning(proj_path, groupname, nodename):
     project = zntrack.Project()
 
