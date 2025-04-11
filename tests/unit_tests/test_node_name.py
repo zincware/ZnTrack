@@ -1,3 +1,5 @@
+import warnings
+
 import pytest
 from dvc.stage.exceptions import InvalidStageName
 
@@ -150,12 +152,103 @@ def test_forbidden_node_names(proj_path, char):
     with zntrack.Project():
         # https://github.com/iterative/dvc/blob/main/tests/func/test_run.py#L372-L375C32
         with pytest.raises(InvalidStageName):
-            MyNode(name=f"copy_name-{char}")
+            MyNode(name=f"copy-name-{char}")
 
 
 @pytest.mark.parametrize("char", ["@:", "#", "$", ":", "/", "\\", ".", ";", ","])
 def test_forbidden_group_names(proj_path, char):
     project = zntrack.Project()
     with pytest.raises(InvalidStageName):
-        with project.group(f"copy_name-{char}"):
+        with project.group(f"copy-name-{char}"):
             MyNode()
+
+
+# --- NODE NAME TESTS --- #
+
+
+@pytest.mark.parametrize("nodename", ["A_B_C"])
+def test_node_name_warns_on_underscore(proj_path, nodename):
+    with zntrack.Project():
+        with pytest.warns(Warning, match="Node name should not contain '_'"):
+            MyNode(name=nodename)
+
+
+@pytest.mark.parametrize("nodename", ["ABC"])
+def test_node_name_no_warning(proj_path, nodename):
+    project = zntrack.Project()
+
+    with project:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            node = MyNode(name=nodename)
+
+    project.build()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        zntrack.from_rev(name=node.name)
+
+
+# --- GROUP NAME TESTS --- #
+
+
+@pytest.mark.parametrize("groupname", ["A_B_C"])
+def test_group_name_warns_on_underscore(proj_path, groupname):
+    project = zntrack.Project()
+
+    with pytest.warns(Warning, match="Group name should not contain '_'"):
+        with project.group(groupname):
+            MyNode()
+
+
+@pytest.mark.parametrize("groupname", ["ABC"])
+def test_group_name_no_warning(proj_path, groupname):
+    project = zntrack.Project()
+
+    with project:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            with project.group(groupname):
+                node = MyNode()
+
+    project.build()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        zntrack.from_rev(name=node.name)
+
+
+# --- COMBINED GROUP+NODE NAME TESTS --- #
+
+
+@pytest.mark.parametrize(
+    "groupname, nodename",
+    [
+        ("A_B_C", "A_B_C"),
+        ("A", "A_B_C"),
+        ("A_B_C", "A"),
+    ],
+)
+def test_group_and_node_name_warns_on_underscore(proj_path, groupname, nodename):
+    project = zntrack.Project()
+
+    with pytest.warns(Warning, match="should not contain '_'"):
+        with project.group(groupname):
+            MyNode(name=nodename)
+
+
+@pytest.mark.parametrize("groupname, nodename", [("ABC", "DEF")])
+def test_group_and_node_name_no_warning(proj_path, groupname, nodename):
+    project = zntrack.Project()
+
+    with project:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error")
+            with project.group(groupname):
+                node = MyNode(name=nodename)
+
+    project.build()
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        zntrack.from_rev(name=node.name)
