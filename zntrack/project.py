@@ -250,6 +250,12 @@ class Project(znflow.DiGraph):
             while (name,) in self.groups:
                 name = f"Group{int(name[5:]) + 1}"
             names = (name,)
+        else:
+            if any("_" in name for name in names):
+                warnings.warn(
+                    "Group name should not contain '_'. "
+                    f"Consider using '-' instead for {','.join(names)}."
+                )
 
         with super().group(*names) as znflow_grp:
             group = Group(names=znflow_grp.names)
