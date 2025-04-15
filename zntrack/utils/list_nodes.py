@@ -2,7 +2,6 @@ import json
 
 import dvc.api
 import pandas as pd
-import znjson
 from rich.console import Console
 from rich.text import Text
 from rich.tree import Tree
@@ -72,7 +71,7 @@ def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFram
     # Load DVC-tracked zntrack.json
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     with fs.open("zntrack.json", "r") as f:
-        config = json.load(f, cls=znjson.ZnDecoder)
+        config = json.load(f)
 
     # Load all nodes from DVC revision
     nodes = [zntrack.from_rev(name=name) for name in config]
