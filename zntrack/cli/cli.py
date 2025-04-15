@@ -9,13 +9,12 @@ import sys
 
 import git
 import typer
-import yaml
 
 from zntrack import Node, utils
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
-from zntrack.utils.misc import load_env_vars
 from zntrack.utils.list_nodes import list_nodes
+from zntrack.utils.misc import load_env_vars
 
 load_env_vars()
 

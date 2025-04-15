@@ -1,12 +1,14 @@
 import json
-import pandas as pd
-from rich.tree import Tree
-from rich.console import Console
-from rich.text import Text
 
 import dvc.api
-import zntrack
+import pandas as pd
 import znjson
+from rich.console import Console
+from rich.text import Text
+from rich.tree import Tree
+
+import zntrack
+
 
 # Extract node data into a DataFrame
 def extract_node_info(node):
@@ -15,7 +17,7 @@ def extract_node_info(node):
     if group:
         group_prefix = "_".join(group) + "_"
         if full_name.startswith(group_prefix):
-            short_name = full_name[len(group_prefix):]
+            short_name = full_name[len(group_prefix) :]
         else:
             short_name = full_name  # fallback
     else:
@@ -39,7 +41,7 @@ def build_forest(df: pd.DataFrame) -> list:
         group_path = tuple(group_path)
 
         for i, part in enumerate(group_path):
-            path = group_path[:i + 1]
+            path = group_path[: i + 1]
             if path not in trees_by_path:
                 node_name = "📁 No Group" if part == "__NO_GROUP__" else f"📁 {part}"
                 tree = Tree(node_name)
@@ -56,6 +58,7 @@ def build_forest(df: pd.DataFrame) -> list:
 
     return forest
 
+
 # Format rich tree nodes
 def format_node(short_name: str, full_name: str, changed: bool) -> Text:
     status = "✅" if not changed else "❌"
@@ -65,7 +68,7 @@ def format_node(short_name: str, full_name: str, changed: bool) -> Text:
     return text
 
 
-def list_nodes(remote: str|None = None, rev: str|None = None) -> pd.DataFrame:
+def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFrame:
     # Load DVC-tracked zntrack.json
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     with fs.open("zntrack.json", "r") as f:
@@ -79,5 +82,5 @@ def list_nodes(remote: str|None = None, rev: str|None = None) -> pd.DataFrame:
     console = Console()
     for top_tree in build_forest(df):
         console.print(top_tree)
-    
+
     return df
