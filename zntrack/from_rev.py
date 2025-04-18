@@ -1,4 +1,3 @@
-import contextlib
 import importlib
 import importlib.util
 import pathlib
@@ -10,7 +9,9 @@ import dvc.stage
 from dvc.stage.exceptions import StageFileDoesNotExistError
 
 
-def from_rev(name: str, remote: str | None = None, rev: str | None = None, path: str | None = None):
+def from_rev(
+    name: str, remote: str | None = None, rev: str | None = None, path: str | None = None
+):
     if path is not None:
         raise NotImplementedError
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
@@ -18,15 +19,13 @@ def from_rev(name: str, remote: str | None = None, rev: str | None = None, path:
         stage = fs.repo.stage.collect(target=name)[0]
     except StageFileDoesNotExistError:
         raise ValueError(f"Stage {name} not found in {fs.repo}")
-    
+
     try:
         cmd = stage.cmd
         name = stage.name
         path = pathlib.Path(stage.path).parent
     except AttributeError:
-        raise ValueError(
-            "Stage is not a ZnTrack pipeline stage."
-        )
+        raise ValueError("Stage is not a ZnTrack pipeline stage.")
     # with fs.repo as repo:
     #     # with dvc.repo.Repo(remote=remote, rev=rev) as repo:
     #     for stage in repo.index.stages:

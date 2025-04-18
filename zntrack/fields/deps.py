@@ -21,7 +21,9 @@ def _deps_getter(self: "Node", name: str):
             # TODO: I am not sure if passing the path is always correct here!
             cls=znjson.ZnDecoder.from_converters(
                 [
-                    converter.create_node_converter(remote=self.state.remote, rev=self.state.rev, path=self.state.path),
+                    converter.create_node_converter(
+                        remote=self.state.remote, rev=self.state.rev, path=self.state.path
+                    ),
                     converter.ConnectionConverter,
                     converter.CombinedConnectionsConverter,
                     converter.DVCImportPathConverter,
@@ -31,19 +33,25 @@ def _deps_getter(self: "Node", name: str):
             ),
         )
         if isinstance(content, converter.DataclassContainer):
-            content = content.get_with_params(self.name, name) # TODO: must use dvc filesystem!
+            content = content.get_with_params(
+                self.name, name
+            )  # TODO: must use dvc filesystem!
         if isinstance(content, list):
             new_content = []
             idx = 0
             for val in content:
-                if isinstance(val, converter.DataclassContainer): # TODO: must use dvc filesystem!
+                if isinstance(
+                    val, converter.DataclassContainer
+                ):  # TODO: must use dvc filesystem!
                     new_content.append(val.get_with_params(self.name, name, idx))
                     idx += 1  # index only runs over dataclasses
                 else:
                     new_content.append(val)
             content = new_content
 
-        content = znflow.handler.UpdateConnectors()(content) # TODO: must use dvc filesystem!
+        content = znflow.handler.UpdateConnectors()(
+            content
+        )  # TODO: must use dvc filesystem!
 
         return content
 

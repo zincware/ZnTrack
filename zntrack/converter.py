@@ -100,7 +100,7 @@ class NodeConverter(znjson.ConverterBase):
                 path=self.path,
             )
         return cls.from_rev(name=s["name"], remote=s["remote"], rev=s["rev"])
-    
+
 
 def create_node_converter(remote: str, rev: str, path: pathlib.Path):
     class CustomConverter(NodeConverter):
@@ -109,7 +109,7 @@ def create_node_converter(remote: str, rev: str, path: pathlib.Path):
     CustomConverter.path = path
     CustomConverter.remote = remote
     CustomConverter.rev = rev
-    
+
     return CustomConverter
 
 
