@@ -182,10 +182,15 @@ class Node(znflow.Node, znfields.Base):
         rev: str | None = None,
         running: bool = False,
         lazy_evaluation: bool = True,
+        path: str | None| pathlib.Path = None,
         **kwargs,
     ) -> T:
         if name is None:
             name = cls.__name__
+        if path is not None:
+            path = pathlib.Path(path)
+        else:
+            path = pathlib.Path()
         lazy_values = {}
         for field in dataclasses.fields(cls):
             # check if the field is in the init
@@ -201,13 +206,13 @@ class Node(znflow.Node, znfields.Base):
             instance = cls(**lazy_values)
         if remote is not None or rev is not None:
             import dvc.api
-
-            with dvc.api.open("zntrack.json", repo=remote, rev=rev) as f:
+            fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            with fs.open(path / "zntrack.json") as f:
                 conf = json.loads(f.read())
                 nwd = pathlib.Path(conf[name]["nwd"]["value"])
         else:
             try:
-                with open("zntrack.json") as f:
+                with open(path / "zntrack.json") as f:
                     conf = json.load(f)
                     nwd = pathlib.Path(conf[name]["nwd"]["value"])
             except FileNotFoundError:
@@ -222,6 +227,7 @@ class Node(znflow.Node, znfields.Base):
             state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
             lazy_evaluation=lazy_evaluation,
             group=Group.from_nwd(instance.nwd),
+            path=path,
         ).to_dict()
 
         instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
@@ -231,7 +237,7 @@ class Node(znflow.Node, znfields.Base):
             # TODO: do we want to set the UUID as well?
             # TODO: test that run_count is correct, when using from_rev from another
             #  commit
-            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
+            with instance.state.fs.open(path / instance.nwd / "node-meta.json") as f:
                 content = json.load(f)
                 run_count = content.get("run_count", 0)
                 run_time = content.get("run_time", 0)
@@ -241,7 +247,6 @@ class Node(znflow.Node, znfields.Base):
                 instance.__dict__["state"]["run_time"] = datetime.timedelta(
                     seconds=run_time
                 )
-
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
                 _ = getattr(instance, field.name)

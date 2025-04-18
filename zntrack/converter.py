@@ -70,6 +70,9 @@ class NodeConverter(znjson.ConverterBase):
     level = 100
     instance = Node
     representation = "zntrack.Node"
+    remote: t.Optional[str] = None
+    rev: t.Optional[str] = None
+    path: t.Optional[pathlib.Path] = None
 
     def encode(self, obj: Node) -> NodeDict:
         return {
@@ -81,9 +84,33 @@ class NodeConverter(znjson.ConverterBase):
         }
 
     def decode(self, s: dict) -> Node:
+        if s["remote"] is None:
+            if self.remote is not None:
+                s["remote"] = self.remote
+        if s["rev"] is None:
+            if self.rev is not None:
+                s["rev"] = self.rev
         module = importlib.import_module(s["module"])
         cls = getattr(module, s["cls"])
+        if self.path is not None:
+            return cls.from_rev(
+                name=s["name"],
+                remote=s["remote"],
+                rev=s["rev"],
+                path=self.path,
+            )
         return cls.from_rev(name=s["name"], remote=s["remote"], rev=s["rev"])
+    
+
+def create_node_converter(remote: str, rev: str, path: pathlib.Path):
+    class CustomConverter(NodeConverter):
+        """Custom converter for zntrack.Node."""
+
+    CustomConverter.path = path
+    CustomConverter.remote = remote
+    CustomConverter.rev = rev
+    
+    return CustomConverter
 
 
 class ConnectionConverter(znjson.ConverterBase):
