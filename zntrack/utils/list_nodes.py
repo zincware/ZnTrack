@@ -69,6 +69,7 @@ def format_node(short_name: str, full_name: str, changed: bool) -> Text:
 
 def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFrame:
     # Load DVC-tracked zntrack.json
+    # TODO use fs.collect() to get all stages.
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     with fs.open("zntrack.json", "r") as f:
         config = json.load(f)
