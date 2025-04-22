@@ -1,7 +1,9 @@
-import zntrack.examples
 import os
 import pathlib
 from dataclasses import dataclass
+
+import zntrack.examples
+
 
 @dataclass
 class ExampleExternalNode:
@@ -29,6 +31,7 @@ def test_subrepo(proj_path):
     assert node.params == {"param1": 1, "param2": 2}
     assert node.outs == {"param1": 1, "param2": 2}
 
+
 # def test_subrepo_external_node(proj_path):
 #     """Test subrepo functionality"""
 #     directory = pathlib.Path("subrepo")
@@ -52,4 +55,3 @@ def test_subrepo(proj_path):
 #     )
 #     # node = zntrack.from_rev("OptionalDeps")
 #     assert node.value.parameter == "Lorem Ipsum"
-
