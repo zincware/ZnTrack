@@ -18,7 +18,6 @@ def _deps_getter(self: "Node", name: str):
         # TODO: Ensure deps are loaded from the correct revision
         content = znjson.loads(
             json.dumps(content),
-            # TODO: I am not sure if passing the path is always correct here!
             cls=znjson.ZnDecoder.from_converters(
                 [
                     converter.create_node_converter(

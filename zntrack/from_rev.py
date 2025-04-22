@@ -26,16 +26,6 @@ def from_rev(
         path = pathlib.Path(stage.path).parent
     except AttributeError:
         raise ValueError("Stage is not a ZnTrack pipeline stage.")
-    # with fs.repo as repo:
-    #     # with dvc.repo.Repo(remote=remote, rev=rev) as repo:
-    #     for stage in repo.index.stages:
-    #         with contextlib.suppress(AttributeError):
-    #             # only PipelineStages have a name attribute
-    #             if stage.name == name:
-    #                 cmd = stage.cmd
-    #                 break
-    #     else:
-    #         raise ValueError(f"Stage {name} not found in {repo}")
 
     # cmd will be "zntrack run module.name --name ..."
     # and we need the module.name and --name part
