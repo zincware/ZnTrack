@@ -8,7 +8,7 @@ from zntrack.node import Node
 
 
 def _params_getter(self: "Node", name: str):
-    with self.state.fs.open(PARAMS_FILE_PATH) as f:
+    with self.state.fs.open(self.state.path / PARAMS_FILE_PATH) as f:
         return yaml.safe_load(f)[self.name][name]
 
 

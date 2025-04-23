@@ -4921,7 +4921,7 @@ wheels = [
 
 [[package]]
 name = "zntrack"
-version = "0.8.4"
+version = "0.8.6"
 source = { editable = "." }
 dependencies = [
     { name = "dvc" },

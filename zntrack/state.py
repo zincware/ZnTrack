@@ -61,6 +61,8 @@ class NodeStatus:
         The node working directory.
     restarted: bool
         Whether the Node was restarted and has been run at least once before.
+    path: str
+        The path to the directory where the ``zntrack.json`` file is located.
     """
 
     remote: str | None = None
@@ -77,6 +79,7 @@ class NodeStatus:
     )
     group: Group | None = None
     run_time: datetime.timedelta | None = None
+    path: pathlib.Path = dataclasses.field(default_factory=pathlib.Path)
     # TODO: move node name and nwd to here as well
 
     @property
@@ -87,7 +90,7 @@ class NodeStatus:
     def nwd(self):
         if self.tmp_path is not None:
             return self.tmp_path
-        return get_nwd(self.node)
+        return self.path / get_nwd(self.node)
 
     @property
     def fs(self) -> AbstractFileSystem:
