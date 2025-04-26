@@ -32,26 +32,26 @@ def test_subrepo(proj_path):
     assert node.outs == {"param1": 1, "param2": 2}
 
 
-# def test_subrepo_external_node(proj_path):
-#     """Test subrepo functionality"""
-#     directory = pathlib.Path("subrepo")
-#     directory.mkdir(parents=True, exist_ok=True)
-#     os.chdir(directory)
+def test_subrepo_external_node(proj_path):
+    """Test subrepo functionality"""
+    directory = pathlib.Path("subrepo")
+    directory.mkdir(parents=True, exist_ok=True)
+    os.chdir(directory)
 
-#     project = zntrack.Project()
+    project = zntrack.Project()
 
-#     ext_node = ExampleExternalNode(parameter="Lorem Ipsum")
+    ext_node = ExampleExternalNode(parameter="Lorem Ipsum")
 
-#     with project:
-#         node = zntrack.examples.OptionalDeps(
-#             value=ext_node,
-#         )
-#     project.build()
+    with project:
+        node = zntrack.examples.OptionalDeps(
+            value=ext_node,
+        )
+    project.build()
 
-#     os.chdir(proj_path)
+    os.chdir(proj_path)
 
-#     node = zntrack.from_rev(
-#         "subrepo/dvc.yaml:OptionalDeps",
-#     )
-#     # node = zntrack.from_rev("OptionalDeps")
-#     assert node.value.parameter == "Lorem Ipsum"
+    node = zntrack.from_rev(
+        "subrepo/dvc.yaml:OptionalDeps",
+    )
+    # node = zntrack.from_rev("OptionalDeps")
+    assert node.value.parameter == "Lorem Ipsum"
