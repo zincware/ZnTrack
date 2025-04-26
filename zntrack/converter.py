@@ -8,6 +8,7 @@ import warnings
 import yaml
 import znflow
 import znjson
+from fsspec import AbstractFileSystem
 
 from zntrack.add import DVCImportPath
 from zntrack.config import (
@@ -26,7 +27,14 @@ class DataclassContainer:
     def __init__(self, cls):
         self.cls = cls
 
-    def get_with_params(self, node_name, attr_name, index: int | None = None):
+    def get_with_params(
+        self,
+        node_name,
+        attr_name,
+        index: int | None,
+        fs: AbstractFileSystem,
+        path: pathlib.Path,
+    ):
         """Get an instance of the dataclass with the parameters from the params file.
 
         Attributes
@@ -40,7 +48,8 @@ class DataclassContainer:
             is a list of dataclasses. None if a single dataclass.
 
         """
-        all_params = yaml.safe_load(PARAMS_FILE_PATH.read_text())
+        with fs.open(path / PARAMS_FILE_PATH) as f:
+            all_params = yaml.safe_load(f)
         if index is not None:
             dc_params = all_params[node_name][attr_name][index]
         else:

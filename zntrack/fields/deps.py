@@ -33,24 +33,24 @@ def _deps_getter(self: "Node", name: str):
         )
         if isinstance(content, converter.DataclassContainer):
             content = content.get_with_params(
-                self.name, name
-            )  # TODO: must use dvc filesystem!
+                self.name, name, index=None, fs=self.state.fs, path=self.state.path
+            )
         if isinstance(content, list):
             new_content = []
             idx = 0
             for val in content:
-                if isinstance(
-                    val, converter.DataclassContainer
-                ):  # TODO: must use dvc filesystem!
-                    new_content.append(val.get_with_params(self.name, name, idx))
+                if isinstance(val, converter.DataclassContainer):
+                    new_content.append(
+                        val.get_with_params(
+                            self.name, name, idx, fs=self.state.fs, path=self.state.path
+                        )
+                    )
                     idx += 1  # index only runs over dataclasses
                 else:
                     new_content.append(val)
             content = new_content
 
-        content = znflow.handler.UpdateConnectors()(
-            content
-        )  # TODO: must use dvc filesystem!
+        content = znflow.handler.UpdateConnectors()(content)
 
         return content
 
