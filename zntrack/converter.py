@@ -27,7 +27,14 @@ class DataclassContainer:
     def __init__(self, cls):
         self.cls = cls
 
-    def get_with_params(self, node_name, attr_name, index: int | None, fs: AbstractFileSystem, path: pathlib.Path):
+    def get_with_params(
+        self,
+        node_name,
+        attr_name,
+        index: int | None,
+        fs: AbstractFileSystem,
+        path: pathlib.Path,
+    ):
         """Get an instance of the dataclass with the parameters from the params file.
 
         Attributes
