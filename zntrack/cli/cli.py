@@ -9,11 +9,11 @@ import sys
 
 import git
 import typer
-import yaml
 
 from zntrack import Node, utils
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
+from zntrack.utils.list_nodes import list_nodes
 from zntrack.utils.misc import load_env_vars
 
 load_env_vars()
@@ -94,8 +94,7 @@ def list(
     rev: str = typer.Argument(None, help="The revision to list (default: HEAD)"),
 ):
     """List all Nodes in the Project."""
-    groups, _ = utils.cli.get_groups(remote, rev)
-    print(yaml.dump(groups))
+    _ = list_nodes(remote=remote, rev=rev)
 
 
 @app.command()

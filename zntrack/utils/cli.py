@@ -29,6 +29,7 @@ def get_groups(remote, rev) -> Tuple[dict, list]:
     fs = DVCFileSystem(url=remote, rev=rev)
     with fs.open(ZNTRACK_FILE_PATH) as f:
         config = json.load(f)
+        # TODO: use Group.from_nwd() to get the groups
 
     true_groups = {}
     node_names = []
