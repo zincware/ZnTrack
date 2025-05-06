@@ -39,6 +39,7 @@ def test_node_meta_lock(proj_path, lockfile_01):
         _ = ReadFileContent(deps_file=file, params="test")
 
     project.repro()
-    # TODO: do we want the node to requrie from_rev()? to update lockfile and other node-meta states?
+    # TODO: do we want the node to requrie from_rev()? 
+    #   to update lockfile and other node-meta states?
     node = ReadFileContent.from_rev()
     assert node.state.lockfile == lockfile_01
