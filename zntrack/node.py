@@ -242,12 +242,14 @@ class Node(znflow.Node, znfields.Base):
                 content = json.load(f)
                 run_count = content.get("run_count", 0)
                 run_time = content.get("run_time", 0)
+                lockfile = content.get("lockfile", None)
                 if node_uuid := content.get("uuid", None):
                     instance._uuid = uuid.UUID(node_uuid)
                 instance.__dict__["state"]["run_count"] = run_count
                 instance.__dict__["state"]["run_time"] = datetime.timedelta(
                     seconds=run_time
                 )
+                instance.__dict__["state"]["lockfile"] = lockfile
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
                 _ = getattr(instance, field.name)
