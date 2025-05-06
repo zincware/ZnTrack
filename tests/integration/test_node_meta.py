@@ -3,7 +3,9 @@ from pathlib import Path
 import pytest
 
 import zntrack
-from zntrack.utils.lockfile import mp_join_stage_lock, mp_start_stage_lock
+from zntrack.utils.lockfile import get_stage_lock
+from unittest.mock import MagicMock
+import json
 
 
 class ReadFileContent(zntrack.Node):
@@ -57,6 +59,11 @@ def test_node_meta_lock_mp(proj_path, lockfile_01):
 
     project.repro()
 
-    queue, proc = mp_start_stage_lock(node.name)
-    lock = mp_join_stage_lock(queue, proc)
-    assert lock == lockfile_01
+    queue = MagicMock() # mock multiprocessing.Queue
+    get_stage_lock(node.name, queue)
+    assert queue.put.call_count == 1
+    lockfile = json.loads(json.dumps(queue.put.call_args[0][0]))
+    assert lockfile["cmd"] == lockfile_01["cmd"]
+    assert lockfile["deps"] == lockfile_01["deps"]
+    assert lockfile["params"] == lockfile_01["params"]
+
