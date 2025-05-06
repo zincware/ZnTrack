@@ -14,8 +14,8 @@ import yaml
 from zntrack import Node, utils
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
+from zntrack.utils.lockfile import mp_join_stage_lock, mp_start_stage_lock
 from zntrack.utils.misc import load_env_vars
-from zntrack.utils.lockfile import mp_start_stage_lock, mp_join_stage_lock
 
 load_env_vars()
 
@@ -55,7 +55,11 @@ def main(
 
 @app.command()
 def run(
-    node_path: str, name: str = None, meta_only: bool = False, method: str = "run", save_lockfile: bool = True
+    node_path: str,
+    name: str = None,
+    meta_only: bool = False,
+    method: str = "run",
+    save_lockfile: bool = True,
 ) -> None:
     """Execute a ZnTrack Node.
 
@@ -93,7 +97,7 @@ def run(
         node.state.set_lockfile(stage_lock)
     run_time = datetime.datetime.now() - start_time
     node.state.add_run_time(run_time)
-    
+
     node.state.save_node_meta()
 
 
