@@ -262,7 +262,7 @@ class DVCPlugin(ZnTrackPlugin):
                     continue
                 content = [
                     pathlib.Path(c).as_posix()
-                    for c in get_attr_always_list(self.node, field.name)
+                    for c in get_attr_always_list(self.node, field.name) if c is not None
                 ]
                 RunDVCImportPathHandler()(self.node.__dict__.get(field.name))
                 stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
