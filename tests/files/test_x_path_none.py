@@ -5,7 +5,6 @@ import typing as t
 import yaml
 
 import zntrack
-import zntrack.group
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -25,14 +24,14 @@ def test_x_path_none(proj_path):
     project = zntrack.Project()
 
     with project:
-        node_none = MyNode(
+        _ = MyNode(
             deps_path=None,
             params_path=None,
             outs_path=None,
             metrics_path=None,
             plots_path=None,
         )
-        node_list_none = MyNode(
+        _ = MyNode(
             deps_path=[None],
             params_path=[None],
             outs_path=[None],
