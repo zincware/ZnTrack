@@ -79,6 +79,7 @@ def test_deps(proj_path):
         _ = NodeC(deps=a.metrics)
         _ = NodeC(deps=a.plots)
         _ = NodeC(deps=a.outs_path)
+        # TODO: do we want to allow `x_path` as a `deps` or should it go into `deps_path`?
         _ = NodeC(deps=a.metrics_paths)
         _ = NodeC(deps=a.plots_path)
 
