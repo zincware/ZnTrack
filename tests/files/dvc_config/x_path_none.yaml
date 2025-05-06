@@ -1,0 +1,11 @@
+stages:
+  MyNode:
+    cmd: zntrack run test_x_path_none.MyNode --name MyNode
+    metrics:
+    - nodes/MyNode/node-meta.json:
+        cache: true
+  MyNode_1:
+    cmd: zntrack run test_x_path_none.MyNode --name MyNode_1
+    metrics:
+    - nodes/MyNode_1/node-meta.json:
+        cache: true

@@ -146,8 +146,11 @@ class DVCPlugin(ZnTrackPlugin):
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
-                content = [{pathlib.Path(x).as_posix(): None} for x in content]
-                stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
+                content = [
+                    {pathlib.Path(x).as_posix(): None} for x in content if x is not None
+                ]
+                if len(content) > 0:
+                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
@@ -159,31 +162,33 @@ class DVCPlugin(ZnTrackPlugin):
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
-                content = [pathlib.Path(x).as_posix() for x in content]
+                content = [pathlib.Path(x).as_posix() for x in content if x is not None]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
+                if len(content) > 0:
+                    stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
-                content = [pathlib.Path(x).as_posix() for x in content]
+                content = [pathlib.Path(x).as_posix() for x in content if x is not None]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
-                # plots[self.node.name] = None
+                if len(content) > 0:
+                    stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS_PATH:
                 if getattr(self.node, field.name) is None:
                     continue
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
-                content = [pathlib.Path(x).as_posix() for x in content]
+                content = [pathlib.Path(x).as_posix() for x in content if x is not None]
                 if field.metadata.get(ZNTRACK_CACHE) is False:
                     content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
+                if len(content) > 0:
+                    stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
@@ -263,9 +268,11 @@ class DVCPlugin(ZnTrackPlugin):
                 content = [
                     pathlib.Path(c).as_posix()
                     for c in get_attr_always_list(self.node, field.name)
+                    if c is not None
                 ]
                 RunDVCImportPathHandler()(self.node.__dict__.get(field.name))
-                stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
+                if len(content) > 0:
+                    stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
 
         for key in stages:
             if key in ["cmd", "always_changed"]:
