@@ -146,7 +146,9 @@ class DVCPlugin(ZnTrackPlugin):
                 content = nwd_handler(
                     get_attr_always_list(self.node, field.name), nwd=self.node.nwd
                 )
-                content = [{pathlib.Path(x).as_posix(): None} for x in content if x is not None]
+                content = [
+                    {pathlib.Path(x).as_posix(): None} for x in content if x is not None
+                ]
                 if len(content) > 0:
                     stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS_PATH:
@@ -265,7 +267,8 @@ class DVCPlugin(ZnTrackPlugin):
                     continue
                 content = [
                     pathlib.Path(c).as_posix()
-                    for c in get_attr_always_list(self.node, field.name) if c is not None
+                    for c in get_attr_always_list(self.node, field.name)
+                    if c is not None
                 ]
                 RunDVCImportPathHandler()(self.node.__dict__.get(field.name))
                 if len(content) > 0:

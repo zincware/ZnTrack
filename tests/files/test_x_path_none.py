@@ -1,15 +1,14 @@
-import zntrack
-import typing as t
 import json
 import pathlib
+import typing as t
 
-import pandas as pd
 import yaml
 
 import zntrack
 import zntrack.group
 
 CWD = pathlib.Path(__file__).parent.resolve()
+
 
 class MyNode(zntrack.Node):
     deps_path: t.Union[list[t.Union[str, None]], None] = zntrack.deps_path()
@@ -20,6 +19,7 @@ class MyNode(zntrack.Node):
 
     def run(self):
         pass
+
 
 def test_x_path_none(proj_path):
     project = zntrack.Project()
@@ -42,9 +42,9 @@ def test_x_path_none(proj_path):
 
     project.build()
 
-    assert json.loads((CWD / "zntrack_config" / "x_path_none.json").read_text()) == json.loads(
-        (proj_path / "zntrack.json").read_text()
-    )
+    assert json.loads(
+        (CWD / "zntrack_config" / "x_path_none.json").read_text()
+    ) == json.loads((proj_path / "zntrack.json").read_text())
     assert yaml.safe_load(
         (CWD / "dvc_config" / "x_path_none.yaml").read_text()
     ) == yaml.safe_load((proj_path / "dvc.yaml").read_text())
