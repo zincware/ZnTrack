@@ -4,6 +4,8 @@ import pytest
 
 import zntrack
 
+from zntrack.utils.lockfile import mp_start_stage_lock, mp_join_stage_lock
+
 
 class ReadFileContent(zntrack.Node):
     deps_file: Path = zntrack.deps_path()
@@ -43,3 +45,18 @@ def test_node_meta_lock(proj_path, lockfile_01):
     #   to update lockfile and other node-meta states?
     node = ReadFileContent.from_rev()
     assert node.state.lockfile == lockfile_01
+
+def test_node_meta_lock_mp(proj_path, lockfile_01):
+    project = zntrack.Project()
+
+    file = Path("data.txt")
+    file.write_text("Lorem Ipsum")
+
+    with project:
+        node = ReadFileContent(deps_file=file, params="test")
+
+    project.repro()
+
+    queue, proc = mp_start_stage_lock(node.name)
+    lock = mp_join_stage_lock(queue, proc)
+    assert lock == lockfile_01
