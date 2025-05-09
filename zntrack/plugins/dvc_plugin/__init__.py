@@ -271,7 +271,6 @@ class DVCPlugin(ZnTrackPlugin):
                                 )
                             )
                     elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
-                        # TODO: iterate the fields and search for zntrack.params_path and zntrack.deps_path
                         for field in dataclasses.fields(con):
                             if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
                                 # add the path to the params_path
