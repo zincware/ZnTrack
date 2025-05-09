@@ -78,7 +78,6 @@ class DVCPlugin(ZnTrackPlugin):
                             #  to the params.yaml file to be later used
                             #  by the DataclassContainer to recreate the
                             #  instance with the correct parameters.
-                            # get all fields which are zntrack.params_path and zntrack.deps_path
                             exclude_fields = [
                                 field.name
                                 for field in dataclasses.fields(val)
@@ -106,7 +105,6 @@ class DVCPlugin(ZnTrackPlugin):
                 elif dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
-                    # get all fields which are zntrack.params_path and zntrack.deps_path
                     exclude_fields = [
                         field.name
                         for field in dataclasses.fields(content)
