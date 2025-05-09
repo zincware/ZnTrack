@@ -1,0 +1,82 @@
+{
+    "NodeWithModel": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithParamsPath"
+            }
+        }
+    },
+    "NodeWithModel_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_1"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithParamsPath"
+            }
+        }
+    },
+    "NodeWithModel_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_2"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithDepsPath"
+            }
+        }
+    },
+    "NodeWithModel_3": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_3"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithDepsPath"
+            }
+        }
+    },
+    "NodeWithModel_4": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_4"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithParamsAndDepsPath"
+            }
+        }
+    },
+    "NodeWithModel_5": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_5"
+        },
+        "model": [
+            {
+                "_type": "@dataclasses.dataclass",
+                "value": {
+                    "module": "test_dataclass_w_deps_params_path",
+                    "cls": "ModelWithParamsAndDepsPath"
+                }
+            }
+        ]
+    }
+}
