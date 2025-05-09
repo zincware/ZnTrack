@@ -79,7 +79,12 @@ class DVCPlugin(ZnTrackPlugin):
                             #  by the DataclassContainer to recreate the
                             #  instance with the correct parameters.
                             # get all fields which are zntrack.params_path and zntrack.deps_path
-                            exclude_fields = [field.name for field in dataclasses.fields(val) if field.metadata.get(FIELD_TYPE) in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]]
+                            exclude_fields = [
+                                field.name
+                                for field in dataclasses.fields(val)
+                                if field.metadata.get(FIELD_TYPE)
+                                in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]
+                            ]
                             dc_params = dataclasses.asdict(val)
                             for f in exclude_fields:
                                 dc_params.pop(f)
@@ -101,8 +106,13 @@ class DVCPlugin(ZnTrackPlugin):
                 elif dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
-                                            # get all fields which are zntrack.params_path and zntrack.deps_path
-                    exclude_fields = [field.name for field in dataclasses.fields(content) if field.metadata.get(FIELD_TYPE) in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]]
+                    # get all fields which are zntrack.params_path and zntrack.deps_path
+                    exclude_fields = [
+                        field.name
+                        for field in dataclasses.fields(content)
+                        if field.metadata.get(FIELD_TYPE)
+                        in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]
+                    ]
                     dc_params = dataclasses.asdict(content)
                     for f in exclude_fields:
                         dc_params.pop(f)
@@ -266,13 +276,18 @@ class DVCPlugin(ZnTrackPlugin):
                             if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
                                 # add the path to the params_path
                                 content = nwd_handler(
-                                    get_attr_always_list(con, field.name), nwd=self.node.nwd
+                                    get_attr_always_list(con, field.name),
+                                    nwd=self.node.nwd,
                                 )
                                 content = [
-                                    {pathlib.Path(x).as_posix(): None} for x in content if x is not None
+                                    {pathlib.Path(x).as_posix(): None}
+                                    for x in content
+                                    if x is not None
                                 ]
                                 if len(content) > 0:
-                                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
+                                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(
+                                        content
+                                    )
                             if field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
                                 content = [
                                     pathlib.Path(c).as_posix()
@@ -280,8 +295,10 @@ class DVCPlugin(ZnTrackPlugin):
                                     if c is not None
                                 ]
                                 if len(content) > 0:
-                                    stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
-                            
+                                    stages.setdefault(FieldTypes.DEPS.value, []).extend(
+                                        content
+                                    )
+
                         # add node name to params.yaml
                         stages.setdefault(FieldTypes.PARAMS.value, []).append(
                             self.node.name

@@ -1,9 +1,7 @@
-import zntrack
-import dataclasses
-from pathlib import Path
 import dataclasses
 import json
 import pathlib
+from pathlib import Path
 
 import yaml
 
@@ -11,36 +9,41 @@ import zntrack
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
+
 class Model:
     """Base Model class"""
+
 
 @dataclasses.dataclass
 class ModelWithParamsPath(Model):
     """Model with parameters"""
 
     params: dict
-    config: str|Path|list[str|Path] = zntrack.params_path()
+    config: str | Path | list[str | Path] = zntrack.params_path()
+
 
 @dataclasses.dataclass
 class ModelWithDepsPath(Model):
     """Model with dependencies"""
 
     params: dict
-    files: str|Path|list[str|Path] = zntrack.deps_path()
+    files: str | Path | list[str | Path] = zntrack.deps_path()
+
 
 @dataclasses.dataclass
 class ModelWithParamsAndDepsPath(Model):
     """Model with parameters and dependencies"""
 
     params: dict
-    config: str|Path|list[str|Path] = zntrack.params_path()
-    files: str|Path|list[str|Path] = zntrack.deps_path()
+    config: str | Path | list[str | Path] = zntrack.params_path()
+    files: str | Path | list[str | Path] = zntrack.deps_path()
+
 
 class NodeWithModel(zntrack.Node):
     """Node with model"""
 
-    model: Model|list[Model] = zntrack.deps()
-    
+    model: Model | list[Model] = zntrack.deps()
+
 
 def test_node_with_dc_model_params_deps(proj_path):
     project = zntrack.Project()
@@ -50,7 +53,9 @@ def test_node_with_dc_model_params_deps(proj_path):
     b1 = ModelWithDepsPath(params={"a": 1}, files="file.txt")
     b2 = ModelWithDepsPath(params={"a": 1}, files=Path("file.txt"))
     c = ModelWithParamsAndDepsPath(
-        params={"a": 1}, config=["config.yaml", Path("config2.yaml")], files=["file.txt", Path("file2.txt")]
+        params={"a": 1},
+        config=["config.yaml", Path("config2.yaml")],
+        files=["file.txt", Path("file2.txt")],
     )
 
     with project:
