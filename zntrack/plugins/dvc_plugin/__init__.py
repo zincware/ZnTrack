@@ -30,6 +30,7 @@ from zntrack.utils.misc import (
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 
+
 def _dataclass_to_dict(object) -> dict:
     """Convert a dataclass to a dictionary excluding certain keys."""
     exclude_fields = [
@@ -41,9 +42,7 @@ def _dataclass_to_dict(object) -> dict:
     dc_params = dataclasses.asdict(object)
     for f in exclude_fields:
         dc_params.pop(f)
-    dc_params["_cls"] = (
-        f"{module_handler(object)}.{object.__class__.__name__}"
-    )
+    dc_params["_cls"] = f"{module_handler(object)}.{object.__class__.__name__}"
     return dc_params
 
 
