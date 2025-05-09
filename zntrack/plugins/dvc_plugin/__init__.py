@@ -5,8 +5,6 @@ import pathlib
 import typing as t
 
 import znflow
-import znflow.handler
-import znflow.utils
 import znjson
 
 from zntrack import config, converter
@@ -31,6 +29,22 @@ from zntrack.utils.misc import (
     sort_and_deduplicate,
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
+
+def _dataclass_to_dict(object) -> dict:
+    """Convert a dataclass to a dictionary excluding certain keys."""
+    exclude_fields = [
+        field.name
+        for field in dataclasses.fields(object)
+        if field.metadata.get(FIELD_TYPE)
+        in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]
+    ]
+    dc_params = dataclasses.asdict(object)
+    for f in exclude_fields:
+        dc_params.pop(f)
+    dc_params["_cls"] = (
+        f"{module_handler(object)}.{object.__class__.__name__}"
+    )
+    return dc_params
 
 
 @dataclasses.dataclass
@@ -78,19 +92,7 @@ class DVCPlugin(ZnTrackPlugin):
                             #  to the params.yaml file to be later used
                             #  by the DataclassContainer to recreate the
                             #  instance with the correct parameters.
-                            exclude_fields = [
-                                field.name
-                                for field in dataclasses.fields(val)
-                                if field.metadata.get(FIELD_TYPE)
-                                in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]
-                            ]
-                            dc_params = dataclasses.asdict(val)
-                            for f in exclude_fields:
-                                dc_params.pop(f)
-                            dc_params["_cls"] = (
-                                f"{module_handler(val)}.{val.__class__.__name__}"
-                            )
-                            new_content.append(dc_params)
+                            new_content.append(_dataclass_to_dict(val))
                         elif isinstance(
                             val, (znflow.Connection, znflow.CombinedConnections)
                         ):
@@ -105,19 +107,7 @@ class DVCPlugin(ZnTrackPlugin):
                 elif dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
-                    exclude_fields = [
-                        field.name
-                        for field in dataclasses.fields(content)
-                        if field.metadata.get(FIELD_TYPE)
-                        in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]
-                    ]
-                    dc_params = dataclasses.asdict(content)
-                    for f in exclude_fields:
-                        dc_params.pop(f)
-                    dc_params["_cls"] = (
-                        f"{module_handler(content)}.{content.__class__.__name__}"
-                    )
-                    data[field.name] = dc_params
+                    data[field.name] = _dataclass_to_dict(content)
                 elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
                     pass
                 else:
