@@ -1,5 +1,5 @@
 import dataclasses
-
+import pytest
 import zntrack
 
 
@@ -10,13 +10,37 @@ class SimpleThermostat:
 
 @dataclasses.dataclass
 class ThermostatA:
-    temperature: float = zntrack.params()
+    temperature: float
 
 
 @dataclasses.dataclass
 class ThermostatB:
     temperature: float = zntrack.params()
+    # we do allow zntrack.params altough they don't do anything
+    # zntrack.params is just the default behavior here.
 
+class HasBase:
+    """Base class for unsupported fields."""
+
+@dataclasses.dataclass
+class HasOuts(HasBase):
+    val: str = zntrack.outs()
+
+@dataclasses.dataclass
+class HasMetrics(HasBase):
+    val: str = zntrack.metrics()
+
+@dataclasses.dataclass
+class HasPlots(HasBase):
+    val: str = zntrack.plots()
+
+@dataclasses.dataclass
+class HasDeps(HasBase):
+    val: str = zntrack.deps()
+
+
+class HasIllegedDC(zntrack.Node):
+    method: HasBase = zntrack.deps()
 
 class MD(zntrack.Node):
     thermostat: ThermostatA | ThermostatB | SimpleThermostat = zntrack.deps()
@@ -52,6 +76,39 @@ def test_switch_deps_class_keep_params(proj_path):
 
     proj.repro()
     assert md.from_rev().result == "SimpleThermostat"
+
+
+@pytest.mark.parametrize(
+    "node_class",
+    [
+        HasDeps,
+    ],
+)
+def test_dc_with_wrong_field_init(node_class):
+    """Test that dataclass with wrong field raises an error."""
+    project = zntrack.Project()
+    instance = node_class(val="test")
+    with project:
+        HasIllegedDC(method=instance)
+    with pytest.raises(TypeError):
+        project.build()
+
+@pytest.mark.parametrize(
+    "node_class",
+    [
+        HasOuts,
+        HasMetrics,
+        HasPlots,
+    ],
+)
+def test_dc_with_wrong_field_no_init(node_class):
+    """Test that dataclass with wrong field raises an error."""
+    project = zntrack.Project()
+    instance = node_class()
+    with project:
+        HasIllegedDC(method=instance)
+    with pytest.raises(TypeError):
+        project.build()
 
 
 if __name__ == "__main__":

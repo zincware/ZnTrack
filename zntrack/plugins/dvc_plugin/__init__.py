@@ -30,15 +30,26 @@ from zntrack.utils.misc import (
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 
+import logging
+
+log = logging.getLogger(__name__)
+
 
 def _dataclass_to_dict(object) -> dict:
     """Convert a dataclass to a dictionary excluding certain keys."""
-    exclude_fields = [
-        field.name
-        for field in dataclasses.fields(object)
-        if field.metadata.get(FIELD_TYPE)
-        in [FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH]
-    ]
+    exclude_fields = []
+    for field in dataclasses.fields(object):
+        if FIELD_TYPE in field.metadata:
+            if field.metadata[FIELD_TYPE] in [
+                FieldTypes.PARAMS_PATH,
+                FieldTypes.DEPS_PATH,
+                FieldTypes.PARAMS, # just do nothing
+            ]:
+                exclude_fields.append(field.name)                
+            else:
+                raise TypeError(
+                    f"Unsupported field type '{field.metadata[FIELD_TYPE]}' for field '{field.name}'"
+                )
     dc_params = dataclasses.asdict(object)
     for f in exclude_fields:
         dc_params.pop(f)
@@ -290,7 +301,7 @@ class DVCPlugin(ZnTrackPlugin):
                             self.node.name
                         )
                     else:
-                        raise ValueError("unsupoorted type")
+                        raise ValueError("unsupported type")
 
                 if len(paths) > 0:
                     stages.setdefault(FieldTypes.DEPS.value, []).extend(paths)
