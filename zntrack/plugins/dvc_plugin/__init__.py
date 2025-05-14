@@ -1,6 +1,7 @@
 import copy
 import dataclasses
 import json
+import logging
 import pathlib
 import typing as t
 
@@ -30,8 +31,6 @@ from zntrack.utils.misc import (
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
 
-import logging
-
 log = logging.getLogger(__name__)
 
 
@@ -44,7 +43,7 @@ def _dataclass_to_dict(object) -> dict:
                 FieldTypes.PARAMS_PATH,
                 FieldTypes.DEPS_PATH,
             ]:
-                exclude_fields.append(field.name)                
+                exclude_fields.append(field.name)
             else:
                 raise TypeError(
                     f"Unsupported field type '{field.metadata[FIELD_TYPE]}' for field '{field.name}'"

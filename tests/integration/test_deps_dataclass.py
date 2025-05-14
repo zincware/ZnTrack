@@ -1,5 +1,7 @@
 import dataclasses
+
 import pytest
+
 import zntrack
 
 
@@ -17,24 +19,30 @@ class ThermostatA:
 class ThermostatB:
     temperature: float
 
+
 class HasBase:
     """Base class for unsupported fields."""
+
 
 @dataclasses.dataclass
 class HasOuts(HasBase):
     val: str = zntrack.outs()
 
+
 @dataclasses.dataclass
 class HasMetrics(HasBase):
     val: str = zntrack.metrics()
+
 
 @dataclasses.dataclass
 class HasPlots(HasBase):
     val: str = zntrack.plots()
 
+
 @dataclasses.dataclass
 class HasDeps(HasBase):
     val: str = zntrack.deps()
+
 
 @dataclasses.dataclass
 class HasParams(HasBase):
@@ -43,6 +51,7 @@ class HasParams(HasBase):
 
 class HasIllegedDC(zntrack.Node):
     method: HasBase = zntrack.deps()
+
 
 class MD(zntrack.Node):
     thermostat: ThermostatA | ThermostatB | SimpleThermostat = zntrack.deps()
@@ -95,6 +104,7 @@ def test_dc_with_wrong_field_init(node_class):
         HasIllegedDC(method=instance)
     with pytest.raises(TypeError):
         project.build()
+
 
 @pytest.mark.parametrize(
     "node_class",
