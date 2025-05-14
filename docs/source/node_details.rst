@@ -72,15 +72,15 @@ This can be useful e.g. when defining a method that uses a parameter file or req
 .. code-block:: python
 
     from dataclasses import dataclass
-    import zntrack
     import yaml
+    import zntrack
 
     @dataclass
     class Calculator:
         config_file: str = zntrack.params_path()
         model_path: str = zntrack.deps_path()
 
-        def get_calculator(self)::
+        def get_calculator(self):
             with open(self.config_file, "r") as f:
                 config = yaml.safe_load(f)
             return func(model=self.model_path, **config)

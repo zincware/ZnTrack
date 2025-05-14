@@ -49,7 +49,7 @@ class HasParams(HasBase):
     val: str = zntrack.params()
 
 
-class HasIllegedDC(zntrack.Node):
+class HasIllegalDC(zntrack.Node):
     method: HasBase = zntrack.deps()
 
 
@@ -101,7 +101,7 @@ def test_dc_with_wrong_field_init(node_class):
     project = zntrack.Project()
     instance = node_class(val="test")
     with project:
-        HasIllegedDC(method=instance)
+        HasIllegalDC(method=instance)
     with pytest.raises(TypeError):
         project.build()
 
@@ -119,7 +119,7 @@ def test_dc_with_wrong_field_no_init(node_class):
     project = zntrack.Project()
     instance = node_class()
     with project:
-        HasIllegedDC(method=instance)
+        HasIllegalDC(method=instance)
     with pytest.raises(TypeError):
         project.build()
 
