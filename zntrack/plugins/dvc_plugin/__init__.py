@@ -43,7 +43,6 @@ def _dataclass_to_dict(object) -> dict:
             if field.metadata[FIELD_TYPE] in [
                 FieldTypes.PARAMS_PATH,
                 FieldTypes.DEPS_PATH,
-                FieldTypes.PARAMS, # just do nothing
             ]:
                 exclude_fields.append(field.name)                
             else:

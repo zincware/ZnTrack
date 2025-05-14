@@ -15,9 +15,7 @@ class ThermostatA:
 
 @dataclasses.dataclass
 class ThermostatB:
-    temperature: float = zntrack.params()
-    # we do allow zntrack.params altough they don't do anything
-    # zntrack.params is just the default behavior here.
+    temperature: float
 
 class HasBase:
     """Base class for unsupported fields."""
@@ -37,6 +35,10 @@ class HasPlots(HasBase):
 @dataclasses.dataclass
 class HasDeps(HasBase):
     val: str = zntrack.deps()
+
+@dataclasses.dataclass
+class HasParams(HasBase):
+    val: str = zntrack.params()
 
 
 class HasIllegedDC(zntrack.Node):
@@ -82,6 +84,7 @@ def test_switch_deps_class_keep_params(proj_path):
     "node_class",
     [
         HasDeps,
+        HasParams,
     ],
 )
 def test_dc_with_wrong_field_init(node_class):
