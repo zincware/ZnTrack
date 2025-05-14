@@ -66,6 +66,26 @@ If you load a :term:`Node` via ``zntrack.from_rev``, you can also use it as an o
             scaled_number = ManipulateNumber(number=1.0, method=scale)
         project.repro()
 
+Off-graph :term:`Node` instances can be extended with :meth:`zntrack.params_path` and :meth:`zntrack.deps_path` to define parameters and dependencies, which will be connected to the :term:`Node` they are used in.
+This can be useful e.g. when defining a method that uses a parameter file or requires a specific file dependency without providing a run method and thus not being a :term:`Node` itself.
+
+.. code-block:: python
+
+    from dataclasses import dataclass
+    import zntrack
+    import yaml
+
+    @dataclass
+    class Calculator:
+        config_file: str = zntrack.params_path()
+        model_path: str = zntrack.deps_path()
+
+        def get_calculator(self)::
+            with open(self.config_file, "r") as f:
+                config = yaml.safe_load(f)
+            return func(model=self.model_path, **config)
+
+
 Always Changed
 ==============
 
