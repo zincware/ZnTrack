@@ -46,7 +46,8 @@ def _dataclass_to_dict(object) -> dict:
                 exclude_fields.append(field.name)
             else:
                 raise TypeError(
-                    f"Unsupported field type '{field.metadata[FIELD_TYPE]}' for field '{field.name}'"
+                    f"Unsupported field type '{field.metadata[FIELD_TYPE]}'"
+                    f" for field '{field.name}'."
                 )
     dc_params = dataclasses.asdict(object)
     for f in exclude_fields:
