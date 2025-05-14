@@ -85,6 +85,9 @@ This can be useful e.g. when defining a method that uses a parameter file or req
                 config = yaml.safe_load(f)
             return func(model=self.model_path, **config)
 
+.. warning::
+
+    Reading files without using the DVCFileSystem in dataclasses will lead to errors when using ``zntrack.from_rev()`` with a ``rev`` or ``remote`` argument.
 
 Always Changed
 ==============
