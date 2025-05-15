@@ -78,6 +78,7 @@ def test_node_with_dc_model_params_deps(proj_path):
         proj_path / "params.yaml"
     ).read_text()
 
+
 if __name__ == "__main__":
     from pathlib import Path
 
