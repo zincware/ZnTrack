@@ -118,13 +118,14 @@ def test_dc_deps_params_files(proj_path):
     with project:
         md = MD(thermostat=instance)
 
-    project.build()
+    project.repro()
 
     node = md.from_rev()
     assert isinstance(node.thermostat, ClassWithDepsAndParams)
     assert node.thermostat.temperature == 10
     assert node.thermostat.config == [config_file]
     assert node.thermostat.files == deps_file
+    assert node.result == "ClassWithDepsAndParams"
 
 
 @pytest.mark.parametrize(
