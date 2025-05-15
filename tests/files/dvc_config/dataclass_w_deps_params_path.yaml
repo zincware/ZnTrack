@@ -1,0 +1,59 @@
+stages:
+  NodeWithModel:
+    cmd: zntrack run test_dataclass_w_deps_params_path.NodeWithModel --name NodeWithModel
+    metrics:
+    - nodes/NodeWithModel/node-meta.json:
+        cache: true
+    params:
+    - NodeWithModel
+    - config.yaml: null
+  NodeWithModel_1:
+    cmd: zntrack run test_dataclass_w_deps_params_path.NodeWithModel --name NodeWithModel_1
+    metrics:
+    - nodes/NodeWithModel_1/node-meta.json:
+        cache: true
+    params:
+    - NodeWithModel_1
+    - config.yaml: null
+  NodeWithModel_2:
+    cmd: zntrack run test_dataclass_w_deps_params_path.NodeWithModel --name NodeWithModel_2
+    deps:
+    - file.txt
+    metrics:
+    - nodes/NodeWithModel_2/node-meta.json:
+        cache: true
+    params:
+    - NodeWithModel_2
+  NodeWithModel_3:
+    cmd: zntrack run test_dataclass_w_deps_params_path.NodeWithModel --name NodeWithModel_3
+    deps:
+    - file.txt
+    metrics:
+    - nodes/NodeWithModel_3/node-meta.json:
+        cache: true
+    params:
+    - NodeWithModel_3
+  NodeWithModel_4:
+    cmd: zntrack run test_dataclass_w_deps_params_path.NodeWithModel --name NodeWithModel_4
+    deps:
+    - file.txt
+    - file2.txt
+    metrics:
+    - nodes/NodeWithModel_4/node-meta.json:
+        cache: true
+    params:
+    - NodeWithModel_4
+    - config.yaml: null
+    - config2.yaml: null
+  NodeWithModel_5:
+    cmd: zntrack run test_dataclass_w_deps_params_path.NodeWithModel --name NodeWithModel_5
+    deps:
+    - file.txt
+    - file2.txt
+    metrics:
+    - nodes/NodeWithModel_5/node-meta.json:
+        cache: true
+    params:
+    - NodeWithModel_5
+    - config.yaml: null
+    - config2.yaml: null

@@ -1,12 +1,11 @@
 import copy
 import dataclasses
 import json
+import logging
 import pathlib
 import typing as t
 
 import znflow
-import znflow.handler
-import znflow.utils
 import znjson
 
 from zntrack import config, converter
@@ -31,6 +30,30 @@ from zntrack.utils.misc import (
     sort_and_deduplicate,
 )
 from zntrack.utils.node_wd import NWDReplaceHandler, nwd
+
+log = logging.getLogger(__name__)
+
+
+def _dataclass_to_dict(object) -> dict:
+    """Convert a dataclass to a dictionary excluding certain keys."""
+    exclude_fields = []
+    for field in dataclasses.fields(object):
+        if FIELD_TYPE in field.metadata:
+            if field.metadata[FIELD_TYPE] in [
+                FieldTypes.PARAMS_PATH,
+                FieldTypes.DEPS_PATH,
+            ]:
+                exclude_fields.append(field.name)
+            else:
+                raise TypeError(
+                    f"Unsupported field type '{field.metadata[FIELD_TYPE]}'"
+                    f" for field '{field.name}'."
+                )
+    dc_params = dataclasses.asdict(object)
+    for f in exclude_fields:
+        dc_params.pop(f)
+    dc_params["_cls"] = f"{module_handler(object)}.{object.__class__.__name__}"
+    return dc_params
 
 
 @dataclasses.dataclass
@@ -78,11 +101,7 @@ class DVCPlugin(ZnTrackPlugin):
                             #  to the params.yaml file to be later used
                             #  by the DataclassContainer to recreate the
                             #  instance with the correct parameters.
-                            dc_params = dataclasses.asdict(val)
-                            dc_params["_cls"] = (
-                                f"{module_handler(val)}.{val.__class__.__name__}"
-                            )
-                            new_content.append(dc_params)
+                            new_content.append(_dataclass_to_dict(val))
                         elif isinstance(
                             val, (znflow.Connection, znflow.CombinedConnections)
                         ):
@@ -97,11 +116,7 @@ class DVCPlugin(ZnTrackPlugin):
                 elif dataclasses.is_dataclass(content) and not isinstance(
                     content, (Node, znflow.Connection, znflow.CombinedConnections)
                 ):
-                    dc_params = dataclasses.asdict(content)
-                    dc_params["_cls"] = (
-                        f"{module_handler(content)}.{content.__class__.__name__}"
-                    )
-                    data[field.name] = dc_params
+                    data[field.name] = _dataclass_to_dict(content)
                 elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
                     pass
                 else:
@@ -253,12 +268,39 @@ class DVCPlugin(ZnTrackPlugin):
                                 )
                             )
                     elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
+                        for field in dataclasses.fields(con):
+                            if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
+                                # add the path to the params_path
+                                content = nwd_handler(
+                                    get_attr_always_list(con, field.name),
+                                    nwd=self.node.nwd,
+                                )
+                                content = [
+                                    {pathlib.Path(x).as_posix(): None}
+                                    for x in content
+                                    if x is not None
+                                ]
+                                if len(content) > 0:
+                                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(
+                                        content
+                                    )
+                            if field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
+                                content = [
+                                    pathlib.Path(c).as_posix()
+                                    for c in get_attr_always_list(con, field.name)
+                                    if c is not None
+                                ]
+                                if len(content) > 0:
+                                    stages.setdefault(FieldTypes.DEPS.value, []).extend(
+                                        content
+                                    )
+
                         # add node name to params.yaml
                         stages.setdefault(FieldTypes.PARAMS.value, []).append(
                             self.node.name
                         )
                     else:
-                        raise ValueError("unsupoorted type")
+                        raise ValueError("unsupported type")
 
                 if len(paths) > 0:
                     stages.setdefault(FieldTypes.DEPS.value, []).extend(paths)
