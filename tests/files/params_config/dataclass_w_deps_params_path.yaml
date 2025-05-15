@@ -1,0 +1,30 @@
+NodeWithModel:
+  model:
+    _cls: test_dataclass_w_deps_params_path.ModelWithParamsPath
+    params:
+      a: 1
+NodeWithModel_1:
+  model:
+    _cls: test_dataclass_w_deps_params_path.ModelWithParamsPath
+    params:
+      a: 1
+NodeWithModel_2:
+  model:
+    _cls: test_dataclass_w_deps_params_path.ModelWithDepsPath
+    params:
+      a: 1
+NodeWithModel_3:
+  model:
+    _cls: test_dataclass_w_deps_params_path.ModelWithDepsPath
+    params:
+      a: 1
+NodeWithModel_4:
+  model:
+    _cls: test_dataclass_w_deps_params_path.ModelWithParamsAndDepsPath
+    params:
+      a: 1
+NodeWithModel_5:
+  model:
+  - _cls: test_dataclass_w_deps_params_path.ModelWithParamsAndDepsPath
+    params:
+      a: 1
