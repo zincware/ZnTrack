@@ -298,7 +298,8 @@ class DataclassConverter(znjson.ConverterBase):
         fields = {
             field.name: getattr(obj, field.name)
             for field in dataclasses.fields(obj)
-            if field.metadata.get(FIELD_TYPE) in {FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH}
+            if field.metadata.get(FIELD_TYPE)
+            in {FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH}
         }
 
         result = {"module": module, "cls": cls}
