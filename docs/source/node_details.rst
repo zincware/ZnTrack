@@ -18,6 +18,9 @@ They are often used to define an interchangeable model, as illustrated in the ex
 Another use case for off-graph :term:`Node` instances is reusing a :term:`Node` from another project.
 If you load a :term:`Node` via ``zntrack.from_rev``, you can also use it as an off-graph :term:`Node`.
 
+In other words, off-graph :term:`Node` instances do not produce any output files when the graph is executed.
+They are only used as dependencies for on-graph :term:`Node` instances, which are responsible for creating output files.
+
 .. note::
 
     Just like on-graph :term:`Node` definitions, it must be possible to import the ``dataclass``-derived :term:`Node`.
