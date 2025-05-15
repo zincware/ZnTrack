@@ -68,7 +68,7 @@ class HasIllegalDC(zntrack.Node):
 
 
 class MD(zntrack.Node):
-    thermostat: ThermostatA | ThermostatB | SimpleThermostat = zntrack.deps()
+    thermostat: ThermostatA | ThermostatB | SimpleThermostat | ClassWithDepsAndParams = zntrack.deps()
 
     result: str = zntrack.outs()
 
@@ -122,10 +122,10 @@ def test_dc_deps_params_files(proj_path):
 
 
     node = md.from_rev()
+    assert isinstance(node.thermostat, ClassWithDepsAndParams)
     assert node.thermostat.temperature == 10
     assert node.thermostat.config == [config_file]
     assert node.thermostat.files == deps_file
-
 
 
 @pytest.mark.parametrize(

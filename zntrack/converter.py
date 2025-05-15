@@ -22,10 +22,10 @@ from zntrack.config import (
 from .node import Node
 from .utils import module_handler
 
-
+@dataclasses.dataclass
 class DataclassContainer:
-    def __init__(self, cls):
-        self.cls = cls
+    cls: t.Any
+    fields: dict = dataclasses.field(default_factory=dict)
 
     def get_with_params(
         self,
@@ -55,7 +55,7 @@ class DataclassContainer:
         else:
             dc_params = all_params[node_name][attr_name]
         dc_params.pop("_cls", None)
-        return self.cls(**dc_params)
+        return self.cls(**dc_params, **self.fields)
 
 
 def _enforce_str_list(content) -> list[str]:
@@ -293,16 +293,28 @@ class DataclassConverter(znjson.ConverterBase):
         module = module_handler(obj)
         cls = obj.__class__.__name__
 
+        # TODO: need to also save / load `zntrack.deps_path` and `zntrack.params_path`
+
+        fields = {}
+        for field in dataclasses.fields(obj):
+            if FIELD_TYPE in field.metadata:
+                if field.metadata[FIELD_TYPE] in [
+                    FieldTypes.PARAMS_PATH,
+                    FieldTypes.DEPS_PATH,
+                ]:
+                   fields[field.name] = getattr(obj, field.name)
+
         return {
             "module": module,
             "cls": cls,
+            "fields": fields,
         }
 
     def decode(self, value: dict) -> DataclassContainer:
         """Create znflow.Connection object from dict."""
         module = importlib.import_module(value["module"])
         cls = getattr(module, value["cls"])
-        return DataclassContainer(cls)
+        return DataclassContainer(cls=cls, fields=value.get("fields", {}))
 
     def __eq__(self, other) -> bool:
         if dataclasses.is_dataclass(other) and not isinstance(
@@ -322,7 +334,7 @@ class DVCImportPathConverter(znjson.ConverterBase):
 
     level = 100
     instance = DVCImportPath
-    representation = "pathlib.Path"
+    representation = "pathlib.PathX"
 
     def encode(self, obj: DVCImportPath) -> str:
         return obj.path.as_posix()
