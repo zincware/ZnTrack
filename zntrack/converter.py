@@ -22,6 +22,7 @@ from zntrack.config import (
 from .node import Node
 from .utils import module_handler
 
+
 @dataclasses.dataclass
 class DataclassContainer:
     cls: t.Any
@@ -302,7 +303,7 @@ class DataclassConverter(znjson.ConverterBase):
                     FieldTypes.PARAMS_PATH,
                     FieldTypes.DEPS_PATH,
                 ]:
-                   fields[field.name] = getattr(obj, field.name)
+                    fields[field.name] = getattr(obj, field.name)
 
         return {
             "module": module,

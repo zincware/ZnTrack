@@ -1,10 +1,10 @@
 import dataclasses
+from pathlib import Path
 
 import pytest
+import yaml
 
 import zntrack
-from pathlib import Path
-import yaml
 
 
 @dataclasses.dataclass
@@ -28,10 +28,8 @@ class ClassWithDepsAndParams:
 
     temperature: float
 
-    config: list[Path|str]|Path|str = zntrack.params_path()
-    files: list[Path|str]|Path|str = zntrack.deps_path()
-
-    
+    config: list[Path | str] | Path | str = zntrack.params_path()
+    files: list[Path | str] | Path | str = zntrack.deps_path()
 
 
 class HasBase:
@@ -68,7 +66,9 @@ class HasIllegalDC(zntrack.Node):
 
 
 class MD(zntrack.Node):
-    thermostat: ThermostatA | ThermostatB | SimpleThermostat | ClassWithDepsAndParams = zntrack.deps()
+    thermostat: ThermostatA | ThermostatB | SimpleThermostat | ClassWithDepsAndParams = (
+        zntrack.deps()
+    )
 
     result: str = zntrack.outs()
 
@@ -117,9 +117,8 @@ def test_dc_deps_params_files(proj_path):
     )
     with project:
         md = MD(thermostat=instance)
-    
-    project.build()
 
+    project.build()
 
     node = md.from_rev()
     assert isinstance(node.thermostat, ClassWithDepsAndParams)
