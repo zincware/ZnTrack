@@ -3,6 +3,8 @@ import dataclasses
 import pytest
 
 import zntrack
+from pathlib import Path
+import yaml
 
 
 @dataclasses.dataclass
@@ -18,6 +20,18 @@ class ThermostatA:
 @dataclasses.dataclass
 class ThermostatB:
     temperature: float
+
+
+@dataclasses.dataclass
+class ClassWithDepsAndParams:
+    """Class with deps and params"""
+
+    temperature: float
+
+    config: list[Path|str]|Path|str = zntrack.params_path()
+    files: list[Path|str]|Path|str = zntrack.deps_path()
+
+    
 
 
 class HasBase:
@@ -87,6 +101,31 @@ def test_switch_deps_class_keep_params(proj_path):
 
     proj.repro()
     assert md.from_rev().result == "SimpleThermostat"
+
+
+def test_dc_deps_params_files(proj_path):
+    config_file = Path("config.yaml")
+    config_file.write_text(yaml.dump({"value": 10}))
+    deps_file = Path("file.txt")
+    deps_file.write_text("test")
+    project = zntrack.Project()
+
+    instance = ClassWithDepsAndParams(
+        temperature=10,
+        config=[config_file],
+        files=deps_file,
+    )
+    with project:
+        md = MD(thermostat=instance)
+    
+    project.build()
+
+
+    node = md.from_rev()
+    assert node.thermostat.temperature == 10
+    assert node.thermostat.config == [config_file]
+    assert node.thermostat.files == deps_file
+
 
 
 @pytest.mark.parametrize(
