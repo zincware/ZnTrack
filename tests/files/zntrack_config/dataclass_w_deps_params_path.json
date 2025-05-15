@@ -8,7 +8,10 @@
             "_type": "@dataclasses.dataclass",
             "value": {
                 "module": "test_dataclass_w_deps_params_path",
-                "cls": "ModelWithParamsPath"
+                "cls": "ModelWithParamsPath",
+                "fields": {
+                    "config": "config.yaml"
+                }
             }
         }
     },
@@ -21,7 +24,13 @@
             "_type": "@dataclasses.dataclass",
             "value": {
                 "module": "test_dataclass_w_deps_params_path",
-                "cls": "ModelWithParamsPath"
+                "cls": "ModelWithParamsPath",
+                "fields": {
+                    "config": {
+                        "_type": "pathlib.Path",
+                        "value": "config.yaml"
+                    }
+                }
             }
         }
     },
@@ -34,7 +43,10 @@
             "_type": "@dataclasses.dataclass",
             "value": {
                 "module": "test_dataclass_w_deps_params_path",
-                "cls": "ModelWithDepsPath"
+                "cls": "ModelWithDepsPath",
+                "fields": {
+                    "files": "file.txt"
+                }
             }
         }
     },
@@ -47,7 +59,13 @@
             "_type": "@dataclasses.dataclass",
             "value": {
                 "module": "test_dataclass_w_deps_params_path",
-                "cls": "ModelWithDepsPath"
+                "cls": "ModelWithDepsPath",
+                "fields": {
+                    "files": {
+                        "_type": "pathlib.Path",
+                        "value": "file.txt"
+                    }
+                }
             }
         }
     },
@@ -60,7 +78,23 @@
             "_type": "@dataclasses.dataclass",
             "value": {
                 "module": "test_dataclass_w_deps_params_path",
-                "cls": "ModelWithParamsAndDepsPath"
+                "cls": "ModelWithParamsAndDepsPath",
+                "fields": {
+                    "config": [
+                        "config.yaml",
+                        {
+                            "_type": "pathlib.Path",
+                            "value": "config2.yaml"
+                        }
+                    ],
+                    "files": [
+                        "file.txt",
+                        {
+                            "_type": "pathlib.Path",
+                            "value": "file2.txt"
+                        }
+                    ]
+                }
             }
         }
     },
@@ -74,7 +108,23 @@
                 "_type": "@dataclasses.dataclass",
                 "value": {
                     "module": "test_dataclass_w_deps_params_path",
-                    "cls": "ModelWithParamsAndDepsPath"
+                    "cls": "ModelWithParamsAndDepsPath",
+                    "fields": {
+                        "config": [
+                            "config.yaml",
+                            {
+                                "_type": "pathlib.Path",
+                                "value": "config2.yaml"
+                            }
+                        ],
+                        "files": [
+                            "file.txt",
+                            {
+                                "_type": "pathlib.Path",
+                                "value": "file2.txt"
+                            }
+                        ]
+                    }
                 }
             }
         ]

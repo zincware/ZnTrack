@@ -290,26 +290,21 @@ class DataclassConverter(znjson.ConverterBase):
     representation = "@dataclasses.dataclass"
 
     def encode(self, obj: object) -> dict:
-        """Convert the znflow.Connection object to dict."""
+        """Convert a dataclass object to a serializable dict."""
         module = module_handler(obj)
         cls = obj.__class__.__name__
 
-        # TODO: need to also save / load `zntrack.deps_path` and `zntrack.params_path`
-
-        fields = {}
-        for field in dataclasses.fields(obj):
-            if FIELD_TYPE in field.metadata:
-                if field.metadata[FIELD_TYPE] in [
-                    FieldTypes.PARAMS_PATH,
-                    FieldTypes.DEPS_PATH,
-                ]:
-                    fields[field.name] = getattr(obj, field.name)
-
-        return {
-            "module": module,
-            "cls": cls,
-            "fields": fields,
+        # Collect relevant fields (PARAMS_PATH, DEPS_PATH)
+        fields = {
+            field.name: getattr(obj, field.name)
+            for field in dataclasses.fields(obj)
+            if field.metadata.get(FIELD_TYPE) in {FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH}
         }
+
+        result = {"module": module, "cls": cls}
+        if fields:
+            result["fields"] = fields
+        return result
 
     def decode(self, value: dict) -> DataclassContainer:
         """Create znflow.Connection object from dict."""
