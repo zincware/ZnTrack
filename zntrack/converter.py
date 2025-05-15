@@ -334,10 +334,11 @@ class DVCImportPathConverter(znjson.ConverterBase):
 
     level = 100
     instance = DVCImportPath
-    representation = "pathlib.PathX"
+    representation = "pathlib.Path"
 
     def encode(self, obj: DVCImportPath) -> str:
         return obj.path.as_posix()
 
-    def decode(self, value: str) -> None:
-        raise NotImplementedError("DVCImportPath is converted to pathlib.Path.")
+    def decode(self, value: str) -> pathlib.Path:
+        # fallback decoder if used over pathlib converter
+        return pathlib.Path(value)
