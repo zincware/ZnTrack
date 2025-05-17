@@ -123,8 +123,7 @@ class DVCPlugin(ZnTrackPlugin):
                 outs_content, plots_content = plots_to_dvc(self, field)
                 if len(outs_content) > 0:
                     stages.setdefault(FieldTypes.OUTS.value, []).extend(outs_content)
-                if len(plots_content) > 0:
-                    plots.extend(plots_content)
+                plots.extend(plots_content)
                 
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS:
                 if len(content := metrics_to_dvc(self, field)) > 0:
