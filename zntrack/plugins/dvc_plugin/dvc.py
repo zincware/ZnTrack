@@ -181,4 +181,4 @@ def deps_to_dvc(self, field):
         else:
             raise ValueError("unsupported type")
         
-        return deps_content + paths, params_content
+    return deps_content + paths, params_content

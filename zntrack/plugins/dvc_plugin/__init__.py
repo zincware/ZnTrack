@@ -100,8 +100,6 @@ class DVCPlugin(ZnTrackPlugin):
             stages["always_changed"] = True
         plots = []
 
-        nwd_handler = NWDReplaceHandler()
-
         for field in dataclasses.fields(self.node):
             if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
                 stages.setdefault(FieldTypes.PARAMS.value, []).append(self.node.name)
@@ -150,77 +148,15 @@ class DVCPlugin(ZnTrackPlugin):
                 if len(content := metrics_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
-                if getattr(self.node, field.name) is None:
-                    continue
-                content = get_attr_always_list(self.node, field.name)
-                paths = []
-                for con in content:
-                    if isinstance(con, (znflow.Connection)):
-                        if con.item is not None:
-                            raise NotImplementedError(
-                                "znflow.Connection getitem is not supported yet."
-                            )
-                        paths.extend(
-                            converter.node_to_output_paths(con.instance, con.attribute)
-                        )
-                    elif isinstance(con, (znflow.CombinedConnections)):
-                        for _con in con.connections:
-                            if con.item is not None:
-                                raise NotImplementedError(
-                                    "znflow.Connection getitem is not supported yet."
-                                )
-                            paths.extend(
-                                converter.node_to_output_paths(
-                                    _con.instance, _con.attribute
-                                )
-                            )
-                    elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
-                        for field in dataclasses.fields(con):
-                            if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
-                                # add the path to the params_path
-                                content = nwd_handler(
-                                    get_attr_always_list(con, field.name),
-                                    nwd=self.node.nwd,
-                                )
-                                content = [
-                                    {pathlib.Path(x).as_posix(): None}
-                                    for x in content
-                                    if x is not None
-                                ]
-                                if len(content) > 0:
-                                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(
-                                        content
-                                    )
-                            if field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
-                                content = [
-                                    pathlib.Path(c).as_posix()
-                                    for c in get_attr_always_list(con, field.name)
-                                    if c is not None
-                                ]
-                                if len(content) > 0:
-                                    stages.setdefault(FieldTypes.DEPS.value, []).extend(
-                                        content
-                                    )
-
-                        # add node name to params.yaml
-                        stages.setdefault(FieldTypes.PARAMS.value, []).append(
-                            self.node.name
-                        )
-                    else:
-                        raise ValueError("unsupported type")
-
-                if len(paths) > 0:
-                    stages.setdefault(FieldTypes.DEPS.value, []).extend(paths)
+                deps_content, params_content = deps_to_dvc(self, field)
+                if len(deps_content) > 0:
+                    stages.setdefault(FieldTypes.DEPS.value, []).extend(deps_content)
+                if len(params_content) > 0:
+                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(
+                        params_content
+                    )
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
-                if getattr(self.node, field.name) is None:
-                    continue
-                content = [
-                    pathlib.Path(c).as_posix()
-                    for c in get_attr_always_list(self.node, field.name)
-                    if c is not None
-                ]
-                RunDVCImportPathHandler()(self.node.__dict__.get(field.name))
-                if len(content) > 0:
+                if len(content := deps_path_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
 
         for key in stages:
