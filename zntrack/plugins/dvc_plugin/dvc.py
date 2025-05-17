@@ -74,3 +74,111 @@ def plots_path_to_dvc(self, field) -> list[str]|list[dict]:
     if field.metadata.get(ZNTRACK_CACHE) is False:
         content = [{c: {"cache": False}} for c in content]
     return content
+
+def metrics_path_to_dvc(self, field) -> list[str]|list[dict]:
+    if getattr(self.node, field.name) is None:
+        return []
+    nwd_handler = NWDReplaceHandler()
+    content = nwd_handler(
+        get_attr_always_list(self.node, field.name), nwd=self.node.nwd
+    )
+    content = [pathlib.Path(x).as_posix() for x in content if x is not None]
+    if field.metadata.get(ZNTRACK_CACHE) is False:
+        content = [{c: {"cache": False}} for c in content]
+    return content
+
+def outs_to_dvc(self, field) -> list[str]|list[dict]:
+    suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+    content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
+    if field.metadata.get(ZNTRACK_CACHE) is False:
+        content = [{c: {"cache": False}} for c in content]
+    return content
+
+def metrics_to_dvc(self, field) -> list[str]|list[dict]:
+    suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+    content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
+    if field.metadata.get(ZNTRACK_CACHE) is False:
+        content = [{c: {"cache": False}} for c in content]
+    return content
+
+def deps_path_to_dvc(self, field) -> list[str]:
+    if getattr(self.node, field.name) is None:
+        return []
+    content = [
+        pathlib.Path(c).as_posix()
+        for c in get_attr_always_list(self.node, field.name)
+        if c is not None
+    ]
+    RunDVCImportPathHandler()(self.node.__dict__.get(field.name))
+    return content
+
+
+def deps_to_dvc(self, field):
+    deps_content = []
+    params_content = []
+    if getattr(self.node, field.name) is None:
+        return deps_content, params_content
+    nwd_handler = NWDReplaceHandler()
+    content = get_attr_always_list(self.node, field.name)
+    paths = []
+    for con in content:
+        if isinstance(con, (znflow.Connection)):
+            if con.item is not None:
+                raise NotImplementedError(
+                    "znflow.Connection getitem is not supported yet."
+                )
+            paths.extend(
+                converter.node_to_output_paths(con.instance, con.attribute)
+            )
+        elif isinstance(con, (znflow.CombinedConnections)):
+            for _con in con.connections:
+                if con.item is not None:
+                    raise NotImplementedError(
+                        "znflow.Connection getitem is not supported yet."
+                    )
+                paths.extend(
+                    converter.node_to_output_paths(
+                        _con.instance, _con.attribute
+                    )
+                )
+        elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
+            for field in dataclasses.fields(con):
+                if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
+                    # add the path to the params_path
+                    content = nwd_handler(
+                        get_attr_always_list(con, field.name),
+                        nwd=self.node.nwd,
+                    )
+                    content = [
+                        {pathlib.Path(x).as_posix(): None}
+                        for x in content
+                        if x is not None
+                    ]
+                    if len(content) > 0:
+                        params_content.extend(content)
+                        # stages.setdefault(FieldTypes.PARAMS.value, []).extend(
+                        #     content
+                        # )
+                if field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
+                    content = [
+                        pathlib.Path(c).as_posix()
+                        for c in get_attr_always_list(con, field.name)
+                        if c is not None
+                    ]
+                    if len(content) > 0:
+                        deps_content.extend(content)
+                        # stages.setdefault(FieldTypes.DEPS.value, []).extend(
+                        #     content
+                        # )
+
+            # add node name to params.yaml
+            # stages.setdefault(FieldTypes.PARAMS.value, []).append(
+            #     self.node.name
+            # )
+            params_content.append(
+                self.node.name
+            )
+        else:
+            raise ValueError("unsupported type")
+        
+        return deps_content + paths, params_content

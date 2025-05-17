@@ -23,8 +23,17 @@ from zntrack.config import (
 # if t.TYPE_CHECKING:
 from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin
+from zntrack.plugins.dvc_plugin.dvc import (
+    metrics_path_to_dvc,
+    outs_path_to_dvc,
+    outs_to_dvc,
+    params_path_to_dvc,
+    plots_path_to_dvc,
+    metrics_to_dvc,
+    deps_path_to_dvc,
+    deps_to_dvc,
+)
 from zntrack.plugins.dvc_plugin.params import deps_to_params
-from zntrack.plugins.dvc_plugin.dvc import params_path_to_dvc, outs_path_to_dvc, plots_path_to_dvc
 from zntrack.utils.misc import (
     RunDVCImportPathHandler,
     get_attr_always_list,
@@ -106,22 +115,11 @@ class DVCPlugin(ZnTrackPlugin):
                 if len(content := plots_path_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS_PATH:
-                if getattr(self.node, field.name) is None:
-                    continue
-                content = nwd_handler(
-                    get_attr_always_list(self.node, field.name), nwd=self.node.nwd
-                )
-                content = [pathlib.Path(x).as_posix() for x in content if x is not None]
-                if field.metadata.get(ZNTRACK_CACHE) is False:
-                    content = [{c: {"cache": False}} for c in content]
-                if len(content) > 0:
+                if len(content := metrics_path_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS:
-                suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
-                content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
-                if field.metadata.get(ZNTRACK_CACHE) is False:
-                    content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
+                if len(content := outs_to_dvc(self, field)) > 0:
+                    stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS:
                 suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
                 content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
@@ -149,11 +147,8 @@ class DVCPlugin(ZnTrackPlugin):
                             plots_config["y"] = {file_path: plots_config["y"]}
                         plots.append({f"{self.node.name}_{field.name}": plots_config})
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS:
-                suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
-                content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
-                if field.metadata.get(ZNTRACK_CACHE) is False:
-                    content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
+                if len(content := metrics_to_dvc(self, field)) > 0:
+                    stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
                 if getattr(self.node, field.name) is None:
                     continue
