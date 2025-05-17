@@ -1,6 +1,6 @@
 [project]
 name = "zntrack"
-version = "0.8.7"
+version = "0.8.8"
 description = "Create, Run and Benchmark DVC Pipelines in Python"
 authors = [
     { name = "Fabian Zills", email = "fzills@icp.uni-stuttgart.de" },
