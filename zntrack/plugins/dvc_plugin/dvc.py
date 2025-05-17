@@ -25,12 +25,12 @@ def _handle_nwd_list(self, field):
     if getattr(self.node, field.name) is None:
         return []
     nwd_handler = NWDReplaceHandler()
-    return nwd_handler(
-        get_attr_always_list(self.node, field.name), nwd=self.node.nwd
-    )
+    return nwd_handler(get_attr_always_list(self.node, field.name), nwd=self.node.nwd)
 
 
-def _paths_to_dvc_list(paths: list[str], as_dict: bool = False, cache: bool = True) -> list[str] | list[dict]:
+def _paths_to_dvc_list(
+    paths: list[str], as_dict: bool = False, cache: bool = True
+) -> list[str] | list[dict]:
     """Helper function to convert lists of paths to DVC format."""
     content = [pathlib.Path(x).as_posix() for x in paths if x is not None]
     if not cache:
@@ -115,9 +115,7 @@ def deps_to_dvc(self, field) -> tuple[list[str], list[str]]:
                 raise NotImplementedError(
                     "znflow.Connection getitem is not supported yet."
                 )
-            paths.extend(
-                converter.node_to_output_paths(con.instance, con.attribute)
-            )
+            paths.extend(converter.node_to_output_paths(con.instance, con.attribute))
         elif isinstance(con, znflow.CombinedConnections):
             for _con in con.connections:
                 if _con.item is not None:
@@ -125,9 +123,7 @@ def deps_to_dvc(self, field) -> tuple[list[str], list[str]]:
                         "znflow.Connection getitem is not supported yet."
                     )
                 paths.extend(
-                    converter.node_to_output_paths(
-                        _con.instance, _con.attribute
-                    )
+                    converter.node_to_output_paths(_con.instance, _con.attribute)
                 )
         elif dataclasses.is_dataclass(con) and not isinstance(con, Node):
             for sub_field in dataclasses.fields(con):
@@ -169,9 +165,7 @@ def plots_to_dvc(self, field) -> tuple[list, list[dict]]:
     if plots_config:
         plots_config = plots_config.copy()
         if "x" not in plots_config or "y" not in plots_config:
-            raise ValueError(
-                "Both 'x' and 'y' must be specified in the plots_config."
-            )
+            raise ValueError("Both 'x' and 'y' must be specified in the plots_config.")
         if "x" in plots_config:
             plots_config["x"] = {file_path: plots_config["x"]}
         if isinstance(plots_config["y"], list):
