@@ -182,3 +182,36 @@ def deps_to_dvc(self, field):
             raise ValueError("unsupported type")
         
     return deps_content + paths, params_content
+
+
+def plots_to_dvc(self, field):
+    plots_content = []
+    outs_content = []
+    suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
+    content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
+    if field.metadata.get(ZNTRACK_CACHE) is False:
+        content = [{c: {"cache": False}} for c in content]
+    outs_content.extend(content)
+
+    if ZNTRACK_OPTION_PLOTS_CONFIG in field.metadata:
+        file_path = (
+            (self.node.nwd / field.name).with_suffix(suffix).as_posix()
+        )
+        plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG].copy()
+        if "x" not in plots_config or "y" not in plots_config:
+            raise ValueError(
+                "Both 'x' and 'y' must be specified in the plots_config."
+            )
+        if "x" in plots_config:
+            plots_config["x"] = {file_path: plots_config["x"]}
+        if isinstance(plots_config["y"], list):
+            for idx, y in enumerate(plots_config["y"]):
+                cfg = copy.deepcopy(plots_config)
+                cfg["y"] = {file_path: y}
+                plots_content.append({f"{self.node.name}_{field.name}_{idx}": cfg})
+        else:
+            if "y" in plots_config:
+                plots_config["y"] = {file_path: plots_config["y"]}
+            plots_content.append({f"{self.node.name}_{field.name}": plots_config})
+
+    return outs_content, plots_content

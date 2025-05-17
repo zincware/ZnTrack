@@ -32,6 +32,7 @@ from zntrack.plugins.dvc_plugin.dvc import (
     metrics_to_dvc,
     deps_path_to_dvc,
     deps_to_dvc,
+    plots_to_dvc,
 )
 from zntrack.plugins.dvc_plugin.params import deps_to_params
 from zntrack.utils.misc import (
@@ -119,31 +120,12 @@ class DVCPlugin(ZnTrackPlugin):
                 if len(content := outs_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS:
-                suffix = field.metadata[ZNTRACK_FIELD_SUFFIX]
-                content = [(self.node.nwd / field.name).with_suffix(suffix).as_posix()]
-                if field.metadata.get(ZNTRACK_CACHE) is False:
-                    content = [{c: {"cache": False}} for c in content]
-                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
-                if ZNTRACK_OPTION_PLOTS_CONFIG in field.metadata:
-                    file_path = (
-                        (self.node.nwd / field.name).with_suffix(suffix).as_posix()
-                    )
-                    plots_config = field.metadata[ZNTRACK_OPTION_PLOTS_CONFIG].copy()
-                    if "x" not in plots_config or "y" not in plots_config:
-                        raise ValueError(
-                            "Both 'x' and 'y' must be specified in the plots_config."
-                        )
-                    if "x" in plots_config:
-                        plots_config["x"] = {file_path: plots_config["x"]}
-                    if isinstance(plots_config["y"], list):
-                        for idx, y in enumerate(plots_config["y"]):
-                            cfg = copy.deepcopy(plots_config)
-                            cfg["y"] = {file_path: y}
-                            plots.append({f"{self.node.name}_{field.name}_{idx}": cfg})
-                    else:
-                        if "y" in plots_config:
-                            plots_config["y"] = {file_path: plots_config["y"]}
-                        plots.append({f"{self.node.name}_{field.name}": plots_config})
+                outs_content, plots_content = plots_to_dvc(self, field)
+                if len(outs_content) > 0:
+                    stages.setdefault(FieldTypes.OUTS.value, []).extend(outs_content)
+                if len(plots_content) > 0:
+                    plots.extend(plots_content)
+                
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS:
                 if len(content := metrics_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
