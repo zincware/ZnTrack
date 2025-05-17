@@ -24,7 +24,7 @@ from zntrack.config import (
 from zntrack.node import Node
 from zntrack.plugins import ZnTrackPlugin
 from zntrack.plugins.dvc_plugin.params import deps_to_params
-from zntrack.utils import module_handler
+from zntrack.plugins.dvc_plugin.dvc import params_path_to_dvc, outs_path_to_dvc, plots_path_to_dvc
 from zntrack.utils.misc import (
     RunDVCImportPathHandler,
     get_attr_always_list,
@@ -63,8 +63,7 @@ class DVCPlugin(ZnTrackPlugin):
             if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
-                value = deps_to_params(self, field)
-                if value is not None:
+                if (value := deps_to_params(self, field)) is not None:
                     data[field.name] = value
 
         if len(data) > 0:
@@ -98,42 +97,13 @@ class DVCPlugin(ZnTrackPlugin):
             if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
                 stages.setdefault(FieldTypes.PARAMS.value, []).append(self.node.name)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
-                if getattr(self.node, field.name) is None:
-                    continue
-                content = nwd_handler(
-                    get_attr_always_list(self.node, field.name), nwd=self.node.nwd
-                )
-                content = [
-                    {pathlib.Path(x).as_posix(): None} for x in content if x is not None
-                ]
-                if len(content) > 0:
+                if len(content := params_path_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS_PATH:
-                if getattr(self.node, field.name) is None:
-                    continue
-                if getattr(self.node, field.name) == nwd:
-                    raise ValueError(
-                        "Can not use 'zntrack.nwd' directly as an output path. "
-                        "Please use 'zntrack.nwd / <path/file>' instead."
-                    )
-                content = nwd_handler(
-                    get_attr_always_list(self.node, field.name), nwd=self.node.nwd
-                )
-                content = [pathlib.Path(x).as_posix() for x in content if x is not None]
-                if field.metadata.get(ZNTRACK_CACHE) is False:
-                    content = [{c: {"cache": False}} for c in content]
-                if len(content) > 0:
+                if len(content := outs_path_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS_PATH:
-                if getattr(self.node, field.name) is None:
-                    continue
-                content = nwd_handler(
-                    get_attr_always_list(self.node, field.name), nwd=self.node.nwd
-                )
-                content = [pathlib.Path(x).as_posix() for x in content if x is not None]
-                if field.metadata.get(ZNTRACK_CACHE) is False:
-                    content = [{c: {"cache": False}} for c in content]
-                if len(content) > 0:
+                if len(content := plots_path_to_dvc(self, field)) > 0:
                     stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS_PATH:
                 if getattr(self.node, field.name) is None:
