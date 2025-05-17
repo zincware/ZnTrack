@@ -105,45 +105,41 @@ class DVCPlugin(ZnTrackPlugin):
             if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
                 stages.setdefault(FieldTypes.PARAMS.value, []).append(self.node.name)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
-                if len(content := params_path_to_dvc(self, field)) > 0:
-                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
+                content = params_path_to_dvc(self, field)
+                stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS_PATH:
-                if len(content := outs_path_to_dvc(self, field)) > 0:
-                    stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
+                content = outs_path_to_dvc(self, field)
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS_PATH:
-                if len(content := plots_path_to_dvc(self, field)) > 0:
-                    stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
+                content = plots_path_to_dvc(self, field)
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS_PATH:
-                if len(content := metrics_path_to_dvc(self, field)) > 0:
-                    stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
+                content = metrics_path_to_dvc(self, field)
+                stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS:
-                if len(content := outs_to_dvc(self, field)) > 0:
-                    stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
+                content = outs_to_dvc(self, field)
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS:
                 outs_content, plots_content = plots_to_dvc(self, field)
-                if len(outs_content) > 0:
-                    stages.setdefault(FieldTypes.OUTS.value, []).extend(outs_content)
+                stages.setdefault(FieldTypes.OUTS.value, []).extend(outs_content)
                 plots.extend(plots_content)
-                
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS:
-                if len(content := metrics_to_dvc(self, field)) > 0:
-                    stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
+                content = metrics_to_dvc(self, field)
+                stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
                 deps_content, params_content = deps_to_dvc(self, field)
-                if len(deps_content) > 0:
-                    stages.setdefault(FieldTypes.DEPS.value, []).extend(deps_content)
-                if len(params_content) > 0:
-                    stages.setdefault(FieldTypes.PARAMS.value, []).extend(
-                        params_content
-                    )
+                stages.setdefault(FieldTypes.DEPS.value, []).extend(deps_content)
+                stages.setdefault(FieldTypes.PARAMS.value, []).extend(params_content)
             elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
-                if len(content := deps_path_to_dvc(self, field)) > 0:
-                    stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
+                content = deps_path_to_dvc(self, field)
+                stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
 
-        for key in stages:
-            if key in ["cmd", "always_changed"]:
-                continue
-            stages[key] = sort_and_deduplicate(stages[key])
+        for key in list(stages):
+            if key not in ["cmd", "always_changed"]:
+                if len(stages[key]) == 0:
+                    del stages[key]
+                else:
+                    stages[key] = sort_and_deduplicate(stages[key])
 
         return {"stages": stages, "plots": plots}
 
