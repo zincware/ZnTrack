@@ -4,54 +4,60 @@ import dataclasses
 import contextlib
 import typing as t
 
+ContextManagerGenInt = t.Generator[int, None, None]
+
+
 class NodeWithFunction(zntrack.Node):
     parameter: int = zntrack.params()
 
-    def get_parameter(self):
+    def get_parameter(self) -> int:
         return self.parameter
-    
-    def run(self):
+
+    def run(self) -> None:
         pass
+
 
 @dataclasses.dataclass
 class ExNodeWithFunction:
-    parameter: int 
+    parameter: int
 
-    def get_parameter(self):
+    def get_parameter(self) -> int:
         return self.parameter
-    
+
 
 class NodeWithContextManager(zntrack.Node):
     parameter: int = zntrack.params()
 
     @contextlib.contextmanager
-    def get_parameter(self) -> t.ContextManager[int]:
+    def get_parameter(self) -> ContextManagerGenInt:
         yield self.parameter
 
-    def run(self):
+    def run(self) -> None:
         pass
+
 
 @dataclasses.dataclass
 class ExNodeWithContextManager:
-    parameter: int 
+    parameter: int
 
     @contextlib.contextmanager
-    def get_parameter(self) -> t.ContextManager[int]:
+    def get_parameter(self) -> ContextManagerGenInt:
         yield self.parameter
 
 
 class NodeWithFunctionDeps(zntrack.Node):
-    fn: t.Callable = zntrack.deps()
+    fn: t.Callable[[], int] = zntrack.deps()
     result: int = zntrack.outs()
 
-    def run(self):
+    def run(self) -> None:
         self.result = self.fn()
 
+
 class NodeWithContextManagerDeps(zntrack.Node):
-    cm: t.ContextManager[int] = zntrack.deps()
+    cm: t.Callable[[], t.ContextManager[int]] = zntrack.deps()
     result: int = zntrack.outs()
 
-    def run(self):
+    def run(self) -> None:
         with self.cm() as value:
             self.result = value
 
@@ -67,6 +73,7 @@ def test_node_with_function(proj_path):
 
     assert b.result == 1
 
+
 def test_ext_node_with_function(proj_path):
     project = zntrack.Project()
 
@@ -75,6 +82,7 @@ def test_ext_node_with_function(proj_path):
         b = NodeWithFunctionDeps(fn=a.get_parameter)
     project.repro()
     assert b.result == 1
+
 
 def test_node_with_context_manager(proj_path):
     project = zntrack.Project()
@@ -86,6 +94,7 @@ def test_node_with_context_manager(proj_path):
     project.repro()
 
     assert b.result == 1
+
 
 def test_ext_node_with_context_manager(proj_path):
     project = zntrack.Project()
