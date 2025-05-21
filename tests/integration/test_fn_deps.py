@@ -1,7 +1,9 @@
 """Test passing callables as dependencies instead of properties or attributes."""
-import zntrack
+
 import contextlib
 import typing as t
+
+import zntrack
 
 ContextManagerGenInt = t.Generator[int, None, None]
 
