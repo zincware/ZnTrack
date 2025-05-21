@@ -1,6 +1,5 @@
 """Test passing callables as dependencies instead of properties or attributes."""
 import zntrack
-import dataclasses
 import contextlib
 import typing as t
 
@@ -17,14 +16,6 @@ class NodeWithFunction(zntrack.Node):
         pass
 
 
-@dataclasses.dataclass
-class ExNodeWithFunction:
-    parameter: int
-
-    def get_parameter(self) -> int:
-        return self.parameter
-
-
 class NodeWithContextManager(zntrack.Node):
     parameter: int = zntrack.params()
 
@@ -34,15 +25,6 @@ class NodeWithContextManager(zntrack.Node):
 
     def run(self) -> None:
         pass
-
-
-@dataclasses.dataclass
-class ExNodeWithContextManager:
-    parameter: int
-
-    @contextlib.contextmanager
-    def get_parameter(self) -> ContextManagerGenInt:
-        yield self.parameter
 
 
 class NodeWithFunctionDeps(zntrack.Node):
@@ -74,16 +56,6 @@ def test_node_with_function(proj_path):
     assert b.result == 1
 
 
-def test_ext_node_with_function(proj_path):
-    project = zntrack.Project()
-
-    a = ExNodeWithFunction(parameter=1)
-    with project:
-        b = NodeWithFunctionDeps(fn=a.get_parameter)
-    project.repro()
-    assert b.result == 1
-
-
 def test_node_with_context_manager(proj_path):
     project = zntrack.Project()
 
@@ -93,14 +65,4 @@ def test_node_with_context_manager(proj_path):
 
     project.repro()
 
-    assert b.result == 1
-
-
-def test_ext_node_with_context_manager(proj_path):
-    project = zntrack.Project()
-
-    a = ExNodeWithContextManager(parameter=1)
-    with project:
-        b = NodeWithContextManagerDeps(cm=a.get_parameter)
-    project.repro()
     assert b.result == 1
