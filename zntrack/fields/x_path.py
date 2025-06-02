@@ -48,7 +48,7 @@ def _paths_getter_input(self: Node, name: str):
                 loader(content, instance=self)
 
             content = nwd_handler(content, nwd=self.nwd)
-            
+
             return content
     except FileNotFoundError:
         return NOT_AVAILABLE
