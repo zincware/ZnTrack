@@ -34,8 +34,10 @@ def _paths_getter_input(self: Node, name: str):
 
     # TODO: missing https://github.com/zincware/ZnTrack/blob/01b26ff103792906788ff80110e15a7a2efc2b46/zntrack/utils/node_wd.py#L74-L76
     # causes DVCImportPath to not work
+    nwd_handler = NWDReplaceHandler()
+
     if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
-        return self.__dict__[name]
+        return nwd_handler(self.__dict__[name], nwd=self.nwd)
     try:
         with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
             content = json.load(f)[self.name][name]
@@ -45,6 +47,8 @@ def _paths_getter_input(self: Node, name: str):
                 loader = TempPathLoader()
                 loader(content, instance=self)
 
+            content = nwd_handler(content, nwd=self.nwd)
+            
             return content
     except FileNotFoundError:
         return NOT_AVAILABLE
