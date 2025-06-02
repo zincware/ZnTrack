@@ -134,7 +134,11 @@ class Node(znflow.Node, znfields.Base):
     )
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
-    _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
+    _protected_: list = dataclasses.field(
+        default_factory=lambda: znflow.Node._protected_ + ["nwd", "name", "state"],
+        init=False,
+        repr=False,
+    )
 
     def __post_init__(self):
         if self.name is None:
