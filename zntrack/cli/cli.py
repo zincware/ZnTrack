@@ -14,6 +14,7 @@ import yaml
 from zntrack import Node, utils
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
+from zntrack.utils.lockfile import mp_join_stage_lock, mp_start_stage_lock
 from zntrack.utils.misc import load_env_vars
 
 load_env_vars()
@@ -54,7 +55,11 @@ def main(
 
 @app.command()
 def run(
-    node_path: str, name: str = None, meta_only: bool = False, method: str = "run"
+    node_path: str,
+    name: str = None,
+    meta_only: bool = False,
+    method: str = "run",
+    save_lockfile: bool = True,
 ) -> None:
     """Execute a ZnTrack Node.
 
@@ -70,6 +75,8 @@ def run(
         Save only the metadata.
     method : str, default 'run'
         The method to run on the node.
+    save_lockfile : bool
+        Save the lockfile for the inputs into the node-meta.json file.
 
     """
     start_time = datetime.datetime.now()
@@ -78,13 +85,19 @@ def run(
 
     cls: Node = utils.import_handler.import_handler(node_path)
     node: Node = cls.from_rev(name=name, running=True)
+    if save_lockfile:
+        queue, proc = mp_start_stage_lock(name)
     node.state.increment_run_count()
     node.state.save_node_meta()
     # dynamic version of node.run()
     getattr(node, method)()
     node.save()
+    if save_lockfile:
+        stage_lock = mp_join_stage_lock(queue, proc)
+        node.state.set_lockfile(stage_lock)
     run_time = datetime.datetime.now() - start_time
     node.state.add_run_time(run_time)
+
     node.state.save_node_meta()
 
 

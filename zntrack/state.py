@@ -61,6 +61,8 @@ class NodeStatus:
         The node working directory.
     restarted: bool
         Whether the Node was restarted and has been run at least once before.
+    path: str
+        The path to the directory where the ``zntrack.json`` file is located.
     """
 
     remote: str | None = None
@@ -77,6 +79,8 @@ class NodeStatus:
     )
     group: Group | None = None
     run_time: datetime.timedelta | None = None
+    path: pathlib.Path = dataclasses.field(default_factory=pathlib.Path)
+    lockfile: dict | None = None
     # TODO: move node name and nwd to here as well
 
     @property
@@ -87,7 +91,7 @@ class NodeStatus:
     def nwd(self):
         if self.tmp_path is not None:
             return self.tmp_path
-        return get_nwd(self.node)
+        return self.path / get_nwd(self.node)
 
     @property
     def fs(self) -> AbstractFileSystem:
@@ -255,6 +259,10 @@ class NodeStatus:
     def increment_run_count(self) -> None:
         self.node.__dict__["state"]["run_count"] = self.run_count + 1
 
+    def set_lockfile(self, lockfile: dict) -> None:
+        """Set the lockfile for the node."""
+        self.node.__dict__["state"]["lockfile"] = lockfile
+
     def save_node_meta(self) -> None:
         node_meta_content = {
             "uuid": str(self.node.uuid),
@@ -264,6 +272,8 @@ class NodeStatus:
 
         if self.run_time is not None:
             node_meta_content["run_time"] = self.run_time.total_seconds()
+        if self.lockfile is not None:
+            node_meta_content["lockfile"] = self.lockfile
 
         with contextlib.suppress(importlib.metadata.PackageNotFoundError):
             module = self.node.__module__.split(".")[0]

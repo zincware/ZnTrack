@@ -61,7 +61,7 @@ def _paths_getter_output(self: Node, name: str):
     if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
         return nwd_handler(self.__dict__[name], nwd=self.nwd)
     try:
-        with self.state.fs.open(ZNTRACK_FILE_PATH) as f:
+        with self.state.fs.open(self.state.path / ZNTRACK_FILE_PATH) as f:
             content = json.load(f)[self.name][name]
             content = znjson.loads(json.dumps(content))
 

@@ -1,0 +1,132 @@
+{
+    "NodeWithModel": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithParamsPath",
+                "fields": {
+                    "config": "config.yaml"
+                }
+            }
+        }
+    },
+    "NodeWithModel_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_1"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithParamsPath",
+                "fields": {
+                    "config": {
+                        "_type": "pathlib.Path",
+                        "value": "config.yaml"
+                    }
+                }
+            }
+        }
+    },
+    "NodeWithModel_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_2"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithDepsPath",
+                "fields": {
+                    "files": "file.txt"
+                }
+            }
+        }
+    },
+    "NodeWithModel_3": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_3"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithDepsPath",
+                "fields": {
+                    "files": {
+                        "_type": "pathlib.Path",
+                        "value": "file.txt"
+                    }
+                }
+            }
+        }
+    },
+    "NodeWithModel_4": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_4"
+        },
+        "model": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_dataclass_w_deps_params_path",
+                "cls": "ModelWithParamsAndDepsPath",
+                "fields": {
+                    "config": [
+                        "config.yaml",
+                        {
+                            "_type": "pathlib.Path",
+                            "value": "config2.yaml"
+                        }
+                    ],
+                    "files": [
+                        "file.txt",
+                        {
+                            "_type": "pathlib.Path",
+                            "value": "file2.txt"
+                        }
+                    ]
+                }
+            }
+        }
+    },
+    "NodeWithModel_5": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/NodeWithModel_5"
+        },
+        "model": [
+            {
+                "_type": "@dataclasses.dataclass",
+                "value": {
+                    "module": "test_dataclass_w_deps_params_path",
+                    "cls": "ModelWithParamsAndDepsPath",
+                    "fields": {
+                        "config": [
+                            "config.yaml",
+                            {
+                                "_type": "pathlib.Path",
+                                "value": "config2.yaml"
+                            }
+                        ],
+                        "files": [
+                            "file.txt",
+                            {
+                                "_type": "pathlib.Path",
+                                "value": "file2.txt"
+                            }
+                        ]
+                    }
+                }
+            }
+        ]
+    }
+}

@@ -8,6 +8,7 @@ import warnings
 import yaml
 import znflow
 import znjson
+from fsspec import AbstractFileSystem
 
 from zntrack.add import DVCImportPath
 from zntrack.config import (
@@ -22,11 +23,19 @@ from .node import Node
 from .utils import module_handler
 
 
+@dataclasses.dataclass
 class DataclassContainer:
-    def __init__(self, cls):
-        self.cls = cls
+    cls: t.Any
+    fields: dict = dataclasses.field(default_factory=dict)
 
-    def get_with_params(self, node_name, attr_name, index: int | None = None):
+    def get_with_params(
+        self,
+        node_name,
+        attr_name,
+        index: int | None,
+        fs: AbstractFileSystem,
+        path: pathlib.Path,
+    ):
         """Get an instance of the dataclass with the parameters from the params file.
 
         Attributes
@@ -40,13 +49,14 @@ class DataclassContainer:
             is a list of dataclasses. None if a single dataclass.
 
         """
-        all_params = yaml.safe_load(PARAMS_FILE_PATH.read_text())
+        with fs.open(path / PARAMS_FILE_PATH) as f:
+            all_params = yaml.safe_load(f)
         if index is not None:
             dc_params = all_params[node_name][attr_name][index]
         else:
             dc_params = all_params[node_name][attr_name]
         dc_params.pop("_cls", None)
-        return self.cls(**dc_params)
+        return self.cls(**dc_params, **self.fields)
 
 
 def _enforce_str_list(content) -> list[str]:
@@ -70,6 +80,9 @@ class NodeConverter(znjson.ConverterBase):
     level = 100
     instance = Node
     representation = "zntrack.Node"
+    remote: t.Optional[str] = None
+    rev: t.Optional[str] = None
+    path: t.Optional[pathlib.Path] = None
 
     def encode(self, obj: Node) -> NodeDict:
         return {
@@ -81,9 +94,33 @@ class NodeConverter(znjson.ConverterBase):
         }
 
     def decode(self, s: dict) -> Node:
+        if s["remote"] is None:
+            if self.remote is not None:
+                s["remote"] = self.remote
+        if s["rev"] is None:
+            if self.rev is not None:
+                s["rev"] = self.rev
         module = importlib.import_module(s["module"])
         cls = getattr(module, s["cls"])
+        if self.path is not None:
+            return cls.from_rev(
+                name=s["name"],
+                remote=s["remote"],
+                rev=s["rev"],
+                path=self.path,
+            )
         return cls.from_rev(name=s["name"], remote=s["remote"], rev=s["rev"])
+
+
+def create_node_converter(remote: str, rev: str, path: pathlib.Path):
+    class CustomConverter(NodeConverter):
+        """Custom converter for zntrack.Node."""
+
+    CustomConverter.path = path
+    CustomConverter.remote = remote
+    CustomConverter.rev = rev
+
+    return CustomConverter
 
 
 class ConnectionConverter(znjson.ConverterBase):
@@ -253,20 +290,28 @@ class DataclassConverter(znjson.ConverterBase):
     representation = "@dataclasses.dataclass"
 
     def encode(self, obj: object) -> dict:
-        """Convert the znflow.Connection object to dict."""
+        """Convert a dataclass object to a serializable dict."""
         module = module_handler(obj)
         cls = obj.__class__.__name__
 
-        return {
-            "module": module,
-            "cls": cls,
+        # Collect relevant fields (PARAMS_PATH, DEPS_PATH)
+        fields = {
+            field.name: getattr(obj, field.name)
+            for field in dataclasses.fields(obj)
+            if field.metadata.get(FIELD_TYPE)
+            in {FieldTypes.PARAMS_PATH, FieldTypes.DEPS_PATH}
         }
+
+        result = {"module": module, "cls": cls}
+        if fields:
+            result["fields"] = fields
+        return result
 
     def decode(self, value: dict) -> DataclassContainer:
         """Create znflow.Connection object from dict."""
         module = importlib.import_module(value["module"])
         cls = getattr(module, value["cls"])
-        return DataclassContainer(cls)
+        return DataclassContainer(cls=cls, fields=value.get("fields", {}))
 
     def __eq__(self, other) -> bool:
         if dataclasses.is_dataclass(other) and not isinstance(
@@ -291,5 +336,6 @@ class DVCImportPathConverter(znjson.ConverterBase):
     def encode(self, obj: DVCImportPath) -> str:
         return obj.path.as_posix()
 
-    def decode(self, value: str) -> None:
-        raise NotImplementedError("DVCImportPath is converted to pathlib.Path.")
+    def decode(self, value: str) -> pathlib.Path:
+        # fallback decoder if used over pathlib converter
+        return pathlib.Path(value)
