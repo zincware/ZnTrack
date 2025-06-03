@@ -18,7 +18,14 @@ from zntrack.group import Group
 from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
-from .config import NOT_AVAILABLE, NWD_PATH, ZNTRACK_LAZY_VALUE, NodeStatusEnum
+from .config import (
+    FIELD_TYPE,
+    NOT_AVAILABLE,
+    NWD_PATH,
+    ZNTRACK_LAZY_VALUE,
+    FieldTypes,
+    NodeStatusEnum,
+)
 
 try:
     from typing import dataclass_transform
@@ -127,7 +134,11 @@ class Node(znflow.Node, znfields.Base):
     )
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
-    _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
+    _protected_: set = dataclasses.field(
+        default_factory=lambda: set(znflow.Node._protected_) | {"nwd", "name", "state"},
+        init=False,
+        repr=False,
+    )
 
     def __post_init__(self):
         if self.name is None:
@@ -135,6 +146,18 @@ class Node(znflow.Node, znfields.Base):
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
+
+        for field in dataclasses.fields(self):
+            # X_Path should be resolved instead of passing
+            #  a connection. They are known at runtime.
+            if field.metadata.get(FIELD_TYPE, None) in [
+                FieldTypes.PARAMS_PATH,
+                FieldTypes.DEPS_PATH,
+                FieldTypes.OUTS_PATH,
+                FieldTypes.PLOTS_PATH,
+                FieldTypes.METRICS_PATH,
+            ]:
+                self._protected_.add(field.name)
 
     def _post_load_(self):
         """Called after `from_rev` is called."""
