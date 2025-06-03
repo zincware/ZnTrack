@@ -78,19 +78,12 @@ def test_deps(proj_path):
         _ = NodeC(deps=a.results)
         _ = NodeC(deps=a.metrics)
         _ = NodeC(deps=a.plots)
-        # _ = NodeC(deps=a.outs_path)
-        # TODO: do we want to allow `x_path` as a `deps` or should it go into `deps_path`?
-        # _ = NodeC(deps=a.metrics_paths)
-        # _ = NodeC(deps=a.plots_path)
 
     with project.group("independent"):
         _ = NodeC(deps=b)
         _ = NodeC(deps=b.results)
         _ = NodeC(deps=b.metrics)
         _ = NodeC(deps=b.plots)
-        # _ = NodeC(deps=b.outs_path)
-        # _ = NodeC(deps=b.metrics_paths)
-        # _ = NodeC(deps=b.plots_path)
 
     with project.group("property"):
         nwp = NodeWithProperty()
