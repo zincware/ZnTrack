@@ -134,8 +134,8 @@ class Node(znflow.Node, znfields.Base):
     )
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
-    _protected_: list = dataclasses.field(
-        default_factory=lambda: znflow.Node._protected_ + ["nwd", "name", "state"],
+    _protected_: set = dataclasses.field(
+        default_factory=lambda: set(znflow.Node._protected_) | {"nwd", "name", "state"},
         init=False,
         repr=False,
     )
@@ -157,7 +157,7 @@ class Node(znflow.Node, znfields.Base):
                 FieldTypes.PLOTS_PATH,
                 FieldTypes.METRICS_PATH,
             ]:
-                self._protected_.append(field.name)
+                self._protected_.add(field.name)
 
     def _post_load_(self):
         """Called after `from_rev` is called."""
