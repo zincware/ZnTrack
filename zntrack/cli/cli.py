@@ -103,7 +103,7 @@ def run(
 
 @app.command()
 def list(
-    remote: str = typer.Argument(".", help="The path/url to the repository"),
+    remote: str = typer.Argument(None, help="The path/url to the repository"),
     rev: str = typer.Argument(None, help="The revision to list (default: HEAD)"),
 ):
     """List all Nodes in the Project."""

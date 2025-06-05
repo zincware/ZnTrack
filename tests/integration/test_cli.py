@@ -84,15 +84,17 @@ def test_list_groups(proj_path, runner):
         ],
     }
 
-    groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
-    assert groups == true_groups
+    raise ValueError("This test is not working yet, needs to be fixed.")
 
-    result = runner.invoke(app, ["list", proj_path.as_posix()])
-    # test stdout == yaml.dump of true_groups
-    groups = yaml.safe_load(result.stdout)
-    assert groups == true_groups
+    # groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
+    # assert groups == true_groups
 
-    assert result.exit_code == 0
+    # result = runner.invoke(app, ["list", proj_path.as_posix()])
+    # # test stdout == yaml.dump of true_groups
+    # groups = yaml.safe_load(result.stdout)
+    # assert groups == true_groups
+
+    # assert result.exit_code == 0
 
 
 def test_list_multi_nested_groups(proj_path, runner):
