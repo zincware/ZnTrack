@@ -1,5 +1,5 @@
 import json
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import dvc.api
 import pandas as pd
@@ -12,12 +12,25 @@ import zntrack
 from dvc.stage import Stage, PipelineStage
 
 
-# --- Tree Building and Formatting ---
+def normalize_path(path: str) -> PurePosixPath:
+    """Clean up path, removing '..' and '.'."""
+    parts = [p for p in PurePosixPath(path).parts if p not in ("..", ".")]
+    return PurePosixPath(*parts)
+
+
+def format_node(short_name: str, full_name: str, changed: bool) -> Text:
+    """Format tree leaf node."""
+    status = "✅" if not changed else "❌"
+    text = Text(f"{short_name} {status}")
+    if short_name != full_name:
+        text.append(f" -> {full_name}", style="dim")
+    return text
+
 
 def build_forest(df: pd.DataFrame) -> list[Tree]:
-    """Build a forest of nested group trees from a DataFrame."""
+    """Build nested tree from dataframe grouped by 'group' column."""
     forest = []
-    grouped = df.groupby(df["group"].apply(lambda g: g or ("__NO_GROUP__",)))
+    grouped = df.groupby(df["group"])
     trees_by_path = {}
 
     for group_path, items in grouped:
@@ -42,75 +55,63 @@ def build_forest(df: pd.DataFrame) -> list[Tree]:
     return forest
 
 
-def format_node(short_name: str, full_name: str, changed: bool) -> Text:
-    """Format a single tree node with change status."""
-    status = "✅" if not changed else "❌"
-    text = Text(f"{short_name} {status}")
-    if short_name != full_name:
-        text.append(f" -> {full_name}", style="dim")
-    return text
-
-
-# --- Node Handling Utilities ---
-
-def extract_node_info(node) -> dict:
-    """Extract node info to be used in the DataFrame."""
-    g = node.group if hasattr(node, "group") else Group(names=["__NO_GROUP__"])
-    full_name = node.__name__
-    short_name = full_name[len("_".join(g.names)) + 1:] if g.names else full_name
-    return {
-        "name": short_name,
-        "full_name": full_name,
-        "group": tuple(g.names),
-        "changed": False  # Placeholder for change detection
-    }
-
-
-def try_load_node(args: tuple) -> dict | None:
-    """Attempt to load a node from a remote/revision."""
-    node_address, remote, rev = args
-    try:
-        node = zntrack.from_rev(name=node_address, remote=remote, rev=rev)
-        return extract_node_info(node)
-    except (ModuleNotFoundError, ValueError):
-        return None
-
-
-# --- Node Listing & Execution ---
-
 def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFrame:
-    """List nodes from a DVC repository."""
+    """List zntrack nodes from DVC repo and display a nested tree."""
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
-    nodes: list[Stage | PipelineStage] = list(fs.repo.stage.collect())
-    print(f"Found {len(nodes)} nodes in the DVC graph.")
+    stages: list[Stage | PipelineStage] = list(fs.repo.stage.collect())
+    print(f"Found {len(stages)} nodes.")
 
     node_data = []
 
-    for node in nodes:
-        if isinstance(node, PipelineStage):
-            try:
-                config_path = Path(node.path_in_repo).parent / "zntrack.json"
-                config = json.loads(fs.read_text(config_path))
-                nwd = config[node.name]["nwd"]["value"]
-                g = Group.from_nwd(Path(nwd))
-                full_name = node.name
-                if g is not None:
-                    short_name = full_name[len("_".join(g.names)) + 1:] if g.names else full_name
-                else:
-                    short_name = full_name
+    for stage in stages:
+        if not isinstance(stage, PipelineStage):
+            continue
 
-                node_data.append({
-                    "name": short_name,
-                    "full_name": full_name,
-                    "group": tuple(g.names) if g is not None else ("__NO_GROUP__",),
-                    "changed": False
-                })
-            except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
-                print(f"Failed to parse node config: {e}")
+        # Determine stage_name and dvc_path if possible
+        if ":" in stage.addressing:
+            dvc_path_str, stage_name = stage.addressing.split(":")
+            dvc_path = normalize_path(dvc_path_str)
+            dvc_parts = dvc_path.parts  # for grouping
+            full_name = str(PurePosixPath(*dvc_parts) / stage_name)
+        else:
+            # Single file project
+            stage_name = stage.addressing
+            dvc_parts = ()
+            full_name = stage_name
+
+        short_name = stage.name
+
+        # Load zntrack group per node (from its nwd)
+        try:
+            config_path = Path(stage.path_in_repo).parent / "zntrack.json"
+            config = json.loads(fs.read_text(config_path))
+            nwd = config[stage.name]["nwd"]["value"]
+            group = Group.from_nwd(Path(nwd))
+            group_parts = tuple(group.names) if group.names else ()
+        except Exception as e:
+            print(f"Could not load group for {stage.name}: {e}")
+            group_parts = ()
+
+        # Build group path
+        if dvc_parts and group_parts:
+            group_path = dvc_parts + group_parts
+        elif dvc_parts:
+            group_path = dvc_parts
+        elif group_parts:
+            group_path = group_parts
+        else:
+            group_path = ("__NO_GROUP__",)
+
+        node_data.append({
+            "name": short_name,
+            "full_name": full_name,
+            "group": group_path,
+            "changed": False
+        })
 
     df = pd.DataFrame(node_data)
 
-    # Optional: Render the tree view
+    # Render tree
     console = Console()
     for top_tree in build_forest(df):
         console.print(top_tree)
