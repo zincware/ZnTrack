@@ -1,0 +1,34 @@
+{
+    "MyNode": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/MyNode"
+        },
+        "deps_path": null,
+        "params_path": null,
+        "outs_path": null,
+        "metrics_path": null,
+        "plots_path": null
+    },
+    "MyNode_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/MyNode_1"
+        },
+        "deps_path": [
+            null
+        ],
+        "params_path": [
+            null
+        ],
+        "outs_path": [
+            null
+        ],
+        "metrics_path": [
+            null
+        ],
+        "plots_path": [
+            null
+        ]
+    }
+}

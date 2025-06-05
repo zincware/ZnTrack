@@ -18,7 +18,14 @@ from zntrack.group import Group
 from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
-from .config import NOT_AVAILABLE, NWD_PATH, ZNTRACK_LAZY_VALUE, NodeStatusEnum
+from .config import (
+    FIELD_TYPE,
+    NOT_AVAILABLE,
+    NWD_PATH,
+    ZNTRACK_LAZY_VALUE,
+    FieldTypes,
+    NodeStatusEnum,
+)
 
 try:
     from typing import dataclass_transform
@@ -127,7 +134,11 @@ class Node(znflow.Node, znfields.Base):
     )
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
-    _protected_ = znflow.Node._protected_ + ["nwd", "name", "state"]
+    _protected_: set = dataclasses.field(
+        default_factory=lambda: set(znflow.Node._protected_) | {"nwd", "name", "state"},
+        init=False,
+        repr=False,
+    )
 
     def __post_init__(self):
         if self.name is None:
@@ -135,6 +146,18 @@ class Node(znflow.Node, znfields.Base):
             # exiting the graph context.
             if not znflow.get_graph() is not znflow.empty_graph:
                 self.name = self.__class__.__name__
+
+        for field in dataclasses.fields(self):
+            # X_Path should be resolved instead of passing
+            #  a connection. They are known at runtime.
+            if field.metadata.get(FIELD_TYPE, None) in [
+                FieldTypes.PARAMS_PATH,
+                FieldTypes.DEPS_PATH,
+                FieldTypes.OUTS_PATH,
+                FieldTypes.PLOTS_PATH,
+                FieldTypes.METRICS_PATH,
+            ]:
+                self._protected_.add(field.name)
 
     def _post_load_(self):
         """Called after `from_rev` is called."""
@@ -182,10 +205,15 @@ class Node(znflow.Node, znfields.Base):
         rev: str | None = None,
         running: bool = False,
         lazy_evaluation: bool = True,
+        path: str | None | pathlib.Path = None,
         **kwargs,
     ) -> T:
         if name is None:
             name = cls.__name__
+        if path is not None:
+            path = pathlib.Path(path)
+        else:
+            path = pathlib.Path()
         lazy_values = {}
         for field in dataclasses.fields(cls):
             # check if the field is in the init
@@ -202,12 +230,13 @@ class Node(znflow.Node, znfields.Base):
         if remote is not None or rev is not None:
             import dvc.api
 
-            with dvc.api.open("zntrack.json", repo=remote, rev=rev) as f:
+            fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            with fs.open(path / "zntrack.json") as f:
                 conf = json.loads(f.read())
                 nwd = pathlib.Path(conf[name]["nwd"]["value"])
         else:
             try:
-                with open("zntrack.json") as f:
+                with open(path / "zntrack.json") as f:
                     conf = json.load(f)
                     nwd = pathlib.Path(conf[name]["nwd"]["value"])
             except FileNotFoundError:
@@ -222,6 +251,7 @@ class Node(znflow.Node, znfields.Base):
             state=NodeStatusEnum.RUNNING if running else NodeStatusEnum.FINISHED,
             lazy_evaluation=lazy_evaluation,
             group=Group.from_nwd(instance.nwd),
+            path=path,
         ).to_dict()
 
         instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
@@ -231,17 +261,18 @@ class Node(znflow.Node, znfields.Base):
             # TODO: do we want to set the UUID as well?
             # TODO: test that run_count is correct, when using from_rev from another
             #  commit
-            with instance.state.fs.open(instance.nwd / "node-meta.json") as f:
+            with instance.state.fs.open(path / instance.nwd / "node-meta.json") as f:
                 content = json.load(f)
                 run_count = content.get("run_count", 0)
                 run_time = content.get("run_time", 0)
+                lockfile = content.get("lockfile", None)
                 if node_uuid := content.get("uuid", None):
                     instance._uuid = uuid.UUID(node_uuid)
                 instance.__dict__["state"]["run_count"] = run_count
                 instance.__dict__["state"]["run_time"] = datetime.timedelta(
                     seconds=run_time
                 )
-
+                instance.__dict__["state"]["lockfile"] = lockfile
         if not instance.state.lazy_evaluation:
             for field in dataclasses.fields(cls):
                 _ = getattr(instance, field.name)
