@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 import pytest
 from typer.testing import CliRunner
@@ -6,7 +7,6 @@ from typer.testing import CliRunner
 import zntrack
 import zntrack.examples
 from zntrack.cli import app
-import subprocess
 
 
 @pytest.fixture()
