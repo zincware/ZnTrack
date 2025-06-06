@@ -982,7 +982,7 @@ wheels = [
 
 [[package]]
 name = "dvc"
-version = "3.59.0"
+version = "3.60.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "attrs" },
@@ -1028,9 +1028,9 @@ dependencies = [
     { name = "voluptuous" },
     { name = "zc-lockfile" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/08/2a/056ba3592887eb9ed26df5ea58badfd37bc039e464a294cc58ef142f3d90/dvc-3.59.0.tar.gz", hash = "sha256:d991221eec54a146050f90b948e5a9c0541c81565356bf034e3faf54a6bfb847", size = 652856, upload-time = "2025-01-13T07:04:23.531Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/6d/0cf6feca9d2100d470ab8d276961a96eb7fe462a47e46e1a69e8697ccaa0/dvc-3.60.0.tar.gz", hash = "sha256:b334bad4301c69f59dd4ad036df76bc84eff6be63e621ed3cc9b3c6bbf92a2eb", size = 654062, upload-time = "2025-06-06T06:55:26.196Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/79/d2/0ff8d61e1a04a782a7e128dd16cc30992635aa1194b116dac46d9f38cc61/dvc-3.59.0-py3-none-any.whl", hash = "sha256:0ad3f8281143dc53b9fa72675248be979f1f3819bc841258e87523e20344dda3", size = 457674, upload-time = "2025-01-13T07:04:20.862Z" },
+    { url = "https://files.pythonhosted.org/packages/58/c7/94bffdd8806982f1a561de3909add81b156b9797b681d9f38337a3321026/dvc-3.60.0-py3-none-any.whl", hash = "sha256:42f5385cbc31916abc59a06e9ce974e2f33fb34a1941a7e817ea279c1c8dd4d5", size = 458476, upload-time = "2025-06-06T06:55:23.562Z" },
 ]
 
 [[package]]
@@ -4964,7 +4964,7 @@ examples = [
 
 [package.metadata]
 requires-dist = [
-    { name = "dvc", specifier = ">=3.59.0" },
+    { name = "dvc", specifier = ">=3.60.0" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pyyaml", specifier = ">=6.0.2" },
     { name = "tqdm", specifier = ">=4.67.1" },

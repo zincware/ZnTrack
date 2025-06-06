@@ -7,7 +7,7 @@ from rich.console import Console
 from rich.text import Text
 from rich.tree import Tree
 from zntrack.group import Group
-import zntrack
+from zntrack.utils.state import get_node_status
 
 from dvc.stage import Stage, PipelineStage
 
@@ -108,7 +108,7 @@ def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int =
             "name": short_name,
             "full_name": stage.addressing,
             "group": group_path,
-            "changed": False
+            "changed": get_node_status(stage.addressing, remote, rev, fs=fs),
         })
 
     df = pd.DataFrame(node_data)
