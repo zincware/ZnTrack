@@ -1,12 +1,11 @@
+import json
+
 import pytest
-import yaml
 from typer.testing import CliRunner
 
 import zntrack
 import zntrack.examples
-from zntrack import utils
 from zntrack.cli import app
-import json
 
 
 @pytest.fixture()
@@ -158,8 +157,6 @@ def test_list_groups(proj_path, runner):
     └── nested_GRP2_ParamsToOuts_1 ✅
 """
     assert result.stdout in outs
-
-
 
 
 def test_list_multi_nested_groups(proj_path, runner):

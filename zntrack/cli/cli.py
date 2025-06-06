@@ -105,7 +105,7 @@ def run(
 def list(
     remote: str = typer.Argument(None, help="The path/url to the repository"),
     rev: str = typer.Argument(None, help="The revision to list (default: HEAD)"),
-    json: bool = typer.Option(False, help="Output in JSON format.")
+    json: bool = typer.Option(False, help="Output in JSON format."),
 ):
     """List all Nodes in the Project."""
     df = list_nodes(remote=remote, rev=rev, verbose=0 if json else 1)

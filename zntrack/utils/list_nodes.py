@@ -3,14 +3,14 @@ from pathlib import Path, PurePosixPath
 
 import dvc.api
 import pandas as pd
+from dvc.stage import PipelineStage, Stage
 from rich.console import Console
+from rich.progress import BarColumn, Progress, SpinnerColumn, TextColumn
 from rich.text import Text
 from rich.tree import Tree
+
 from zntrack.group import Group
 from zntrack.utils.state import get_node_status
-
-from dvc.stage import Stage, PipelineStage
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 
 
 def normalize_path(path: str) -> PurePosixPath:
@@ -65,7 +65,9 @@ def build_forest(df: pd.DataFrame) -> list[Tree]:
     return forest
 
 
-def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int = 1) -> pd.DataFrame:
+def list_nodes(
+    remote: str | None = None, rev: str | None = None, verbose: int = 1
+) -> pd.DataFrame:
     """List zntrack nodes from DVC repo and display a nested tree."""
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     stages: list[Stage | PipelineStage] = list(fs.repo.stage.collect())
@@ -77,22 +79,20 @@ def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int =
         TextColumn("[cyan]Node: {task.completed}/{task.total} |"),
         BarColumn(),
         # Second "column": Current item being processed
-        TextColumn("[progress.description] [bold]{task.fields[current_node_address]}[/bold]"),
-        transient=True, # Keeps the bar from lingering after completion
+        TextColumn(
+            "[progress.description] [bold]{task.fields[current_node_address]}[/bold]"
+        ),
+        transient=True,  # Keeps the bar from lingering after completion
         refresh_per_second=10,
     ) as progress:
         task = progress.add_task(
             "[cyan]Checking nodes...",
             total=len(stages),
-            current_node_address="" # Initialize custom field
+            current_node_address="",  # Initialize custom field
         )
         for idx, stage in enumerate(stages, 1):
             # Update the custom field for current node's addressing
-            progress.update(
-                task,
-                completed=idx,
-                current_node_address=stage.addressing
-            )
+            progress.update(task, completed=idx, current_node_address=stage.addressing)
             if not isinstance(stage, PipelineStage):
                 continue
             # Determine stage_name and dvc_path if possible
@@ -106,7 +106,7 @@ def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int =
                 stage_name = stage.addressing
                 # If addressing is a dvc.yaml, we treat its parent as the dvc_parts
                 if stage_name == "dvc.yaml":
-                    dvc_parts = () # no dvc_parts if it's just dvc.yaml in root
+                    dvc_parts = ()  # no dvc_parts if it's just dvc.yaml in root
                 elif PurePosixPath(stage_name).name == "dvc.yaml":
                     dvc_parts = PurePosixPath(stage_name).parent.parts
                 else:
@@ -121,7 +121,7 @@ def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int =
                 nwd = config[stage.name]["nwd"]["value"]
                 group = Group.from_nwd(Path(nwd))
                 group_parts = tuple(group.names) if group.names else ()
-            except Exception as e:
+            except Exception:
                 group_parts = ()
 
             # Build group path
@@ -134,12 +134,14 @@ def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int =
             else:
                 group_path = ("__NO_GROUP__",)
 
-            node_data.append({
-                "name": short_name,
-                "full_name": stage.addressing,
-                "group": group_path,
-                "changed": get_node_status(stage.addressing, remote, rev, fs=fs),
-            })
+            node_data.append(
+                {
+                    "name": short_name,
+                    "full_name": stage.addressing,
+                    "group": group_path,
+                    "changed": get_node_status(stage.addressing, remote, rev, fs=fs),
+                }
+            )
 
     df = pd.DataFrame(node_data)
 

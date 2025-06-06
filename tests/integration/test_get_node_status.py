@@ -1,7 +1,7 @@
-from zntrack.utils.state import get_node_status
-from dvc.api import DVCFileSystem
-import zntrack.examples
 import subprocess
+
+import zntrack.examples
+from zntrack.utils.state import get_node_status
 
 
 def test_get_node_status(proj_path):
@@ -32,10 +32,13 @@ def test_get_node_status(proj_path):
 
     assert get_node_status(a.name, remote=None, rev=None) is True
     assert get_node_status(b.name, remote=None, rev=None) is False
-    assert get_node_status(c.name, remote=None, rev=None) is False # DVC the deps have not been updated, so this still assumes it is True
+    assert (
+        get_node_status(c.name, remote=None, rev=None) is False
+    )  # DVC the deps have not been updated, so this still assumes it is True
 
     subprocess.check_call(["dvc", "repro", a.name])
     assert get_node_status(a.name, remote=None, rev=None) is False
     assert get_node_status(b.name, remote=None, rev=None) is False
-    assert get_node_status(c.name, remote=None, rev=None) is True # Now the deps have been updated, so this is True again
-
+    assert (
+        get_node_status(c.name, remote=None, rev=None) is True
+    )  # Now the deps have been updated, so this is True again
