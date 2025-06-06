@@ -55,12 +55,10 @@ def build_forest(df: pd.DataFrame) -> list[Tree]:
     return forest
 
 
-def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFrame:
+def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int = 1) -> pd.DataFrame:
     """List zntrack nodes from DVC repo and display a nested tree."""
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     stages: list[Stage | PipelineStage] = list(fs.repo.stage.collect())
-    print(f"Found {len(stages)} nodes.")
-
     node_data = []
 
     for stage in stages:
@@ -70,14 +68,19 @@ def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFram
         # Determine stage_name and dvc_path if possible
         if ":" in stage.addressing:
             dvc_path_str, stage_name = stage.addressing.split(":")
-            dvc_path = normalize_path(dvc_path_str)
-            dvc_parts = dvc_path.parts  # for grouping
-            full_name = str(PurePosixPath(*dvc_parts) / stage_name)
+            # Exclude 'dvc.yaml' from the dvc_parts for grouping
+            dvc_path_obj = normalize_path(dvc_path_str)
+            dvc_parts = tuple(p for p in dvc_path_obj.parts if p != "dvc.yaml")
         else:
             # Single file project
             stage_name = stage.addressing
-            dvc_parts = ()
-            full_name = stage_name
+            # If addressing is a dvc.yaml, we treat its parent as the dvc_parts
+            if stage_name == "dvc.yaml":
+                dvc_parts = () # no dvc_parts if it's just dvc.yaml in root
+            elif PurePosixPath(stage_name).name == "dvc.yaml":
+                dvc_parts = PurePosixPath(stage_name).parent.parts
+            else:
+                dvc_parts = ()
 
         short_name = stage.name
 
@@ -89,7 +92,6 @@ def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFram
             group = Group.from_nwd(Path(nwd))
             group_parts = tuple(group.names) if group.names else ()
         except Exception as e:
-            print(f"Could not load group for {stage.name}: {e}")
             group_parts = ()
 
         # Build group path
@@ -104,7 +106,7 @@ def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFram
 
         node_data.append({
             "name": short_name,
-            "full_name": full_name,
+            "full_name": stage.addressing,
             "group": group_path,
             "changed": False
         })
@@ -112,8 +114,9 @@ def list_nodes(remote: str | None = None, rev: str | None = None) -> pd.DataFram
     df = pd.DataFrame(node_data)
 
     # Render tree
-    console = Console()
-    for top_tree in build_forest(df):
-        console.print(top_tree)
+    if verbose > 0:
+        console = Console()
+        for top_tree in build_forest(df):
+            console.print(top_tree)
 
     return df
