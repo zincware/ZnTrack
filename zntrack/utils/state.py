@@ -9,13 +9,25 @@ import znjson
 
 
 def get_node_status(addressing: str, remote: str|None, rev:str|None, fs: dvc.api.DVCFileSystem|None = None) -> bool | None:
-    print(f"Checking node status for {addressing} in remote {remote} at revision {rev}")
+    """Check if a node has changed since the last DVC run.
+    
+    Returns:
+        - True if the node has changed
+        - False if the node has not changed
+        - None if the node does not exist or is not a zntrack node
+    """
+
+    # TODO: this should check the node status of all dependencies, and if 
+    # any of them has changed, the value should be set to None / unknown.
     if fs is None:
         fs = dvc.fs.DVCFileSystem(
             repo=remote,
             rev=rev,
         )
-    stage = next(iter(fs.repo.stage.collect(addressing)))
+    try:
+        stage = next(iter(fs.repo.stage.collect(addressing)))
+    except Exception:
+        return None
     stage.save_deps(allow_missing=True)
     dvc_lock = to_single_stage_lockfile(stage)
     dvc_lock = {k: v for k, v in dvc_lock.items() if k in ["cmd", "deps", "params"]}
@@ -25,13 +37,11 @@ def get_node_status(addressing: str, remote: str|None, rev:str|None, fs: dvc.api
             fs.read_text(Path(stage.path_in_repo).parent / "zntrack.json"),
         )
     except FileNotFoundError:
-        print(f"zntrack.json not found for {stage.name} at {stage.path_in_repo}")
         return None
     
     try:
         nwd = Path(zntrack_meta[stage.name]["nwd"]["value"])
     except KeyError:
-        print(f"Node {stage.name} does not have a 'nwd' entry in zntrack.json")
         return None
     
     nwd_in_repo = Path(stage.path_in_repo).parent / nwd
@@ -40,21 +50,17 @@ def get_node_status(addressing: str, remote: str|None, rev:str|None, fs: dvc.api
             fs.read_text(nwd_in_repo / "node-meta.json")
         )
     except FileNotFoundError:
-        print(f"node-meta.json not found for {stage.name} at {nwd_in_repo}")
-        return False
-    
+        return True
+
     try:
         node_lock = node_meta["lockfile"]
     except KeyError:
-        print(f"Node {stage.name} does not have a 'lockfile' entry in node-meta.json")
         return None # old zntrack version
 
     # Compare dvc_lock with node_lock
     if dvc_lock == node_lock:
-        print(f"Node {stage.name} is unchanged.")
         return False
     else:
-        print(f"Node {stage.name} has changed.")
         return True
 
 

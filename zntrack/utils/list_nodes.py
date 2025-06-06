@@ -10,6 +10,7 @@ from zntrack.group import Group
 from zntrack.utils.state import get_node_status
 
 from dvc.stage import Stage, PipelineStage
+from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
 
 
 def normalize_path(path: str) -> PurePosixPath:
@@ -20,8 +21,17 @@ def normalize_path(path: str) -> PurePosixPath:
 
 def format_node(short_name: str, full_name: str, changed: bool) -> Text:
     """Format tree leaf node."""
-    status = "✅" if not changed else "❌"
-    text = Text(f"{short_name} {status}")
+    if changed is True:
+        status_symbol = "❌"
+        style = "bold red"
+    elif changed is False:
+        status_symbol = "✅"
+        style = "bold green"
+    else:  # changed is None (unknown status)
+        status_symbol = "❓"
+        style = "bold blue"
+
+    text = Text(f"{short_name} {status_symbol}", style=style)
     if short_name != full_name:
         text.append(f" -> {full_name}", style="dim")
     return text
@@ -61,55 +71,75 @@ def list_nodes(remote: str | None = None, rev: str | None = None, verbose: int =
     stages: list[Stage | PipelineStage] = list(fs.repo.stage.collect())
     node_data = []
 
-    for stage in stages:
-        if not isinstance(stage, PipelineStage):
-            continue
-
-        # Determine stage_name and dvc_path if possible
-        if ":" in stage.addressing:
-            dvc_path_str, stage_name = stage.addressing.split(":")
-            # Exclude 'dvc.yaml' from the dvc_parts for grouping
-            dvc_path_obj = normalize_path(dvc_path_str)
-            dvc_parts = tuple(p for p in dvc_path_obj.parts if p != "dvc.yaml")
-        else:
-            # Single file project
-            stage_name = stage.addressing
-            # If addressing is a dvc.yaml, we treat its parent as the dvc_parts
-            if stage_name == "dvc.yaml":
-                dvc_parts = () # no dvc_parts if it's just dvc.yaml in root
-            elif PurePosixPath(stage_name).name == "dvc.yaml":
-                dvc_parts = PurePosixPath(stage_name).parent.parts
+    with Progress(
+        SpinnerColumn(),
+        # First "column": Overall progress count
+        TextColumn("[cyan]Node: {task.completed}/{task.total} |"),
+        BarColumn(),
+        # Second "column": Current item being processed
+        TextColumn("[progress.description] [bold]{task.fields[current_node_address]}[/bold]"),
+        transient=True, # Keeps the bar from lingering after completion
+        refresh_per_second=10,
+    ) as progress:
+        task = progress.add_task(
+            "[cyan]Checking nodes...",
+            total=len(stages),
+            current_node_address="" # Initialize custom field
+        )
+        for idx, stage in enumerate(stages, 1):
+            # Update the custom field for current node's addressing
+            progress.update(
+                task,
+                completed=idx,
+                current_node_address=stage.addressing
+            )
+            if not isinstance(stage, PipelineStage):
+                continue
+            # Determine stage_name and dvc_path if possible
+            if ":" in stage.addressing:
+                dvc_path_str, stage_name = stage.addressing.split(":")
+                # Exclude 'dvc.yaml' from the dvc_parts for grouping
+                dvc_path_obj = normalize_path(dvc_path_str)
+                dvc_parts = tuple(p for p in dvc_path_obj.parts if p != "dvc.yaml")
             else:
-                dvc_parts = ()
+                # Single file project
+                stage_name = stage.addressing
+                # If addressing is a dvc.yaml, we treat its parent as the dvc_parts
+                if stage_name == "dvc.yaml":
+                    dvc_parts = () # no dvc_parts if it's just dvc.yaml in root
+                elif PurePosixPath(stage_name).name == "dvc.yaml":
+                    dvc_parts = PurePosixPath(stage_name).parent.parts
+                else:
+                    dvc_parts = ()
 
-        short_name = stage.name
+            short_name = stage.name
 
-        # Load zntrack group per node (from its nwd)
-        try:
-            config_path = Path(stage.path_in_repo).parent / "zntrack.json"
-            config = json.loads(fs.read_text(config_path))
-            nwd = config[stage.name]["nwd"]["value"]
-            group = Group.from_nwd(Path(nwd))
-            group_parts = tuple(group.names) if group.names else ()
-        except Exception as e:
-            group_parts = ()
+            # Load zntrack group per node (from its nwd)
+            try:
+                config_path = Path(stage.path_in_repo).parent / "zntrack.json"
+                config = json.loads(fs.read_text(config_path))
+                nwd = config[stage.name]["nwd"]["value"]
+                group = Group.from_nwd(Path(nwd))
+                group_parts = tuple(group.names) if group.names else ()
+            except Exception as e:
+                group_parts = ()
 
-        # Build group path
-        if dvc_parts and group_parts:
-            group_path = dvc_parts + group_parts
-        elif dvc_parts:
-            group_path = dvc_parts
-        elif group_parts:
-            group_path = group_parts
-        else:
-            group_path = ("__NO_GROUP__",)
+            # Build group path
+            if dvc_parts and group_parts:
+                group_path = dvc_parts + group_parts
+            elif dvc_parts:
+                group_path = dvc_parts
+            elif group_parts:
+                group_path = group_parts
+            else:
+                group_path = ("__NO_GROUP__",)
 
-        node_data.append({
-            "name": short_name,
-            "full_name": stage.addressing,
-            "group": group_path,
-            "changed": get_node_status(stage.addressing, remote, rev, fs=fs),
-        })
+            node_data.append({
+                "name": short_name,
+                "full_name": stage.addressing,
+                "group": group_path,
+                "changed": get_node_status(stage.addressing, remote, rev, fs=fs),
+            })
 
     df = pd.DataFrame(node_data)
 
