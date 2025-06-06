@@ -6,6 +6,7 @@ from typer.testing import CliRunner
 import zntrack
 import zntrack.examples
 from zntrack.cli import app
+import subprocess
 
 
 @pytest.fixture()
@@ -45,21 +46,23 @@ def test_run_w_name(proj_path, runner):
 
 def test_list_groups(proj_path, runner):
     with zntrack.Project() as proj:
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        a = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
 
     with proj.group("example1"):
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        b = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
 
     with proj.group("nested", "GRP1"):
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        c = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
     with proj.group("nested", "GRP2"):
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        d = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
 
     proj.build()
+
+    subprocess.check_call(["dvc", "repro", a.name, b.name, c.name, d.name])
 
     true_groups = [
         {
@@ -71,7 +74,7 @@ def test_list_groups(proj_path, runner):
             "name": "ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "ParamsToOuts_1",
             "group": [
                 "__NO_GROUP__",
@@ -87,7 +90,7 @@ def test_list_groups(proj_path, runner):
             "name": "example1_ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "example1_ParamsToOuts_1",
             "group": [
                 "example1",
@@ -104,7 +107,7 @@ def test_list_groups(proj_path, runner):
             "name": "nested_GRP1_ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "nested_GRP1_ParamsToOuts_1",
             "group": [
                 "nested",
@@ -122,7 +125,7 @@ def test_list_groups(proj_path, runner):
             "name": "nested_GRP2_ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "nested_GRP2_ParamsToOuts_1",
             "group": [
                 "nested",
@@ -144,17 +147,17 @@ def test_list_groups(proj_path, runner):
     outs = """
 📁 No Group
 ├── ParamsToOuts ✅
-└── ParamsToOuts_1 ✅
+└── ParamsToOuts_1 ❌
 📁 example1
 ├── example1_ParamsToOuts ✅
-└── example1_ParamsToOuts_1 ✅
+└── example1_ParamsToOuts_1 ❌
 📁 nested
 ├── 📁 GRP1
 │   ├── nested_GRP1_ParamsToOuts ✅
-│   └── nested_GRP1_ParamsToOuts_1 ✅
+│   └── nested_GRP1_ParamsToOuts_1 ❌
 └── 📁 GRP2
     ├── nested_GRP2_ParamsToOuts ✅
-    └── nested_GRP2_ParamsToOuts_1 ✅
+    └── nested_GRP2_ParamsToOuts_1 ❌
 """
     assert result.stdout in outs
 
@@ -182,7 +185,7 @@ def test_list_multi_nested_groups(proj_path, runner):
 
     true_groups = [
         {
-            "changed": False,
+            "changed": True,
             "full_name": "ParamsToOuts",
             "group": [
                 "__NO_GROUP__",
@@ -190,7 +193,7 @@ def test_list_multi_nested_groups(proj_path, runner):
             "name": "ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "ParamsToOuts_1",
             "group": [
                 "__NO_GROUP__",
@@ -198,7 +201,7 @@ def test_list_multi_nested_groups(proj_path, runner):
             "name": "ParamsToOuts_1",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "dynamics_400K_B_ParamsToOuts",
             "group": [
                 "dynamics",
@@ -208,7 +211,7 @@ def test_list_multi_nested_groups(proj_path, runner):
             "name": "dynamics_400K_B_ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "dynamics_400K_B_ParamsToOuts_1",
             "group": [
                 "dynamics",
@@ -218,7 +221,7 @@ def test_list_multi_nested_groups(proj_path, runner):
             "name": "dynamics_400K_B_ParamsToOuts_1",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "dynamics_400K_ParamsToOuts",
             "group": [
                 "dynamics",
@@ -227,7 +230,7 @@ def test_list_multi_nested_groups(proj_path, runner):
             "name": "dynamics_400K_ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "dynamics_400K_ParamsToOuts_1",
             "group": [
                 "dynamics",
@@ -236,7 +239,7 @@ def test_list_multi_nested_groups(proj_path, runner):
             "name": "dynamics_400K_ParamsToOuts_1",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "dynamics_ParamsToOuts",
             "group": [
                 "dynamics",
@@ -244,7 +247,7 @@ def test_list_multi_nested_groups(proj_path, runner):
             "name": "dynamics_ParamsToOuts",
         },
         {
-            "changed": False,
+            "changed": True,
             "full_name": "dynamics_ParamsToOuts_1",
             "group": [
                 "dynamics",
@@ -264,16 +267,16 @@ def test_list_multi_nested_groups(proj_path, runner):
 
     outs = """
 📁 No Group
-├── ParamsToOuts ✅
-└── ParamsToOuts_1 ✅
+├── ParamsToOuts ❌
+└── ParamsToOuts_1 ❌
 📁 dynamics
-├── dynamics_ParamsToOuts ✅
-├── dynamics_ParamsToOuts_1 ✅
+├── dynamics_ParamsToOuts ❌
+├── dynamics_ParamsToOuts_1 ❌
 └── 📁 400K
-    ├── dynamics_400K_ParamsToOuts ✅
-    ├── dynamics_400K_ParamsToOuts_1 ✅
+    ├── dynamics_400K_ParamsToOuts ❌
+    ├── dynamics_400K_ParamsToOuts_1 ❌
     └── 📁 B
-        ├── dynamics_400K_B_ParamsToOuts ✅
-        └── dynamics_400K_B_ParamsToOuts_1 ✅
+        ├── dynamics_400K_B_ParamsToOuts ❌
+        └── dynamics_400K_B_ParamsToOuts_1 ❌
 """
     assert result.stdout in outs
