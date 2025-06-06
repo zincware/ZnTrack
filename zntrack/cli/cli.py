@@ -9,11 +9,11 @@ import sys
 
 import git
 import typer
-import yaml
 
 from zntrack import Node, utils
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
+from zntrack.utils.list_nodes import list_nodes
 from zntrack.utils.lockfile import mp_join_stage_lock, mp_start_stage_lock
 from zntrack.utils.misc import load_env_vars
 
@@ -103,12 +103,14 @@ def run(
 
 @app.command()
 def list(
-    remote: str = typer.Argument(".", help="The path/url to the repository"),
+    remote: str = typer.Argument(None, help="The path/url to the repository"),
     rev: str = typer.Argument(None, help="The revision to list (default: HEAD)"),
+    json: bool = typer.Option(False, help="Output in JSON format."),
 ):
     """List all Nodes in the Project."""
-    groups, _ = utils.cli.get_groups(remote, rev)
-    print(yaml.dump(groups))
+    df = list_nodes(remote=remote, rev=rev, verbose=0 if json else 1)
+    if json:
+        typer.echo(df.to_json(orient="records", indent=2))
 
 
 @app.command()

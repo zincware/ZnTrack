@@ -10,7 +10,7 @@ keywords=["data-science", "data-version-control", "machine-learning", "reproduci
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
-    "dvc>=3.59.0",
+    "dvc>=3.60.0",
     "pandas>=2.2.3",
     "pyyaml>=6.0.2",
     "tqdm>=4.67.1",

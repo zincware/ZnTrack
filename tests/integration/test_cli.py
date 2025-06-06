@@ -1,10 +1,11 @@
+import json
+import subprocess
+
 import pytest
-import yaml
 from typer.testing import CliRunner
 
 import zntrack
 import zntrack.examples
-from zntrack import utils
 from zntrack.cli import app
 
 
@@ -45,54 +46,120 @@ def test_run_w_name(proj_path, runner):
 
 def test_list_groups(proj_path, runner):
     with zntrack.Project() as proj:
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        a = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
 
     with proj.group("example1"):
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        b = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
 
     with proj.group("nested", "GRP1"):
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        c = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
     with proj.group("nested", "GRP2"):
-        _ = zntrack.examples.ParamsToOuts(params=15)
+        d = zntrack.examples.ParamsToOuts(params=15)
         _ = zntrack.examples.ParamsToOuts(params=15)
 
     proj.build()
 
-    true_groups = {
-        "example1": [
-            "ParamsToOuts -> example1_ParamsToOuts",
-            "ParamsToOuts_1 -> example1_ParamsToOuts_1",
-        ],
-        "nodes": [
-            "ParamsToOuts",
-            "ParamsToOuts_1",
-        ],
-        "nested": [
-            {
-                "GRP1": [
-                    "ParamsToOuts -> nested_GRP1_ParamsToOuts",
-                    "ParamsToOuts_1 -> nested_GRP1_ParamsToOuts_1",
-                ],
-                "GRP2": [
-                    "ParamsToOuts -> nested_GRP2_ParamsToOuts",
-                    "ParamsToOuts_1 -> nested_GRP2_ParamsToOuts_1",
-                ],
-            }
-        ],
-    }
+    subprocess.check_call(["dvc", "repro", a.name, b.name, c.name, d.name])
 
-    groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
-    assert groups == true_groups
+    true_groups = [
+        {
+            "changed": False,
+            "full_name": "ParamsToOuts",
+            "group": [
+                "__NO_GROUP__",
+            ],
+            "name": "ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "ParamsToOuts_1",
+            "group": [
+                "__NO_GROUP__",
+            ],
+            "name": "ParamsToOuts_1",
+        },
+        {
+            "changed": False,
+            "full_name": "example1_ParamsToOuts",
+            "group": [
+                "example1",
+            ],
+            "name": "example1_ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "example1_ParamsToOuts_1",
+            "group": [
+                "example1",
+            ],
+            "name": "example1_ParamsToOuts_1",
+        },
+        {
+            "changed": False,
+            "full_name": "nested_GRP1_ParamsToOuts",
+            "group": [
+                "nested",
+                "GRP1",
+            ],
+            "name": "nested_GRP1_ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "nested_GRP1_ParamsToOuts_1",
+            "group": [
+                "nested",
+                "GRP1",
+            ],
+            "name": "nested_GRP1_ParamsToOuts_1",
+        },
+        {
+            "changed": False,
+            "full_name": "nested_GRP2_ParamsToOuts",
+            "group": [
+                "nested",
+                "GRP2",
+            ],
+            "name": "nested_GRP2_ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "nested_GRP2_ParamsToOuts_1",
+            "group": [
+                "nested",
+                "GRP2",
+            ],
+            "name": "nested_GRP2_ParamsToOuts_1",
+        },
+    ]
 
-    result = runner.invoke(app, ["list", proj_path.as_posix()])
-    # test stdout == yaml.dump of true_groups
-    groups = yaml.safe_load(result.stdout)
+    result = runner.invoke(app, ["list", proj_path.as_posix(), "--json"])
+    groups = json.loads(result.stdout)
     assert groups == true_groups
 
     assert result.exit_code == 0
+
+    result = runner.invoke(app, ["list", proj_path.as_posix()])
+    assert result.exit_code == 0
+
+    outs = """
+📁 No Group
+├── ParamsToOuts ✅
+└── ParamsToOuts_1 ❌
+📁 example1
+├── example1_ParamsToOuts ✅
+└── example1_ParamsToOuts_1 ❌
+📁 nested
+├── 📁 GRP1
+│   ├── nested_GRP1_ParamsToOuts ✅
+│   └── nested_GRP1_ParamsToOuts_1 ❌
+└── 📁 GRP2
+    ├── nested_GRP2_ParamsToOuts ✅
+    └── nested_GRP2_ParamsToOuts_1 ❌
+"""
+    assert result.stdout in outs
 
 
 def test_list_multi_nested_groups(proj_path, runner):
@@ -116,31 +183,100 @@ def test_list_multi_nested_groups(proj_path, runner):
 
     proj.build()
 
-    true_groups = {
-        "dynamics": [
-            {
-                "400K": [
-                    {
-                        "B": [
-                            "ParamsToOuts -> dynamics_400K_B_ParamsToOuts",
-                            "ParamsToOuts_1 -> dynamics_400K_B_ParamsToOuts_1",
-                        ]
-                    },
-                    "ParamsToOuts -> dynamics_400K_ParamsToOuts",
-                    "ParamsToOuts_1 -> dynamics_400K_ParamsToOuts_1",
-                ]
-            },
-            "ParamsToOuts -> dynamics_ParamsToOuts",
-            "ParamsToOuts_1 -> dynamics_ParamsToOuts_1",
-        ],
-        "nodes": ["ParamsToOuts", "ParamsToOuts_1"],
-    }
+    true_groups = [
+        {
+            "changed": True,
+            "full_name": "ParamsToOuts",
+            "group": [
+                "__NO_GROUP__",
+            ],
+            "name": "ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "ParamsToOuts_1",
+            "group": [
+                "__NO_GROUP__",
+            ],
+            "name": "ParamsToOuts_1",
+        },
+        {
+            "changed": True,
+            "full_name": "dynamics_400K_B_ParamsToOuts",
+            "group": [
+                "dynamics",
+                "400K",
+                "B",
+            ],
+            "name": "dynamics_400K_B_ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "dynamics_400K_B_ParamsToOuts_1",
+            "group": [
+                "dynamics",
+                "400K",
+                "B",
+            ],
+            "name": "dynamics_400K_B_ParamsToOuts_1",
+        },
+        {
+            "changed": True,
+            "full_name": "dynamics_400K_ParamsToOuts",
+            "group": [
+                "dynamics",
+                "400K",
+            ],
+            "name": "dynamics_400K_ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "dynamics_400K_ParamsToOuts_1",
+            "group": [
+                "dynamics",
+                "400K",
+            ],
+            "name": "dynamics_400K_ParamsToOuts_1",
+        },
+        {
+            "changed": True,
+            "full_name": "dynamics_ParamsToOuts",
+            "group": [
+                "dynamics",
+            ],
+            "name": "dynamics_ParamsToOuts",
+        },
+        {
+            "changed": True,
+            "full_name": "dynamics_ParamsToOuts_1",
+            "group": [
+                "dynamics",
+            ],
+            "name": "dynamics_ParamsToOuts_1",
+        },
+    ]
 
-    groups, _ = utils.cli.get_groups(remote=proj_path, rev=None)
+    result = runner.invoke(app, ["list", proj_path.as_posix(), "--json"])
+    groups = json.loads(result.stdout)
     assert groups == true_groups
+
+    assert result.exit_code == 0
 
     result = runner.invoke(app, ["list", proj_path.as_posix()])
     assert result.exit_code == 0
-    groups = yaml.safe_load(result.stdout)
-    assert groups == true_groups
-    assert result.exit_code == 0
+
+    outs = """
+📁 No Group
+├── ParamsToOuts ❌
+└── ParamsToOuts_1 ❌
+📁 dynamics
+├── dynamics_ParamsToOuts ❌
+├── dynamics_ParamsToOuts_1 ❌
+└── 📁 400K
+    ├── dynamics_400K_ParamsToOuts ❌
+    ├── dynamics_400K_ParamsToOuts_1 ❌
+    └── 📁 B
+        ├── dynamics_400K_B_ParamsToOuts ❌
+        └── dynamics_400K_B_ParamsToOuts_1 ❌
+"""
+    assert result.stdout in outs

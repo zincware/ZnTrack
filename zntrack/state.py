@@ -280,3 +280,9 @@ class NodeStatus:
             node_meta_content["package_version"] = importlib.metadata.version(module)
         self.nwd.mkdir(parents=True, exist_ok=True)
         (self.nwd / "node-meta.json").write_text(json.dumps(node_meta_content, indent=2))
+
+    @property
+    def changed(self) -> bool:
+        stage = self.get_stage()
+        with stage.repo.lock:
+            return stage.changed()
