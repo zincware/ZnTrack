@@ -7,7 +7,11 @@ from dvc.stage.exceptions import StageFileDoesNotExistError
 
 
 def from_rev(
-    name: str, remote: str | None = None, rev: str | None = None, path: str | None = None, fs: dvc.api.DVCFileSystem | None = None
+    name: str,
+    remote: str | None = None,
+    rev: str | None = None,
+    path: str | None = None,
+    fs: dvc.api.DVCFileSystem | None = None,
 ):
     if path is not None:
         raise NotImplementedError
