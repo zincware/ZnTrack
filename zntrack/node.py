@@ -13,6 +13,7 @@ import znfields
 import znflow
 from dvc.stage.exceptions import InvalidStageName
 from dvc.stage.utils import is_valid_name
+import dvc.api
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
@@ -206,6 +207,7 @@ class Node(znflow.Node, znfields.Base):
         running: bool = False,
         lazy_evaluation: bool = True,
         path: str | None | pathlib.Path = None,
+        fs: dvc.api.DVCFileSystem | None = None,
         **kwargs,
     ) -> T:
         if name is None:
@@ -228,9 +230,8 @@ class Node(znflow.Node, znfields.Base):
             )
             instance = cls(**lazy_values)
         if remote is not None or rev is not None:
-            import dvc.api
-
-            fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            if fs is None:
+                fs = dvc.api.DVCFileSystem(url=remote, rev=rev, subrepos=True)
             with fs.open(path / "zntrack.json") as f:
                 conf = json.loads(f.read())
                 nwd = pathlib.Path(conf[name]["nwd"]["value"])

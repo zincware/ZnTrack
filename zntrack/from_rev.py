@@ -1,20 +1,18 @@
 import importlib
-import importlib.util
 import pathlib
 import sys
 
 import dvc.api
-import dvc.repo
-import dvc.stage
 from dvc.stage.exceptions import StageFileDoesNotExistError
 
 
 def from_rev(
-    name: str, remote: str | None = None, rev: str | None = None, path: str | None = None
+    name: str, remote: str | None = None, rev: str | None = None, path: str | None = None, fs: dvc.api.DVCFileSystem | None = None
 ):
     if path is not None:
         raise NotImplementedError
-    fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+    if fs is None:
+        fs = dvc.api.DVCFileSystem(url=remote, rev=rev, subrepos=True)
     try:
         stage = fs.repo.stage.collect(target=name)[0]
     except StageFileDoesNotExistError:
@@ -50,4 +48,4 @@ def from_rev(
         )
 
     cls = getattr(module, cls_name)
-    return cls.from_rev(name, remote=remote, rev=rev, path=path)
+    return cls.from_rev(name, remote=remote, rev=rev, path=path, fs=fs)
