@@ -5,6 +5,7 @@ import sys
 import dvc.api
 from dvc.scm import SCMError
 from dvc.stage.exceptions import StageFileDoesNotExistError
+import git
 
 
 def from_rev(
@@ -14,8 +15,34 @@ def from_rev(
     path: str | None = None,
     fs: dvc.api.DVCFileSystem | None = None,
 ):
+    """Load a ZnTrack Node.
+    
+    Load an instance of any ZnTrack Node, given its name.
+
+    Arguments
+    ---------
+    name : str
+        The name of the ZnTrack Node to load.
+        If multiple ``dvc.yaml`` files are present, the name should be
+        specified as `path/to/dvc.yaml:NodeName`.
+    remote : str, optional
+        The remote URL where the DVC repository is located.
+        If not provided, the current working directory will be used.
+        Can be a local path or a remote URL (e.g., git repository).
+    rev : str, optional
+        The revision (commit hash, branch name, or tag) to load the Node from.
+        If not provided, the current WORKSPACE revision will be used.
+    fs: dvc.api.DVCFileSystem, optional
+        A DVCFileSystem instance to use for accessing the DVC repository.
+        If not provided, a new DVCFileSystem will be created using the `remote` and `rev`.
+    """
     if path is not None:
         raise NotImplementedError
+    if remote is not None and pathlib.Path(remote).is_absolute():
+        raise ValueError(
+            "The 'remote' argument should not be an absolute path. "
+            "Provide a relative path or use the 'fs' argument to specify a DVCFileSystem."
+        )
     if fs is None:
         fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     else:
@@ -33,6 +60,9 @@ def from_rev(
         remote = fs.repo.url
         try:
             rev = fs.repo.get_rev()
+            # check if rev is the same as HEAD, then set to None
+            if rev == git.Repo(fs.repo.root_dir).head.commit.hexsha:
+                rev = None
         except SCMError:
             rev = None
     try:
