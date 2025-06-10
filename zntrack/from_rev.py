@@ -3,8 +3,8 @@ import pathlib
 import sys
 
 import dvc.api
-from dvc.stage.exceptions import StageFileDoesNotExistError
 from dvc.scm import SCMError
+from dvc.stage.exceptions import StageFileDoesNotExistError
 
 
 def from_rev(

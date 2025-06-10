@@ -1,6 +1,7 @@
 import os
 import pathlib
 from dataclasses import dataclass
+
 from dvc.api import DVCFileSystem
 from git import Repo
 
@@ -34,9 +35,7 @@ def test_subrepo(proj_path):
     assert node_loaded.outs == {"param1": 1, "param2": 2}
 
     # now test with DVCFs
-    node_loaded = zntrack.from_rev(
-        "subrepo/dvc.yaml:ParamsToOuts", fs=DVCFileSystem()
-    )
+    node_loaded = zntrack.from_rev("subrepo/dvc.yaml:ParamsToOuts", fs=DVCFileSystem())
     assert node_loaded.params == {"param1": 1, "param2": 2}
     assert node_loaded.outs == {"param1": 1, "param2": 2}
 
@@ -50,19 +49,16 @@ def test_subrepo(proj_path):
     node.params = {"param1": 3, "param2": 4}
     project.repro()
     os.chdir(proj_path)
-    
+
     node_loaded = zntrack.from_rev(
         "subrepo/dvc.yaml:ParamsToOuts",
     )
     assert node_loaded.params == {"param1": 3, "param2": 4}
     assert node_loaded.outs == {"param1": 3, "param2": 4}
 
-    node_loaded = zntrack.from_rev(
-        "subrepo/dvc.yaml:ParamsToOuts", rev="HEAD"
-    )
+    node_loaded = zntrack.from_rev("subrepo/dvc.yaml:ParamsToOuts", rev="HEAD")
     assert node_loaded.params == {"param1": 1, "param2": 2}
     assert node_loaded.outs == {"param1": 1, "param2": 2}
-
 
 
 def test_subrepo_external_node(proj_path):
@@ -89,9 +85,7 @@ def test_subrepo_external_node(proj_path):
     assert node.value.parameter == "Lorem Ipsum"
 
     # now test with DVCFs
-    node = zntrack.from_rev(
-        "subrepo/dvc.yaml:OptionalDeps", fs=DVCFileSystem()
-    )
+    node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps", fs=DVCFileSystem())
     assert node.value.parameter == "Lorem Ipsum"
 
     # make a commit and change things
@@ -107,8 +101,6 @@ def test_subrepo_external_node(proj_path):
     )
 
     assert node.value.parameter == "Dolor Sit Amet"
-    
-    node = zntrack.from_rev(
-        "subrepo/dvc.yaml:OptionalDeps", rev="HEAD"
-    )
+
+    node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps", rev="HEAD")
     assert node.value.parameter == "Lorem Ipsum"
