@@ -1,20 +1,70 @@
 import importlib
-import importlib.util
 import pathlib
 import sys
 
 import dvc.api
-import dvc.repo
-import dvc.stage
+import git
+from dvc.scm import SCMError
 from dvc.stage.exceptions import StageFileDoesNotExistError
 
 
 def from_rev(
-    name: str, remote: str | None = None, rev: str | None = None, path: str | None = None
+    name: str,
+    remote: str | None = None,
+    rev: str | None = None,
+    path: str | None = None,
+    fs: dvc.api.DVCFileSystem | None = None,
 ):
+    """Load a ZnTrack Node.
+
+    Load an instance of any ZnTrack Node, given its name.
+
+    Arguments
+    ---------
+    name : str
+        The name of the ZnTrack Node to load.
+        If multiple ``dvc.yaml`` files are present, the name should be
+        specified as `path/to/dvc.yaml:NodeName`.
+    remote : str, optional
+        The remote URL where the DVC repository is located.
+        If not provided, the current working directory will be used.
+        Can be a local path or a remote URL (e.g., git repository).
+    rev : str, optional
+        The revision (commit hash, branch name, or tag) to load the Node from.
+        If not provided, the current WORKSPACE revision will be used.
+    fs: dvc.api.DVCFileSystem, optional
+        A DVCFileSystem instance to use for accessing the DVC repository.
+        If not provided, a new DVCFileSystem will be created using the `remote` and `rev`.
+    """
     if path is not None:
         raise NotImplementedError
-    fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+    if remote is not None and pathlib.Path(remote).is_absolute():
+        raise ValueError(
+            "The 'remote' argument should not be an absolute path. "
+            "Provide a relative path or use the 'fs' argument to specify a DVCFileSystem."
+        )
+    if fs is None:
+        fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+    else:
+        if remote is not None:
+            raise ValueError(
+                "If 'fs' is provided, 'remote' should be None. "
+                "The remote is already specified in the DVCFileSystem."
+            )
+        if rev is not None:
+            raise ValueError(
+                "If 'fs' is provided, 'rev' should be None. "
+                "The revision is already specified in the DVCFileSystem."
+            )
+        # get remote and rev from the fs
+        remote = fs.repo.url
+        try:
+            rev = fs.repo.get_rev()
+            # check if rev is the same as HEAD, then set to None
+            if rev == git.Repo(fs.repo.root_dir).head.commit.hexsha:
+                rev = None
+        except SCMError:
+            rev = None
     try:
         stage = fs.repo.stage.collect(target=name)[0]
     except StageFileDoesNotExistError:
@@ -50,4 +100,4 @@ def from_rev(
         )
 
     cls = getattr(module, cls_name)
-    return cls.from_rev(name, remote=remote, rev=rev, path=path)
+    return cls.from_rev(name, remote=remote, rev=rev, path=path, fs=fs)
