@@ -2,11 +2,11 @@ import os
 import pathlib
 from dataclasses import dataclass
 
+import pytest
 from dvc.api import DVCFileSystem
 from git import Repo
 
 import zntrack.examples
-import pytest
 
 
 @dataclass

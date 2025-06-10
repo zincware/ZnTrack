@@ -3,9 +3,9 @@ import pathlib
 import sys
 
 import dvc.api
+import git
 from dvc.scm import SCMError
 from dvc.stage.exceptions import StageFileDoesNotExistError
-import git
 
 
 def from_rev(
@@ -16,7 +16,7 @@ def from_rev(
     fs: dvc.api.DVCFileSystem | None = None,
 ):
     """Load a ZnTrack Node.
-    
+
     Load an instance of any ZnTrack Node, given its name.
 
     Arguments

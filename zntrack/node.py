@@ -14,12 +14,11 @@ import znfields
 import znflow
 from dvc.stage.exceptions import InvalidStageName
 from dvc.stage.utils import is_valid_name
+from fsspec.implementations.local import LocalFileSystem
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
-from fsspec.implementations.local import LocalFileSystem
-
 
 from .config import (
     FIELD_TYPE,

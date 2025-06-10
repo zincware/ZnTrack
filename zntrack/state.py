@@ -81,7 +81,7 @@ class NodeStatus:
     run_time: datetime.timedelta | None = None
     path: pathlib.Path = dataclasses.field(default_factory=pathlib.Path)
     lockfile: dict | None = None
-    fs: AbstractFileSystem|None = dataclasses.field(
+    fs: AbstractFileSystem | None = dataclasses.field(
         default_factory=LocalFileSystem, repr=False, compare=False, hash=False
     )
     # TODO: move node name and nwd to here as well
