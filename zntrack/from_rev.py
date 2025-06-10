@@ -4,6 +4,7 @@ import sys
 
 import dvc.api
 from dvc.stage.exceptions import StageFileDoesNotExistError
+from dvc.scm import SCMError
 
 
 def from_rev(
@@ -16,7 +17,24 @@ def from_rev(
     if path is not None:
         raise NotImplementedError
     if fs is None:
-        fs = dvc.api.DVCFileSystem(url=remote, rev=rev, subrepos=True)
+        fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+    else:
+        if remote is not None:
+            raise ValueError(
+                "If 'fs' is provided, 'remote' should be None. "
+                "The remote is already specified in the DVCFileSystem."
+            )
+        if rev is not None:
+            raise ValueError(
+                "If 'fs' is provided, 'rev' should be None. "
+                "The revision is already specified in the DVCFileSystem."
+            )
+        # get remote and rev from the fs
+        remote = fs.repo.url
+        try:
+            rev = fs.repo.get_rev()
+        except SCMError:
+            rev = None
     try:
         stage = fs.repo.stage.collect(target=name)[0]
     except StageFileDoesNotExistError:

@@ -231,7 +231,7 @@ class Node(znflow.Node, znfields.Base):
             instance = cls(**lazy_values)
         if remote is not None or rev is not None:
             if fs is None:
-                fs = dvc.api.DVCFileSystem(url=remote, rev=rev, subrepos=True)
+                fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
             with fs.open(path / "zntrack.json") as f:
                 conf = json.loads(f.read())
                 nwd = pathlib.Path(conf[name]["nwd"]["value"])
