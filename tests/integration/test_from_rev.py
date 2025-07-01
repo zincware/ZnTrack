@@ -1,10 +1,9 @@
+import tempfile
 import uuid
 
 import dvc.scm
-import pytest
 import git
-import tempfile
-from pathlib import Path
+import pytest
 
 import zntrack.examples
 
@@ -52,17 +51,14 @@ def test_import_from_remote(proj_path):
         == "0e2ec8fab1123c1259ccf96a9590c4b161fc44cf4d93f755699a8fe99c3afe4c"
     )
 
+
 def test_import_from_remote_local(proj_path):
     with tempfile.TemporaryDirectory() as tmpdir:
         git.Repo.clone_from(
-            "https://github.com/PythonFZ/zntrack-examples",
-            tmpdir,
-            branch="main"
+            "https://github.com/PythonFZ/zntrack-examples", tmpdir, branch="main"
         )
         node: zntrack.examples.ParamsToMetrics = zntrack.from_rev(
-            "ParamsToMetrics",
-            remote=tmpdir,
-            rev="8d0c992"
+            "ParamsToMetrics", remote=tmpdir, rev="8d0c992"
         )
         assert node.params == {"loss": 0.1, "accuracy": 0.9}
         assert node.metrics == {"loss": 0.1, "accuracy": 0.9}
@@ -146,9 +142,7 @@ def test_connect_from_remote(proj_path):
 def test_connect_from_remote_local(proj_path):
     with tempfile.TemporaryDirectory() as tmpdir:
         git.Repo.clone_from(
-            "https://github.com/PythonFZ/zntrack-examples",
-            tmpdir,
-            branch="main"
+            "https://github.com/PythonFZ/zntrack-examples", tmpdir, branch="main"
         )
         project = zntrack.Project()
 
@@ -197,9 +191,7 @@ def test_two_nodes_connect_external(proj_path):
 def test_two_nodes_connect_external_local(proj_path):
     with tempfile.TemporaryDirectory() as tmpdir:
         git.Repo.clone_from(
-            "https://github.com/PythonFZ/zntrack-examples",
-            tmpdir,
-            branch="main"
+            "https://github.com/PythonFZ/zntrack-examples", tmpdir, branch="main"
         )
         node_a: zntrack.examples.ParamsToOuts = zntrack.from_rev(
             name="NumericOuts",
