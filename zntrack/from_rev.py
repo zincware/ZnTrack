@@ -6,7 +6,6 @@ import sys
 import dvc.api
 import dvc.repo
 import dvc.stage
-from dvc.stage.exceptions import StageFileDoesNotExistError
 
 
 def from_rev(
