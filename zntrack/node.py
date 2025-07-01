@@ -231,7 +231,15 @@ class Node(znflow.Node, znfields.Base):
             import dvc.api
 
             fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
-            path = (pathlib.Path(path) if path.is_absolute() else (pathlib.Path(fs.repo.root_dir) / path)).resolve().relative_to(pathlib.Path(fs.repo.root_dir).resolve())
+            path = (
+                (
+                    pathlib.Path(path)
+                    if path.is_absolute()
+                    else (pathlib.Path(fs.repo.root_dir) / path)
+                )
+                .resolve()
+                .relative_to(pathlib.Path(fs.repo.root_dir).resolve())
+            )
             with fs.open(path / "zntrack.json") as f:
                 conf = json.loads(f.read())
                 nwd = pathlib.Path(conf[name]["nwd"]["value"])
