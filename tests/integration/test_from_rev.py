@@ -2,6 +2,9 @@ import uuid
 
 import dvc.scm
 import pytest
+import git
+import tempfile
+from pathlib import Path
 
 import zntrack.examples
 
@@ -48,7 +51,33 @@ def test_import_from_remote(proj_path):
         node.state.get_stage_hash(include_outs=True)
         == "0e2ec8fab1123c1259ccf96a9590c4b161fc44cf4d93f755699a8fe99c3afe4c"
     )
-    # assert node.state.state ==
+
+def test_import_from_remote_local(proj_path):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        git.Repo.clone_from(
+            "https://github.com/PythonFZ/zntrack-examples",
+            tmpdir,
+            branch="main"
+        )
+        node: zntrack.examples.ParamsToMetrics = zntrack.from_rev(
+            "ParamsToMetrics",
+            remote=tmpdir,
+            rev="8d0c992"
+        )
+        assert node.params == {"loss": 0.1, "accuracy": 0.9}
+        assert node.metrics == {"loss": 0.1, "accuracy": 0.9}
+        assert node.name == "ParamsToMetrics"
+        assert node.state.rev == "8d0c992"
+        assert node.state.remote == tmpdir
+        assert node.uuid == uuid.UUID("65b1c652-6508-4ee5-816c-c2f3cec22cc7")
+        assert (
+            node.state.get_stage_hash()
+            == "70cbf7993d07a6cd0266a0fc0a874e163bc6f464ecc82bb1367b18d24091853c"
+        )
+        assert (
+            node.state.get_stage_hash(include_outs=True)
+            == "0e2ec8fab1123c1259ccf96a9590c4b161fc44cf4d93f755699a8fe99c3afe4c"
+        )
 
 
 def test_connect_from_remote(proj_path):
@@ -114,6 +143,37 @@ def test_connect_from_remote(proj_path):
     # project.build()
 
 
+def test_connect_from_remote_local(proj_path):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        git.Repo.clone_from(
+            "https://github.com/PythonFZ/zntrack-examples",
+            tmpdir,
+            branch="main"
+        )
+        project = zntrack.Project()
+
+        external_node: zntrack.examples.ParamsToMetrics = zntrack.from_rev(
+            "ParamsToMetrics",
+            remote=tmpdir,
+            rev="59dac86",
+        )
+
+        with project:
+            n1 = zntrack.examples.DepsToMetrics(
+                deps=external_node.metrics,
+            )
+            n2 = zntrack.examples.DepsToMetrics(
+                deps=external_node.metrics,
+            )
+
+        project.repro()
+
+        assert external_node.metrics == {"accuracy": 0.9, "loss": 0.1}
+        assert external_node.params == {"accuracy": 0.9, "loss": 0.1}
+        assert n1.metrics == {"accuracy": 0.9, "loss": 0.1}
+        assert n2.metrics == {"accuracy": 0.9, "loss": 0.1}
+
+
 def test_two_nodes_connect_external(proj_path):
     node_a: zntrack.examples.ParamsToOuts = zntrack.from_rev(
         name="NumericOuts",
@@ -132,3 +192,29 @@ def test_two_nodes_connect_external(proj_path):
 
     assert node1.outs == node_a.outs + 1
     assert node2.outs == node_a.outs + 1
+
+
+def test_two_nodes_connect_external_local(proj_path):
+    with tempfile.TemporaryDirectory() as tmpdir:
+        git.Repo.clone_from(
+            "https://github.com/PythonFZ/zntrack-examples",
+            tmpdir,
+            branch="main"
+        )
+        node_a: zntrack.examples.ParamsToOuts = zntrack.from_rev(
+            name="NumericOuts",
+            remote=tmpdir,
+            rev="de82dc7104ac3",
+        )
+        assert node_a.name == "NumericOuts"
+        assert node_a.__dict__["nwd"].as_posix() == "nodes/NumericOuts"
+
+        with zntrack.Project() as project:
+            assert node_a.name == "NumericOuts"
+            node1 = zntrack.examples.AddOne(number=node_a.outs)
+            node2 = zntrack.examples.AddOne(number=node_a.outs)
+
+        project.repro()
+
+        assert node1.outs == node_a.outs + 1
+        assert node2.outs == node_a.outs + 1
