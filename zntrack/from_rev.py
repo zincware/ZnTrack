@@ -15,9 +15,11 @@ def from_rev(
     if path is not None:
         raise NotImplementedError
     fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
-    try:
-        stage = fs.repo.stage.collect(target=name)[0]
-    except StageFileDoesNotExistError:
+    stages = fs.repo.stage.collect()
+    for stage in stages:
+        if hasattr(stage, "name") and stage.name == name:
+            break
+    else:
         raise ValueError(f"Stage {name} not found in {fs.repo}")
 
     try:
