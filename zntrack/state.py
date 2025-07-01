@@ -211,7 +211,12 @@ class NodeStatus:
 
     def get_stage(self) -> dvc.stage.Stage:
         """Access to the internal dvc.repo api."""
-        stage = next(iter(self.dvc_fs.repo.stage.collect(self.name)))
+        stages = self.dvc_fs.repo.stage.collect()
+        for stage in stages:
+            if hasattr(stage, "name") and stage.name == self.name:
+                break
+        else:
+            raise ValueError(f"Stage {self.name} not found in {self.dvc_fs.repo}")
         if self.rev is None and self.remote is None:
             # If we want to look at the current workspace result, we need to
             # load all the information, not just dvc.yaml
