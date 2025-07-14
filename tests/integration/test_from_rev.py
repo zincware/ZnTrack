@@ -206,6 +206,7 @@ def test_remote_and_fs(proj_path):
     assert node.state.remote == "https://github.com/PythonFZ/zntrack-examples"
     assert node.state.rev.startswith("de82dc7104ac3")
 
+
 def test_two_nodes_connect_external_local(proj_path):
     with tempfile.TemporaryDirectory() as tmpdir:
         git.Repo.clone_from(

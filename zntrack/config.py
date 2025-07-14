@@ -44,7 +44,7 @@ ZNTRACK_SAVE_FUNC = _ZNTRACK_SAVE_FUNC_TYPE()
 class _NOT_AVAILABLE_TYPE:
     def __repr__(self) -> str:
         return "NOT_AVAILABLE"
-    
+
     def __getattr__(self, name):
         # When someone tries to access an attribute on NOT_AVAILABLE,
         # raise a helpful error about missing external dependencies

@@ -84,9 +84,9 @@ def from_rev(
     package_and_module, cls_name = run_str.rsplit(".", 1)
 
     sys.path.append(pathlib.Path.cwd().as_posix())
-    
+
     # If we have a filesystem with a local repo, add it to Python path
-    if fs is not None and hasattr(fs, 'repo') and fs.repo is not None:
+    if fs is not None and hasattr(fs, "repo") and fs.repo is not None:
         repo_root = pathlib.Path(fs.repo.root_dir)
         if repo_root.exists():
             repo_root_str = str(repo_root)

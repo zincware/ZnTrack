@@ -15,9 +15,11 @@ from zntrack.node import Node
 
 def _deps_getter(self: "Node", name: str):
     # Use relative path if using DVCFileSystem
-    if (hasattr(self.state.fs, 'repo') and 
-        self.state.fs is not None and 
-        getattr(self.state.fs, 'repo', None) is not None):
+    if (
+        hasattr(self.state.fs, "repo")
+        and self.state.fs is not None
+        and getattr(self.state.fs, "repo", None) is not None
+    ):
         # For DVCFileSystem, use path relative to repo root
         repo_root = pathlib.Path(self.state.fs.repo.root_dir)
         if self.state.path.is_absolute():
@@ -33,7 +35,7 @@ def _deps_getter(self: "Node", name: str):
     else:
         # For local filesystem, use absolute path
         zntrack_path = self.state.path / ZNTRACK_FILE_PATH
-    
+
     with self.state.fs.open(zntrack_path) as f:
         content = json.load(f)[self.name][name]
         # TODO: Ensure deps are loaded from the correct revision
@@ -43,9 +45,9 @@ def _deps_getter(self: "Node", name: str):
                 cls=znjson.ZnDecoder.from_converters(
                     [
                         converter.create_node_converter(
-                            remote=self.state.remote or "", 
-                            rev=self.state.rev or "", 
-                            path=self.state.path
+                            remote=self.state.remote or "",
+                            rev=self.state.rev or "",
+                            path=self.state.path,
                         ),
                         converter.ConnectionConverter,
                         converter.CombinedConnectionsConverter,
@@ -59,10 +61,15 @@ def _deps_getter(self: "Node", name: str):
             # If external dataclass module can't be imported, return NOT_AVAILABLE
             # The enhanced NOT_AVAILABLE object will provide helpful errors when accessed
             from zntrack.config import NOT_AVAILABLE
+
             return NOT_AVAILABLE
         if isinstance(content, converter.DataclassContainer):
             content = content.get_with_params(
-                self.name, name, index=None, fs=self.state.fs, path=self.state.path  # type: ignore
+                self.name,
+                name,
+                index=None,
+                fs=self.state.fs,
+                path=self.state.path,  # type: ignore
             )
         if isinstance(content, list):
             new_content = []
@@ -71,7 +78,11 @@ def _deps_getter(self: "Node", name: str):
                 if isinstance(val, converter.DataclassContainer):
                     new_content.append(
                         val.get_with_params(
-                            self.name, name, idx, fs=self.state.fs, path=self.state.path  # type: ignore
+                            self.name,
+                            name,
+                            idx,
+                            fs=self.state.fs,
+                            path=self.state.path,  # type: ignore
                         )
                     )
                     idx += 1  # index only runs over dataclasses

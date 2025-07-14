@@ -12,7 +12,7 @@ from zntrack.node import Node
 
 def _outs_getter(self: "Node", name: str, suffix: str):
     # Use relative path if using DVCFileSystem
-    if hasattr(self.state.fs, 'repo') and self.state.fs.repo:
+    if hasattr(self.state.fs, "repo") and self.state.fs.repo:
         # For DVCFileSystem, use path relative to repo root
         repo_root = pathlib.Path(self.state.fs.repo.root_dir)
         # nwd is already relative to the state.path, so we need to make it relative to repo root
@@ -30,7 +30,7 @@ def _outs_getter(self: "Node", name: str, suffix: str):
     else:
         # For local filesystem, use absolute path
         outs_path = (self.nwd / name).with_suffix(suffix)
-    
+
     with self.state.fs.open(outs_path) as f:
         return json.load(f, cls=znjson.ZnDecoder)
 

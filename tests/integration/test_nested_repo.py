@@ -1,6 +1,5 @@
 import os
 import pathlib
-from dataclasses import dataclass
 
 import pytest
 from dvc.api import DVCFileSystem
@@ -68,26 +67,27 @@ def test_subrepo(proj_path):
 def test_subrepo_external_node(proj_path):
     """Test subrepo functionality with external dataclasses."""
     # Create external node module file that can be imported
-    external_module_content = '''
+    external_module_content = """
 from dataclasses import dataclass
 
-@dataclass  
+@dataclass
 class ExampleExternalNode:
     parameter: str
-'''
-    
+"""
+
     external_module_path = proj_path / "external_nodes.py"
     with open(external_module_path, "w") as f:
         f.write(external_module_content)
-    
+
     # Import the external node from the file
-    import sys
     import importlib.util
+    import sys
+
     spec = importlib.util.spec_from_file_location("external_nodes", external_module_path)
     external_nodes = importlib.util.module_from_spec(spec)
     sys.modules["external_nodes"] = external_nodes
     spec.loader.exec_module(external_nodes)
-    
+
     ExampleExternalNode = external_nodes.ExampleExternalNode
 
     directory = pathlib.Path("subrepo")
@@ -108,18 +108,18 @@ class ExampleExternalNode:
 
     assert node.value.parameter == "Lorem Ipsum"
 
-
     # Test: External dependencies behavior with nested repos
     # Remove the module from sys.modules to simulate it not being available
     if "external_nodes" in sys.modules:
         del sys.modules["external_nodes"]
-    
+
     # Load node - should raise error when external module is not available
     node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps")
     # The value itself will be NOT_AVAILABLE, but accessing its attributes should raise
     assert node.value is zntrack.NOT_AVAILABLE
-    
-    # Accessing attributes on NOT_AVAILABLE should raise helpful error
-    with pytest.raises(ModuleNotFoundError, match="Cannot access attribute.*external dependency"):
-        _ = node.value.parameter
 
+    # Accessing attributes on NOT_AVAILABLE should raise helpful error
+    with pytest.raises(
+        ModuleNotFoundError, match="Cannot access attribute.*external dependency"
+    ):
+        _ = node.value.parameter

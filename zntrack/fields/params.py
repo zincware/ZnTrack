@@ -13,7 +13,7 @@ _T = t.TypeVar("_T")
 
 def _params_getter(self: "Node", name: str):
     # Use relative path if using DVCFileSystem
-    if hasattr(self.state.fs, 'repo') and self.state.fs.repo:
+    if hasattr(self.state.fs, "repo") and self.state.fs.repo:
         # For DVCFileSystem, use path relative to repo root
         # self.state.path is the absolute path to the subrepo
         # We need to make it relative to the repo root
@@ -32,7 +32,7 @@ def _params_getter(self: "Node", name: str):
     else:
         # For local filesystem, use absolute path
         params_path = self.state.path / PARAMS_FILE_PATH
-    
+
     with self.state.fs.open(params_path) as f:
         return yaml.safe_load(f)[self.name][name]
 

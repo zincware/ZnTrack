@@ -41,7 +41,7 @@ def _paths_getter(self: Node, name: str):
         return nwd_handler(self.__dict__[name], nwd=self.nwd)
     try:
         # Use relative path if using DVCFileSystem
-        if hasattr(self.state.fs, 'repo') and self.state.fs.repo:
+        if hasattr(self.state.fs, "repo") and self.state.fs.repo:
             # For DVCFileSystem, use path relative to repo root
             repo_root = pathlib.Path(self.state.fs.repo.root_dir)
             if self.state.path.is_absolute():
@@ -57,7 +57,7 @@ def _paths_getter(self: Node, name: str):
         else:
             # For local filesystem, use absolute path
             zntrack_path = self.state.path / ZNTRACK_FILE_PATH
-        
+
         with self.state.fs.open(zntrack_path) as f:
             content = json.load(f)[self.name][name]
             content = znjson.loads(json.dumps(content))
