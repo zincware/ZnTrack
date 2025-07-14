@@ -81,6 +81,9 @@ class NodeStatus:
     run_time: datetime.timedelta | None = None
     path: pathlib.Path = dataclasses.field(default_factory=pathlib.Path)
     lockfile: dict | None = None
+    fs: AbstractFileSystem | None = dataclasses.field(
+        default_factory=LocalFileSystem, repr=False, compare=False, hash=False
+    )
     # TODO: move node name and nwd to here as well
 
     @property
@@ -92,47 +95,6 @@ class NodeStatus:
         if self.tmp_path is not None:
             return self.tmp_path
         return self.path / get_nwd(self.node)
-
-    @property
-    def fs(self) -> AbstractFileSystem:
-        """Get the file system of the Node.
-
-        If the remote is None, the local file system is returned.
-        Otherwise, a DVCFileSystem is returned.
-        The FileSystem should be used to open files to ensure,
-        that the correct version of the file is loaded.
-
-        Examples
-        --------
-
-        >>> import zntrack
-        >>> from pathlib import Path
-        >>>
-        >>> class MyNode(zntrack.Node):
-        ...     outs_path: Path = zntrack.outs_path(zntrack.nwd / "file.txt")
-        ...
-        ...     def run(self):
-        ...         self.outs_path.parent.mkdir(parents=True, exist_ok=True)
-        ...         self.outs_path.write_text("Hello World!")
-        ...
-        ...     @property
-        ...     def data(self):
-        ...         with self.state.fs.open(self.outs_path) as f:
-        ...             return f.read()
-        ...
-        >>> # build and run the graph and make multiple commits.
-        >>> # the filesystem ensures that the correct version of the file is loaded.
-        >>>
-        >>> zntrack.from_rev("MyNode", rev="HEAD").data
-        >>> zntrack.from_remote("MyNode", rev="HEAD~1").data
-
-        """
-        if self.remote is None and self.rev is None:
-            return LocalFileSystem()
-        return dvc.api.DVCFileSystem(
-            url=self.remote,
-            rev=self.rev,
-        )
 
     @property
     def dvc_fs(self) -> dvc.api.DVCFileSystem:

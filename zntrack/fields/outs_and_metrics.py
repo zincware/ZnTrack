@@ -7,10 +7,14 @@ from zntrack import config
 from zntrack.config import NOT_AVAILABLE, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
+from zntrack.utils.filesystem import resolve_dvc_path
 
 
 def _outs_getter(self: "Node", name: str, suffix: str):
-    with self.state.fs.open((self.nwd / name).with_suffix(suffix)) as f:
+    target_path = (self.nwd / name).with_suffix(suffix)
+    outs_path = resolve_dvc_path(self.state.fs, self.state.path, target_path)
+
+    with self.state.fs.open(outs_path) as f:
         return json.load(f, cls=znjson.ZnDecoder)
 
 

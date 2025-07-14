@@ -8,11 +8,13 @@ import typing as t
 import uuid
 import warnings
 
+import dvc.api
 import typing_extensions as ty_ex
 import znfields
 import znflow
 from dvc.stage.exceptions import InvalidStageName
 from dvc.stage.utils import is_valid_name
+from fsspec.implementations.local import LocalFileSystem
 
 from zntrack.group import Group
 from zntrack.state import NodeStatus
@@ -206,6 +208,7 @@ class Node(znflow.Node, znfields.Base):
         running: bool = False,
         lazy_evaluation: bool = True,
         path: str | None | pathlib.Path = None,
+        fs: dvc.api.DVCFileSystem | None = None,
         **kwargs,
     ) -> T:
         if name is None:
@@ -228,10 +231,11 @@ class Node(znflow.Node, znfields.Base):
             )
             instance = cls(**lazy_values)
         if remote is not None or rev is not None:
-            import dvc.api
-
-            fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
-            with fs.open(path / "zntrack.json") as f:
+            if fs is None:
+                _fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            else:
+                _fs = fs
+            with _fs.open(path / "zntrack.json") as f:
                 conf = json.loads(f.read())
                 nwd = pathlib.Path(conf[name]["nwd"]["value"])
         else:
@@ -245,6 +249,11 @@ class Node(znflow.Node, znfields.Base):
         instance.__dict__["nwd"] = nwd
 
         # TODO: check if the node is finished or not.
+        if fs is None:
+            if remote is not None or rev is not None:
+                fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            else:
+                fs = LocalFileSystem()
         instance.__dict__["state"] = NodeStatus(
             remote=remote,
             rev=rev,
@@ -252,8 +261,8 @@ class Node(znflow.Node, znfields.Base):
             lazy_evaluation=lazy_evaluation,
             group=Group.from_nwd(instance.nwd),
             path=path,
+            fs=fs,
         ).to_dict()
-
         instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
 
         with contextlib.suppress(FileNotFoundError):

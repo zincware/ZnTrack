@@ -4,6 +4,7 @@ import uuid
 import dvc.scm
 import git
 import pytest
+from dvc.fs import DVCFileSystem
 
 import zntrack.examples
 
@@ -186,6 +187,24 @@ def test_two_nodes_connect_external(proj_path):
 
     assert node1.outs == node_a.outs + 1
     assert node2.outs == node_a.outs + 1
+
+
+def test_remote_and_fs(proj_path):
+    fs = DVCFileSystem(
+        url="https://github.com/PythonFZ/zntrack-examples", rev="de82dc7104ac3"
+    )
+    with pytest.raises(ValueError):
+        zntrack.from_rev(
+            name="NumericOuts",
+            remote="https://github.com/PythonFZ/zntrack-examples",
+            fs=fs,
+        )
+    with pytest.raises(ValueError):
+        zntrack.from_rev(name="NumericOuts", rev="de82dc7104ac3", fs=fs)
+
+    node: zntrack.Node = zntrack.from_rev(name="NumericOuts", fs=fs)
+    assert node.state.remote == "https://github.com/PythonFZ/zntrack-examples"
+    assert node.state.rev.startswith("de82dc7104ac3")
 
 
 def test_two_nodes_connect_external_local(proj_path):

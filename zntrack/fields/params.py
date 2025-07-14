@@ -6,12 +6,17 @@ import yaml
 from zntrack.config import PARAMS_FILE_PATH, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
+from zntrack.utils.filesystem import resolve_state_file_path
 
 _T = t.TypeVar("_T")
 
 
 def _params_getter(self: "Node", name: str):
-    with self.state.fs.open(self.state.path / PARAMS_FILE_PATH) as f:
+    params_path = resolve_state_file_path(
+        self.state.fs, self.state.path, PARAMS_FILE_PATH
+    )
+
+    with self.state.fs.open(params_path) as f:
         return yaml.safe_load(f)[self.name][name]
 
 

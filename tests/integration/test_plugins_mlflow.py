@@ -4,13 +4,17 @@ import pathlib
 import uuid
 
 import git
-import mlflow
 import pandas as pd
 import pytest
 import yaml
-from mlflow.utils import mlflow_tags
 
 import zntrack.examples
+
+try:
+    import mlflow
+    from mlflow.utils import mlflow_tags
+except ImportError:
+    pytest.skip("mlflow is not installed", allow_module_level=True)
 
 
 @dataclasses.dataclass
