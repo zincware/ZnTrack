@@ -1,6 +1,7 @@
 import dataclasses
 import json
 import pathlib
+import typing as t
 
 import znflow
 import znflow.handler
@@ -83,7 +84,7 @@ def _deps_getter(self: "Node", name: str):
         return content
 
 
-def deps(default=dataclasses.MISSING, **kwargs):
+def deps(default=dataclasses.MISSING, **kwargs) -> t.Any:
     """Define dependencies for a node.
 
     A Node dependency field can be used to pass data from one node to another.

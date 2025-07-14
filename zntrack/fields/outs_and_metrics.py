@@ -1,5 +1,6 @@
 import json
 import pathlib
+import typing as t
 
 import znjson
 
@@ -52,7 +53,7 @@ def _metrics_save_func(self: "Node", name: str, suffix: str):
         raise TypeError(f"Error while saving {name} to {self.nwd / name}.json") from err
 
 
-def outs(*, cache: bool = True, independent: bool = False, **kwargs):
+def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> t.Any:
     """Define output for a node.
 
     An output can be anything that can be pickled.
@@ -88,7 +89,7 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs):
     )
 
 
-def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs):
+def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs) -> t.Any:
     """Define metrics for a node.
 
     The metrics must be a dictionary that can be serialized to JSON.

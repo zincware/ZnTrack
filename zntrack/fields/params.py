@@ -1,11 +1,14 @@
 import dataclasses
 import pathlib
+import typing as t
 
 import yaml
 
 from zntrack.config import PARAMS_FILE_PATH, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
+
+_T = t.TypeVar("_T")
 
 
 def _params_getter(self: "Node", name: str):
@@ -34,7 +37,18 @@ def _params_getter(self: "Node", name: str):
         return yaml.safe_load(f)[self.name][name]
 
 
-def params(default=dataclasses.MISSING, **kwargs):
+# Overloads for type checking
+@t.overload
+def params(default: _T, **kwargs) -> _T: ...
+
+
+@t.overload
+def params(*, default_factory: t.Callable[[], _T], **kwargs) -> _T: ...
+
+
+def params(
+    default=dataclasses.MISSING, *, default_factory=dataclasses.MISSING, **kwargs
+) -> t.Any:
     """ZnTrack parameter field.
 
     A field to define a parameter for a ZnTrack node.
@@ -69,6 +83,7 @@ def params(default=dataclasses.MISSING, **kwargs):
     #  or anything that can not be serialized
     return field(
         default=default,
+        default_factory=default_factory,
         field_type=FieldTypes.PARAMS,
         load_fn=_params_getter,
         suffix=None,
