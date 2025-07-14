@@ -89,18 +89,24 @@ def from_rev(
     package_and_module, cls_name = run_str.rsplit(".", 1)
 
     sys.path.append(pathlib.Path.cwd().as_posix())
-    if remote is not None:
-        # check if remote is a path that exists
-        if pathlib.Path(remote).exists():
-            sys.path.append(remote)
+    
+    # If we have a filesystem with a local repo, add it to Python path
+    if fs is not None and hasattr(fs, 'repo') and fs.repo is not None:
+        repo_root = pathlib.Path(fs.repo.root_dir)
+        if repo_root.exists():
+            repo_root_str = str(repo_root)
+            if repo_root_str not in sys.path:
+                sys.path.insert(0, repo_root_str)
 
     try:
         module = importlib.import_module(package_and_module)
     except ModuleNotFoundError:
         raise ModuleNotFoundError(
-            f"No module found for '{package_and_module}'. The package might be available "
-            f"via 'pip install {package_and_module}' or from the remote"
-            f"via 'pip install git+{remote}'."
+            f"The node depends on package '{package_and_module}' which is not installed "
+            f"in the current environment. You can install it via:\n"
+            f"  pip install {package_and_module}\n"
+            f"Or if it's available from the remote repository:\n"
+            f"  pip install git+{remote if remote else 'REMOTE_URL'}"
         )
 
     cls = getattr(module, cls_name)
