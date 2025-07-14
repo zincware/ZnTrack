@@ -29,6 +29,7 @@ FIELD_PATH_TYPE = t.Union[
 ]
 
 
+
 def _paths_getter(self: Node, name: str):
     # TODO: if self._external_: try looking into
     # external/self.uuid/...
@@ -60,7 +61,7 @@ def outs_path(
     cache: bool = True,
     independent: bool = False,
     **kwargs,
-):
+) -> t.Any:
     """Define output file path(s) for a node.
 
     Parameters
@@ -90,7 +91,7 @@ def outs_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
-def params_path(default: FIELD_PATH_TYPE = dataclasses.MISSING, **kwargs):
+def params_path(default: FIELD_PATH_TYPE = dataclasses.MISSING, **kwargs) -> t.Any:
     """Define input parameter file path(s).
 
     Parameters
@@ -204,7 +205,7 @@ def metrics_path(
 
 def deps_path(
     default: FIELD_PATH_TYPE = dataclasses.MISSING, *, cache: bool = True, **kwargs
-):
+) -> t.Any:
     """Define dependency file path(s) for a node.
 
     Parameters
