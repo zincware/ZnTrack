@@ -1,5 +1,6 @@
 import dataclasses
 import json
+import pathlib
 import typing as t
 from pathlib import Path
 
@@ -39,7 +40,25 @@ def _paths_getter(self: Node, name: str):
     if name in self.__dict__ and self.__dict__[name] is not ZNTRACK_LAZY_VALUE:
         return nwd_handler(self.__dict__[name], nwd=self.nwd)
     try:
-        with self.state.fs.open(self.state.path / ZNTRACK_FILE_PATH) as f:
+        # Use relative path if using DVCFileSystem
+        if hasattr(self.state.fs, 'repo') and self.state.fs.repo:
+            # For DVCFileSystem, use path relative to repo root
+            repo_root = pathlib.Path(self.state.fs.repo.root_dir)
+            if self.state.path.is_absolute():
+                try:
+                    relative_path = self.state.path.relative_to(repo_root)
+                    zntrack_path = str(relative_path / ZNTRACK_FILE_PATH)
+                except ValueError:
+                    # If path is not relative to repo root, use absolute path
+                    zntrack_path = str(self.state.path / ZNTRACK_FILE_PATH)
+            else:
+                # Path is already relative
+                zntrack_path = str(self.state.path / ZNTRACK_FILE_PATH)
+        else:
+            # For local filesystem, use absolute path
+            zntrack_path = self.state.path / ZNTRACK_FILE_PATH
+        
+        with self.state.fs.open(zntrack_path) as f:
             content = json.load(f)[self.name][name]
             content = znjson.loads(json.dumps(content))
 

@@ -61,8 +61,12 @@ def from_rev(
         try:
             rev = fs.repo.get_rev()
             # check if rev is the same as HEAD, then set to None
-            if rev == git.Repo(fs.repo.root_dir).head.commit.hexsha:
-                rev = None
+            try:
+                if rev == git.Repo(fs.repo.root_dir).head.commit.hexsha:
+                    rev = None
+            except (git.exc.InvalidGitRepositoryError, git.exc.NoSuchPathError):
+                # If we can't access the local git repo, just use the rev as-is
+                pass
         except SCMError:
             rev = None
     try:

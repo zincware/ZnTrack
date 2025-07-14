@@ -249,6 +249,11 @@ class Node(znflow.Node, znfields.Base):
         instance.__dict__["nwd"] = nwd
 
         # TODO: check if the node is finished or not.
+        if fs is None:
+            if remote is not None or rev is not None:
+                fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            else:
+                fs = LocalFileSystem()
         instance.__dict__["state"] = NodeStatus(
             remote=remote,
             rev=rev,
@@ -256,7 +261,7 @@ class Node(znflow.Node, znfields.Base):
             lazy_evaluation=lazy_evaluation,
             group=Group.from_nwd(instance.nwd),
             path=path,
-            fs=fs or LocalFileSystem(),
+            fs=fs,
         ).to_dict()
         instance.__dict__["state"]["plugins"] = get_plugins_from_env(instance)
 
