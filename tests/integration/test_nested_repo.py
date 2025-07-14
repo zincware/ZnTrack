@@ -88,7 +88,7 @@ class ExampleExternalNode:
     sys.modules["external_nodes"] = external_nodes
     spec.loader.exec_module(external_nodes)
 
-    ExampleExternalNode = external_nodes.ExampleExternalNode
+    example_external_node = external_nodes.ExampleExternalNode
 
     directory = pathlib.Path("subrepo")
     directory.mkdir(parents=True, exist_ok=True)
@@ -96,7 +96,7 @@ class ExampleExternalNode:
 
     project = zntrack.Project()
 
-    ext_node = ExampleExternalNode(parameter="Lorem Ipsum")
+    ext_node = example_external_node(parameter="Lorem Ipsum")
 
     with project:
         node = zntrack.examples.OptionalDeps(

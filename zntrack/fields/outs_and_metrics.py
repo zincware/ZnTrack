@@ -15,7 +15,8 @@ def _outs_getter(self: "Node", name: str, suffix: str):
     if hasattr(self.state.fs, "repo") and self.state.fs.repo:
         # For DVCFileSystem, use path relative to repo root
         repo_root = pathlib.Path(self.state.fs.repo.root_dir)
-        # nwd is already relative to the state.path, so we need to make it relative to repo root
+        # nwd is already relative to the state.path, so we need to make it
+        # relative to repo root
         nwd_path = self.nwd
         if nwd_path.is_absolute():
             try:
