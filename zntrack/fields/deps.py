@@ -1,6 +1,5 @@
 import dataclasses
 import json
-import pathlib
 import typing as t
 
 import znflow
@@ -11,30 +10,13 @@ from zntrack import converter
 from zntrack.config import ZNTRACK_FILE_PATH, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
+from zntrack.utils.filesystem import resolve_state_file_path
 
 
 def _deps_getter(self: "Node", name: str):
-    # Use relative path if using DVCFileSystem
-    if (
-        hasattr(self.state.fs, "repo")
-        and self.state.fs is not None
-        and getattr(self.state.fs, "repo", None) is not None
-    ):
-        # For DVCFileSystem, use path relative to repo root
-        repo_root = pathlib.Path(self.state.fs.repo.root_dir)
-        if self.state.path.is_absolute():
-            try:
-                relative_path = self.state.path.relative_to(repo_root)
-                zntrack_path = str(relative_path / ZNTRACK_FILE_PATH)
-            except ValueError:
-                # If path is not relative to repo root, use absolute path
-                zntrack_path = str(self.state.path / ZNTRACK_FILE_PATH)
-        else:
-            # Path is already relative
-            zntrack_path = str(self.state.path / ZNTRACK_FILE_PATH)
-    else:
-        # For local filesystem, use absolute path
-        zntrack_path = self.state.path / ZNTRACK_FILE_PATH
+    zntrack_path = resolve_state_file_path(
+        self.state.fs, self.state.path, ZNTRACK_FILE_PATH
+    )
 
     with self.state.fs.open(zntrack_path) as f:
         content = json.load(f)[self.name][name]
@@ -57,12 +39,20 @@ def _deps_getter(self: "Node", name: str):
                     add_default=True,
                 ),
             )
-        except (ModuleNotFoundError, AttributeError):
+        except ModuleNotFoundError:
             # If external dataclass module can't be imported, return NOT_AVAILABLE
             # The enhanced NOT_AVAILABLE object will provide helpful errors when accessed
             from zntrack.config import NOT_AVAILABLE
 
             return NOT_AVAILABLE
+        except AttributeError as e:
+            # Only catch AttributeErrors related to missing module attributes
+            if "module" in str(e).lower() or "attribute" in str(e).lower():
+                from zntrack.config import NOT_AVAILABLE
+
+                return NOT_AVAILABLE
+            # Re-raise other AttributeErrors as they might indicate different issues
+            raise
         if isinstance(content, converter.DataclassContainer):
             content = content.get_with_params(
                 self.name,

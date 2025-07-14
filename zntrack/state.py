@@ -96,53 +96,6 @@ class NodeStatus:
             return self.tmp_path
         return self.path / get_nwd(self.node)
 
-    # @property
-    # def fs(self) -> AbstractFileSystem:
-    #     """Get the file system of the Node.
-
-    #     If the remote is None, the local file system is returned.
-    #     Otherwise, a DVCFileSystem is returned.
-    #     The FileSystem should be used to open files to ensure,
-    #     that the correct version of the file is loaded.
-
-    #     Examples
-    #     --------
-
-    #     >>> import zntrack
-    #     >>> from pathlib import Path
-    #     >>>
-    #     >>> class MyNode(zntrack.Node):
-    #     ...     outs_path: Path = zntrack.outs_path(zntrack.nwd / "file.txt")
-    #     ...
-    #     ...     def run(self):
-    #     ...         self.outs_path.parent.mkdir(parents=True, exist_ok=True)
-    #     ...         self.outs_path.write_text("Hello World!")
-    #     ...
-    #     ...     @property
-    #     ...     def data(self):
-    #     ...         with self.state.fs.open(self.outs_path) as f:
-    #     ...             return f.read()
-    #     ...
-    #     >>> # build and run the graph and make multiple commits.
-    #     >>> # the filesystem ensures that the correct version of the file is loaded.
-    #     >>>
-    #     >>> zntrack.from_rev("MyNode", rev="HEAD").data
-    #     >>> zntrack.from_remote("MyNode", rev="HEAD~1").data
-
-    #     """
-    #     try:
-    #         return self.node.__dict__["state"]["fs"]
-    #     except KeyError:
-    #         if self.remote is None and self.rev is None:
-    #             fs =  LocalFileSystem()
-    #         else:
-    #             fs = dvc.api.DVCFileSystem(
-    #                 url=self.remote,
-    #                 rev=self.rev,
-    #             )
-    #         self.node.__dict__["state"]["fs"] = fs
-    #         return fs
-
     @property
     def dvc_fs(self) -> dvc.api.DVCFileSystem:
         """Get the file system of the Node."""

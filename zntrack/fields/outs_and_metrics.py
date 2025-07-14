@@ -1,5 +1,4 @@
 import json
-import pathlib
 import typing as t
 
 import znjson
@@ -8,29 +7,12 @@ from zntrack import config
 from zntrack.config import NOT_AVAILABLE, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
+from zntrack.utils.filesystem import resolve_dvc_path
 
 
 def _outs_getter(self: "Node", name: str, suffix: str):
-    # Use relative path if using DVCFileSystem
-    if hasattr(self.state.fs, "repo") and self.state.fs.repo:
-        # For DVCFileSystem, use path relative to repo root
-        repo_root = pathlib.Path(self.state.fs.repo.root_dir)
-        # nwd is already relative to the state.path, so we need to make it
-        # relative to repo root
-        nwd_path = self.nwd
-        if nwd_path.is_absolute():
-            try:
-                relative_nwd = nwd_path.relative_to(repo_root)
-                outs_path = str((relative_nwd / name).with_suffix(suffix))
-            except ValueError:
-                # If path is not relative to repo root, use absolute path
-                outs_path = str((nwd_path / name).with_suffix(suffix))
-        else:
-            # nwd is already relative
-            outs_path = str((nwd_path / name).with_suffix(suffix))
-    else:
-        # For local filesystem, use absolute path
-        outs_path = (self.nwd / name).with_suffix(suffix)
+    target_path = (self.nwd / name).with_suffix(suffix)
+    outs_path = resolve_dvc_path(self.state.fs, self.state.path, target_path)
 
     with self.state.fs.open(outs_path) as f:
         return json.load(f, cls=znjson.ZnDecoder)

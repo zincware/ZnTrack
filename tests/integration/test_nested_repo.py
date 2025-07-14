@@ -83,43 +83,54 @@ class ExampleExternalNode:
     import importlib.util
     import sys
 
-    spec = importlib.util.spec_from_file_location("external_nodes", external_module_path)
-    external_nodes = importlib.util.module_from_spec(spec)
-    sys.modules["external_nodes"] = external_nodes
-    spec.loader.exec_module(external_nodes)
+    # Store original sys.modules state for cleanup
+    original_modules = sys.modules.copy()
 
-    example_external_node = external_nodes.ExampleExternalNode
-
-    directory = pathlib.Path("subrepo")
-    directory.mkdir(parents=True, exist_ok=True)
-    os.chdir(directory)
-
-    project = zntrack.Project()
-
-    ext_node = example_external_node(parameter="Lorem Ipsum")
-
-    with project:
-        node = zntrack.examples.OptionalDeps(
-            value=ext_node,
+    try:
+        spec = importlib.util.spec_from_file_location(
+            "external_nodes", external_module_path
         )
-    project.build()
+        external_nodes = importlib.util.module_from_spec(spec)
+        sys.modules["external_nodes"] = external_nodes
+        spec.loader.exec_module(external_nodes)
 
-    os.chdir(proj_path)
+        example_external_node = external_nodes.ExampleExternalNode
 
-    assert node.value.parameter == "Lorem Ipsum"
+        directory = pathlib.Path("subrepo")
+        directory.mkdir(parents=True, exist_ok=True)
+        os.chdir(directory)
 
-    # Test: External dependencies behavior with nested repos
-    # Remove the module from sys.modules to simulate it not being available
-    if "external_nodes" in sys.modules:
-        del sys.modules["external_nodes"]
+        project = zntrack.Project()
 
-    # Load node - should raise error when external module is not available
-    node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps")
-    # The value itself will be NOT_AVAILABLE, but accessing its attributes should raise
-    assert node.value is zntrack.NOT_AVAILABLE
+        ext_node = example_external_node(parameter="Lorem Ipsum")
 
-    # Accessing attributes on NOT_AVAILABLE should raise helpful error
-    with pytest.raises(
-        ModuleNotFoundError, match="Cannot access attribute.*external dependency"
-    ):
-        _ = node.value.parameter
+        with project:
+            node = zntrack.examples.OptionalDeps(
+                value=ext_node,
+            )
+        project.build()
+
+        os.chdir(proj_path)
+
+        assert node.value.parameter == "Lorem Ipsum"
+
+        # Test: External dependencies behavior with nested repos
+        # Remove the module from sys.modules to simulate it not being available
+        if "external_nodes" in sys.modules:
+            del sys.modules["external_nodes"]
+
+        # Load node - should raise error when external module is not available
+        node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps")
+        # The value itself will be NOT_AVAILABLE, but accessing attributes should raise
+        assert node.value is zntrack.NOT_AVAILABLE
+
+        # Accessing attributes on NOT_AVAILABLE should raise helpful error
+        with pytest.raises(
+            ModuleNotFoundError, match="Cannot access attribute.*external dependency"
+        ):
+            _ = node.value.parameter
+
+    finally:
+        # Restore original sys.modules state to avoid affecting other tests
+        sys.modules.clear()
+        sys.modules.update(original_modules)
