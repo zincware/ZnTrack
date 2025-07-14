@@ -29,7 +29,6 @@ FIELD_PATH_TYPE = t.Union[
 ]
 
 
-
 def _paths_getter(self: Node, name: str):
     # TODO: if self._external_: try looking into
     # external/self.uuid/...

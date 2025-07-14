@@ -10,7 +10,6 @@ from zntrack.node import Node
 _T = t.TypeVar("_T")
 
 
-
 def _params_getter(self: "Node", name: str):
     with self.state.fs.open(self.state.path / PARAMS_FILE_PATH) as f:
         return yaml.safe_load(f)[self.name][name]
@@ -18,24 +17,15 @@ def _params_getter(self: "Node", name: str):
 
 # Overloads for type checking
 @t.overload
-def params(
-    default: _T,
-    **kwargs
-) -> _T: ...
+def params(default: _T, **kwargs) -> _T: ...
+
 
 @t.overload
-def params(
-    *,
-    default_factory: t.Callable[[], _T],
-    **kwargs
-) -> _T: ...
+def params(*, default_factory: t.Callable[[], _T], **kwargs) -> _T: ...
 
 
 def params(
-    default=dataclasses.MISSING,
-    *,
-    default_factory=dataclasses.MISSING,
-    **kwargs
+    default=dataclasses.MISSING, *, default_factory=dataclasses.MISSING, **kwargs
 ) -> t.Any:
     """ZnTrack parameter field.
 

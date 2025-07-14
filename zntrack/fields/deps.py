@@ -13,7 +13,6 @@ from zntrack.fields.base import field
 from zntrack.node import Node
 
 
-
 def _deps_getter(self: "Node", name: str):
     with self.state.fs.open(self.state.path / ZNTRACK_FILE_PATH) as f:
         content = json.load(f)[self.name][name]

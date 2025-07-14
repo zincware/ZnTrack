@@ -9,7 +9,6 @@ from zntrack.fields.base import field
 from zntrack.node import Node
 
 
-
 def _outs_getter(self: "Node", name: str, suffix: str):
     with self.state.fs.open((self.nwd / name).with_suffix(suffix)) as f:
         return json.load(f, cls=znjson.ZnDecoder)
