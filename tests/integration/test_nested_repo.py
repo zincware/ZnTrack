@@ -57,7 +57,7 @@ def test_subrepo(proj_path):
     assert node_loaded.outs == {"param1": 1, "param2": 2}
 
     # now try loading the node using an absolute path
-    with pytest.raises(ValueError):
+    with pytest.raises(FileNotFoundError):
         # DVCFileSystem struggles with absolute paths
         node_loaded = zntrack.from_rev(
             "subrepo/dvc.yaml:ParamsToOuts",

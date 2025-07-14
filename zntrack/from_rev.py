@@ -38,11 +38,6 @@ def from_rev(
     """
     if path is not None:
         raise NotImplementedError
-    if remote is not None and pathlib.Path(remote).is_absolute():
-        raise ValueError(
-            "The 'remote' argument should not be an absolute path. "
-            "Provide a relative path or use the 'fs' argument to specify a DVCFileSystem."
-        )
     if fs is None:
         fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
     else:
