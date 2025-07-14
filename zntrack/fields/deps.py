@@ -54,21 +54,14 @@ def _deps_getter(self: "Node", name: str):
                     add_default=True,
                 ),
             )
-        except (ModuleNotFoundError, AttributeError) as e:
-            # If external dataclass module can't be imported, provide helpful error
-            import warnings
-            if isinstance(e, ModuleNotFoundError):
-                warnings.warn(
-                    f"External dependency could not be loaded: {e}. "
-                    f"The node depends on a package that is not installed in the current environment. "
-                    f"You may need to add the appropriate path to sys.path or install the package.",
-                    UserWarning
-                )
+        except (ModuleNotFoundError, AttributeError):
+            # If external dataclass module can't be imported, return NOT_AVAILABLE
+            # The enhanced NOT_AVAILABLE object will provide helpful errors when accessed
             from zntrack.config import NOT_AVAILABLE
             return NOT_AVAILABLE
         if isinstance(content, converter.DataclassContainer):
             content = content.get_with_params(
-                self.name, name, index=None, fs=self.state.fs, path=self.state.path
+                self.name, name, index=None, fs=self.state.fs, path=self.state.path  # type: ignore
             )
         if isinstance(content, list):
             new_content = []
@@ -77,7 +70,7 @@ def _deps_getter(self: "Node", name: str):
                 if isinstance(val, converter.DataclassContainer):
                     new_content.append(
                         val.get_with_params(
-                            self.name, name, idx, fs=self.state.fs, path=self.state.path
+                            self.name, name, idx, fs=self.state.fs, path=self.state.path  # type: ignore
                         )
                     )
                     idx += 1  # index only runs over dataclasses

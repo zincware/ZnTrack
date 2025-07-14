@@ -44,6 +44,16 @@ ZNTRACK_SAVE_FUNC = _ZNTRACK_SAVE_FUNC_TYPE()
 class _NOT_AVAILABLE_TYPE:
     def __repr__(self) -> str:
         return "NOT_AVAILABLE"
+    
+    def __getattr__(self, name):
+        # When someone tries to access an attribute on NOT_AVAILABLE,
+        # raise a helpful error about missing external dependencies
+        raise ModuleNotFoundError(
+            f"Cannot access attribute '{name}' because the external dependency "
+            f"is not available. This typically means an external package is not "
+            f"installed in the current environment. Please ensure all required "
+            f"dependencies are installed or available in your Python path."
+        )
 
 
 NOT_AVAILABLE = _NOT_AVAILABLE_TYPE()

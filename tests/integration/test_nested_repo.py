@@ -114,11 +114,12 @@ class ExampleExternalNode:
     if "external_nodes" in sys.modules:
         del sys.modules["external_nodes"]
     
-    # # Load node - external dataclass may not be available due to import issues
+    # Load node - should raise error when external module is not available
     node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps")
-    
-    # Current behavior: external dataclasses return NOT_AVAILABLE when 
-    # the module cannot be imported during deserialization
-    # TODO: this should raise the error to inform that the module is not available
+    # The value itself will be NOT_AVAILABLE, but accessing its attributes should raise
     assert node.value is zntrack.NOT_AVAILABLE
+    
+    # Accessing attributes on NOT_AVAILABLE should raise helpful error
+    with pytest.raises(ModuleNotFoundError, match="Cannot access attribute.*external dependency"):
+        _ = node.value.parameter
 
