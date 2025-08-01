@@ -48,7 +48,7 @@ def graph() -> NodeLinkData:
     """Get the workflow graph in node-link format."""
     import dvc.api
     import znjson
-    from dvc.stage import PipelineStage
+    from dvc.stage import PipelineStage, Stage
     from networkx.readwrite import json_graph
 
     class PipelineStageConverter(znjson.ConverterBase):
@@ -61,19 +61,36 @@ def graph() -> NodeLinkData:
         def decode(self, value: str) -> PipelineStage:
             raise NotImplementedError("Decoding PipelineStage is not implemented")
 
+    class StageConverter(znjson.ConverterBase):
+        instance: type = Stage
+        representation: str = "dvc.stage.Stage"
+
+        def encode(self, obj: Stage) -> str:
+            return obj.addressing
+
+        def decode(self, value: str) -> Stage:
+            raise NotImplementedError("Decoding Stage is not implemented")
+
+    # TODO: in general have a graph builder that removed all
+    #  but the longest / shortest path connections?
+
     fs = dvc.api.DVCFileSystem()
     graph = fs.repo.index.graph
     return json.loads(
         json.dumps(
             json_graph.node_link_data(graph, edges="edges"),
-            cls=znjson.ZnEncoder.from_converters([PipelineStageConverter]),
+            cls=znjson.ZnEncoder.from_converters(
+                [PipelineStageConverter, StageConverter]
+            ),
         )
     )
 
 
 @mcp.tool
 def node_info(node: str) -> dict:
-    """Get information about a specific node in the workflow, including class source if it's a zntrack node."""
+    """Get information about a specific node in the workflow,
+    including class source if it's a zntrack node.
+    """
     import importlib
     import inspect
     import shlex
