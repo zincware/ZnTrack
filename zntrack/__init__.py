@@ -3,6 +3,7 @@ import logging
 import sys
 
 from zntrack import config
+from zntrack import entrypoints
 from zntrack.add import add
 from zntrack.apply import apply
 from zntrack.config import NOT_AVAILABLE, FieldTypes
