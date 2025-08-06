@@ -60,4 +60,3 @@ __all__ = [
 def nodes() -> dict[str, list[str]]:
     """Return the available nodes, grouped into categories."""
     return {"zntrack.examples": __all__}
-

@@ -1,29 +1,26 @@
 # server.py
 
-import sys
-from fastmcp import FastMCP
-from collections import defaultdict
-
-import importlib
 import dataclasses
+import importlib
 import inspect
-from typing import get_type_hints, Protocol
+import sys
+from collections import defaultdict
 from pathlib import Path
+from typing import Protocol, get_type_hints
 
-import importlib
-import dataclasses
+from fastmcp import FastMCP
+
 from zntrack.config import FIELD_TYPE
-from typing import get_type_hints
-import importlib
 from zntrack.entrypoints import get_registered_nodes
 
 mcp = FastMCP("ZnTrack 🚀")
+
 
 def analyze_node(path: str, name: str) -> dict:
     module = importlib.import_module(path)
     node_class = getattr(module, name)
     docs = node_class.__doc__
-    
+
     fields_by_type = defaultdict(list)
     type_hints = get_type_hints(node_class)
 
@@ -49,22 +46,22 @@ def analyze_node(path: str, name: str) -> dict:
 
         # Properties
         if isinstance(attr, property):
-            return_type = get_type_hints(attr.fget).get('return', None)
+            return_type = get_type_hints(attr.fget).get("return", None)
             methods["properties"][attr_name] = repr(return_type)
 
         # Class methods
         elif inspect.ismethod(attr) and getattr(attr, "__self__", None) is node_class:
-            return_type = get_type_hints(attr).get('return', None)
+            return_type = get_type_hints(attr).get("return", None)
             methods["class_methods"][attr_name] = repr(return_type)
 
         # Static methods
         elif isinstance(inspect.getattr_static(node_class, attr_name), staticmethod):
-            return_type = get_type_hints(attr).get('return', None)
+            return_type = get_type_hints(attr).get("return", None)
             methods["static_methods"][attr_name] = repr(return_type)
 
         # Instance methods
         elif inspect.isfunction(attr):
-            return_type = get_type_hints(attr).get('return', None)
+            return_type = get_type_hints(attr).get("return", None)
             methods["instance_methods"][attr_name] = repr(return_type)
 
     return {
@@ -75,10 +72,11 @@ def analyze_node(path: str, name: str) -> dict:
         "methods": methods,
     }
 
+
 @mcp.tool
 def get_interfaces() -> dict[str, list[str]]:
     """Get all available ZnTrack interfaces in the current environment.
-    
+
     The interfaces are sorted by their module names.
     """
     return get_registered_nodes(group="zntrack.interfaces")
@@ -113,8 +111,10 @@ def check_interface(interface_path: str, interface_name: str) -> dict[str, bool]
                 node_class = getattr(node_module, node_name)
 
                 # Check that all protocol methods exist and are callable
-                if not all(hasattr(node_class, name) and callable(getattr(node_class, name))
-                           for name in required_attrs):
+                if not all(
+                    hasattr(node_class, name) and callable(getattr(node_class, name))
+                    for name in required_attrs
+                ):
                     continue
 
                 for name, proto_func in required_attrs.items():
@@ -141,27 +141,29 @@ def check_interface(interface_path: str, interface_name: str) -> dict[str, bool]
 
     return supported_nodes
 
+
 @mcp.tool
 def available_nodes() -> dict[str, list[str]]:
     """Get all available ZnTrack nodes in the current environment.
-    
+
     The nodes are sorted by their module names.
     """
     from zntrack.entrypoints import get_registered_nodes
+
     return get_registered_nodes()
- 
+
 
 @mcp.tool
 def node_info(path: str, name: str) -> dict:
     """Get information about a specific ZnTrack node.
-    
+
     Attributes
     ----------
     path : str
         The module path of the node, e.g. "zntrack.examples"
     name : str
         The name of the node, e.g. "ParamsToOuts"
-    
+
     """
     try:
         return analyze_node(path, name)
@@ -185,11 +187,13 @@ def graph_getting_started() -> str:
     file = Path(__file__).parent / "resources" / "graph_getting_started.md"
     return file.read_text()
 
+
 @mcp.resource("docs://graph/with-groups")
 def graph_with_groups() -> str:
     """Get documentation on how to build a graph with groups."""
     file = Path(__file__).parent / "resources" / "graph_with_groups.md"
     return file.read_text()
+
 
 @mcp.resource("docs://node/getting-started")
 def node_getting_started() -> str:
@@ -213,6 +217,7 @@ def get_project_groups(project_dir: str) -> list[tuple[str, ...]]:
 
     return list(project.groups.keys())
 
+
 @mcp.tool
 def get_all_nodes(project_dir: str) -> list[str]:
     """List all nodes in the current project.
@@ -227,6 +232,7 @@ def get_all_nodes(project_dir: str) -> list[str]:
 
     return [x["value"].name for _, x in project.nodes(data=True)]
 
+
 @mcp.tool
 def get_nodes_in_group(group: tuple[str, ...], project_dir: str) -> dict:
     """List all nodes in a specific group."""
@@ -236,18 +242,20 @@ def get_nodes_in_group(group: tuple[str, ...], project_dir: str) -> dict:
 
     try:
         node_names = [project.nodes[x]["value"].name for x in project.groups[group].uuids]
-        return {"group": group,
-                "nodes": node_names}
+        return {"group": group, "nodes": node_names}
     except KeyError:
         return {"error": f"Group {group} not found."}
-    
+
+
 @mcp.tool
 def get_connections(name: str, project_dir: str) -> dict:
     """Get all connections for a specific node."""
     sys.path.insert(0, project_dir)
     from main import project
 
-    node_uuid = [uuid for uuid, x in project.nodes(data=True) if x["value"].name == name][0]
+    node_uuid = [uuid for uuid, x in project.nodes(data=True) if x["value"].name == name][
+        0
+    ]
     if not node_uuid:
         return {"error": f"Node {name} not found."}
     successors_uuid = list(project.successors(node_uuid))
@@ -262,10 +270,12 @@ def get_connections(name: str, project_dir: str) -> dict:
         "predecessors": predecessors,
     }
 
+
 @mcp.tool
 def get_node_by_name(name: str, project_dir: str) -> dict:
     """Get a node by its name."""
     import zntrack
+
     try:
         node = zntrack.from_rev(name, remote=project_dir)
     except Exception as e:
