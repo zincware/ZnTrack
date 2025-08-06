@@ -103,10 +103,11 @@ class NodeConverter(znjson.ConverterBase):
         module = importlib.import_module(s["module"])
         cls = getattr(module, s["cls"])
         if self.path is not None:
+            print(f"Serializing {cls.__name__} using {s}")
             return cls.from_rev(
                 name=s["name"],
-                remote=s["remote"],
-                rev=s["rev"],
+                remote=s["remote"] if s["remote"] != "" else None,
+                rev=s["rev"] if s["rev"] != "" else None,
                 path=self.path,
             )
         return cls.from_rev(name=s["name"], remote=s["remote"], rev=s["rev"])
