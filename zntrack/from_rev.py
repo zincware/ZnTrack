@@ -107,4 +107,6 @@ def from_rev(
     cls = getattr(module, cls_name)
     if remote is not None or rev is not None:
         return cls.from_rev(name, remote=remote, rev=rev, path=path, fs=fs)
-    return cls.from_rev(name, remote=remote, rev=rev, path=path) # rely on local filesystem
+    return cls.from_rev(
+        name, remote=remote, rev=rev, path=path
+    )  # rely on local filesystem

@@ -1,7 +1,7 @@
 import dataclasses
 import json
-import typing as t
 import traceback
+import typing as t
 
 import znflow
 import znflow.handler
@@ -45,6 +45,7 @@ def _deps_getter(self: "Node", name: str):
             # If external dataclass module can't be imported, return NOT_AVAILABLE
             # The enhanced NOT_AVAILABLE object will provide helpful errors when accessed
             from zntrack.config import NOT_AVAILABLE
+
             print(f"Module not found for {self.name}.{name}, returning NOT_AVAILABLE")
 
             return NOT_AVAILABLE
@@ -52,7 +53,10 @@ def _deps_getter(self: "Node", name: str):
             # Only catch AttributeErrors related to missing module attributes
             if "module" in str(e).lower() or "attribute" in str(e).lower():
                 from zntrack.config import NOT_AVAILABLE
-                print(f"Module attribute error for {self.name}.{name}, returning NOT_AVAILABLE")
+
+                print(
+                    f"Module attribute error for {self.name}.{name}, returning NOT_AVAILABLE"
+                )
 
                 return NOT_AVAILABLE
             # Re-raise other AttributeErrors as they might indicate different issues
@@ -62,7 +66,7 @@ def _deps_getter(self: "Node", name: str):
             print(f"Unexpected error while loading deps for {self.name}.{name}: {e}")
             traceback.print_exc()
             raise
-        
+
         if isinstance(content, converter.DataclassContainer):
             content = content.get_with_params(
                 self.name,

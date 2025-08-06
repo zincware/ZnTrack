@@ -235,17 +235,12 @@ def test_two_nodes_connect_external_local(proj_path):
 def proj_with_deps(proj_path):
     project = zntrack.Project()
     with project:
-        x1 = zntrack.examples.AddNumbers(
-            a=1, b=2
-        )
-        x2 = zntrack.examples.AddNumbers(
-            a=3, b=4
-        )
-        a = zntrack.examples.AddNodeAttributes(
-            a=x1.c, b=x2.c
-        )
+        x1 = zntrack.examples.AddNumbers(a=1, b=2)
+        x2 = zntrack.examples.AddNumbers(a=3, b=4)
+        a = zntrack.examples.AddNodeAttributes(a=x1.c, b=x2.c)
     project.repro()
     return project, x1, x2, a
+
 
 def test_from_rev_deps(proj_with_deps):
     project, x1, x2, a = proj_with_deps
@@ -258,6 +253,7 @@ def test_from_rev_deps(proj_with_deps):
     assert node.b == 7
     assert node.c == 10
 
+
 def test_from_rev_deps_remote(proj_with_deps):
     project, x1, x2, a = proj_with_deps
 
@@ -269,6 +265,7 @@ def test_from_rev_deps_remote(proj_with_deps):
     assert node.a == 3
     assert node.b == 7
     assert node.c == 10
+
 
 def test_from_rev_deps_rev_HEAD(proj_with_deps):
     project, x1, x2, a = proj_with_deps
@@ -286,6 +283,7 @@ def test_from_rev_deps_rev_HEAD(proj_with_deps):
     assert node.a == 3
     assert node.b == 7
     assert node.c == 10
+
 
 def test_from_rev_deps_rev_HEAD_remote(proj_with_deps):
     project, x1, x2, a = proj_with_deps
