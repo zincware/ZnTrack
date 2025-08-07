@@ -3,6 +3,7 @@
 import pathlib
 from typing import Union
 
+
 def resolve_dvc_path(
     fs, state_path: pathlib.Path, target_path: Union[str, pathlib.Path]
 ) -> Union[str, pathlib.Path]:
