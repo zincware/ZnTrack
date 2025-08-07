@@ -72,7 +72,10 @@ def from_rev(
     try:
         cmd = stage.cmd
         name = stage.name
-        path = pathlib.Path(stage.path).parent
+        path = pathlib.Path(stage.path_in_repo).parent
+        # DVC Issue where stage.path is relative to the DVC root
+        # if rev is given, if only remote is given, it is relative to file system
+        # so we need to use path_in_repo instead.
     except AttributeError:
         raise ValueError("Stage is not a ZnTrack pipeline stage.")
 
@@ -82,7 +85,6 @@ def from_rev(
     name = cmd.split()[4]
 
     package_and_module, cls_name = run_str.rsplit(".", 1)
-
     sys.path.append(pathlib.Path.cwd().as_posix())
 
     # If we have a filesystem with a local repo, add it to Python path
@@ -92,7 +94,6 @@ def from_rev(
             repo_root_str = str(repo_root)
             if repo_root_str not in sys.path:
                 sys.path.insert(0, repo_root_str)
-
     try:
         module = importlib.import_module(package_and_module)
     except ModuleNotFoundError:
@@ -105,4 +106,8 @@ def from_rev(
         )
 
     cls = getattr(module, cls_name)
-    return cls.from_rev(name, remote=remote, rev=rev, path=path, fs=fs)
+    if remote is not None or rev is not None:
+        return cls.from_rev(name, remote=remote, rev=rev, path=path, fs=fs)
+    return cls.from_rev(
+        name, remote=remote, rev=rev, path=path
+    )  # rely on local filesystem

@@ -105,14 +105,14 @@ class NodeConverter(znjson.ConverterBase):
         if self.path is not None:
             return cls.from_rev(
                 name=s["name"],
-                remote=s["remote"],
-                rev=s["rev"],
+                remote=s["remote"] if s["remote"] != "" else None,
+                rev=s["rev"] if s["rev"] != "" else None,
                 path=self.path,
             )
         return cls.from_rev(name=s["name"], remote=s["remote"], rev=s["rev"])
 
 
-def create_node_converter(remote: str, rev: str, path: pathlib.Path):
+def create_node_converter(remote: str | None, rev: str | None, path: pathlib.Path):
     class CustomConverter(NodeConverter):
         """Custom converter for zntrack.Node."""
 
