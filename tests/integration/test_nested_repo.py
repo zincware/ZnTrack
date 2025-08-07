@@ -8,6 +8,7 @@ from git import Repo
 import zntrack.examples
 
 
+
 def test_subrepo(proj_path):
     """Test subrepo functionality"""
     directory = pathlib.Path("subrepo")

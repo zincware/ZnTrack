@@ -73,6 +73,7 @@ def from_rev(
         cmd = stage.cmd
         name = stage.name
         path = pathlib.Path(stage.path_in_repo).parent
+        print(f"Stage path: {path}")
         # DVC Issue where stage.path is relative to the DVC root
         # if rev is given, if only remote is given, it is relative to file system
         # so we need to use path_in_repo instead.
