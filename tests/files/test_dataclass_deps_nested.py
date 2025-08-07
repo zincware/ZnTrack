@@ -48,7 +48,7 @@ def test_nested_dc_deps(proj_path):
     thermostat = Thermostat(temperature=300, method=Langevin())
 
     with project:
-        md = MD(thermostat=thermostat)
+        _ = MD(thermostat=thermostat)
 
     project.build()
 
