@@ -1,7 +1,6 @@
 import os
 import pathlib
 
-import pytest
 from dvc.api import DVCFileSystem
 from git import Repo
 
