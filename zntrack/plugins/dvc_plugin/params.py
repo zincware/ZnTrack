@@ -1,3 +1,4 @@
+import copy
 import dataclasses
 
 import znflow
@@ -40,7 +41,7 @@ def _dataclass_to_dict(object) -> dict:
             # Recursively convert nested dataclasses
             dc_params[field.name] = _dataclass_to_dict(value)
         else:
-            dc_params[field.name] = value
+            dc_params[field.name] = copy.deepcopy(value)
 
     dc_params["_cls"] = f"{module_handler(object)}.{object.__class__.__name__}"
     return dc_params
