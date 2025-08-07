@@ -18,7 +18,6 @@ def _deps_getter(self: "Node", name: str):
     zntrack_path = resolve_state_file_path(
         self.state.fs, self.state.path, ZNTRACK_FILE_PATH
     )
-    print(f"Loading deps from {zntrack_path} for {self.name}.{name}")
 
     with self.state.fs.open(zntrack_path) as f:
         content = json.load(f)[self.name][name]
@@ -29,8 +28,8 @@ def _deps_getter(self: "Node", name: str):
                 cls=znjson.ZnDecoder.from_converters(
                     [
                         converter.create_node_converter(
-                            remote=self.state.remote or "",
-                            rev=self.state.rev or "",
+                            remote=self.state.remote,
+                            rev=self.state.rev,
                             path=self.state.path,
                         ),
                         converter.ConnectionConverter,

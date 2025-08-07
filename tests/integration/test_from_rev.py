@@ -257,6 +257,11 @@ def test_from_rev_deps(proj_with_deps):
 def test_from_rev_deps_remote(proj_with_deps):
     project, x1, x2, a = proj_with_deps
 
+    # as soon as we pass remote/rev we need a commit
+    repo = git.Repo()
+    repo.git.add(all=True)
+    repo.index.commit("Test commit for from_rev")
+
     node: zntrack.examples.AddNodeAttributes = zntrack.from_rev(
         a.name,
         remote=".",
