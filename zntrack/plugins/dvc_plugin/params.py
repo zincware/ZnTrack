@@ -47,9 +47,31 @@ def _dataclass_to_dict(object) -> dict:
     return dc_params
 
 
+def auto_inferred_to_params(value):
+    """
+    Convert auto-inferred field values to params format.
+    
+    Handles dataclass serialization for auto-inferred fields that should 
+    be treated as parameters.
+    """
+    if isinstance(value, list):
+        # Handle list of potentially mixed types
+        serialized_value = []
+        for item in value:
+            if dataclasses.is_dataclass(item) and not isinstance(item, Node):
+                serialized_value.append(_dataclass_to_dict(item))
+            else:
+                serialized_value.append(item)
+        return serialized_value
+    elif dataclasses.is_dataclass(value) and not isinstance(value, Node):
+        return _dataclass_to_dict(value)
+    else:
+        return value
+
+
 def deps_to_params(self, field):
     if getattr(self.node, field.name) is None:
-        return
+        return None
     content = getattr(self.node, field.name)
     if isinstance(content, (list, tuple, dict)):
         new_content = []
@@ -76,9 +98,10 @@ def deps_to_params(self, field):
     ):
         return _dataclass_to_dict(content)
     elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
-        return
+        return None
     else:
         raise ValueError(
             f"Found unsupported type '{type(content)}' ({content})"
             f" for DEPS field '{field.name}'"
         )
+    return None

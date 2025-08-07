@@ -1,0 +1,80 @@
+{
+    "ParamsToOuts": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/ParamsToOuts"
+        }
+    },
+    "int_NodeWithAutoFields": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/int/NodeWithAutoFields"
+        }
+    },
+    "int_NodeWithAutoFields_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/int/NodeWithAutoFields_1"
+        },
+        "value": {
+            "_type": "znflow.Connection",
+            "value": {
+                "instance": {
+                    "_type": "zntrack.Node",
+                    "value": {
+                        "module": "zntrack.examples.nodes",
+                        "name": "ParamsToOuts",
+                        "cls": "ParamsToOuts",
+                        "remote": null,
+                        "rev": null
+                    }
+                },
+                "attribute": "outs",
+                "item": null
+            }
+        }
+    },
+    "int_NodeWithAutoFields_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/int/NodeWithAutoFields_2"
+        }
+    },
+    "list_NodeWithAutoFieldsList": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/list/NodeWithAutoFieldsList"
+        }
+    },
+    "list_NodeWithAutoFieldsList_1": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/list/NodeWithAutoFieldsList_1"
+        },
+        "value": [
+            {
+                "_type": "znflow.Connection",
+                "value": {
+                    "instance": {
+                        "_type": "zntrack.Node",
+                        "value": {
+                            "module": "zntrack.examples.nodes",
+                            "name": "ParamsToOuts",
+                            "cls": "ParamsToOuts",
+                            "remote": null,
+                            "rev": null
+                        }
+                    },
+                    "attribute": "outs",
+                    "item": null
+                }
+            }
+        ]
+    },
+    "list_NodeWithAutoFieldsList_2": {
+        "nwd": {
+            "_type": "pathlib.Path",
+            "value": "nodes/list/NodeWithAutoFieldsList_2"
+        }
+    }
+}
