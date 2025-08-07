@@ -65,7 +65,7 @@ class TestFieldAnnotationsWithDefaults(zntrack.Node):
     params_path_str_with_val: str = zntrack.params_path("config.yaml")
     params_path_path_with_val: Path = zntrack.params_path(Path("config.yaml"))
 
-    # Path fiels using zntrack.nwd
+    # Path fields using zntrack.nwd
     outs_path_in_nwd: Path = zntrack.outs_path(zntrack.nwd / "output.txt")
     metrics_path_in_nwd: Path = zntrack.metrics_path(zntrack.nwd / "metrics.json")
     plots_path_in_nwd: Path = zntrack.plots_path(zntrack.nwd / "plot.png")
