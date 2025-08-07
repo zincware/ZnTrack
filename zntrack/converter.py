@@ -23,6 +23,27 @@ from .node import Node
 from .utils import module_handler
 
 
+def _reconstruct_nested_dataclasses(params: dict) -> dict:
+    """Recursively reconstruct nested dataclasses from their dictionary representation."""
+    reconstructed_params = {}
+    for key, value in params.items():
+        if key == "_cls":
+            continue
+        if isinstance(value, dict) and "_cls" in value:
+            # This is a nested dataclass, reconstruct it
+            cls_path = value["_cls"]
+            module_name, class_name = cls_path.rsplit(".", 1)
+            module = importlib.import_module(module_name)
+            nested_cls = getattr(module, class_name)
+            
+            # Recursively process nested parameters
+            nested_params = _reconstruct_nested_dataclasses(value)
+            reconstructed_params[key] = nested_cls(**nested_params)
+        else:
+            reconstructed_params[key] = value
+    return reconstructed_params
+
+
 @dataclasses.dataclass
 class DataclassContainer:
     cls: t.Any
@@ -56,7 +77,11 @@ class DataclassContainer:
         else:
             dc_params = all_params[node_name][attr_name]
         dc_params.pop("_cls", None)
-        return self.cls(**dc_params, **self.fields)
+        
+        # Recursively reconstruct nested dataclasses
+        reconstructed_params = _reconstruct_nested_dataclasses(dc_params)
+        
+        return self.cls(**reconstructed_params, **self.fields)
 
 
 def _enforce_str_list(content) -> list[str]:
