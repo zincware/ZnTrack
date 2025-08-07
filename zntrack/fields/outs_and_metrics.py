@@ -77,7 +77,9 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> t.Any:
 
 
 @t.overload
-def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs) -> t.Any: ...
+def metrics(
+    *, cache: bool | None = None, independent: bool = False, **kwargs
+) -> t.Any: ...
 
 
 def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs) -> t.Any:

@@ -26,7 +26,11 @@ from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
 FIELD_PATH_TYPE = t.Union[
-    str, Path, t.List[t.Union[str, Path]], t.Tuple[t.Union[str, Path], ...], dataclasses._MISSING_TYPE
+    str,
+    Path,
+    t.List[t.Union[str, Path]],
+    t.Tuple[t.Union[str, Path], ...],
+    dataclasses._MISSING_TYPE,
 ]
 
 # Type variable for better path type inference
@@ -215,7 +219,9 @@ def params_path(default: Path, **kwargs) -> Path: ...
 
 
 @t.overload
-def params_path(default: t.List[t.Union[str, Path]], **kwargs) -> t.List[t.Union[str, Path]]: ...
+def params_path(
+    default: t.List[t.Union[str, Path]], **kwargs
+) -> t.List[t.Union[str, Path]]: ...
 
 
 @t.overload
@@ -235,11 +241,15 @@ def params_path(*, default_factory: t.Callable[[], Path], **kwargs) -> Path: ...
 
 
 @t.overload
-def params_path(*, default_factory: t.Callable[[], t.List[t.Union[str, Path]]], **kwargs) -> t.List[t.Union[str, Path]]: ...
+def params_path(
+    *, default_factory: t.Callable[[], t.List[t.Union[str, Path]]], **kwargs
+) -> t.List[t.Union[str, Path]]: ...
 
 
 @t.overload
-def params_path(*, default_factory: t.Callable[[], t.Tuple[t.Union[str, Path], ...]], **kwargs) -> t.Tuple[t.Union[str, Path], ...]: ...
+def params_path(
+    *, default_factory: t.Callable[[], t.Tuple[t.Union[str, Path], ...]], **kwargs
+) -> t.Tuple[t.Union[str, Path], ...]: ...
 
 
 @t.overload
@@ -411,9 +421,7 @@ def deps_path() -> t.Any: ...
 
 
 @t.overload
-def deps_path(
-    default: _PathT, *, cache: bool = True, **kwargs
-) -> _PathT: ...
+def deps_path(default: _PathT, *, cache: bool = True, **kwargs) -> _PathT: ...
 
 
 @t.overload
