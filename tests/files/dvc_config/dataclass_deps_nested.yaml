@@ -1,0 +1,10 @@
+stages:
+  MD:
+    cmd: zntrack run test_dataclass_deps_nested.MD --name MD
+    metrics:
+    - nodes/MD/node-meta.json:
+        cache: true
+    outs:
+    - nodes/MD/result.json
+    params:
+    - MD
