@@ -113,7 +113,7 @@ class NodeConverter(znjson.ConverterBase):
         return cls.from_rev(name=s["name"], remote=s["remote"], rev=s["rev"])
 
 
-def create_node_converter(remote: str|None, rev: str|None, path: pathlib.Path):
+def create_node_converter(remote: str | None, rev: str | None, path: pathlib.Path):
     class CustomConverter(NodeConverter):
         """Custom converter for zntrack.Node."""
 
