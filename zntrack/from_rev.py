@@ -86,7 +86,6 @@ def from_rev(
     name = cmd.split()[4]
 
     package_and_module, cls_name = run_str.rsplit(".", 1)
-
     sys.path.append(pathlib.Path.cwd().as_posix())
 
     # If we have a filesystem with a local repo, add it to Python path
@@ -95,8 +94,8 @@ def from_rev(
         if repo_root.exists():
             repo_root_str = str(repo_root)
             if repo_root_str not in sys.path:
+                print(f"Adding {repo_root_str} to sys.path")
                 sys.path.insert(0, repo_root_str)
-
     try:
         module = importlib.import_module(package_and_module)
     except ModuleNotFoundError:
@@ -111,6 +110,7 @@ def from_rev(
     cls = getattr(module, cls_name)
     if remote is not None or rev is not None:
         return cls.from_rev(name, remote=remote, rev=rev, path=path, fs=fs)
+    # raise ValueError("for testing purposes, path is not implemented yet")
     return cls.from_rev(
         name, remote=remote, rev=rev, path=path
     )  # rely on local filesystem

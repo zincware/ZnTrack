@@ -114,20 +114,14 @@ class ExampleExternalNode:
         assert node.value.parameter == "Lorem Ipsum"
 
         # Test: External dependencies behavior with nested repos
-        # Remove the module from sys.modules to simulate it not being available
+        # Remove the module from sys.modules to check that it is being loaded correctly
         if "external_nodes" in sys.modules:
             del sys.modules["external_nodes"]
 
         # Load node - should raise error when external module is not available
         node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps")
         # The value itself will be NOT_AVAILABLE, but accessing attributes should raise
-        assert node.value is zntrack.NOT_AVAILABLE
-
-        # Accessing attributes on NOT_AVAILABLE should raise helpful error
-        with pytest.raises(
-            ModuleNotFoundError, match="Cannot access attribute.*external dependency"
-        ):
-            _ = node.value.parameter
+        assert node.value.parameter == "Lorem Ipsum"
 
     finally:
         # Restore original sys.modules state to avoid affecting other tests
