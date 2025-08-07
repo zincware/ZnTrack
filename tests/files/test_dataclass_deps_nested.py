@@ -1,8 +1,10 @@
 import dataclasses
-import zntrack
 import json
 import pathlib
+
 import yaml
+
+import zntrack
 
 CWD = pathlib.Path(__file__).parent.resolve()
 
@@ -10,6 +12,7 @@ CWD = pathlib.Path(__file__).parent.resolve()
 @dataclasses.dataclass
 class Langevin:
     """Langevin dynamics class"""
+
     friction: float = 0.1
 
     def get_thermostat(self):
@@ -19,11 +22,13 @@ class Langevin:
 @dataclasses.dataclass
 class Berendsen:
     """Berendsen thermostat class"""
+
     time: float = 0.5
 
     def get_thermostat(self):
         return "Berendsen thermostat"
-    
+
+
 @dataclasses.dataclass
 class Thermostat:
     temperature: float
@@ -37,13 +42,14 @@ class MD(zntrack.Node):
     def run(self):
         self.result = self.thermostat.method.get_thermostat()
 
+
 def test_nested_dc_deps(proj_path):
     project = zntrack.Project()
     thermostat = Thermostat(temperature=300, method=Langevin())
 
     with project:
         md = MD(thermostat=thermostat)
-        
+
     project.build()
 
     assert json.loads(
@@ -55,6 +61,7 @@ def test_nested_dc_deps(proj_path):
     assert (CWD / "params_config" / "dataclass_deps_nested.yaml").read_text() == (
         proj_path / "params.yaml"
     ).read_text()
+
 
 if __name__ == "__main__":
     test_nested_dc_deps(pathlib.Path.cwd())

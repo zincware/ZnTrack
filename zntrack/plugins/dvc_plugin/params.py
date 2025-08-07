@@ -26,13 +26,13 @@ def _dataclass_to_dict(object) -> dict:
                     f"Unsupported field type '{field.metadata[FIELD_TYPE]}'"
                     f" for field '{field.name}'."
                 )
-    
+
     # Custom conversion that handles nested dataclasses
     dc_params = {}
     for field in dataclasses.fields(object):
         if field.name in exclude_fields:
             continue
-        
+
         value = getattr(object, field.name)
         if dataclasses.is_dataclass(value) and not isinstance(
             value, (Node, znflow.Connection, znflow.CombinedConnections)
@@ -41,7 +41,7 @@ def _dataclass_to_dict(object) -> dict:
             dc_params[field.name] = _dataclass_to_dict(value)
         else:
             dc_params[field.name] = value
-    
+
     dc_params["_cls"] = f"{module_handler(object)}.{object.__class__.__name__}"
     return dc_params
 
