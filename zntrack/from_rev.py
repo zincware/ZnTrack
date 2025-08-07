@@ -73,7 +73,6 @@ def from_rev(
         cmd = stage.cmd
         name = stage.name
         path = pathlib.Path(stage.path_in_repo).parent
-        print(f"Stage path: {path}")
         # DVC Issue where stage.path is relative to the DVC root
         # if rev is given, if only remote is given, it is relative to file system
         # so we need to use path_in_repo instead.
@@ -94,7 +93,6 @@ def from_rev(
         if repo_root.exists():
             repo_root_str = str(repo_root)
             if repo_root_str not in sys.path:
-                print(f"Adding {repo_root_str} to sys.path")
                 sys.path.insert(0, repo_root_str)
     try:
         module = importlib.import_module(package_and_module)
@@ -110,7 +108,6 @@ def from_rev(
     cls = getattr(module, cls_name)
     if remote is not None or rev is not None:
         return cls.from_rev(name, remote=remote, rev=rev, path=path, fs=fs)
-    # raise ValueError("for testing purposes, path is not implemented yet")
     return cls.from_rev(
         name, remote=remote, rev=rev, path=path
     )  # rely on local filesystem

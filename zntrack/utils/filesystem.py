@@ -26,7 +26,6 @@ def resolve_dvc_path(
         # Already relative — assume it's correctly relative to the repo root
         final_path = target_path
 
-    print(f"Resolving DVC path: {target_path} relative to {repo_root} -> {final_path}")
     return str(final_path)
 
 

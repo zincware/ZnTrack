@@ -1,6 +1,5 @@
 import dataclasses
 import json
-import traceback
 import typing as t
 
 import znflow
@@ -17,9 +16,6 @@ from zntrack.utils.filesystem import resolve_state_file_path
 def _deps_getter(self: "Node", name: str):
     zntrack_path = resolve_state_file_path(
         self.state.fs, self.state.path, ZNTRACK_FILE_PATH
-    )
-    print(
-        f"Loading deps for {self.name}.{name} from {zntrack_path} and {self.state.path=}"
     )
     with self.state.fs.open(zntrack_path) as f:
         content = json.load(f)[self.name][name]
@@ -47,25 +43,14 @@ def _deps_getter(self: "Node", name: str):
             # The enhanced NOT_AVAILABLE object will provide helpful errors when accessed
             from zntrack.config import NOT_AVAILABLE
 
-            print(f"Module not found for {self.name}.{name}, returning NOT_AVAILABLE")
-
             return NOT_AVAILABLE
         except AttributeError as e:
             # Only catch AttributeErrors related to missing module attributes
             if "module" in str(e).lower() or "attribute" in str(e).lower():
                 from zntrack.config import NOT_AVAILABLE
 
-                print(
-                    f"Module attribute error for {self.name}.{name}, returning NOT_AVAILABLE"
-                )
-
                 return NOT_AVAILABLE
             # Re-raise other AttributeErrors as they might indicate different issues
-            print(f"Unexpected error for {self.name}.{name}: {e}")
-            raise
-        except Exception as e:
-            print(f"Unexpected error while loading deps for {self.name}.{name}: {e}")
-            traceback.print_exc()
             raise
 
         if isinstance(content, converter.DataclassContainer):
@@ -96,7 +81,6 @@ def _deps_getter(self: "Node", name: str):
             content = new_content
 
         content = znflow.handler.UpdateConnectors()(content)
-        print(f"Loaded deps for {self.name}.{name}: {content}")
         return content
 
 
