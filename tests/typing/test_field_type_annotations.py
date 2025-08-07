@@ -8,6 +8,7 @@ do not raise type errors when no explicit value is provided.
 """
 
 from pathlib import Path
+
 import pandas as pd
 
 import zntrack
@@ -30,7 +31,9 @@ class TestFieldAnnotations(zntrack.Node):
     dep_int: int = zntrack.deps()
     dep_str: str = zntrack.deps()
 
-    plots_data: pd.DataFrame = zntrack.plots()  # pandas.DataFrame, but we don't enforce the type
+    plots_data: pd.DataFrame = (
+        zntrack.plots()
+    )  # pandas.DataFrame, but we don't enforce the type
 
     # Path fields
     params_path_str: str = zntrack.params_path()
