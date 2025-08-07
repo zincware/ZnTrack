@@ -18,7 +18,7 @@ def _deps_getter(self: "Node", name: str):
     zntrack_path = resolve_state_file_path(
         self.state.fs, self.state.path, ZNTRACK_FILE_PATH
     )
-    print(f"Loading deps for {self.name}.{name} from {zntrack_path}")
+    print(f"Loading deps for {self.name}.{name} from {zntrack_path} and {self.state.path=}")
     with self.state.fs.open(zntrack_path) as f:
         content = json.load(f)[self.name][name]
         # TODO: Ensure deps are loaded from the correct revision
