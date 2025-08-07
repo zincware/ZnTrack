@@ -1,3 +1,5 @@
+import typing as t
+
 import pandas as pd
 
 from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, FieldTypes
@@ -22,6 +24,22 @@ def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
 def _plots_getter(self: "Node", name: str, suffix: str):
     with self.state.fs.open((self.nwd / name).with_suffix(suffix)) as f:
         return pd.read_csv(f, index_col=0)
+
+
+@t.overload
+def plots(
+    *,
+    y: str | list[str] | None = None,
+    cache: bool = True,
+    independent: bool = False,
+    x: str = "step",
+    x_label: str | None = None,
+    y_label: str | None = None,
+    template: str | None = None,
+    title: str | None = None,
+    autosave: bool = False,
+    **kwargs,
+) -> t.Any: ...
 
 
 def plots(
