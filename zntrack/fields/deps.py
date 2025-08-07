@@ -17,7 +17,6 @@ def _deps_getter(self: "Node", name: str):
     zntrack_path = resolve_state_file_path(
         self.state.fs, self.state.path, ZNTRACK_FILE_PATH
     )
-
     with self.state.fs.open(zntrack_path) as f:
         content = json.load(f)[self.name][name]
         # TODO: Ensure deps are loaded from the correct revision
@@ -27,8 +26,8 @@ def _deps_getter(self: "Node", name: str):
                 cls=znjson.ZnDecoder.from_converters(
                     [
                         converter.create_node_converter(
-                            remote=self.state.remote or "",
-                            rev=self.state.rev or "",
+                            remote=self.state.remote,
+                            rev=self.state.rev,
                             path=self.state.path,
                         ),
                         converter.ConnectionConverter,
@@ -53,6 +52,7 @@ def _deps_getter(self: "Node", name: str):
                 return NOT_AVAILABLE
             # Re-raise other AttributeErrors as they might indicate different issues
             raise
+
         if isinstance(content, converter.DataclassContainer):
             content = content.get_with_params(
                 self.name,
@@ -81,7 +81,6 @@ def _deps_getter(self: "Node", name: str):
             content = new_content
 
         content = znflow.handler.UpdateConnectors()(content)
-
         return content
 
 

@@ -229,3 +229,81 @@ def test_two_nodes_connect_external_local(proj_path):
 
         assert node1.outs == node_a.outs + 1
         assert node2.outs == node_a.outs + 1
+
+
+@pytest.fixture
+def proj_with_deps(proj_path):
+    project = zntrack.Project()
+    with project:
+        x1 = zntrack.examples.AddNumbers(a=1, b=2)
+        x2 = zntrack.examples.AddNumbers(a=3, b=4)
+        a = zntrack.examples.AddNodeAttributes(a=x1.c, b=x2.c)
+    project.repro()
+    return project, x1, x2, a
+
+
+def test_from_rev_deps(proj_with_deps):
+    project, x1, x2, a = proj_with_deps
+
+    node: zntrack.examples.AddNodeAttributes = zntrack.from_rev(
+        a.name,
+    )
+
+    assert node.a == 3
+    assert node.b == 7
+    assert node.c == 10
+
+
+def test_from_rev_deps_remote(proj_with_deps):
+    project, x1, x2, a = proj_with_deps
+
+    # as soon as we pass remote/rev we need a commit
+    repo = git.Repo()
+    repo.git.add(all=True)
+    repo.index.commit("Test commit for from_rev")
+
+    node: zntrack.examples.AddNodeAttributes = zntrack.from_rev(
+        a.name,
+        remote=".",
+    )
+
+    assert node.a == 3
+    assert node.b == 7
+    assert node.c == 10
+
+
+def test_from_rev_deps_rev_HEAD(proj_with_deps):
+    project, x1, x2, a = proj_with_deps
+
+    # We create a git commit so that we have a valid HEAD to refer to
+    repo = git.Repo()
+    repo.git.add(all=True)
+    repo.index.commit("Test commit for from_rev")
+
+    node: zntrack.examples.AddNodeAttributes = zntrack.from_rev(
+        a.name,
+        rev="HEAD",
+    )
+
+    assert node.a == 3
+    assert node.b == 7
+    assert node.c == 10
+
+
+def test_from_rev_deps_rev_HEAD_remote(proj_with_deps):
+    project, x1, x2, a = proj_with_deps
+
+    # We create a git commit so that we have a valid HEAD to refer to
+    repo = git.Repo()
+    repo.git.add(all=True)
+    repo.index.commit("Test commit for from_rev")
+
+    node: zntrack.examples.AddNodeAttributes = zntrack.from_rev(
+        a.name,
+        rev="HEAD",
+        remote=".",
+    )
+
+    assert node.a == 3
+    assert node.b == 7
+    assert node.c == 10

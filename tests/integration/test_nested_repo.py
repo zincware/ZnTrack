@@ -1,7 +1,6 @@
 import os
 import pathlib
 
-import pytest
 from dvc.api import DVCFileSystem
 from git import Repo
 
@@ -55,13 +54,12 @@ def test_subrepo(proj_path):
     assert node_loaded.params == {"param1": 1, "param2": 2}
     assert node_loaded.outs == {"param1": 1, "param2": 2}
 
-    # now try loading the node using an absolute path
-    with pytest.raises(FileNotFoundError):
-        # DVCFileSystem struggles with absolute paths
-        node_loaded = zntrack.from_rev(
-            "subrepo/dvc.yaml:ParamsToOuts",
-            remote=proj_path.resolve().as_posix(),
-        )
+    node_loaded = zntrack.from_rev(
+        "subrepo/dvc.yaml:ParamsToOuts",
+        remote=proj_path.resolve().as_posix(),
+    )
+    assert node_loaded.params == {"param1": 3, "param2": 4}
+    assert node_loaded.outs == {"param1": 3, "param2": 4}
 
 
 def test_subrepo_external_node(proj_path):
@@ -115,20 +113,14 @@ class ExampleExternalNode:
         assert node.value.parameter == "Lorem Ipsum"
 
         # Test: External dependencies behavior with nested repos
-        # Remove the module from sys.modules to simulate it not being available
+        # Remove the module from sys.modules to check that it is being loaded correctly
         if "external_nodes" in sys.modules:
             del sys.modules["external_nodes"]
 
         # Load node - should raise error when external module is not available
         node = zntrack.from_rev("subrepo/dvc.yaml:OptionalDeps")
         # The value itself will be NOT_AVAILABLE, but accessing attributes should raise
-        assert node.value is zntrack.NOT_AVAILABLE
-
-        # Accessing attributes on NOT_AVAILABLE should raise helpful error
-        with pytest.raises(
-            ModuleNotFoundError, match="Cannot access attribute.*external dependency"
-        ):
-            _ = node.value.parameter
+        assert node.value.parameter == "Lorem Ipsum"
 
     finally:
         # Restore original sys.modules state to avoid affecting other tests
