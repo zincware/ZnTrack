@@ -36,6 +36,10 @@ def _metrics_save_func(self: "Node", name: str, suffix: str):
         raise TypeError(f"Error while saving {name} to {self.nwd / name}.json") from err
 
 
+@t.overload
+def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> t.Any: ...
+
+
 def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> t.Any:
     """Define output for a node.
 
@@ -70,6 +74,10 @@ def outs(*, cache: bool = True, independent: bool = False, **kwargs) -> t.Any:
         init=False,
         **kwargs,
     )
+
+
+@t.overload
+def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs) -> t.Any: ...
 
 
 def metrics(*, cache: bool | None = None, independent: bool = False, **kwargs) -> t.Any:

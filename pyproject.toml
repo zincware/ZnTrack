@@ -36,6 +36,7 @@ dev = [
     "ipykernel>=6.29.5",
     "mlflow>=2.20.0",
     "pre-commit>=4.1.0",
+    "pyright>=1.1.403",
     "pytest>=8.3.4",
     "pytest-benchmark[histogram]>=5.1.0",
     "pytest-cov>=6.0.0",
