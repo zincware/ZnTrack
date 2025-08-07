@@ -55,9 +55,10 @@ class TestFieldAnnotationsWithDefaults(zntrack.Node):
     # These should work fine (correct type matching)
     param_good_int: int = zntrack.params(42)
     param_good_str: str = zntrack.params("hello")
-    param_good_dict: dict = zntrack.params({})
+    param_good_tuple: str = zntrack.params(("word",))
 
     # Using default_factory
+    param_good_dict: dict = zntrack.params(default_factory=dict)
     param_factory: list = zntrack.params(default_factory=list)
 
     # Path fields with correct types
