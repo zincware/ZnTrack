@@ -4,17 +4,19 @@ import zntrack
 @dataclasses.dataclass
 class Langevin:
     """Langevin dynamics class"""
+    friction: float = 0.1
 
     def get_thermostat(self):
-        return "Langevin thermostat"
+        return f"Langevin thermostat '{self.friction}'"
 
 
 @dataclasses.dataclass
 class Berendsen:
     """Berendsen thermostat class"""
+    time: float = 0.5
 
     def get_thermostat(self):
-        return "Berendsen thermostat"
+        return f"Berendsen thermostat '{self.time}'"
     
 @dataclasses.dataclass
 class Thermostat:
@@ -37,4 +39,14 @@ def test_nested_dc_deps(proj_path):
         md = MD(thermostat=thermostat)
         
     project.repro()
-    assert md.from_rev().result == "Langevin thermostat"
+    assert md.from_rev().result == "Langevin thermostat '0.1'"
+
+    md.thermostat.method = Langevin(friction=0.2)
+    project.repro()
+    
+    assert md.from_rev().result == "Langevin thermostat '0.2'"
+
+    md.thermostat.method = Berendsen(time=1.0)
+    project.repro()
+    
+    assert md.from_rev().result == "Berendsen thermostat '1.0'"
