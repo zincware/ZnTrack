@@ -25,6 +25,9 @@ from .utils import module_handler
 
 def _reconstruct_nested_dataclasses(params: dict) -> dict:
     """Recursively reconstruct nested dataclasses from their dictionary representation."""
+    if not isinstance(params, dict):
+        return params
+
     reconstructed_params = {}
     for key, value in params.items():
         if key == "_cls":
@@ -32,13 +35,24 @@ def _reconstruct_nested_dataclasses(params: dict) -> dict:
         if isinstance(value, dict) and "_cls" in value:
             # This is a nested dataclass, reconstruct it
             cls_path = value["_cls"]
-            module_name, class_name = cls_path.rsplit(".", 1)
-            module = importlib.import_module(module_name)
-            nested_cls = getattr(module, class_name)
+            if not isinstance(cls_path, str) or "." not in cls_path:
+                raise ValueError(f"Invalid class path format: {cls_path}")
+            try:
+                module_name, class_name = cls_path.rsplit(".", 1)
+                module = importlib.import_module(module_name)
+                nested_cls = getattr(module, class_name)
+            except (ImportError, AttributeError, ValueError) as e:  
+                raise ImportError(f"Failed to import class {cls_path}: {e}") from e  
+
+            if not dataclasses.is_dataclass(nested_cls):
+                raise TypeError(f"Class {cls_path} is not a dataclass")  
 
             # Recursively process nested parameters
             nested_params = _reconstruct_nested_dataclasses(value)
-            reconstructed_params[key] = nested_cls(**nested_params)
+            try:
+                reconstructed_params[key] = nested_cls(**nested_params)
+            except TypeError as e:
+                raise TypeError(f"Failed to instantiate {cls_path}: {e}") from e  
         else:
             reconstructed_params[key] = value
     return reconstructed_params
