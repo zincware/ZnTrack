@@ -118,7 +118,7 @@ class TestTypeSafetyErrors(zntrack.Node):
         ("config1.yaml", "config2.yaml")
     )  # Should error: list not assignable to Path
     # using default factory with list
-    params_path_list_mismatch: Path = zntrack.params_path(
+    params_path_list_mismatch_lambda: Path = zntrack.params_path(
         default_factory=lambda: ["config1.yaml", "config2.yaml"]
     )  # Should error: list not assignable to Path
 
