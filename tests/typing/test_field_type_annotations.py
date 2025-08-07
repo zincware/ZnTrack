@@ -112,10 +112,10 @@ class TestTypeSafetyErrors(zntrack.Node):
 
     # List vs single type mismatches (should error when uncommented)
     outs_path_list_mismatch: str = zntrack.outs_path(
-        ["file1.txt", "file2.txt"]
+        ("file1.txt", "file2.txt")
     )  # Should error: list not assignable to str
     params_path_list_mismatch: Path = zntrack.params_path(
-        ["config1.yaml", "config2.yaml"]
+        ("config1.yaml", "config2.yaml")
     )  # Should error: list not assignable to Path
     # using default factory with list
     params_path_list_mismatch: Path = zntrack.params_path(
