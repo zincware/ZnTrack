@@ -70,19 +70,15 @@ def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
                 if params.get(name, {}).get(f.name) is not None:
                     if "_cls" in json.dumps(params[name][f.name]):
                         setattr(cls, f.name, zntrack.deps())
-                        log.debug(
-                            f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps() (via dataclass)"
-                        )
+                        log.debug(f"Auto-inferred field '{name}.{f.name}' set to 'deps'")
                     else:
                         setattr(cls, f.name, zntrack.params())
                         log.debug(
-                            f"Auto-inferred field '{name}.{f.name}' set to zntrack.params()"
+                            f"Auto-inferred field '{name}.{f.name}' set to 'params'"
                         )
                 else:
                     setattr(cls, f.name, zntrack.deps())
-                    log.debug(
-                        f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps()"
-                    )
+                    log.debug(f"Auto-inferred field '{name}.{f.name}' set to 'deps'")
 
                 # Ensure type annotation is preserved
                 cls.__annotations__[f.name] = f.type
@@ -233,9 +229,6 @@ class Node(znflow.Node, znfields.Base):
                     ]:
                         continue
                     value = getattr(self, field.name)
-                    print(
-                        f"Saving field {field.name}:{value} with type {field.metadata[FIELD_TYPE]}"
-                    )
                     if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
                         raise ValueError(
                             f"Field '{field.name}' is not set."
@@ -298,29 +291,6 @@ class Node(znflow.Node, znfields.Base):
 
         lazy_values = {}
         update_auto_inferred_fields(cls, path, name, lazy_values, _fs)
-        # auto_inferred_fields_exist = False
-        # for field in dataclasses.fields(cls):
-        #     # check if the field is in the init
-        #     if field.name in Node()._protected_ | {"always_changed", "nwd", "name"}:
-        #         continue
-        #     # now everything else is a field.
-        #     if field.init:
-        #         lazy_values[field.name] = ZNTRACK_LAZY_VALUE
-        #         if field.metadata.get(FIELD_TYPE, None) is None:
-        #             auto_inferred_fields_exist = True
-        #             # auto-inferred fields, need to assign a getter and overwrite the field
-        #             import zntrack
-        #             with _fs.open(path / "params.yaml") as f:
-        #                 params = yaml.safe_load(f)
-        #             if params.get(name, {}).get(field.name, None) is not None:
-        #                 setattr(cls, field.name, zntrack.params())
-        #                 print(f"Auto-inferred field '{name}.{field.name}' set to zntrack.params()")
-        #             else:
-        #                 setattr(cls, field.name, zntrack.deps())
-        #                 print(f"Auto-inferred field '{name}.{field.name}' set to zntrack.deps()")
-        #             cls.__annotations__[field.name] = field.type
-        # if auto_inferred_fields_exist:
-        #     cls = dataclasses.dataclass(cls, kw_only=True) # if there are any
 
         lazy_values["name"] = name
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml

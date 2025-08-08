@@ -34,14 +34,15 @@ def test_auto_fields_inference(proj_path):
     with project:
         n1 = zntrack.examples.ParamsToOuts(params=16)
     with project.group("int"):
-        t1 = NodeWithAutoFields(value=10)
-        t2 = NodeWithAutoFields(value=n1.outs)
-        t3 = NodeWithAutoFields(value=dc)  # type: ignore
+        _ = NodeWithAutoFields(value=10)
+        _ = NodeWithAutoFields(value=n1.outs)
+        _ = NodeWithAutoFields(value=dc)  # type: ignore
     with project.group("list"):
-        t4 = NodeWithAutoFieldsList(value=[1, 2, 3])
-        t5 = NodeWithAutoFieldsList(value=[n1.outs])
-        t6 = NodeWithAutoFieldsList(value=[dc])
-    # with project.group("list-mixed"):  # these are currently not supported and should raise errors
+        _ = NodeWithAutoFieldsList(value=[1, 2, 3])
+        _ = NodeWithAutoFieldsList(value=[n1.outs])
+        _ = NodeWithAutoFieldsList(value=[dc])
+    # with project.group("list-mixed"):
+    # these are currently not supported and should raise errors
     #     t7 = NodeWithAutoFieldsList(value=[1, 2, 3, n1.outs])
     #     t8 = NodeWithAutoFieldsList(value=[dc, 4, 5])
     #     t9 = NodeWithAutoFieldsList(value=[n1.outs, dc])
