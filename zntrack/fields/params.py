@@ -22,6 +22,10 @@ def _params_getter(self: "Node", name: str):
 
 # Overloads for type checking
 @t.overload
+def params() -> t.Any: ...
+
+
+@t.overload
 def params(default: _T, **kwargs) -> _T: ...
 
 

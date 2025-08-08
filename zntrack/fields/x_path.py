@@ -26,8 +26,15 @@ from zntrack.utils.misc import TempPathLoader
 from zntrack.utils.node_wd import NWDReplaceHandler
 
 FIELD_PATH_TYPE = t.Union[
-    str, Path, t.List[t.Union[str, Path]], dataclasses._MISSING_TYPE
+    str,
+    Path,
+    t.List[t.Union[str, Path]],
+    t.Tuple[t.Union[str, Path], ...],
+    dataclasses._MISSING_TYPE,
 ]
+
+# Type variable for better path type inference
+_PathT = t.TypeVar("_PathT", str, Path, t.List[t.Union[str, Path]])
 
 
 def _paths_getter(self: Node, name: str):
@@ -57,6 +64,110 @@ def _paths_getter(self: Node, name: str):
             return content
     except FileNotFoundError:
         return NOT_AVAILABLE
+
+
+@t.overload
+def outs_path() -> t.Any: ...
+
+
+@t.overload
+def outs_path(
+    default: str,
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> str: ...
+
+
+@t.overload
+def outs_path(
+    default: Path,
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> Path: ...
+
+
+@t.overload
+def outs_path(
+    default: t.List[t.Union[str, Path]],
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> t.List[t.Union[str, Path]]: ...
+
+
+@t.overload
+def outs_path(
+    default: t.Tuple[Path, ...],
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> t.Tuple[Path, ...]: ...
+
+
+@t.overload
+def outs_path(
+    default: t.Tuple[str, ...],
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> t.Tuple[str, ...]: ...
+
+
+@t.overload
+def outs_path(
+    *,
+    default_factory: t.Callable[[], str],
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> str: ...
+
+
+@t.overload
+def outs_path(
+    *,
+    default_factory: t.Callable[[], Path],
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> Path: ...
+
+
+@t.overload
+def outs_path(
+    *,
+    default_factory: t.Callable[[], t.List[t.Union[str, Path]]],
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> t.List[t.Union[str, Path]]: ...
+
+
+@t.overload
+def outs_path(
+    *,
+    default_factory: t.Callable[[], t.Tuple[t.Union[str, Path], ...]],
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> t.Tuple[t.Union[str, Path], ...]: ...
+
+
+@t.overload
+def outs_path(
+    default: FIELD_PATH_TYPE = dataclasses.MISSING,
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> t.Any: ...
 
 
 def outs_path(
@@ -95,6 +206,56 @@ def outs_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
+@t.overload
+def params_path() -> t.Any: ...
+
+
+@t.overload
+def params_path(default: str, **kwargs) -> str: ...
+
+
+@t.overload
+def params_path(default: Path, **kwargs) -> Path: ...
+
+
+@t.overload
+def params_path(
+    default: t.List[t.Union[str, Path]], **kwargs
+) -> t.List[t.Union[str, Path]]: ...
+
+
+@t.overload
+def params_path(default: t.Tuple[Path, ...], **kwargs) -> t.Tuple[Path, ...]: ...
+
+
+@t.overload
+def params_path(default: t.Tuple[str, ...], **kwargs) -> t.Tuple[str, ...]: ...
+
+
+@t.overload
+def params_path(*, default_factory: t.Callable[[], str], **kwargs) -> str: ...
+
+
+@t.overload
+def params_path(*, default_factory: t.Callable[[], Path], **kwargs) -> Path: ...
+
+
+@t.overload
+def params_path(
+    *, default_factory: t.Callable[[], t.List[t.Union[str, Path]]], **kwargs
+) -> t.List[t.Union[str, Path]]: ...
+
+
+@t.overload
+def params_path(
+    *, default_factory: t.Callable[[], t.Tuple[t.Union[str, Path], ...]], **kwargs
+) -> t.Tuple[t.Union[str, Path], ...]: ...
+
+
+@t.overload
+def params_path(default: FIELD_PATH_TYPE = dataclasses.MISSING, **kwargs) -> t.Any: ...
+
+
 def params_path(default: FIELD_PATH_TYPE = dataclasses.MISSING, **kwargs) -> t.Any:
     """Define input parameter file path(s).
 
@@ -124,6 +285,30 @@ def params_path(default: FIELD_PATH_TYPE = dataclasses.MISSING, **kwargs) -> t.A
     kwargs["metadata"][ZNTRACK_CACHE] = True  # TODO: remove?
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
+
+
+@t.overload
+def plots_path() -> t.Any: ...
+
+
+@t.overload
+def plots_path(
+    default: _PathT,
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> _PathT: ...
+
+
+@t.overload
+def plots_path(
+    default: FIELD_PATH_TYPE = dataclasses.MISSING,
+    *,
+    cache: bool = True,
+    independent: bool = False,
+    **kwargs,
+) -> t.Any: ...
 
 
 def plots_path(
@@ -168,6 +353,30 @@ def plots_path(
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
 
 
+@t.overload
+def metrics_path() -> t.Any: ...
+
+
+@t.overload
+def metrics_path(
+    default: _PathT,
+    *,
+    cache: bool | None = None,
+    independent: bool = False,
+    **kwargs,
+) -> _PathT: ...
+
+
+@t.overload
+def metrics_path(
+    default: FIELD_PATH_TYPE = dataclasses.MISSING,
+    *,
+    cache: bool | None = None,
+    independent: bool = False,
+    **kwargs,
+) -> t.Any: ...
+
+
 def metrics_path(
     default: FIELD_PATH_TYPE = dataclasses.MISSING,
     *,
@@ -205,6 +414,20 @@ def metrics_path(
     kwargs["metadata"][ZNTRACK_INDEPENDENT_OUTPUT_TYPE] = independent
     kwargs["metadata"][ZNTRACK_FIELD_LOAD] = _paths_getter
     return znfields.field(default=default, getter=plugin_getter, **kwargs)
+
+
+@t.overload
+def deps_path() -> t.Any: ...
+
+
+@t.overload
+def deps_path(default: _PathT, *, cache: bool = True, **kwargs) -> _PathT: ...
+
+
+@t.overload
+def deps_path(
+    default: FIELD_PATH_TYPE = dataclasses.MISSING, *, cache: bool = True, **kwargs
+) -> t.Any: ...
 
 
 def deps_path(

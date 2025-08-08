@@ -12,6 +12,8 @@ from zntrack.fields.base import field
 from zntrack.node import Node
 from zntrack.utils.filesystem import resolve_state_file_path
 
+_T = t.TypeVar("_T")
+
 
 def _deps_getter(self: "Node", name: str):
     zntrack_path = resolve_state_file_path(
@@ -82,6 +84,14 @@ def _deps_getter(self: "Node", name: str):
 
         content = znflow.handler.UpdateConnectors()(content)
         return content
+
+
+@t.overload
+def deps() -> t.Any: ...
+
+
+@t.overload
+def deps(default: _T, **kwargs) -> _T: ...
 
 
 def deps(default=dataclasses.MISSING, **kwargs) -> t.Any:
