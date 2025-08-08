@@ -1,5 +1,7 @@
-import zntrack
 import dataclasses
+
+import zntrack
+
 
 @dataclasses.dataclass
 class DCWithFn:
@@ -8,8 +10,10 @@ class DCWithFn:
     def get_number(self) -> int:
         return self.value
 
+
 class NodeWithFn(zntrack.Node):
     """A node that uses auto-inferred fields with a function"""
+
     value: int
 
     def run(self):
@@ -18,13 +22,16 @@ class NodeWithFn(zntrack.Node):
     def get_number(self) -> int:
         return self.value
 
+
 class NodeUsingFn(zntrack.Node):
     """A node that uses another node's function"""
+
     fn: NodeWithFn | DCWithFn
     result: int = zntrack.outs()
 
     def run(self):
         self.result = self.fn.get_number()
+
 
 def test_auto_fields_with_function(proj_path):
     project = zntrack.Project()
@@ -35,7 +42,7 @@ def test_auto_fields_with_function(proj_path):
     with project.group("function"):
         t1 = NodeUsingFn(fn=n1)
         t2 = NodeUsingFn(fn=dc)
-    
+
     project.repro()
 
     assert zntrack.from_rev(t1.name).result == 10

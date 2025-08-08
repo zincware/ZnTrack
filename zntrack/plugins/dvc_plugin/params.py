@@ -47,7 +47,6 @@ def _dataclass_to_dict(object) -> dict:
     return dc_params
 
 
-
 def deps_to_params(self, field):
     if getattr(self.node, field.name) is None:
         return None

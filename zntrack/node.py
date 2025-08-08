@@ -7,18 +7,15 @@ import pathlib
 import typing as t
 import uuid
 import warnings
-import yaml
+
 import dvc.api
 import typing_extensions as ty_ex
+import yaml
 import znfields
 import znflow
 from dvc.stage.exceptions import InvalidStageName
 from dvc.stage.utils import is_valid_name
 from fsspec.implementations.local import LocalFileSystem
-
-from zntrack.group import Group
-from zntrack.state import NodeStatus
-from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
 from zntrack.config import (
     FIELD_TYPE,
@@ -28,6 +25,9 @@ from zntrack.config import (
     FieldTypes,
     NodeStatusEnum,
 )
+from zntrack.group import Group
+from zntrack.state import NodeStatus
+from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
 try:
     from typing import dataclass_transform
@@ -39,9 +39,8 @@ T = t.TypeVar("T", bound="Node")
 log = logging.getLogger(__name__)
 
 
-import dataclasses
-import yaml
 import zntrack
+
 
 def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
     """
@@ -73,13 +72,19 @@ def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
                 if params.get(name, {}).get(f.name) is not None:
                     if "_cls" in json.dumps(params[name][f.name]):
                         setattr(cls, f.name, zntrack.deps())
-                        log.debug(f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps() (via dataclass)")
+                        log.debug(
+                            f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps() (via dataclass)"
+                        )
                     else:
                         setattr(cls, f.name, zntrack.params())
-                        log.debug(f"Auto-inferred field '{name}.{f.name}' set to zntrack.params()")
+                        log.debug(
+                            f"Auto-inferred field '{name}.{f.name}' set to zntrack.params()"
+                        )
                 else:
                     setattr(cls, f.name, zntrack.deps())
-                    log.debug(f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps()")
+                    log.debug(
+                        f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps()"
+                    )
 
                 # Ensure type annotation is preserved
                 cls.__annotations__[f.name] = f.type
@@ -235,7 +240,9 @@ class Node(znflow.Node, znfields.Base):
                     ]:
                         continue
                     value = getattr(self, field.name)
-                    print(f"Saving field {field.name}:{value} with type {field.metadata[FIELD_TYPE]}")
+                    print(
+                        f"Saving field {field.name}:{value} with type {field.metadata[FIELD_TYPE]}"
+                    )
                     if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
                         raise ValueError(
                             f"Field '{field.name}' is not set."
@@ -297,9 +304,7 @@ class Node(znflow.Node, znfields.Base):
             nwd = NWD_PATH / name
 
         lazy_values = {}
-        update_auto_inferred_fields(
-            cls, path, name, lazy_values, _fs
-        )
+        update_auto_inferred_fields(cls, path, name, lazy_values, _fs)
         # auto_inferred_fields_exist = False
         # for field in dataclasses.fields(cls):
         #     # check if the field is in the init
@@ -322,7 +327,7 @@ class Node(znflow.Node, znfields.Base):
         #                 print(f"Auto-inferred field '{name}.{field.name}' set to zntrack.deps()")
         #             cls.__annotations__[field.name] = field.type
         # if auto_inferred_fields_exist:
-        #     cls = dataclasses.dataclass(cls, kw_only=True) # if there are any 
+        #     cls = dataclasses.dataclass(cls, kw_only=True) # if there are any
 
         lazy_values["name"] = name
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
