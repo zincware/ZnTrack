@@ -61,23 +61,21 @@ class DVCPlugin(ZnTrackPlugin):
     def convert_to_params_yaml(self) -> dict | object:
         from zntrack.fields.auto import infer_field_type, is_auto_inferred_field
         import dataclasses
+
         
         data = {}
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
+            field_type = field.metadata.get(FIELD_TYPE)
+            # Handle auto-inferred fields
+            if is_auto_inferred_field(self.node.__class__, field.name):
+                value = getattr(self.node, field.name)
+                field_type = infer_field_type(value)
+
+            if field_type == FieldTypes.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
+            elif field_type == FieldTypes.DEPS:
                 if (value := deps_to_params(self, field)) is not None:
                     data[field.name] = value
-            elif is_auto_inferred_field(self.node.__class__, field.name):
-                # Auto-inferred field - check the actual value to determine type
-                value = getattr(self.node, field.name)
-                if infer_field_type(value) == FieldTypes.PARAMS:
-                    from zntrack.plugins.dvc_plugin.params import (
-                        auto_inferred_to_params,
-                    )
-
-                    data[field.name] = auto_inferred_to_params(value)
 
         if len(data) > 0:
             return data

@@ -38,6 +38,13 @@
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/int/NodeWithAutoFields_2"
+        },
+        "value": {
+            "_type": "@dataclasses.dataclass",
+            "value": {
+                "module": "test_auto_fields",
+                "cls": "SomeDataClass"
+            }
         }
     },
     "list_NodeWithAutoFieldsList": {
@@ -75,6 +82,15 @@
         "nwd": {
             "_type": "pathlib.Path",
             "value": "nodes/list/NodeWithAutoFieldsList_2"
-        }
+        },
+        "value": [
+            {
+                "_type": "@dataclasses.dataclass",
+                "value": {
+                    "module": "test_auto_fields",
+                    "cls": "SomeDataClass"
+                }
+            }
+        ]
     }
 }

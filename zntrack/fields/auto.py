@@ -18,19 +18,16 @@ def infer_field_type(value) -> FieldTypes:
     if isinstance(value, (znflow.Connection, znflow.CombinedConnections)):
         return FieldTypes.DEPS
     
-    # Check if it's a zntrack Node instance
-    if isinstance(value, Node):
+    # Check if its a dataclass / zntrack.Node
+    if dataclasses.is_dataclass(value):
         return FieldTypes.DEPS
-    
-    # Check if it's a dataclass (but not a Node) - treat as PARAMS for serialization
-    # Dataclasses can be serialized to params.yaml with special _cls metadata
-    if dataclasses.is_dataclass(value) and not isinstance(value, Node):
-        return FieldTypes.PARAMS
     
     # Check if it's a list/collection containing nodes or connections
     if isinstance(value, (list, tuple)):
         for item in value:
-            if isinstance(item, (znflow.Connection, znflow.CombinedConnections, Node)):
+            if isinstance(item, (znflow.Connection, znflow.CombinedConnections)):
+                return FieldTypes.DEPS
+            if dataclasses.is_dataclass(item):
                 return FieldTypes.DEPS
         # If list contains only dataclasses and/or primitives, treat as PARAMS
         # (dataclasses can be serialized to params.yaml)

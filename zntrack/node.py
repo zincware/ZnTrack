@@ -71,11 +71,15 @@ def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
                 auto_inferred_fields_exist = True
 
                 if params.get(name, {}).get(f.name) is not None:
-                    setattr(cls, f.name, zntrack.params())
-                    print(f"Auto-inferred field '{name}.{f.name}' set to zntrack.params()")
+                    if "_cls" in json.dumps(params[name][f.name]):
+                        setattr(cls, f.name, zntrack.deps())
+                        log.debug(f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps() (via dataclass)")
+                    else:
+                        setattr(cls, f.name, zntrack.params())
+                        log.debug(f"Auto-inferred field '{name}.{f.name}' set to zntrack.params()")
                 else:
                     setattr(cls, f.name, zntrack.deps())
-                    print(f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps()")
+                    log.debug(f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps()")
 
                 # Ensure type annotation is preserved
                 cls.__annotations__[f.name] = f.type
