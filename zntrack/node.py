@@ -47,6 +47,20 @@ def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
     """
     import zntrack
 
+    needs_update = any(
+        f.init
+        and f.metadata.get(FIELD_TYPE) is None
+        and f.name not in Node()._protected_ | {"always_changed", "nwd", "name"}
+        for f in dataclasses.fields(cls)
+    )
+
+    if not needs_update:
+        for f in dataclasses.fields(cls):
+            # lazy values need to be set
+            if f.init and f.name not in Node()._protected_ | {"always_changed", "nwd", "name"}:
+                lazy_values[f.name] = ZNTRACK_LAZY_VALUE
+        return cls
+
     auto_inferred_fields_exist = False
     original_fields = {f.name: f for f in dataclasses.fields(cls)}
 
