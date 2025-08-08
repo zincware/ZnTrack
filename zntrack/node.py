@@ -50,8 +50,11 @@ def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
     auto_inferred_fields_exist = False
     original_fields = {f.name: f for f in dataclasses.fields(cls)}
 
-    with _fs.open(path / "params.yaml") as stream:
-        params = yaml.safe_load(stream) or {}
+    try:
+        with _fs.open(path / "params.yaml") as stream:
+            params = yaml.safe_load(stream) or {}
+    except FileNotFoundError:
+        params = {}
 
     for f in dataclasses.fields(cls):
         # Skip protected fields
