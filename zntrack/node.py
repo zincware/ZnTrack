@@ -191,7 +191,12 @@ class Node(znflow.Node, znfields.Base):
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
     def __post_init__(self):
-        self._protected_ = set(self._protected_) | {"nwd", "name", "state", "always_changed"}
+        self._protected_ = set(self._protected_) | {
+            "nwd",
+            "name",
+            "state",
+            "always_changed",
+        }
         if self.name is None:
             # automatic node names expects the name to be None when
             # exiting the graph context.

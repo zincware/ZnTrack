@@ -59,8 +59,9 @@ def test_mixed_auto_fields(proj_path):
     project = zntrack.Project()
     dc = DCWithFn(value=42)
     with project:
-        t1 = NodeUsingFn(fn=[1, dc])  # type: ignore
+        _ = NodeUsingFn(fn=[1, dc])  # type: ignore
         # needs to raise an error, because can't be both params and deps
     with pytest.raises(ValueError):
-        #  ValueError: Found unsupported type '<class 'int'>' (1) for DEPS field 'fn' in list
+        #  ValueError: Found unsupported
+        # type '<class 'int'>' (1) for DEPS field 'fn' in list
         project.build()
