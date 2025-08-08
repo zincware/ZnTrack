@@ -39,15 +39,13 @@ T = t.TypeVar("T", bound="Node")
 log = logging.getLogger(__name__)
 
 
-import zntrack
-
-
 def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
     """
     Replace auto-inferred fields with zntrack.params/zntrack.deps
     while preserving original metadata for all other fields,
     including fields with init=False.
     """
+    import zntrack
 
     auto_inferred_fields_exist = False
     original_fields = {f.name: f for f in dataclasses.fields(cls)}
@@ -196,13 +194,8 @@ class Node(znflow.Node, znfields.Base):
     )
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
-    _protected_: set = dataclasses.field(
-        default_factory=lambda: set(znflow.Node._protected_) | {"nwd", "name", "state"},
-        init=False,
-        repr=False,
-    )
-
     def __post_init__(self):
+        self._protected_ = set(self._protected_) | {"nwd", "name", "state"}
         if self.name is None:
             # automatic node names expects the name to be None when
             # exiting the graph context.
