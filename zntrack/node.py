@@ -7,7 +7,7 @@ import pathlib
 import typing as t
 import uuid
 import warnings
-
+import yaml
 import dvc.api
 import typing_extensions as ty_ex
 import znfields
@@ -20,7 +20,7 @@ from zntrack.group import Group
 from zntrack.state import NodeStatus
 from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
-from .config import (
+from zntrack.config import (
     FIELD_TYPE,
     NOT_AVAILABLE,
     NWD_PATH,
@@ -37,6 +37,57 @@ except ImportError:
 T = t.TypeVar("T", bound="Node")
 
 log = logging.getLogger(__name__)
+
+
+import dataclasses
+import yaml
+import zntrack
+
+def update_auto_inferred_fields(cls, path, name, lazy_values, _fs):
+    """
+    Replace auto-inferred fields with zntrack.params/zntrack.deps
+    while preserving original metadata for all other fields,
+    including fields with init=False.
+    """
+
+    auto_inferred_fields_exist = False
+    original_fields = {f.name: f for f in dataclasses.fields(cls)}
+
+    with _fs.open(path / "params.yaml") as stream:
+        params = yaml.safe_load(stream) or {}
+
+    for f in dataclasses.fields(cls):
+        # Skip protected fields
+        if f.name in Node()._protected_ | {"always_changed", "nwd", "name"}:
+            # Still reattach the original field to preserve metadata
+            setattr(cls, f.name, original_fields[f.name])
+            cls.__annotations__[f.name] = f.type
+            continue
+
+        if f.init:
+            lazy_values[f.name] = ZNTRACK_LAZY_VALUE
+
+            if f.metadata.get(FIELD_TYPE) is None:
+                auto_inferred_fields_exist = True
+
+                if params.get(name, {}).get(f.name) is not None:
+                    setattr(cls, f.name, zntrack.params())
+                    print(f"Auto-inferred field '{name}.{f.name}' set to zntrack.params()")
+                else:
+                    setattr(cls, f.name, zntrack.deps())
+                    print(f"Auto-inferred field '{name}.{f.name}' set to zntrack.deps()")
+
+                # Ensure type annotation is preserved
+                cls.__annotations__[f.name] = f.type
+                continue  # skip reattaching original field
+        # For all other cases (including init=False fields), reattach the original
+        setattr(cls, f.name, original_fields[f.name])
+        cls.__annotations__[f.name] = f.type
+
+    if auto_inferred_fields_exist:
+        cls = dataclasses.dataclass(cls, kw_only=True)
+
+    return cls
 
 
 def _name_setter(self, attr_name: str, value: str) -> None:
@@ -172,7 +223,15 @@ class Node(znflow.Node, znfields.Base):
         for plugin in self.state.plugins.values():
             with plugin:
                 for field in dataclasses.fields(self):
+                    if field.metadata.get(FIELD_TYPE, None) is None:
+                        continue
+                    if field.metadata[FIELD_TYPE] in [
+                        FieldTypes.PARAMS,
+                        FieldTypes.DEPS,
+                    ]:
+                        continue
                     value = getattr(self, field.name)
+                    print(f"Saving field {field.name}:{value} with type {field.metadata[FIELD_TYPE]}")
                     if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
                         raise ValueError(
                             f"Field '{field.name}' is not set."
@@ -217,11 +276,49 @@ class Node(znflow.Node, znfields.Base):
             path = pathlib.Path(path)
         else:
             path = pathlib.Path()
+
+        if fs is None:
+            if remote is not None or rev is not None:
+                _fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            else:
+                _fs = LocalFileSystem()
+        else:
+            _fs = fs
+        try:
+            with _fs.open(path / "zntrack.json") as f:
+                conf = json.load(f)
+                nwd = pathlib.Path(conf[name]["nwd"]["value"])
+        except FileNotFoundError:
+            # from_rev is called before a graph is built
+            nwd = NWD_PATH / name
+
         lazy_values = {}
-        for field in dataclasses.fields(cls):
-            # check if the field is in the init
-            if field.init:
-                lazy_values[field.name] = ZNTRACK_LAZY_VALUE
+        update_auto_inferred_fields(
+            cls, path, name, lazy_values, _fs
+        )
+        # auto_inferred_fields_exist = False
+        # for field in dataclasses.fields(cls):
+        #     # check if the field is in the init
+        #     if field.name in Node()._protected_ | {"always_changed", "nwd", "name"}:
+        #         continue
+        #     # now everything else is a field.
+        #     if field.init:
+        #         lazy_values[field.name] = ZNTRACK_LAZY_VALUE
+        #         if field.metadata.get(FIELD_TYPE, None) is None:
+        #             auto_inferred_fields_exist = True
+        #             # auto-inferred fields, need to assign a getter and overwrite the field
+        #             import zntrack
+        #             with _fs.open(path / "params.yaml") as f:
+        #                 params = yaml.safe_load(f)
+        #             if params.get(name, {}).get(field.name, None) is not None:
+        #                 setattr(cls, field.name, zntrack.params())
+        #                 print(f"Auto-inferred field '{name}.{field.name}' set to zntrack.params()")
+        #             else:
+        #                 setattr(cls, field.name, zntrack.deps())
+        #                 print(f"Auto-inferred field '{name}.{field.name}' set to zntrack.deps()")
+        #             cls.__annotations__[field.name] = field.type
+        # if auto_inferred_fields_exist:
+        #     cls = dataclasses.dataclass(cls, kw_only=True) # if there are any 
 
         lazy_values["name"] = name
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
@@ -230,22 +327,6 @@ class Node(znflow.Node, znfields.Base):
                 "ignore", message=".*should not contain '_'*", category=UserWarning
             )
             instance = cls(**lazy_values)
-        if remote is not None or rev is not None:
-            if fs is None:
-                _fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
-            else:
-                _fs = fs
-            with _fs.open(path / "zntrack.json") as f:
-                conf = json.loads(f.read())
-                nwd = pathlib.Path(conf[name]["nwd"]["value"])
-        else:
-            try:
-                with open(path / "zntrack.json") as f:
-                    conf = json.load(f)
-                    nwd = pathlib.Path(conf[name]["nwd"]["value"])
-            except FileNotFoundError:
-                # from_rev is called before a graph is built
-                nwd = NWD_PATH / name
         instance.__dict__["nwd"] = nwd
 
         # TODO: check if the node is finished or not.
