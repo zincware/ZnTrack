@@ -21,7 +21,7 @@ def test_AddNodes(proj_path, eager):
         project.repro()
 
     assert add_numbers_a.c == 3
-    # TODO: Node status is not beind updated when not using from_rev
+    # TODO: Node status is not being updated when not using from_rev
     if eager:
         assert add_numbers_a.state.state == NodeStatusEnum.FINISHED
     assert add_numbers_b.c == 4

@@ -19,7 +19,7 @@ class MyNode(zntrack.Node):
 
 def test_node(proj_path):
     with zntrack.Project() as proj:
-        node = MyNode(name="some-node", always_changed=True)
+        MyNode(name="some-node", always_changed=True)
 
     proj.repro()
 

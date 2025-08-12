@@ -8,7 +8,7 @@ import znflow.utils
 from zntrack.add import DVCImportPath
 from zntrack.utils.import_handler import import_handler
 
-from ..config import ENV_FILE_PATH
+from ..config import ENV_FILE_PATH, NWD_PATH
 
 
 class RunDVCImportPathHandler(znflow.utils.IterableHandler):
@@ -116,22 +116,34 @@ def sort_and_deduplicate(data: list[str | dict[str, dict]]):
         if key not in new_data:
             if isinstance(key, dict):
                 if next(iter(key.keys())) in new_data:
-                    raise ValueError(
-                        f"Duplicate key with different parameters found: {key}"
-                    )
+                    raise ValueError(f"Found Duplicate key with different params: {key}")
                 for other_key in new_data:
                     if isinstance(other_key, dict):
                         if next(iter(other_key.keys())) == next(iter(key.keys())):
                             if other_key != key:
                                 raise ValueError(
-                                    f"Duplicate key with different parameters found: {key}"
+                                    f"Found Duplicate key with different params: {key}"
                                 )
             if isinstance(key, str):
                 for other_key in new_data:
                     if isinstance(other_key, dict) and key in other_key.keys():
                         raise ValueError(
-                            f"Duplicate key with different parameters found: {key}"
+                            f"Found Duplicate key with different params: {key}"
                         )
             new_data.append(key)
 
     return new_data
+
+
+def nwd_to_name(nwd: pathlib.Path) -> str:
+    # Convert both paths to lists of parts
+    nwd_parts = nwd.parts
+    base_parts = NWD_PATH.parts
+
+    # Remove the common prefix (base path) from nwd_parts
+    if nwd_parts[: len(base_parts)] == base_parts:
+        rel_parts = nwd_parts[len(base_parts) :]
+    else:
+        raise ValueError(f"{nwd} does not start with {NWD_PATH}")
+
+    return "_".join(rel_parts)

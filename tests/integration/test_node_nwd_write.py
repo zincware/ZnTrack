@@ -5,7 +5,8 @@ import pytest
 
 import zntrack
 
-# TODO UNCLEAR ERROR, __file__ atribute is not the same as the test file we want to collect
+# TODO UNCLEAR ERROR, __file__ attribute is not the
+#  same as the test file we want to collect
 
 
 class WriteToNWD(zntrack.Node):
@@ -19,7 +20,7 @@ class WriteToNWD(zntrack.Node):
 
 class FileToOuts(zntrack.Node):
     # although, this is a file path, it has to be zn.deps
-    file: tuple[pathlib.Path] = zntrack.deps()
+    file: tuple[pathlib.Path] = zntrack.deps_path()
     text: str = zntrack.outs()
 
     def run(self):

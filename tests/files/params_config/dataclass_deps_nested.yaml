@@ -1,0 +1,7 @@
+MD:
+  thermostat:
+    _cls: test_dataclass_deps_nested.Thermostat
+    method:
+      _cls: test_dataclass_deps_nested.Langevin
+      friction: 0.1
+    temperature: 300

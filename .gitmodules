@@ -1,3 +1,9 @@
 [submodule "zntrack-examples"]
 	path = zntrack-examples
 	url = https://github.com/PythonFZ/zntrack-examples.git
+[submodule "docs/source/examples/pack_box"]
+	path = docs/source/examples/pack_box
+	url = https://github.com/PythonFZ/zntrack-examples.git
+[submodule "docs/source/examples/classifier_comparison"]
+	path = docs/source/examples/classifier_comparison
+	url = https://github.com/PythonFZ/zntrack-examples.git

@@ -1,6 +1,8 @@
+import typing as t
+
 import pandas as pd
 
-from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, ZnTrackOptionEnum
+from zntrack.config import NOT_AVAILABLE, ZNTRACK_OPTION_PLOTS_CONFIG, FieldTypes
 from zntrack.fields.base import field
 from zntrack.node import Node
 
@@ -22,6 +24,22 @@ def _plots_autosave_setter(self: Node, name: str, value: pd.DataFrame):
 def _plots_getter(self: "Node", name: str, suffix: str):
     with self.state.fs.open((self.nwd / name).with_suffix(suffix)) as f:
         return pd.read_csv(f, index_col=0)
+
+
+@t.overload
+def plots(
+    *,
+    y: str | list[str] | None = None,
+    cache: bool = True,
+    independent: bool = False,
+    x: str = "step",
+    x_label: str | None = None,
+    y_label: str | None = None,
+    template: str | None = None,
+    title: str | None = None,
+    autosave: bool = False,
+    **kwargs,
+) -> t.Any: ...
 
 
 def plots(
@@ -65,6 +83,16 @@ def plots(
         Save the data of this field every time it is being
         updated. Disable for large dataframes.
 
+    Examples
+    --------
+
+    >>> import zntrack
+    >>> import pandas as pd
+    >>> class MyNode(zntrack.Node):
+    ...     plots: pd.DataFrame = zntrack.plots(y="loss")
+    ...
+    ...     def run(self):
+    ...         self.plots = pd.DataFrame({"loss": [1, 2, 3]})
     """
     if y is None:
         y = []
@@ -91,7 +119,7 @@ def plots(
         default=NOT_AVAILABLE,
         cache=cache,
         independent=independent,
-        zntrack_option=ZnTrackOptionEnum.PLOTS,
+        field_type=FieldTypes.PLOTS,
         dump_fn=_plots_save_func,
         suffix=".csv",
         load_fn=_plots_getter,

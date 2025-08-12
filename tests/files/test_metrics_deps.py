@@ -14,8 +14,8 @@ def test_metrics_as_deps(proj_path):
     with project:
         metrics_node = zntrack.examples.ParamsToMetrics(params={"loss": 0.01})
 
-        metrics_deps = zntrack.examples.DepsToMetrics(deps=metrics_node.metrics)
-        params_deps = zntrack.examples.DepsToMetrics(deps=metrics_node.params)
+        zntrack.examples.DepsToMetrics(deps=metrics_node.metrics)
+        zntrack.examples.DepsToMetrics(deps=metrics_node.params)
 
     project.build()
 

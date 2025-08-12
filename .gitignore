@@ -168,3 +168,5 @@ dvc.yaml
 .dvc
 nodes/
 .vscode/
+junit.xml
+.DS_Store

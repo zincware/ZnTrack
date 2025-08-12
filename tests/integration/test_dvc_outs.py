@@ -40,7 +40,7 @@ class AssertTempPath(zntrack.Node):
 def test_run_temp_path(proj_path):
     project = zntrack.Project()
     with project:
-        node = AssertTempPath()
+        AssertTempPath()
     project.repro()
 
 

@@ -13,6 +13,6 @@ stages:
     cmd: zntrack run test_plots.Plotting --name Plotting
     metrics:
     - nodes/Plotting/node-meta.json:
-        cache: false
+        cache: true
     outs:
     - nodes/Plotting/a.csv
