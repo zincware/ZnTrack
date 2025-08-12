@@ -10,8 +10,6 @@ import logging
 from collections import defaultdict
 
 log = logging.getLogger(__name__)
-
-
 def get_registered_nodes(group: str = "zntrack.nodes") -> dict[str, list[str]]:
     """Get all packages that registered into [project.entry-points.'zntrack.nodes']."""
     registered_nodes = defaultdict(list)
@@ -29,6 +27,7 @@ def get_registered_nodes(group: str = "zntrack.nodes") -> dict[str, list[str]]:
                 nodes_dict = nodes_func()
 
                 for module_name, node_names in nodes_dict.items():
+                    module_name = module_name.replace("-", "_")  # Normalize module names
                     registered_nodes[module_name].extend(node_names)
 
             except Exception as e:
