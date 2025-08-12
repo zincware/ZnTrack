@@ -3,10 +3,9 @@
 import dataclasses
 import importlib.metadata
 import inspect
-import sys
 from collections import defaultdict
 from pathlib import Path
-from typing import Protocol, get_type_hints
+from typing import get_type_hints
 
 from fastmcp import FastMCP
 
@@ -15,11 +14,13 @@ from zntrack.entrypoints import get_registered_nodes
 
 mcp = FastMCP("ZnTrack 🚀")
 
+
 @mcp.tool
 def get_graph_getting_started() -> str:
     """Get documentation on how to build a graph."""
     file = Path(__file__).parent / "resources" / "graph_getting_started.md"
     return file.read_text()
+
 
 @mcp.tool
 def get_graph_with_groups() -> str:
@@ -27,11 +28,13 @@ def get_graph_with_groups() -> str:
     file = Path(__file__).parent / "resources" / "graph_with_groups.md"
     return file.read_text()
 
+
 @mcp.tool
 def get_node_getting_started() -> str:
     """Get documentation on how to use ZnTrack nodes."""
     file = Path(__file__).parent / "resources" / "node_getting_started.md"
     return file.read_text()
+
 
 @mcp.tool
 def get_package_info() -> dict[str, str]:
@@ -48,6 +51,7 @@ def get_package_info() -> dict[str, str]:
 
     return package_info
 
+
 @mcp.tool
 def get_node_list(package: str) -> list[str]:
     """Get all nodes provided by a specific package."""
@@ -56,6 +60,7 @@ def get_node_list(package: str) -> list[str]:
         return [f"Package '{package}' not found."]
     return sorted(nodes[package])
 
+
 @mcp.tool
 def get_interfaces_list(package: str) -> list[str]:
     """Get interfaces that define how nodes can interact with each other."""
@@ -63,6 +68,7 @@ def get_interfaces_list(package: str) -> list[str]:
     if package not in interfaces:
         return [f"Package '{package}' not found."]
     return sorted(interfaces[package])
+
 
 @mcp.tool
 def get_interface_info(package: str, interface: str) -> dict:
@@ -81,10 +87,11 @@ def get_interface_info(package: str, interface: str) -> dict:
     except Exception as e:
         return {"error": str(e)}
 
+
 @mcp.tool
 def get_node_info(package: str, node: str, detailed: bool = False) -> dict:
     """Get information about a specific ZnTrack node.
-    
+
     Parameters
     ----------
     package : str
@@ -164,6 +171,7 @@ def get_docs_diffusion() -> str:
     """Additional information when computing self diffusion."""
     return "It is important to run the simulation long enough. For water, at least 1 ns, for more viscous liquids, up to 50 ns or more "
 
+
 # @mcp.resource("docs://build-workflow")
 # def build_workflow() -> list[str]:
 #     """How to build a workflow with ZnTrack nodes."""
@@ -233,7 +241,6 @@ def get_docs_diffusion() -> str:
 #         "fields": fields_by_type,
 #         "methods": methods,
 #     }
-
 
 
 # @mcp.tool

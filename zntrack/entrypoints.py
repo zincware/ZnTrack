@@ -10,6 +10,8 @@ import logging
 from collections import defaultdict
 
 log = logging.getLogger(__name__)
+
+
 def get_registered_nodes(group: str = "zntrack.nodes") -> dict[str, list[str]]:
     """Get all packages that registered into [project.entry-points.'zntrack.nodes']."""
     registered_nodes = defaultdict(list)
