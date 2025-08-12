@@ -94,6 +94,10 @@ def deps() -> t.Any: ...
 def deps(default: _T, **kwargs) -> _T: ...
 
 
+@t.overload
+def deps(*, default_factory: t.Callable[[], _T], **kwargs) -> _T: ...
+
+
 def deps(default=dataclasses.MISSING, **kwargs) -> t.Any:
     """Define dependencies for a node.
 
