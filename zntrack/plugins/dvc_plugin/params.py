@@ -105,7 +105,7 @@ def deps_to_params(self, field):
             elif isinstance(content, set):
                 # Sets cannot contain dicts (unhashable), so convert to list
                 new_content = list(new_content)
-        
+
         if len(new_content) > 0:
             return new_content
     elif dataclasses.is_dataclass(content) and not isinstance(

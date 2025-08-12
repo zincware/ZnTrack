@@ -57,7 +57,9 @@ def test_nested_dc_deps(proj_path):
 
     assert md.from_rev().result == "Berendsen thermostat '1.0'"
 
+
 # test nested lists
+
 
 @dataclasses.dataclass(frozen=True)
 class FuncOne:
@@ -65,7 +67,8 @@ class FuncOne:
 
     def get_value(self):
         return self.value
-    
+
+
 @dataclasses.dataclass
 class FuncCollector:
     funcs: list[FuncOne] = dataclasses.field(default_factory=list)
@@ -73,12 +76,14 @@ class FuncCollector:
     def get_values(self):
         return [func.get_value() for func in self.funcs]
 
+
 class FuncNode(zntrack.Node):
     collector: FuncCollector = zntrack.deps()
     result: list[int] = zntrack.outs()
 
     def run(self):
         self.result = self.collector.get_values()
+
 
 def test_nested_list_deps(proj_path):
     project = zntrack.Project()
@@ -158,7 +163,9 @@ def test_nested_tuple_deps(proj_path):
     assert node.from_rev().result == [1, 2]
 
     # Test with updated tuple - need to update the same node instance
-    node.collector = FuncTupleCollector(funcs=(FuncOne(value=1), FuncOne(value=2), FuncOne(value=3)))
+    node.collector = FuncTupleCollector(
+        funcs=(FuncOne(value=1), FuncOne(value=2), FuncOne(value=3))
+    )
     project.repro()
 
     assert node.from_rev().result == [1, 2, 3]
@@ -174,8 +181,10 @@ def test_nested_set_deps(proj_path):
     project.repro()
     assert node.from_rev().result == [1, 2]
 
-    # Test with updated set - need to update the same node instance  
-    node.collector = FuncSetCollector(funcs={FuncOne(value=1), FuncOne(value=2), FuncOne(value=3)})
+    # Test with updated set - need to update the same node instance
+    node.collector = FuncSetCollector(
+        funcs={FuncOne(value=1), FuncOne(value=2), FuncOne(value=3)}
+    )
     project.repro()
 
     assert node.from_rev().result == [1, 2, 3]
@@ -183,7 +192,9 @@ def test_nested_set_deps(proj_path):
 
 def test_nested_dict_deps(proj_path):
     project = zntrack.Project()
-    collector = FuncDictCollector(funcs={"first": FuncOne(value=1), "second": FuncOne(value=2)})
+    collector = FuncDictCollector(
+        funcs={"first": FuncOne(value=1), "second": FuncOne(value=2)}
+    )
 
     with project:
         node = FuncDictNode(collector=collector)
@@ -191,12 +202,14 @@ def test_nested_dict_deps(proj_path):
     project.repro()
     assert node.from_rev().result == [1, 2]
 
-    # Test with updated dict - need to update the same node instance  
-    node.collector = FuncDictCollector(funcs={
-        "first": FuncOne(value=1), 
-        "second": FuncOne(value=2), 
-        "third": FuncOne(value=3)
-    })
+    # Test with updated dict - need to update the same node instance
+    node.collector = FuncDictCollector(
+        funcs={
+            "first": FuncOne(value=1),
+            "second": FuncOne(value=2),
+            "third": FuncOne(value=3),
+        }
+    )
     project.repro()
 
     assert node.from_rev().result == [1, 2, 3]
