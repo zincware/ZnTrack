@@ -8,9 +8,13 @@ authors = [
 license = "Apache-2.0"
 keywords=["data-science", "data-version-control", "machine-learning", "reproducibility", "collaboration"]
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
+    "cp2k-input-tools",
     "dvc>=3.60.0",
+    "ipsuite",
+    "massband",
+    "mlipx",
     "pandas>=2.2.3",
     "pyyaml>=6.0.2",
     "tqdm>=4.67.1",
@@ -22,6 +26,7 @@ dependencies = [
 
 [project.scripts]
 zntrack = 'zntrack.cli:app'
+zntrack-mcp = 'zntrack.mcp:mcp.run'
 
 [project.urls]
 Repository = "https://github.com/zincware/zntrack"
@@ -55,6 +60,12 @@ examples = [
     "mace-torch>=0.3.10",
     "paraffin>=0.3.6",
     "rdkit2ase>=0.1.4",
+]
+
+[project.optional-dependencies]
+mcp = [
+    "mcp>=1.12.3",
+    "fastmcp>=2.10.6",
 ]
 
 [build-system]
@@ -120,6 +131,12 @@ markers = [
     "needs_internet: marks tests which need internet access (deselect with '-m \"not needs_internet\"')",
 ]
 addopts = "-m 'not benchmark'"
+
+[tool.uv.sources]
+ipsuite = { path = "../ipsuite", editable = true }
+massband = { path = "../massband", editable = true }
+mlipx = { path = "../mlipx", editable = true }
+cp2k-input-tools = { git = "https://github.com/cp2k/cp2k-input-tools.git" }
 
 [project.entry-points.'zntrack.nodes']
 zntrack-examples = 'zntrack.examples:nodes'

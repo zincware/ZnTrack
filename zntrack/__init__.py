@@ -2,7 +2,7 @@ import importlib.metadata
 import logging
 import sys
 
-from zntrack import config
+from zntrack import config, entrypoints
 from zntrack.add import add
 from zntrack.apply import apply
 from zntrack.config import NOT_AVAILABLE, FieldTypes

@@ -57,7 +57,6 @@ __all__ = [
 ]
 
 
-def nodes() -> list[Node]:
+def nodes() -> dict[str, list[str]]:
     """Return the available nodes, grouped into categories."""
-
-    return [globals()[name] for name in __all__]
+    return {"zntrack.examples": __all__}
