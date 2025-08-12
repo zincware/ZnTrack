@@ -55,7 +55,7 @@ class TestFieldAnnotationsWithDefaults(zntrack.Node):
     # These should work fine (correct type matching)
     param_good_int: int = zntrack.params(42)
     param_good_str: str = zntrack.params("hello")
-    param_good_tuple: str = zntrack.params(("word",))
+    param_good_tuple: tuple = zntrack.params(("word",))
 
     # Using default_factory
     param_good_dict: dict = zntrack.params(default_factory=dict)
@@ -82,6 +82,9 @@ class TestFieldAnnotationsWithDefaults(zntrack.Node):
     outs_path_tuple: tuple[Path, ...] = zntrack.outs_path(
         (zntrack.nwd / "output1.txt", zntrack.nwd / "output2.txt")
     )
+
+    # deps with default factory
+    deps_cls: list = zntrack.deps(default_factory=list)
 
     def run(self):
         pass
