@@ -1,0 +1,52 @@
+stages:
+  ParamsToOuts:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToOuts --name ParamsToOuts
+    metrics:
+    - nodes/ParamsToOuts/node-meta.json:
+        cache: true
+    outs:
+    - nodes/ParamsToOuts/outs.json
+    params:
+    - ParamsToOuts
+  int_NodeWithAutoFields:
+    cmd: zntrack run test_auto_fields.NodeWithAutoFields --name int_NodeWithAutoFields
+    metrics:
+    - nodes/int/NodeWithAutoFields/node-meta.json:
+        cache: true
+    params:
+    - int_NodeWithAutoFields
+  int_NodeWithAutoFields_1:
+    cmd: zntrack run test_auto_fields.NodeWithAutoFields --name int_NodeWithAutoFields_1
+    deps:
+    - nodes/ParamsToOuts/outs.json
+    metrics:
+    - nodes/int/NodeWithAutoFields_1/node-meta.json:
+        cache: true
+  int_NodeWithAutoFields_2:
+    cmd: zntrack run test_auto_fields.NodeWithAutoFields --name int_NodeWithAutoFields_2
+    metrics:
+    - nodes/int/NodeWithAutoFields_2/node-meta.json:
+        cache: true
+    params:
+    - int_NodeWithAutoFields_2
+  list_NodeWithAutoFieldsList:
+    cmd: zntrack run test_auto_fields.NodeWithAutoFieldsList --name list_NodeWithAutoFieldsList
+    metrics:
+    - nodes/list/NodeWithAutoFieldsList/node-meta.json:
+        cache: true
+    params:
+    - list_NodeWithAutoFieldsList
+  list_NodeWithAutoFieldsList_1:
+    cmd: zntrack run test_auto_fields.NodeWithAutoFieldsList --name list_NodeWithAutoFieldsList_1
+    deps:
+    - nodes/ParamsToOuts/outs.json
+    metrics:
+    - nodes/list/NodeWithAutoFieldsList_1/node-meta.json:
+        cache: true
+  list_NodeWithAutoFieldsList_2:
+    cmd: zntrack run test_auto_fields.NodeWithAutoFieldsList --name list_NodeWithAutoFieldsList_2
+    metrics:
+    - nodes/list/NodeWithAutoFieldsList_2/node-meta.json:
+        cache: true
+    params:
+    - list_NodeWithAutoFieldsList_2

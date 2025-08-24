@@ -1,0 +1,20 @@
+stages:
+  ParamsToOuts:
+    always_changed: true
+    cmd: zntrack run zntrack.examples.nodes.ParamsToOuts --name ParamsToOuts
+    metrics:
+    - nodes/ParamsToOuts/node-meta.json:
+        cache: true
+    outs:
+    - nodes/ParamsToOuts/outs.json
+    params:
+    - ParamsToOuts
+  ParamsToOuts_1:
+    cmd: zntrack run zntrack.examples.nodes.ParamsToOuts --name ParamsToOuts_1
+    metrics:
+    - nodes/ParamsToOuts_1/node-meta.json:
+        cache: true
+    outs:
+    - nodes/ParamsToOuts_1/outs.json
+    params:
+    - ParamsToOuts_1

@@ -16,11 +16,7 @@ from dvc.stage.exceptions import InvalidStageName
 from dvc.stage.utils import is_valid_name
 from fsspec.implementations.local import LocalFileSystem
 
-from zntrack.group import Group
-from zntrack.state import NodeStatus
-from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
-
-from .config import (
+from zntrack.config import (
     FIELD_TYPE,
     NOT_AVAILABLE,
     NWD_PATH,
@@ -28,6 +24,10 @@ from .config import (
     FieldTypes,
     NodeStatusEnum,
 )
+from zntrack.fields.auto import update_auto_inferred_fields
+from zntrack.group import Group
+from zntrack.state import NodeStatus
+from zntrack.utils.misc import get_plugins_from_env, nwd_to_name
 
 try:
     from typing import dataclass_transform
@@ -136,13 +136,13 @@ class Node(znflow.Node, znfields.Base):
     )
     always_changed: bool = dataclasses.field(default=False, repr=False)
 
-    _protected_: set = dataclasses.field(
-        default_factory=lambda: set(znflow.Node._protected_) | {"nwd", "name", "state"},
-        init=False,
-        repr=False,
-    )
-
     def __post_init__(self):
+        self._protected_ = set(self._protected_) | {
+            "nwd",
+            "name",
+            "state",
+            "always_changed",
+        }
         if self.name is None:
             # automatic node names expects the name to be None when
             # exiting the graph context.
@@ -172,6 +172,13 @@ class Node(znflow.Node, znfields.Base):
         for plugin in self.state.plugins.values():
             with plugin:
                 for field in dataclasses.fields(self):
+                    if field.metadata.get(FIELD_TYPE, None) is None:
+                        continue
+                    if field.metadata[FIELD_TYPE] in [
+                        FieldTypes.PARAMS,
+                        FieldTypes.DEPS,
+                    ]:
+                        continue
                     value = getattr(self, field.name)
                     if any(value is x for x in [ZNTRACK_LAZY_VALUE, NOT_AVAILABLE]):
                         raise ValueError(
@@ -217,11 +224,24 @@ class Node(znflow.Node, znfields.Base):
             path = pathlib.Path(path)
         else:
             path = pathlib.Path()
+
+        if fs is None:
+            if remote is not None or rev is not None:
+                _fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
+            else:
+                _fs = LocalFileSystem()
+        else:
+            _fs = fs
+        try:
+            with _fs.open(path / "zntrack.json") as f:
+                conf = json.load(f)
+                nwd = pathlib.Path(conf[name]["nwd"]["value"])
+        except FileNotFoundError:
+            # from_rev is called before a graph is built
+            nwd = NWD_PATH / name
+
         lazy_values = {}
-        for field in dataclasses.fields(cls):
-            # check if the field is in the init
-            if field.init:
-                lazy_values[field.name] = ZNTRACK_LAZY_VALUE
+        update_auto_inferred_fields(cls, path, name, lazy_values, _fs)
 
         lazy_values["name"] = name
         lazy_values["always_changed"] = None  # TODO: read the state from dvc.yaml
@@ -230,22 +250,6 @@ class Node(znflow.Node, znfields.Base):
                 "ignore", message=".*should not contain '_'*", category=UserWarning
             )
             instance = cls(**lazy_values)
-        if remote is not None or rev is not None:
-            if fs is None:
-                _fs = dvc.api.DVCFileSystem(url=remote, rev=rev)
-            else:
-                _fs = fs
-            with _fs.open(path / "zntrack.json") as f:
-                conf = json.loads(f.read())
-                nwd = pathlib.Path(conf[name]["nwd"]["value"])
-        else:
-            try:
-                with open(path / "zntrack.json") as f:
-                    conf = json.load(f)
-                    nwd = pathlib.Path(conf[name]["nwd"]["value"])
-            except FileNotFoundError:
-                # from_rev is called before a graph is built
-                nwd = NWD_PATH / name
         instance.__dict__["nwd"] = nwd
 
         # TODO: check if the node is finished or not.
