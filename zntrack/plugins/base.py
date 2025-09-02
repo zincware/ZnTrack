@@ -6,6 +6,7 @@ import pathlib
 import typing as t
 
 import yaml
+from yaml import SafeDumper
 
 from zntrack.config import (
     EXP_INFO_PATH,
@@ -16,6 +17,16 @@ from zntrack.config import (
 
 if t.TYPE_CHECKING:
     from zntrack import Node
+
+
+class _NoAnchorDumper(SafeDumper):
+    """Custom YAML dumper that disables anchor/alias generation.
+    
+    This prevents the generation of anchor references like '&id001' 
+    in YAML output when the same object appears multiple times.
+    """
+    def ignore_aliases(self, data):
+        return True
 
 
 def plugin_getter(self: "Node", name: str):
@@ -58,7 +69,7 @@ def get_exp_info() -> dict:
 
 
 def set_exp_info(data: dict) -> None:
-    EXP_INFO_PATH.write_text(yaml.safe_dump(data))
+    EXP_INFO_PATH.write_text(yaml.dump(data, Dumper=_NoAnchorDumper))
     _gitignore_file(EXP_INFO_PATH.as_posix())
 
 
