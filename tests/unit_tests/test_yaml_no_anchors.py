@@ -1,17 +1,8 @@
 """Test that YAML output does not contain anchor references."""
 
 import yaml
-from yaml import SafeDumper
 
-
-class _NoAnchorDumper(SafeDumper):
-    """Custom YAML dumper that disables anchor/alias generation.
-    
-    This prevents the generation of anchor references like '&id001' 
-    in YAML output when the same object appears multiple times.
-    """
-    def ignore_aliases(self, data):
-        return True
+from zntrack.plugins.base import _NoAnchorDumper
 
 
 def test_no_anchor_dumper():

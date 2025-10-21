@@ -9,12 +9,12 @@ import warnings
 import git
 import tqdm
 import yaml
-from yaml import SafeDumper
 import znflow
 
 from zntrack import utils
 from zntrack.config import NWD_PATH
 from zntrack.group import Group
+from zntrack.plugins.base import _NoAnchorDumper
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.finalize import make_commit
 from zntrack.utils.import_handler import import_handler
@@ -24,16 +24,6 @@ from . import config
 from .deployment import ZnTrackDeployment
 
 log = logging.getLogger(__name__)
-
-
-class _NoAnchorDumper(SafeDumper):
-    """Custom YAML dumper that disables anchor/alias generation.
-    
-    This prevents the generation of anchor references like '&id001' 
-    in YAML output when the same object appears multiple times.
-    """
-    def ignore_aliases(self, data):
-        return True
 
 
 class _FinalNodeNameString(str):
