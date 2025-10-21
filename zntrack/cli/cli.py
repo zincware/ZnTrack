@@ -68,7 +68,8 @@ def parse_command_from_dvc_yaml(stage_name: str) -> tuple[str, str | None]:
     dvc_yaml_path = config.DVC_FILE_PATH
     if not dvc_yaml_path.exists():
         raise FileNotFoundError(
-            f"{config.DVC_FILE_PATH} not found. Make sure you're in the project root directory."
+            f"{config.DVC_FILE_PATH} not found. "
+            "Make sure you're in the project root directory."
         )
 
     with dvc_yaml_path.open() as f:
@@ -98,7 +99,8 @@ def parse_command_from_dvc_yaml(stage_name: str) -> tuple[str, str | None]:
 
     if len(parts) < 3 or parts[0] != "zntrack" or parts[1] != "run":
         raise ValueError(
-            f"Unexpected command format in {config.DVC_FILE_PATH} for stage '{stage_name}': {cmd}"
+            f"Unexpected command format in {config.DVC_FILE_PATH} "
+            f"for stage '{stage_name}': {cmd}"
         )
 
     node_path = parts[2]
@@ -135,7 +137,8 @@ def run(
 
     Use as 'zntrack run module.Node --name node_name' or 'zntrack run <node-name>'.
 
-    When providing just a node name (without dots), the command will be parsed from dvc.yaml.
+    When providing just a node name (without dots), the command will be parsed
+    from dvc.yaml.
 
     Arguments:
     ---------

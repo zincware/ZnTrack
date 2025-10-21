@@ -47,7 +47,7 @@ def test_run_w_name(proj_path, runner):
 def test_run_node_by_stage_name(proj_path, runner):
     """Test running a node by its stage name from dvc.yaml."""
     with zntrack.Project() as proj:
-        node = zntrack.examples.ParamsToOuts(params=42, name="TestNode")
+        zntrack.examples.ParamsToOuts(params=42, name="TestNode")
 
     proj.build()
 
@@ -108,7 +108,7 @@ def test_run_node_no_dvc_yaml(tmp_path, runner):
 def test_run_backwards_compatibility(proj_path, runner):
     """Test that the old module.Node syntax still works."""
     with zntrack.Project() as proj:
-        node = zntrack.examples.ParamsToOuts(params=99, name="BackwardsCompatTest")
+        zntrack.examples.ParamsToOuts(params=99, name="BackwardsCompatTest")
 
     proj.build()
 
