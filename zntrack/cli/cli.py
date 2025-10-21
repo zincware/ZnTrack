@@ -86,7 +86,9 @@ def parse_command_from_dvc_yaml(stage_name: str) -> tuple[str, str | None]:
 
     stage = dvc_config["stages"][stage_name]
     if "cmd" not in stage:
-        raise ValueError(f"No command found for stage '{stage_name}' in {config.DVC_FILE_PATH}")
+        raise ValueError(
+            f"No command found for stage '{stage_name}' in {config.DVC_FILE_PATH}"
+        )
 
     cmd = stage["cmd"]
 
