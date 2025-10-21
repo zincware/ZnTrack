@@ -44,6 +44,84 @@ def test_run_w_name(proj_path, runner):
     assert node.outs == 15
 
 
+def test_run_node_by_stage_name(proj_path, runner):
+    """Test running a node by its stage name from dvc.yaml."""
+    with zntrack.Project() as proj:
+        zntrack.examples.ParamsToOuts(params=42, name="TestNode")
+
+    proj.build()
+
+    # Run using just the stage name
+    result = runner.invoke(app, ["run", "TestNode"])
+    assert result.exit_code == 0
+
+    # Verify the node was run correctly
+    loaded_node = zntrack.examples.ParamsToOuts.from_rev(name="TestNode")
+    assert loaded_node.outs == 42
+
+
+def test_run_node_by_stage_name_without_name_param(proj_path, runner):
+    """Test running a node by its stage name when the node has no custom name."""
+    with zntrack.Project() as proj:
+        node = zntrack.examples.ParamsToOuts(params=25)
+
+    proj.build()
+
+    # Run using just the stage name (default name is 'ParamsToOuts')
+    result = runner.invoke(app, ["run", "ParamsToOuts"])
+    assert result.exit_code == 0
+
+    # Verify the node was run correctly
+    assert node.outs == 25
+
+
+def test_run_node_stage_name_not_found(proj_path, runner):
+    """Test error handling when stage name is not found in dvc.yaml."""
+    with zntrack.Project() as proj:
+        zntrack.examples.ParamsToOuts(params=15, name="TestNode")
+
+    proj.build()
+
+    # Try to run a non-existent stage
+    result = runner.invoke(app, ["run", "NonExistentNode"])
+    assert result.exit_code == 1
+    assert "not found in dvc.yaml" in result.stdout
+
+
+def test_run_node_no_dvc_yaml(tmp_path, runner):
+    """Test error handling when dvc.yaml doesn't exist."""
+    # Change to a directory without dvc.yaml
+    import os
+
+    original_cwd = os.getcwd()
+    try:
+        os.chdir(tmp_path)
+
+        # Try to run with a stage name
+        result = runner.invoke(app, ["run", "SomeNode"])
+        assert result.exit_code == 1
+        assert "dvc.yaml not found" in result.stdout
+    finally:
+        os.chdir(original_cwd)
+
+
+def test_run_backwards_compatibility(proj_path, runner):
+    """Test that the old module.Node syntax still works."""
+    with zntrack.Project() as proj:
+        zntrack.examples.ParamsToOuts(params=99, name="BackwardsCompatTest")
+
+    proj.build()
+
+    # Old syntax should still work
+    result = runner.invoke(
+        app, ["run", "zntrack.examples.ParamsToOuts", "--name", "BackwardsCompatTest"]
+    )
+    assert result.exit_code == 0
+
+    loaded_node = zntrack.examples.ParamsToOuts.from_rev(name="BackwardsCompatTest")
+    assert loaded_node.outs == 99
+
+
 def test_list_groups(proj_path, runner):
     with zntrack.Project() as proj:
         a = zntrack.examples.ParamsToOuts(params=15)
