@@ -165,7 +165,7 @@ def run(
             node_path = parsed_node_path
         except (FileNotFoundError, ValueError) as e:
             typer.echo(f"Error: {e}", err=True)
-            raise typer.Exit(1)
+            raise typer.Exit(1) from e
 
     utils.misc.load_env_vars(name)
     sys.path.append(pathlib.Path.cwd().as_posix())
