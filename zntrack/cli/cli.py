@@ -9,6 +9,7 @@ import sys
 
 import git
 import typer
+import yaml
 
 from zntrack import Node, utils
 from zntrack.state import PLUGIN_LIST
@@ -43,6 +44,73 @@ def version_callback(value: bool) -> None:
         raise typer.Exit()
 
 
+def parse_command_from_dvc_yaml(stage_name: str) -> tuple[str, str | None]:
+    """Parse the command from dvc.yaml for a given stage name.
+
+    Arguments:
+    ---------
+    stage_name : str
+        The name of the stage in dvc.yaml
+
+    Returns:
+    -------
+    tuple[str, str | None]
+        A tuple of (node_path, name) extracted from the command
+
+    Raises:
+    ------
+    FileNotFoundError
+        If dvc.yaml is not found
+    ValueError
+        If the stage is not found in dvc.yaml or command cannot be parsed
+
+    """
+    dvc_yaml_path = pathlib.Path("dvc.yaml")
+    if not dvc_yaml_path.exists():
+        raise FileNotFoundError(
+            "dvc.yaml not found. Make sure you're in the project root directory."
+        )
+
+    with open(dvc_yaml_path) as f:
+        dvc_config = yaml.safe_load(f)
+
+    if "stages" not in dvc_config:
+        raise ValueError("No stages found in dvc.yaml")
+
+    if stage_name not in dvc_config["stages"]:
+        available_stages = ", ".join(dvc_config["stages"].keys())
+        raise ValueError(
+            f"Stage '{stage_name}' not found in dvc.yaml. "
+            f"Available stages: {available_stages}"
+        )
+
+    stage = dvc_config["stages"][stage_name]
+    if "cmd" not in stage:
+        raise ValueError(f"No command found for stage '{stage_name}' in dvc.yaml")
+
+    cmd = stage["cmd"]
+
+    # Parse the command: "zntrack run module.Node --name node_name"
+    # Split by whitespace and parse arguments
+    parts = cmd.split()
+
+    if len(parts) < 3 or parts[0] != "zntrack" or parts[1] != "run":
+        raise ValueError(
+            f"Unexpected command format in dvc.yaml for stage '{stage_name}': {cmd}"
+        )
+
+    node_path = parts[2]
+    name = None
+
+    # Look for --name argument
+    if "--name" in parts:
+        name_idx = parts.index("--name")
+        if name_idx + 1 < len(parts):
+            name = parts[name_idx + 1]
+
+    return node_path, name
+
+
 @app.callback()
 def main(
     version: bool = typer.Option(
@@ -63,14 +131,18 @@ def run(
 ) -> None:
     """Execute a ZnTrack Node.
 
-    Use as 'zntrack run module.Node --name node_name'.
+    Use as 'zntrack run module.Node --name node_name' or 'zntrack run <node-name>'.
+
+    When providing just a node name (without dots), the command will be parsed from dvc.yaml.
 
     Arguments:
     ---------
     node_path : str
-        The full path to the Node, e.g. `ipsuite.nodes.SmilesToAtoms`
+        The full path to the Node (e.g. `ipsuite.nodes.SmilesToAtoms`) or
+        the name of a stage in dvc.yaml (e.g. `MyNode`)
     name : str
-        The name of the node.
+        The name of the node. If not provided and node_path is a stage name,
+        it will be extracted from dvc.yaml.
     meta_only : bool
         Save only the metadata.
     method : str, default 'run'
@@ -80,6 +152,19 @@ def run(
 
     """
     start_time = datetime.datetime.now()
+
+    # If node_path doesn't contain a dot, treat it as a stage name from dvc.yaml
+    if "." not in node_path:
+        try:
+            parsed_node_path, parsed_name = parse_command_from_dvc_yaml(node_path)
+            # Use parsed values if not overridden by command line arguments
+            if name is None:
+                name = parsed_name
+            node_path = parsed_node_path
+        except (FileNotFoundError, ValueError) as e:
+            typer.echo(f"Error: {e}", err=True)
+            raise typer.Exit(1)
+
     utils.misc.load_env_vars(name)
     sys.path.append(pathlib.Path.cwd().as_posix())
 
