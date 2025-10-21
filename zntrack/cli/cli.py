@@ -11,7 +11,7 @@ import git
 import typer
 import yaml
 
-from zntrack import Node, utils
+from zntrack import Node, config, utils
 from zntrack.state import PLUGIN_LIST
 from zntrack.utils.import_handler import import_handler
 from zntrack.utils.list_nodes import list_nodes
@@ -65,28 +65,28 @@ def parse_command_from_dvc_yaml(stage_name: str) -> tuple[str, str | None]:
         If the stage is not found in dvc.yaml or command cannot be parsed
 
     """
-    dvc_yaml_path = pathlib.Path("dvc.yaml")
+    dvc_yaml_path = config.DVC_FILE_PATH
     if not dvc_yaml_path.exists():
         raise FileNotFoundError(
-            "dvc.yaml not found. Make sure you're in the project root directory."
+            f"{config.DVC_FILE_PATH} not found. Make sure you're in the project root directory."
         )
 
-    with open(dvc_yaml_path) as f:
+    with dvc_yaml_path.open() as f:
         dvc_config = yaml.safe_load(f)
 
     if "stages" not in dvc_config:
-        raise ValueError("No stages found in dvc.yaml")
+        raise ValueError(f"No stages found in {config.DVC_FILE_PATH}")
 
     if stage_name not in dvc_config["stages"]:
         available_stages = ", ".join(dvc_config["stages"].keys())
         raise ValueError(
-            f"Stage '{stage_name}' not found in dvc.yaml. "
+            f"Stage '{stage_name}' not found in {config.DVC_FILE_PATH}. "
             f"Available stages: {available_stages}"
         )
 
     stage = dvc_config["stages"][stage_name]
     if "cmd" not in stage:
-        raise ValueError(f"No command found for stage '{stage_name}' in dvc.yaml")
+        raise ValueError(f"No command found for stage '{stage_name}' in {config.DVC_FILE_PATH}")
 
     cmd = stage["cmd"]
 
@@ -96,7 +96,7 @@ def parse_command_from_dvc_yaml(stage_name: str) -> tuple[str, str | None]:
 
     if len(parts) < 3 or parts[0] != "zntrack" or parts[1] != "run":
         raise ValueError(
-            f"Unexpected command format in dvc.yaml for stage '{stage_name}': {cmd}"
+            f"Unexpected command format in {config.DVC_FILE_PATH} for stage '{stage_name}': {cmd}"
         )
 
     node_path = parts[2]
