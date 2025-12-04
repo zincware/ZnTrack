@@ -62,6 +62,37 @@ def test_subrepo(proj_path):
     assert node_loaded.outs == {"param1": 3, "param2": 4}
 
 
+def test_from_rev_in_subrepo(proj_path):
+    """Test loading a node with from_rev when cwd is inside a subrepo.
+
+    This tests the scenario where:
+    1. The DVC repo root is at the parent directory
+    2. The project is in a subdirectory
+    3. The user is inside that subdirectory
+    4. The user calls zntrack.from_rev("NodeName") without specifying a path
+
+    This should work because the zntrack.json and other files are in the
+    current directory. The path should NOT be duplicated.
+    """
+    directory = pathlib.Path("subrepo")
+    directory.mkdir(parents=True, exist_ok=True)
+    os.chdir(directory)
+
+    project = zntrack.Project()
+    with project:
+        _ = zntrack.examples.ParamsToOuts(
+            params={"param1": 1, "param2": 2},
+        )
+    project.repro()
+
+    # Now we're inside the subdirectory and want to load the node
+    # This should work - we shouldn't need to specify the path since
+    # zntrack.json is in the current directory
+    node_loaded = zntrack.from_rev("ParamsToOuts")
+    assert node_loaded.params == {"param1": 1, "param2": 2}
+    assert node_loaded.outs == {"param1": 1, "param2": 2}
+
+
 def test_subrepo_external_node(proj_path):
     """Test subrepo functionality with external dataclasses."""
     # Create external node module file that can be imported

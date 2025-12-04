@@ -76,6 +76,25 @@ def from_rev(
         # DVC Issue where stage.path is relative to the DVC root
         # if rev is given, if only remote is given, it is relative to file system
         # so we need to use path_in_repo instead.
+
+        # When using local filesystem (no remote/rev), check if the current working
+        # directory is already inside the stage's path. If so, use an empty path
+        # to avoid path duplication issues.
+        if remote is None and rev is None and fs.repo is not None:
+            repo_root = pathlib.Path(fs.repo.root_dir).resolve()
+            cwd = pathlib.Path.cwd().resolve()
+            try:
+                cwd_relative = cwd.relative_to(repo_root)
+                # If cwd is at or inside the stage's path, adjust accordingly
+                if cwd_relative == path or str(cwd_relative).startswith(str(path) + "/"):
+                    # We're inside the stage directory, use empty path
+                    path = pathlib.Path()
+                elif str(path).startswith(str(cwd_relative) + "/"):
+                    # Stage is inside cwd, use relative path from cwd
+                    path = pathlib.Path(str(path)[len(str(cwd_relative)) + 1 :])
+            except ValueError:
+                # cwd is not inside repo_root, keep the path as-is
+                pass
     except AttributeError:
         raise ValueError("Stage is not a ZnTrack pipeline stage.")
 
