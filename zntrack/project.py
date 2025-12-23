@@ -9,6 +9,7 @@ import warnings
 import git
 import tqdm
 import yaml
+from yaml import SafeDumper
 import znflow
 
 from zntrack import utils
@@ -23,6 +24,16 @@ from . import config
 from .deployment import ZnTrackDeployment
 
 log = logging.getLogger(__name__)
+
+
+class _NoAnchorDumper(SafeDumper):
+    """Custom YAML dumper that disables anchor/alias generation.
+    
+    This prevents the generation of anchor references like '&id001' 
+    in YAML output when the same object appears multiple times.
+    """
+    def ignore_aliases(self, data):
+        return True
 
 
 class _FinalNodeNameString(str):
@@ -176,8 +187,8 @@ class Project(znflow.DiGraph):
         if len(dvc_dict["plots"]) == 0:
             del dvc_dict["plots"]
 
-        config.PARAMS_FILE_PATH.write_text(yaml.safe_dump(params_dict))
-        config.DVC_FILE_PATH.write_text(yaml.safe_dump(dvc_dict))
+        config.PARAMS_FILE_PATH.write_text(yaml.dump(params_dict, Dumper=_NoAnchorDumper))
+        config.DVC_FILE_PATH.write_text(yaml.dump(dvc_dict, Dumper=_NoAnchorDumper))
         config.ZNTRACK_FILE_PATH.write_text(json.dumps(zntrack_dict, indent=4))
 
         # TODO: update file or overwrite?
