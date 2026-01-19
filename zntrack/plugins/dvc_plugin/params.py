@@ -62,7 +62,7 @@ def _dataclass_to_dict(object) -> dict:
 
 def deps_to_params(self, field):
     if getattr(self.node, field.name) is None:
-        return
+        return None
     content = getattr(self.node, field.name)
     if isinstance(content, (list, tuple, set, dict)):
         if isinstance(content, dict):
@@ -113,9 +113,10 @@ def deps_to_params(self, field):
     ):
         return _dataclass_to_dict(content)
     elif isinstance(content, (znflow.Connection, znflow.CombinedConnections)):
-        return
+        return None
     else:
         raise ValueError(
             f"Found unsupported type '{type(content)}' ({content})"
             f" for DEPS field '{field.name}'"
         )
+    return None

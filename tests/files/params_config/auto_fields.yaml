@@ -1,0 +1,17 @@
+ParamsToOuts:
+  params: 16
+int_NodeWithAutoFields:
+  value: 10
+int_NodeWithAutoFields_2:
+  value:
+    _cls: test_auto_fields.SomeDataClass
+    x: 42
+list_NodeWithAutoFieldsList:
+  value:
+  - 1
+  - 2
+  - 3
+list_NodeWithAutoFieldsList_2:
+  value:
+  - _cls: test_auto_fields.SomeDataClass
+    x: 42

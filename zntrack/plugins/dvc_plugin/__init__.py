@@ -59,11 +59,21 @@ class DVCPlugin(ZnTrackPlugin):
                 dump_func(self.node, field.name)
 
     def convert_to_params_yaml(self) -> dict | object:
+        import dataclasses
+
+        from zntrack.fields.auto import infer_field_type, is_auto_inferred_field
+
         data = {}
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
+            field_type = field.metadata.get(FIELD_TYPE)
+            # Handle auto-inferred fields
+            if is_auto_inferred_field(self.node.__class__, field.name):
+                value = getattr(self.node, field.name)
+                field_type = infer_field_type(value)
+
+            if field_type == FieldTypes.PARAMS:
                 data[field.name] = getattr(self.node, field.name)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
+            elif field_type == FieldTypes.DEPS:
                 if (value := deps_to_params(self, field)) is not None:
                     data[field.name] = value
 
@@ -72,6 +82,8 @@ class DVCPlugin(ZnTrackPlugin):
         return PLUGIN_EMPTY_RETRUN_VALUE
 
     def convert_to_dvc_yaml(self) -> dict | object:
+        from zntrack.fields.auto import infer_field_type, is_auto_inferred_field
+
         node_dict = converter.NodeConverter().encode(self.node)
 
         cmd = f"zntrack run {node_dict['module']}.{node_dict['cls']}"
@@ -93,35 +105,42 @@ class DVCPlugin(ZnTrackPlugin):
         plots = []
 
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS:
+            field_type = field.metadata.get(FIELD_TYPE)
+
+            # Handle auto-inferred fields
+            if is_auto_inferred_field(self.node.__class__, field.name):
+                value = getattr(self.node, field.name)
+                field_type = infer_field_type(value)
+
+            if field_type == FieldTypes.PARAMS:
                 stages.setdefault(FieldTypes.PARAMS.value, []).append(self.node.name)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.PARAMS_PATH:
+            elif field_type == FieldTypes.PARAMS_PATH:
                 content = params_path_to_dvc(self, field)
                 stages.setdefault(FieldTypes.PARAMS.value, []).extend(content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS_PATH:
+            elif field_type == FieldTypes.OUTS_PATH:
                 content = outs_path_to_dvc(self, field)
                 stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS_PATH:
+            elif field_type == FieldTypes.PLOTS_PATH:
                 content = plots_path_to_dvc(self, field)
                 stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS_PATH:
+            elif field_type == FieldTypes.METRICS_PATH:
                 content = metrics_path_to_dvc(self, field)
                 stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.OUTS:
+            elif field_type == FieldTypes.OUTS:
                 content = outs_to_dvc(self, field)
                 stages.setdefault(FieldTypes.OUTS.value, []).extend(content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.PLOTS:
+            elif field_type == FieldTypes.PLOTS:
                 outs_content, plots_content = plots_to_dvc(self, field)
                 stages.setdefault(FieldTypes.OUTS.value, []).extend(outs_content)
                 plots.extend(plots_content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.METRICS:
+            elif field_type == FieldTypes.METRICS:
                 content = metrics_to_dvc(self, field)
                 stages.setdefault(FieldTypes.METRICS.value, []).extend(content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS:
+            elif field_type == FieldTypes.DEPS:
                 deps_content, params_content = deps_to_dvc(self, field)
                 stages.setdefault(FieldTypes.DEPS.value, []).extend(deps_content)
                 stages.setdefault(FieldTypes.PARAMS.value, []).extend(params_content)
-            elif field.metadata.get(FIELD_TYPE) == FieldTypes.DEPS_PATH:
+            elif field_type == FieldTypes.DEPS_PATH:
                 content = deps_path_to_dvc(self, field)
                 stages.setdefault(FieldTypes.DEPS.value, []).extend(content)
 
@@ -135,11 +154,20 @@ class DVCPlugin(ZnTrackPlugin):
         return {"stages": stages, "plots": plots}
 
     def convert_to_zntrack_json(self, graph) -> dict | object:
+        from zntrack.fields.auto import infer_field_type, is_auto_inferred_field
+
         data = {
             "nwd": self.node.nwd,
         }
         for field in dataclasses.fields(self.node):
-            if field.metadata.get(FIELD_TYPE) in [
+            field_type = field.metadata.get(FIELD_TYPE)
+
+            # Handle auto-inferred fields
+            if is_auto_inferred_field(self.node.__class__, field.name):
+                value = getattr(self.node, field.name)
+                field_type = infer_field_type(value)
+
+            if field_type in [
                 FieldTypes.PARAMS_PATH,
                 FieldTypes.DEPS_PATH,
                 FieldTypes.OUTS_PATH,
